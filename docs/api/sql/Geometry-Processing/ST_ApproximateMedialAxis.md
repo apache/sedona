@@ -45,7 +45,7 @@ Output:
 MULTILINESTRING ((50 45, 50 5), (50 45, 35 45), (65 45, 50 45), (35 45, 65 45))
 ```
 
-![ST_ApproximateMedialAxis input and output](../../../image/skeleton/ST_ApproximateMedialAxis_illustration.png "st approximate medial axis input and output")
+![ST_ApproximateMedialAxis](../../../image/ST_ApproximateMedialAxis/ST_ApproximateMedialAxis.svg)
 
 SQL Example (L-shape):
 

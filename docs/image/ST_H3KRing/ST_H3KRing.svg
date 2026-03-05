@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="230" viewBox="0 0 400 230">
+  <rect width="400" height="230" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_H3KRing</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">H3 cells within k steps of center cell</text>
+  <polygon points="280.0,142.6 270.0,160.0 250.0,160.0 240.0,142.6 250.0,125.3 270.0,125.3" fill="#4a90d9" stroke="#1565C0" stroke-width="0.8" fill-opacity="0.15"/>
+  <polygon points="250.0,160.0 240.0,177.3 220.0,177.3 210.0,160.0 220.0,142.6 240.0,142.6" fill="#4a90d9" stroke="#1565C0" stroke-width="0.8" fill-opacity="0.15"/>
+  <polygon points="220.0,177.3 210.0,194.6 190.0,194.6 180.0,177.3 190.0,160.0 210.0,160.0" fill="#4a90d9" stroke="#1565C0" stroke-width="0.8" fill-opacity="0.15"/>
+  <polygon points="190.0,160.0 180.0,177.3 160.0,177.3 150.0,160.0 160.0,142.6 180.0,142.6" fill="#4a90d9" stroke="#1565C0" stroke-width="0.8" fill-opacity="0.15"/>
+  <polygon points="160.0,142.6 150.0,160.0 130.0,160.0 120.0,142.6 130.0,125.3 150.0,125.3" fill="#4a90d9" stroke="#1565C0" stroke-width="0.8" fill-opacity="0.15"/>
+  <polygon points="160.0,108.0 150.0,125.3 130.0,125.3 120.0,108.0 130.0,90.7 150.0,90.7" fill="#4a90d9" stroke="#1565C0" stroke-width="0.8" fill-opacity="0.15"/>
+  <polygon points="160.0,73.4 150.0,90.7 130.0,90.7 120.0,73.4 130.0,56.0 150.0,56.0" fill="#4a90d9" stroke="#1565C0" stroke-width="0.8" fill-opacity="0.15"/>
+  <polygon points="190.0,56.0 180.0,73.4 160.0,73.4 150.0,56.0 160.0,38.7 180.0,38.7" fill="#4a90d9" stroke="#1565C0" stroke-width="0.8" fill-opacity="0.15"/>
+  <polygon points="220.0,38.7 210.0,56.0 190.0,56.0 180.0,38.7 190.0,21.4 210.0,21.4" fill="#4a90d9" stroke="#1565C0" stroke-width="0.8" fill-opacity="0.15"/>
+  <polygon points="250.0,56.0 240.0,73.4 220.0,73.4 210.0,56.0 220.0,38.7 240.0,38.7" fill="#4a90d9" stroke="#1565C0" stroke-width="0.8" fill-opacity="0.15"/>
+  <polygon points="280.0,73.4 270.0,90.7 250.0,90.7 240.0,73.4 250.0,56.0 270.0,56.0" fill="#4a90d9" stroke="#1565C0" stroke-width="0.8" fill-opacity="0.15"/>
+  <polygon points="280.0,108.0 270.0,125.3 250.0,125.3 240.0,108.0 250.0,90.7 270.0,90.7" fill="#4a90d9" stroke="#1565C0" stroke-width="0.8" fill-opacity="0.15"/>
+  <polygon points="250.0,125.3 240.0,142.6 220.0,142.6 210.0,125.3 220.0,108.0 240.0,108.0" fill="#FF9800" stroke="#EF6C00" stroke-width="1" fill-opacity="0.25"/>
+  <polygon points="220.0,142.6 210.0,160.0 190.0,160.0 180.0,142.6 190.0,125.3 210.0,125.3" fill="#FF9800" stroke="#EF6C00" stroke-width="1" fill-opacity="0.25"/>
+  <polygon points="190.0,125.3 180.0,142.6 160.0,142.6 150.0,125.3 160.0,108.0 180.0,108.0" fill="#FF9800" stroke="#EF6C00" stroke-width="1" fill-opacity="0.25"/>
+  <polygon points="190.0,90.7 180.0,108.0 160.0,108.0 150.0,90.7 160.0,73.4 180.0,73.4" fill="#FF9800" stroke="#EF6C00" stroke-width="1" fill-opacity="0.25"/>
+  <polygon points="220.0,73.4 210.0,90.7 190.0,90.7 180.0,73.4 190.0,56.0 210.0,56.0" fill="#FF9800" stroke="#EF6C00" stroke-width="1" fill-opacity="0.25"/>
+  <polygon points="250.0,90.7 240.0,108.0 220.0,108.0 210.0,90.7 220.0,73.4 240.0,73.4" fill="#FF9800" stroke="#EF6C00" stroke-width="1" fill-opacity="0.25"/>
+  <polygon points="220.0,108.0 210.0,125.3 190.0,125.3 180.0,108.0 190.0,90.7 210.0,90.7" fill="#E53935" stroke="#C62828" stroke-width="1.5" fill-opacity="0.35"/>
+  <text x="200" y="112" font-family="monospace" font-size="9" fill="#C62828" text-anchor="middle" font-weight="bold">k=0</text>
+  <text x="165" y="95" font-family="monospace" font-size="8" fill="#EF6C00" font-weight="bold">k=1</text>
+  <text x="135" y="77" font-family="monospace" font-size="8" fill="#1565C0" font-weight="bold">k=2</text>
+  <text x="200" y="198" font-family="monospace" font-size="10" fill="#333" text-anchor="middle">Returns H3 cells within distance k of center</text>
+  <circle cx="90" cy="215" r="5" fill="#E53935" fill-opacity="0.35" stroke="#C62828" stroke-width="0.8"/>
+  <text x="99" y="219" font-family="monospace" font-size="8" fill="#C62828">Center</text>
+  <circle cx="165" cy="215" r="5" fill="#FF9800" fill-opacity="0.25" stroke="#EF6C00" stroke-width="0.8"/>
+  <text x="174" y="219" font-family="monospace" font-size="8" fill="#EF6C00">Ring 1</text>
+  <circle cx="240" cy="215" r="5" fill="#4a90d9" fill-opacity="0.15" stroke="#1565C0" stroke-width="0.8"/>
+  <text x="249" y="219" font-family="monospace" font-size="8" fill="#1565C0">Ring 2</text>
+</svg>
