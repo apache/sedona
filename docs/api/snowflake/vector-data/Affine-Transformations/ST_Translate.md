@@ -28,7 +28,7 @@ If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGO
 
 ![ST_Translate](../../../../image/ST_Translate/ST_Translate.svg "ST_Translate")
 
-Format: `ST_Translate(geometry: geometry, deltaX: deltaX, deltaY: deltaY, deltaZ: deltaZ)`
+Format: `ST_Translate(geometry: Geometry, deltaX: Double, deltaY: Double, deltaZ: Double)`
 
 Return type: `Geometry`
 
