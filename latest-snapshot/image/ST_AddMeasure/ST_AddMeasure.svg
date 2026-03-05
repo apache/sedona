@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="170" viewBox="0 0 400 170">
+  <rect width="400" height="170" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_AddMeasure</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">measureStart=100, measureEnd=400</text>
+  <polyline points="102.5,125.0 200.0,60.0 297.5,92.5" fill="none" stroke="#43A047" stroke-width="2.5"/>
+  <circle cx="102.5" cy="125.0" r="4" fill="#43A047" stroke="#fff" stroke-width="1"/>
+  <text x="102.5" y="140.0" font-family="monospace" font-size="9" fill="#43A047" text-anchor="middle">M=100</text>
+  <circle cx="200.0" cy="60.0" r="4" fill="#43A047" stroke="#fff" stroke-width="1"/>
+  <text x="200.0" y="50.0" font-family="monospace" font-size="9" fill="#43A047" text-anchor="middle">M=250</text>
+  <circle cx="297.5" cy="92.5" r="4" fill="#43A047" stroke="#fff" stroke-width="1"/>
+  <text x="297.5" y="82.5" font-family="monospace" font-size="9" fill="#43A047" text-anchor="middle">M=400</text>
+  <rect x="155" y="152" width="8" height="8" fill="rgba(67,160,71,0.2)" stroke="#43A047" stroke-width="1"/>
+  <text x="167" y="160" font-family="monospace" font-size="9" fill="#43A047">Result (with M values)</text>
+</svg>
