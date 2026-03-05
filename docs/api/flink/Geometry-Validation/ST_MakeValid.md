@@ -24,6 +24,8 @@ Introduction: Given an invalid geometry, create a valid representation of the ge
 Collapsed geometries are either converted to empty (keepCollapsed=true) or a valid geometry of lower dimension (keepCollapsed=false).
 Default is keepCollapsed=false.
 
+![ST_MakeValid](../../../image/ST_MakeValid/ST_MakeValid.svg "ST_MakeValid")
+
 Format:
 
 `ST_MakeValid (A: Geometry)`
