@@ -21,6 +21,8 @@
 
 Introduction: Performs a counter-clockwise rotation of the specified geometry around the Y-axis by the given angle measured in radians.
 
+![ST_RotateY](../../../image/ST_RotateY/ST_RotateY.svg "ST_RotateY")
+
 Format: `ST_RotateY(geometry: Geometry, angle: Double)`
 
 Return type: `Geometry`

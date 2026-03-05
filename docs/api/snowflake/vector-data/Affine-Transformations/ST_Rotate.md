@@ -21,6 +21,8 @@
 
 Introduction: Rotates a geometry by a specified angle in radians counter-clockwise around a given origin point. The origin for rotation can be specified as either a POINT geometry or x and y coordinates. If the origin is not specified, the geometry is rotated around POINT(0 0).
 
+![ST_Rotate](../../../../image/ST_Rotate/ST_Rotate.svg "ST_Rotate")
+
 Formats;
 
 `ST_Rotate (geometry: Geometry, angle: Double)`
