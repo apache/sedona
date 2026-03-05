@@ -36,3 +36,5 @@ Output:
 ```
 213
 ```
+
+![ST_BingTile](../../../../image/ST_BingTile/ST_BingTile.svg)

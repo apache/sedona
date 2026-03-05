@@ -38,3 +38,5 @@ Output:
 ```
 3
 ```
+
+![ST_BingTileX](../../../image/ST_BingTileX/ST_BingTileX.svg)

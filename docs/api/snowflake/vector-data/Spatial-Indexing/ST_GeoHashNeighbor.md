@@ -42,3 +42,5 @@ Result:
 |u1pc                         |
 +-----------------------------+
 ```
+
+![ST_GeoHashNeighbor](../../../../image/ST_GeoHashNeighbor/ST_GeoHashNeighbor.svg)

@@ -36,3 +36,5 @@ Output:
 ```
 3
 ```
+
+![ST_BingTileZoomLevel](../../../../image/ST_BingTileZoomLevel/ST_BingTileZoomLevel.svg)

@@ -41,3 +41,5 @@ Output:
 ```
 [POLYGON ((-180 85.05112877980659, -180 0, 0 0, 0 85.05112877980659, -180 85.05112877980659)), ...]
 ```
+
+![ST_BingTileToGeom](../../../image/ST_BingTileToGeom/ST_BingTileToGeom.svg)
