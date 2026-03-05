@@ -26,6 +26,8 @@ To scale the geometry relative to a point other than the true origin (e.g., scal
 !!!Note
     This function is designed for scaling 2D geometries. While it currently doesn't support scaling the Z and M coordinates, it preserves these values during the scaling operation.
 
+![ST_ScaleGeom](../../../../image/ST_ScaleGeom/ST_ScaleGeom.svg "ST_ScaleGeom")
+
 Format:
 
 `ST_ScaleGeom(geometry: Geometry, factor: Geometry, origin: Geometry)`

@@ -26,7 +26,9 @@ If the geometry is 2D, and a deltaZ parameter is specified, no change is done to
 If the geometry is empty, no change is done to it.
 If the given geometry contains sub-geometries (GEOMETRY COLLECTION, MULTI POLYGON/LINE/POINT), all underlying geometries are individually translated.
 
-Format: `ST_Translate(geometry: geometry, deltaX: deltaX, deltaY: deltaY, deltaZ: deltaZ)`
+![ST_Translate](../../../../image/ST_Translate/ST_Translate.svg "ST_Translate")
+
+Format: `ST_Translate(geometry: Geometry, deltaX: Double, deltaY: Double, deltaZ: Double)`
 
 Return type: `Geometry`
 
