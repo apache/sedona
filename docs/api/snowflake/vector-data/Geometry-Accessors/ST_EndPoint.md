@@ -21,6 +21,8 @@
 
 Introduction: Returns last point of given linestring.
 
+![ST_EndPoint](../../../../image/ST_EndPoint/ST_EndPoint.svg "ST_EndPoint")
+
 Format: `ST_EndPoint(geom: geometry)`
 
 Return type: `Geometry`

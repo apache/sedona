@@ -21,6 +21,8 @@
 
 Introduction: Returns a LINESTRING representing the exterior ring (shell) of a POLYGON. Returns NULL if the geometry is not a polygon.
 
+![ST_ExteriorRing](../../../image/ST_ExteriorRing/ST_ExteriorRing.svg "ST_ExteriorRing")
+
 Format: `ST_ExteriorRing(A: Geometry)`
 
 Return type: `Geometry`

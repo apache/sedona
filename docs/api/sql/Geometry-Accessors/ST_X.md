@@ -21,6 +21,8 @@
 
 Introduction: Returns X Coordinate of given Point null otherwise.
 
+![ST_X](../../../image/ST_X/ST_X.svg "ST_X")
+
 Format: `ST_X(pointA: Point)`
 
 Return type: `Double`

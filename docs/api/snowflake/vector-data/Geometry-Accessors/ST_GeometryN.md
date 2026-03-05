@@ -21,6 +21,8 @@
 
 Introduction: Return the 0-based Nth geometry if the geometry is a GEOMETRYCOLLECTION, (MULTI)POINT, (MULTI)LINESTRING, MULTICURVE or (MULTI)POLYGON. Otherwise, return null
 
+![ST_GeometryN](../../../../image/ST_GeometryN/ST_GeometryN.svg "ST_GeometryN")
+
 Format: `ST_GeometryN(geom: geometry, n: Int)`
 
 Return type: `Geometry`

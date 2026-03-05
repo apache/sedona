@@ -21,6 +21,8 @@
 
 Introduction: Returns number of points in a LineString
 
+![ST_NumPoints](../../../../image/ST_NumPoints/ST_NumPoints.svg "ST_NumPoints")
+
 Format: `ST_NumPoints(geom: geometry)`
 
 Return type: `Integer`

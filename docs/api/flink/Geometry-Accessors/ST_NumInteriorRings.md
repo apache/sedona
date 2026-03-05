@@ -21,6 +21,8 @@
 
 Introduction: Returns number of interior rings of polygon geometries.
 
+![ST_NumInteriorRings](../../../image/ST_NumInteriorRings/ST_NumInteriorRings.svg "ST_NumInteriorRings")
+
 Format: `ST_NumInteriorRings(geom: Geometry)`
 
 Return type: `Integer`

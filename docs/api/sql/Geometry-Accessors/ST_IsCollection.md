@@ -25,6 +25,8 @@ Collection types are the following:
 - GEOMETRYCOLLECTION
 - MULTI{POINT, POLYGON, LINESTRING}
 
+![ST_IsCollection](../../../image/ST_IsCollection/ST_IsCollection.svg "ST_IsCollection")
+
 Format: `ST_IsCollection(geom: Geometry)`
 
 Return type: `Boolean`

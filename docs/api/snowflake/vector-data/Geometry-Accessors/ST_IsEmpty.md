@@ -21,6 +21,8 @@
 
 Introduction: Test if a geometry is empty geometry
 
+![ST_IsEmpty](../../../../image/ST_IsEmpty/ST_IsEmpty.svg "ST_IsEmpty")
+
 Format: `ST_IsEmpty (A:geometry)`
 
 Return type: `Boolean`

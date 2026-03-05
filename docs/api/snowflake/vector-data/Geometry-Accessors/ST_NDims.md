@@ -21,6 +21,8 @@
 
 Introduction: Returns the coordinate dimension of the geometry.
 
+![ST_NDims](../../../../image/ST_NDims/ST_NDims.svg "ST_NDims")
+
 Format: `ST_NDims(geom: geometry)`
 
 Return type: `Integer`

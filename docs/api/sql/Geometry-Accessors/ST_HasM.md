@@ -21,6 +21,8 @@
 
 Introduction: Checks for the presence of M coordinate values representing measures or linear references. Returns true if the input geometry includes an M coordinate, false otherwise.
 
+![ST_HasM](../../../image/ST_HasM/ST_HasM.svg "ST_HasM")
+
 Format: `ST_HasM(geom: Geometry)`
 
 Return type: `Boolean`

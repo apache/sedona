@@ -21,6 +21,8 @@
 
 Introduction: This function takes a GeometryCollection/Multi Geometry object and returns a set of geometries containing the individual geometries that make up the input geometry. The function is useful for breaking down a GeometryCollection/Multi Geometry into its constituent geometries.
 
+![ST_Dump](../../../../image/ST_Dump/ST_Dump.svg "ST_Dump")
+
 Format: `ST_Dump(geom: geometry)`
 
 Return type: `Array<Geometry>`
