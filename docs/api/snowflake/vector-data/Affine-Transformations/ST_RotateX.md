@@ -21,6 +21,8 @@
 
 Introduction: Performs a counter-clockwise rotation of the specified geometry around the X-axis by the given angle measured in radians.
 
+![ST_RotateX](../../../../image/ST_RotateX/ST_RotateX.svg "ST_RotateX")
+
 Format: `ST_RotateX(geometry: Geometry, angle: Double)`
 
 Return type: `Geometry`

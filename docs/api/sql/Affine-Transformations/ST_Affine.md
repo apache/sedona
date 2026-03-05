@@ -37,6 +37,8 @@ Based on the invoked function, the following transformation is applied:
 
 If the given geometry is empty, the result is also empty.
 
+![ST_Affine](../../../image/ST_Affine/ST_Affine.svg "ST_Affine")
+
 Format:
 
 `ST_Affine(geometry, a, b, c, d, e, f, g, h, i, xOff, yOff, zOff)`

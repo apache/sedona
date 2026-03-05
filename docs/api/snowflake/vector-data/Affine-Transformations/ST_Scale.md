@@ -24,6 +24,8 @@ Introduction: This function scales the geometry to a new size by multiplying the
 !!!Note
     This function is designed for scaling 2D geometries. While it currently doesn't support scaling the Z and M coordinates, it preserves these values during the scaling operation.
 
+![ST_Scale](../../../../image/ST_Scale/ST_Scale.svg "ST_Scale")
+
 Format: `ST_Scale(geometry: Geometry, scaleX: Double, scaleY: Double)`
 
 Return type: `Geometry`
