@@ -21,6 +21,8 @@
 
 Introduction: Returns M minima of the given geometry or null if there is no M coordinate.
 
+![ST_MMin](../../../image/ST_MMin/ST_MMin.svg "ST_MMin")
+
 Format: `ST_MMin(geom: Geometry)`
 
 Return type: `Double`

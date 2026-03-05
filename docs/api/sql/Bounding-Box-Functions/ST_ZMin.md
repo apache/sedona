@@ -21,6 +21,8 @@
 
 Introduction: Returns Z minima of the given geometry or null if there is no Z coordinate.
 
+![ST_ZMin](../../../image/ST_ZMin/ST_ZMin.svg "ST_ZMin")
+
 Format: `ST_ZMin(geom: Geometry)`
 
 Return type: `Double`

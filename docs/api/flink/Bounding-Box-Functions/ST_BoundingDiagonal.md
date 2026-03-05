@@ -23,6 +23,8 @@ Introduction: Returns a linestring spanning minimum and maximum values of each d
 If an empty geometry is provided, the returned LineString is also empty.
 If a single vertex (POINT) is provided, the returned LineString has both the start and end points same as the points coordinates
 
+![ST_BoundingDiagonal](../../../image/ST_BoundingDiagonal/ST_BoundingDiagonal.svg "ST_BoundingDiagonal")
+
 Format: `ST_BoundingDiagonal(geom: Geometry)`
 
 Return type: `Geometry`

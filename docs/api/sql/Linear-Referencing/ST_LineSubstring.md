@@ -21,6 +21,8 @@
 
 Introduction: Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are Double values between 0 and 1. This only works with LINESTRINGs.
 
+![ST_LineSubstring](../../../image/ST_LineSubstring/ST_LineSubstring.svg "ST_LineSubstring")
+
 Format:
 
 `ST_LineSubstring (geom: Geometry, startfraction: Double, endfraction: Double)`

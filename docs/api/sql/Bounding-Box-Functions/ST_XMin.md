@@ -21,6 +21,8 @@
 
 Introduction: Returns the minimum X coordinate of a geometry
 
+![ST_XMin](../../../image/ST_XMin/ST_XMin.svg "ST_XMin")
+
 Format: `ST_XMin (A: Geometry)`
 
 Return type: `Double`

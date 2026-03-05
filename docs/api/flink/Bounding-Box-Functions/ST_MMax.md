@@ -21,6 +21,8 @@
 
 Introduction: Returns M maxima of the given geometry or null if there is no M coordinate.
 
+![ST_MMax](../../../image/ST_MMax/ST_MMax.svg "ST_MMax")
+
 Format: `ST_MMax(geom: Geometry)`
 
 Return type: `Double`

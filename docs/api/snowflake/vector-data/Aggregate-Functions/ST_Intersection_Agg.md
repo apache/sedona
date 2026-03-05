@@ -21,6 +21,8 @@
 
 Introduction: Return the polygon intersection of all polygons in A
 
+![ST_Intersection_Agg](../../../../image/ST_Intersection_Agg/ST_Intersection_Agg.svg "ST_Intersection_Agg")
+
 Format: `ST_Intersection_Agg (A:geometryColumn)`
 
 Return type: `Geometry`

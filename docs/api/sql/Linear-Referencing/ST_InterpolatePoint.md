@@ -24,6 +24,8 @@ Introduction: Returns the interpolated measure value of a linear measured LineSt
 !!!Note
     Make sure that both geometries have the same SRID, otherwise the function will throw an IllegalArgumentException.
 
+![ST_InterpolatePoint](../../../image/ST_InterpolatePoint/ST_InterpolatePoint.svg "ST_InterpolatePoint")
+
 Format: `ST_InterpolatePoint(linestringM: Geometry, point: Geometry)`
 
 Return type: `Double`

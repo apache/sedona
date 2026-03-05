@@ -24,6 +24,8 @@ Introduction: Returns a geometry expanded from the bounding box of the input. Th
 1. By individual axis using `deltaX`, `deltaY`, or `deltaZ` parameters.
 2. Uniformly across all axes using the `uniformDelta` parameter.
 
+![ST_Expand](../../../../image/ST_Expand/ST_Expand.svg "ST_Expand")
+
 Format:
 
 `ST_Expand(geometry: Geometry, uniformDelta: Double)`
