@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="150" viewBox="0 0 400 150">
+  <rect width="400" height="150" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_LineInterpolatePoint</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">fraction = 0.4</text>
+  <polyline points="138.8,115.0 173.8,62.5 226.2,80.0 261.2,45.0" fill="none" stroke="#1565C0" stroke-width="2"/>
+  <circle cx="138.8" cy="115.0" r="2.5" fill="#1565C0"/>
+  <circle cx="173.8" cy="62.5" r="2.5" fill="#1565C0"/>
+  <circle cx="226.2" cy="80.0" r="2.5" fill="#1565C0"/>
+  <circle cx="261.2" cy="45.0" r="2.5" fill="#1565C0"/>
+  <circle cx="177.6" cy="63.8" r="5" fill="#E53935" stroke="#fff" stroke-width="1"/>
+  <text x="177.6" y="55.8" font-family="monospace" font-size="9" fill="#E53935" text-anchor="middle">40%</text>
+  <rect x="110" y="132" width="8" height="8" fill="rgba(21,101,192,0.2)" stroke="#1565C0" stroke-width="1"/>
+  <text x="122" y="140" font-family="monospace" font-size="9" fill="#1565C0">LineString</text>
+  <rect x="200" y="132" width="8" height="8" fill="#E53935" stroke="#E53935" stroke-width="1"/>
+  <text x="212" y="140" font-family="monospace" font-size="9" fill="#E53935">Result Point</text>
+</svg>

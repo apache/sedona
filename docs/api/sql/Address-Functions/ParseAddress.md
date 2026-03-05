@@ -31,6 +31,8 @@ The data directory can be configured via `spark.sedona.libpostal.dataDir`. You c
 
 To prepare the libpostal data for a remote filesystem, first download it to a local machine by following the [libpostal installation instructions](https://github.com/openvenues/libpostal#installation-maclinux). After installation, the data files will be in the directory you specified during setup (commonly `/tmp/libpostal/`). Then upload them to your remote storage.
 
+![ParseAddress](../../../image/ParseAddress/ParseAddress.svg "ParseAddress")
+
 Format: `ParseAddress (address: String)`
 
 Return type: `Array<Struct<label: String, value: String>>`

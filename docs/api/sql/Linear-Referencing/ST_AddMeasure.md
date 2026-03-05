@@ -21,6 +21,8 @@
 
 Introduction: Computes a new geometry with measure (M) values linearly interpolated between start and end points. For geometries lacking M dimensions, M values are added. Existing M values are overwritten by the new values. Applies only to LineString and MultiLineString inputs.
 
+![ST_AddMeasure](../../../image/ST_AddMeasure/ST_AddMeasure.svg "ST_AddMeasure")
+
 Format: `ST_AddMeasure(geom: Geometry, measureStart: Double, measureEnd: Double)`
 
 Return type: `Geometry`

@@ -21,6 +21,8 @@
 
 Introduction: This function checks if a geometry is a valid trajectory representation. For a trajectory to be considered valid, it must be a LineString that includes measure (M) values. The key requirement is that the M values increase from one vertex to the next as you move along the line.
 
+![ST_IsValidTrajectory](../../../image/ST_IsValidTrajectory/ST_IsValidTrajectory.svg "ST_IsValidTrajectory")
+
 Format: `ST_IsValidTrajectory(geom: Geometry)`
 
 Return type: `Boolean`

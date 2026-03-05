@@ -31,6 +31,8 @@ Introduction: Returns a geometry expanded from the bounding box of the input. Th
     2. For XYZ geometries, specifying only `deltaX` and `deltaY` will preserve the original Z dimension.
     3. If the input geometry has an M dimension then using this function will drop the said M dimension.
 
+![ST_Expand](../../../image/ST_Expand/ST_Expand.svg "ST_Expand")
+
 Format:
 
 `ST_Expand(geometry: Geometry, uniformDelta: Double)`

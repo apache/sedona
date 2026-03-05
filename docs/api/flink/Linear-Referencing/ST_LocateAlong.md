@@ -25,6 +25,8 @@ Additionally, an optional `offset` parameter can shift the resulting points left
 
 This allows identifying precise locations along a measured linear geometry based on supplied measure values, with the ability to offset the output points if needed.
 
+![ST_LocateAlong](../../../image/ST_LocateAlong/ST_LocateAlong.svg "ST_LocateAlong")
+
 Format:
 
 `ST_LocateAlong(linear: Geometry, measure: Double, offset: Double)`

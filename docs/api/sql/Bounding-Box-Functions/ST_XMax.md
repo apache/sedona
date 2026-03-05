@@ -21,6 +21,8 @@
 
 Introduction: Returns the maximum X coordinate of a geometry
 
+![ST_XMax](../../../image/ST_XMax/ST_XMax.svg "ST_XMax")
+
 Format: `ST_XMax (A: Geometry)`
 
 Return type: `Double`

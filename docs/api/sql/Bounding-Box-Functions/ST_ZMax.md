@@ -21,6 +21,8 @@
 
 Introduction: Returns Z maxima of the given geometry or null if there is no Z coordinate.
 
+![ST_ZMax](../../../image/ST_ZMax/ST_ZMax.svg "ST_ZMax")
+
 Format: `ST_ZMax(geom: Geometry)`
 
 Return type: `Double`

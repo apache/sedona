@@ -21,6 +21,8 @@
 
 Introduction: Return the polygon union of all polygons in A. All inputs must be polygons.
 
+![ST_Union_Agg](../../../image/ST_Union_Agg/ST_Union_Agg.svg "ST_Union_Agg")
+
 Format: `ST_Union_Agg (A: geometryColumn)`
 
 Return type: `Geometry`

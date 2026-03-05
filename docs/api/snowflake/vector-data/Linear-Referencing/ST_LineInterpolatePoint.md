@@ -21,6 +21,8 @@
 
 Introduction: Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be located.
 
+![ST_LineInterpolatePoint](../../../../image/ST_LineInterpolatePoint/ST_LineInterpolatePoint.svg "ST_LineInterpolatePoint")
+
 Format: `ST_LineInterpolatePoint (geom: geometry, fraction: Double)`
 
 Return type: `Geometry`
