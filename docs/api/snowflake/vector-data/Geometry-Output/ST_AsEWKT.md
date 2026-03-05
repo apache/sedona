@@ -25,6 +25,8 @@ The format originated in PostGIS but is supported by many GIS tools.
 If the geometry is lacking SRID a WKT format is produced.
 [See ST_SetSRID](../Spatial-Reference-System/ST_SetSRID.md)
 
+![ST_AsEWKT](../../../../image/ST_AsEWKT/ST_AsEWKT.svg "ST_AsEWKT")
+
 Format: `ST_AsEWKT (A:geometry)`
 
 Return type: `String`

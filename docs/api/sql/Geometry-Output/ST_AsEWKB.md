@@ -26,6 +26,8 @@ If the geometry is lacking SRID a WKB format is produced.
 [See ST_SetSRID](../Spatial-Reference-System/ST_SetSRID.md)
 It will ignore the M coordinate if present.
 
+![ST_AsEWKB](../../../image/ST_AsEWKB/ST_AsEWKB.svg "ST_AsEWKB")
+
 Format: `ST_AsEWKB (A: Geometry)`
 
 Return type: `Binary`

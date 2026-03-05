@@ -21,6 +21,8 @@
 
 Introduction: Return the Well-Known Binary representation of a geometry
 
+![ST_AsBinary](../../../../image/ST_AsBinary/ST_AsBinary.svg "ST_AsBinary")
+
 Format: `ST_AsBinary (A:geometry)`
 
 Return type: `Binary`

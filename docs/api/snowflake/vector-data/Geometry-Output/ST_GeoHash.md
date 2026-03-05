@@ -21,6 +21,8 @@
 
 Introduction: Returns GeoHash of the geometry with given precision
 
+![ST_GeoHash](../../../../image/ST_GeoHash/ST_GeoHash.svg "ST_GeoHash")
+
 Format: `ST_GeoHash(geom: geometry, precision: int)`
 
 Return type: `String`

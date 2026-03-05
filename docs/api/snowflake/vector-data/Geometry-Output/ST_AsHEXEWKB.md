@@ -21,6 +21,8 @@
 
 Introduction: This function returns the input geometry encoded to a text representation in HEXEWKB format. The HEXEWKB encoding can use either little-endian (NDR) or big-endian (XDR) byte ordering. If no encoding is explicitly specified, the function defaults to using the little-endian (NDR) format.
 
+![ST_AsHEXEWKB](../../../../image/ST_AsHEXEWKB/ST_AsHEXEWKB.svg "ST_AsHEXEWKB")
+
 Format: `ST_AsHEXEWKB(geom: Geometry, endian: String = NDR)`
 
 Return type: `String`

@@ -22,6 +22,8 @@
 Introduction: Return the Well-Known Text string representation of a geometry.
 It will support M coordinate if present since v1.5.0.
 
+![ST_AsText](../../../image/ST_AsText/ST_AsText.svg "ST_AsText")
+
 Format: `ST_AsText (A: Geometry)`
 
 Return type: `String`

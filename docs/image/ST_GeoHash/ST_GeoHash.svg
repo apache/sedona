@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="120" viewBox="0 0 380 120">
+  <rect width="380" height="120" fill="#f5f5f5" rx="5"/>
+  <defs><marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#666"/></marker></defs>
+  <circle cx="35.0" cy="20.0" r="4" fill="#4A90D9" stroke="none"/>
+  <line x1="140.0" y1="60.0" x2="180.0" y2="60.0" stroke="#666" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  <text x="160.0" y="50.0" font-family="monospace" font-size="9" fill="#666" text-anchor="middle">ST_GeoHash</text>
+  <rect x="190.0" y="49.0" width="180.0" height="22" rx="4" fill="#E8F5E9" stroke="#43A047" stroke-width="1"/>
+  <text x="280.0" y="64.0" font-family="monospace" font-size="9" fill="#333" text-anchor="middle">s00twy01mt</text>
+  <text x="280.0" y="84.0" font-family="monospace" font-size="9" fill="#999" text-anchor="middle">GeoHash</text>
+</svg>

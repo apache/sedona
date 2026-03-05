@@ -27,6 +27,8 @@ The type parameter takes the following options -
 - "Feature": Wraps the geometry in a GeoJSON Feature.
 - "FeatureCollection": Wraps the Feature in a GeoJSON FeatureCollection.
 
+![ST_AsGeoJSON](../../../../image/ST_AsGeoJSON/ST_AsGeoJSON.svg "ST_AsGeoJSON")
+
 Format:
 
 `ST_AsGeoJSON (A:geometry)`

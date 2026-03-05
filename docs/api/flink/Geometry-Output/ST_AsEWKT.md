@@ -26,6 +26,8 @@ If the geometry is lacking SRID a WKT format is produced.
 [See ST_SetSRID](../Spatial-Reference-System/ST_SetSRID.md)
 It will support M coordinate if present since v1.5.0.
 
+![ST_AsEWKT](../../../image/ST_AsEWKT/ST_AsEWKT.svg "ST_AsEWKT")
+
 Format: `ST_AsEWKT (A: Geometry)`
 
 Return type: `String`

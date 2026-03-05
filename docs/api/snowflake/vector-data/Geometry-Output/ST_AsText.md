@@ -21,6 +21,8 @@
 
 Introduction: Return the Well-Known Text string representation of a geometry
 
+![ST_AsText](../../../../image/ST_AsText/ST_AsText.svg "ST_AsText")
+
 Format: `ST_AsText (A:geometry)`
 
 Return type: `String`

@@ -21,6 +21,8 @@
 
 Introduction: Return the [KML](https://www.ogc.org/standards/kml) string representation of a geometry
 
+![ST_AsKML](../../../../image/ST_AsKML/ST_AsKML.svg "ST_AsKML")
+
 Format: `ST_AsKML (A:geometry)`
 
 Return type: `String`

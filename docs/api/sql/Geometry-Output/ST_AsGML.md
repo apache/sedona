@@ -21,6 +21,8 @@
 
 Introduction: Return the [GML](https://www.ogc.org/standards/gml) string representation of a geometry
 
+![ST_AsGML](../../../image/ST_AsGML/ST_AsGML.svg "ST_AsGML")
+
 Format: `ST_AsGML (A: Geometry)`
 
 Return type: `String`
