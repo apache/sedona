@@ -19,7 +19,7 @@
 
 # ST_GeometryType
 
-Introduction: Returns the type of the geometry as a string. EG: 'ST_Linestring', 'ST_Polygon' etc.
+Introduction: Returns the type of the geometry as a string. EG: 'ST_LineString', 'ST_Polygon' etc.
 
 ![ST_GeometryType](../../../image/ST_GeometryType/ST_GeometryType.svg "ST_GeometryType")
 

@@ -19,7 +19,7 @@
 
 # ST_IsPolygonCW
 
-Introduction: Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise.
+Introduction: Returns true if all polygonal components in the input geometry have their exterior rings oriented clockwise and interior rings oriented counter-clockwise.
 
 ![ST_IsPolygonCW](../../../image/ST_IsPolygonCW/ST_IsPolygonCW.svg "ST_IsPolygonCW")
 
