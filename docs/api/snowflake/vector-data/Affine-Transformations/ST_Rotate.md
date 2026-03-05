@@ -23,7 +23,7 @@ Introduction: Rotates a geometry by a specified angle in radians counter-clockwi
 
 ![ST_Rotate](../../../../image/ST_Rotate/ST_Rotate.svg "ST_Rotate")
 
-Formats;
+Formats:
 
 `ST_Rotate (geometry: Geometry, angle: Double)`
 
