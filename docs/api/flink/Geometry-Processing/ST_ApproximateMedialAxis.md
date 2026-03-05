@@ -44,3 +44,5 @@ Output:
 ```
 MULTILINESTRING ((50 45, 50 5), (50 45, 35 45), (65 45, 50 45), (35 45, 65 45))
 ```
+
+![ST_ApproximateMedialAxis](../../../image/ST_ApproximateMedialAxis/ST_ApproximateMedialAxis.svg)

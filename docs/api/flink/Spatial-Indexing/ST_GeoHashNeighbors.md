@@ -38,3 +38,5 @@ Output:
 ```
 [u1pc, u301, u300, u2bp, u0zz, u0zx, u1p8, u1p9]
 ```
+
+![ST_GeoHashNeighbors](../../../image/ST_GeoHashNeighbors/ST_GeoHashNeighbors.svg)

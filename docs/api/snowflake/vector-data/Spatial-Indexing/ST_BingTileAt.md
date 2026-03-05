@@ -36,3 +36,5 @@ Output:
 ```
 123030123010121
 ```
+
+![ST_BingTileAt](../../../../image/ST_BingTileAt/ST_BingTileAt.svg)

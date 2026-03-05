@@ -42,3 +42,5 @@ Result:
 |[u1pc, u301, u300, u2bp, ...] |
 +-----------------------------+
 ```
+
+![ST_GeoHashNeighbors](../../../../image/ST_GeoHashNeighbors/ST_GeoHashNeighbors.svg)

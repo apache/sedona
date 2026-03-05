@@ -46,3 +46,5 @@ Output:
 | +I |                   78 |
 +----+----------------------+
 ```
+
+![ST_H3CellDistance](../../../image/ST_H3CellDistance/ST_H3CellDistance.svg)

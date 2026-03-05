@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="190" viewBox="0 0 400 190">
+  <rect width="400" height="190" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_BingTileAt</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Get Bing Tile quadkey at a lon/lat point</text>
+  <rect x="80" y="48" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="80" y="83" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="80" y="118" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="115" y="48" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="115" y="83" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="115" y="118" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="150" y="48" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="150" y="83" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="150" y="118" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="185" y="48" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="185" y="83" width="35" height="35" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="1.5"/>
+  <rect x="185" y="118" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="220" y="48" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="220" y="83" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="220" y="118" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="255" y="48" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="255" y="83" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <rect x="255" y="118" width="35" height="35" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <circle cx="199" cy="101" r="4" fill="#E53935" stroke="#fff" stroke-width="1.5"/>
+  <text x="207" y="96" font-family="monospace" font-size="8" fill="#E53935" font-weight="bold">lon,lat</text>
+  <text x="200" y="162" font-family="monospace" font-size="10" fill="#1565C0" text-anchor="middle">Returns quadkey of tile containing the point</text>
+  <text x="200" y="178" font-family="monospace" font-size="9" fill="#666" text-anchor="middle">at specified zoom level</text>
+</svg>

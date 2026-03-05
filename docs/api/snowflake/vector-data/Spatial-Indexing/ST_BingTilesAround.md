@@ -36,3 +36,5 @@ Output:
 ```
 [0, 2, 1, 3]
 ```
+
+![ST_BingTilesAround](../../../../image/ST_BingTilesAround/ST_BingTilesAround.svg)
