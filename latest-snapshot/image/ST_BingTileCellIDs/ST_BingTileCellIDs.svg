@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="230" viewBox="0 0 400 230">
+  <rect width="400" height="230" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_BingTileCellIDs</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Bing Tiles covering a geometry</text>
+  <rect x="55" y="42" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="55" y="72" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="55" y="102" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="55" y="132" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="85" y="42" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="85" y="72" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="85" y="102" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="85" y="132" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="115" y="42" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="115" y="72" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="115" y="102" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="115" y="132" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="145" y="42" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="145" y="72" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="145" y="102" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="145" y="132" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="175" y="42" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="175" y="72" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="175" y="102" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="175" y="132" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="205" y="42" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="205" y="72" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="205" y="102" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="205" y="132" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="235" y="42" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="235" y="72" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="235" y="102" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="235" y="132" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="265" y="42" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="265" y="72" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="265" y="102" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="265" y="132" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="295" y="42" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="295" y="72" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="295" y="102" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="295" y="132" width="30" height="30" fill="#fff" stroke="#e0e0e0" stroke-width="0.6"/>
+  <rect x="85" y="42" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="85" y="72" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="85" y="102" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="115" y="42" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="115" y="72" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="115" y="102" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="115" y="132" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="145" y="42" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="145" y="72" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="145" y="102" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="145" y="132" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="175" y="42" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="175" y="72" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="175" y="102" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="175" y="132" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="205" y="42" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="205" y="72" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="205" y="102" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="205" y="132" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="235" y="42" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="235" y="72" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="235" y="102" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="235" y="132" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="265" y="72" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <rect x="265" y="102" width="30" height="30" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="0.8"/>
+  <polygon points="120,60 250,52 280,108 245,150 135,148 95,105" fill="none" stroke="#E53935" stroke-width="2" stroke-dasharray="5,3"/>
+  <text x="200" y="195" font-family="monospace" font-size="10" fill="#1565C0" text-anchor="middle">Returns array of quadkeys covering the geometry</text>
+  <rect x="70" y="208" width="10" height="10" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="1"/>
+  <text x="84" y="217" font-family="monospace" font-size="8" fill="#1565C0">Covered tiles</text>
+  <line x1="190" y1="213" x2="220" y2="213" stroke="#E53935" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <text x="224" y="217" font-family="monospace" font-size="8" fill="#E53935">Input geometry</text>
+</svg>
