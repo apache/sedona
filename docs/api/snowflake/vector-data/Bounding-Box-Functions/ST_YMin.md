@@ -21,6 +21,8 @@
 
 Introduction: Return the minimum Y coordinate of A
 
+![ST_YMin](../../../../image/ST_YMin/ST_YMin.svg "ST_YMin")
+
 Format: `ST_Y_Min (A:geometry)`
 
 Return type: `Double`

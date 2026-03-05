@@ -29,6 +29,8 @@ the record is an outlier.
 !!!Note
     ST_LocalOutlierFactor has a useSphere parameter rather than a useSpheroid parameter. This function thus uses a spherical model of the earth rather than an ellipsoidal model when calculating distance.
 
+![ST_LocalOutlierFactor](../../../image/ST_LocalOutlierFactor/ST_LocalOutlierFactor.svg "ST_LocalOutlierFactor")
+
 Format: `ST_LocalOutlierFactor(geometry: Geometry, k: Int, useSphere: Boolean)`
 
 Return type: `Double`

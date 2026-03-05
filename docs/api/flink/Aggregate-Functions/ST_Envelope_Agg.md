@@ -21,6 +21,8 @@
 
 Introduction: Return the entire envelope boundary of all geometries in A
 
+![ST_Envelope_Agg](../../../image/ST_Envelope_Agg/ST_Envelope_Agg.svg "ST_Envelope_Agg")
+
 Format: `ST_Envelope_Agg (A: geometryColumn)`
 
 Return type: `Geometry`

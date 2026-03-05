@@ -21,6 +21,8 @@
 
 Introduction: Collects all geometries in a geometry column into a single multi-geometry (MultiPoint, MultiLineString, MultiPolygon, or GeometryCollection). Unlike `ST_Union_Agg`, this function does not dissolve boundaries between geometries - it simply collects them into a multi-geometry.
 
+![ST_Collect_Agg](../../../image/ST_Collect_Agg/ST_Collect_Agg.svg "ST_Collect_Agg")
+
 Format: `ST_Collect_Agg (A: geometryColumn)`
 
 Return type: `Geometry`

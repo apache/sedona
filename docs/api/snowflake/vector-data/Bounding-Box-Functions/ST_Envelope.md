@@ -21,6 +21,8 @@
 
 Introduction: Return the envelope boundary of A
 
+![ST_Envelope](../../../../image/ST_Envelope/ST_Envelope.svg "ST_Envelope")
+
 Format: `ST_Envelope (A:geometry)`
 
 Return type: `Geometry`

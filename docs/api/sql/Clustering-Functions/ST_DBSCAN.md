@@ -27,6 +27,8 @@ Returns a struct containing the cluster ID and a boolean indicating if the recor
 - `minPoints` is the minimum number of neighbors a single record must have to form a cluster.
 - `useSpheroid` is whether to use ST_DistanceSpheroid or ST_Distance as the distance metric.
 
+![ST_DBSCAN](../../../image/ST_DBSCAN/ST_DBSCAN.svg "ST_DBSCAN")
+
 Format: `ST_DBSCAN(geom: Geometry, epsilon: Double, minPoints: Integer, useSpheroid: Boolean)`
 
 Return type: `Struct<isCore: Boolean, cluster: Long>`

@@ -21,6 +21,8 @@
 
 Introduction: Returns a double between 0 and 1, representing the location of the closest point on the LineString as a fraction of its total length. The first argument must be a LINESTRING, and the second argument is a POINT geometry.
 
+![ST_LineLocatePoint](../../../../image/ST_LineLocatePoint/ST_LineLocatePoint.svg "ST_LineLocatePoint")
+
 Format: `ST_LineLocatePoint(linestring: Geometry, point: Geometry)`
 
 Return type: `Double`

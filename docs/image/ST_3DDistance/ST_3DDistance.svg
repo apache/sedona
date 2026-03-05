@@ -1,27 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
-  <defs>
-    <style>
-      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
-    </style>
-    <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
-    </marker>
-    <marker id="arrowGrev" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
-      <path d="M8,0 L0,3 L8,6" fill="#2ecc71" />
-    </marker>
-  </defs>
-  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_3DDistance</text>
-  <circle cx="112.5" cy="218.75" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
-  <text x="121.5" y="211.75" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
-  <circle cx="387.5" cy="81.25" r="5" fill="#d94a4a" stroke="#d94a4a" stroke-width="1.5" />
-  <text x="396.5" y="74.25" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
-  <line x1="112.5" y1="218.75" x2="387.5" y2="81.25" stroke="#2ecc71" stroke-width="2" stroke-dasharray="6,3" marker-start="url(#arrowGrev)" marker-end="url(#arrowG)" />
-  <text x="258" y="144" font-size="15" font-weight="bold" fill="#2ecc71" font-style="italic">d₃D</text>
-  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns the 3D minimum cartesian distance between A and B</text>
-  <rect x="93" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
-  <text x="109" y="266" font-size="13" fill="#333333">Geometry A</text>
-  <rect x="203" y="255" width="12" height="12" rx="2" fill="#d94a4a" stroke="#d94a4a" stroke-width="1" />
-  <text x="219" y="266" font-size="13" fill="#333333">Geometry B</text>
-  <rect x="313" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
-  <text x="329" y="266" font-size="13" fill="#333333">Distance</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="220" viewBox="0 0 400 220">
+  <rect width="400" height="220" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_3DDistance</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">3D Euclidean distance between two geometries</text>
+  <!-- Isometric axes from origin at (70,160) -->
+  <line x1="70" y1="160" x2="210" y2="160" stroke="#aaa" stroke-width="1"/>
+  <text x="215" y="163" font-family="monospace" font-size="9" fill="#999">X</text>
+  <line x1="70" y1="160" x2="170" y2="118" stroke="#aaa" stroke-width="1"/>
+  <text x="175" y="116" font-family="monospace" font-size="9" fill="#999">Y</text>
+  <line x1="70" y1="160" x2="70" y2="38" stroke="#aaa" stroke-width="1"/>
+  <text x="64" y="35" font-family="monospace" font-size="9" fill="#999">Z</text>
+  <!-- Projection: sx = 70 + x*16 + y*10, sy = 160 - z*13 - y*4 -->
+  <!-- Point A (1,2,1): sx=70+16+20=106, sy=160-13-8=139; gnd=(106,152) -->
+  <!-- Point B (7,5,7): sx=70+112+50=232, sy=160-91-20=49; gnd=(232,140) -->
+  <!-- 3D dist = sqrt(36+9+36) = 9.0 -->
+  <!-- Ground shadow projections -->
+  <circle cx="106" cy="152" r="2.5" fill="#bbb" stroke="#999" stroke-width="0.5"/>
+  <circle cx="232" cy="140" r="2.5" fill="#bbb" stroke="#999" stroke-width="0.5"/>
+  <line x1="106" y1="152" x2="232" y2="140" stroke="#ccc" stroke-width="1.2" stroke-dasharray="3,2"/>
+  <text x="169" y="152" font-family="monospace" font-size="8" fill="#aaa" text-anchor="middle">2D ground</text>
+  <!-- Vertical pillars from ground to 3D points -->
+  <line x1="106" y1="139" x2="106" y2="152" stroke="#4a90d9" stroke-width="0.8" stroke-dasharray="2,2"/>
+  <text x="114" y="148" font-family="monospace" font-size="7" fill="#4a90d9">Z=1</text>
+  <line x1="232" y1="49" x2="232" y2="140" stroke="#d94a4a" stroke-width="0.8" stroke-dasharray="2,2"/>
+  <text x="240" y="100" font-family="monospace" font-size="7" fill="#d94a4a">Z=7</text>
+  <!-- 3D Distance line between A and B -->
+  <line x1="106" y1="139" x2="232" y2="49" stroke="#2ecc71" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <!-- Distance label at midpoint (169, 94) -->
+  <text x="158" y="85" font-family="monospace" font-size="10" fill="#2ecc71" font-weight="bold">d = 9.0</text>
+  <!-- Point A -->
+  <circle cx="106" cy="139" r="5" fill="#4a90d9" stroke="#fff" stroke-width="1.5"/>
+  <text x="82" y="133" font-family="monospace" font-size="9" fill="#4a90d9" text-anchor="end" font-weight="bold">A (1,2,1)</text>
+  <!-- Point B -->
+  <circle cx="232" cy="49" r="5" fill="#d94a4a" stroke="#fff" stroke-width="1.5"/>
+  <text x="244" y="44" font-family="monospace" font-size="9" fill="#d94a4a" text-anchor="start" font-weight="bold">B (7,5,7)</text>
+  <!-- Result -->
+  <text x="200" y="185" font-family="monospace" font-size="10" fill="#2ecc71" text-anchor="middle">Returns: 9.0</text>
+  <!-- Legend -->
+  <circle cx="78" cy="204" r="4" fill="#4a90d9"/>
+  <text x="86" y="208" font-family="monospace" font-size="9" fill="#4a90d9">Point A</text>
+  <circle cx="148" cy="204" r="4" fill="#d94a4a"/>
+  <text x="156" y="208" font-family="monospace" font-size="9" fill="#d94a4a">Point B</text>
+  <line x1="214" y1="204" x2="239" y2="204" stroke="#2ecc71" stroke-width="2" stroke-dasharray="4,2"/>
+  <text x="244" y="208" font-family="monospace" font-size="9" fill="#2ecc71">3D Distance</text>
 </svg>
