@@ -21,6 +21,8 @@
 
 Introduction: RETURN true if LINESTRING is ST_IsClosed and ST_IsSimple.
 
+![ST_IsRing](../../../image/ST_IsRing/ST_IsRing.svg "ST_IsRing")
+
 Format: `ST_IsRing(geom: Geometry)`
 
 Return type: `Boolean`

@@ -21,6 +21,8 @@
 
 Introduction: Returns list of Points which geometry consists of.
 
+![ST_DumpPoints](../../../image/ST_DumpPoints/ST_DumpPoints.svg "ST_DumpPoints")
+
 Format: `ST_DumpPoints(geom: Geometry)`
 
 Return type: `Array<Geometry>`

@@ -21,6 +21,8 @@
 
 Introduction: Test if geometry's only self-intersections are at boundary points.
 
+![ST_IsSimple](../../../image/ST_IsSimple/ST_IsSimple.svg "ST_IsSimple")
+
 Format: `ST_IsSimple (A: Geometry)`
 
 Return type: `Boolean`

@@ -21,6 +21,8 @@
 
 Introduction: Return the Nth point in a single linestring or circular linestring in the geometry. Negative values are counted backwards from the end of the LineString, so that -1 is the last point. Returns NULL if there is no linestring in the geometry.
 
+![ST_PointN](../../../image/ST_PointN/ST_PointN.svg "ST_PointN")
+
 Format: `ST_PointN(A: Geometry, B: Integer)`
 
 Return type: `Geometry`

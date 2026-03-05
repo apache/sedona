@@ -21,6 +21,8 @@
 
 Introduction: Returns M Coordinate of given Point, null otherwise.
 
+![ST_M](../../../image/ST_M/ST_M.svg "ST_M")
+
 Format: `ST_M(geom: Geometry)`
 
 Return type: `Double`

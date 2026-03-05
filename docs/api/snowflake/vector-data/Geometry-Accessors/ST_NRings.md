@@ -25,6 +25,8 @@ this function also takes into account the number of  exterior rings.
 This function returns 0 for an empty Polygon or MultiPolygon.
 If the geometry is not a Polygon or MultiPolygon, an IllegalArgument Exception is thrown.
 
+![ST_NRings](../../../../image/ST_NRings/ST_NRings.svg "ST_NRings")
+
 Format: `ST_NRings(geom: geometry)`
 
 Return type: `Integer`

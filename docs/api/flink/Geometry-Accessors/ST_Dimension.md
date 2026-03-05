@@ -21,6 +21,8 @@
 
 Introduction: Return the topological dimension of this Geometry object, which must be less than or equal to the coordinate dimension. OGC SPEC s2.1.1.1 - returns 0 for POINT, 1 for LINESTRING, 2 for POLYGON, and the largest dimension of the components of a GEOMETRYCOLLECTION. If the dimension is unknown (e.g. for an empty GEOMETRYCOLLECTION) 0 is returned.
 
+![ST_Dimension](../../../image/ST_Dimension/ST_Dimension.svg "ST_Dimension")
+
 Format: `ST_Dimension (A: Geometry) | ST_Dimension (C: Geometrycollection)`
 
 Return type: `Integer`

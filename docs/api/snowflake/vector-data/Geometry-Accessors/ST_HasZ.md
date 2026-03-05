@@ -21,6 +21,8 @@
 
 Introduction: Checks for the presence of Z coordinate values representing measures or linear references. Returns true if the input geometry includes an Z coordinate, false otherwise.
 
+![ST_HasZ](../../../../image/ST_HasZ/ST_HasZ.svg "ST_HasZ")
+
 Format: `ST_HasZ(geom: Geometry)`
 
 Return type: `Boolean`

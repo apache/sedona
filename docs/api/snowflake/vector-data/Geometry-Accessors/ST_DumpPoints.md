@@ -21,6 +21,8 @@
 
 Introduction: Returns a MultiPoint geometry which consists of individual points that compose the input line string.
 
+![ST_DumpPoints](../../../../image/ST_DumpPoints/ST_DumpPoints.svg "ST_DumpPoints")
+
 Format: `ST_DumpPoints(geom: geometry)`
 
 Return type: `Array<Geometry>`
