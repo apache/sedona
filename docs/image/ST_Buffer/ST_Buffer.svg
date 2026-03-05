@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225">
+  <rect width="400" height="225" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_Buffer</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Buffer around geometry (default: round)</text>
+  <path d="M 216.8 32.6 L 316.8 107.6 A 28 28 0 0 1 300.0 158.0 L 100.0 158.0 A 28 28 0 0 1 83.2 107.6 L 183.2 32.6 A 28 28 0 0 1 216.8 32.6 Z" fill="rgba(46,204,113,0.2)" stroke="#2ecc71" stroke-width="2"/>
+  <polygon points="200,55 300,130 100,130" fill="rgba(74,144,217,0.25)" stroke="#1565C0" stroke-width="2"/>
+  <line x1="200" y1="55" x2="200" y2="27" stroke="#E53935" stroke-width="1.5"/>
+  <line x1="196" y1="55" x2="204" y2="55" stroke="#E53935" stroke-width="1"/>
+  <line x1="196" y1="27" x2="204" y2="27" stroke="#E53935" stroke-width="1"/>
+  <text x="210" y="43" font-family="monospace" font-size="9" fill="#E53935" font-weight="bold">d</text>
+  <text x="310" y="55" font-family="monospace" font-size="8" fill="#2ecc71">join=round</text>
+  <text x="310" y="65" font-family="monospace" font-size="8" fill="#2ecc71">(default)</text>
+  <text x="200" y="175" font-family="monospace" font-size="10" fill="#333" text-anchor="middle">Returns geometry expanded by distance d</text>
+  <rect x="70" y="190" width="10" height="10" fill="rgba(74,144,217,0.25)" stroke="#1565C0" stroke-width="1"/>
+  <text x="84" y="199" font-family="monospace" font-size="8" fill="#1565C0">Original</text>
+  <rect x="150" y="190" width="10" height="10" fill="rgba(46,204,113,0.2)" stroke="#2ecc71" stroke-width="1"/>
+  <text x="164" y="199" font-family="monospace" font-size="8" fill="#2ecc71">Buffer</text>
+  <line x1="220" y1="195" x2="240" y2="195" stroke="#E53935" stroke-width="1.5"/>
+  <text x="244" y="199" font-family="monospace" font-size="8" fill="#E53935">Distance</text>
+</svg>

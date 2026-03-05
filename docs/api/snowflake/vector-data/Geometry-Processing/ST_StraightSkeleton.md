@@ -38,3 +38,5 @@ SELECT Sedona.ST_StraightSkeleton(
 ```
 
 Output: `MULTILINESTRING ((50 5, 50 45), (50 45, 35 45), (50 45, 65 45), (35 45, 30 45), (35 45, 40 40), (65 45, 70 45), (65 45, 60 40), (50 5, 45 5), (50 5, 55 5))`
+
+![ST_StraightSkeleton](../../../../image/ST_StraightSkeleton/ST_StraightSkeleton.svg)

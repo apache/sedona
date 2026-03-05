@@ -38,3 +38,5 @@ Output:
 ```
 POLYGON ((0 0, 0 -40.97989806962013, 45 -40.97989806962013, 45 0, 0 0))
 ```
+
+![ST_BingTilePolygon](../../../image/ST_BingTilePolygon/ST_BingTilePolygon.svg)

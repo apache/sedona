@@ -38,3 +38,5 @@ Output:
 ```
 [1230301230]
 ```
+
+![ST_BingTileCellIDs](../../../image/ST_BingTileCellIDs/ST_BingTileCellIDs.svg)

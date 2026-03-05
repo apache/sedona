@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="180" viewBox="0 0 400 180">
+  <rect width="400" height="180" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_BingTileX</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Get tile X coordinate from quadkey</text>
+  <rect x="90" y="48" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="90" y="80" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="90" y="112" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <text x="106" y="43" font-family="monospace" font-size="8" fill="#999" text-anchor="middle">0</text>
+  <rect x="122" y="48" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="122" y="80" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="122" y="112" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <text x="138" y="43" font-family="monospace" font-size="8" fill="#999" text-anchor="middle">1</text>
+  <rect x="154" y="48" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="154" y="80" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="154" y="112" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <text x="170" y="43" font-family="monospace" font-size="8" fill="#999" text-anchor="middle">2</text>
+  <rect x="186" y="48" width="32" height="32" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="1.5"/>
+  <rect x="186" y="80" width="32" height="32" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="1.5"/>
+  <rect x="186" y="112" width="32" height="32" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="1.5"/>
+  <text x="202" y="43" font-family="monospace" font-size="8" fill="#1565C0" text-anchor="middle" font-weight="bold">3</text>
+  <rect x="218" y="48" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="218" y="80" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="218" y="112" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <text x="234" y="43" font-family="monospace" font-size="8" fill="#999" text-anchor="middle">4</text>
+  <rect x="250" y="48" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="250" y="80" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="250" y="112" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <text x="266" y="43" font-family="monospace" font-size="8" fill="#999" text-anchor="middle">5</text>
+  <text x="202" y="32" font-family="monospace" font-size="10" fill="#1565C0" text-anchor="middle" font-weight="bold">X = 3</text>
+  <text x="200" y="158" font-family="monospace" font-size="10" fill="#1565C0" text-anchor="middle">Returns the tile X coordinate from a quadkey</text>
+</svg>
