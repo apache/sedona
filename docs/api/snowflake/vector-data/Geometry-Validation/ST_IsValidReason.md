@@ -24,6 +24,8 @@ Introduction: Returns text stating if the geometry is valid. If not, it provides
 - 0 (default): Use usual OGC SFS (Simple Features Specification) validity semantics.
 - 1: "ESRI flag", Accepts certain self-touching rings as valid, which are considered invalid under OGC standards.
 
+![ST_IsValidReason](../../../../image/ST_IsValidReason/ST_IsValidReason.svg "ST_IsValidReason")
+
 Formats:
 
 ```

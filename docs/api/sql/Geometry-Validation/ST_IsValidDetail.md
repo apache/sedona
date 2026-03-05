@@ -28,6 +28,8 @@ The flags parameter is a bitfield with the following options:
 - 0 (default): Use usual OGC SFS (Simple Features Specification) validity semantics.
 - 1: "ESRI flag", Accepts certain self-touching rings as valid, which are considered invalid under OGC standards.
 
+![ST_IsValidDetail](../../../image/ST_IsValidDetail/ST_IsValidDetail.svg "ST_IsValidDetail")
+
 Formats:
 
 ```sql
