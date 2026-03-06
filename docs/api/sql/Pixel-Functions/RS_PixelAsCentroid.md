@@ -23,6 +23,8 @@ Introduction: Returns the centroid (point geometry) of the specified pixel's are
 The pixel coordinates specified are 1-indexed.
 If `colX` and `rowY` are out of bounds for the raster, they are interpolated assuming the same skew and translate values.
 
+![RS_PixelAsCentroid](../../../image/RS_PixelAsCentroid/RS_PixelAsCentroid.svg "RS_PixelAsCentroid")
+
 Format: `RS_PixelAsCentroid(raster: Raster, colX: Integer, rowY: Integer)`
 
 Return type: `Geometry`

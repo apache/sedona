@@ -21,6 +21,8 @@
 
 Introduction: Returns the envelope of the raster as a Geometry.
 
+![RS_Envelope](../../../image/RS_Envelope/RS_Envelope.svg "RS_Envelope")
+
 Format: `RS_Envelope (raster: Raster)`
 
 Return type: `Geometry`
