@@ -32,6 +32,8 @@ A Safety mode is triggered when `noDataValue` is not given. This sets `noDataVal
 !!! Warning
     Using a noDataValue that falls within the normalization range can lead to loss of valid data. If any data value within a raster band matches the specified noDataValue, it will be replaced and cannot be distinguished or recovered later. Exercise caution in selecting a noDataValue to avoid unintentional data alteration.
 
+![RS_NormalizeAll](../../../image/RS_NormalizeAll/RS_NormalizeAll.svg "RS_NormalizeAll")
+
 Formats:
 
 ```

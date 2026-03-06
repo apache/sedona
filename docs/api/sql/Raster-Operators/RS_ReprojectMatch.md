@@ -31,6 +31,10 @@ The default resampling algorithm is `NearestNeighbor`. The following resampling 
 
 This function serves the same purpose as the [`RasterArray.reproject_match` function in rioxarray](https://corteva.github.io/rioxarray/html/rioxarray.html#rioxarray.raster_array.RasterArray.reproject_match).
 
+![RS_ReprojectMatch](../../../image/RS_ReprojectMatch/RS_ReprojectMatch.svg "RS_ReprojectMatch")
+
+![RS_ReprojectMatch_clip](../../../image/RS_ReprojectMatch_clip/RS_ReprojectMatch_clip.svg "RS_ReprojectMatch_clip")
+
 Format:
 
 `RS_ReprojectMatch (raster: Raster, reference: Raster, algorithm: String)`
@@ -49,5 +53,3 @@ WITH t AS (
 ```
 
 Output:
-
-![Output](../../../image/ReprojectMatch_example.png)

@@ -26,6 +26,8 @@ This technique is effective in scenarios where continuity of spatial data is imp
 !!!note
     This method assumes that the spatial influence of a variable diminishes with distance. In geospatial analysis, this means features or phenomena closer to a point of interest are given more weight than those further away. For example, in environmental data analysis, measurements from nearby locations have a greater impact on interpolated values than distant ones, reflecting the natural gradation and spatial continuity.
 
+![RS_Interpolate](../../../image/RS_Interpolate/RS_Interpolate.svg "RS_Interpolate")
+
 Formats:
 
 ```sql
@@ -76,6 +78,3 @@ SELECT RS_Interpolate(raster, 1, 2.0, 'Variable', 12, 1000)
 ```
 
 Output (Shown as heatmap):
-
-![Original raster](../../../image/heatmap_Interpolate.png "Original raster")
-![Interpolated raster](../../../image/heatmap_Interpolate2.png "Interpolated raster")

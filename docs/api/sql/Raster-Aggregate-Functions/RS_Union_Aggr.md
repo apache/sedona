@@ -28,6 +28,8 @@ Introduction: This function combines multiple rasters into a single multiband ra
     - Indexes to be unique and not repeated.
     - Rasters should be of the same shape.
 
+![RS_Union_Aggr](../../../image/RS_Union_Aggr/RS_Union_Aggr.svg "RS_Union_Aggr")
+
 Format: `RS_Union_Aggr(A: rasterColumn, B: indexColumn)`
 
 Return type: `Raster`

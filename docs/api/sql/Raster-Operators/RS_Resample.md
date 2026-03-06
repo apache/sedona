@@ -44,6 +44,8 @@ Following are valid values for the algorithm parameter (Case-insensitive):
 
 For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](../Raster-affine-transformation.md) section.
 
+![RS_Resample](../../../image/RS_Resample/RS_Resample.svg "RS_Resample")
+
 Format:
 
 ```sql

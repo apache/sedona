@@ -24,6 +24,8 @@ Introduction: Returns a combined multi-band raster from 2 or more input Rasters.
 !!!note
     If the provided input Rasters don't have same shape an IllegalArgumentException will be thrown.
 
+![RS_Union](../../../image/RS_Union/RS_Union.svg "RS_Union")
+
 Format:
 
 ```sql
