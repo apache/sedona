@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 390" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="700" height="390" fill="#ffffff"/>
+  <text x="350" y="30" text-anchor="middle" font-size="16" font-weight="600" fill="#2c3e50">RS_PixelAsPolygon</text>
+  <text x="350" y="50" text-anchor="middle" font-size="12" fill="#7f8c8d">Returns the bounding polygon of the specified pixel</text>
+  <rect x="120" y="85" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="162" y="85" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="204" y="85" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="246" y="85" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="288" y="85" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="330" y="85" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="372" y="85" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="414" y="85" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="456" y="85" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="498" y="85" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="120" y="117" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="162" y="117" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="204" y="117" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="246" y="117" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="288" y="117" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="330" y="117" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="372" y="117" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="414" y="117" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="456" y="117" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="498" y="117" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="120" y="149" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="162" y="149" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="204" y="149" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="246" y="149" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="288" y="149" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="330" y="149" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="372" y="149" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="414" y="149" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="456" y="149" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="498" y="149" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="120" y="181" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="162" y="181" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="204" y="181" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="246" y="181" width="42" height="32" fill="#fff176" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="288" y="181" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="330" y="181" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="372" y="181" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="414" y="181" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="456" y="181" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="498" y="181" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="120" y="213" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="162" y="213" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="204" y="213" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="246" y="213" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="288" y="213" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="330" y="213" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="372" y="213" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="414" y="213" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="456" y="213" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="498" y="213" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="120" y="245" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="162" y="245" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="204" y="245" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="246" y="245" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="288" y="245" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="330" y="245" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="372" y="245" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="414" y="245" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="456" y="245" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="498" y="245" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="120" y="277" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="162" y="277" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="204" y="277" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="246" y="277" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="288" y="277" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="330" y="277" width="42" height="32" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="372" y="277" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="414" y="277" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="456" y="277" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="498" y="277" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="120" y="309" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="162" y="309" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="204" y="309" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="246" y="309" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="288" y="309" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="330" y="309" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="372" y="309" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="414" y="309" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="456" y="309" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="498" y="309" width="42" height="32" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="120" y="85" width="420" height="256" fill="none" stroke="#c8cdd0" stroke-width="1.2"/>
+  <polygon points="246,181 288,181 288,213 246,213" fill="rgba(231,76,60,0.15)" stroke="#e74c3c" stroke-width="3"/>
+  <text x="243" y="176" text-anchor="end" font-size="9" fill="#e74c3c">(246, 181)</text>
+  <text x="291" y="225" text-anchor="start" font-size="9" fill="#e74c3c">(288, 213)</text>
+  <text x="350" y="371" text-anchor="middle" font-size="11" fill="#e74c3c">Red polygon = bounding rectangle of pixel at (col=4, row=4)</text>
+</svg>

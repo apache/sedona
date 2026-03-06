@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 360" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="700" height="360" fill="#ffffff"/>
+  <text x="350" y="30" text-anchor="middle" font-size="16" font-weight="600" fill="#2c3e50">RS_PixelAsPoint</text>
+  <text x="350" y="50" text-anchor="middle" font-size="12" fill="#7f8c8d">Returns a point at the upper-left corner of the specified pixel</text>
+  <rect x="140" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="120" width="50" height="40" fill="#fff176" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="120" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="160" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="160" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="160" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="160" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="160" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="160" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="160" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="160" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="200" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="200" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="200" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="200" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="200" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="200" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="200" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="200" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="240" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="240" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="80" width="400" height="240" fill="none" stroke="#c8cdd0" stroke-width="1.2"/>
+  <circle cx="290" cy="120" r="6" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <text x="300" y="110" text-anchor="start" font-size="11" fill="#e74c3c">POINT (upper-left corner)</text>
+  <line x1="290" y1="120" x2="290" y2="135" stroke="#e74c3c" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="290" y1="120" x2="305" y2="120" stroke="#e74c3c" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="165.0" y="72" text-anchor="middle" font-size="9" fill="#2980b9">col 1</text>
+  <text x="215.0" y="72" text-anchor="middle" font-size="9" fill="#2980b9">col 2</text>
+  <text x="265.0" y="72" text-anchor="middle" font-size="9" fill="#2980b9">col 3</text>
+  <text x="315.0" y="72" text-anchor="middle" font-size="9" fill="#2980b9">col 4</text>
+  <text x="365.0" y="72" text-anchor="middle" font-size="9" fill="#2980b9">col 5</text>
+  <text x="415.0" y="72" text-anchor="middle" font-size="9" fill="#2980b9">col 6</text>
+  <text x="465.0" y="72" text-anchor="middle" font-size="9" fill="#2980b9">col 7</text>
+  <text x="515.0" y="72" text-anchor="middle" font-size="9" fill="#2980b9">col 8</text>
+  <text x="132" y="100.0" text-anchor="end" font-size="9" fill="#2980b9">row 1</text>
+  <text x="132" y="140.0" text-anchor="end" font-size="9" fill="#2980b9">row 2</text>
+  <text x="132" y="180.0" text-anchor="end" font-size="9" fill="#2980b9">row 3</text>
+  <text x="132" y="220.0" text-anchor="end" font-size="9" fill="#2980b9">row 4</text>
+  <text x="132" y="260.0" text-anchor="end" font-size="9" fill="#2980b9">row 5</text>
+  <text x="132" y="300.0" text-anchor="end" font-size="9" fill="#2980b9">row 6</text>
+</svg>
