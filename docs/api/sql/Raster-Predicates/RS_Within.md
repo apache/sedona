@@ -22,6 +22,8 @@
 Introduction: Returns true if the geometry or raster on the left side is within the geometry or raster on the right side.
 The convex hull of the raster is considered in the test.
 
+![RS_Within](../../../image/RS_Within/RS_Within.svg "RS_Within")
+
 The rules for testing spatial relationship is the same as `RS_Intersects`.
 
 Format: `RS_Within(raster: Raster, geom: Geometry)`

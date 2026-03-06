@@ -23,6 +23,8 @@ Introduction: Returns the min convex hull geometry of the raster **excluding** t
 If no band is specified, all the bands are considered when creating the min convex hull of the raster.
 The created geometry representing the min convex hull has world coordinates of the raster in its CRS as the corner coordinates.
 
+![RS_MinConvexHull](../../../image/RS_MinConvexHull/RS_MinConvexHull.svg "RS_MinConvexHull")
+
 !!!Note
     If the specified band does not exist in the raster, RS_MinConvexHull throws an IllegalArgumentException
 

@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 390" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="700" height="390" fill="#ffffff"/>
+  <text x="350" y="30" text-anchor="middle" font-size="16" font-weight="600" fill="#2c3e50">RS_ConvexHull</text>
+  <text x="350" y="52" text-anchor="middle" font-size="12" fill="#7f8c8d">Returns the convex hull of the raster (including NoData pixels)</text>
+  <defs>
+    <pattern id="nodata-hatch-140-85" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#cccccc" stroke-width="1.5"/>
+    </pattern>
+  </defs>
+  <polygon points="140,85 176,85 186,113 150,113" fill="#e8e8e8" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="140,85 176,85 186,113 150,113" fill="url(#nodata-hatch-140-85)" stroke="none"/>
+  <polygon points="176,85 212,85 222,113 186,113" fill="#e8e8e8" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="176,85 212,85 222,113 186,113" fill="url(#nodata-hatch-140-85)" stroke="none"/>
+  <polygon points="212,85 248,85 258,113 222,113" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="248,85 284,85 294,113 258,113" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="284,85 320,85 330,113 294,113" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="320,85 356,85 366,113 330,113" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="356,85 392,85 402,113 366,113" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="392,85 428,85 438,113 402,113" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="428,85 464,85 474,113 438,113" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="464,85 500,85 510,113 474,113" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="150,113 186,113 196,141 160,141" fill="#e8e8e8" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="150,113 186,113 196,141 160,141" fill="url(#nodata-hatch-140-85)" stroke="none"/>
+  <polygon points="186,113 222,113 232,141 196,141" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="222,113 258,113 268,141 232,141" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="258,113 294,113 304,141 268,141" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="294,113 330,113 340,141 304,141" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="330,113 366,113 376,141 340,141" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="366,113 402,113 412,141 376,141" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="402,113 438,113 448,141 412,141" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="438,113 474,113 484,141 448,141" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="474,113 510,113 520,141 484,141" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="160,141 196,141 206,169 170,169" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="196,141 232,141 242,169 206,169" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="232,141 268,141 278,169 242,169" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="268,141 304,141 314,169 278,169" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="304,141 340,141 350,169 314,169" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="340,141 376,141 386,169 350,169" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="376,141 412,141 422,169 386,169" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="412,141 448,141 458,169 422,169" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="448,141 484,141 494,169 458,169" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="484,141 520,141 530,169 494,169" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="170,169 206,169 216,197 180,197" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="206,169 242,169 252,197 216,197" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="242,169 278,169 288,197 252,197" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="278,169 314,169 324,197 288,197" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="314,169 350,169 360,197 324,197" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="350,169 386,169 396,197 360,197" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="386,169 422,169 432,197 396,197" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="422,169 458,169 468,197 432,197" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="458,169 494,169 504,197 468,197" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="494,169 530,169 540,197 504,197" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="180,197 216,197 226,225 190,225" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="216,197 252,197 262,225 226,225" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="252,197 288,197 298,225 262,225" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="288,197 324,197 334,225 298,225" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="324,197 360,197 370,225 334,225" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="360,197 396,197 406,225 370,225" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="396,197 432,197 442,225 406,225" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="432,197 468,197 478,225 442,225" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="468,197 504,197 514,225 478,225" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="504,197 540,197 550,225 514,225" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="190,225 226,225 236,253 200,253" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="226,225 262,225 272,253 236,253" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="262,225 298,225 308,253 272,253" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="298,225 334,225 344,253 308,253" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="334,225 370,225 380,253 344,253" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="370,225 406,225 416,253 380,253" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="406,225 442,225 452,253 416,253" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="442,225 478,225 488,253 452,253" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="478,225 514,225 524,253 488,253" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="514,225 550,225 560,253 524,253" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="200,253 236,253 246,281 210,281" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="236,253 272,253 282,281 246,281" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="272,253 308,253 318,281 282,281" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="308,253 344,253 354,281 318,281" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="344,253 380,253 390,281 354,281" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="380,253 416,253 426,281 390,281" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="416,253 452,253 462,281 426,281" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="452,253 488,253 498,281 462,281" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="488,253 524,253 534,281 498,281" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="524,253 560,253 570,281 534,281" fill="#e8e8e8" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="524,253 560,253 570,281 534,281" fill="url(#nodata-hatch-140-85)" stroke="none"/>
+  <polygon points="210,281 246,281 256,309 220,309" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="246,281 282,281 292,309 256,309" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="282,281 318,281 328,309 292,309" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="318,281 354,281 364,309 328,309" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="354,281 390,281 400,309 364,309" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="390,281 426,281 436,309 400,309" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="426,281 462,281 472,309 436,309" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="462,281 498,281 508,309 472,309" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="498,281 534,281 544,309 508,309" fill="#e8e8e8" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="498,281 534,281 544,309 508,309" fill="url(#nodata-hatch-140-85)" stroke="none"/>
+  <polygon points="534,281 570,281 580,309 544,309" fill="#e8e8e8" stroke="#c8cdd0" stroke-width="0.5"/>
+  <polygon points="534,281 570,281 580,309 544,309" fill="url(#nodata-hatch-140-85)" stroke="none"/>
+  <polygon points="140,85 500,85 580,309 220,309" fill="none" stroke="#c8cdd0" stroke-width="1.2"/>
+  <polygon points="140,85 500,85 580,309 220,309" fill="rgba(231,76,60,0.15)" stroke="#e74c3c" stroke-width="2.5"/>
+  <text x="135" y="197.0" text-anchor="end" font-size="10" fill="#cccccc">NoData cells</text>
+  <text x="135" y="211.0" text-anchor="end" font-size="10" fill="#cccccc">still included</text>
+  <text x="350" y="359" text-anchor="middle" font-size="11" fill="#e74c3c">Red polygon = RS_ConvexHull result (follows raster skew)</text>
+  <text x="360.0" y="75" text-anchor="middle" font-size="12" fill="#2980b9">Skewed Raster (10x8) with NoData cells</text>
+</svg>

@@ -21,6 +21,8 @@
 
 Introduction: Returns a list of the pixel's upper-left corner point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band.
 
+![RS_PixelAsPoints](../../../image/RS_PixelAsPoints/RS_PixelAsPoints.svg "RS_PixelAsPoints")
+
 Format: `RS_PixelAsPoints(raster: Raster, band: Integer)`
 
 Return type: `Array<Struct<geom: Geometry, val: Double, x: Integer, y: Integer>>`

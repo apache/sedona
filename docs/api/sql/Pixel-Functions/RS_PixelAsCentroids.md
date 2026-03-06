@@ -22,6 +22,8 @@
 Introduction: Returns a list of the centroid point geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band.
 Each centroid represents the geometric center of the corresponding pixel's area.
 
+![RS_PixelAsCentroids](../../../image/RS_PixelAsCentroids/RS_PixelAsCentroids.svg "RS_PixelAsCentroids")
+
 Format: `RS_PixelAsCentroids(raster: Raster, band: Integer)`
 
 Return type: `Array<Struct<geom: Geometry, val: Double, x: Integer, y: Integer>>`

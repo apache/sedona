@@ -21,6 +21,8 @@
 
 Introduction: Returns a list of the polygon geometry, the pixel value and its raster X and Y coordinates for each pixel in the raster at the specified band.
 
+![RS_PixelAsPolygons](../../../image/RS_PixelAsPolygons/RS_PixelAsPolygons.svg "RS_PixelAsPolygons")
+
 Format: `RS_PixelAsPolygons(raster: Raster, band: Integer)`
 
 Return type: `Array<Struct<geom: Geometry, val: Double, x: Integer, y: Integer>>`

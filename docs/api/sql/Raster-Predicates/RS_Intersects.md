@@ -22,6 +22,8 @@
 Introduction: Returns true if raster or geometry on the left side intersects with the raster or geometry on the right side.
 The convex hull of the raster is considered in the test.
 
+![RS_Intersects](../../../image/RS_Intersects/RS_Intersects.svg "RS_Intersects")
+
 Rules for testing spatial relationship:
 
 - If the raster or geometry does not have a defined SRID, it is assumed to be in WGS84.
