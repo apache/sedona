@@ -21,6 +21,8 @@
 
 Introduction: Returns a point geometry of the specified pixel's upper-left corner. The pixel coordinates specified are 1-indexed.
 
+![RS_PixelAsPoint](../../../image/RS_PixelAsPoint/RS_PixelAsPoint.svg "RS_PixelAsPoint")
+
 !!!Note
     If the pixel coordinates specified do not exist in the raster (out of bounds), RS_PixelAsPoint throws an IndexOutOfBoundsException.
 

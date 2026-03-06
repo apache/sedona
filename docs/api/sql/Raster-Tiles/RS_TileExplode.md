@@ -21,6 +21,8 @@
 
 Introduction: Generates records containing raster tiles resulting from the split of the input raster based upon the desired dimensions of the output rasters.
 
+![RS_TileExplode](../../../image/RS_TileExplode/RS_TileExplode.svg "RS_TileExplode")
+
 Format: `RS_TileExplode(raster: Raster, width: Int, height: Int, padWithNoData: Boolean = false, noDataVal: Double = null)`
 
 Format: `RS_TileExplode(raster: Raster, bandIndex: Int, width: Int, height: Int, padWithNoData: Boolean = false, noDataVal: Double = null)`

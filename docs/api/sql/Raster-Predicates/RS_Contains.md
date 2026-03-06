@@ -22,6 +22,8 @@
 Introduction: Returns true if the geometry or raster on the left side contains the geometry or raster on the right side.
 The convex hull of the raster is considered in the test.
 
+![RS_Contains](../../../image/RS_Contains/RS_Contains.svg "RS_Contains")
+
 The rules for testing spatial relationship is the same as `RS_Intersects`.
 
 Format:

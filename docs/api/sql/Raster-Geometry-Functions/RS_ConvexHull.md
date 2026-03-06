@@ -22,6 +22,8 @@
 Introduction: Return the convex hull geometry of the raster including the NoDataBandValue band pixels.
 For regular shaped and non-skewed rasters, this gives more or less the same result as RS_Envelope and hence is only useful for irregularly shaped or skewed rasters.
 
+![RS_ConvexHull](../../../image/RS_ConvexHull/RS_ConvexHull.svg "RS_ConvexHull")
+
 Format: `RS_ConvexHull(raster: Raster)`
 
 Return type: `Geometry`

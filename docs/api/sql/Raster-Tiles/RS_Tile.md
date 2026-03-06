@@ -21,6 +21,8 @@
 
 Introduction: Returns an array of rasters resulting from the split of the input raster based upon the desired dimensions of the output rasters.
 
+![RS_Tile](../../../image/RS_Tile/RS_Tile.svg "RS_Tile")
+
 Format: `RS_Tile(raster: Raster, width: Int, height: Int, padWithNoData: Boolean = false, noDataVal: Double = null)`
 
 Format: `RS_Tile(raster: Raster, bandIndices: Array[Int], width: Int, height: Int, padWithNoData: Boolean = false, noDataVal: Double = null)`
