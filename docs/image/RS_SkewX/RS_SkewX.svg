@@ -1,17 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="700" height="370" viewBox="0 0 700 370" font-family="Arial, Helvetica, sans-serif">
 <rect width="700" height="370" fill="white"/>
-<text x="350" y="28" text-anchor="middle" font-size="17" fill="#333" font-weight="bold" font-style="normal">RS_SkewX</text><text x="350" y="48" text-anchor="middle" font-size="12" fill="#666" font-weight="normal" font-style="normal">X skew: horizontal shift per row</text><text x="160.0" y="80" text-anchor="middle" font-size="13" fill="#333" font-weight="bold" font-style="normal">SkewX = 0</text><rect x="60" y="90" width="200" height="200" fill="#E3F2FD" stroke="#1565C0" stroke-width="1.5"/>
-<line x1="110" y1="90" x2="110" y2="290" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
-<line x1="160" y1="90" x2="160" y2="290" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
-<line x1="210" y1="90" x2="210" y2="290" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
-<line x1="60" y1="140" x2="260" y2="140" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
-<line x1="60" y1="190" x2="260" y2="190" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
-<line x1="60" y1="240" x2="260" y2="240" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/><text x="355" y="190.0" text-anchor="middle" font-size="28" fill="#333" font-weight="bold" font-style="normal">→</text><text x="530.0" y="80" text-anchor="middle" font-size="13" fill="#333" font-weight="bold" font-style="normal">SkewX = 0.1</text><polygon points="400.0,90.0 600.0,90.0 660.0,290.0 460.0,290.0" fill="#E3F2FD" stroke="#1565C0" stroke-width="1.5" opacity="1.0"/>
-<line x1="450.0" y1="90.0" x2="510.0" y2="290.0" stroke="#1565C0" stroke-width="0.8" opacity="0.4"/>
-<line x1="500.0" y1="90.0" x2="560.0" y2="290.0" stroke="#1565C0" stroke-width="0.8" opacity="0.4"/>
-<line x1="550.0" y1="90.0" x2="610.0" y2="290.0" stroke="#1565C0" stroke-width="0.8" opacity="0.4"/>
-<line x1="415.0" y1="140.0" x2="615.0" y2="140.0" stroke="#1565C0" stroke-width="0.8" opacity="0.4"/>
-<line x1="430.0" y1="190.0" x2="630.0" y2="190.0" stroke="#1565C0" stroke-width="0.8" opacity="0.4"/>
-<line x1="445.0" y1="240.0" x2="645.0" y2="240.0" stroke="#1565C0" stroke-width="0.8" opacity="0.4"/><line x1="400" y1="140" x2="415" y2="140" stroke="#D32F2F" stroke-width="1.2" stroke-dasharray="4,3"/><line x1="400" y1="190" x2="430" y2="190" stroke="#D32F2F" stroke-width="1.2" stroke-dasharray="4,3"/><line x1="400" y1="240" x2="445" y2="240" stroke="#D32F2F" stroke-width="1.2" stroke-dasharray="4,3"/><line x1="400" y1="290" x2="460" y2="290" stroke="#D32F2F" stroke-width="1.2" stroke-dasharray="4,3"/><line x1="400" y1="315" x2="460" y2="315" stroke="#D32F2F" stroke-width="2"/>
-<polygon points="460,315 454.1,318.8 454.1,311.2" fill="#D32F2F"/>
-<polygon points="400,315 405.9,311.2 405.9,318.8" fill="#D32F2F"/><text x="430.0" y="335" text-anchor="middle" font-size="11" fill="#D32F2F" font-weight="bold" font-style="normal">SkewX × 4 rows</text><line x1="400" y1="290" x2="400" y2="310" stroke="#D32F2F" stroke-width="1" stroke-dasharray="3,3"/><line x1="460" y1="290" x2="460" y2="310" stroke="#D32F2F" stroke-width="1" stroke-dasharray="3,3"/><text x="350" y="355" text-anchor="middle" font-size="11" fill="#666" font-weight="normal" font-style="italic">Each row shifts horizontally by SkewX CRS units</text></svg>
+<text x="350" y="28" text-anchor="middle" font-size="17" fill="#333" font-weight="bold">RS_SkewX</text>
+<text x="350" y="48" text-anchor="middle" font-size="12" fill="#666">X skew: horizontal shift per row</text>
+<text x="160" y="80" text-anchor="middle" font-size="13" fill="#333" font-weight="bold">SkewX = 0 (no skew)</text>
+<rect x="70" y="90" width="180" height="180" fill="#E3F2FD" stroke="#1565C0" stroke-width="1.5"/>
+<line x1="130" y1="90" x2="130" y2="270" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
+<line x1="190" y1="90" x2="190" y2="270" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
+<line x1="70" y1="150" x2="250" y2="150" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
+<line x1="70" y1="210" x2="250" y2="210" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
+<line x1="70" y1="90" x2="70" y2="280" stroke="#666" stroke-width="0.8" stroke-dasharray="3,3"/>
+<text x="360" y="180" text-anchor="middle" font-size="28" fill="#333" font-weight="bold">→</text>
+<text x="527" y="80" text-anchor="middle" font-size="13" fill="#333" font-weight="bold">SkewX = 0.5</text>
+<polygon points="410,90 590,90 644,270 464,270" fill="#E3F2FD" stroke="#1565C0" stroke-width="1.5"/>
+<line x1="470" y1="90" x2="524" y2="270" stroke="#1565C0" stroke-width="0.8" opacity="0.4"/>
+<line x1="530" y1="90" x2="584" y2="270" stroke="#1565C0" stroke-width="0.8" opacity="0.4"/>
+<line x1="428" y1="150" x2="608" y2="150" stroke="#1565C0" stroke-width="0.8" opacity="0.4"/>
+<line x1="446" y1="210" x2="626" y2="210" stroke="#1565C0" stroke-width="0.8" opacity="0.4"/>
+<line x1="410" y1="90" x2="410" y2="280" stroke="#666" stroke-width="0.8" stroke-dasharray="3,3"/>
+<line x1="410" y1="150" x2="425" y2="150" stroke="#D32F2F" stroke-width="1.5"/>
+<polygon points="428,150 423,147 423,153" fill="#D32F2F"/>
+<text x="419" y="144" text-anchor="middle" font-size="9" fill="#D32F2F" font-weight="bold">SkewX</text>
+<line x1="410" y1="210" x2="443" y2="210" stroke="#D32F2F" stroke-width="1.5"/>
+<polygon points="446,210 441,207 441,213" fill="#D32F2F"/>
+<text x="428" y="204" text-anchor="middle" font-size="9" fill="#D32F2F" font-weight="bold">2×SkewX</text>
+<line x1="410" y1="270" x2="461" y2="270" stroke="#D32F2F" stroke-width="1.5"/>
+<polygon points="464,270 459,267 459,273" fill="#D32F2F"/>
+<text x="437" y="264" text-anchor="middle" font-size="9" fill="#D32F2F" font-weight="bold">3×SkewX</text>
+<text x="350" y="352" text-anchor="middle" font-size="11" fill="#666" font-style="italic">Row r is shifted horizontally by r × SkewX from the origin</text>
+</svg>
