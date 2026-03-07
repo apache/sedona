@@ -21,6 +21,8 @@
 
 Introduction: Returns the grid coordinate of the given world coordinates as a Point.
 
+![RS_WorldToRasterCoord](../../../image/RS_WorldToRasterCoord/RS_WorldToRasterCoord.svg "RS_WorldToRasterCoord")
+
 Format:
 
 `RS_WorldToRasterCoord(raster: Raster, point: Geometry)`

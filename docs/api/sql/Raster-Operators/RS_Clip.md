@@ -32,6 +32,8 @@ The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
     - Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`.
     - Since `v1.7.0`, `RS_Clip` function will return `null` if the `raster` and `geometry` geometry do not intersect. If you want to throw an exception in this case, you can set the `lenient` parameter to `false`.
 
+![RS_Clip](../../../image/RS_Clip/RS_Clip.svg "RS_Clip")
+
 Format:
 
 ```
@@ -58,10 +60,6 @@ Return type: `Raster`
 
 Since: `v1.5.1`
 
-Original Raster:
-
-![Original raster](../../../image/original-raster-clip.png "Original raster")
-
 SQL Example
 
 ```sql
@@ -72,10 +70,6 @@ SELECT RS_Clip(
     )
 ```
 
-Output:
-
-![Cropped raster](../../../image/cropped-raster.png "Cropped raster")
-
 SQL Example
 
 ```sql
@@ -85,7 +79,3 @@ SELECT RS_Clip(
         false, 200, false
     )
 ```
-
-Output:
-
-![Clipped raster](../../../image/clipped-raster.png "Clipped raster")
