@@ -76,5 +76,3 @@ SQL Example:
 ```sql
 SELECT RS_Interpolate(raster, 1, 2.0, 'Variable', 12, 1000)
 ```
-
-Output (Shown as heatmap):

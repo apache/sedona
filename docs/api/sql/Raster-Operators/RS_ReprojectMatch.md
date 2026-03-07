@@ -51,5 +51,3 @@ WITH t AS (
         RS_MapAlgebra(RS_MakeEmptyRaster(1, 500, 500, 16536,4185970, 1000, -1000, 0, 0, 32612), 'D', 'out = sin(y() * 0.2);') rast2
 ) SELECT t.rast1, t.rast2, RS_ReprojectMatch(rast1, rast2) rast12, RS_ReprojectMatch(rast2, rast1) rast21 FROM t
 ```
-
-Output:

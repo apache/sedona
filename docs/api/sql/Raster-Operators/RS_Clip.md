@@ -60,8 +60,6 @@ Return type: `Raster`
 
 Since: `v1.5.1`
 
-Original Raster:
-
 SQL Example
 
 ```sql
@@ -72,8 +70,6 @@ SELECT RS_Clip(
     )
 ```
 
-Output:
-
 SQL Example
 
 ```sql
@@ -83,5 +79,3 @@ SELECT RS_Clip(
         false, 200, false
     )
 ```
-
-Output:
