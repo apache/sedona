@@ -11,7 +11,7 @@ export type MinimizedResult = import("./index.js").MinimizedResult;
 export type CustomOptions = import("./index.js").CustomOptions;
 export type RawSourceMap = import("./index.js").RawSourceMap;
 export type PredefinedOptions<T> = import("./index.js").PredefinedOptions<T>;
-export type ExtractedComments = Array<string>;
+export type ExtractedComments = string[];
 /**
  * @param {Input} input input
  * @param {RawSourceMap=} sourceMap source map

@@ -77,11 +77,13 @@ declare namespace TerserPlugin {
     Configuration,
     Asset,
     AssetInfo,
+    TemplatePath,
     JestWorker,
     RawSourceMap,
     TraceMap,
     Rule,
     Rules,
+    EXPECTED_ANY,
     ExtractCommentsFunction,
     ExtractCommentsCondition,
     ExtractCommentsFilename,
@@ -116,6 +118,7 @@ type Compilation = import("webpack").Compilation;
 type Configuration = import("webpack").Configuration;
 type Asset = import("webpack").Asset;
 type AssetInfo = import("webpack").AssetInfo;
+type TemplatePath = import("webpack").TemplatePath;
 type JestWorker = import("jest-worker").Worker;
 type RawSourceMap = import("@jridgewell/trace-mapping").EncodedSourceMap & {
   sources: string[];
@@ -125,8 +128,9 @@ type RawSourceMap = import("@jridgewell/trace-mapping").EncodedSourceMap & {
 type TraceMap = import("@jridgewell/trace-mapping").TraceMap;
 type Rule = RegExp | string;
 type Rules = Rule[] | Rule;
+type EXPECTED_ANY = any;
 type ExtractCommentsFunction = (
-  astNode: any,
+  astNode: EXPECTED_ANY,
   comment: {
     value: string;
     type: "comment1" | "comment2" | "comment3" | "comment4";
@@ -141,7 +145,7 @@ type ExtractCommentsCondition =
   | "some"
   | RegExp
   | ExtractCommentsFunction;
-type ExtractCommentsFilename = string | ((fileData: any) => string);
+type ExtractCommentsFilename = TemplatePath;
 type ExtractCommentsBanner =
   | boolean
   | string
@@ -191,21 +195,21 @@ type MinimizedResult = {
   /**
    * errors
    */
-  errors?: Array<Error | string> | undefined;
+  errors?: (Error | string)[] | undefined;
   /**
    * warnings
    */
-  warnings?: Array<Error | string> | undefined;
+  warnings?: (Error | string)[] | undefined;
   /**
    * extracted comments
    */
-  extractedComments?: Array<string> | undefined;
+  extractedComments?: string[] | undefined;
 };
 type Input = {
   [file: string]: string;
 };
 type CustomOptions = {
-  [key: string]: any;
+  [key: string]: EXPECTED_ANY;
 };
 type InferDefaultType<T> = T extends infer U ? U : CustomOptions;
 type PredefinedOptions<T> = {
