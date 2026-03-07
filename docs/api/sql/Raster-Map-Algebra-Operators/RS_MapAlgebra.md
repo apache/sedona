@@ -21,6 +21,8 @@
 
 Introduction: Apply a map algebra script on a raster.
 
+![RS_MapAlgebra](../../../image/RS_MapAlgebra/RS_MapAlgebra.svg "RS_MapAlgebra")
+
 Format:
 
 ```

@@ -26,6 +26,8 @@ The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
 - When true, any pixel touched by the geometry will be included.
 - When false (default), only pixels whose centroid intersects with the geometry will be included.
 
+![RS_ZonalStats_allTouched](../../../image/RS_ZonalStats_allTouched/RS_ZonalStats_allTouched.svg "RS_ZonalStats_allTouched")
+
 - `count`: Number of pixels in the region.
 - `sum`: Sum of pixel values.
 - `mean|average|avg`: Arithmetic mean.
@@ -45,6 +47,8 @@ The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
     - The option provided to `statType` should be valid.
 
     `lenient` parameter is set to `true` by default. The function will return `null` if the `raster` and `zone` geometry do not intersect.
+
+![RS_ZonalStats](../../../image/RS_ZonalStats/RS_ZonalStats.svg "RS_ZonalStats")
 
 Format:
 

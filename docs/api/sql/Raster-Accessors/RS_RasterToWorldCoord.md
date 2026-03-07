@@ -21,6 +21,8 @@
 
 Introduction: Returns the upper left X and Y coordinates of the given row and column of the given raster geometric units of the geo-referenced raster as a Point geometry. If any out of bounds values are given, the X and Y coordinates of the assumed point considering existing raster pixel size and skew values will be returned.
 
+![RS_RasterToWorldCoord](../../../image/RS_RasterToWorldCoord/RS_RasterToWorldCoord.svg "RS_RasterToWorldCoord")
+
 Format: `RS_RasterToWorldCoord(raster: Raster, colX: Integer, rowY: Integer)`
 
 Return type: `Geometry`
