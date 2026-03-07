@@ -29,6 +29,8 @@ Introduction: Returns the pixel width of the raster in CRS units.
 
 For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](../Raster-affine-transformation.md) section.
 
+![RS_ScaleX](../../../image/RS_ScaleX/RS_ScaleX.svg "RS_ScaleX")
+
 Format: `RS_ScaleX(raster: Raster)`
 
 Return type: `Double`

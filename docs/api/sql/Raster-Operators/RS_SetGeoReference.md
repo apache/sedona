@@ -24,6 +24,8 @@ Default format is `GDAL`. If all 6 parameters are not provided then will return 
 
 For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](../Raster-affine-transformation.md) section.
 
+![RS_SetGeoReference](../../../image/RS_SetGeoReference/RS_SetGeoReference.svg "RS_SetGeoReference")
+
 Format:
 
 ```

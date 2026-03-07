@@ -21,6 +21,8 @@
 
 Introduction: Returns the Y coordinate of the upper-left corner of the raster.
 
+![RS_UpperLeftY](../../../image/RS_UpperLeftY/RS_UpperLeftY.svg "RS_UpperLeftY")
+
 Format: `RS_UpperLeftY(raster: Raster)`
 
 Return type: `Double`

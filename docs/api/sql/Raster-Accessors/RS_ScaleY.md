@@ -29,6 +29,8 @@ Introduction: Returns the pixel height of the raster in CRS units.
 
 For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](../Raster-affine-transformation.md) section.
 
+![RS_ScaleY](../../../image/RS_ScaleY/RS_ScaleY.svg "RS_ScaleY")
+
 Format: `RS_ScaleY(raster: Raster)`
 
 Return type: `Double`
