@@ -25,9 +25,9 @@ Introduction: Returns the X coordinate of the grid coordinate of the given world
 
 Format:
 
-`RS_WorldToRasterCoord(raster: Raster, point: Geometry)`
+`RS_WorldToRasterCoordX(raster: Raster, point: Geometry)`
 
-`RS_WorldToRasterCoord(raster: Raster, x: Double, y: Double)`
+`RS_WorldToRasterCoordX(raster: Raster, x: Double, y: Double)`
 
 Return type: `Integer`
 
