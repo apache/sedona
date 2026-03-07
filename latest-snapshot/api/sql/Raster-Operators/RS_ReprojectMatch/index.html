@@ -5250,6 +5250,8 @@ value is assigned, or 0 is assigned if the input raster does not have nodata val
 <li>Bicubic</li>
 </ol>
 <p>This function serves the same purpose as the <a href="https://corteva.github.io/rioxarray/html/rioxarray.html#rioxarray.raster_array.RasterArray.reproject_match"><code>RasterArray.reproject_match</code> function in rioxarray</a>.</p>
+<p><img alt="RS_ReprojectMatch" src="../../../../image/RS_ReprojectMatch/RS_ReprojectMatch.svg" title="RS_ReprojectMatch" /></p>
+<p><img alt="RS_ReprojectMatch_clip" src="../../../../image/RS_ReprojectMatch_clip/RS_ReprojectMatch_clip.svg" title="RS_ReprojectMatch_clip" /></p>
 <p>Format:</p>
 <p><code>RS_ReprojectMatch (raster: Raster, reference: Raster, algorithm: String)</code></p>
 <p>Return type: <code>Raster</code></p>
@@ -5260,8 +5262,6 @@ value is assigned, or 0 is assigned if the input raster does not have nodata val
 <span class="w">        </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span><span class="w"> </span><span class="mi">16536</span><span class="p">,</span><span class="mi">4185970</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">32612</span><span class="p">),</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;out = sin(y() * 0.2);&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">rast2</span>
 <span class="p">)</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">rast1</span><span class="p">,</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">rast2</span><span class="p">,</span><span class="w"> </span><span class="n">RS_ReprojectMatch</span><span class="p">(</span><span class="n">rast1</span><span class="p">,</span><span class="w"> </span><span class="n">rast2</span><span class="p">)</span><span class="w"> </span><span class="n">rast12</span><span class="p">,</span><span class="w"> </span><span class="n">RS_ReprojectMatch</span><span class="p">(</span><span class="n">rast2</span><span class="p">,</span><span class="w"> </span><span class="n">rast1</span><span class="p">)</span><span class="w"> </span><span class="n">rast21</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">t</span>
 </code></pre></div>
-<p>Output:</p>
-<p><img alt="Output" src="../../../../image/ReprojectMatch_example.png" /></p>
 
 
 
@@ -5282,7 +5282,7 @@ value is assigned, or 0 is assigned if the input raster does not have nodata val
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 4, 2026 08:31:50 UTC">March 4, 2026 08:31:50</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 7, 2026 00:22:58 UTC">March 7, 2026 00:22:58</span>
   </span>
 
     
