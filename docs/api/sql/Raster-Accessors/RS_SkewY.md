@@ -21,6 +21,8 @@
 
 Introduction: Returns the Y skew or rotation parameter.
 
+![RS_SkewY](../../../image/RS_SkewY/RS_SkewY.svg "RS_SkewY")
+
 Format: `RS_SkewY(raster: Raster)`
 
 Return type: `Double`

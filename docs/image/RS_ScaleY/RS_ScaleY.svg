@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="580" height="340" viewBox="0 0 580 340" font-family="Arial, Helvetica, sans-serif">
+<rect width="580" height="340" fill="white"/>
+<text x="290" y="28" text-anchor="middle" font-size="17" fill="#333" font-weight="bold" font-style="normal">RS_ScaleY</text><text x="290" y="48" text-anchor="middle" font-size="12" fill="#666" font-weight="normal" font-style="normal">Returns the pixel height of the raster in CRS units</text><rect x="140" y="75" width="240" height="225" fill="#E3F2FD" stroke="#1565C0" stroke-width="1.5"/>
+<line x1="200" y1="75" x2="200" y2="300" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
+<line x1="260" y1="75" x2="260" y2="300" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
+<line x1="320" y1="75" x2="320" y2="300" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
+<line x1="140" y1="120" x2="380" y2="120" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
+<line x1="140" y1="165" x2="380" y2="165" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
+<line x1="140" y1="210" x2="380" y2="210" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/>
+<line x1="140" y1="255" x2="380" y2="255" stroke="#1565C0" stroke-width="0.8" opacity="0.5"/><line x1="400" y1="75" x2="400" y2="120" stroke="#D32F2F" stroke-width="2.2"/>
+<polygon points="400,120 396.2,114.1 403.8,114.1" fill="#D32F2F"/>
+<polygon points="400,75 403.8,80.9 396.2,80.9" fill="#D32F2F"/><text x="410" y="101.5" text-anchor="start" font-size="12" fill="#D32F2F" font-weight="bold" font-style="normal">ScaleY</text><line x1="380" y1="75" x2="395" y2="75" stroke="#D32F2F" stroke-width="1" stroke-dasharray="3,3"/><line x1="380" y1="120" x2="395" y2="120" stroke="#D32F2F" stroke-width="1" stroke-dasharray="3,3"/><line x1="480" y1="75" x2="480" y2="300" stroke="#1565C0" stroke-width="1.5"/>
+<polygon points="480,300 476.2,294.1 483.8,294.1" fill="#1565C0"/>
+<polygon points="480,75 483.8,80.9 476.2,80.9" fill="#1565C0"/><text x="490" y="191.5" text-anchor="start" font-size="11" fill="#1565C0" font-weight="normal" font-style="normal">5 × ScaleY</text><text x="170.0" y="101.5" text-anchor="middle" font-size="10" fill="#1565C0" font-weight="bold" font-style="normal">row 1</text><text x="170.0" y="146.5" text-anchor="middle" font-size="10" fill="#1565C0" font-weight="bold" font-style="normal">row 2</text><text x="170.0" y="191.5" text-anchor="middle" font-size="10" fill="#1565C0" font-weight="bold" font-style="normal">row 3</text><text x="170.0" y="236.5" text-anchor="middle" font-size="10" fill="#1565C0" font-weight="bold" font-style="normal">row 4</text><text x="170.0" y="281.5" text-anchor="middle" font-size="10" fill="#1565C0" font-weight="bold" font-style="normal">row 5</text><text x="290" y="320" text-anchor="middle" font-size="11" fill="#666" font-weight="normal" font-style="italic">ScaleY is typically negative (Y decreases downward)</text></svg>

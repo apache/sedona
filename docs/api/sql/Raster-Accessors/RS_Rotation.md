@@ -21,6 +21,8 @@
 
 Introduction: Returns the uniform rotation of the raster in radian.
 
+![RS_Rotation](../../../image/RS_Rotation/RS_Rotation.svg "RS_Rotation")
+
 Format: `RS_Rotation(raster: Raster)`
 
 Return type: `Double`

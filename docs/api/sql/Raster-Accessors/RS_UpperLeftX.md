@@ -21,6 +21,8 @@
 
 Introduction: Returns the X coordinate of the upper-left corner of the raster.
 
+![RS_UpperLeftX](../../../image/RS_UpperLeftX/RS_UpperLeftX.svg "RS_UpperLeftX")
+
 Format: `RS_UpperLeftX(raster: Raster)`
 
 Return type: `Double`
