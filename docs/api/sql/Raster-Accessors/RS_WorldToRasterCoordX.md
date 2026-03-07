@@ -21,6 +21,8 @@
 
 Introduction: Returns the X coordinate of the grid coordinate of the given world coordinates as an integer.
 
+![RS_WorldToRasterCoordX](../../../image/RS_WorldToRasterCoordX/RS_WorldToRasterCoordX.svg "RS_WorldToRasterCoordX")
+
 Format:
 
 `RS_WorldToRasterCoord(raster: Raster, point: Geometry)`

@@ -21,6 +21,8 @@
 
 Introduction: Returns the X skew or rotation parameter.
 
+![RS_SkewX](../../../image/RS_SkewX/RS_SkewX.svg "RS_SkewX")
+
 Format: `RS_SkewX(raster: Raster)`
 
 Return type: `Double`

@@ -46,6 +46,8 @@ For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Af
 
     The `sample()` function is only there to reduce the data sent to `collect()`, you may also use `filter()` if that's appropriate.
 
+![RS_GeoReference](../../../image/RS_GeoReference/RS_GeoReference.svg "RS_GeoReference")
+
 Format: `RS_GeoReference(raster: Raster, format: String = "GDAL")`
 
 Return type: `String`
