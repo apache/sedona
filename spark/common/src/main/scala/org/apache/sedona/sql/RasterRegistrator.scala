@@ -31,9 +31,13 @@ object RasterRegistrator {
   def registerAll(sparkSession: SparkSession): Unit = {
     if (isGeoToolsAvailable) {
       RasterUdtRegistratorWrapper.registerAll(gridClassName)
-      sparkSession.udf.register(
-        RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName,
-        functions.udaf(RasterUdafCatalog.rasterAggregateExpression))
+      val functionName = RasterUdafCatalog.rasterAggregateExpression.getClass.getSimpleName
+      val functionIdentifier = FunctionIdentifier(functionName)
+      if (!sparkSession.sessionState.functionRegistry.functionExists(functionIdentifier)) {
+        sparkSession.udf.register(
+          functionName,
+          functions.udaf(RasterUdafCatalog.rasterAggregateExpression))
+      }
     }
   }
 

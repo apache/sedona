@@ -26,8 +26,14 @@ import org.locationtech.jts.index.SpatialIndex
 object UdtRegistratorWrapper {
 
   def registerAll(): Unit = {
-    UDTRegistration.register(classOf[Geometry].getName, classOf[GeometryUDT].getName)
-    UDTRegistration.register(classOf[Geography].getName, classOf[GeographyUDT].getName)
-    UDTRegistration.register(classOf[SpatialIndex].getName, classOf[IndexUDT].getName)
+    registerIfNotExists(classOf[Geometry].getName, classOf[GeometryUDT].getName)
+    registerIfNotExists(classOf[Geography].getName, classOf[GeographyUDT].getName)
+    registerIfNotExists(classOf[SpatialIndex].getName, classOf[IndexUDT].getName)
+  }
+
+  private def registerIfNotExists(userClass: String, udtClass: String): Unit = {
+    if (!UDTRegistration.exists(userClass)) {
+      UDTRegistration.register(userClass, udtClass)
+    }
   }
 }
