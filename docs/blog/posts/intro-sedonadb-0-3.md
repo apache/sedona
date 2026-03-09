@@ -9,6 +9,7 @@ authors:
   - feng
   - peter
   - jia
+  - pranav
 title: "SedonaDB 0.3.0 Release"
 ---
 
@@ -32,7 +33,6 @@ title: "SedonaDB 0.3.0 Release"
 -->
 
 # SedonaDB 0.3.0 Release
-
 
 The Apache Sedona community is excited to announce the release of
 [SedonaDB](https://sedona.apache.org/sedonadb) version 0.3.0!
@@ -108,20 +108,20 @@ sd.sql("""
     GROUP BY divisions.id, get_field(divisions.names, 'primary')
     ORDER BY n DESC
 """).limit(5)
-#> ┌──────────────────────────────────────┬────────────────────────────┬───────┐
-#> │                  id                  ┆            name            ┆   n   │
-#> │                 utf8                 ┆            utf8            ┆ int64 │
-#> ╞══════════════════════════════════════╪════════════════════════════╪═══════╡
-#> │ 1373e423-efdc-471a-ae51-3e9d6c4231b2 ┆ UPZs de Bogotá             ┆   860 │
-#> ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┤
-#> │ 74e87dad-3b11-4fc5-bedd-cb51a617e141 ┆ Distrito-sede de Guarulhos ┆   388 │
-#> ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┤
-#> │ 76077e78-c0c0-48f4-9683-1a16a56dfaf9 ┆ Roma I                     ┆   346 │
-#> ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┤
-#> │ ee274c81-5b62-4e80-be67-e613b9219b17 ┆ Roma VII                   ┆   289 │
-#> ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┤
-#> │ bf762f01-cad0-46be-b47b-76435478035c ┆ Birmingham                 ┆   263 │
-#> └──────────────────────────────────────┴────────────────────────────┴───────┘
+# > ┌──────────────────────────────────────┬────────────────────────────┬───────┐
+# > │                  id                  ┆            name            ┆   n   │
+# > │                 utf8                 ┆            utf8            ┆ int64 │
+# > ╞══════════════════════════════════════╪════════════════════════════╪═══════╡
+# > │ 1373e423-efdc-471a-ae51-3e9d6c4231b2 ┆ UPZs de Bogotá             ┆   860 │
+# > ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┤
+# > │ 74e87dad-3b11-4fc5-bedd-cb51a617e141 ┆ Distrito-sede de Guarulhos ┆   388 │
+# > ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┤
+# > │ 76077e78-c0c0-48f4-9683-1a16a56dfaf9 ┆ Roma I                     ┆   346 │
+# > ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┤
+# > │ ee274c81-5b62-4e80-be67-e613b9219b17 ┆ Roma VII                   ┆   289 │
+# > ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌┤
+# > │ bf762f01-cad0-46be-b47b-76435478035c ┆ Birmingham                 ┆   263 │
+# > └──────────────────────────────────────┴────────────────────────────┴───────┘
 ```
 
 The way that this join algorithm worked was approximately (1) read all
@@ -160,20 +160,17 @@ million point dataset in about 30 seconds with only 3 GB of memory!
 import sedona.db
 
 sd = sedona.db.connect()
-sd.options.memory_limit = '3g'
+sd.options.memory_limit = "3g"
 sd.options.memory_pool_type = "fair"
 
 url = "https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/microsoft-buildings_point.parquet"
 sd.read_parquet(url).to_view("buildings")
-sd.sql(
-    """
+sd.sql("""
     SELECT ROW_NUMBER() OVER () AS building_id, geometry
     FROM buildings
-    """
-).to_parquet("buildings_idx.parquet")
+    """).to_parquet("buildings_idx.parquet")
 
-sd.sql(
-    """
+sd.sql("""
     SELECT
         l.building_id,
         r.building_id AS nearest_building_id,
@@ -183,11 +180,10 @@ sd.sql(
     JOIN "buildings_idx.parquet" AS r
         ON l.building_id <> r.building_id
         AND ST_DWithin(l.geometry, r.geometry, 1e-10)
-    """
-).to_memtable().to_view("duplicates", overwrite=True)
+    """).to_memtable().to_view("duplicates", overwrite=True)
 
 sd.view("duplicates").count()
-#> 1017476
+# > 1017476
 ```
 
 For some perspective, DuckDB 1.5.0 (beta) needs about 12 GB of memory to
@@ -232,8 +228,7 @@ cities = pd.DataFrame(
 )
 
 sd.create_data_frame(cities).to_view("cities", overwrite=True)
-sd.sql(
-  """
+sd.sql("""
   SELECT
     name,
     ST_Transform(
@@ -241,8 +236,7 @@ sd.sql(
       utm_code
     ) AS geom
   FROM cities
-  """
-).to_view("cities_item_crs")
+  """).to_view("cities_item_crs")
 
 sd.view("cities_item_crs")
 ```
@@ -261,9 +255,7 @@ sd.view("cities_item_crs")
 Crucially, it can also get you back!
 
 ``` python
-sd.sql(
-    "SELECT name, ST_Transform(geom, 4326) FROM cities_item_crs"
-)
+sd.sql("SELECT name, ST_Transform(geom, 4326) FROM cities_item_crs")
 ```
 
     ┌───────────┬────────────────────────────────────────────────┐
@@ -311,7 +303,7 @@ canada = countries.geometry[countries.name == "Canada"]
 
 url_cities = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities.fgb"
 sd.read_pyogrio(url_cities).to_view("cities", overwrite=True)
-sd.sql("SELECT * FROM cities WHERE ST_Contains($1, wkb_geometry)", params=(canada, ))
+sd.sql("SELECT * FROM cities WHERE ST_Contains($1, wkb_geometry)", params=(canada,))
 ```
 
     ┌───────────┬─────────────────────────────────────────────┐
@@ -365,7 +357,7 @@ sd.read_pyogrio(url).to_parquet(
     "optimized.parquet",
     geoparquet_version="1.1",
     max_row_group_size=100_000,
-    sort_by="wkb_geometry"
+    sort_by="wkb_geometry",
 )
 ```
 
@@ -465,11 +457,11 @@ feature request and motivating use case!
 ## What’s Next?
 
 During the 0.3.0 development cycle we merged the first steps of two
-exciting contributions: A GPU-accellerated spatial join and support for
+exciting contributions: A GPU-accelerated spatial join and support for
 reading point cloud formats LAS and LAZ. In 0.4.0 we hope to have these
 components polished and ready to go! Finally, we hope to broaden our
 support for the Geography data type throughout the engine and
-accellerate its current implementation.
+accelerate its current implementation.
 
 ## Contributors
 
