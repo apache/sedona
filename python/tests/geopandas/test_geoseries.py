@@ -1318,7 +1318,21 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_representative_point(self):
-        pass
+        geoms = [
+            Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            LineString([(0, 0), (1, 1), (1, 0)]),
+            Point(0, 0),
+            None,
+        ]
+        s = GeoSeries(geoms)
+        expected = gpd.GeoSeries(geoms).representative_point()
+
+        result = s.representative_point()
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().representative_point()
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_minimum_bounding_circle(self):
         s = GeoSeries(
@@ -1374,7 +1388,28 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_normalize(self):
-        pass
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (1, 1)]),
+                Point(0, 0),
+                None,
+            ]
+        )
+        result = s.normalize()
+        expected = gpd.GeoSeries(
+            [
+                shapely.normalize(Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])),
+                shapely.normalize(LineString([(0, 0), (1, 1)])),
+                shapely.normalize(Point(0, 0)),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().normalize()
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_make_valid(self):
         s = sgpd.GeoSeries(
@@ -1431,7 +1466,28 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_reverse(self):
-        pass
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (1, 1), (2, 2)]),
+                LineString([(0, 0), (1, 0), (1, 1)]),
+                Point(0, 0),
+                None,
+            ]
+        )
+        result = s.reverse()
+        expected = gpd.GeoSeries(
+            [
+                LineString([(2, 2), (1, 1), (0, 0)]),
+                LineString([(1, 1), (1, 0), (0, 0)]),
+                Point(0, 0),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().reverse()
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_segmentize(self):
         s = GeoSeries(

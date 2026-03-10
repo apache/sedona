@@ -730,8 +730,35 @@ class GeoFrame(metaclass=ABCMeta):
     # def set_precision(self, grid_size, mode="valid_output"):
     #     raise NotImplementedError("This method is not implemented yet.")
 
-    # def representative_point(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def representative_point(self):
+        """Return a point that is guaranteed to be within each geometry.
+
+        Returns a ``GeoSeries`` of (cheaply computed) points that are guaranteed
+        to be within each geometry.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (1, 1), (1, 0)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s.representative_point()
+        0    POINT (0.5 0.5)
+        1      POINT (1 0.5)
+        2      POINT (0 0)
+        dtype: geometry
+
+        """
+        return _delegate_to_geometry_column("representative_point", self)
 
     def minimum_bounding_circle(self):
         """Return a ``GeoSeries`` of geometries representing the minimum bounding
@@ -803,8 +830,35 @@ class GeoFrame(metaclass=ABCMeta):
     # def minimum_clearance(self):
     #     raise NotImplementedError("This method is not implemented yet.")
 
-    # def normalize(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def normalize(self):
+        """Return a ``GeoSeries`` of normalized geometries.
+
+        Normalization reorganizes the coordinates in a consistent order,
+        which can be useful for comparison purposes.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (1, 1)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s.normalize()
+        0    POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
+        1                    LINESTRING (0 0, 1 1)
+        2                              POINT (0 0)
+        dtype: geometry
+
+        """
+        return _delegate_to_geometry_column("normalize", self)
 
     def make_valid(self, *, method="linework", keep_collapsed=True):
         """Repairs invalid geometries.
@@ -869,8 +923,32 @@ class GeoFrame(metaclass=ABCMeta):
             "make_valid", self, method=method, keep_collapsed=keep_collapsed
         )
 
-    # def reverse(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def reverse(self):
+        """Return a ``GeoSeries`` with the coordinate order reversed.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         LineString([(0, 0), (1, 1), (2, 2)]),
+        ...         LineString([(0, 0), (1, 0), (1, 1)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s.reverse()
+        0    LINESTRING (2 2, 1 1, 0 0)
+        1    LINESTRING (1 1, 1 0, 0 0)
+        2                    POINT (0 0)
+        dtype: geometry
+
+        """
+        return _delegate_to_geometry_column("reverse", self)
 
     def segmentize(self, max_segment_length):
         """Returns a ``GeoSeries`` with vertices added to line segments based on
