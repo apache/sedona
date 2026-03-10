@@ -32,23 +32,23 @@ title: "SedonaDB 0.3.0 Release"
 # under the License.
 -->
 
-# SedonaDB 0.3.0 Release
-
 The Apache Sedona community is excited to announce the release of
 [SedonaDB](https://sedona.apache.org/sedonadb) version 0.3.0!
 
 SedonaDB is the first open-source, single-node analytical database
 engine that treats spatial data as a first-class citizen. It is
 developed as a subproject of Apache Sedona. This release consists of
-[183 resolved
+[187 resolved
 issues](https://github.com/apache/sedona-db/milestone/2?closed=1)
-including 40 new functions from 18 contributors.
+including 36 new functions from 18 contributors.
 
 Apache Sedona powers large-scale geospatial processing on distributed
 engines like Spark (SedonaSpark), Flink (SedonaFlink), and Snowflake
 (SedonaSnow). SedonaDB extends the Sedona ecosystem with a single-node
 engine optimized for small-to-medium data analytics, delivering the
 simplicity and speed that distributed systems often cannot.
+
+<!-- more -->
 
 ## Release Highlights
 
@@ -62,7 +62,7 @@ We’re excited to have so many things to highlight in this release!
 - Improved spatial function coverage and documentation
 - R DataFrame API
 
-``` python
+```python
 # pip install "apache-sedona[db]"
 import sedona.db
 
@@ -82,7 +82,7 @@ internet connection/hard drive can load [Overture Maps
 Divisions](https://docs.overturemaps.org/guides/divisions/) and
 [Places](https://docs.overturemaps.org/guides/places/) data.
 
-``` python
+```python
 overture = "s3://overturemaps-us-west-2/release/2026-02-18.0"
 options = {"aws.skip_signature": True, "aws.region": "us-west-2"}
 sd.read_parquet(f"{overture}/theme=places/type=place/", options=options).to_view(
@@ -156,7 +156,7 @@ be the subject of a dedicated future blog post, but as a quick example:
 SedonaDB can identify duplicate (or nearly duplicate) points in a 130
 million point dataset in about 30 seconds with only 3 GB of memory!
 
-``` python
+```python
 import sedona.db
 
 sd = sedona.db.connect()
@@ -214,7 +214,7 @@ the 0.3 release we added support throughout the stack such that columns
 of this type work in all functions. For example, if you want to
 transform some input into a local CRS, SedonaDB can get you there:
 
-``` python
+```python
 import pandas as pd
 
 cities = pd.DataFrame(
@@ -254,7 +254,7 @@ sd.view("cities_item_crs")
 
 Crucially, it can also get you back!
 
-``` python
+```python
 sd.sql("SELECT name, ST_Transform(geom, 4326) FROM cities_item_crs")
 ```
 
@@ -272,8 +272,8 @@ sd.sql("SELECT name, ST_Transform(geom, 4326) FROM cities_item_crs")
 The main route to creating item-level CRSes is `ST_Transform()` and
 `ST_SetSRID()`, as well as the last argument of `ST_Point()`,
 `ST_GeomFromWKT()`, `ST_GeomFromWKB()`. The new functions
-`ST_GeomFromEWKT()` and `ST_GeomFromEKWB()` always return item-level
-CRSes (and SRIDs are preserved when exporting via `ST_AsEKWT()` and
+`ST_GeomFromEWKT()` and `ST_GeomFromEWKB()` always return item-level
+CRSes (and SRIDs are preserved when exporting via `ST_AsEWKT()` and
 `ST_AsEWKB()`). Item-level CRSes should be preserved across calls to all
 other functions (just like type-level CRSes are in previous versions).
 We’d love to hear more use cases to ensure our support covers the full
@@ -291,10 +291,10 @@ serializing query parameters to SQL.
 In SedonaDB 0.3.0, we added parameterized query support in R and Python
 along with converters for most geometry-like and/or CRS-like objects.
 For example, if you have some contextual information as a GeoPandas
-DataFrame, you can now insert that into any SQL query without worying
+DataFrame, you can now insert that into any SQL query without worrying
 about setting the CRS or serializing to SQL.
 
-``` python
+```python
 import geopandas
 
 url_countries = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.fgb"
@@ -329,7 +329,7 @@ the box! Functionally this means that SedonaDB no longer needs an extra
 efficiently: with the built-in geometry and geography types came
 embedded statistics to reduce file size for many applications.
 
-``` python
+```python
 # A Parquet file with no GeoParquet metadata
 url = "https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.parquet"
 sd.read_parquet(url).schema
@@ -351,7 +351,7 @@ files that work nicely with SedonaDB, GeoPandas, and other engine’s
 spatial filter pushdown. This works nicely with SedonaDB’s GDAL/OGR read
 support to produce optimized GeoParquet files from just about anything:
 
-``` python
+```python
 url = "https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/ns-water_water-point.fgb"
 sd.read_pyogrio(url).to_parquet(
     "optimized.parquet",
@@ -371,13 +371,13 @@ package](https://github.com/geopandas/pyogrio)’s Arrow interface. In
 streaming, this makes SedonaDB an excellent choice for arbitrary
 read/write/convert workflows that scale to any size of input.
 
-``` python
+```python
 sd.read_parquet("optimized.parquet").to_pyogrio("water-point.fgb")
 ```
 
 ## Improved spatial function coverage
 
-Since the 0.2.0 release we have been fortunate to work with contributors
+Since the 0.2.0 release we have been fortunate to work with contributors to
 add 36 new `ST_` and `RS_` functions to our growing catalogue. Users of
 rs_bandpath, rs_convexhull, rs_crs, rs_envelope, rs_georeference,
 rs_numbands, rs_rastertoworldcoord, rs_rastertoworldcoordx,
@@ -409,6 +409,48 @@ Thank you to [2010YOUY01](https://github.com/2010YOUY01),
 [yutannihilation](https://github.com/yutannihilation) for these
 contributions!
 
+## R GDAL/OGR read support
+
+Early testers of SedonaDB for R expressed excitement over the potential
+but noted that to be useful it would have to provide a way to read spatial
+formats like Shapefile, FlatGeoBuf, and GeoPackage without going through
+an sf DataFrame first. In SedonaDB 0.3.0, we added `sd_read_sf()`, which
+leverages the GDAL ArrowArrayStream feature that is experimentally
+available from the sf package.
+
+```r
+library(sedonadb)
+
+# Works with files
+fgb <- system.file("files/natural-earth_cities.fgb", package = "sedonadb")
+sd_read_sf(fgb)
+```
+
+    <sedonab_dataframe: NA x 2>
+    ┌────────────┬─────────────────────────────────────────────┐
+    │    name    ┆                 wkb_geometry                │
+    │    utf8    ┆                   geometry                  │
+    ╞════════════╪═════════════════════════════════════════════╡
+    │ Wellington ┆ POINT(174.77720094690068 -41.2920679923151) │
+    ├╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+    │ Auckland   ┆ POINT(174.763027 -36.8480549)               │
+    ├╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+    │ Melbourne  ┆ POINT(144.9730704 -37.8180855)              │
+    ├╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+    │ Canberra   ┆ POINT(149.1290262 -35.2830285)              │
+    ├╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+    │ Sydney     ┆ POINT(151.2125477744749 -33.87137339218338) │
+    ├╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+    │ Suva       ┆ POINT(178.4417073 -18.1330159)              │
+    └────────────┴─────────────────────────────────────────────┘
+    Preview of up to 6 row(s)
+
+R GDAL/OGR support is more limited than the same feature in Python (e.g.,
+SQL filters are not automatically pushed down into the data source
+and instead must be specified in the read call); however, it hopefully
+removes some friction and unlocks R support for a wider variety of
+use cases!
+
 ## R DataFrame API
 
 Last but not least, we added the building blocks for a
@@ -417,13 +459,9 @@ basic expression translation and support for most geometry-like objects
 in the r-spatial ecosystem. This API is experimental and feedback is
 welcome!
 
-``` r
+```r
 library(sedonadb)
-```
 
-    Warning: package 'sedonadb' was built under R version 4.5.2
-
-``` r
 url <- "https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/ns-water_water-point.parquet"
 df <- sd_read_parquet(url)
 
@@ -465,8 +503,8 @@ accelerate its current implementation.
 
 ## Contributors
 
-``` shell
-git shortlog -sn apache-sedona-db-0.3.0.dev..HEAD
+```shell
+git shortlog -sn apache-sedona-db-0.3.0.dev..apache-sedona-db-0.3.0
     50  Dewey Dunnington
     45  Kristin Cowalcijk
     19  Hiroaki Yutani
