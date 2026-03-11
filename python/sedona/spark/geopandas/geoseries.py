@@ -1221,7 +1221,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         return _to_bool(result)
 
-    def disjoint(self, other, align=None):
+    def disjoint(self, other, align=None) -> pspd.Series:
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align
 

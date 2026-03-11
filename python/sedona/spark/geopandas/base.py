@@ -1434,9 +1434,8 @@ class GeoFrame(metaclass=ABCMeta):
         """Returns a geometry containing the union of all geometries in the
         ``GeoSeries``.
 
-        .. deprecated::
-            The ``unary_union`` attribute is deprecated. Use
-            :meth:`union_all` instead.
+        Deprecated: The ``unary_union`` attribute is deprecated. Use
+        :meth:`union_all` instead.
 
         Returns
         -------
@@ -1625,7 +1624,7 @@ class GeoFrame(metaclass=ABCMeta):
         each aligned geometry that is disjoint from `other`.
 
         An object is said to be disjoint from `other` if its
-        `boundary` and `interior` does not intersect at all with those of the
+        `boundary` and `interior` do not intersect at all with those of the
         other.
 
         The operation works on a 1-to-1 row-wise manner.
