@@ -17,6 +17,7 @@
 import os
 import shutil
 import tempfile
+import warnings
 import pytest
 import numpy as np
 import pandas as pd
@@ -1002,7 +1003,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         lst = [g for geom in self.geoms for g in geom if g.is_valid]
         with pytest.warns(FutureWarning, match="unary_union"):
             sgpd_result = GeoSeries(lst).unary_union
-        import warnings
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", FutureWarning)
@@ -1253,15 +1253,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                     gpd.GeoSeries(geom2), align=False
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
-
-    def test_frechet_distance(self):
-        pass
-
-    def test_hausdorff_distance(self):
-        pass
-
-    def test_geom_equals(self):
-        pass
 
     def test_contains(self):
         for geom, geom2 in self.pairs:

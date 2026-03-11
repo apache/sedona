@@ -994,6 +994,10 @@ class GeoSeries(GeoFrame, pspd.Series):
             raise NotImplementedError(
                 "Sedona does not support only_edges=True for voronoi_polygons."
             )
+        if extend_to is not None:
+            raise NotImplementedError(
+                "Sedona does not support extend_to for voronoi_polygons."
+            )
         spark_expr = stf.ST_VoronoiPolygons(self.spark.column, tolerance, extend_to)
         return self._query_geometry_column(
             spark_expr,

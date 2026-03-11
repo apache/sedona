@@ -2330,15 +2330,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().distance(s2, align=False)
         self.check_pd_series_equal(df_result, expected)
 
-    def test_frechet_distance(self):
-        pass
-
-    def test_hausdorff_distance(self):
-        pass
-
-    def test_geom_equals(self):
-        pass
-
     def test_intersection(self):
         s = sgpd.GeoSeries(
             [

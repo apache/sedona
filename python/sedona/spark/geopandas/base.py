@@ -847,7 +847,8 @@ class GeoFrame(metaclass=ABCMeta):
         tolerance : float, default 0.0
             Snapping tolerance for vertices to be considered equal.
         extend_to : Geometry, default None
-            Not supported in Sedona.
+            Not supported. Passing a non-None value will raise
+            ``NotImplementedError``.
         only_edges : bool, default False
             Only ``only_edges=False`` is supported. Passing ``only_edges=True``
             will raise ``NotImplementedError``.
