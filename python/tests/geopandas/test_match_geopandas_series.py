@@ -770,7 +770,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_representative_point(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).representative_point()
+            gpd_result = gpd.GeoSeries(geom).representative_point()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_minimum_bounding_circle(self):
         for geom in self.geoms:
@@ -788,7 +791,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         pass
 
     def test_normalize(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).normalize()
+            gpd_result = gpd.GeoSeries(geom).normalize()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_make_valid(self):
         import shapely
@@ -818,7 +824,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             GeoSeries([Point(0, 0)]).make_valid(method="linework")
 
     def test_reverse(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).reverse()
+            gpd_result = gpd.GeoSeries(geom).reverse()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     @pytest.mark.skipif(
         parse_version(gpd.__version__) < parse_version("0.14.0"),

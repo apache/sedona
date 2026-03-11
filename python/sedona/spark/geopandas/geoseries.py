@@ -1030,8 +1030,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     def representative_point(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        spark_expr = stf.ST_PointOnSurface(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
     def minimum_bounding_circle(self) -> "GeoSeries":
         spark_expr = stf.ST_MinimumBoundingCircle(self.spark.column)
@@ -1053,8 +1056,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     def normalize(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        spark_expr = stf.ST_Normalize(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
     def make_valid(self, *, method="linework", keep_collapsed=True) -> "GeoSeries":
         if method != "structure":
@@ -1069,8 +1075,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def reverse(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        spark_expr = stf.ST_Reverse(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
     def segmentize(self, max_segment_length):
         other_series, extended = self._make_series_of_val(max_segment_length)
