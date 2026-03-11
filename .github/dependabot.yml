@@ -50,5 +50,3 @@ updates:
       github-dependencies:
         patterns:
           - '*'
-    cooldown:
-      default-days: 7
