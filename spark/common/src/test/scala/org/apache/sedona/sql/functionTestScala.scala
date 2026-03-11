@@ -2246,7 +2246,8 @@ class functionTestScala
       ("MULTILINESTRING ((-29 -27, -30 -29.7, -45 -33), (-45 -33, -46 -32))"),
       ("MULTILINESTRING ((-29 -27, -30 -29.7, -36 -31, -45 -33), (-45.2 -33.2, -46 -32))"),
       ("POLYGON ((8 25, 28 22, 15 11, 33 3, 56 30, 47 44, 35 36, 43 19, 24 39, 8 25))"),
-      ("MULTILINESTRING ((10 160, 60 120), (120 140, 60 120), (120 140, 180 120), (100 180, 120 140))"))
+      ("MULTILINESTRING ((10 160, 60 120), (120 140, 60 120), (120 140, 180 120), (100 180, 120 140))"),
+      ("LINESTRING (0 0, 1 1)"))
       .toDF("Geometry")
 
     When("Using ST_LineMerge")
@@ -2261,7 +2262,8 @@ class functionTestScala
         "LINESTRING (-29 -27, -30 -29.7, -45 -33, -46 -32)",
         "MULTILINESTRING ((-45.2 -33.2, -46 -32), (-29 -27, -30 -29.7, -36 -31, -45 -33))",
         "GEOMETRYCOLLECTION EMPTY",
-        "MULTILINESTRING ((10 160, 60 120, 120 140), (100 180, 120 140), (120 140, 180 120))")
+        "MULTILINESTRING ((10 160, 60 120, 120 140), (100 180, 120 140), (120 140, 180 120))",
+        "LINESTRING (0 0, 1 1)")
   }
 
   it("Should pass ST_LocateAlong") {

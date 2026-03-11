@@ -1196,6 +1196,9 @@ public class Functions {
   }
 
   public static Geometry lineMerge(Geometry geometry) {
+    if (geometry instanceof LineString) {
+      return geometry;
+    }
     if (geometry instanceof MultiLineString) {
       MultiLineString multiLineString = (MultiLineString) geometry;
       int numLineStrings = multiLineString.getNumGeometries();
