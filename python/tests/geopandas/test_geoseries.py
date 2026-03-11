@@ -748,13 +748,54 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_pd_series_equal(df_result, expected)
 
     def test_count_coordinates(self):
-        pass
+        s = GeoSeries(
+            [
+                Point(0, 0),
+                LineString([(0, 0), (1, 1), (2, 2)]),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            ]
+        )
+        result = s.count_coordinates()
+        expected = pd.Series([1, 3, 5], dtype="int32")
+        self.check_pd_series_equal(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().count_coordinates()
+        self.check_pd_series_equal(df_result, expected)
 
     def test_count_geometries(self):
-        pass
+        s = GeoSeries(
+            [
+                Point(0, 0),
+                MultiPoint([(0, 0), (1, 1)]),
+                MultiLineString([[(0, 0), (1, 1)], [(2, 2), (3, 3)]]),
+            ]
+        )
+        result = s.count_geometries()
+        expected = pd.Series([1, 2, 2], dtype="int32")
+        self.check_pd_series_equal(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().count_geometries()
+        self.check_pd_series_equal(df_result, expected)
 
     def test_count_interior_rings(self):
-        pass
+        s = GeoSeries(
+            [
+                Polygon(
+                    [(0, 0), (10, 0), (10, 10), (0, 10)],
+                    [[(1, 1), (2, 1), (2, 2), (1, 2)]],
+                ),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            ]
+        )
+        result = s.count_interior_rings()
+        expected = pd.Series([1, 0], dtype="int32")
+        self.check_pd_series_equal(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().count_interior_rings()
+        self.check_pd_series_equal(df_result, expected)
 
     def test_dwithin(self):
         s = GeoSeries(
@@ -1238,7 +1279,28 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_sgpd_equals_gpd(result, expected)
 
     def test_concave_hull(self):
-        pass
+        s = GeoSeries(
+            [
+                MultiPoint([(0, 0), (1, 0), (0.5, 0.5), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                Point(0, 0),
+                None,
+            ]
+        )
+        expected = gpd.GeoSeries(
+            [
+                MultiPoint([(0, 0), (1, 0), (0.5, 0.5), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                Point(0, 0),
+                None,
+            ]
+        ).concave_hull(ratio=0.5)
+        result = s.concave_hull(ratio=0.5)
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().concave_hull(ratio=0.5)
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_convex_hull(self):
         s = GeoSeries(
@@ -1297,13 +1359,80 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_minimum_rotated_rectangle(self):
-        pass
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (2, 1)]),
+                Point(0, 0),
+                None,
+            ]
+        )
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                LineString([(0, 0), (2, 1)]),
+                Point(0, 0),
+                None,
+            ]
+        ).minimum_rotated_rectangle()
+        result = s.minimum_rotated_rectangle()
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().minimum_rotated_rectangle()
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_exterior(self):
-        pass
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                Polygon(
+                    [(0, 0), (10, 0), (10, 10), (0, 10)],
+                    [[(1, 1), (2, 1), (2, 2), (1, 2)]],
+                ),
+                None,
+            ]
+        )
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                Polygon(
+                    [(0, 0), (10, 0), (10, 10), (0, 10)],
+                    [[(1, 1), (2, 1), (2, 2), (1, 2)]],
+                ),
+                None,
+            ]
+        ).exterior
+        result = s.exterior
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().exterior
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_extract_unique_points(self):
-        pass
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (1, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                Point(0, 0),
+                None,
+            ]
+        )
+        expected = gpd.GeoSeries(
+            [
+                LineString([(0, 0), (1, 1), (0, 0)]),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                Point(0, 0),
+                None,
+            ]
+        ).extract_unique_points()
+        result = s.extract_unique_points()
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().extract_unique_points()
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_offset_curve(self):
         pass
@@ -1312,7 +1441,28 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         pass
 
     def test_remove_repeated_points(self):
-        pass
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (0, 0), (1, 1), (1, 1), (2, 2)]),
+                Polygon([(0, 0), (1, 0), (1, 0), (1, 1), (0, 1)]),
+                Point(0, 0),
+                None,
+            ]
+        )
+        expected = gpd.GeoSeries(
+            [
+                LineString([(0, 0), (0, 0), (1, 1), (1, 1), (2, 2)]),
+                Polygon([(0, 0), (1, 0), (1, 0), (1, 1), (0, 1)]),
+                Point(0, 0),
+                None,
+            ]
+        ).remove_repeated_points()
+        result = s.remove_repeated_points()
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().remove_repeated_points()
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_set_precision(self):
         pass
@@ -1667,7 +1817,28 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_sgpd_equals_gpd(result, expected)
 
     def test_line_merge(self):
-        pass
+        s = GeoSeries(
+            [
+                MultiLineString([[(0, 0), (1, 1)], [(1, 1), (2, 2)]]),
+                MultiLineString([[(0, 0), (1, 1)], [(2, 2), (3, 3)]]),
+                LineString([(0, 0), (1, 1)]),
+                None,
+            ]
+        )
+        expected = gpd.GeoSeries(
+            [
+                MultiLineString([[(0, 0), (1, 1)], [(1, 1), (2, 2)]]),
+                MultiLineString([[(0, 0), (1, 1)], [(2, 2), (3, 3)]]),
+                LineString([(0, 0), (1, 1)]),
+                None,
+            ]
+        ).line_merge()
+        result = s.line_merge()
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().line_merge()
+        self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_unary_union(self):
         pass

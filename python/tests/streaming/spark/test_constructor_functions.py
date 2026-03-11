@@ -252,9 +252,11 @@ SEDONA_LISTED_SQL_FUNCTIONS = [
         SuiteContainer.empty()
         .with_function_name("ST_LineMerge")
         .with_arguments(
-            ["ST_GeomFromText('LINESTRING(-29 -27,-30 -29.7,-36 -31,-45 -33,-46 -32)')"]
+            [
+                "ST_GeomFromText('MULTILINESTRING((-29 -27,-30 -29.7,-36 -31),(-36 -31,-45 -33,-46 -32))')"
+            ]
         )
-        .with_expected_result(0.0)
+        .with_expected_result(19.652212220711906)
         .with_transform("ST_LENGTH")
     ),
     (
