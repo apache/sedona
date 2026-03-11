@@ -1312,7 +1312,8 @@ class GeoFrame(metaclass=ABCMeta):
         Parameters
         ----------
         directed : bool, default False
-            Currently not supported by Sedona.
+            Only ``directed=False`` is supported. Passing ``directed=True``
+            will raise ``NotImplementedError``.
 
         Returns
         -------
