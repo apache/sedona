@@ -65,7 +65,7 @@ jobs:
           persist-credentials: false
       - name: Set up QEMU
         if: runner.os == 'Linux'
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
         with:
           # temporarily pin to qemu@v8 to workaround non-determininstic gcc segfaults
           # https://github.com/docker/setup-qemu-action/issues/188
@@ -80,7 +80,7 @@ jobs:
           CIBW_ARCHS_MACOS: 'x86_64 arm64'
         with:
           package-dir: python
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
@@ -99,7 +99,7 @@ jobs:
       - name: Build sdist
         run: cd python && uv build --sdist
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: cibw-sdist
           path: python/dist/*.tar.gz
@@ -113,7 +113,7 @@ jobs:
     permissions:
       id-token: write # IMPORTANT: mandatory for Trusted Publishing
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           # unpacks wheel files into artifacts
           pattern: cibw-*
