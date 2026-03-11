@@ -291,7 +291,13 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_m(self):
-        pass
+        # M coordinate is not well supported in Shapely/geopandas
+        # so we just check that ST_M returns NaN for standard 2D/3D points
+        sgpd_result = GeoSeries(self.points).m
+        assert isinstance(sgpd_result, ps.Series)
+        # Standard 2D/3D points have no M, should be NaN
+        expected = pd.Series([np.nan] * len(self.points))
+        self.check_pd_series_equal(sgpd_result, expected)
 
     def test_from_file(self):
         pass
@@ -498,7 +504,13 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_type(self):
-        pass
+        for geom in self.geoms:
+            # Sedona converts LinearRing to LineString
+            if isinstance(geom[0], LinearRing):
+                continue
+            sgpd_result = GeoSeries(geom).type
+            gpd_result = gpd.GeoSeries(geom).type
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_length(self):
         for geom in self.geoms:
@@ -749,10 +761,20 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_delaunay_triangles(self):
-        pass
+        # Sedona ST_DelaunayTriangles is element-wise (returns a GeometryCollection
+        # per input geometry), while geopandas operates on all points across the
+        # GeoSeries as a single set. Cannot compare directly.
+        for geom in self.geoms:
+            result = GeoSeries(geom).delaunay_triangles()
+            assert len(result) == len(geom)
 
     def test_voronoi_polygons(self):
-        pass
+        # Sedona ST_VoronoiPolygons is element-wise, while geopandas operates on
+        # all points across the GeoSeries as a single set. Cannot compare directly.
+        for geom in self.geoms:
+            result = GeoSeries(geom).voronoi_polygons()
+            collected = result.to_geopandas()
+            assert len(collected) == len(geom)
 
     def test_envelope(self):
         for geom in self.geoms:
@@ -977,7 +999,15 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_unary_union(self):
-        pass
+        lst = [g for geom in self.geoms for g in geom if g.is_valid]
+        with pytest.warns(FutureWarning, match="unary_union"):
+            sgpd_result = GeoSeries(lst).unary_union
+        import warnings
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", FutureWarning)
+            gpd_result = gpd.GeoSeries(lst).unary_union
+        self.check_geom_equals(sgpd_result, gpd_result)
 
     def test_union_all(self):
         if parse_version(gpd.__version__) < parse_version("1.1.0"):
@@ -1027,7 +1057,17 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_disjoint(self):
-        pass
+        for geom, geom2 in self.pairs:
+            sgpd_result = GeoSeries(geom).disjoint(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).disjoint(gpd.GeoSeries(geom2), align=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).disjoint(GeoSeries(geom2), align=False)
+                gpd_result = gpd.GeoSeries(geom).disjoint(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_intersects(self):
         for geom, geom2 in self.pairs:
@@ -1213,6 +1253,15 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                     gpd.GeoSeries(geom2), align=False
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_frechet_distance(self):
+        pass
+
+    def test_hausdorff_distance(self):
+        pass
+
+    def test_geom_equals(self):
+        pass
 
     def test_contains(self):
         for geom, geom2 in self.pairs:

@@ -165,9 +165,31 @@ class GeoFrame(metaclass=ABCMeta):
         return _delegate_to_geometry_column("geom_type", self)
 
     @property
-    @abstractmethod
     def type(self):
-        raise NotImplementedError("This method is not implemented yet.")
+        """Return the geometry type of each geometry in the GeoSeries.
+
+        This is an alias for :attr:`geom_type`.
+
+        Returns
+        -------
+        pandas.Series (str)
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point, Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s.type
+        0    Polygon
+        1      Point
+        dtype: object
+        """
+        return self.geom_type
 
     @property
     def length(self):
@@ -772,11 +794,80 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("convex_hull", self)
 
-    # def delaunay_triangles(self, tolerance=0.0, only_edges=False):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def delaunay_triangles(self, tolerance=0.0, only_edges=False):
+        """Return Delaunay triangulation of the vertices of each geometry.
 
-    # def voronoi_polygons(self, tolerance=0.0, extend_to=None, only_edges=False):
-    #     raise NotImplementedError("This method is not implemented yet.")
+        .. note::
+
+            Unlike geopandas, which collects all vertices across the
+            entire GeoSeries and computes a single triangulation, Sedona
+            computes the triangulation **per row**. Each input geometry
+            produces one ``GeometryCollection`` containing its triangles.
+            The output GeoSeries has the same length as the input.
+
+        Parameters
+        ----------
+        tolerance : float, default 0.0
+            Snapping tolerance for vertices to be considered equal.
+        only_edges : bool, default False
+            If True, return only the edges of the triangulation as a
+            MultiLineString. If False, return triangles as a
+            GeometryCollection of Polygons.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import MultiPoint
+        >>> s = GeoSeries([MultiPoint([(0, 0), (1, 0), (0.5, 1)])])
+        >>> s.delaunay_triangles()
+        0    GEOMETRYCOLLECTION (POLYGON ((0 0, 0.5 1, 1 0...
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column(
+            "delaunay_triangles", self, tolerance, only_edges
+        )
+
+    def voronoi_polygons(self, tolerance=0.0, extend_to=None, only_edges=False):
+        """Return Voronoi diagram of the vertices of each geometry.
+
+        .. note::
+
+            Unlike geopandas, which collects all vertices across the
+            entire GeoSeries and computes a single Voronoi diagram, Sedona
+            computes the diagram **per row**. Each input geometry produces
+            one ``GeometryCollection`` containing its Voronoi polygons.
+            The output GeoSeries has the same length as the input.
+
+        Parameters
+        ----------
+        tolerance : float, default 0.0
+            Snapping tolerance for vertices to be considered equal.
+        extend_to : Geometry, default None
+            Not supported in Sedona.
+        only_edges : bool, default False
+            Only ``only_edges=False`` is supported. Passing ``only_edges=True``
+            will raise ``NotImplementedError``.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import MultiPoint
+        >>> s = GeoSeries([MultiPoint([(0, 0), (1, 0), (0.5, 1)])])
+        >>> s.voronoi_polygons()
+        0    GEOMETRYCOLLECTION (POLYGON ((-0.25 -0.5, -0....
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column(
+            "voronoi_polygons", self, tolerance, extend_to, only_edges
+        )
 
     @property
     def envelope(self):
@@ -1337,9 +1428,35 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("line_merge", self, directed)
 
-    # @property
-    # def unary_union(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    @property
+    def unary_union(self):
+        """Returns a geometry containing the union of all geometries in the
+        ``GeoSeries``.
+
+        .. deprecated::
+            The ``unary_union`` attribute is deprecated. Use
+            :meth:`union_all` instead.
+
+        Returns
+        -------
+        Geometry
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import box
+        >>> s = GeoSeries([box(0, 0, 1, 1), box(0, 0, 2, 2)])
+        >>> s.unary_union.wkt  # doctest: +SKIP
+        'POLYGON ((0 1, 0 2, 2 2, 2 0, 1 0, 0 0, 0 1))'
+        """
+        import warnings
+
+        warnings.warn(
+            "The 'unary_union' attribute is deprecated, use the 'union_all()' method instead.",
+            FutureWarning,
+            stacklevel=2,
+        )
+        return _delegate_to_geometry_column("union_all", self)
 
     def union_all(self, method="unary", grid_size=None) -> BaseGeometry:
         """Returns a geometry containing the union of all geometries in the
@@ -1501,6 +1618,36 @@ class GeoFrame(metaclass=ABCMeta):
 
         """
         return _delegate_to_geometry_column("crosses", self, other, align)
+
+    def disjoint(self, other, align=None):
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        each aligned geometry that is disjoint from `other`.
+
+        An object is said to be disjoint from `other` if its
+        `boundary` and `interior` does not intersect at all with those of the
+        other.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to test if is
+            disjoint.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (bool)
+
+        See also
+        --------
+        GeoSeries.intersects
+        GeoSeries.crosses
+        """
+        return _delegate_to_geometry_column("disjoint", self, other, align)
 
     def intersects(self, other, align=None):
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for

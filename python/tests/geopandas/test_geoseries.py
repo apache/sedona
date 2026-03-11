@@ -251,7 +251,13 @@ class TestGeoSeries(TestGeopandasBase):
         self.check_pd_series_equal(result, expected)
 
     def test_m(self):
-        pass
+        geoseries = sgpd.GeoSeries(
+            [Point(0, -1, 2.5), Point(2.5, 0, -1), Point(-1, 2.5, 0)]
+        )
+        result = geoseries.m
+        # ST_M returns NaN for points without M coordinate
+        expected = pd.Series([np.nan, np.nan, np.nan])
+        self.check_pd_series_equal(result, expected)
 
     def test_from_file(self):
         pass
@@ -649,7 +655,39 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_pd_series_equal(df_result, expected)
 
     def test_type(self):
-        pass
+        geoseries = GeoSeries(
+            [
+                Point(0, 0),
+                MultiPoint([(0, 0), (1, 1)]),
+                LineString([(0, 0), (1, 1)]),
+                MultiLineString([[(0, 0), (1, 1)]]),
+                Polygon([(0, 0), (1, 0), (1, 1)]),
+                MultiPolygon(
+                    [
+                        Polygon([(0, 0), (1, 0), (0, 1)]),
+                        Polygon([(2, 2), (3, 2), (2, 3)]),
+                    ]
+                ),
+                GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)])]),
+            ]
+        )
+        result = geoseries.type
+        expected = pd.Series(
+            [
+                "Point",
+                "MultiPoint",
+                "LineString",
+                "MultiLineString",
+                "Polygon",
+                "MultiPolygon",
+                "GeometryCollection",
+            ]
+        )
+        self.check_pd_series_equal(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = geoseries.to_geoframe().type
+        self.check_pd_series_equal(df_result, expected)
 
     def test_length(self):
         geoseries = GeoSeries(
@@ -1329,10 +1367,51 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_delaunay_triangles(self):
-        pass
+        s = GeoSeries(
+            [
+                MultiPoint([(0, 0), (1, 0), (0.5, 1)]),
+                MultiPoint([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            ]
+        )
+        # Sedona ST_DelaunayTriangles is element-wise (returns a GeometryCollection
+        # per input), unlike geopandas which operates on all points at once.
+        result = s.delaunay_triangles()
+        result_gpd = result.to_geopandas()
+        assert len(result_gpd) == 2
+        # First input (3 points) should produce 1 triangle
+        assert result_gpd.iloc[0].geom_type == "GeometryCollection"
+        assert len(list(result_gpd.iloc[0].geoms)) == 1
+        # Second input (4 points) should produce 2 triangles
+        assert result_gpd.iloc[1].geom_type == "GeometryCollection"
+        assert len(list(result_gpd.iloc[1].geoms)) == 2
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().delaunay_triangles()
+        df_result_gpd = df_result.to_geopandas()
+        assert len(df_result_gpd) == 2
 
     def test_voronoi_polygons(self):
-        pass
+        s = GeoSeries(
+            [
+                MultiPoint([(0, 0), (1, 0), (0.5, 1)]),
+            ]
+        )
+        # Sedona ST_VoronoiPolygons is element-wise, unlike geopandas
+        result = s.voronoi_polygons()
+        result_gpd = result.to_geopandas()
+        assert len(result_gpd) == 1
+        assert result_gpd.iloc[0].geom_type == "GeometryCollection"
+        # 3 points should produce 3 Voronoi polygons
+        assert len(list(result_gpd.iloc[0].geoms)) == 3
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().voronoi_polygons()
+        df_result_gpd = df_result.to_geopandas()
+        assert len(df_result_gpd) == 1
+
+        # only_edges=True should raise
+        with pytest.raises(NotImplementedError):
+            s.voronoi_polygons(only_edges=True)
 
     def test_envelope(self):
         s = sgpd.GeoSeries(
@@ -1841,7 +1920,16 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_unary_union(self):
-        pass
+        s = GeoSeries([box(0, 0, 1, 1), box(0, 0, 2, 2)])
+        with pytest.warns(FutureWarning, match="unary_union"):
+            result = s.unary_union
+        expected = Polygon([(0, 1), (0, 2), (2, 2), (2, 0), (1, 0), (0, 0), (0, 1)])
+        self.check_geom_equals(result, expected)
+
+        # Check that GeoDataFrame works too
+        with pytest.warns(FutureWarning, match="unary_union"):
+            df_result = s.to_geoframe().unary_union
+        self.check_geom_equals(df_result, expected)
 
     def test_union_all(self):
         s = GeoSeries([box(0, 0, 1, 1), box(0, 0, 2, 2)])
@@ -1944,7 +2032,29 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_pd_series_equal(result, expected)
 
     def test_disjoint(self):
-        pass
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 2), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                Point(0, 0),
+                Point(5, 5),
+            ],
+        )
+        s2 = GeoSeries(
+            [
+                Point(3, 3),
+                Point(1, 1),
+                Point(0, 0),
+                Point(0, 0),
+            ],
+        )
+        result = s.disjoint(s2, align=False)
+        expected = pd.Series([True, False, False, True])
+        self.check_pd_series_equal(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().disjoint(s2, align=False)
+        self.check_pd_series_equal(df_result, expected)
 
     def test_intersects(self):
         s = sgpd.GeoSeries(
@@ -2219,6 +2329,15 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         # Check that GeoDataFrame works too
         df_result = s.to_geoframe().distance(s2, align=False)
         self.check_pd_series_equal(df_result, expected)
+
+    def test_frechet_distance(self):
+        pass
+
+    def test_hausdorff_distance(self):
+        pass
+
+    def test_geom_equals(self):
+        pass
 
     def test_intersection(self):
         s = sgpd.GeoSeries(
