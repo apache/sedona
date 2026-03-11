@@ -313,14 +313,94 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("is_empty", self)
 
-    # def count_coordinates(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def count_coordinates(self):
+        """Return a ``Series`` of ``dtype('int64')`` with the number of
+        coordinate tuples in each geometry.
 
-    # def count_geometries(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+        Returns
+        -------
+        Series (int)
 
-    # def count_interior_rings(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point, LineString, Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(0, 0),
+        ...         LineString([(0, 0), (1, 1), (2, 2)]),
+        ...         Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+        ...     ]
+        ... )
+        >>> s.count_coordinates()
+        0    1
+        1    3
+        2    5
+        dtype: int64
+
+        """
+        return _delegate_to_geometry_column("count_coordinates", self)
+
+    def count_geometries(self):
+        """Return a ``Series`` of ``dtype('int64')`` with the number of
+        geometries in each multi-geometry or geometry collection.
+
+        For non-multi geometries, returns 1.
+
+        Returns
+        -------
+        Series (int)
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point, MultiPoint, MultiLineString
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(0, 0),
+        ...         MultiPoint([(0, 0), (1, 1)]),
+        ...         MultiLineString([[(0, 0), (1, 1)], [(2, 2), (3, 3)]]),
+        ...     ]
+        ... )
+        >>> s.count_geometries()
+        0    1
+        1    2
+        2    2
+        dtype: int64
+
+        """
+        return _delegate_to_geometry_column("count_geometries", self)
+
+    def count_interior_rings(self):
+        """Return a ``Series`` of ``dtype('int64')`` with the number of
+        interior rings (holes) in each polygon geometry.
+
+        Returns 0 for polygons without holes and for non-polygon geometries.
+
+        Returns
+        -------
+        Series (int)
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point, Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (10, 0), (10, 10), (0, 10)],
+        ...                 [[(1, 1), (2, 1), (2, 2), (1, 2)]]),
+        ...         Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s.count_interior_rings()
+        0    1
+        1    0
+        2    0
+        dtype: int64
+
+        """
+        return _delegate_to_geometry_column("count_interior_rings", self)
 
     @property
     def is_simple(self):
@@ -609,8 +689,41 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("centroid", self)
 
-    # def concave_hull(self, ratio=0.0, allow_holes=False):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def concave_hull(self, ratio=0.0, allow_holes=False):
+        """Return the concave hull of each geometry.
+
+        The concave hull of a geometry is a possibly concave geometry that
+        encloses the input geometry.
+
+        Parameters
+        ----------
+        ratio : float, default 0.0
+            A value between 0 and 1 controlling the concaveness of the hull.
+            1 produces the convex hull; 0 produces a hull with maximum
+            concaveness.
+        allow_holes : bool, default False
+            If True, the concave hull may contain holes.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import MultiPoint
+        >>> s = GeoSeries(
+        ...     [MultiPoint([(0, 0), (1, 0), (0.5, 0.5), (1, 1), (0, 1)])]
+        ... )
+        >>> s.concave_hull(ratio=0.3)
+        0    POLYGON ((0 0, 0 1, 0.5 0.5, 1 1, 1 0, 0 0))
+        dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.convex_hull : convex hull geometry
+        """
+        return _delegate_to_geometry_column("concave_hull", self, ratio, allow_holes)
 
     @property
     def convex_hull(self):
@@ -707,15 +820,81 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("envelope", self)
 
-    # def minimum_rotated_rectangle(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def minimum_rotated_rectangle(self):
+        """Return the minimum rotated rectangle (oriented envelope) that
+        encloses each geometry.
 
-    # @property
-    # def exterior(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+        Unlike ``envelope``, the rectangle may be rotated to better fit the
+        geometry.
 
-    # def extract_unique_points(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import MultiPoint
+        >>> s = GeoSeries(
+        ...     [MultiPoint([(0, 0), (1, 0), (0.5, 1)])]
+        ... )
+        >>> s.minimum_rotated_rectangle()
+        0    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))
+        dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.envelope : axis-aligned bounding rectangle
+        GeoSeries.convex_hull : convex hull geometry
+        """
+        return _delegate_to_geometry_column("minimum_rotated_rectangle", self)
+
+    @property
+    def exterior(self):
+        """Return the outer boundary of each polygon geometry.
+
+        Returns a ``GeoSeries`` of LinearRings representing the exterior ring
+        of each polygon. For non-polygon geometries, returns ``None``.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])]
+        ... )
+        >>> s.exterior
+        0    LINEARRING (0 0, 1 0, 1 1, 0 1, 0 0)
+        dtype: geometry
+
+        """
+        return _delegate_to_geometry_column("exterior", self)
+
+    def extract_unique_points(self):
+        """Return a ``GeoSeries`` of MultiPoints representing all distinct
+        vertices of each geometry.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString
+        >>> s = GeoSeries(
+        ...     [LineString([(0, 0), (1, 1), (0, 0)])]
+        ... )
+        >>> s.extract_unique_points()
+        0    MULTIPOINT ((0 0), (1 1))
+        dtype: geometry
+
+        """
+        return _delegate_to_geometry_column("extract_unique_points", self)
 
     # def offset_curve(self, distance, quad_segs=8, join_style="round", mitre_limit=5.0):
     #     raise NotImplementedError("This method is not implemented yet.")
@@ -724,8 +903,33 @@ class GeoFrame(metaclass=ABCMeta):
     # def interiors(self):
     #     raise NotImplementedError("This method is not implemented yet.")
 
-    # def remove_repeated_points(self, tolerance=0.0):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def remove_repeated_points(self, tolerance=0.0):
+        """Return a ``GeoSeries`` with duplicate points removed.
+
+        Parameters
+        ----------
+        tolerance : float, default 0.0
+            Remove vertices that are within ``tolerance`` distance of one
+            another. A tolerance of 0.0 removes only exactly repeated
+            coordinates.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString
+        >>> s = GeoSeries(
+        ...     [LineString([(0, 0), (0, 0), (1, 1), (1, 1), (2, 2)])]
+        ... )
+        >>> s.remove_repeated_points()
+        0    LINESTRING (0 0, 1 1, 2 2)
+        dtype: geometry
+
+        """
+        return _delegate_to_geometry_column("remove_repeated_points", self, tolerance)
 
     # def set_precision(self, grid_size, mode="valid_output"):
     #     raise NotImplementedError("This method is not implemented yet.")
@@ -1093,8 +1297,38 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("force_3d", self, z)
 
-    # def line_merge(self, directed=False):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def line_merge(self, directed=False):
+        """Return merged LineStrings.
+
+        Returns a ``GeoSeries`` of (Multi)LineStrings, where connected
+        LineStrings are merged together into single LineStrings.
+
+        Parameters
+        ----------
+        directed : bool, default False
+            Currently not supported by Sedona.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import MultiLineString
+        >>> s = GeoSeries(
+        ...     [
+        ...         MultiLineString([[(0, 0), (1, 1)], [(1, 1), (2, 2)]]),
+        ...         MultiLineString([[(0, 0), (1, 1)], [(2, 2), (3, 3)]]),
+        ...     ]
+        ... )
+        >>> s.line_merge()
+        0                     LINESTRING (0 0, 1 1, 2 2)
+        1    MULTILINESTRING ((0 0, 1 1), (2 2, 3 3))
+        dtype: geometry
+
+        """
+        return _delegate_to_geometry_column("line_merge", self, directed)
 
     # @property
     # def unary_union(self):

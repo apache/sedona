@@ -792,30 +792,24 @@ class GeoSeries(GeoFrame, pspd.Series):
         return _to_bool(result)
 
     def count_coordinates(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError(
-            _not_implemented_error(
-                "count_coordinates",
-                "Counts the number of coordinate tuples in each geometry.",
-            )
+        spark_expr = stf.ST_NPoints(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=False,
         )
 
     def count_geometries(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError(
-            _not_implemented_error(
-                "count_geometries",
-                "Counts the number of geometries in each multi-geometry or collection.",
-            )
+        spark_expr = stf.ST_NumGeometries(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=False,
         )
 
     def count_interior_rings(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError(
-            _not_implemented_error(
-                "count_interior_rings",
-                "Counts the number of interior rings (holes) in each polygon.",
-            )
+        spark_expr = stf.ST_NumInteriorRings(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=False,
         )
 
     def dwithin(self, other, distance, align=None):
@@ -972,8 +966,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def concave_hull(self, ratio=0.0, allow_holes=False):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        spark_expr = stf.ST_ConcaveHull(self.spark.column, ratio, allow_holes)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
     @property
     def convex_hull(self) -> "GeoSeries":
@@ -1000,17 +997,26 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def minimum_rotated_rectangle(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        spark_expr = stf.ST_OrientedEnvelope(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
     @property
     def exterior(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        spark_expr = stf.ST_ExteriorRing(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
     def extract_unique_points(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        spark_expr = stf.ST_Points(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
     def offset_curve(self, distance, quad_segs=8, join_style="round", mitre_limit=5.0):
         # Implementation of the abstract method.
@@ -1022,8 +1028,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         raise NotImplementedError("This method is not implemented yet.")
 
     def remove_repeated_points(self, tolerance=0.0):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        args = (self.spark.column, tolerance) if tolerance else (self.spark.column,)
+        spark_expr = stf.ST_RemoveRepeatedPoints(*args)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
     def set_precision(self, grid_size, mode="valid_output"):
         # Implementation of the abstract method.
@@ -1114,8 +1124,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def line_merge(self, directed=False):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        spark_expr = stf.ST_LineMerge(self.spark.column)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
     # ============================================================================
     # GEOMETRIC OPERATIONS
