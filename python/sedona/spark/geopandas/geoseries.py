@@ -806,7 +806,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def count_interior_rings(self):
-        spark_expr = stf.ST_NumInteriorRings(self.spark.column)
+        # Sedona's ST_NumInteriorRings returns NULL for non-polygon geometries
+        # (including MultiPolygon). GeoPandas semantics require 0 for
+        # non-polygon and empty geometries, so we wrap with coalesce.
+        spark_expr = F.coalesce(stf.ST_NumInteriorRings(self.spark.column), F.lit(0))
         return self._query_geometry_column(
             spark_expr,
             returns_geom=False,
@@ -1124,6 +1127,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def line_merge(self, directed=False):
+        if directed:
+            raise NotImplementedError(
+                "Sedona does not support directed line_merge; "
+                "the 'directed' argument must be False."
+            )
         spark_expr = stf.ST_LineMerge(self.spark.column)
         return self._query_geometry_column(
             spark_expr,

@@ -314,7 +314,7 @@ class GeoFrame(metaclass=ABCMeta):
         return _delegate_to_geometry_column("is_empty", self)
 
     def count_coordinates(self):
-        """Return a ``Series`` of ``dtype('int64')`` with the number of
+        """Return a ``Series`` of ``dtype('int')`` with the number of
         coordinate tuples in each geometry.
 
         Returns
@@ -336,13 +336,13 @@ class GeoFrame(metaclass=ABCMeta):
         0    1
         1    3
         2    5
-        dtype: int64
+        dtype: int32
 
         """
         return _delegate_to_geometry_column("count_coordinates", self)
 
     def count_geometries(self):
-        """Return a ``Series`` of ``dtype('int64')`` with the number of
+        """Return a ``Series`` of ``dtype('int')`` with the number of
         geometries in each multi-geometry or geometry collection.
 
         For non-multi geometries, returns 1.
@@ -366,13 +366,13 @@ class GeoFrame(metaclass=ABCMeta):
         0    1
         1    2
         2    2
-        dtype: int64
+        dtype: int32
 
         """
         return _delegate_to_geometry_column("count_geometries", self)
 
     def count_interior_rings(self):
-        """Return a ``Series`` of ``dtype('int64')`` with the number of
+        """Return a ``Series`` of ``dtype('int')`` with the number of
         interior rings (holes) in each polygon geometry.
 
         Returns 0 for polygons without holes and for non-polygon geometries.
@@ -397,7 +397,7 @@ class GeoFrame(metaclass=ABCMeta):
         0    1
         1    0
         2    0
-        dtype: int64
+        dtype: int32
 
         """
         return _delegate_to_geometry_column("count_interior_rings", self)
@@ -853,8 +853,14 @@ class GeoFrame(metaclass=ABCMeta):
     def exterior(self):
         """Return the outer boundary of each polygon geometry.
 
-        Returns a ``GeoSeries`` of LinearRings representing the exterior ring
+        Returns a ``GeoSeries`` of LineStrings representing the exterior ring
         of each polygon. For non-polygon geometries, returns ``None``.
+
+        .. note::
+           Sedona's ``ST_ExteriorRing`` returns a ``LINESTRING`` rather than
+           a ``LINEARRING``.  The coordinates are identical to those of the
+           exterior ring but the geometry type differs from geopandas, which
+           returns a ``LINEARRING``.
 
         Returns
         -------
@@ -868,7 +874,7 @@ class GeoFrame(metaclass=ABCMeta):
         ...     [Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])]
         ... )
         >>> s.exterior
-        0    LINEARRING (0 0, 1 0, 1 1, 0 1, 0 0)
+        0    LINESTRING (0 0, 1 0, 1 1, 0 1, 0 0)
         dtype: geometry
 
         """

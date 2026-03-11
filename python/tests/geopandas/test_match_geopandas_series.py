@@ -561,12 +561,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_count_interior_rings(self):
-        # Sedona returns null for empty geometries while geopandas returns 0,
-        # so we only test with non-empty polygons.
-        geom = [self.polygons[1], self.polygons[2]]
-        sgpd_result = GeoSeries(geom).count_interior_rings()
-        gpd_result = gpd.GeoSeries(geom).count_interior_rings()
-        self.check_pd_series_equal(sgpd_result, gpd_result)
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).count_interior_rings()
+            gpd_result = gpd.GeoSeries(geom).count_interior_rings()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_dwithin(self):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
