@@ -32,7 +32,7 @@
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A cluster computing system for processing large-scale spatial data: Snowflake tester programs.</description>
-    <url>http://sedona.apache.org/</url>
+    <url>https://sedona.apache.org/</url>
 
     <properties>
         <maven.deploy.skip>${skip.deploy.common.modules}</maven.deploy.skip>

@@ -554,7 +554,7 @@ Vote result thread (Permalink from https://lists.apache.org/list.html):
 
 
 Website:
-http://sedona.apache.org/
+https://sedona.apache.org/
 
 Release notes:
 https://github.com/apache/sedona/blob/sedona-{{ sedona_create_release.current_version }}/docs/setup/release-notes.md

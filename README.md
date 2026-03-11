@@ -225,7 +225,7 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
 * [Working with Spatial R in Sedona](https://sedona.apache.org/latest/api/rdocs/)
 * [Sedona Python API Documentation](https://sedona.apache.org/latest/api/pydocs/)
 
-Please visit [Apache Sedona website](http://sedona.apache.org/) for detailed information
+Please visit [Apache Sedona website](https://sedona.apache.org/) for detailed information
 
 ## Star History
 
