@@ -111,11 +111,11 @@ jobs:
           cd python
 
           # Conditional shapely version adjustments
-          if [ "${SHAPELY_VERSION}" == "1" ]; then
+          if [[ "${SHAPELY_VERSION}" == "1" ]]; then
             uv add "shapely<2.0.0"
           fi
 
-          if [ "${SPARK_VERSION:0:1}" == "4" ]; then
+          if [[ "${SPARK_VERSION:0:1}" == "4" ]]; then
             # Spark 4.x requires Python 3.10+, and we remove flink since it conflicts with pyspark 4.x
             uv remove apache-flink --optional flink
             uv add "pyspark==${SPARK_VERSION}; python_version >= '3.10'"
