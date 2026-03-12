@@ -22,7 +22,6 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.Functions;
-import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.FunctionsProj4;
 import org.apache.sedona.common.Predicates;
 import org.apache.sedona.common.enums.FileDataSplitter;
@@ -1171,19 +1170,19 @@ public class UDFs {
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static byte[] ST_VoronoiPolygons(byte[] geometry) {
     return GeometrySerde.serialize(
-        FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserialize(geometry), 0.0, null));
+        Functions.voronoiPolygons(GeometrySerde.deserialize(geometry), 0.0, null));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "tolerance"})
   public static byte[] ST_VoronoiPolygons(byte[] geometry, double tolerance) {
     return GeometrySerde.serialize(
-        FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserialize(geometry), tolerance, null));
+        Functions.voronoiPolygons(GeometrySerde.deserialize(geometry), tolerance, null));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "tolerance", "extent"})
   public static byte[] ST_VoronoiPolygons(byte[] geometry, double tolerance, byte[] extent) {
     return GeometrySerde.serialize(
-        FunctionsGeoTools.voronoiPolygons(
+        Functions.voronoiPolygons(
             GeometrySerde.deserialize(geometry), tolerance, GeometrySerde.deserialize(extent)));
   }
 
@@ -1266,7 +1265,7 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geomA", "geomB"})
-  public static double ST_FrechetDistance(byte[] geomA, byte[] geomB) {
+  public static Double ST_FrechetDistance(byte[] geomA, byte[] geomB) {
     return Functions.frechetDistance(
         GeometrySerde.deserialize(geomA), GeometrySerde.deserialize(geomB));
   }

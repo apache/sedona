@@ -93,6 +93,16 @@ public class PredicatesTest extends TestBase {
   }
 
   @Test
+  public void testEqualsGeometryCollection() throws ParseException {
+    Geometry gc1 = geomFromEWKT("GEOMETRYCOLLECTION(POINT(0 0), LINESTRING(0 0, 1 1))");
+    Geometry gc2 = geomFromEWKT("GEOMETRYCOLLECTION(POINT(0 0), LINESTRING(0 0, 1 1))");
+    assertTrue(Predicates.equals(gc1, gc2));
+
+    Geometry gc3 = geomFromEWKT("GEOMETRYCOLLECTION(POINT(0 0), LINESTRING(0 0, 2 2))");
+    assertFalse(Predicates.equals(gc1, gc3));
+  }
+
+  @Test
   public void testRelateBoolean() throws ParseException {
     Geometry geom1 = geomFromEWKT("POINT(1 2)");
     Geometry geom2 = Functions.buffer(geomFromEWKT("POINT(1 2)"), 2);

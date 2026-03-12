@@ -542,13 +542,13 @@ public class GeomUtils {
     geometry.geometryChanged();
   }
 
-  public static double getFrechetDistance(Geometry g1, Geometry g2) {
-    if (g1.isEmpty() || g2.isEmpty()) return 0.0;
+  public static Double getFrechetDistance(Geometry g1, Geometry g2) {
+    if (g1.isEmpty() || g2.isEmpty()) return Double.NaN;
     return DiscreteFrechetDistance.distance(g1, g2);
   }
 
   public static Double getHausdorffDistance(Geometry g1, Geometry g2, double densityFrac) {
-    if (g1.isEmpty() || g2.isEmpty()) return 0.0;
+    if (g1.isEmpty() || g2.isEmpty()) return Double.NaN;
     DiscreteHausdorffDistance hausdorffDistanceObj = new DiscreteHausdorffDistance(g1, g2);
     if (densityFrac != -1) {
       hausdorffDistanceObj.setDensifyFraction(densityFrac);
