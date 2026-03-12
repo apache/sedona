@@ -1330,6 +1330,89 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         return result
 
+    def frechet_distance(self, other, align=None, densify=None) -> pspd.Series:
+        if densify is not None:
+            raise NotImplementedError(
+                "Sedona does not support the densify parameter for frechet_distance."
+            )
+
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_expr = stf.ST_FrechetDistance(F.col("L"), F.col("R"))
+        result = self._row_wise_operation(
+            spark_expr,
+            other_series,
+            align,
+            default_val=None,
+        )
+        return result
+
+    def hausdorff_distance(self, other, align=None, densify=None) -> pspd.Series:
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        if densify is not None:
+            spark_expr = stf.ST_HausdorffDistance(F.col("L"), F.col("R"), densify)
+        else:
+            spark_expr = stf.ST_HausdorffDistance(F.col("L"), F.col("R"))
+        result = self._row_wise_operation(
+            spark_expr,
+            other_series,
+            align,
+            default_val=None,
+        )
+        return result
+
+    def geom_equals(self, other, align=None) -> pspd.Series:
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_expr = stp.ST_Equals(F.col("L"), F.col("R"))
+        result = self._row_wise_operation(
+            spark_expr,
+            other_series,
+            align,
+            returns_geom=False,
+            default_val=False,
+        )
+        return _to_bool(result)
+
+    def interpolate(self, distance, normalized=False) -> "GeoSeries":
+        other_series, extended = self._make_series_of_val(distance)
+        align = not extended
+
+        if normalized:
+            spark_expr = stf.ST_LineInterpolatePoint(F.col("L"), F.col("R"))
+        else:
+            spark_expr = stf.ST_LineInterpolatePoint(
+                F.col("L"), F.col("R") / stf.ST_Length(F.col("L"))
+            )
+        return self._row_wise_operation(
+            spark_expr,
+            other_series,
+            align=align,
+            returns_geom=True,
+        )
+
+    def project(self, other, normalized=False, align=None) -> pspd.Series:
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        if normalized:
+            spark_expr = stf.ST_LineLocatePoint(F.col("L"), F.col("R"))
+        else:
+            spark_expr = stf.ST_LineLocatePoint(F.col("L"), F.col("R")) * stf.ST_Length(
+                F.col("L")
+            )
+        result = self._row_wise_operation(
+            spark_expr,
+            other_series,
+            align,
+            default_val=None,
+        )
+        return result
+
     def intersection(
         self, other: Union["GeoSeries", BaseGeometry], align: Union[bool, None] = None
     ) -> "GeoSeries":

@@ -103,6 +103,23 @@ public class PredicatesTest extends TestBase {
   }
 
   @Test
+  public void testEqualsEmptyGeometries() throws ParseException {
+    // Empty geometries of different types should be considered equal
+    Geometry pointEmpty = geomFromEWKT("POINT EMPTY");
+    Geometry multipolygonEmpty = geomFromEWKT("MULTIPOLYGON EMPTY");
+    assertTrue(Predicates.equals(pointEmpty, multipolygonEmpty));
+
+    // Empty geometries of the same type should be equal
+    Geometry linestringEmpty = geomFromEWKT("LINESTRING EMPTY");
+    Geometry linestringEmpty2 = geomFromEWKT("LINESTRING EMPTY");
+    assertTrue(Predicates.equals(linestringEmpty, linestringEmpty2));
+
+    // An empty geometry and a non-empty geometry should not be equal
+    Geometry point = geomFromEWKT("POINT(0 0)");
+    assertFalse(Predicates.equals(pointEmpty, point));
+  }
+
+  @Test
   public void testRelateBoolean() throws ParseException {
     Geometry geom1 = geomFromEWKT("POINT(1 2)");
     Geometry geom2 = Functions.buffer(geomFromEWKT("POINT(1 2)"), 2);

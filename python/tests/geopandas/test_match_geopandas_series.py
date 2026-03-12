@@ -1285,6 +1285,100 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
 
+    def test_frechet_distance(self):
+        line_pairs = [
+            (self.linestrings, self.linestrings),
+            (self.linearrings, self.linearrings),
+            (self.linestrings, self.linearrings),
+        ]
+        for geom, geom2 in line_pairs:
+            # Skip pairs containing empty geometries
+            if any(g.is_empty for g in geom) or any(g.is_empty for g in geom2):
+                continue
+
+            sgpd_result = GeoSeries(geom).frechet_distance(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).frechet_distance(
+                gpd.GeoSeries(geom2), align=True
+            )
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).frechet_distance(
+                    GeoSeries(geom2), align=False
+                )
+                gpd_result = gpd.GeoSeries(geom).frechet_distance(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_hausdorff_distance(self):
+        for geom, geom2 in self.pairs:
+            sgpd_result = GeoSeries(geom).hausdorff_distance(
+                GeoSeries(geom2), align=True
+            )
+            gpd_result = gpd.GeoSeries(geom).hausdorff_distance(
+                gpd.GeoSeries(geom2), align=True
+            )
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).hausdorff_distance(
+                    GeoSeries(geom2), align=False
+                )
+                gpd_result = gpd.GeoSeries(geom).hausdorff_distance(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_geom_equals(self):
+        for geom, geom2 in self.pairs:
+            if self.contains_any_geom_collection(geom, geom2):
+                continue
+
+            sgpd_result = GeoSeries(geom).geom_equals(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).geom_equals(
+                gpd.GeoSeries(geom2), align=True
+            )
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).geom_equals(GeoSeries(geom2), align=False)
+                gpd_result = gpd.GeoSeries(geom).geom_equals(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_interpolate(self):
+        for geom in [self.linestrings, self.linearrings]:
+            # Skip empty geometries
+            non_empty = [g for g in geom if not g.is_empty]
+            if not non_empty:
+                continue
+
+            sgpd_result = GeoSeries(non_empty).interpolate(1.0)
+            gpd_result = gpd.GeoSeries(non_empty).interpolate(1.0)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+            sgpd_result = GeoSeries(non_empty).interpolate(0.5, normalized=True)
+            gpd_result = gpd.GeoSeries(non_empty).interpolate(0.5, normalized=True)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_project(self):
+        for geom in [self.linestrings, self.linearrings]:
+            # Skip empty geometries
+            non_empty = [g for g in geom if not g.is_empty]
+            if not non_empty:
+                continue
+
+            point = Point(1, 1)
+            sgpd_result = GeoSeries(non_empty).project(point)
+            gpd_result = gpd.GeoSeries(non_empty).project(point)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            sgpd_result = GeoSeries(non_empty).project(point, normalized=True)
+            gpd_result = gpd.GeoSeries(non_empty).project(point, normalized=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
     def test_set_crs(self):
         for geom in self.geoms:
             if isinstance(geom[0], Polygon) and geom[0] == Polygon():

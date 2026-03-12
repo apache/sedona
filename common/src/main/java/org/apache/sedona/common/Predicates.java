@@ -56,6 +56,9 @@ public class Predicates {
   }
 
   public static boolean equals(Geometry leftGeometry, Geometry rightGeometry) {
+    if (leftGeometry.isEmpty() && rightGeometry.isEmpty()) {
+      return true;
+    }
     return leftGeometry.equalsTopo(rightGeometry);
   }
 
