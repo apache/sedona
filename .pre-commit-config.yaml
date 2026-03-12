@@ -515,4 +515,4 @@ repos:
         description: actionlint is a static checker for GitHub Actions workflow files
         args:
           - -ignore
-          - 'SC\d+' # Ignores all ShellCheck warnings
+          - 'SC2086'
