@@ -2,3494 +2,3494 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://sedona.apache.org/latest/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/download/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/sedonaflink/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/sedonasnow/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/sedonaspark/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/java-api/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/python-api/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Functions/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Overview/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Affine-Transformations/ST_Affine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Affine-Transformations/ST_Rotate/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Affine-Transformations/ST_RotateX/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Affine-Transformations/ST_RotateY/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Affine-Transformations/ST_Scale/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Affine-Transformations/ST_ScaleGeom/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Affine-Transformations/ST_Translate/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Aggregate-Functions/ST_Envelope_Agg/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Aggregate-Functions/ST_Intersection_Agg/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Aggregate-Functions/ST_Union_Agg/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Bounding-Box-Functions/ST_BoundingDiagonal/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Bounding-Box-Functions/ST_Envelope/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Bounding-Box-Functions/ST_Expand/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Bounding-Box-Functions/ST_MMax/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Bounding-Box-Functions/ST_MMin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Bounding-Box-Functions/ST_XMax/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Bounding-Box-Functions/ST_XMin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Bounding-Box-Functions/ST_YMax/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Bounding-Box-Functions/ST_YMin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Bounding-Box-Functions/ST_ZMax/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Bounding-Box-Functions/ST_ZMin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/GeometryType/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_Boundary/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_CoordDim/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_CrossesDateLine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_Dimension/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_Dump/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_DumpPoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_EndPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_ExteriorRing/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_GeometryN/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_GeometryType/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_HasM/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_HasZ/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_InteriorRingN/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_IsClosed/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_IsCollection/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_IsEmpty/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_IsPolygonCCW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_IsPolygonCW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_IsRing/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_IsSimple/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_M/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_NDims/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_NPoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_NRings/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_NumGeometries/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_NumInteriorRing/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_NumInteriorRings/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_NumPoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_PointN/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_Points/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_StartPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_X/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_Y/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_Z/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Accessors/ST_Zmflag/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_GeomCollFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_GeomFromEWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_GeomFromEWKT/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_GeomFromGML/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_GeomFromGeoHash/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_GeomFromGeoJSON/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_GeomFromKML/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_GeomFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_GeomFromWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_GeomFromWKT/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_GeometryFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_LineFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_LineFromWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_LineStringFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_LinestringFromWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_MLineFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_MPointFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_MPolyFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_MakeEnvelope/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_MakePoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_MakePointM/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_Point/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_PointFromGeoHash/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_PointFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_PointFromWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_PointM/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_PointZ/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_PointZM/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_PolygonFromEnvelope/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Constructors/ST_PolygonFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_AddPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_Collect/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_CollectionExtract/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_FlipCoordinates/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_Force2D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_Force3D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_Force3DM/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_Force3DZ/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_Force4D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_ForceCollection/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_ForcePolygonCCW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_ForcePolygonCW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_ForceRHR/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_Force_2D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_LineFromMultiPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_LineMerge/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_LineSegments/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_MakeLine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_MakePolygon/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_Multi/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_Normalize/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_Polygon/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_Project/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_RemovePoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_RemoveRepeatedPoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_Reverse/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_Segmentize/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_SetPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Editors/ST_ShiftLongitude/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Output/ST_AsBinary/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Output/ST_AsEWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Output/ST_AsEWKT/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Output/ST_AsGML/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Output/ST_AsGeoJSON/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Output/ST_AsHEXEWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Output/ST_AsKML/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Output/ST_AsText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Output/ST_GeoHash/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_ApproximateMedialAxis/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_Buffer/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_BuildArea/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_Centroid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_ConcaveHull/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_ConvexHull/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_DelaunayTriangles/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_GeneratePoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_GeometricMedian/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_LabelPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_MinimumBoundingCircle/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_MinimumBoundingRadius/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_OrientedEnvelope/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_PointOnSurface/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_Polygonize/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_ReducePrecision/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_Simplify/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_SimplifyPolygonHull/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_SimplifyPreserveTopology/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_SimplifyVW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_Snap/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_StraightSkeleton/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_TriangulatePolygon/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_VoronoiPolygons/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Validation/ST_IsValid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Validation/ST_IsValidReason/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Validation/ST_MakeValid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Linear-Referencing/ST_AddMeasure/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Linear-Referencing/ST_InterpolatePoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Linear-Referencing/ST_IsValidTrajectory/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Linear-Referencing/ST_LineInterpolatePoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Linear-Referencing/ST_LineLocatePoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Linear-Referencing/ST_LineSubstring/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Linear-Referencing/ST_LocateAlong/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_3DDistance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_Angle/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_Area/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_AreaSpheroid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_Azimuth/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_ClosestPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_Degrees/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_Distance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_DistanceSphere/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_DistanceSpheroid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_FrechetDistance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_HausdorffDistance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_Length/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_Length2D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_LengthSpheroid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_LongestLine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_MaxDistance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_MinimumClearance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_MinimumClearanceLine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_Perimeter/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Measurement-Functions/ST_Perimeter2D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Overlay-Functions/ST_Difference/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Overlay-Functions/ST_Intersection/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Overlay-Functions/ST_SubDivide/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Overlay-Functions/ST_SymDifference/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Overlay-Functions/ST_UnaryUnion/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Overlay-Functions/ST_Union/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_Contains/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_CoveredBy/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_Covers/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_Crosses/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_DWithin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_Disjoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_Equals/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_Intersects/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_OrderingEquals/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_Overlaps/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_Relate/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_RelateMatch/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_Touches/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_Within/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_BingTile/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_BingTileAt/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_BingTileCellIDs/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_BingTilePolygon/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_BingTileToGeom/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_BingTileX/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_BingTileY/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_BingTileZoomLevel/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_BingTilesAround/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_GeoHashNeighbor/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_GeoHashNeighbors/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_H3CellDistance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_H3CellIDs/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_H3KRing/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_H3ToGeom/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_S2CellIDs/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_S2ToGeom/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Reference-System/ST_BestSRID/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Reference-System/ST_SRID/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Reference-System/ST_SetSRID/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/flink/Spatial-Reference-System/ST_Transform/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/javadoc/spark/legal/jquery/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/javadoc/spark/legal/jqueryUI/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/javadoc/spark/legal/jszip/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/javadoc/spark/legal/pako/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/pydocs/_static/color-scheme-info/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Functions/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Overview/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Affine-Transformations/ST_Affine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Affine-Transformations/ST_Rotate/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Affine-Transformations/ST_RotateX/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Affine-Transformations/ST_RotateY/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Affine-Transformations/ST_Scale/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Affine-Transformations/ST_ScaleGeom/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Affine-Transformations/ST_Translate/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Aggregate-Functions/ST_Envelope_Agg/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Aggregate-Functions/ST_Intersection_Agg/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Aggregate-Functions/ST_Union_Agg/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Bounding-Box-Functions/ST_BoundingDiagonal/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Bounding-Box-Functions/ST_Envelope/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Bounding-Box-Functions/ST_Expand/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Bounding-Box-Functions/ST_XMax/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Bounding-Box-Functions/ST_XMin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Bounding-Box-Functions/ST_YMax/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Bounding-Box-Functions/ST_YMin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Bounding-Box-Functions/ST_ZMax/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Bounding-Box-Functions/ST_ZMin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/GeometryType/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_Boundary/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_CoordDim/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_CrossesDateLine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_Dimension/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_Dump/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_DumpPoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_EndPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_ExteriorRing/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_GeometryN/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_GeometryType/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_HasZ/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_InteriorRingN/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_IsClosed/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_IsCollection/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_IsEmpty/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_IsPolygonCCW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_IsPolygonCW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_IsRing/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_IsSimple/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_NDims/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_NPoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_NRings/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_NumGeometries/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_NumInteriorRing/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_NumInteriorRings/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_NumPoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_PointN/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_Points/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_StartPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_X/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_Y/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Accessors/ST_Z/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_GeomCollFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_GeomFromEWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_GeomFromEWKT/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_GeomFromGML/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_GeomFromGeoHash/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_GeomFromGeoJSON/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_GeomFromKML/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_GeomFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_GeomFromWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_GeomFromWKT/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_GeometryFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_LineFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_LineFromWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_LineStringFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_LinestringFromWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_MLineFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_MPointFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_MPolyFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_MakeEnvelope/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_MakePoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_Point/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_PointFromGeoHash/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_PointFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_PointFromWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_PointZ/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_PolygonFromEnvelope/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Constructors/ST_PolygonFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_AddPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_Collect/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_CollectionExtract/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_FlipCoordinates/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_Force2D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_Force3D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_Force3DZ/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_ForceCollection/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_ForcePolygonCCW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_ForcePolygonCW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_ForceRHR/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_Force_2D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_LineFromMultiPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_LineMerge/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_MakeLine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_MakePolygon/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_Multi/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_Normalize/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_Polygon/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_Project/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_RemovePoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_RemoveRepeatedPoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_Reverse/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_Segmentize/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_SetPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Editors/ST_ShiftLongitude/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Output/ST_AsBinary/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Output/ST_AsEWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Output/ST_AsEWKT/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Output/ST_AsGML/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Output/ST_AsGeoJSON/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Output/ST_AsHEXEWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Output/ST_AsKML/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Output/ST_AsText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Output/ST_GeoHash/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_ApproximateMedialAxis/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_Buffer/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_BuildArea/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_Centroid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_ConcaveHull/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_ConvexHull/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_DelaunayTriangles/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_GeneratePoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_GeometricMedian/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_LabelPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_MaximumInscribedCircle/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_MinimumBoundingCircle/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_MinimumBoundingRadius/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_OrientedEnvelope/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_PointOnSurface/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_Polygonize/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_ReducePrecision/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_Simplify/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_SimplifyPolygonHull/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_SimplifyPreserveTopology/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_SimplifyVW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_Snap/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_StraightSkeleton/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_TriangulatePolygon/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_VoronoiPolygons/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Validation/ST_IsValid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Validation/ST_IsValidDetail/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Validation/ST_IsValidReason/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Validation/ST_MakeValid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Linear-Referencing/ST_LineInterpolatePoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Linear-Referencing/ST_LineLocatePoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Linear-Referencing/ST_LineSubstring/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_3DDistance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_Angle/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_Area/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_AreaSpheroid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_Azimuth/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_ClosestPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_Degrees/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_Distance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_DistanceSphere/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_DistanceSpheroid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_FrechetDistance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_HausdorffDistance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_Length/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_Length2D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_LengthSpheroid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_LongestLine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_MaxDistance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_MinimumClearance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_MinimumClearanceLine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_Perimeter/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Measurement-Functions/ST_Perimeter2D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Overlay-Functions/ST_Difference/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Overlay-Functions/ST_Intersection/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Overlay-Functions/ST_Split/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Overlay-Functions/ST_SubDivide/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Overlay-Functions/ST_SubDivideExplode/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Overlay-Functions/ST_SymDifference/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Overlay-Functions/ST_UnaryUnion/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Overlay-Functions/ST_Union/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_Contains/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_CoveredBy/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_Covers/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_Crosses/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_DWithin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_Disjoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_Equals/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_Intersects/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_OrderingEquals/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_Overlaps/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_Relate/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_RelateMatch/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_Touches/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_Within/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_BingTile/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_BingTileAt/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_BingTileCellIDs/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_BingTilePolygon/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_BingTileToGeom/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_BingTileX/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_BingTileY/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_BingTileZoomLevel/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_BingTilesAround/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_GeoHashNeighbor/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_GeoHashNeighbors/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_S2CellIDs/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Reference-System/ST_BestSRID/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Reference-System/ST_SRID/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Reference-System/ST_SetSRID/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Reference-System/ST_Transform/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/CRS-Transformation/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/DataFrameAPI/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Functions/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/NearestNeighbourSearching/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Optimizer/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Overview/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Parameter/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Functions/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-affine-transformation/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-loader/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-map-algebra/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-writer/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Reading-legacy-parquet/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spider/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Visualization-SedonaKepler/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Visualization-SedonaPyDeck/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Address-Functions/ExpandAddress/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Address-Functions/ParseAddress/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Affine-Transformations/ST_Affine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Affine-Transformations/ST_Rotate/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Affine-Transformations/ST_RotateX/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Affine-Transformations/ST_RotateY/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Affine-Transformations/ST_Scale/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Affine-Transformations/ST_ScaleGeom/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Affine-Transformations/ST_Translate/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Aggregate-Functions/ST_Collect_Agg/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Aggregate-Functions/ST_Envelope_Agg/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Aggregate-Functions/ST_Intersection_Agg/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Aggregate-Functions/ST_Union_Agg/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Bounding-Box-Functions/ST_BoundingDiagonal/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Bounding-Box-Functions/ST_Envelope/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Bounding-Box-Functions/ST_Expand/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Bounding-Box-Functions/ST_MMax/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Bounding-Box-Functions/ST_MMin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Bounding-Box-Functions/ST_XMax/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Bounding-Box-Functions/ST_XMin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Bounding-Box-Functions/ST_YMax/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Bounding-Box-Functions/ST_YMin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Bounding-Box-Functions/ST_ZMax/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Bounding-Box-Functions/ST_ZMin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Clustering-Functions/ST_DBSCAN/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Clustering-Functions/ST_LocalOutlierFactor/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/GeometryType/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_Boundary/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_CoordDim/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_CrossesDateLine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_Dimension/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_Dump/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_DumpPoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_EndPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_ExteriorRing/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_GeometryN/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_GeometryType/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_HasM/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_HasZ/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_InteriorRingN/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_IsClosed/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_IsCollection/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_IsEmpty/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_IsPolygonCCW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_IsPolygonCW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_IsRing/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_IsSimple/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_M/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_NDims/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_NPoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_NRings/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_NumGeometries/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_NumInteriorRing/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_NumInteriorRings/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_NumPoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_PointN/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_Points/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_StartPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_X/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_Y/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_Z/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Accessors/ST_Zmflag/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_GeomCollFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_GeomFromEWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_GeomFromEWKT/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_GeomFromGML/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_GeomFromGeoHash/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_GeomFromGeoJSON/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_GeomFromKML/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_GeomFromMySQL/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_GeomFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_GeomFromWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_GeomFromWKT/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_GeometryFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_LineFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_LineFromWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_LineStringFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_LinestringFromWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_MLineFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_MPointFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_MPolyFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_MakeEnvelope/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_MakePoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_MakePointM/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_Point/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_PointFromGeoHash/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_PointFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_PointFromWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_PointM/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_PointZ/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_PointZM/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_PolygonFromEnvelope/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Constructors/ST_PolygonFromText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_AddPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_Collect/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_CollectionExtract/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_FlipCoordinates/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_Force2D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_Force3D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_Force3DM/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_Force3DZ/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_Force4D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_ForceCollection/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_ForcePolygonCCW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_ForcePolygonCW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_ForceRHR/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_Force_2D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_LineFromMultiPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_LineMerge/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_LineSegments/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_MakeLine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_MakePolygon/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_Multi/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_Normalize/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_Polygon/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_Project/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_RemovePoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_RemoveRepeatedPoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_Reverse/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_Segmentize/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_SetPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Editors/ST_ShiftLongitude/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Output/ST_AsBinary/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Output/ST_AsEWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Output/ST_AsEWKT/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Output/ST_AsGML/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Output/ST_AsGeoJSON/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Output/ST_AsHEXEWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Output/ST_AsKML/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Output/ST_AsText/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Output/ST_GeoHash/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_ApproximateMedialAxis/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_Buffer/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_BuildArea/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_Centroid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_ConcaveHull/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_ConvexHull/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_DelaunayTriangles/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_GeneratePoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_GeometricMedian/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_LabelPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_MaximumInscribedCircle/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_MinimumBoundingCircle/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_MinimumBoundingRadius/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_OrientedEnvelope/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_PointOnSurface/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_Polygonize/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_ReducePrecision/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_Simplify/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_SimplifyPolygonHull/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_SimplifyPreserveTopology/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_SimplifyVW/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_Snap/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_StraightSkeleton/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_TriangulatePolygon/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_VoronoiPolygons/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Validation/ST_IsValid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Validation/ST_IsValidDetail/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Validation/ST_IsValidReason/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Validation/ST_MakeValid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Linear-Referencing/ST_AddMeasure/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Linear-Referencing/ST_InterpolatePoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Linear-Referencing/ST_IsValidTrajectory/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Linear-Referencing/ST_LineInterpolatePoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Linear-Referencing/ST_LineLocatePoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Linear-Referencing/ST_LineSubstring/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Linear-Referencing/ST_LocateAlong/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_Add/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_Array/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_BitwiseAND/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_BitwiseOR/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_CountValue/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_Divide/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_FetchRegion/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_GreaterThan/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_GreaterThanEqual/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_LessThan/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_LessThanEqual/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_LogicalDifference/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_LogicalOver/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_Mean/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_Mode/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_Modulo/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_Multiply/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_MultiplyFactor/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_Normalize/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_NormalizedDifference/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_SquareRoot/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Map-Algebra-Operators/RS_Subtract/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_3DDistance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_Angle/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_Area/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_AreaSpheroid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_Azimuth/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_ClosestPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_Degrees/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_Distance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_DistanceSphere/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_DistanceSpheroid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_FrechetDistance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_HausdorffDistance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_Length/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_Length2D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_LengthSpheroid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_LongestLine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_MaxDistance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_MinimumClearance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_MinimumClearanceLine/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_Perimeter/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Measurement-Functions/ST_Perimeter2D/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Overlay-Functions/ST_Difference/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Overlay-Functions/ST_Intersection/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Overlay-Functions/ST_Split/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Overlay-Functions/ST_SubDivide/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Overlay-Functions/ST_SubDivideExplode/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Overlay-Functions/ST_SymDifference/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Overlay-Functions/ST_UnaryUnion/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Overlay-Functions/ST_Union/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Pixel-Functions/RS_PixelAsCentroid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Pixel-Functions/RS_PixelAsCentroids/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Pixel-Functions/RS_PixelAsPoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Pixel-Functions/RS_PixelAsPoints/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Pixel-Functions/RS_PixelAsPolygon/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Pixel-Functions/RS_PixelAsPolygons/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_Contains/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_CoveredBy/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_Covers/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_Crosses/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_DWithin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_Disjoint/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_Equals/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_Intersects/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_OrderingEquals/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_Overlaps/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_Relate/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_RelateMatch/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_Touches/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_Within/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_GeoReference/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_GeoTransform/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_Height/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_RasterToWorldCoord/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_RasterToWorldCoordX/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_RasterToWorldCoordY/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_Rotation/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_ScaleX/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_ScaleY/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_SkewX/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_SkewY/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_UpperLeftX/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_UpperLeftY/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_Width/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_WorldToRasterCoord/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_WorldToRasterCoordX/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Accessors/RS_WorldToRasterCoordY/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Aggregate-Functions/RS_Union_Aggr/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Band-Accessors/RS_Band/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Band-Accessors/RS_BandIsNoData/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Band-Accessors/RS_BandNoDataValue/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Band-Accessors/RS_BandPixelType/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Band-Accessors/RS_Count/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Band-Accessors/RS_SummaryStats/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Band-Accessors/RS_SummaryStatsAll/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Band-Accessors/RS_ZonalStats/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Band-Accessors/RS_ZonalStatsAll/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Constructors/RS_FromArcInfoAsciiGrid/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Constructors/RS_FromGeoTiff/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Constructors/RS_FromNetCDF/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Constructors/RS_MakeEmptyRaster/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Constructors/RS_MakeRaster/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Constructors/RS_NetCDFInfo/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Geometry-Functions/RS_ConvexHull/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Geometry-Functions/RS_Envelope/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Geometry-Functions/RS_MinConvexHull/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Map-Algebra-Operators/RS_AddBandFromArray/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Map-Algebra-Operators/RS_BandAsArray/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Map-Algebra-Operators/RS_MapAlgebra/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_AddBand/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_CRS/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_Clip/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_Interpolate/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_MetaData/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_NormalizeAll/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_NumBands/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_ReprojectMatch/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_Resample/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_SRID/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_SetBandNoDataValue/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_SetCRS/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_SetGeoReference/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_SetPixelType/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_SetSRID/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_SetValue/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_SetValues/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_Union/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_Value/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_Values/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Output/RS_AsBase64/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Output/RS_AsImage/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Output/RS_AsMatrix/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Predicates/RS_Contains/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Predicates/RS_Intersects/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Predicates/RS_Within/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Tiles/RS_Tile/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Raster-Tiles/RS_TileExplode/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_BingTile/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_BingTileAt/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_BingTileCellIDs/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_BingTilePolygon/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_BingTileToGeom/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_BingTileX/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_BingTileY/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_BingTileZoomLevel/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_BingTilesAround/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_GeoHashNeighbor/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_GeoHashNeighbors/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_H3CellDistance/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_H3CellIDs/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_H3KRing/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_H3ToGeom/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_S2CellIDs/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_S2ToGeom/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Reference-System/ST_BestSRID/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Reference-System/ST_SRID/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Reference-System/ST_SetSRID/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Reference-System/ST_Transform/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Statistics/ST_BinaryDistanceBandColumn/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Statistics/ST_GLocal/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Spatial-Statistics/ST_WeightedDistanceBandColumn/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Functions/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Constructors/ST_GeogFromEWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Constructors/ST_GeogFromEWKT/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Constructors/ST_GeogFromGeoHash/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Constructors/ST_GeogFromWKB/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Constructors/ST_GeogFromWKT/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Constructors/ST_GeogToGeometry/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Constructors/ST_GeomToGeography/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Functions/ST_AsEWKT/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Functions/ST_Envelope/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/stats/sql/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/viz/java-api/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/viz/sql/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/asf/asf/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/asf/telemetry/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2025/09/05/should-you-use-h3-for-geospatial-analytics-a-deep-dive-with-apache-spark-and-sedona/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2025/12/01/sedonadb-020-release/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2026/03/01/sedonadb-030-release/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2025/09/24/introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2025/12/11/introducing-spatialbench-performance-benchmarks-for-spatial-database-queries/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2025/07/09/welcome-to-the-apache-sedona-blog/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2026/01/11/apache-sedona-2025-year-in-review/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2026/01/08/spatial-query-benchmarking-databricks/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/2025/10/21/managing-spatial-tables-in-data-lakehouses-with-iceberg/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/contact/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/contributor/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/develop/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/geopandas/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/publication/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/publish/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/release-manager/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/rule/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/snapshot/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/community/vote/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/azure-synapse-analytics/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/cluster/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/compile/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/databricks/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/docker/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/emr/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/fabric/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/glue/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/install-python/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/install-scala/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/maven-coordinates/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/modules/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/overview/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/platform/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/release-notes/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/wherobots/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/zeppelin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/flink/install-python/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/flink/install-scala/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/flink/modules/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/flink/platform/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/snowflake/install/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/setup/snowflake/modules/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/Advanced-Tutorial-Tune-your-Application/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/benchmark/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/demo/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/geopandas-api/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/geopandas-shapely/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/jupyter-notebook/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/raster/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/rdd/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/sql-pure-sql/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/sql/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/storing-blobs-in-parquet/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/viz-gallery/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/viz/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/zeppelin/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/concepts/clustering-algorithms/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/concepts/distance-spark/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/concepts/spatial-joins/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/files/csv-geometry-sedona-spark/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/files/geojson-sedona-spark/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/files/geopackage-sedona-spark/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/files/geoparquet-sedona-spark/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/files/shapefiles-sedona-spark/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/files/stac-sedona-spark/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/flink/pyflink-sql/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/flink/sql/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/tutorial/snowflake/sql/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/archive/2026/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/blog/archive/2025/</loc>
-         <lastmod>2026-03-11</lastmod>
+         <lastmod>2026-03-12</lastmod>
     </url>
 </urlset>
