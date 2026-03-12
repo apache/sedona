@@ -23,7 +23,7 @@ updates:
     schedule:
       interval: monthly
     groups:
-      github-dependencies:
+      github-actions-dependencies:
         patterns:
           - '*'
     cooldown:
@@ -35,7 +35,7 @@ updates:
     schedule:
       interval: monthly
     groups:
-      github-dependencies:
+      pip-dependencies:
         patterns:
           - '*'
     cooldown:
@@ -47,6 +47,6 @@ updates:
     schedule:
       interval: monthly
     groups:
-      github-dependencies:
+      pre-commit-hooks:
         patterns:
           - '*'
