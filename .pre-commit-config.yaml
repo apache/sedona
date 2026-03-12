@@ -507,3 +507,22 @@ repos:
         description: a tool to verify that your files are in harmony with your .editorconfig
         exclude: ^docs/image/.*$|^R/man/.*\.Rd$|^spark/common/src/test/resources/.*$
         alias: ec
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.11
+    hooks:
+      - id: actionlint
+        name: run actionlint
+        description: actionlint is a static checker for GitHub Actions workflow files
+        args:
+          - -ignore
+          - 'SC2015'
+          - -ignore
+          - 'SC2061'
+          - -ignore
+          - 'SC2072'
+          - -ignore
+          - 'SC2086'
+          - -ignore
+          - 'SC2102'
+          - -ignore
+          - 'SC2155'
