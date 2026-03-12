@@ -126,8 +126,8 @@ public class LineStringRDDTest extends SpatialRDDTestBase {
   @Test
   public void testPolygonUnion()
   {
-  	LineStringRDD lineStringRDD = new LineStringRDD(sc, InputLocation, offset, splitter, numPartitions);
-  	assert lineStringRDD.PolygonUnion() instanceof Polygon;
+    LineStringRDD lineStringRDD = new LineStringRDD(sc, InputLocation, offset, splitter, numPartitions);
+    assert lineStringRDD.PolygonUnion() instanceof Polygon;
   }
   */
 
