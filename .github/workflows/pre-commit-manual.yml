@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-name: pre-commit
+name: Manual hooks
 
 on: [pull_request]
 
@@ -48,6 +48,6 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: ~/.cache/pre-commit
-          key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
-      - name: Run pre-commit
-        run: pre-commit run --color=always --all-files --show-diff-on-failure
+          key: pre-commit-manual|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Run manual pre-commit hooks
+        run: pre-commit run --color=always --all-files --hook-stage manual --show-diff-on-failure
