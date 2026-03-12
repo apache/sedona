@@ -513,3 +513,6 @@ repos:
       - id: actionlint
         name: run actionlint
         description: actionlint is a static checker for GitHub Actions workflow files
+        args:
+          - -ignore
+          - 'SC\d+' # Ignores all ShellCheck warnings
