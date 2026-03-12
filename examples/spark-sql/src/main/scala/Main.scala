@@ -46,7 +46,7 @@ object Main extends App {
 
   SedonaVizRegistrator.registerAll(sedona)
 
-	val resourceFolder = System.getProperty("user.dir")+"/src/test/resources/"
+    val resourceFolder = System.getProperty("user.dir")+"/src/test/resources/"
 
   // SQL-based spatial operations
   println("=== Running SQL Examples ===")
