@@ -3565,7 +3565,7 @@ public class FunctionsTest extends TestBase {
     Polygon p1 = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
     LineString emptyPoint = GEOMETRY_FACTORY.createLineString();
     Double actual = Functions.frechetDistance(p1, emptyPoint);
-    assertTrue(Double.isNaN(actual));
+    assertNull(actual);
   }
 
   @Test
@@ -4278,7 +4278,7 @@ public class FunctionsTest extends TestBase {
     Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 2, 2, 1, 2, 0, 4, 1, 1, 2));
     LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
     Double actual = Functions.hausdorffDistance(polygon, emptyLineString, 0.00001);
-    assertTrue(Double.isNaN(actual));
+    assertNull(actual);
   }
 
   @Test
@@ -4286,7 +4286,7 @@ public class FunctionsTest extends TestBase {
     Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 2, 2, 1, 2, 0, 4, 1, 1, 2));
     LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
     Double actual = Functions.hausdorffDistance(polygon, emptyLineString);
-    assertTrue(Double.isNaN(actual));
+    assertNull(actual);
   }
 
   @Test
