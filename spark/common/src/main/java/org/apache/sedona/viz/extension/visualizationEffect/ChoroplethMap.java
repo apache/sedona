@@ -159,31 +159,31 @@ public class ChoroplethMap extends VisualizationOperator {
   @Override
   protected JavaPairRDD<Integer, Color> GenerateColorMatrix()
   {
-  	//This Color Matrix version controls some too high pixel weights by dividing the max weight to 1/4.
-  	logger.debug("[VisualizationOperator][GenerateColorMatrix][Start]");
-  	final long maxWeight = this.distributedCountMatrix.max(new PixelCountComparator())._2;
-  	final long minWeight = 0;
-  	System.out.println("Max weight "+maxWeight);
-  	JavaPairRDD<Integer, Long> normalizedPixelWeights = this.distributedCountMatrix.mapToPair(new PairFunction<Tuple2<Integer,Long>, Integer, Long>(){
-  		@Override
-  		public Tuple2<Integer, Long> call(Tuple2<Integer, Long> pixelWeight) throws Exception {
-  			if(pixelWeight._2>maxWeight/20)
-  			{
-  				return new Tuple2<Integer, Long>(pixelWeight._1,new Long(255));
-  			}
-  			return new Tuple2<Integer, Long>(pixelWeight._1,(pixelWeight._2-minWeight)*255/(maxWeight/20-minWeight));
-  		}});
-  	this.distributedColorMatrix = normalizedPixelWeights.mapToPair(new PairFunction<Tuple2<Integer,Long>,Integer,Color>()
-  	{
+    //This Color Matrix version controls some too high pixel weights by dividing the max weight to 1/4.
+    logger.debug("[VisualizationOperator][GenerateColorMatrix][Start]");
+    final long maxWeight = this.distributedCountMatrix.max(new PixelCountComparator())._2;
+    final long minWeight = 0;
+    System.out.println("Max weight "+maxWeight);
+    JavaPairRDD<Integer, Long> normalizedPixelWeights = this.distributedCountMatrix.mapToPair(new PairFunction<Tuple2<Integer,Long>, Integer, Long>(){
+      @Override
+      public Tuple2<Integer, Long> call(Tuple2<Integer, Long> pixelWeight) throws Exception {
+        if(pixelWeight._2>maxWeight/20)
+        {
+          return new Tuple2<Integer, Long>(pixelWeight._1,new Long(255));
+        }
+        return new Tuple2<Integer, Long>(pixelWeight._1,(pixelWeight._2-minWeight)*255/(maxWeight/20-minWeight));
+      }});
+    this.distributedColorMatrix = normalizedPixelWeights.mapToPair(new PairFunction<Tuple2<Integer,Long>,Integer,Color>()
+    {
 
-  		@Override
-  		public Tuple2<Integer, Color> call(Tuple2<Integer, Long> pixelCount) throws Exception {
-  			Color pixelColor = EncodeColor(pixelCount._2.intValue());
-  			return new Tuple2<Integer,Color>(pixelCount._1,pixelColor);
-  		}
-  	});
-  	logger.debug("[VisualizationOperator][GenerateColorMatrix][Stop]");
-  	return this.distributedColorMatrix;
+      @Override
+      public Tuple2<Integer, Color> call(Tuple2<Integer, Long> pixelCount) throws Exception {
+        Color pixelColor = EncodeColor(pixelCount._2.intValue());
+        return new Tuple2<Integer,Color>(pixelCount._1,pixelColor);
+      }
+    });
+    logger.debug("[VisualizationOperator][GenerateColorMatrix][Stop]");
+    return this.distributedColorMatrix;
   }
   */
 

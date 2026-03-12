@@ -199,29 +199,29 @@ public class VisualizationPartitioner extends Partitioner implements Serializabl
 
     if(pixelCoordinateInPartition._1()<=0+photoFilterRadius || pixelCoordinateInPartition._1()>=partitionIntervalX-photoFilterRadius||pixelCoordinateInPartition._2()<=0+photoFilterRadius || pixelCoordinateInPartition._2()>=partitionIntervalY-photoFilterRadius)
     {
-    	// Second, calculate the partitions that the pixel duplicates should go to
-    	for (int x = -photoFilterRadius; x <= photoFilterRadius; x++) {
-    		for (int y = -photoFilterRadius; y <= photoFilterRadius; y++) {
-    			int neighborPixelX = pixelCoordinateInPartition._1()+x;
-    			int neighborPixelY = pixelCoordinateInPartition._2()+y;
-    			try {
-    				partitionId = RasterizationUtils.CalculatePartitionId(this.resolutionX,this.resolutionY,this.partitionX, this.partitionY, neighborPixelX, neighborPixelY);
-    				// This partition id is out of the image boundary
-    				if(partitionId<0) continue;
-    				if(!existingPartitionIds.contains(partitionId))
-    				{
-    					Pixel newPixelDuplicate = pixelDoubleTuple2._1();
-    					newPixelDuplicate.setCurrentPartitionId(partitionId);
-    					newPixelDuplicate.setDuplicate(true);
-    					existingPartitionIds.add(partitionId);
-    					duplicatePixelList.add(new Tuple2<Pixel, Double>(newPixelDuplicate, pixelDoubleTuple2._2()));
-    				}
-    			} catch (Exception e) {
-    				e.printStackTrace();
-    			}
+      // Second, calculate the partitions that the pixel duplicates should go to
+      for (int x = -photoFilterRadius; x <= photoFilterRadius; x++) {
+        for (int y = -photoFilterRadius; y <= photoFilterRadius; y++) {
+          int neighborPixelX = pixelCoordinateInPartition._1()+x;
+          int neighborPixelY = pixelCoordinateInPartition._2()+y;
+          try {
+            partitionId = RasterizationUtils.CalculatePartitionId(this.resolutionX,this.resolutionY,this.partitionX, this.partitionY, neighborPixelX, neighborPixelY);
+            // This partition id is out of the image boundary
+            if(partitionId<0) continue;
+            if(!existingPartitionIds.contains(partitionId))
+            {
+              Pixel newPixelDuplicate = pixelDoubleTuple2._1();
+              newPixelDuplicate.setCurrentPartitionId(partitionId);
+              newPixelDuplicate.setDuplicate(true);
+              existingPartitionIds.add(partitionId);
+              duplicatePixelList.add(new Tuple2<Pixel, Double>(newPixelDuplicate, pixelDoubleTuple2._2()));
+            }
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
 
-    		}
-    	}
+        }
+      }
 
     }*/
 
