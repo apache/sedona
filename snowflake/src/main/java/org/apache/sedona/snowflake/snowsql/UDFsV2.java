@@ -20,7 +20,6 @@ package org.apache.sedona.snowflake.snowsql;
 
 import java.io.IOException;
 import org.apache.sedona.common.Functions;
-import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.FunctionsProj4;
 import org.apache.sedona.common.Predicates;
 import org.apache.sedona.common.sphere.Haversine;
@@ -1402,7 +1401,7 @@ public class UDFsV2 {
       returnTypes = "Geometry")
   public static String ST_VoronoiPolygons(String geometry) {
     return GeometrySerde.serGeoJson(
-        FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserGeoJson(geometry), 0.0, null));
+        Functions.voronoiPolygons(GeometrySerde.deserGeoJson(geometry), 0.0, null));
   }
 
   @UDFAnnotations.ParamMeta(
@@ -1411,7 +1410,7 @@ public class UDFsV2 {
       returnTypes = "Geometry")
   public static String ST_VoronoiPolygons(String geometry, double tolerance) {
     return GeometrySerde.serGeoJson(
-        FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserGeoJson(geometry), tolerance, null));
+        Functions.voronoiPolygons(GeometrySerde.deserGeoJson(geometry), tolerance, null));
   }
 
   @UDFAnnotations.ParamMeta(
@@ -1420,7 +1419,7 @@ public class UDFsV2 {
       returnTypes = "Geometry")
   public static String ST_VoronoiPolygons(String geometry, double tolerance, String extent) {
     return GeometrySerde.serGeoJson(
-        FunctionsGeoTools.voronoiPolygons(
+        Functions.voronoiPolygons(
             GeometrySerde.deserGeoJson(geometry), tolerance, GeometrySerde.deserGeoJson(extent)));
   }
 
@@ -1535,7 +1534,7 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geomA", "geomB"},
       argTypes = {"Geometry", "Geometry"})
-  public static double ST_FrechetDistance(String geomA, String geomB) {
+  public static Double ST_FrechetDistance(String geomA, String geomB) {
     return Functions.frechetDistance(
         GeometrySerde.deserGeoJson(geomA), GeometrySerde.deserGeoJson(geomB));
   }

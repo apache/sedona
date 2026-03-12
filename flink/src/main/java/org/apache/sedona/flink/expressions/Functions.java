@@ -23,7 +23,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.annotation.InputGroup;
 import org.apache.flink.table.functions.ScalarFunction;
-import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.flink.GeometryArrayTypeSerializer;
 import org.apache.sedona.flink.GeometryTypeSerializer;
 import org.geotools.api.referencing.FactoryException;
@@ -3039,7 +3038,7 @@ public class Functions {
             Object extend) {
       Geometry geom = (Geometry) o;
       Geometry extendTo = (Geometry) extend;
-      return FunctionsGeoTools.voronoiPolygons(geom, tolerance, extendTo);
+      return org.apache.sedona.common.Functions.voronoiPolygons(geom, tolerance, extendTo);
     }
 
     @DataTypeHint(
@@ -3054,7 +3053,7 @@ public class Functions {
             Object o,
         @DataTypeHint("Double") Double tolerance) {
       Geometry geom = (Geometry) o;
-      return FunctionsGeoTools.voronoiPolygons(geom, tolerance, null);
+      return org.apache.sedona.common.Functions.voronoiPolygons(geom, tolerance, null);
     }
 
     @DataTypeHint(
@@ -3068,7 +3067,7 @@ public class Functions {
                 bridgedTo = Geometry.class)
             Object o) {
       Geometry geom = (Geometry) o;
-      return FunctionsGeoTools.voronoiPolygons(geom, 0, null);
+      return org.apache.sedona.common.Functions.voronoiPolygons(geom, 0, null);
     }
   }
 

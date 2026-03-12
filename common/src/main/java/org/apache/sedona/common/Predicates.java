@@ -56,7 +56,7 @@ public class Predicates {
   }
 
   public static boolean equals(Geometry leftGeometry, Geometry rightGeometry) {
-    return leftGeometry.symDifference(rightGeometry).isEmpty();
+    return leftGeometry.equalsTopo(rightGeometry);
   }
 
   public static boolean disjoint(Geometry leftGeometry, Geometry rightGeometry) {

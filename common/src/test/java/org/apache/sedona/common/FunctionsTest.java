@@ -3564,9 +3564,8 @@ public class FunctionsTest extends TestBase {
   public void testFrechetGeomEmpty() {
     Polygon p1 = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
     LineString emptyPoint = GEOMETRY_FACTORY.createLineString();
-    double expected = 0.0;
-    double actual = Functions.frechetDistance(p1, emptyPoint);
-    assertEquals(expected, actual, 1e-9);
+    Double actual = Functions.frechetDistance(p1, emptyPoint);
+    assertNull(actual);
   }
 
   @Test
@@ -4278,18 +4277,16 @@ public class FunctionsTest extends TestBase {
   public void hausdorffDistanceEmptyGeom() throws Exception {
     Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 2, 2, 1, 2, 0, 4, 1, 1, 2));
     LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
-    Double expected = 0.0;
     Double actual = Functions.hausdorffDistance(polygon, emptyLineString, 0.00001);
-    assertEquals(expected, actual);
+    assertNull(actual);
   }
 
   @Test
   public void hausdorffDistanceDefaultEmptyGeom() throws Exception {
     Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 2, 2, 1, 2, 0, 4, 1, 1, 2));
     LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
-    Double expected = 0.0;
     Double actual = Functions.hausdorffDistance(polygon, emptyLineString);
-    assertEquals(expected, actual);
+    assertNull(actual);
   }
 
   @Test
@@ -4367,26 +4364,26 @@ public class FunctionsTest extends TestBase {
   @Test
   public void voronoiPolygons() {
     MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0, 0, 2, 2));
-    Geometry actual1 = FunctionsGeoTools.voronoiPolygons(multiPoint, 0, null);
+    Geometry actual1 = Functions.voronoiPolygons(multiPoint, 0, null);
     assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))",
         actual1.toText());
 
-    Geometry actual2 = FunctionsGeoTools.voronoiPolygons(multiPoint, 30, null);
+    Geometry actual2 = Functions.voronoiPolygons(multiPoint, 30, null);
     assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 4, 4 -2, -2 -2)))", actual2.toText());
 
     Geometry buf = Functions.buffer(GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1)), 10);
-    Geometry actual3 = FunctionsGeoTools.voronoiPolygons(multiPoint, 0, buf);
+    Geometry actual3 = Functions.voronoiPolygons(multiPoint, 0, buf);
     assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 -9, -9 -9)), POLYGON ((-9 11, 11 11, 11 -9, -9 11)))",
         actual3.toText());
 
-    Geometry actual4 = FunctionsGeoTools.voronoiPolygons(multiPoint, 30, buf);
+    Geometry actual4 = Functions.voronoiPolygons(multiPoint, 30, buf);
     assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 11, 11 -9, -9 -9)))", actual4.toText());
 
-    Geometry actual5 = FunctionsGeoTools.voronoiPolygons(null, 0, null);
+    Geometry actual5 = Functions.voronoiPolygons(null, 0, null);
     assertEquals(null, actual5);
   }
 

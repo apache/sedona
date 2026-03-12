@@ -29,11 +29,9 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.geotools.util.factory.Hints;
-import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.operation.buffer.BufferOp;
 import org.locationtech.jts.operation.buffer.BufferParameters;
-import org.locationtech.jts.triangulate.VoronoiDiagramBuilder;
 
 public class FunctionsGeoTools {
 
@@ -172,23 +170,6 @@ public class FunctionsGeoTools {
                 + ex.getMessage());
       }
     }
-  }
-
-  public static Geometry voronoiPolygons(Geometry geom, double tolerance, Geometry extendTo) {
-    if (geom == null) {
-      return null;
-    }
-    VoronoiDiagramBuilder builder = new VoronoiDiagramBuilder();
-    builder.setSites(geom);
-    builder.setTolerance(tolerance);
-    if (extendTo != null) {
-      builder.setClipEnvelope(extendTo.getEnvelopeInternal());
-    } else {
-      Envelope e = geom.getEnvelopeInternal();
-      e.expandBy(Math.max(e.getWidth(), e.getHeight()));
-      builder.setClipEnvelope(e);
-    }
-    return builder.getDiagram(geom.getFactory());
   }
 
   public static Geometry bufferSpheroid(Geometry geometry, double radius, BufferParameters params)

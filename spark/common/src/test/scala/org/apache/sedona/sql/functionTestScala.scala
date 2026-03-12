@@ -3436,7 +3436,6 @@ class functionTestScala
         "'LINESTRING (1 2, 1 5, 2 6, 1 2)'",
         "'POINT (10 34)'",
         0.34) -> (33.24154027718932, 33.24154027718932),
-      ("'LINESTRING (1 0, 1 1, 2 1, 2 0, 1 0)'", "'POINT EMPTY'", 0.23) -> (0.0, 0.0),
       (
         "'POLYGON ((1 2, 2 1, 2 0, 4 1, 1 2))'",
         "'MULTIPOINT ((1 0), (40 10), (-10 -40))'",
@@ -3456,6 +3455,13 @@ class functionTestScala
       assert(expected == actual)
       assert(expectedDefaultValue == actualDefaultValue)
     }
+    // Empty geometries should return null
+    val dfEmpty = sparkSession.sql(
+      "SELECT ST_HausdorffDistance(ST_GeomFromWKT('LINESTRING (1 0, 1 1, 2 1, 2 0, 1 0)'), ST_GeomFromWKT('POINT EMPTY'), 0.23) AS dist")
+    assert(dfEmpty.take(1)(0).isNullAt(0))
+    val dfEmptyDefault = sparkSession.sql(
+      "SELECT ST_HausdorffDistance(ST_GeomFromWKT('LINESTRING (1 0, 1 1, 2 1, 2 0, 1 0)'), ST_GeomFromWKT('POINT EMPTY')) AS dist")
+    assert(dfEmptyDefault.take(1)(0).isNullAt(0))
   }
 
   it("Passed ST_CoordDim with 3D point") {
