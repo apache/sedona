@@ -730,10 +730,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def type(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError(
-            _not_implemented_error("type", "Returns numeric geometry type codes.")
-        )
+        return self.geom_type
 
     @property
     def length(self) -> pspd.Series:
@@ -984,12 +981,28 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def delaunay_triangles(self, tolerance=0.0, only_edges=False):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        spark_expr = stf.ST_DelaunayTriangles(
+            self.spark.column, tolerance, int(only_edges)
+        )
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
     def voronoi_polygons(self, tolerance=0.0, extend_to=None, only_edges=False):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        if only_edges:
+            raise NotImplementedError(
+                "Sedona does not support only_edges=True for voronoi_polygons."
+            )
+        if extend_to is not None:
+            raise NotImplementedError(
+                "Sedona does not support extend_to for voronoi_polygons."
+            )
+        spark_expr = stf.ST_VoronoiPolygons(self.spark.column, tolerance, extend_to)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
     @property
     def envelope(self) -> "GeoSeries":
@@ -1144,8 +1157,14 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def unary_union(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        import warnings
+
+        warnings.warn(
+            "The 'unary_union' attribute is deprecated, use the 'union_all()' method instead.",
+            FutureWarning,
+            stacklevel=2,
+        )
+        return self.union_all()
 
     def union_all(self, method="unary", grid_size=None) -> BaseGeometry:
         if grid_size is not None:
@@ -1202,9 +1221,18 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         return _to_bool(result)
 
-    def disjoint(self, other, align=None):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+    def disjoint(self, other, align=None) -> pspd.Series:
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_expr = stp.ST_Disjoint(F.col("L"), F.col("R"))
+        result = self._row_wise_operation(
+            spark_expr,
+            other_series,
+            align,
+            default_val=False,
+        )
+        return _to_bool(result)
 
     def intersects(
         self, other: Union["GeoSeries", BaseGeometry], align: Union[bool, None] = None
@@ -1671,7 +1699,37 @@ class GeoSeries(GeoFrame, pspd.Series):
     # GeoSeries-only (not in GeoDataFrame)
     @property
     def m(self) -> pspd.Series:
-        raise NotImplementedError("GeoSeries.m() is not implemented yet.")
+        """Return the m coordinate of point geometries in a GeoSeries
+
+        Returns
+        -------
+        pandas.Series
+
+        Examples
+        --------
+
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point
+        >>> s = GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
+        >>> s.m
+        0    NaN
+        1    NaN
+        2    NaN
+        dtype: float64
+
+        See Also
+        --------
+
+        GeoSeries.x
+        GeoSeries.y
+        GeoSeries.z
+
+        """
+        spark_col = stf.ST_M(self.spark.column)
+        return self._query_geometry_column(
+            spark_col,
+            returns_geom=False,
+        )
 
     # ============================================================================
     # CONSTRUCTION METHODS
