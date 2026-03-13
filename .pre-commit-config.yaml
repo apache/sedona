@@ -513,16 +513,3 @@ repos:
       - id: actionlint
         name: run actionlint
         description: actionlint is a static checker for GitHub Actions workflow files
-        args:
-          - -ignore
-          - 'SC2015'
-          - -ignore
-          - 'SC2061'
-          - -ignore
-          - 'SC2072'
-          - -ignore
-          - 'SC2086'
-          - -ignore
-          - 'SC2102'
-          - -ignore
-          - 'SC2155'
