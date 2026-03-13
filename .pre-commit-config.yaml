@@ -145,6 +145,16 @@ repos:
             docs/index\.md
           )$
       - id: insert-license
+        name: add license for all R Markdown files
+        description: automatically adds a licence header to all R Markdown files that don't have a license header
+        files: \.Rmd$
+        args:
+          - --comment-style
+          - '<!--||-->'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
         name: add license for all Makefile files
         description: automatically adds a licence header to all Makefiles that don't have a license header
         files: ^Makefile$
