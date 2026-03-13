@@ -20,9 +20,17 @@ exclude_dirs = ["python/tests"]
 skips = ["B101"]
 
 [tool.codespell]
-ignore-words = '.github/linters/codespell.txt'
-skip = './docs/image,./docs/usecases,./site,./spark/common/src/test/resources,./tools/maven/scalafmt.conf'
-
+ignore-words = ".github/linters/codespell.txt"
+skip = [
+    "docker/zeppelin/examples/*.zpln",
+    "docs/image/*",
+    "docs/usecases/*",
+    "docs-overrides/package-lock.json",
+    "site/*",
+    "spark/common/src/main/java/org/apache/sedona/sql/datasources/osmpbf/build/*",
+    "spark/common/src/test/resources/*",
+    "tools/maven/scalafmt.conf"
+]
 # ---------------------------------------------------------------------------
 # Root pyproject.toml used only for documentation & dev dependency management.
 # This is NOT a distributable Python package. Actual Sedona Python package is
