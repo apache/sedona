@@ -305,17 +305,6 @@ repos:
       - id: codespell
         name: run codespell
         description: check spelling with codespell
-        args: [--ignore-words=.github/linters/codespell.txt]
-        exclude: |
-          (?x)(
-            ^docker/zeppelin|
-            ^docs/image|
-            ^docs/usecases|
-            ^docs-overrides|
-            ^spark/common/src/test/resources|
-            ^tools/maven/scalafmt|
-            osmpbf/build
-          )
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0
     hooks:
