@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="150" viewBox="0 0 400 150">
+  <rect width="400" height="150" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_LineSubstring</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">startFraction=0.2, endFraction=0.7</text>
+  <polyline points="138.8,115.0 173.8,62.5 226.2,80.0 261.2,45.0" fill="none" stroke="#999" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polyline points="157.4,87.1 159.2,84.3 161.1,81.5 163.0,78.7 164.8,75.9 166.7,73.1 168.6,70.3 170.4,67.5 172.3,64.7 174.4,62.7 177.6,63.8 180.8,64.9 184.0,65.9 187.2,67.0 190.4,68.0 193.5,69.1 196.7,70.2 199.9,71.2 203.1,72.3 206.3,73.3 209.5,74.4 212.7,75.5 215.9,76.5 219.0,77.6 222.2,78.7 225.4,79.7" fill="none" stroke="#43A047" stroke-width="3"/>
+  <circle cx="157.4" cy="87.1" r="4" fill="#43A047" stroke="#fff" stroke-width="1"/>
+  <text x="157.4" y="79.1" font-family="monospace" font-size="9" fill="#43A047" text-anchor="middle">20%</text>
+  <circle cx="225.4" cy="79.7" r="4" fill="#43A047" stroke="#fff" stroke-width="1"/>
+  <text x="225.4" y="71.7" font-family="monospace" font-size="9" fill="#43A047" text-anchor="middle">70%</text>
+  <rect x="110" y="132" width="8" height="8" fill="rgba(153,153,153,0.2)" stroke="#999" stroke-width="1" stroke-dasharray="2,1"/>
+  <text x="122" y="140" font-family="monospace" font-size="9" fill="#999">Original</text>
+  <rect x="200" y="132" width="8" height="8" fill="rgba(67,160,71,0.2)" stroke="#43A047" stroke-width="1"/>
+  <text x="212" y="140" font-family="monospace" font-size="9" fill="#43A047">Substring</text>
+</svg>

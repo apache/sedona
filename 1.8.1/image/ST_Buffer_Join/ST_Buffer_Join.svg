@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="225" viewBox="0 0 400 225">
+  <rect width="400" height="225" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_Buffer</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Buffer join styles at polygon corners</text>
+  <path d="M 14.9 58.0 A 18 18 0 0 0 47.1 42.0 L 82.1 112.0 A 18 18 0 0 1 49.9 112.0 L 84.9 42.0 A 18 18 0 0 0 117.1 58.0 L 82.1 128.0 L 49.9 128.0 Z" fill="#2ecc71" fill-opacity="0.15" stroke="#2ecc71" stroke-width="1.5"/>
+  <polyline points="31,50 66,120 101,50" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+  <text x="66" y="160" font-family="monospace" font-size="10" fill="#2ecc71" text-anchor="middle" font-weight="bold">join=round</text>
+  <path d="M 147.9 58.0 A 18 18 0 0 0 180.1 42.0 L 199.0 79.8 L 217.9 42.0 A 18 18 0 0 0 250.1 58.0 L 215.1 128.0 L 182.9 128.0 Z" fill="#FF9800" fill-opacity="0.15" stroke="#FF9800" stroke-width="1.5"/>
+  <polyline points="164,50 199,120 234,50" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+  <text x="199" y="160" font-family="monospace" font-size="10" fill="#FF9800" text-anchor="middle" font-weight="bold">join=mitre</text>
+  <path d="M 280.9 58.0 A 18 18 0 0 0 313.1 42.0 L 348.1 112.0 L 315.9 112.0 L 350.9 42.0 A 18 18 0 0 0 383.1 58.0 L 348.1 128.0 L 315.9 128.0 Z" fill="#9C27B0" fill-opacity="0.15" stroke="#9C27B0" stroke-width="1.5"/>
+  <polyline points="297,50 332,120 367,50" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+  <text x="332" y="160" font-family="monospace" font-size="10" fill="#9C27B0" text-anchor="middle" font-weight="bold">join=bevel</text>
+  <text x="200" y="185" font-family="monospace" font-size="9" fill="#333" text-anchor="middle">Buffer style parameter: join=round|mitre|bevel</text>
+  <text x="200" y="210" font-family="monospace" font-size="9" fill="#666" text-anchor="middle">Controls how buffer corners are shaped at polygon vertices</text>
+</svg>

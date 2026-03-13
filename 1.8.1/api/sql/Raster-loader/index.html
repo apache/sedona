@@ -16,7 +16,7 @@
         <link rel="prev" href="../Visualization-SedonaKepler/">
       
       
-        <link rel="next" href="../Raster-aggregate-function/">
+        <link rel="next" href="../Raster-Functions/">
       
       
         
@@ -75,7 +75,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#step-1-load-raster-to-a-binary-dataframe" class="md-skip">
+        <a href="#loading-raster-using-the-raster-data-source" class="md-skip">
           Skip to content
         </a>
       
@@ -102,7 +102,7 @@ You're not viewing the latest stable version.
     
     
   <div style="background: #CA463A; color: white; text-align: center; padding: 0.5rem;">
-    <a href="setup/release-notes/" title="Announcement">🎉 Apache Sedona 1.8.1 is now available! Check out the new features and improvements.</a>
+    <a href="blog/2026/03/01/sedonadb-030-release/" title="Announcement">🌵SedonaDB (Rust) 0.3.0 is out now, featuring larger-than-memory spatial joins, and row-level CRS!</a>
   </div>
   
       <!--
@@ -2266,65 +2266,15 @@ You're not viewing the latest stable version.
   
   
   
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_1" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_4_1_2_1" id="__nav_3_4_1_2_1_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Geometry type
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_1_2_1">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Geometry type
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../Constructor/" class="md-nav__link">
+      <a href="../Geometry-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Constructor
+    Geometry Functions
   
 
     
@@ -2345,14 +2295,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../Function/" class="md-nav__link">
+      <a href="../geography/Geography-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Function
+    Geography Functions
   
 
     
@@ -2361,240 +2311,6 @@ You're not viewing the latest stable version.
   
 
       </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../AggregateFunction/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregate function
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_4_1_2_2" id="__nav_3_4_1_2_2_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Geography type
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_1_2_2">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Geography type
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../geography/Constructor/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Constructor
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../geography/Function/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Function
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../geography/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../geography/AggregateFunction/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregate function
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
     </li>
   
 
@@ -2643,6 +2359,34 @@ You're not viewing the latest stable version.
     
   
     Query optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../CRS-Transformation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRS Transformation
   
 
     
@@ -2758,10 +2502,10 @@ You're not viewing the latest stable version.
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_9" >
         
           
-          <label class="md-nav__link" for="__nav_3_4_1_2_8" id="__nav_3_4_1_2_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_4_1_2_9" id="__nav_3_4_1_2_9_label" tabindex="0">
             
   
   
@@ -2779,8 +2523,8 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_1_2_8">
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_1_2_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2977,6 +2721,29 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#loading-raster-using-the-raster-data-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading raster using the raster data source
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-raster-using-binaryfile-loader-deprecated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading raster using binaryFile loader (Deprecated)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Loading raster using binaryFile loader (Deprecated)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#step-1-load-raster-to-a-binary-dataframe" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2986,79 +2753,12 @@ You're not viewing the latest stable version.
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#step-2-create-a-raster-type-column" class="md-nav__link">
     <span class="md-ellipsis">
       
         Step 2: Create a raster type column
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 2: Create a raster type column">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#rs_fromarcinfoasciigrid" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        RS_FromArcInfoAsciiGrid
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rs_fromgeotiff" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        RS_FromGeoTiff
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rs_makeemptyraster" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        RS_MakeEmptyRaster
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rs_makeraster" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        RS_MakeRaster
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rs_fromnetcdf" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        RS_FromNetCDF
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rs_netcdfinfo" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        RS_NetCDFInfo
       
     </span>
   </a>
@@ -3086,14 +2786,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../Raster-aggregate-function/" class="md-nav__link">
+      <a href="../Raster-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Raster aggregates
+    Raster Functions
   
 
     
@@ -3142,34 +2842,6 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../Raster-operators/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Raster operators
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../Raster-map-algebra/" class="md-nav__link">
         
   
@@ -3178,34 +2850,6 @@ You're not viewing the latest stable version.
     
   
     Raster map algebra
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Raster-visualizer/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Raster visualization
   
 
     
@@ -4317,98 +3961,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../flink/Constructor/" class="md-nav__link">
+      <a href="../../flink/Geometry-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Constructor (Flink)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../flink/Function/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Function (Flink)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../flink/Aggregator/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregator (Flink)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../flink/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate (Flink)
+    Geometry Functions
   
 
     
@@ -4800,98 +4360,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../snowflake/vector-data/Constructor/" class="md-nav__link">
+      <a href="../../snowflake/vector-data/Geometry-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Constructor (Snowflake)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../snowflake/vector-data/Function/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Function (Snowflake)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../snowflake/vector-data/AggregateFunction/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregate Function (Snowflake)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../snowflake/vector-data/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate (Snowflake)
+    Geometry Functions
   
 
     
@@ -5834,6 +5310,29 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#loading-raster-using-the-raster-data-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading raster using the raster data source
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-raster-using-binaryfile-loader-deprecated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loading raster using binaryFile loader (Deprecated)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Loading raster using binaryFile loader (Deprecated)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#step-1-load-raster-to-a-binary-dataframe" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5843,79 +5342,12 @@ You're not viewing the latest stable version.
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#step-2-create-a-raster-type-column" class="md-nav__link">
     <span class="md-ellipsis">
       
         Step 2: Create a raster type column
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Step 2: Create a raster type column">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#rs_fromarcinfoasciigrid" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        RS_FromArcInfoAsciiGrid
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rs_fromgeotiff" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        RS_FromGeoTiff
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rs_makeemptyraster" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        RS_MakeEmptyRaster
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rs_makeraster" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        RS_MakeRaster
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rs_fromnetcdf" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        RS_FromNetCDF
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rs_netcdfinfo" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        RS_NetCDFInfo
       
     </span>
   </a>
@@ -5979,178 +5411,83 @@ You're not viewing the latest stable version.
 <p class="admonition-title">Note</p>
 <p>Sedona loader are available in Scala, Java and Python and have the same APIs.</p>
 </div>
+<h2 id="loading-raster-using-the-raster-data-source">Loading raster using the raster data source<a class="headerlink" href="#loading-raster-using-the-raster-data-source" title="Permanent link">&para;</a></h2>
+<p>The <code>raster</code> data source loads GeoTiff files and automatically splits them into smaller tiles. Each tile is a row in the resulting DataFrame stored in <code>Raster</code> format.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Scala</label><label for="__tabbed_1_2">Java</label><label for="__tabbed_1_3">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">rawDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/*.tif&quot;</span><span class="p">)</span>
+<span class="n">rawDf</span><span class="p">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s">&quot;rawdf&quot;</span><span class="p">)</span>
+<span class="n">rawDf</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">rawDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">&quot;/some/path/*.tif&quot;</span><span class="p">);</span>
+<span class="n">rawDf</span><span class="p">.</span><span class="na">createOrReplaceTempView</span><span class="p">(</span><span class="s">&quot;rawdf&quot;</span><span class="p">);</span>
+<span class="n">rawDf</span><span class="p">.</span><span class="na">show</span><span class="p">();</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">rawDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/some/path/*.tif&quot;</span><span class="p">)</span>
+<span class="n">rawDf</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;rawdf&quot;</span><span class="p">)</span>
+<span class="n">rawDf</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>The output will look like this:</p>
+<div class="highlight"><pre><span></span><code>+--------------------+---+---+----+
+|                rast|  x|  y|name|
++--------------------+---+---+----+
+|GridCoverage2D[&quot;g...|  0|  0| ...|
+|GridCoverage2D[&quot;g...|  1|  0| ...|
+|GridCoverage2D[&quot;g...|  2|  0| ...|
+...
+</code></pre></div>
+<p>The output contains the following columns:</p>
+<ul>
+<li><code>rast</code>: The raster data in <code>Raster</code> format.</li>
+<li><code>x</code>: The 0-based x-coordinate of the tile. This column is only present when retile is not disabled.</li>
+<li><code>y</code>: The 0-based y-coordinate of the tile. This column is only present when retile is not disabled.</li>
+<li><code>name</code>: The name of the raster file.</li>
+</ul>
+<p>The size of the tile is determined by the internal tiling scheme of the raster data. It is recommended to use <a href="https://www.cogeo.org/">Cloud Optimized GeoTIFF (COG)</a> format for raster data since they usually organize pixel data as square tiles. You can also disable automatic tiling using <code>option("retile", "false")</code>, or specify the tile size manually using options such as <code>option("tileWidth", "256")</code> and <code>option("tileHeight", "256")</code>.</p>
+<p>The options for the <code>raster</code> data source are as follows:</p>
+<ul>
+<li><code>retile</code>: Whether to enable tiling. Default is <code>true</code>.</li>
+<li><code>tileWidth</code>: The width of the tile. If not specified, the size of internal tiles will be used.</li>
+<li><code>tileHeight</code>: The height of the tile. If not specified, will use <code>tileWidth</code> if <code>tileWidth</code> is explicitly set, otherwise the size of internal tiles will be used.</li>
+<li><code>padWithNoData</code>: Pad the right and bottom of the tile with NODATA values if the tile is smaller than the specified tile size. Default is <code>false</code>.</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the internal tiling scheme of raster data is not friendly for tiling, the <code>raster</code> data source will throw an error, and you can disable automatic tiling using <code>option("retile", "false")</code>, or specify the tile size manually to workaround this issue. A better solution is to translate the raster data into COG format using <code>gdal_translate</code> or other tools.</p>
+</div>
+<p>The <code>raster</code> data source also works with Spark generic file source options, such as <code>option("pathGlobFilter", "*.tif*")</code> and <code>option("recursiveFileLookup", "true")</code>. For instance, you can load all the <code>.tif</code> files recursively in a directory using</p>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;recursiveFileLookup&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
+    <span class="s2">&quot;pathGlobFilter&quot;</span><span class="p">,</span> <span class="s2">&quot;*.tif*&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path_to_raster_data_folder</span><span class="p">)</span>
+</code></pre></div>
+<p>One difference from other file source loaders is that when the loaded path ends with <code>/</code>, the <code>raster</code> data source will look up raster files in the directory and all its subdirectories recursively. This is equivalent to specifying a path without trailing <code>/</code> and setting <code>option("recursiveFileLookup", "true")</code>.</p>
+<h2 id="loading-raster-using-binaryfile-loader-deprecated">Loading raster using binaryFile loader (Deprecated)<a class="headerlink" href="#loading-raster-using-binaryfile-loader-deprecated" title="Permanent link">&para;</a></h2>
 <p>The raster loader of Sedona leverages Spark built-in binary data source and works with several RS constructors to produce Raster type. Each raster is a row in the resulting DataFrame and stored in a <code>Raster</code> format.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>After loading rasters, you can quickly visualize them in a Jupyter notebook using <code>SedonaUtils.display_image(df)</code>. It automatically detects raster columns and renders them as images. See <a href="../Raster-Functions/#raster-output">Raster visualizer docs</a> for details.</p>
+</div>
 <p>By default, these functions uses lon/lat order since <code>v1.5.0</code>. Before, it used lat/lon order.</p>
-<h2 id="step-1-load-raster-to-a-binary-dataframe">Step 1: Load raster to a binary DataFrame<a class="headerlink" href="#step-1-load-raster-to-a-binary-dataframe" title="Permanent link">&para;</a></h2>
+<h3 id="step-1-load-raster-to-a-binary-dataframe">Step 1: Load raster to a binary DataFrame<a class="headerlink" href="#step-1-load-raster-to-a-binary-dataframe" title="Permanent link">&para;</a></h3>
 <p>You can load any type of raster data using the code below. Then use the RS constructors below to create a Raster DataFrame.</p>
 <div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;binaryFile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/*.asc&quot;</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="step-2-create-a-raster-type-column">Step 2: Create a raster type column<a class="headerlink" href="#step-2-create-a-raster-type-column" title="Permanent link">&para;</a></h2>
-<h3 id="rs_fromarcinfoasciigrid">RS_FromArcInfoAsciiGrid<a class="headerlink" href="#rs_fromarcinfoasciigrid" title="Permanent link">&para;</a></h3>
-<p>Introduction: Returns a raster geometry from an Arc Info Ascii Grid file.</p>
-<p>Format: <code>RS_FromArcInfoAsciiGrid(asc: ARRAY[Byte])</code></p>
-<p>Since: <code>v1.4.0</code></p>
-<p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;binaryFile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/*.asc&quot;</span><span class="p">)</span>
-<span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;RS_FromArcInfoAsciiGrid(content)&quot;</span><span class="p">))</span>
-</code></pre></div>
-<h3 id="rs_fromgeotiff">RS_FromGeoTiff<a class="headerlink" href="#rs_fromgeotiff" title="Permanent link">&para;</a></h3>
-<p>Introduction: Returns a raster geometry from a GeoTiff file.</p>
-<p>Format: <code>RS_FromGeoTiff(asc: ARRAY[Byte])</code></p>
-<p>Since: <code>v1.4.0</code></p>
-<p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;binaryFile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/*.tiff&quot;</span><span class="p">)</span>
-<span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;RS_FromGeoTiff(content)&quot;</span><span class="p">))</span>
-</code></pre></div>
-<h3 id="rs_makeemptyraster">RS_MakeEmptyRaster<a class="headerlink" href="#rs_makeemptyraster" title="Permanent link">&para;</a></h3>
-<p>Introduction: Returns an empty raster geometry. Every band in the raster is initialized to <code>0.0</code>.</p>
-<p>Since: <code>v1.5.0</code></p>
-<p>Format:</p>
-<div class="highlight"><pre><span></span><code>RS_MakeEmptyRaster(numBands: Integer, bandDataType: String = &#39;D&#39;, width: Integer, height: Integer, upperleftX: Double, upperleftY: Double, cellSize: Double)
-</code></pre></div>
+<h3 id="step-2-create-a-raster-type-column">Step 2: Create a raster type column<a class="headerlink" href="#step-2-create-a-raster-type-column" title="Permanent link">&para;</a></h3>
+<p>Use one of the following raster constructors to create a Raster DataFrame:</p>
 <ul>
-<li>NumBands: The number of bands in the raster. If not specified, the raster will have a single band.</li>
-<li>BandDataType: Optional parameter specifying the data types of all the bands in the created raster.
-Accepts one of:<ol>
-<li>"D" - 64 bits Double</li>
-<li>"F" - 32 bits Float</li>
-<li>"I" - 32 bits signed Integer</li>
-<li>"S" - 16 bits signed Short</li>
-<li>"US" - 16 bits unsigned Short</li>
-<li>"B" - 8 bits unsigned Byte</li>
-</ol>
-</li>
-<li>Width: The width of the raster in pixels.</li>
-<li>Height: The height of the raster in pixels.</li>
-<li>UpperleftX: The X coordinate of the upper left corner of the raster, in terms of the CRS units.</li>
-<li>UpperleftY: The Y coordinate of the upper left corner of the raster, in terms of the CRS units.</li>
-<li>Cell Size (pixel size): The size of the cells in the raster, in terms of the CRS units.</li>
+<li><a href="../Raster-Constructors/RS_FromArcInfoAsciiGrid/">RS_FromArcInfoAsciiGrid</a> - Create raster from Arc Info Ascii Grid files</li>
+<li><a href="../Raster-Constructors/RS_FromGeoTiff/">RS_FromGeoTiff</a> - Create raster from GeoTiff files</li>
+<li><a href="../Raster-Constructors/RS_MakeEmptyRaster/">RS_MakeEmptyRaster</a> - Create an empty raster geometry</li>
 </ul>
-<p>It uses the default Cartesian coordinate system.</p>
-<p>Format:</p>
-<div class="highlight"><pre><span></span><code>RS_MakeEmptyRaster(numBands: Integer, bandDataType: String = &#39;D&#39;, width: Integer, height: Integer, upperleftX: Double, upperleftY: Double, scaleX: Double, scaleY: Double, skewX: Double, skewY: Double, srid: Integer)
-</code></pre></div>
-<ul>
-<li>NumBands: The number of bands in the raster. If not specified, the raster will have a single band.</li>
-<li>BandDataType: Optional parameter specifying the data types of all the bands in the created raster.
-Accepts one of:<ol>
-<li>"D" - 64 bits Double</li>
-<li>"F" - 32 bits Float</li>
-<li>"I" - 32 bits signed Integer</li>
-<li>"S" - 16 bits signed Short</li>
-<li>"US" - 16 bits unsigned Short</li>
-<li>"B" - 8 bits Byte</li>
-</ol>
-</li>
-<li>Width: The width of the raster in pixels.</li>
-<li>Height: The height of the raster in pixels.</li>
-<li>UpperleftX: The X coordinate of the upper left corner of the raster, in terms of the CRS units.</li>
-<li>UpperleftY: The Y coordinate of the upper left corner of the raster, in terms of the CRS units.</li>
-<li>ScaleX: The scaling factor of the cells on the X axis</li>
-<li>ScaleY: The scaling factor of the cells on the Y axis</li>
-<li>SkewX: The skew of the raster on the X axis, effectively tilting them in the horizontal direction</li>
-<li>SkewY: The skew of the raster on the Y axis, effectively tilting them in the vertical direction</li>
-<li>SRID: The SRID of the raster. Use 0 if you want to use the default Cartesian coordinate system. Use 4326 if you want to use WGS84.</li>
-</ul>
-<p>For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the <a href="../Raster-affine-transformation/">Affine Transformations</a> section.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If any other value than the accepted values for the bandDataType is provided, RS_MakeEmptyRaster defaults to double as the data type for the raster.</p>
-</div>
-<p>Spark SQL example 1 (with 2 bands):</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
-</code></pre></div>
-<p>Output:</p>
-<div class="highlight"><pre><span></span><code>+--------------------------------------------+
-|rs_makeemptyraster(2, 10, 10, 0.0, 0.0, 1.0)|
-+--------------------------------------------+
-|                        GridCoverage2D[&quot;g...|
-+--------------------------------------------+
-</code></pre></div>
-<p>Spark SQL example 2 (with 2 bands and dataType):</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;I&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">Create</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">raster</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="nb">integer</span><span class="w"> </span><span class="n">datatype</span>
-</code></pre></div>
-<p>Output:</p>
-<div class="highlight"><pre><span></span><code>+--------------------------------------------+
-|rs_makeemptyraster(2, 10, 10, 0.0, 0.0, 1.0)|
-+--------------------------------------------+
-|                        GridCoverage2D[&quot;g...|
-+--------------------------------------------+
-</code></pre></div>
-<p>Spark SQL example 3 (with 2 bands, scale, skew, and SRID):</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">)</span>
-</code></pre></div>
-<p>Output:</p>
-<div class="highlight"><pre><span></span><code>+------------------------------------------------------------------+
-|rs_makeemptyraster(2, 10, 10, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 4326)|
-+------------------------------------------------------------------+
-|                                              GridCoverage2D[&quot;g...|
-+------------------------------------------------------------------+
-</code></pre></div>
-<p>Spark SQL example 4 (with 2 bands, scale, skew, and SRID):</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;F&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">Create</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">raster</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="nb">float</span><span class="w"> </span><span class="n">datatype</span>
-</code></pre></div>
-<p>Output:</p>
-<div class="highlight"><pre><span></span><code>+------------------------------------------------------------------+
-|rs_makeemptyraster(2, 10, 10, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 4326)|
-+------------------------------------------------------------------+
-|                                              GridCoverage2D[&quot;g...|
-+------------------------------------------------------------------+
-</code></pre></div>
-<h3 id="rs_makeraster">RS_MakeRaster<a class="headerlink" href="#rs_makeraster" title="Permanent link">&para;</a></h3>
-<p>Introduction: Creates a raster from the given array of pixel values. The width, height, geo-reference information, and
-the CRS will be taken from the given reference raster. The data type of the resulting raster will be DOUBLE and the
-number of bands of the resulting raster will be <code>data.length / (refRaster.width * refRaster.height)</code>.</p>
-<p>Since: <code>v1.6.0</code></p>
-<p>Format: <code>RS_MakeRaster(refRaster: Raster, bandDataType: String, data: ARRAY[Double])</code></p>
-<ul>
-<li>refRaster: The reference raster from which the width, height, geo-reference information, and the CRS will be taken.</li>
-<li>bandDataType: The data type of the bands in the resulting raster. Please refer to the <code>RS_MakeEmptyRaster</code> function for the accepted values.</li>
-<li>data: The array of pixel values. The size of the array cannot be 0, and should be multiple of width * height of the reference raster.</li>
-</ul>
-<p>SQL example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">WITH</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">rast</span><span class="p">)</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="n">RS_AsMatrix</span><span class="p">(</span><span class="n">RS_MakeRaster</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="nb">ARRAY</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">)))</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">r</span>
-</code></pre></div>
-<p>Output:</p>
-<div class="highlight"><pre><span></span><code>+------------------------------------------------------------+
-|rs_asmatrix(rs_makeraster(rast, D, array(1, 2, 3, 4, 5, 6)))|
-+------------------------------------------------------------+
-||1.0  2.0  3.0|\n|4.0  5.0  6.0|\n                          |
-+------------------------------------------------------------+
-</code></pre></div>
-<h3 id="rs_fromnetcdf">RS_FromNetCDF<a class="headerlink" href="#rs_fromnetcdf" title="Permanent link">&para;</a></h3>
-<p>Introduction: Returns a raster geometry representing the given record variable short name from a NetCDF file.
-This API reads the array data of the record variable <em>in memory</em> along with all its dimensions
-Since the netCDF format has many variants, the reader might not work for your test case, if that is so, please report this using the public forums.</p>
-<p>This API has been tested for netCDF classic (NetCDF 1, 2, 5) and netCDF4/HDF5 files.</p>
-<p>This API requires the name of the record variable. It is assumed that a variable of the given name exists, and its last 2 dimensions are 'lat' and 'lon' dimensions <em>respectively</em>.</p>
-<p>If this assumption does not hold true for your case, you can choose to pass the lonDimensionName and latDimensionName explicitly.</p>
-<p>You can use <a href="#rs_netcdfinfo">RS_NetCDFInfo</a> to get the details of the passed netCDF file (variables and its dimensions).</p>
-<p>Format 1: <code>RS_FromNetCDF(netCDF: ARRAY[Byte], recordVariableName: String)</code></p>
-<p>Format 2: <code>RS_FromNetCDF(netCDF: ARRAY[Byte], recordVariableName: String, lonDimensionName: String, latDimensionName: String)</code></p>
-<p>Since: <code>v1.5.1</code></p>
-<p>Spark Example:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;binaryFile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/test.nc&quot;</span><span class="p">)</span>
-<span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;RS_FromNetCDF(content, &#39;O3&#39;)&quot;</span><span class="p">))</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;binaryFile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/test.nc&quot;</span><span class="p">)</span>
-<span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">.</span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;RS_FromNetCDF(content, &#39;O3&#39;, &#39;lon&#39;, &#39;lat&#39;)&quot;</span><span class="p">))</span>
-</code></pre></div>
-<h3 id="rs_netcdfinfo">RS_NetCDFInfo<a class="headerlink" href="#rs_netcdfinfo" title="Permanent link">&para;</a></h3>
-<p>Introduction: Returns a string containing names of the variables in a given netCDF file along with its dimensions.</p>
-<p>Format: <code>RS_NetCDFInfo(netCDF: ARRAY[Byte])</code></p>
-<p>Since: <code>1.5.1</code></p>
-<p>Spark Example:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;binaryFile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/test.nc&quot;</span><span class="p">)</span>
-<span class="n">recordInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">&quot;RS_NetCDFInfo(content) as record_info&quot;</span><span class="p">).</span><span class="n">first</span><span class="p">().</span><span class="n">getString</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">print</span><span class="p">(</span><span class="n">recordInfo</span><span class="p">)</span>
-</code></pre></div>
-<p>Output:</p>
-<div class="highlight"><pre><span></span><code>O3(time=2, z=2, lat=48, lon=80)
-
-NO2(time=2, z=2, lat=48, lon=80)
-</code></pre></div>
+<p>See the full list of <a href="../Raster-Functions/#raster-constructors">Raster Constructors</a> for more options.</p>
 
 
 
@@ -6171,7 +5508,7 @@ NO2(time=2, z=2, lat=48, lon=80)
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47 UTC">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 27, 2026 06:37:29 UTC">February 27, 2026 06:37:29</span>
   </span>
 
     

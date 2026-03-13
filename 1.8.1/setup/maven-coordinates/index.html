@@ -102,7 +102,7 @@ You're not viewing the latest stable version.
     
     
   <div style="background: #CA463A; color: white; text-align: center; padding: 0.5rem;">
-    <a href="setup/release-notes/" title="Announcement">🎉 Apache Sedona 1.8.1 is now available! Check out the new features and improvements.</a>
+    <a href="blog/2026/03/01/sedonadb-030-release/" title="Announcement">🌵SedonaDB (Rust) 0.3.0 is out now, featuring larger-than-memory spatial joins, and row-level CRS!</a>
   </div>
   
       <!--
@@ -2389,65 +2389,15 @@ You're not viewing the latest stable version.
   
   
   
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_1" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_4_1_2_1" id="__nav_3_4_1_2_1_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Geometry type
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_1_2_1">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Geometry type
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../../api/sql/Constructor/" class="md-nav__link">
+      <a href="../../api/sql/Geometry-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Constructor
+    Geometry Functions
   
 
     
@@ -2468,14 +2418,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../api/sql/Function/" class="md-nav__link">
+      <a href="../../api/sql/geography/Geography-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Function
+    Geography Functions
   
 
     
@@ -2484,240 +2434,6 @@ You're not viewing the latest stable version.
   
 
       </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/sql/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/sql/AggregateFunction/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregate function
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_4_1_2_2" id="__nav_3_4_1_2_2_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Geography type
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_1_2_2">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Geography type
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/sql/geography/Constructor/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Constructor
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/sql/geography/Function/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Function
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/sql/geography/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/sql/geography/AggregateFunction/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregate function
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
     </li>
   
 
@@ -2766,6 +2482,34 @@ You're not viewing the latest stable version.
     
   
     Query optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/CRS-Transformation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRS Transformation
   
 
     
@@ -2881,10 +2625,10 @@ You're not viewing the latest stable version.
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_9" >
         
           
-          <label class="md-nav__link" for="__nav_3_4_1_2_8" id="__nav_3_4_1_2_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_4_1_2_9" id="__nav_3_4_1_2_9_label" tabindex="0">
             
   
   
@@ -2902,8 +2646,8 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_1_2_8">
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_1_2_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3070,14 +2814,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../api/sql/Raster-aggregate-function/" class="md-nav__link">
+      <a href="../../api/sql/Raster-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Raster aggregates
+    Raster Functions
   
 
     
@@ -3126,34 +2870,6 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../api/sql/Raster-operators/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Raster operators
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../api/sql/Raster-map-algebra/" class="md-nav__link">
         
   
@@ -3162,34 +2878,6 @@ You're not viewing the latest stable version.
     
   
     Raster map algebra
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/sql/Raster-visualizer/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Raster visualization
   
 
     
@@ -4301,98 +3989,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../api/flink/Constructor/" class="md-nav__link">
+      <a href="../../api/flink/Geometry-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Constructor (Flink)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/flink/Function/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Function (Flink)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/flink/Aggregator/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregator (Flink)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/flink/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate (Flink)
+    Geometry Functions
   
 
     
@@ -4784,98 +4388,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../api/snowflake/vector-data/Constructor/" class="md-nav__link">
+      <a href="../../api/snowflake/vector-data/Geometry-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Constructor (Snowflake)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/snowflake/vector-data/Function/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Function (Snowflake)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/snowflake/vector-data/AggregateFunction/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregate Function (Snowflake)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/snowflake/vector-data/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate (Snowflake)
+    Geometry Functions
   
 
     
@@ -5956,7 +5476,7 @@ You're not viewing the latest stable version.
 <p>Apache Sedona provides different packages for each supported version of Spark.</p>
 <p>Please use the artifact with Spark major.minor version in the artifact name. For example, for Spark 3.4, the artifacts to use should be <code>sedona-spark-shaded-3.4_2.12</code>.</p>
 <p>If you are using the Scala 2.13 builds of Spark, please use the corresponding packages for Scala 2.13, which are suffixed by <code>_2.13</code>.</p>
-<p>The optional GeoTools library is required if you want to use CRS transformation, ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.</p>
+<p>The optional GeoTools library is required if you want to use raster operators. Vector CRS transformation (ST_Transform) now uses the built-in proj4sedona library by default and does not require GeoTools. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.</p>
 <div class="admonition abstract">
 <p class="admonition-title">Sedona with Apache Spark and Scala 2.12</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Spark 3.4 and Scala 2.12</label><label for="__tabbed_1_2">Spark 3.5 and Scala 2.12</label><label for="__tabbed_1_3">Spark 4.0 and Scala 2.12</label></div>
@@ -6008,7 +5528,7 @@ You're not viewing the latest stable version.
 </div>
 <div class="admonition abstract">
 <p class="admonition-title">Sedona with Apache Spark and Scala 2.13</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Spark 3.4 and Scala 2.13</label><label for="__tabbed_2_2">Spark 3.5 and Scala 2.13</label><label for="__tabbed_2_3">Spark 4.0 and Scala 2.13</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Spark 3.4 and Scala 2.13</label><label for="__tabbed_2_2">Spark 3.5 and Scala 2.13</label><label for="__tabbed_2_3">Spark 4.0 and Scala 2.13</label><label for="__tabbed_2_4">Spark 4.1 and Scala 2.13</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
@@ -6042,6 +5562,20 @@ You're not viewing the latest stable version.
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
 <span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.apache.sedona<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-shaded-4.0_2.13<span class="nt">&lt;/artifactId&gt;</span>
+<span class="w">  </span><span class="nt">&lt;version&gt;</span>1.8.1<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+<span class="cm">&lt;!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
+<span class="nt">&lt;dependency&gt;</span>
+<span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
+<span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
+<span class="w">    </span><span class="nt">&lt;version&gt;</span>1.8.1-33.1<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
+<span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.apache.sedona<span class="nt">&lt;/groupId&gt;</span>
+<span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-shaded-4.1_2.13<span class="nt">&lt;/artifactId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;version&gt;</span>1.8.1<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
 <span class="cm">&lt;!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
@@ -6105,7 +5639,7 @@ You're not viewing the latest stable version.
 <p>Apache Sedona provides different packages for each supported version of Spark.</p>
 <p>Please use the artifacts with Spark major.minor version in the artifact name. For example, for Spark 3.4, the artifacts to use should be <code>sedona-spark-3.4_2.12</code>.</p>
 <p>If you are using the Scala 2.13 builds of Spark, please use the corresponding packages for Scala 2.13, which are suffixed by <code>_2.13</code>.</p>
-<p>The optional GeoTools library is required if you want to use CRS transformation, ShapefileReader or GeoTiff reader. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license, so we cannot package it in Sedona official release.</p>
+<p>The optional GeoTools library is required if you want to use raster operators. Vector CRS transformation (ST_Transform) now uses the built-in proj4sedona library by default and does not require GeoTools. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license, so we cannot package it in Sedona official release.</p>
 <div class="admonition abstract">
 <p class="admonition-title">Sedona with Apache Spark and Scala 2.12</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Spark 3.4 and Scala 2.12</label><label for="__tabbed_5_2">Spark 3.5 and Scala 2.12</label><label for="__tabbed_5_3">Spark 4.0 and Scala 2.12</label></div>
@@ -6154,7 +5688,7 @@ You're not viewing the latest stable version.
 </div>
 <div class="admonition abstract">
 <p class="admonition-title">Sedona with Apache Spark and Scala 2.13</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Spark 3.4 and Scala 2.13</label><label for="__tabbed_6_2">Spark 3.5 and Scala 2.13</label><label for="__tabbed_6_3">Spark 4.0 and Scala 2.13</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:4"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><input id="__tabbed_6_4" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Spark 3.4 and Scala 2.13</label><label for="__tabbed_6_2">Spark 3.5 and Scala 2.13</label><label for="__tabbed_6_3">Spark 4.0 and Scala 2.13</label><label for="__tabbed_6_4">Spark 4.1 and Scala 2.13</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
@@ -6186,6 +5720,19 @@ You're not viewing the latest stable version.
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
 <span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.apache.sedona<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-4.0_2.13<span class="nt">&lt;/artifactId&gt;</span>
+<span class="w">  </span><span class="nt">&lt;version&gt;</span>1.8.1<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+<span class="nt">&lt;dependency&gt;</span>
+<span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
+<span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
+<span class="w">    </span><span class="nt">&lt;version&gt;</span>1.8.1-33.1<span class="nt">&lt;/version&gt;</span>
+<span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
+<span class="w">  </span><span class="nt">&lt;groupId&gt;</span>org.apache.sedona<span class="nt">&lt;/groupId&gt;</span>
+<span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-4.1_2.13<span class="nt">&lt;/artifactId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;version&gt;</span>1.8.1<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
 <span class="nt">&lt;dependency&gt;</span>
@@ -6292,7 +5839,7 @@ You're not viewing the latest stable version.
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 8, 2025 04:31:05 UTC">September 8, 2025 04:31:05</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 13, 2026 05:06:13 UTC">March 13, 2026 05:06:13</span>
   </span>
 
     

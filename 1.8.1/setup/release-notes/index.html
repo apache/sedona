@@ -102,7 +102,7 @@ You're not viewing the latest stable version.
     
     
   <div style="background: #CA463A; color: white; text-align: center; padding: 0.5rem;">
-    <a href="setup/release-notes/" title="Announcement">🎉 Apache Sedona 1.8.1 is now available! Check out the new features and improvements.</a>
+    <a href="blog/2026/03/01/sedonadb-030-release/" title="Announcement">🌵SedonaDB (Rust) 0.3.0 is out now, featuring larger-than-memory spatial joins, and row-level CRS!</a>
   </div>
   
       <!--
@@ -2257,65 +2257,15 @@ You're not viewing the latest stable version.
   
   
   
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_1" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_4_1_2_1" id="__nav_3_4_1_2_1_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Geometry type
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_1_2_1">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Geometry type
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../../api/sql/Constructor/" class="md-nav__link">
+      <a href="../../api/sql/Geometry-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Constructor
+    Geometry Functions
   
 
     
@@ -2336,14 +2286,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../api/sql/Function/" class="md-nav__link">
+      <a href="../../api/sql/geography/Geography-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Function
+    Geography Functions
   
 
     
@@ -2352,240 +2302,6 @@ You're not viewing the latest stable version.
   
 
       </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/sql/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/sql/AggregateFunction/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregate function
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_4_1_2_2" id="__nav_3_4_1_2_2_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Geography type
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_1_2_2">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Geography type
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/sql/geography/Constructor/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Constructor
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/sql/geography/Function/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Function
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/sql/geography/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/sql/geography/AggregateFunction/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregate function
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
     </li>
   
 
@@ -2634,6 +2350,34 @@ You're not viewing the latest stable version.
     
   
     Query optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/CRS-Transformation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRS Transformation
   
 
     
@@ -2749,10 +2493,10 @@ You're not viewing the latest stable version.
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_9" >
         
           
-          <label class="md-nav__link" for="__nav_3_4_1_2_8" id="__nav_3_4_1_2_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_4_1_2_9" id="__nav_3_4_1_2_9_label" tabindex="0">
             
   
   
@@ -2770,8 +2514,8 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_1_2_8">
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_1_2_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2938,14 +2682,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../api/sql/Raster-aggregate-function/" class="md-nav__link">
+      <a href="../../api/sql/Raster-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Raster aggregates
+    Raster Functions
   
 
     
@@ -2994,34 +2738,6 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../api/sql/Raster-operators/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Raster operators
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../api/sql/Raster-map-algebra/" class="md-nav__link">
         
   
@@ -3030,34 +2746,6 @@ You're not viewing the latest stable version.
     
   
     Raster map algebra
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/sql/Raster-visualizer/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Raster visualization
   
 
     
@@ -4169,98 +3857,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../api/flink/Constructor/" class="md-nav__link">
+      <a href="../../api/flink/Geometry-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Constructor (Flink)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/flink/Function/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Function (Flink)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/flink/Aggregator/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregator (Flink)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/flink/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate (Flink)
+    Geometry Functions
   
 
     
@@ -4652,98 +4256,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../api/snowflake/vector-data/Constructor/" class="md-nav__link">
+      <a href="../../api/snowflake/vector-data/Geometry-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Constructor (Snowflake)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/snowflake/vector-data/Function/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Function (Snowflake)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/snowflake/vector-data/AggregateFunction/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregate Function (Snowflake)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/snowflake/vector-data/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate (Snowflake)
+    Geometry Functions
   
 
     
@@ -10007,7 +9527,7 @@ You're not viewing the latest stable version.
 <li>Flexible map algebra equations: <code>SELECT RS_MapAlgebra(rast, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);') as ndvi FROM raster_table</code></li>
 </ul>
 </li>
-<li>Add native support of <a href="../../api/sql/Function/#st_h3celldistance">Uber H3 functions</a> in Sedona Spark and Sedona Flink.</li>
+<li>Add native support of <a href="../../api/sql/Geometry-Functions/#spatial-indexing">Uber H3 functions</a> in Sedona Spark and Sedona Flink.</li>
 <li>Add SedonaKepler and SedonaPyDeck for <a href="../../tutorial/sql/#visualize-query-results">interactive map visualization</a> on Sedona Spark.</li>
 </ul>
 <h3 id="bug_9">Bug<a class="headerlink" href="#bug_9" title="Permanent link">&para;</a></h3>
@@ -10234,7 +9754,7 @@ You're not viewing the latest stable version.
 <p>Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.</p>
 <h3 id="highlights_8">Highlights<a class="headerlink" href="#highlights_8" title="Permanent link">&para;</a></h3>
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Sedona Spark</strong> More raster functions and bridge RasterUDT and Map Algebra operators. See <a href="../../api/sql/Raster-operators/#raster-based-operators">Raster based operators</a> and <a href="../../api/sql/Raster-operators/#raster-to-map-algebra-operators">Raster to Map Algebra operators</a>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Sedona Spark</strong> More raster functions and bridge RasterUDT and Map Algebra operators. See <a href="../../api/sql/Raster-Functions/#raster-operators">Raster based operators</a> and <a href="../../api/sql/Raster-Functions/#raster-map-algebra-operators">Raster to Map Algebra operators</a>.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <strong>Sedona Spark &amp; Flink</strong> Added geodesic / geography functions:<ul>
 <li>ST_DistanceSphere</li>
 <li>ST_DistanceSpheroid</li>
@@ -10893,7 +10413,7 @@ You're not viewing the latest stable version.
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="January 5, 2026 21:55:42 UTC">January 5, 2026 21:55:42</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 27, 2026 06:37:29 UTC">February 27, 2026 06:37:29</span>
   </span>
 
     

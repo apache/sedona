@@ -1211,6 +1211,36 @@
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_GeoHash&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">precision</span><span class="p">))</span></div>
 
 
+<div class="viewcode-block" id="ST_GeoHashNeighbors"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_GeoHashNeighbors">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_GeoHashNeighbors</span><span class="p">(</span><span class="n">geohash</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the 8 neighboring geohash cells of the given geohash string.</span>
+
+<span class="sd">    The neighbors are returned in the order: [N, NE, E, SE, S, SW, W, NW].</span>
+
+<span class="sd">    :param geohash: Geohash string column.</span>
+<span class="sd">    :type geohash: ColumnOrName</span>
+<span class="sd">    :return: Array of 8 neighboring geohash strings.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_GeoHashNeighbors&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">geohash</span><span class="p">,))</span></div>
+
+
+<div class="viewcode-block" id="ST_GeoHashNeighbor"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_GeoHashNeighbor">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_GeoHashNeighbor</span><span class="p">(</span>
+    <span class="n">geohash</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">direction</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the neighboring geohash cell in the specified direction.</span>
+
+<span class="sd">    :param geohash: Geohash string column.</span>
+<span class="sd">    :type geohash: ColumnOrName</span>
+<span class="sd">    :param direction: Compass direction: &#39;n&#39;, &#39;ne&#39;, &#39;e&#39;, &#39;se&#39;, &#39;s&#39;, &#39;sw&#39;, &#39;w&#39;, &#39;nw&#39;.</span>
+<span class="sd">    :type direction: Union[ColumnOrName, str]</span>
+<span class="sd">    :return: Neighboring geohash string.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_GeoHashNeighbor&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">geohash</span><span class="p">,</span> <span class="n">direction</span><span class="p">))</span></div>
+
+
 <div class="viewcode-block" id="ST_GeometricMedian"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_GeometricMedian">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_GeometricMedian</span><span class="p">(</span>
     <span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span>

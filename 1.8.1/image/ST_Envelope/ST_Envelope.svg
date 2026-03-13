@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="160" viewBox="0 0 400 160">
+  <rect width="400" height="160" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_Envelope</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Bounding box of geometry</text>
+  <polygon points="166.7,103.3 200.0,111.7 233.3,86.7 216.7,53.3 183.3,61.7 166.7,103.3" stroke="#1565C0" stroke-width="2" fill="rgba(21,101,192,0.12)"/>
+  <polygon points="166.7,111.7 233.3,111.7 233.3,53.3 166.7,53.3 166.7,111.7" stroke="#E53935" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
+  <rect x="110" y="142" width="8" height="8" fill="rgba(21,101,192,0.12)" stroke="#1565C0" stroke-width="1"/>
+  <text x="122" y="150" font-family="monospace" font-size="9" fill="#1565C0">Geometry</text>
+  <rect x="200" y="142" width="8" height="8" fill="none" stroke="#E53935" stroke-width="1" stroke-dasharray="2,1"/>
+  <text x="212" y="150" font-family="monospace" font-size="9" fill="#E53935">Envelope</text>
+</svg>

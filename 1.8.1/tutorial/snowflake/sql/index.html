@@ -102,7 +102,7 @@ You're not viewing the latest stable version.
     
     
   <div style="background: #CA463A; color: white; text-align: center; padding: 0.5rem;">
-    <a href="setup/release-notes/" title="Announcement">🎉 Apache Sedona 1.8.1 is now available! Check out the new features and improvements.</a>
+    <a href="blog/2026/03/01/sedonadb-030-release/" title="Announcement">🌵SedonaDB (Rust) 0.3.0 is out now, featuring larger-than-memory spatial joins, and row-level CRS!</a>
   </div>
   
       <!--
@@ -2257,65 +2257,15 @@ You're not viewing the latest stable version.
   
   
   
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_1" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_4_1_2_1" id="__nav_3_4_1_2_1_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Geometry type
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_1_2_1">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Geometry type
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../../../api/sql/Constructor/" class="md-nav__link">
+      <a href="../../../api/sql/Geometry-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Constructor
+    Geometry Functions
   
 
     
@@ -2336,14 +2286,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../../api/sql/Function/" class="md-nav__link">
+      <a href="../../../api/sql/geography/Geography-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Function
+    Geography Functions
   
 
     
@@ -2352,240 +2302,6 @@ You're not viewing the latest stable version.
   
 
       </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/sql/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/sql/AggregateFunction/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregate function
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_4_1_2_2" id="__nav_3_4_1_2_2_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Geography type
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_1_2_2">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Geography type
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/sql/geography/Constructor/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Constructor
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/sql/geography/Function/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Function
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/sql/geography/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/sql/geography/AggregateFunction/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregate function
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
     </li>
   
 
@@ -2634,6 +2350,34 @@ You're not viewing the latest stable version.
     
   
     Query optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/sql/CRS-Transformation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRS Transformation
   
 
     
@@ -2749,10 +2493,10 @@ You're not viewing the latest stable version.
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_9" >
         
           
-          <label class="md-nav__link" for="__nav_3_4_1_2_8" id="__nav_3_4_1_2_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_4_1_2_9" id="__nav_3_4_1_2_9_label" tabindex="0">
             
   
   
@@ -2770,8 +2514,8 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4_1_2_8">
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_1_2_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2938,14 +2682,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../../api/sql/Raster-aggregate-function/" class="md-nav__link">
+      <a href="../../../api/sql/Raster-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Raster aggregates
+    Raster Functions
   
 
     
@@ -2994,34 +2738,6 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../../api/sql/Raster-operators/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Raster operators
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../api/sql/Raster-map-algebra/" class="md-nav__link">
         
   
@@ -3030,34 +2746,6 @@ You're not viewing the latest stable version.
     
   
     Raster map algebra
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/sql/Raster-visualizer/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Raster visualization
   
 
     
@@ -4169,98 +3857,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../../api/flink/Constructor/" class="md-nav__link">
+      <a href="../../../api/flink/Geometry-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Constructor (Flink)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/flink/Function/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Function (Flink)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/flink/Aggregator/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregator (Flink)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/flink/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate (Flink)
+    Geometry Functions
   
 
     
@@ -4956,98 +4560,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../../api/snowflake/vector-data/Constructor/" class="md-nav__link">
+      <a href="../../../api/snowflake/vector-data/Geometry-Functions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Constructor (Snowflake)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/snowflake/vector-data/Function/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Function (Snowflake)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/snowflake/vector-data/AggregateFunction/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Aggregate Function (Snowflake)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/snowflake/vector-data/Predicate/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Predicate (Snowflake)
+    Geometry Functions
   
 
     
@@ -6343,7 +5863,7 @@ POINT (-122.42 37.76)   San Francisco
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>SedonaSQL provides lots of functions to create a Geometry column, please read <a href="../../../api/snowflake/vector-data/Constructor/">SedonaSQL API</a>.</p>
+<p>SedonaSQL provides lots of functions to create a Geometry column, please read <a href="../../../api/snowflake/vector-data/Geometry-Functions/">SedonaSQL API</a>.</p>
 </div>
 <h2 id="check-the-lonlat-order">Check the lon/lat order<a class="headerlink" href="#check-the-lonlat-order" title="Permanent link">&para;</a></h2>
 <p>In SedonaSnow <code>v1.4.1</code> and before, we use lat/lon order in the following functions:</p>
@@ -6382,7 +5902,7 @@ POINT (37.76 -122.42)   San Francisco
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>SedonaSQL provides lots of functions to save the Geometry column, please read <a href="../../../api/snowflake/vector-data/Function/">SedonaSQL API</a>.</p>
+<p>SedonaSQL provides lots of functions to save the Geometry column, please read <a href="../../../api/snowflake/vector-data/Overview/">SedonaSQL API</a>.</p>
 </div>
 <h2 id="transform-the-coordinate-reference-system">Transform the Coordinate Reference System<a class="headerlink" href="#transform-the-coordinate-reference-system" title="Permanent link">&para;</a></h2>
 <p>Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in a Geometry column. The unit of all related distances in SedonaSQL is same as the unit of all geometries in a Geometry column.</p>
@@ -6436,7 +5956,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Read <a href="../../../api/snowflake/vector-data/Constructor/">SedonaSQL API</a> to learn how to create a Geometry type query window.</p>
+<p>Read <a href="../../../api/snowflake/vector-data/Geometry-Functions/">SedonaSQL API</a> to learn how to create a Geometry type query window.</p>
 </div>
 <h2 id="knn-query">KNN query<a class="headerlink" href="#knn-query" title="Permanent link">&para;</a></h2>
 <p>Use <mark>SEDONA.ST_Distance</mark>, <mark>SEDONA.ST_DistanceSphere</mark>, <mark>ST_DistanceSpheroid</mark> to calculate the distance and rank the distance.</p>
@@ -6521,7 +6041,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <p>Note that only the Hausdorff distance takes in a third <code>densityFraction</code> parameter in <span class="arithmatex"><span class="MathJax_Preview">(0,1]</span><script type="math/tex">(0,1]</script></span> with smaller values giving more accurate results.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>If you use planar Euclidean distance functions like <code>SEDONA.ST_Distance</code>, <code>SEDONA.ST_HausdorffDistance</code> or <code>SEDONA.ST_FrechetDistance</code> as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of <code>distance</code> should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See <a href="../../../api/snowflake/vector-data/Function/#st_transform">SEDONA.ST_Transform</a>. If you don't want to transform your data, please consider using <code>SEDONA.ST_DistanceSpheroid</code> or <code>SEDONA.ST_DistanceSphere</code>.</p>
+<p>If you use planar Euclidean distance functions like <code>SEDONA.ST_Distance</code>, <code>SEDONA.ST_HausdorffDistance</code> or <code>SEDONA.ST_FrechetDistance</code> as the predicate, Sedona doesn't control the distance's unit (degree or meter). It is same with the geometry. If your coordinates are in the longitude and latitude system, the unit of <code>distance</code> should be degree instead of meter or mile. To change the geometry's unit, please either transform the coordinate reference system to a meter-based system. See <a href="../../../api/snowflake/vector-data/Spatial-Reference-System/ST_Transform/">SEDONA.ST_Transform</a>. If you don't want to transform your data, please consider using <code>SEDONA.ST_DistanceSpheroid</code> or <code>SEDONA.ST_DistanceSphere</code>.</p>
 </div>
 <p>For instance, the following returns roughly 78.45 kilometers, since the geometries are assumed to be in degrees of longitude and latitude, even if no CRS was explicitly set.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_DistanceSpheroid</span><span class="p">(</span><span class="n">pointdf</span><span class="p">.</span><span class="n">pointshape</span><span class="p">,</span><span class="n">pointdf2</span><span class="p">.</span><span class="n">pointshape</span><span class="p">)</span>
@@ -6566,7 +6086,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <p>You can use Sedona's built-in Google S2 functions to perform an approximate equi-join. This algorithm leverages Snowflake's internal equi-join algorithm and might be performant given that you can opt to skip the refinement step  by sacrificing query accuracy. Sedona's S2 functions are a nice complement to Snowflake's native H3 and Geohash functions.</p>
 <p>Please use the following steps:</p>
 <h3 id="1-generate-s2-ids-for-both-tables">1. Generate S2 ids for both tables<a class="headerlink" href="#1-generate-s2-ids-for-both-tables" title="Permanent link">&para;</a></h3>
-<p>Use <a href="../../../api/snowflake/vector-data/Function/#st_s2cellids">SEDONA.ST_S2CellIds</a> to generate cell IDs. Each geometry may produce one or more IDs.</p>
+<p>Use <a href="../../../api/snowflake/vector-data/Spatial-Indexing/ST_S2CellIDs/">SEDONA.ST_S2CellIds</a> to generate cell IDs. Each geometry may produce one or more IDs.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">lefts</span><span class="p">,</span><span class="w"> </span><span class="k">TABLE</span><span class="p">(</span><span class="n">FLATTEN</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_S2CellIDs</span><span class="p">(</span><span class="n">lefts</span><span class="p">.</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">)))</span><span class="w"> </span><span class="n">s1</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">rights</span><span class="p">,</span><span class="w"> </span><span class="k">TABLE</span><span class="p">(</span><span class="n">FLATTEN</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_S2CellIDs</span><span class="p">(</span><span class="n">rights</span><span class="p">.</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">)))</span><span class="w"> </span><span class="n">s2</span>
@@ -6578,7 +6098,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 </code></pre></div>
 <h3 id="3-optional-refine-the-result">3. Optional: Refine the result<a class="headerlink" href="#3-optional-refine-the-result" title="Permanent link">&para;</a></h3>
 <p>Due to the nature of S2 Cellid, the equi-join results might have a few false-positives depending on the S2 level you choose. A smaller level indicates bigger cells, less exploded rows, but more false positives.</p>
-<p>To ensure the correctness, you can use one of the <a href="../../../api/snowflake/vector-data/Predicate/">Spatial Predicates</a> to filter out them. Use this query instead of the query in Step 2.</p>
+<p>To ensure the correctness, you can use one of the <a href="../../../api/snowflake/vector-data/Geometry-Functions/#predicates">Spatial Predicates</a> to filter out them. Use this query instead of the query in Step 2.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">lcs_id</span><span class="p">,</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">geom</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">lcs_geom</span><span class="p">,</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">lcs_name</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">rcs_id</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">geom</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">rcs_geom</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">rcs_name</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">lcs</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">lcs</span><span class="p">.</span><span class="n">cellId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">cellId</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">ST_Contains</span><span class="p">(</span><span class="n">lcs</span><span class="p">.</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="n">rcs</span><span class="p">.</span><span class="n">geom</span><span class="p">)</span>
@@ -6630,7 +6150,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <span class="w">          </span><span class="p">)</span>
 <span class="w">      </span><span class="p">)</span>
 <span class="p">),</span>
-<span class="c1">-- compute s2 cells covering the polyons for both tables</span>
+<span class="c1">-- compute s2 cells covering the polygons for both tables</span>
 <span class="c1">-- S2 discretizes the polygons, hence higher resolution yields more accurate queries, at the cost of increased computation</span>
 <span class="c1">-- both tables need to be discretized at the same level - in this case 10</span>
 <span class="n">lefts_s2</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
@@ -6660,16 +6180,16 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <h2 id="functions-that-are-only-available-in-sedona">Functions that are only available in Sedona<a class="headerlink" href="#functions-that-are-only-available-in-sedona" title="Permanent link">&para;</a></h2>
 <p>Sedona implements over 200 geospatial vector and raster functions, which are much more than what Snowflake native functions offer. For example:</p>
 <ul>
-<li><a href="../../../api/snowflake/vector-data/Function/#st_3ddistance">SEDONA.ST_3DDistance</a></li>
-<li><a href="../../../api/snowflake/vector-data/Function/#st_force_2d">SEDONA.ST_Force2D</a></li>
-<li><a href="../../../api/snowflake/vector-data/Function/#st_geometryn">SEDONA.ST_GeometryN</a></li>
-<li><a href="../../../api/snowflake/vector-data/Function/#st_makevalid">SEDONA.ST_MakeValid</a></li>
-<li><a href="../../../api/snowflake/vector-data/Function/#st_multi">SEDONA.ST_Multi</a></li>
-<li><a href="../../../api/snowflake/vector-data/Function/#st_numgeometries">SEDONA.ST_NumGeometries</a></li>
-<li><a href="../../../api/snowflake/vector-data/Function/#st_reduceprecision">SEDONA.ST_ReducePrecision</a></li>
-<li><a href="../../../api/snowflake/vector-data/Function/#st_subdivideexplode">SEDONA.ST_SubdivideExplode</a></li>
+<li><a href="../../../api/snowflake/vector-data/Measurement-Functions/ST_3DDistance/">SEDONA.ST_3DDistance</a></li>
+<li><a href="../../../api/snowflake/vector-data/Geometry-Editors/ST_Force_2D/">SEDONA.ST_Force2D</a></li>
+<li><a href="../../../api/snowflake/vector-data/Geometry-Accessors/ST_GeometryN/">SEDONA.ST_GeometryN</a></li>
+<li><a href="../../../api/snowflake/vector-data/Geometry-Validation/ST_MakeValid/">SEDONA.ST_MakeValid</a></li>
+<li><a href="../../../api/snowflake/vector-data/Geometry-Editors/ST_Multi/">SEDONA.ST_Multi</a></li>
+<li><a href="../../../api/snowflake/vector-data/Geometry-Accessors/ST_NumGeometries/">SEDONA.ST_NumGeometries</a></li>
+<li><a href="../../../api/snowflake/vector-data/Geometry-Processing/ST_ReducePrecision/">SEDONA.ST_ReducePrecision</a></li>
+<li><a href="../../../api/snowflake/vector-data/Overlay-Functions/ST_SubDivideExplode/">SEDONA.ST_SubdivideExplode</a></li>
 </ul>
-<p>You can click the links above to learn more about these functions. More functions can be found in <a href="../../../api/snowflake/vector-data/Function/">SedonaSQL API</a>.</p>
+<p>You can click the links above to learn more about these functions. More functions can be found in <a href="../../../api/snowflake/vector-data/Overview/">SedonaSQL API</a>.</p>
 <h2 id="interoperate-with-snowflake-native-functions">Interoperate with Snowflake native functions<a class="headerlink" href="#interoperate-with-snowflake-native-functions" title="Permanent link">&para;</a></h2>
 <p>Sedona can interoperate with Snowflake native functions seamlessly. There are two ways to do this:</p>
 <ul>
@@ -6747,7 +6267,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 31, 2025 05:43:03 UTC">July 31, 2025 05:43:03</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 27, 2026 06:37:29 UTC">February 27, 2026 06:37:29</span>
   </span>
 
     
