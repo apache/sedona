@@ -29,7 +29,7 @@
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A cluster computing system for processing large-scale spatial data: SQL API for Spark 4.1.</description>
-    <url>http://sedona.apache.org/</url>
+    <url>https://sedona.apache.org/</url>
     <packaging>jar</packaging>
 
     <properties>
