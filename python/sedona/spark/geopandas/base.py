@@ -2363,6 +2363,263 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("distance", self, other, align)
 
+    def frechet_distance(self, other, align=None, densify=None):
+        """Returns a ``Series`` containing the discrete Fréchet distance to aligned `other`.
+
+        The Fréchet distance is a measure of similarity: it is the greatest distance
+        between any point in A and the closest point in B. The discrete distance is an
+        approximation of this metric: only vertices are considered. The parameter
+        ``densify`` makes this approximation less coarse by splitting the line segments
+        between vertices before computing the distance.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to find the
+            distance to.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+        densify : float, optional
+            The densify parameter is not supported by Sedona.
+            Passing a value will raise a ``NotImplementedError``.
+
+        Returns
+        -------
+        Series (float)
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString
+        >>> s1 = GeoSeries(
+        ...     [
+        ...         LineString([(0, 0), (1, 0), (2, 0)]),
+        ...         LineString([(0, 0), (1, 1)]),
+        ...     ]
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         LineString([(0, 1), (1, 2), (2, 1)]),
+        ...         LineString([(1, 0), (2, 1)]),
+        ...     ]
+        ... )
+
+        >>> s1.frechet_distance(s2)
+        0    2.0
+        1    1.0
+        dtype: float64
+
+        See also
+        --------
+        GeoSeries.hausdorff_distance
+        """
+        return _delegate_to_geometry_column(
+            "frechet_distance", self, other, align, densify
+        )
+
+    def hausdorff_distance(self, other, align=None, densify=None):
+        """Returns a ``Series`` containing the Hausdorff distance to aligned `other`.
+
+        The Hausdorff distance is the largest distance consisting of any point in `self`
+        with the nearest point in `other`.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to find the
+            distance to.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+        densify : float, optional
+            The fraction by which to densify each segment. Each segment will be
+            split into a number of equal-length subsegments whose fraction of
+            the segment length is closest to the given fraction.
+
+        Returns
+        -------
+        Series (float)
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString
+        >>> s1 = GeoSeries(
+        ...     [
+        ...         LineString([(0, 0), (1, 0), (2, 0)]),
+        ...         LineString([(0, 0), (1, 1)]),
+        ...     ]
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         LineString([(0, 1), (1, 2), (2, 1)]),
+        ...         LineString([(1, 0), (2, 1)]),
+        ...     ]
+        ... )
+
+        >>> s1.hausdorff_distance(s2)
+        0    2.0
+        1    1.0
+        dtype: float64
+
+        See also
+        --------
+        GeoSeries.frechet_distance
+        """
+        return _delegate_to_geometry_column(
+            "hausdorff_distance", self, other, align, densify
+        )
+
+    def geom_equals(self, other, align=None):
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        each aligned geometry equal to `other`.
+
+        An object is said to be equal to `other` if its set-theoretic
+        boundary, interior, and exterior coincides with those of the other.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to test for
+            equality.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point
+        >>> s1 = GeoSeries(
+        ...     [
+        ...         Point(0, 0),
+        ...         Point(1, 1),
+        ...         Point(2, 2),
+        ...     ]
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Point(0, 0),
+        ...         Point(2, 2),
+        ...         Point(2, 2),
+        ...     ]
+        ... )
+
+        >>> s1.geom_equals(s2)
+        0     True
+        1    False
+        2     True
+        dtype: bool
+
+        See also
+        --------
+        GeoSeries.geom_equals_exact
+        """
+        return _delegate_to_geometry_column("geom_equals", self, other, align)
+
+    def interpolate(self, distance, normalized=False):
+        """Return a point at the specified distance along each geometry.
+
+        Parameters
+        ----------
+        distance : float or Series of floats
+            Distance(s) along the geometries at which a point should be
+            returned. If np.array or pd.Series are used then it must have
+            same length as the GeoSeries.
+        normalized : bool (default False)
+            If True, ``distance`` will be interpreted as a fraction
+            of the geometric object's length.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString
+        >>> s = GeoSeries(
+        ...     [
+        ...         LineString([(0, 0), (2, 0), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...     ],
+        ... )
+
+        >>> s.interpolate(1)
+        0                POINT (1 0)
+        1    POINT (0.70711 0.70711)
+        2    POINT (1.29289 0.70711)
+        dtype: geometry
+
+        See also
+        --------
+        GeoSeries.project
+        """
+        return _delegate_to_geometry_column("interpolate", self, distance, normalized)
+
+    def project(self, other, normalized=False, align=None):
+        """Return the distance along each geometry nearest to `other`.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        The project method is the inverse of interpolate.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The *other* geometry to compute the projected point from.
+        normalized : bool (default False)
+            If True, return the distance normalized to the length of the object.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (float)
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         LineString([(0, 0), (2, 0), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         LineString([(2, 0), (0, 2)]),
+        ...     ],
+        ... )
+
+        >>> s.project(Point(1, 0))
+        0    1.000000
+        1    0.707107
+        2    0.707107
+        dtype: float64
+
+        >>> s.project(Point(1, 0), normalized=True)
+        0    0.207107
+        1    0.250000
+        2    0.250000
+        dtype: float64
+
+        See also
+        --------
+        GeoSeries.interpolate
+        """
+        return _delegate_to_geometry_column("project", self, other, normalized, align)
+
     def intersection(self, other, align=None):
         """Returns a ``GeoSeries`` of the intersection of points in each
         aligned geometry with `other`.

@@ -2635,6 +2635,177 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         expected = pd.Series(["FF2F11212", "212101212"])
         self.check_pd_series_equal(result, expected)
 
+    def test_frechet_distance(self):
+        s1 = GeoSeries(
+            [
+                LineString([(0, 0), (1, 0), (2, 0)]),
+                LineString([(0, 0), (1, 1)]),
+            ]
+        )
+        s2 = GeoSeries(
+            [
+                LineString([(0, 1), (1, 2), (2, 1)]),
+                LineString([(1, 0), (2, 1)]),
+            ]
+        )
+
+        result = s1.frechet_distance(s2, align=False)
+        expected = pd.Series([2.0, 1.0])
+        self.check_pd_series_equal(result, expected)
+
+        # Test with single geometry
+        line = LineString([(0, 1), (1, 2), (2, 1)])
+        result = s1.frechet_distance(line)
+        expected = pd.Series([2.0, 1.0])
+        self.check_pd_series_equal(result, expected)
+
+        # Test that GeoDataFrame works too
+        df_result = s1.to_geoframe().frechet_distance(s2, align=False)
+        expected = pd.Series([2.0, 1.0])
+        self.check_pd_series_equal(df_result, expected)
+
+        # Test that densify raises NotImplementedError
+        with pytest.raises(NotImplementedError):
+            s1.frechet_distance(s2, densify=0.5)
+
+    def test_hausdorff_distance(self):
+        s1 = GeoSeries(
+            [
+                LineString([(0, 0), (1, 0), (2, 0)]),
+                LineString([(0, 0), (1, 1)]),
+            ]
+        )
+        s2 = GeoSeries(
+            [
+                LineString([(0, 1), (1, 2), (2, 1)]),
+                LineString([(1, 0), (2, 1)]),
+            ]
+        )
+
+        result = s1.hausdorff_distance(s2, align=False)
+        expected = pd.Series([2.0, 1.0])
+        self.check_pd_series_equal(result, expected)
+
+        # Test with single geometry
+        line = LineString([(0, 1), (1, 2), (2, 1)])
+        result = s1.hausdorff_distance(line)
+        expected = pd.Series([2.0, 1.0])
+        self.check_pd_series_equal(result, expected)
+
+        # Test that GeoDataFrame works too
+        df_result = s1.to_geoframe().hausdorff_distance(s2, align=False)
+        expected = pd.Series([2.0, 1.0])
+        self.check_pd_series_equal(df_result, expected)
+
+        # Test with densify parameter
+        result = s1.hausdorff_distance(s2, densify=0.5, align=False)
+        expected = pd.Series([2.0, 1.0])
+        self.check_pd_series_equal(result, expected)
+
+    def test_geom_equals(self):
+        s1 = GeoSeries(
+            [
+                Point(0, 0),
+                Point(1, 1),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            ]
+        )
+        s2 = GeoSeries(
+            [
+                Point(0, 0),
+                Point(2, 2),
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            ]
+        )
+
+        result = s1.geom_equals(s2, align=False)
+        expected = pd.Series([True, False, True])
+        self.check_pd_series_equal(result, expected)
+
+        # Test with single geometry
+        result = s1.geom_equals(Point(0, 0))
+        expected = pd.Series([True, False, False])
+        self.check_pd_series_equal(result, expected)
+
+        # Test that GeoDataFrame works too
+        df_result = s1.to_geoframe().geom_equals(s2, align=False)
+        expected = pd.Series([True, False, True])
+        self.check_pd_series_equal(df_result, expected)
+
+    def test_interpolate(self):
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (2, 0), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                LineString([(2, 0), (0, 2)]),
+            ]
+        )
+
+        # Test with absolute distance
+        result = s.interpolate(1)
+        expected = gpd.GeoSeries(
+            [
+                Point(1, 0),
+                Point(0.7071067811865476, 0.7071067811865476),
+                Point(1.2928932188134524, 0.7071067811865476),
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Test with normalized distance
+        result = s.interpolate(0.5, normalized=True)
+        expected = gpd.GeoSeries(s.to_geopandas().interpolate(0.5, normalized=True))
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Test that GeoDataFrame works too
+        df_result = s.to_geoframe().interpolate(1)
+        expected = gpd.GeoSeries(
+            [
+                Point(1, 0),
+                Point(0.7071067811865476, 0.7071067811865476),
+                Point(1.2928932188134524, 0.7071067811865476),
+            ]
+        )
+        self.check_sgpd_equals_gpd(df_result, expected)
+
+    def test_project(self):
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (2, 0), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                LineString([(2, 0), (0, 2)]),
+            ]
+        )
+
+        # Test with a single point
+        result = s.project(Point(1, 0))
+        expected = pd.Series([1.0, 0.7071067811865476, 0.7071067811865476])
+        self.check_pd_series_equal(result, expected)
+
+        # Test with normalized=True
+        result = s.project(Point(1, 0), normalized=True)
+        expected = pd.Series(s.to_geopandas().project(Point(1, 0), normalized=True))
+        self.check_pd_series_equal(result, expected)
+
+        # Test with two GeoSeries
+        s2 = GeoSeries(
+            [
+                Point(1, 0),
+                Point(1, 0),
+                Point(2, 1),
+            ]
+        )
+        result = s.project(s2, align=False)
+        expected = pd.Series(
+            s.to_geopandas().project(gpd.GeoSeries(s2.to_geopandas()), align=False)
+        )
+        self.check_pd_series_equal(result, expected)
+
+        # Test that GeoDataFrame works too
+        df_result = s.to_geoframe().project(Point(1, 0))
+        expected = pd.Series([1.0, 0.7071067811865476, 0.7071067811865476])
+        self.check_pd_series_equal(df_result, expected)
+
     def test_set_crs(self):
         geo_series = sgpd.GeoSeries([Point(0, 0), Point(1, 1)], name="geometry")
         assert geo_series.crs == None

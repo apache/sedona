@@ -1340,6 +1340,7 @@ public class Functions {
   }
 
   public static Geometry lineInterpolatePoint(Geometry geom, double fraction) {
+    if (geom.isEmpty()) return geom.getFactory().createPoint();
     double length = geom.getLength();
     LengthIndexedLine indexedLine = new LengthIndexedLine(geom);
     Coordinate interPoint = indexedLine.extractPoint(length * fraction);
@@ -1485,7 +1486,8 @@ public class Functions {
     return ConstrainedDelaunayTriangulator.triangulate(geom);
   }
 
-  public static double lineLocatePoint(Geometry geom, Geometry point) {
+  public static Double lineLocatePoint(Geometry geom, Geometry point) {
+    if (geom.isEmpty() || point.isEmpty()) return null;
     double length = geom.getLength();
     LengthIndexedLine indexedLine = new LengthIndexedLine(geom);
     return indexedLine.indexOf(point.getCoordinate()) / length;

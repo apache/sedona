@@ -29,6 +29,7 @@
 /.scala-build
 /.settings/
 /.venv/
+/.venv-test/
 /.vscode/
 /bin/
 /conf/
