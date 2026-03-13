@@ -2409,7 +2409,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         >>> s1.frechet_distance(s2)
         0    2.0
-        1    2.0
+        1    1.0
         dtype: float64
 
         See also
@@ -2464,7 +2464,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         >>> s1.hausdorff_distance(s2)
         0    2.0
-        1    2.0
+        1    1.0
         dtype: float64
 
         See also
