@@ -1487,7 +1487,7 @@ public class Functions {
   }
 
   public static Double lineLocatePoint(Geometry geom, Geometry point) {
-    if (geom.isEmpty()) return null;
+    if (geom.isEmpty() || point.isEmpty()) return null;
     double length = geom.getLength();
     LengthIndexedLine indexedLine = new LengthIndexedLine(geom);
     return indexedLine.indexOf(point.getCoordinate()) / length;

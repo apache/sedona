@@ -1402,8 +1402,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         if normalized:
             spark_expr = stf.ST_LineLocatePoint(F.col("L"), F.col("R"))
         else:
-            spark_expr = stf.ST_LineLocatePoint(F.col("L"), F.col("R")) * stf.ST_Length(
-                F.col("L")
+            locate = stf.ST_LineLocatePoint(F.col("L"), F.col("R"))
+            length = stf.ST_Length(F.col("L"))
+            spark_expr = F.when(locate.isNull(), F.lit(None)).otherwise(
+                F.when(length == 0, F.lit(0.0)).otherwise(locate * length)
             )
         result = self._row_wise_operation(
             spark_expr,

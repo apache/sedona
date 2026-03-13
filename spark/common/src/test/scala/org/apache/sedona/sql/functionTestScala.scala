@@ -2503,6 +2503,12 @@ class functionTestScala
     assert(df.take(1)(0).isNullAt(0))
   }
 
+  it("Should return null for ST_LineLocatePoint with empty point") {
+    val df = sparkSession.sql(
+      "SELECT ST_LineLocatePoint(ST_GeomFromWKT('LINESTRING(0 0, 1 1)'), ST_GeomFromWKT('POINT EMPTY')) AS loc")
+    assert(df.take(1)(0).isNullAt(0))
+  }
+
   it("Should return POINT EMPTY for ST_LineInterpolatePoint with empty geometry") {
     val df = sparkSession.sql(
       "SELECT ST_LineInterpolatePoint(ST_GeomFromWKT('LINESTRING EMPTY'), 0.5) AS pt")

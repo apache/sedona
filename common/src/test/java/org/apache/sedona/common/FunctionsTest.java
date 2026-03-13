@@ -4415,6 +4415,25 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void lineLocatePointEmptyPoint() {
+    LineString line =
+        GEOMETRY_FACTORY.createLineString(
+            new Coordinate[] {new Coordinate(0, 0), new Coordinate(1, 1)});
+    Geometry emptyPoint = GEOMETRY_FACTORY.createPoint();
+    assertNull(Functions.lineLocatePoint(line, emptyPoint));
+  }
+
+  @Test
+  public void lineLocatePointZeroLength() {
+    LineString zeroLen =
+        GEOMETRY_FACTORY.createLineString(
+            new Coordinate[] {new Coordinate(1, 1), new Coordinate(1, 1)});
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(2, 2));
+    Double result = Functions.lineLocatePoint(zeroLen, point);
+    assertTrue(Double.isNaN(result));
+  }
+
+  @Test
   public void lineInterpolatePointEmpty() {
     LineString emptyLine = GEOMETRY_FACTORY.createLineString();
     Geometry actual = Functions.lineInterpolatePoint(emptyLine, 0.5);
