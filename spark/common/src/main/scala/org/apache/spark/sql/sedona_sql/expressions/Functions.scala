@@ -32,6 +32,7 @@ import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.types._
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom._
+import org.locationtech.jts.geom.Geometry
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.LibPostalUtils.{getExpanderFromConf, getParserFromConf}
 import org.apache.spark.unsafe.types.UTF8String
@@ -393,9 +394,9 @@ private[apache] case class ST_IsValidDetail(children: Seq[Expression])
 
   override def inputTypes: Seq[AbstractDataType] = {
     if (nArgs == 2) {
-      Seq(GeometryUDT, IntegerType)
+      Seq(GeometryUDT(), IntegerType)
     } else if (nArgs == 1) {
-      Seq(GeometryUDT)
+      Seq(GeometryUDT())
     } else {
       throw new IllegalArgumentException(s"Invalid number of arguments: $nArgs")
     }
@@ -439,7 +440,7 @@ private[apache] case class ST_IsValidDetail(children: Seq[Expression])
   override def dataType: DataType = new StructType()
     .add("valid", BooleanType, nullable = false)
     .add("reason", StringType, nullable = true)
-    .add("location", GeometryUDT, nullable = true)
+    .add("location", GeometryUDT(), nullable = true)
 }
 
 private[apache] case class ST_IsValidTrajectory(inputExpressions: Seq[Expression])
@@ -735,7 +736,7 @@ private[apache] case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expres
 
   override def dataType: DataType = DataTypes.createStructType(
     Array(
-      DataTypes.createStructField("center", GeometryUDT, false),
+      DataTypes.createStructField("center", GeometryUDT(), false),
       DataTypes.createStructField("radius", DataTypes.DoubleType, false)))
 
   override def children: Seq[Expression] = inputExpressions
@@ -1068,7 +1069,7 @@ private[apache] case class ST_SubDivideExplode(children: Seq[Expression])
 
   override def elementSchema: StructType = {
     new StructType()
-      .add("geom", GeometryUDT, true)
+      .add("geom", GeometryUDT(), true)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -1187,8 +1188,8 @@ private[apache] case class ST_MaximumInscribedCircle(children: Seq[Expression])
   override def nullable: Boolean = true
 
   override def dataType: DataType = new StructType()
-    .add("center", GeometryUDT, nullable = false)
-    .add("nearest", GeometryUDT, nullable = false)
+    .add("center", GeometryUDT(), nullable = false)
+    .add("nearest", GeometryUDT(), nullable = false)
     .add("radius", DoubleType, nullable = false)
 }
 
@@ -1692,13 +1693,13 @@ private[apache] case class ST_GeneratePoints(inputExpressions: Seq[Expression], 
 
   override def nullable: Boolean = true
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def inputTypes: Seq[AbstractDataType] = {
     if (nArgs == 3) {
-      Seq(GeometryUDT, IntegerType, IntegerType)
+      Seq(GeometryUDT(), IntegerType, IntegerType)
     } else if (nArgs == 2) {
-      Seq(GeometryUDT, IntegerType)
+      Seq(GeometryUDT(), IntegerType)
     } else {
       throw new IllegalArgumentException(s"Invalid number of arguments: $nArgs")
     }

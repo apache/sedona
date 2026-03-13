@@ -147,7 +147,7 @@ private[apache] case class RS_TileExplode(children: Seq[Expression])
     new StructType()
       .add("x", IntegerType, nullable = false)
       .add("y", IntegerType, nullable = false)
-      .add("tile", RasterUDT, nullable = false)
+      .add("tile", RasterUDT(), nullable = false)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

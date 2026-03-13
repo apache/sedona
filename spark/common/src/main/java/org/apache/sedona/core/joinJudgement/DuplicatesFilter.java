@@ -20,7 +20,9 @@ package org.apache.sedona.core.joinJudgement;
 
 import java.util.Iterator;
 import java.util.List;
-import org.apache.commons.collections.iterators.FilterIterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -57,11 +59,10 @@ public class DuplicatesFilter<U extends Geometry, T extends Geometry>
     final List<Envelope> partitionExtents = dedupParamsBroadcast.getValue().getPartitionExtents();
     if (partitionId < partitionExtents.size()) {
       HalfOpenRectangle extent = new HalfOpenRectangle(partitionExtents.get(partitionId));
-      return new FilterIterator(
-          geometryPair,
-          p ->
-              !GeomUtils.isDuplicate(
-                  ((Pair<U, T>) p).getLeft(), ((Pair<U, T>) p).getRight(), extent));
+      return StreamSupport.stream(
+              Spliterators.spliteratorUnknownSize(geometryPair, Spliterator.ORDERED), false)
+          .filter(p -> !GeomUtils.isDuplicate(p.getLeft(), p.getRight(), extent))
+          .iterator();
     } else {
       log.warn("Didn't find partition extent for this partition: " + partitionId);
       return geometryPair;

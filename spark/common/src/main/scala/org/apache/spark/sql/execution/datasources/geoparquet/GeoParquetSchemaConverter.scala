@@ -193,7 +193,7 @@ class GeoParquetToSparkSchemaConverter(
       case BINARY =>
         originalType match {
           case UTF8 | ENUM | JSON => StringType
-          case null if isGeometryField(field.getName) => GeometryUDT
+          case null if isGeometryField(field.getName) => GeometryUDT()
           case null if assumeBinaryIsString => StringType
           case null => BinaryType
           case BSON => BinaryType

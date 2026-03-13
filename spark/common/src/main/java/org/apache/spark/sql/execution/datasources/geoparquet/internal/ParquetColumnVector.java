@@ -19,6 +19,7 @@
 package org.apache.spark.sql.execution.datasources.geoparquet.internal;
 
 import com.google.common.base.Preconditions;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +40,24 @@ final class ParquetColumnVector {
   private final ParquetColumn column;
   private final List<ParquetColumnVector> children;
   private final WritableColumnVector vector;
+
+  /**
+   * Mark the given column vector as all-null / missing. In Spark <= 4.0 this is {@code
+   * setAllNull()}, in Spark >= 4.1 it was renamed to {@code setMissing()}.
+   */
+  private static void markAllNull(WritableColumnVector v) {
+    try {
+      Method m;
+      try {
+        m = v.getClass().getMethod("setAllNull");
+      } catch (NoSuchMethodException e) {
+        m = v.getClass().getMethod("setMissing");
+      }
+      m.invoke(v);
+    } catch (Exception e) {
+      throw new RuntimeException("Cannot mark column vector as all null", e);
+    }
+  }
 
   /**
    * Repetition & Definition levels These are allocated only for leaf columns; for non-leaf columns,
@@ -84,7 +103,7 @@ final class ParquetColumnVector {
       }
 
       if (defaultValue == null) {
-        vector.setAllNull();
+        markAllNull(vector);
         return;
       }
       // For Parquet tables whose columns have associated DEFAULT values, this reader must return
@@ -139,7 +158,7 @@ final class ParquetColumnVector {
       // This can happen if all the fields of a struct are missing, in which case we should mark
       // the struct itself as a missing column
       if (allChildrenAreMissing) {
-        vector.setAllNull();
+        markAllNull(vector);
       }
     }
   }

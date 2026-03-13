@@ -67,7 +67,7 @@ class StacTable(
   override def schema(): StructType = {
     // Check if the schema is already cached
     val fullSchema = schemaCache.computeIfAbsent(opts, _ => inferStacSchema(opts))
-    val updatedGeometrySchema = GeoJSONUtils.updateGeometrySchema(fullSchema, GeometryUDT)
+    val updatedGeometrySchema = GeoJSONUtils.updateGeometrySchema(fullSchema, GeometryUDT())
     updatePropertiesPromotedSchema(updatedGeometrySchema)
   }
 

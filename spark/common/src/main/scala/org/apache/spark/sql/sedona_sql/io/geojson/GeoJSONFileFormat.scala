@@ -69,7 +69,7 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
 
     fullSchemaOption.map { fullSchema =>
       // Replace 'geometry' field type with GeometryUDT
-      val newFields = GeoJSONUtils.updateGeometrySchema(fullSchema, GeometryUDT)
+      val newFields = GeoJSONUtils.updateGeometrySchema(fullSchema, GeometryUDT())
       StructType(newFields)
     }
   }
@@ -131,7 +131,7 @@ class GeoJSONFileFormat extends TextBasedFileFormat with DataSourceRegister {
       geometryColumnName.split('.'),
       resolver = SQLConf.get.resolver) match {
       case Some(StructField(_, dataType, _, _)) =>
-        if (!dataType.acceptsType(GeometryUDT)) {
+        if (!dataType.acceptsType(GeometryUDT())) {
           throw new IllegalArgumentException(s"$geometryColumnName is not a geometry column")
         }
       case None =>

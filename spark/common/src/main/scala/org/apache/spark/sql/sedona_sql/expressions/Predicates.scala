@@ -40,7 +40,7 @@ abstract class ST_Predicate
 
   override def nullable: Boolean = children.exists(_.nullable)
 
-  override def inputTypes: Seq[AbstractDataType] = Seq(GeometryUDT, GeometryUDT)
+  override def inputTypes: Seq[AbstractDataType] = Seq(GeometryUDT(), GeometryUDT())
 
   override def dataType: DataType = BooleanType
 

@@ -37,8 +37,8 @@ object InferrableRasterTypes {
   def isRasterType(t: Type): Boolean = t =:= typeOf[GridCoverage2D]
   def isRasterArrayType(t: Type): Boolean = t =:= typeOf[Array[GridCoverage2D]]
 
-  val rasterUDT: UserDefinedType[_] = RasterUDT
-  val rasterUDTArray: ArrayType = DataTypes.createArrayType(RasterUDT)
+  val rasterUDT: UserDefinedType[_] = RasterUDT()
+  val rasterUDTArray: ArrayType = DataTypes.createArrayType(RasterUDT())
 
   def rasterExtractor(expr: Expression)(input: InternalRow): Any = expr.toRaster(input)
 

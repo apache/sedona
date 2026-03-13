@@ -32,7 +32,7 @@ class SedonaSqlAstBuilder extends SparkSqlAstBuilder {
    */
   override def visitPrimitiveDataType(ctx: PrimitiveDataTypeContext): DataType = {
     ctx.getText.toUpperCase() match {
-      case "GEOMETRY" => GeometryUDT
+      case "GEOMETRY" => GeometryUDT()
       case _ => super.visitPrimitiveDataType(ctx)
     }
   }

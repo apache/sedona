@@ -169,7 +169,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         val geomTypes = (geo \ "columns" \ "geometry" \ "geometry_types").extract[Seq[String]]
         assert(geomTypes.nonEmpty)
         val sparkSqlRowMetadata = metadata.get(ParquetReadSupport.SPARK_METADATA_KEY)
-        assert(!sparkSqlRowMetadata.contains("GeometryUDT"))
+        assert(!sparkSqlRowMetadata.contains("GeometryUDT()"))
       }
     }
     it("GEOPARQUET Test example-1.1.0.parquet") {
@@ -206,8 +206,8 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val schema = StructType(
         Seq(
           StructField("id", IntegerType, nullable = false),
-          StructField("g0", GeometryUDT, nullable = false),
-          StructField("g1", GeometryUDT, nullable = false)))
+          StructField("g0", GeometryUDT(), nullable = false),
+          StructField("g1", GeometryUDT(), nullable = false)))
       val df = sparkSession.createDataFrame(testData.asJava, schema).repartition(1)
       val geoParquetSavePath = geoparquetoutputlocation + "/multi_geoms.parquet"
       df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
@@ -241,7 +241,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val schema = StructType(
         Seq(
           StructField("id", IntegerType, nullable = false),
-          StructField("g", GeometryUDT, nullable = false)))
+          StructField("g", GeometryUDT(), nullable = false)))
       val df = sparkSession.createDataFrame(Collections.emptyList[Row](), schema)
       val geoParquetSavePath = geoparquetoutputlocation + "/empty.parquet"
       df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
@@ -262,7 +262,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val schema = StructType(
         Seq(
           StructField("id", IntegerType, nullable = false),
-          StructField("geom_column", GeometryUDT, nullable = false)))
+          StructField("geom_column", GeometryUDT(), nullable = false)))
       val df = sparkSession.createDataFrame(Collections.emptyList[Row](), schema)
       val geoParquetSavePath = geoparquetoutputlocation + "/snake_case_column_name.parquet"
       df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
@@ -277,7 +277,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val schema = StructType(
         Seq(
           StructField("id", IntegerType, nullable = false),
-          StructField("geomColumn", GeometryUDT, nullable = false)))
+          StructField("geomColumn", GeometryUDT(), nullable = false)))
       val df = sparkSession.createDataFrame(Collections.emptyList[Row](), schema)
       val geoParquetSavePath = geoparquetoutputlocation + "/camel_case_column_name.parquet"
       df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
@@ -400,8 +400,8 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val schema = StructType(
         Seq(
           StructField("id", IntegerType, nullable = false),
-          StructField("g0", GeometryUDT, nullable = false),
-          StructField("g1", GeometryUDT, nullable = false)))
+          StructField("g0", GeometryUDT(), nullable = false),
+          StructField("g1", GeometryUDT(), nullable = false)))
       val df = sparkSession.createDataFrame(testData.asJava, schema).repartition(1)
 
       val projjson0 =

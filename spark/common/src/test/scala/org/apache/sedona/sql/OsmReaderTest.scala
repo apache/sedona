@@ -176,28 +176,28 @@ class OsmReaderTest extends TestBaseScala with Matchers {
         "smoothness" -> "excellent"))
 
       // make sure the nodes match with refs
-      val nodes = osmData.where("kind == 'node'")
-      val ways = osmData.where("kind == 'way'")
-      val relations = osmData.where("kind == 'relation'")
+      val nodes = osmData.where("kind == 'node'").as("n")
+      val ways = osmData.where("kind == 'way'").as("w")
+      val relations = osmData.where("kind == 'relation'").as("rel")
 
       ways
         .selectExpr("explode(refs) AS ref")
-        .alias("w")
-        .join(nodes, col("w.ref") === nodes("id"))
+        .alias("w2")
+        .join(nodes, col("w2.ref") === col("n.id"))
         .count() shouldEqual (47812)
 
       ways
         .selectExpr("explode(refs) AS ref", "id")
-        .alias("w")
-        .join(nodes, col("w.ref") === nodes("id"))
-        .groupBy("w.id")
+        .alias("w2")
+        .join(nodes, col("w2.ref") === col("n.id"))
+        .groupBy("w2.id")
         .count()
         .count() shouldEqual (ways.count())
 
       relations
         .selectExpr("explode(refs) AS ref", "id")
         .alias("r")
-        .join(nodes, col("r.ref") === nodes("id"))
+        .join(nodes, col("r.ref") === col("n.id"))
         .groupBy("r.id")
         .count()
         .count() shouldEqual (162)
@@ -205,7 +205,7 @@ class OsmReaderTest extends TestBaseScala with Matchers {
       relations
         .selectExpr("explode(refs) AS ref", "id")
         .alias("r")
-        .join(ways, col("r.ref") === ways("id"))
+        .join(ways, col("r.ref") === col("w.id"))
         .groupBy("r.id")
         .count()
         .count() shouldEqual (261)

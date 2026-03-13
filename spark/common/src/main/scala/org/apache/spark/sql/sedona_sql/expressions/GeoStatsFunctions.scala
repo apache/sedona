@@ -36,7 +36,7 @@ private[apache] case class ST_DBSCAN(children: Seq[Expression])
     StructType(Seq(StructField("isCore", BooleanType), StructField("cluster", LongType)))
 
   override def inputTypes: Seq[AbstractDataType] =
-    Seq(GeometryUDT, DoubleType, IntegerType, BooleanType)
+    Seq(GeometryUDT(), DoubleType, IntegerType, BooleanType)
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression =
     copy(children = newChildren)
@@ -74,7 +74,7 @@ private[apache] case class ST_LocalOutlierFactor(children: Seq[Expression])
   override def dataType: DataType = DoubleType
 
   override def inputTypes: Seq[AbstractDataType] =
-    Seq(GeometryUDT, IntegerType, BooleanType)
+    Seq(GeometryUDT(), IntegerType, BooleanType)
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression =
     copy(children = newChildren)
@@ -139,7 +139,7 @@ private[apache] case class ST_BinaryDistanceBandColumn(children: Seq[Expression]
       Seq(StructField("neighbor", children(5).dataType), StructField("value", DoubleType))))
 
   override def inputTypes: Seq[AbstractDataType] =
-    Seq(GeometryUDT, DoubleType, BooleanType, BooleanType, BooleanType, children(5).dataType)
+    Seq(GeometryUDT(), DoubleType, BooleanType, BooleanType, BooleanType, children(5).dataType)
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression =
     copy(children = newChildren)
@@ -174,7 +174,7 @@ private[apache] case class ST_WeightedDistanceBandColumn(children: Seq[Expressio
 
   override def inputTypes: Seq[AbstractDataType] =
     Seq(
-      GeometryUDT,
+      GeometryUDT(),
       DoubleType,
       DoubleType,
       BooleanType,

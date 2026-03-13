@@ -698,7 +698,7 @@ class ShapefileTests extends TestBaseScala with BeforeAndAfterAll {
         Seq(
           StructField("osm_id", StringType),
           StructField("code2", LongType),
-          StructField("geometry", GeometryUDT)))
+          StructField("geometry", GeometryUDT())))
       val shapefileDf = sparkSession.read
         .format("shapefile")
         .schema(customSchema)

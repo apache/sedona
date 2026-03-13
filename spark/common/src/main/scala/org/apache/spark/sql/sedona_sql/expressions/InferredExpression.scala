@@ -325,13 +325,13 @@ object InferredTypes {
 
   def inferSparkType(t: Type): DataType = {
     if (t =:= typeOf[Geometry]) {
-      GeometryUDT
+      GeometryUDT()
     } else if (t =:= typeOf[Array[Geometry]] || t =:= typeOf[java.util.List[Geometry]]) {
-      DataTypes.createArrayType(GeometryUDT)
+      DataTypes.createArrayType(GeometryUDT())
     } else if (t =:= typeOf[Geography]) {
-      GeographyUDT
+      GeographyUDT()
     } else if (t =:= typeOf[Array[Geography]] || t =:= typeOf[java.util.List[Geography]]) {
-      DataTypes.createArrayType(GeographyUDT)
+      DataTypes.createArrayType(GeographyUDT())
     } else if (InferredRasterExpression.isRasterType(t)) {
       InferredRasterExpression.rasterUDT
     } else if (InferredRasterExpression.isRasterArrayType(t)) {

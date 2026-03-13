@@ -75,7 +75,7 @@ class StacDataSource() extends TableProvider with DataSourceRegister {
 
     // Check if the schema is already cached
     val fullSchema = schemaCache.computeIfAbsent(optsMap, _ => inferStacSchema(optsMap))
-    val updatedGeometrySchema = GeoJSONUtils.updateGeometrySchema(fullSchema, GeometryUDT)
+    val updatedGeometrySchema = GeoJSONUtils.updateGeometrySchema(fullSchema, GeometryUDT())
     updatePropertiesPromotedSchema(updatedGeometrySchema)
   }
 

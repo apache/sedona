@@ -82,7 +82,7 @@ private[apache] case class ST_Collect(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def children: Seq[Expression] = inputExpressions
 
