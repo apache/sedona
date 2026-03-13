@@ -1292,7 +1292,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             (self.linestrings, self.linearrings),
         ]
         for geom, geom2 in line_pairs:
-            # Skip pairs containing empty geometries
+            # Skip pairs containing empty geometries — Sedona returns 0.0 instead of NaN
             if any(g.is_empty for g in geom) or any(g.is_empty for g in geom2):
                 continue
 
@@ -1313,6 +1313,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     def test_hausdorff_distance(self):
         for geom, geom2 in self.pairs:
+            # Skip pairs containing empty geometries — Sedona returns 0.0 instead of NaN
+            if any(g.is_empty for g in geom) or any(g.is_empty for g in geom2):
+                continue
+
             sgpd_result = GeoSeries(geom).hausdorff_distance(
                 GeoSeries(geom2), align=True
             )
@@ -1332,6 +1336,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     def test_geom_equals(self):
         for geom, geom2 in self.pairs:
+            # Skip GeometryCollection — ST_Equals does not support GeometryCollection arguments
             if self.contains_any_geom_collection(geom, geom2):
                 continue
 
@@ -1350,7 +1355,8 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     def test_interpolate(self):
         for geom in [self.linestrings, self.linearrings]:
-            # Skip empty geometries
+            # Skip empty geometries — ST_LineInterpolatePoint returns POINT EMPTY
+            # but division by ST_Length(empty)=0 causes issues
             non_empty = [g for g in geom if not g.is_empty]
             if not non_empty:
                 continue
@@ -1365,7 +1371,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     def test_project(self):
         for geom in [self.linestrings, self.linearrings]:
-            # Skip empty geometries
+            # Skip empty geometries — Sedona returns -inf instead of NaN
             non_empty = [g for g in geom if not g.is_empty]
             if not non_empty:
                 continue
