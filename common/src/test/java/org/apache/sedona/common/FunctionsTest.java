@@ -4408,6 +4408,21 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void lineLocatePointEmpty() {
+    LineString emptyLine = GEOMETRY_FACTORY.createLineString();
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+    assertNull(Functions.lineLocatePoint(emptyLine, point));
+  }
+
+  @Test
+  public void lineInterpolatePointEmpty() {
+    LineString emptyLine = GEOMETRY_FACTORY.createLineString();
+    Geometry actual = Functions.lineInterpolatePoint(emptyLine, 0.5);
+    assertTrue(actual.isEmpty());
+    assertEquals("Point", actual.getGeometryType());
+  }
+
+  @Test
   public void locateAlong() throws ParseException {
     Geometry geom =
         Constructors.geomFromEWKT("MULTIPOINT M(1 2 3, 3 4 3, 9 4 3, 3 2 1, 1 2 3, 5 4 2)");

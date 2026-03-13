@@ -1385,9 +1385,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         if normalized:
             spark_expr = stf.ST_LineInterpolatePoint(F.col("L"), F.col("R"))
         else:
-            spark_expr = stf.ST_LineInterpolatePoint(
-                F.col("L"), F.col("R") / stf.ST_Length(F.col("L"))
-            )
+            length = stf.ST_Length(F.col("L"))
+            fraction = F.when(length == 0, F.lit(0.0)).otherwise(F.col("R") / length)
+            spark_expr = stf.ST_LineInterpolatePoint(F.col("L"), fraction)
         return self._row_wise_operation(
             spark_expr,
             other_series,

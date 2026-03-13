@@ -812,7 +812,7 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geom", "point"},
       argTypes = {"Geometry", "Geometry"})
-  public static double ST_LineLocatePoint(String geom, String point) {
+  public static Double ST_LineLocatePoint(String geom, String point) {
     return Functions.lineLocatePoint(
         GeometrySerde.deserGeoJson(geom), GeometrySerde.deserGeoJson(point));
   }

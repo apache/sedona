@@ -2497,6 +2497,20 @@ class functionTestScala
     assert(result(3).get(0).asInstanceOf[Double] == 1.0)
   }
 
+  it("Should return null for ST_LineLocatePoint with empty geometry") {
+    val df = sparkSession.sql(
+      "SELECT ST_LineLocatePoint(ST_GeomFromWKT('LINESTRING EMPTY'), ST_GeomFromWKT('POINT(1 1)')) AS loc")
+    assert(df.take(1)(0).isNullAt(0))
+  }
+
+  it("Should return POINT EMPTY for ST_LineInterpolatePoint with empty geometry") {
+    val df = sparkSession.sql(
+      "SELECT ST_LineInterpolatePoint(ST_GeomFromWKT('LINESTRING EMPTY'), 0.5) AS pt")
+    val geom = df.take(1)(0).get(0).asInstanceOf[Geometry]
+    assert(geom.isEmpty)
+    assert(geom.getGeometryType == "Point")
+  }
+
   it("Should pass ST_Multi") {
     val df = sparkSession.sql("select ST_Astext(ST_Multi(ST_Point(1.0,1.0)))")
     val result = df.collect()
@@ -3284,6 +3298,10 @@ class functionTestScala
       val expected = expectedResult
       assertEquals(expected, actual, 1e-9)
     }
+    // Empty geometries should return null
+    val dfEmpty = sparkSession.sql(
+      "SELECT ST_FrechetDistance(ST_GeomFromWKT('LINESTRING (0 0, 1 0)'), ST_GeomFromWKT('POINT EMPTY'))")
+    assert(dfEmpty.take(1)(0).isNullAt(0))
   }
 
   it("should pass ST_Affine") {
