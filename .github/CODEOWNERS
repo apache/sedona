@@ -15,10 +15,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
-*                           @jiayuasu
-.editorconfig               @jbampton @jiayuasu
-.pre-commit-config.yaml     @jbampton @jiayuasu
-.prettierignore             @jbampton @jiayuasu
-.prettierrc                 @jbampton @jiayuasu
-Makefile                    @jbampton @jiayuasu
-/.github/linters/           @jbampton @jiayuasu
+*                                                   @jiayuasu
+.editorconfig                                       @jbampton @jiayuasu
+.pre-commit-config.yaml                             @jbampton @jiayuasu
+.prettierignore                                     @jbampton @jiayuasu
+.prettierrc                                         @jbampton @jiayuasu
+Makefile                                            @jbampton @jiayuasu
+/.github/linters/                                   @jbampton @jiayuasu
+/.github/workflows/license-templates/LICENSE.txt    @jbampton @jiayuasu
+/.github/dependabot.yml                             @jbampton @jiayuasu
+/scripts/                                           @jbampton @jiayuasu
