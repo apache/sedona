@@ -118,6 +118,16 @@ repos:
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
       - id: insert-license
+        name: add license for all ini files
+        description: automatically adds a licence header to all ini files that don't have a license header
+        files: \.ini$
+        args:
+          - --comment-style
+          - '|;|'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
         name: add license for all Java files
         description: automatically adds a licence header to all Java files that don't have a license header
         files: \.java$
@@ -526,3 +536,16 @@ repos:
           - 'SC2102'
           - -ignore
           - 'SC2155'
+  - repo: https://github.com/checkmake/checkmake.git
+    rev: v0.3.2
+    hooks:
+      - id: checkmake
+        name: run checkmake (root)
+        description: checkmake is a linter for Makefiles
+        files: ^Makefile$
+        args: ['--config=checkmake.ini']
+      - id: checkmake
+        name: run checkmake (python/sedona/doc)
+        description: checkmake is a linter for Makefiles
+        files: ^python/sedona/doc/Makefile$
+        args: ['--config=python/sedona/doc/checkmake.ini']

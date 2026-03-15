@@ -18,7 +18,7 @@
 PYTHON := $(shell command -v python || command -v python3 || echo python)
 PIP := $(PYTHON) -m pip
 
-.PHONY: check checkinstall checkupdate install docsinstall docsbuild clean test
+.PHONY: check checkinstall checkupdate install docsinstall docsbuild clean run-docs
 
 check:
 	@echo "Running pre-commit checks..."
