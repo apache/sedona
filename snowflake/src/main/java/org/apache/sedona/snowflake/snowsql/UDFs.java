@@ -638,7 +638,7 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom", "point"})
-  public static double ST_LineLocatePoint(byte[] geom, byte[] point) {
+  public static Double ST_LineLocatePoint(byte[] geom, byte[] point) {
     return Functions.lineLocatePoint(
         GeometrySerde.deserialize(geom), GeometrySerde.deserialize(point));
   }
