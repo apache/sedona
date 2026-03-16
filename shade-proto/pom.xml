@@ -28,7 +28,7 @@
 
     <artifactId>shade-proto</artifactId>
     <name>${project.groupId}:${project.artifactId}</name>
-    <url>http://sedona.apache.org/</url>
+    <url>https://sedona.apache.org/</url>
     <packaging>jar</packaging>
 
     <properties>

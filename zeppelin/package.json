@@ -29,7 +29,7 @@
     "type": "git",
     "url": "https://github.com/apache/sedona"
   },
-  "homepage": "http://sedona.apache.org/",
+  "homepage": "https://sedona.apache.org/",
   "bugs": {
     "url": "https://issues.apache.org/jira/projects/SEDONA/issues/"
   }
