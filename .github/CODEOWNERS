@@ -16,12 +16,17 @@
 # under the License.
 
 *                                                   @jiayuasu
+/.github/linters/                                   @jbampton @jiayuasu
+/.github/workflows/license-templates/LICENSE.txt    @jbampton @jiayuasu
+/.github/workflows/pre-commit.yml                   @jbampton @jiayuasu
+/.github/workflows/pre-commit-manual.yml            @jbampton @jiayuasu
+/.github/dependabot.yml                             @jbampton @jiayuasu
+/python/sedona/doc/checkmake.ini                    @jbampton @jiayuasu
+/python/sedona/doc/Makefile                         @jbampton @jiayuasu
+/scripts/                                           @jbampton @jiayuasu
 .editorconfig                                       @jbampton @jiayuasu
 .pre-commit-config.yaml                             @jbampton @jiayuasu
 .prettierignore                                     @jbampton @jiayuasu
 .prettierrc                                         @jbampton @jiayuasu
+checkmake.ini                                       @jbampton @jiayuasu
 Makefile                                            @jbampton @jiayuasu
-/.github/linters/                                   @jbampton @jiayuasu
-/.github/workflows/license-templates/LICENSE.txt    @jbampton @jiayuasu
-/.github/dependabot.yml                             @jbampton @jiayuasu
-/scripts/                                           @jbampton @jiayuasu
