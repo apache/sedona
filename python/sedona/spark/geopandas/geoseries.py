@@ -1151,6 +1151,53 @@ class GeoSeries(GeoFrame, pspd.Series):
             returns_geom=True,
         )
 
+    def build_area(self, node=True):
+        if len(self) == 0:
+            return GeoSeries([], name="polygons")
+
+        if node:
+            aggr_expr = sta.ST_Union_Aggr(self.spark.column)
+        else:
+            aggr_expr = sta.ST_Collect_Agg(self.spark.column)
+
+        build_expr = stf.ST_BuildArea(aggr_expr)
+        result = self._query_geometry_column(
+            build_expr, returns_geom=False, is_aggr=True
+        )
+        geom = result.take([0]).iloc[0]
+
+        if geom is None or geom.is_empty:
+            return GeoSeries([], name="polygons")
+
+        parts = shapely.get_parts(geom)
+        return GeoSeries(list(parts), name="polygons")
+
+    def polygonize(self, node=True, full=False):
+        if full:
+            raise NotImplementedError(
+                "Sedona does not support full=True for polygonize."
+            )
+
+        if len(self) == 0:
+            return GeoSeries([], name="polygons")
+
+        if node:
+            aggr_expr = sta.ST_Union_Aggr(self.spark.column)
+        else:
+            aggr_expr = sta.ST_Collect_Agg(self.spark.column)
+
+        poly_expr = stf.ST_Polygonize(aggr_expr)
+        result = self._query_geometry_column(
+            poly_expr, returns_geom=False, is_aggr=True
+        )
+        geom = result.take([0]).iloc[0]
+
+        if geom is None or geom.is_empty:
+            return GeoSeries([], name="polygons")
+
+        parts = shapely.get_parts(geom)
+        return GeoSeries(list(parts), name="polygons")
+
     # ============================================================================
     # GEOMETRIC OPERATIONS
     # ============================================================================
@@ -1550,6 +1597,20 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         return result
 
+    def relate_pattern(self, other, pattern, align=None) -> pspd.Series:
+        other, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_col = stp.ST_Relate(F.col("L"), F.col("R"), F.lit(pattern))
+        result = self._row_wise_operation(
+            spark_col,
+            other,
+            align,
+            returns_geom=False,
+            default_val=False,
+        )
+        return _to_bool(result)
+
     # ============================================================================
     # SPATIAL PREDICATES
     # ============================================================================
@@ -1568,14 +1629,19 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         return _to_bool(result)
 
-    def contains_properly(self, other, align=None):
-        # Implementation of the abstract method.
-        raise NotImplementedError(
-            _not_implemented_error(
-                "contains_properly",
-                "Tests if geometries properly contain other geometries (no boundary contact).",
-            )
+    def contains_properly(self, other, align=None) -> pspd.Series:
+        other, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_col = stp.ST_Relate(F.col("L"), F.col("R"), F.lit("T**FF*FF*"))
+        result = self._row_wise_operation(
+            spark_col,
+            other,
+            align,
+            returns_geom=False,
+            default_val=False,
         )
+        return _to_bool(result)
 
     def buffer(
         self,
