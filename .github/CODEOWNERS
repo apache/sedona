@@ -20,6 +20,7 @@
 /.github/workflows/license-templates/LICENSE.txt    @jbampton @jiayuasu
 /.github/workflows/pre-commit.yml                   @jbampton @jiayuasu
 /.github/workflows/pre-commit-manual.yml            @jbampton @jiayuasu
+/.github/workflows/pre-commit-reusable.yml          @jbampton @jiayuasu
 /.github/dependabot.yml                             @jbampton @jiayuasu
 /python/sedona/doc/checkmake.ini                    @jbampton @jiayuasu
 /python/sedona/doc/Makefile                         @jbampton @jiayuasu
