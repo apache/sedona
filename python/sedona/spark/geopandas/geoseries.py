@@ -1165,7 +1165,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         sdf = self._internal.spark_frame.select(dump_expr.alias("polygons"))
 
-        if sdf.head(1) is None or len(sdf.head(1)) == 0:
+        if not sdf.take(1):
             return GeoSeries([], name="polygons", crs=self.crs)
 
         internal = InternalFrame(
@@ -1200,7 +1200,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         sdf = self._internal.spark_frame.select(dump_expr.alias("polygons"))
 
-        if sdf.head(1) is None or len(sdf.head(1)) == 0:
+        if not sdf.take(1):
             return GeoSeries([], name="polygons", crs=self.crs)
 
         internal = InternalFrame(
