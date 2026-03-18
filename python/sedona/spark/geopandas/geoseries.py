@@ -26,7 +26,7 @@ import pyspark.pandas as pspd
 import pyspark
 from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
-from pyspark.pandas.internal import InternalFrame
+from pyspark.pandas.internal import InternalField, InternalFrame
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for
 from pyspark.sql.types import NullType
@@ -1153,7 +1153,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     def build_area(self, node=True):
         if len(self) == 0:
-            return GeoSeries([], name="polygons")
+            return GeoSeries([], name="polygons", crs=self.crs)
 
         if node:
             aggr_expr = sta.ST_Union_Aggr(self.spark.column)
@@ -1161,16 +1161,25 @@ class GeoSeries(GeoFrame, pspd.Series):
             aggr_expr = sta.ST_Collect_Agg(self.spark.column)
 
         build_expr = stf.ST_BuildArea(aggr_expr)
-        result = self._query_geometry_column(
-            build_expr, returns_geom=False, is_aggr=True
+        dump_expr = F.explode(stf.ST_Dump(build_expr))
+
+        sdf = self._internal.spark_frame.select(dump_expr.alias("polygons"))
+
+        if sdf.head(1) is None or len(sdf.head(1)) == 0:
+            return GeoSeries([], name="polygons", crs=self.crs)
+
+        internal = InternalFrame(
+            spark_frame=sdf,
+            index_spark_columns=None,
+            column_labels=[("polygons",)],
+            data_spark_columns=[scol_for(sdf, "polygons")],
+            data_fields=[InternalField(np.dtype("object"), sdf.schema["polygons"])],
+            column_label_names=[("polygons",)],
         )
-        geom = result.take([0]).iloc[0]
-
-        if geom is None or geom.is_empty:
-            return GeoSeries([], name="polygons")
-
-        parts = shapely.get_parts(geom)
-        return GeoSeries(list(parts), name="polygons")
+        ps_series = first_series(PandasOnSparkDataFrame(internal))
+        ps_series.rename("polygons", inplace=True)
+        result = GeoSeries(ps_series, crs=self.crs)
+        return result
 
     def polygonize(self, node=True, full=False):
         if full:
@@ -1179,7 +1188,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             )
 
         if len(self) == 0:
-            return GeoSeries([], name="polygons")
+            return GeoSeries([], name="polygons", crs=self.crs)
 
         if node:
             aggr_expr = sta.ST_Union_Aggr(self.spark.column)
@@ -1187,16 +1196,25 @@ class GeoSeries(GeoFrame, pspd.Series):
             aggr_expr = sta.ST_Collect_Agg(self.spark.column)
 
         poly_expr = stf.ST_Polygonize(aggr_expr)
-        result = self._query_geometry_column(
-            poly_expr, returns_geom=False, is_aggr=True
+        dump_expr = F.explode(stf.ST_Dump(poly_expr))
+
+        sdf = self._internal.spark_frame.select(dump_expr.alias("polygons"))
+
+        if sdf.head(1) is None or len(sdf.head(1)) == 0:
+            return GeoSeries([], name="polygons", crs=self.crs)
+
+        internal = InternalFrame(
+            spark_frame=sdf,
+            index_spark_columns=None,
+            column_labels=[("polygons",)],
+            data_spark_columns=[scol_for(sdf, "polygons")],
+            data_fields=[InternalField(np.dtype("object"), sdf.schema["polygons"])],
+            column_label_names=[("polygons",)],
         )
-        geom = result.take([0]).iloc[0]
-
-        if geom is None or geom.is_empty:
-            return GeoSeries([], name="polygons")
-
-        parts = shapely.get_parts(geom)
-        return GeoSeries(list(parts), name="polygons")
+        ps_series = first_series(PandasOnSparkDataFrame(internal))
+        ps_series.rename("polygons", inplace=True)
+        result = GeoSeries(ps_series, crs=self.crs)
+        return result
 
     # ============================================================================
     # GEOMETRIC OPERATIONS
