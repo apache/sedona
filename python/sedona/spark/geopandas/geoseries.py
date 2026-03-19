@@ -26,7 +26,7 @@ import pyspark.pandas as pspd
 import pyspark
 from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
-from pyspark.pandas.internal import InternalField, InternalFrame
+from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for
 from pyspark.sql.types import NullType
@@ -1168,6 +1168,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         if not sdf.take(1):
             return GeoSeries([], name="polygons", crs=self.crs)
 
+        from pyspark.pandas.internal import InternalField
+
         internal = InternalFrame(
             spark_frame=sdf,
             index_spark_columns=None,
@@ -1202,6 +1204,8 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         if not sdf.take(1):
             return GeoSeries([], name="polygons", crs=self.crs)
+
+        from pyspark.pandas.internal import InternalField
 
         internal = InternalFrame(
             spark_frame=sdf,
