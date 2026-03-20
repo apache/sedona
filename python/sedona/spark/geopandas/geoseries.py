@@ -1151,6 +1151,75 @@ class GeoSeries(GeoFrame, pspd.Series):
             returns_geom=True,
         )
 
+    def build_area(self, node=True):
+        if len(self) == 0:
+            return GeoSeries([], name="polygons", crs=self.crs)
+
+        if node:
+            aggr_expr = sta.ST_Union_Aggr(self.spark.column)
+        else:
+            aggr_expr = sta.ST_Collect_Agg(self.spark.column)
+
+        build_expr = stf.ST_BuildArea(aggr_expr)
+        dump_expr = F.explode(stf.ST_Dump(build_expr))
+
+        sdf = self._internal.spark_frame.select(dump_expr.alias("polygons"))
+
+        if not sdf.take(1):
+            return GeoSeries([], name="polygons", crs=self.crs)
+
+        from pyspark.pandas.internal import InternalField
+
+        internal = InternalFrame(
+            spark_frame=sdf,
+            index_spark_columns=None,
+            column_labels=[("polygons",)],
+            data_spark_columns=[scol_for(sdf, "polygons")],
+            data_fields=[InternalField(np.dtype("object"), sdf.schema["polygons"])],
+            column_label_names=[("polygons",)],
+        )
+        ps_series = first_series(PandasOnSparkDataFrame(internal))
+        ps_series.rename("polygons", inplace=True)
+        result = GeoSeries(ps_series, crs=self.crs)
+        return result
+
+    def polygonize(self, node=True, full=False):
+        if full:
+            raise NotImplementedError(
+                "Sedona does not support full=True for polygonize."
+            )
+
+        if len(self) == 0:
+            return GeoSeries([], name="polygons", crs=self.crs)
+
+        if node:
+            aggr_expr = sta.ST_Union_Aggr(self.spark.column)
+        else:
+            aggr_expr = sta.ST_Collect_Agg(self.spark.column)
+
+        poly_expr = stf.ST_Polygonize(aggr_expr)
+        dump_expr = F.explode(stf.ST_Dump(poly_expr))
+
+        sdf = self._internal.spark_frame.select(dump_expr.alias("polygons"))
+
+        if not sdf.take(1):
+            return GeoSeries([], name="polygons", crs=self.crs)
+
+        from pyspark.pandas.internal import InternalField
+
+        internal = InternalFrame(
+            spark_frame=sdf,
+            index_spark_columns=None,
+            column_labels=[("polygons",)],
+            data_spark_columns=[scol_for(sdf, "polygons")],
+            data_fields=[InternalField(np.dtype("object"), sdf.schema["polygons"])],
+            column_label_names=[("polygons",)],
+        )
+        ps_series = first_series(PandasOnSparkDataFrame(internal))
+        ps_series.rename("polygons", inplace=True)
+        result = GeoSeries(ps_series, crs=self.crs)
+        return result
+
     # ============================================================================
     # GEOMETRIC OPERATIONS
     # ============================================================================
@@ -1550,6 +1619,20 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         return result
 
+    def relate_pattern(self, other, pattern, align=None) -> pspd.Series:
+        other, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_col = stp.ST_Relate(F.col("L"), F.col("R"), F.lit(pattern))
+        result = self._row_wise_operation(
+            spark_col,
+            other,
+            align,
+            returns_geom=False,
+            default_val=False,
+        )
+        return _to_bool(result)
+
     # ============================================================================
     # SPATIAL PREDICATES
     # ============================================================================
@@ -1568,14 +1651,19 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         return _to_bool(result)
 
-    def contains_properly(self, other, align=None):
-        # Implementation of the abstract method.
-        raise NotImplementedError(
-            _not_implemented_error(
-                "contains_properly",
-                "Tests if geometries properly contain other geometries (no boundary contact).",
-            )
+    def contains_properly(self, other, align=None) -> pspd.Series:
+        other, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        spark_col = stp.ST_Relate(F.col("L"), F.col("R"), F.lit("T**FF*FF*"))
+        result = self._row_wise_operation(
+            spark_col,
+            other,
+            align,
+            returns_geom=False,
+            default_val=False,
         )
+        return _to_bool(result)
 
     def buffer(
         self,

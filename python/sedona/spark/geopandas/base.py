@@ -1429,6 +1429,79 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("line_merge", self, directed)
 
+    def build_area(self, node=True):
+        """Create an areal geometry formed by the constituent linework.
+
+        Builds areas from the GeoSeries that contain linework which represents
+        the edges of a planar graph.  All geometries within the GeoSeries are
+        considered together and the resulting polygons therefore do not map 1:1
+        to input geometries.
+
+        Parameters
+        ----------
+        node : bool, default True
+            If True, the linework is noded together before building areas.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import MultiLineString
+        >>> s = GeoSeries(
+        ...     [
+        ...         MultiLineString(
+        ...             [[(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)]]
+        ...         ),
+        ...     ]
+        ... )
+        >>> s.build_area()
+        0    POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
+        Name: polygons, dtype: geometry
+        """
+        return _delegate_to_geometry_column("build_area", self, node)
+
+    def polygonize(self, node=True, full=False):
+        """Create polygons formed from the linework of a GeoSeries.
+
+        Polygonizes the GeoSeries that contain linework which represents the
+        edges of a planar graph.  All geometries within the GeoSeries are
+        considered together and the resulting polygons therefore do not map 1:1
+        to input geometries.
+
+        Parameters
+        ----------
+        node : bool, default True
+            If True, the linework is noded together before polygonizing.
+        full : bool, default False
+            If True, return the full polygonization result including cut edges,
+            dangles, and invalid rings.
+            Not supported in Sedona; passing ``True`` will raise
+            ``NotImplementedError``.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import MultiLineString
+        >>> s = GeoSeries(
+        ...     [
+        ...         MultiLineString(
+        ...             [[(0, 0), (0, 1), (1, 1)], [(1, 1), (1, 0), (0, 0)]]
+        ...         ),
+        ...     ]
+        ... )
+        >>> s.polygonize()
+        0    POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
+        Name: polygons, dtype: geometry
+        """
+        return _delegate_to_geometry_column("polygonize", self, node, full)
+
     @property
     def unary_union(self):
         """Returns a geometry containing the union of all geometries in the
@@ -3399,7 +3472,64 @@ class GeoFrame(metaclass=ABCMeta):
         return _delegate_to_geometry_column("contains", self, other, align)
 
     def contains_properly(self, other, align=None):
-        raise NotImplementedError("This method is not implemented yet.")
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        each aligned geometry that properly contains `other`.
+
+        An object is said to properly contain `other` if the `other` object
+        lies entirely within the `interior` of the object (no shared boundary
+        points).
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to test whether
+            it is properly contained.
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point, Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+        ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+        ...     ]
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Point(1, 1),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+
+        >>> s.contains_properly(s2)
+        0     True
+        1    False
+        dtype: bool
+
+        Notes
+        -----
+        This method works in a row-wise manner. It does not check if an element
+        of one GeoSeries ``contains_properly`` any element of the other one.
+
+        The difference from ``contains`` is that ``contains_properly`` returns
+        ``False`` when the `other` geometry touches the boundary of the object.
+
+        See also
+        --------
+        GeoSeries.contains
+        GeoSeries.within
+        """
+        return _delegate_to_geometry_column("contains_properly", self, other, align)
 
     def relate(self, other, align=None):
         """Returns the DE-9IM matrix string for the relationship between each geometry and `other`.
@@ -3471,6 +3601,66 @@ class GeoFrame(metaclass=ABCMeta):
         GeoSeries.within
         """
         return _delegate_to_geometry_column("relate", self, other, align)
+
+    def relate_pattern(self, other, pattern, align=None):
+        """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` if the
+        DE-9IM relationship between each geometry and `other` matches the
+        specified `pattern`.
+
+        The operation works on a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to relate to.
+        pattern : str
+            The DE-9IM pattern to match. A 9-character string where each
+            character is one of: 'T' (matches any non-empty intersection),
+            'F' (matches empty intersection), '*' (matches anything),
+            '0', '1', '2' (matches specific dimensions).
+        align : bool | None (default None)
+            If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+            If False, the order of elements is preserved.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point, Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+        ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+        ...     ]
+        ... )
+        >>> s2 = GeoSeries(
+        ...     [
+        ...         Point(1, 1),
+        ...         Point(3, 3),
+        ...     ]
+        ... )
+
+        >>> s.relate_pattern(s2, "T*F**FFF*")
+        0     True
+        1    False
+        dtype: bool
+
+        Notes
+        -----
+        This method works in a row-wise manner.
+
+        See also
+        --------
+        GeoSeries.relate
+        GeoSeries.contains
+        GeoSeries.intersects
+        """
+        return _delegate_to_geometry_column(
+            "relate_pattern", self, other, pattern, align
+        )
 
     def to_parquet(self, path, **kwargs):
         raise NotImplementedError("This method is not implemented yet.")

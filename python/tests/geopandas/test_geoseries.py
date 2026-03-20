@@ -1919,6 +1919,60 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().line_merge()
         self.check_sgpd_equals_gpd(df_result, expected)
 
+    def test_build_area(self):
+        # build_area is an aggregate operation: all linework is combined,
+        # then areas are built from the combined noded linework.
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (1, 0)]),
+                LineString([(1, 0), (0.5, 1)]),
+                LineString([(0.5, 1), (0, 0)]),
+            ]
+        )
+        result = s.build_area()
+        assert result.name == "polygons"
+        assert len(result) == 1
+        expected_poly = Polygon([(1, 0), (0, 0), (0.5, 1), (1, 0)])
+        self.check_geom_equals(result.iloc[0], expected_poly)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().build_area()
+        assert df_result.name == "polygons"
+        assert len(df_result) == 1
+        self.check_geom_equals(df_result.iloc[0], expected_poly)
+
+        # Test empty GeoSeries
+        result_empty = GeoSeries([]).build_area()
+        assert len(result_empty) == 0
+        assert result_empty.name == "polygons"
+
+    def test_polygonize(self):
+        # polygonize is an aggregate operation: all linework is combined,
+        # then polygons are formed from the combined noded linework.
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]),
+                LineString([(1, 0), (2, 0), (2, 1), (1, 1)]),
+            ]
+        )
+        result = s.polygonize()
+        assert result.name == "polygons"
+        assert len(result) == 2
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().polygonize()
+        assert df_result.name == "polygons"
+        assert len(df_result) == 2
+
+        # Test that full=True raises NotImplementedError
+        with pytest.raises(NotImplementedError):
+            s.polygonize(full=True)
+
+        # Test empty GeoSeries
+        result_empty = GeoSeries([]).polygonize()
+        assert len(result_empty) == 0
+        assert result_empty.name == "polygons"
+
     def test_unary_union(self):
         s = GeoSeries([box(0, 0, 1, 1), box(0, 0, 2, 2)])
         with pytest.warns(FutureWarning, match="unary_union"):
@@ -2556,7 +2610,34 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_pd_series_equal(df_result, expected)
 
     def test_contains_properly(self):
-        pass
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+            ]
+        )
+        s2 = GeoSeries(
+            [
+                Point(1, 1),  # interior point → True
+                Point(0, 0),  # boundary point → False
+                Point(3, 3),  # exterior point → False
+            ]
+        )
+
+        result = s.contains_properly(s2, align=False)
+        expected = pd.Series([True, False, False])
+        self.check_pd_series_equal(result, expected)
+
+        # Test with single geometry
+        result = s.contains_properly(Point(1, 1))
+        expected = pd.Series([True, True, True])
+        self.check_pd_series_equal(result, expected)
+
+        # Test that GeoDataFrame works too
+        df_result = s.to_geoframe().contains_properly(s2, align=False)
+        expected = pd.Series([True, False, False])
+        self.check_pd_series_equal(df_result, expected)
 
     def test_relate(self):
         s = GeoSeries(
@@ -2634,6 +2715,42 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         expected = pd.Series(["FF2F11212", "212101212"])
         self.check_pd_series_equal(result, expected)
+
+    def test_relate_pattern(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+                Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+            ]
+        )
+        s2 = GeoSeries(
+            [
+                Point(1, 1),  # interior → contains pattern matches
+                Point(0, 0),  # boundary → contains pattern fails
+                Point(3, 3),  # exterior → contains pattern fails
+            ]
+        )
+
+        # Test contains_properly pattern: T**FF*FF*
+        result = s.relate_pattern(s2, "T**FF*FF*", align=False)
+        expected = pd.Series([True, False, False])
+        self.check_pd_series_equal(result, expected)
+
+        # Test intersects pattern: T********
+        result = s.relate_pattern(s2, "T********", align=False)
+        expected = pd.Series([True, False, False])
+        self.check_pd_series_equal(result, expected)
+
+        # Test with single geometry
+        result = s.relate_pattern(Point(1, 1), "T**FF*FF*")
+        expected = pd.Series([True, True, True])
+        self.check_pd_series_equal(result, expected)
+
+        # Test that GeoDataFrame works too
+        df_result = s.to_geoframe().relate_pattern(s2, "T**FF*FF*", align=False)
+        expected = pd.Series([True, False, False])
+        self.check_pd_series_equal(df_result, expected)
 
     def test_frechet_distance(self):
         s1 = GeoSeries(

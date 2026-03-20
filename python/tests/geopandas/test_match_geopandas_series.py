@@ -999,6 +999,28 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(geom).line_merge()
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+    def test_build_area(self):
+        # build_area is aggregate: use linestrings forming a triangle
+        geom = [
+            LineString([(0, 0), (1, 0)]),
+            LineString([(1, 0), (0.5, 1)]),
+            LineString([(0.5, 1), (0, 0)]),
+        ]
+        sgpd_result = GeoSeries(geom).build_area()
+        gpd_result = gpd.GeoSeries(geom).build_area()
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_polygonize(self):
+        # polygonize is aggregate: use linestrings forming a closed ring
+        geom = [
+            LineString([(0, 0), (1, 0)]),
+            LineString([(1, 0), (0.5, 1)]),
+            LineString([(0.5, 1), (0, 0)]),
+        ]
+        sgpd_result = GeoSeries(geom).polygonize()
+        gpd_result = gpd.GeoSeries(geom).polygonize()
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_unary_union(self):
         lst = [g for geom in self.geoms for g in geom if g.is_valid]
         with pytest.warns(FutureWarning, match="unary_union"):
@@ -1270,7 +1292,25 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_contains_properly(self):
-        pass
+        for geom, geom2 in self.pairs:
+            if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
+                continue
+            sgpd_result = GeoSeries(geom).contains_properly(
+                GeoSeries(geom2), align=True
+            )
+            gpd_result = gpd.GeoSeries(geom).contains_properly(
+                gpd.GeoSeries(geom2), align=True
+            )
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).contains_properly(
+                    GeoSeries(geom2), align=False
+                )
+                gpd_result = gpd.GeoSeries(geom).contains_properly(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_relate(self):
         for geom, geom2 in self.pairs:
@@ -1284,6 +1324,26 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                     gpd.GeoSeries(geom2), align=False
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_relate_pattern(self):
+        for geom, geom2 in self.pairs:
+            for pattern in ["T********", "T*F**FFF*", "FF*FF****"]:
+                sgpd_result = GeoSeries(geom).relate_pattern(
+                    GeoSeries(geom2), pattern, align=True
+                )
+                gpd_result = gpd.GeoSeries(geom).relate_pattern(
+                    gpd.GeoSeries(geom2), pattern, align=True
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+                if len(geom) == len(geom2):
+                    sgpd_result = GeoSeries(geom).relate_pattern(
+                        GeoSeries(geom2), pattern, align=False
+                    )
+                    gpd_result = gpd.GeoSeries(geom).relate_pattern(
+                        gpd.GeoSeries(geom2), pattern, align=False
+                    )
+                    self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_frechet_distance(self):
         line_pairs = [
