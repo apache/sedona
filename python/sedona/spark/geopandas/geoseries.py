@@ -1157,7 +1157,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     def build_area(self, node=True):
         if self._is_empty():
-            return GeoSeries([], name="polygons", crs=self.crs)
+            return GeoSeries([], name="polygons", crs=None)
 
         if node:
             aggr_expr = sta.ST_Union_Aggr(self.spark.column)
@@ -1194,7 +1194,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             )
 
         if self._is_empty():
-            return GeoSeries([], name="polygons", crs=self.crs)
+            return GeoSeries([], name="polygons", crs=None)
 
         if node:
             aggr_expr = sta.ST_Union_Aggr(self.spark.column)
