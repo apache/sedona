@@ -214,6 +214,7 @@
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.boundary"><code class="docutils literal notranslate"><span class="pre">GeoSeries.boundary</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.bounds"><code class="docutils literal notranslate"><span class="pre">GeoSeries.bounds</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.buffer"><code class="docutils literal notranslate"><span class="pre">GeoSeries.buffer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.build_area"><code class="docutils literal notranslate"><span class="pre">GeoSeries.build_area()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.centroid"><code class="docutils literal notranslate"><span class="pre">GeoSeries.centroid</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.clip"><code class="docutils literal notranslate"><span class="pre">GeoSeries.clip()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.concave_hull"><code class="docutils literal notranslate"><span class="pre">GeoSeries.concave_hull()</span></code></a></li>
@@ -284,8 +285,10 @@
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.offset_curve"><code class="docutils literal notranslate"><span class="pre">GeoSeries.offset_curve()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.overlaps"><code class="docutils literal notranslate"><span class="pre">GeoSeries.overlaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.plot"><code class="docutils literal notranslate"><span class="pre">GeoSeries.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.polygonize"><code class="docutils literal notranslate"><span class="pre">GeoSeries.polygonize()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.project"><code class="docutils literal notranslate"><span class="pre">GeoSeries.project()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.relate"><code class="docutils literal notranslate"><span class="pre">GeoSeries.relate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.relate_pattern"><code class="docutils literal notranslate"><span class="pre">GeoSeries.relate_pattern()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.remove_repeated_points"><code class="docutils literal notranslate"><span class="pre">GeoSeries.remove_repeated_points()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.representative_point"><code class="docutils literal notranslate"><span class="pre">GeoSeries.representative_point()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.reverse"><code class="docutils literal notranslate"><span class="pre">GeoSeries.reverse()</span></code></a></li>
@@ -721,10 +724,10 @@
 </li>
       <li><a href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.boundary">boundary (sedona.spark.geopandas.GeoSeries property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.boundary">boundary() (sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.boundaryEnvelope">boundaryEnvelope (sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD property)</a>
 </li>
       <li><a href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.bounds">bounds (sedona.spark.geopandas.GeoSeries property)</a>
@@ -732,6 +735,8 @@
       <li><a href="sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryBuffer.buffer">buffer (sedona.spark.utils.geometry_serde_general.GeometryBuffer attribute)</a>
 </li>
       <li><a href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.buffer">buffer() (sedona.spark.geopandas.GeoSeries method)</a>
+</li>
+      <li><a href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.build_area">build_area() (sedona.spark.geopandas.GeoSeries method)</a>
 </li>
       <li><a href="sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.builder">builder() (sedona.spark.SedonaContext.SedonaContext class method)</a>
 </li>
@@ -2126,6 +2131,8 @@
         <li><a href="sedona.spark.utils.html#sedona.spark.utils.geometry_serde_general.GeometryTypeID.POLYGON">(sedona.spark.utils.geometry_serde_general.GeometryTypeID attribute)</a>
 </li>
       </ul></li>
+      <li><a href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.polygonize">polygonize() (sedona.spark.geopandas.GeoSeries method)</a>
+</li>
       <li><a href="sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.polygon_rdd.PolygonRDD">PolygonRDD (class in sedona.spark.core.SpatialRDD.polygon_rdd)</a>
 
       <ul>
@@ -2277,6 +2284,8 @@
       <li><a href="sedona.spark.register.html#sedona.spark.register.geo_registrator.SedonaRegistrator.registerAll">registerAll() (sedona.spark.register.geo_registrator.SedonaRegistrator class method)</a>
 </li>
       <li><a href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.relate">relate() (sedona.spark.geopandas.GeoSeries method)</a>
+</li>
+      <li><a href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.relate_pattern">relate_pattern() (sedona.spark.geopandas.GeoSeries method)</a>
 </li>
       <li><a href="sedona.spark.utils.html#sedona.spark.utils.binary_parser.BinaryParser.remove_negative">remove_negative() (sedona.spark.utils.binary_parser.BinaryParser class method)</a>
 </li>

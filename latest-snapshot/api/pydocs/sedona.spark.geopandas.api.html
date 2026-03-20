@@ -217,6 +217,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.boundary"><code class="docutils literal notranslate"><span class="pre">GeoSeries.boundary</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.bounds"><code class="docutils literal notranslate"><span class="pre">GeoSeries.bounds</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.buffer"><code class="docutils literal notranslate"><span class="pre">GeoSeries.buffer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.build_area"><code class="docutils literal notranslate"><span class="pre">GeoSeries.build_area()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.centroid"><code class="docutils literal notranslate"><span class="pre">GeoSeries.centroid</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.clip"><code class="docutils literal notranslate"><span class="pre">GeoSeries.clip()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.concave_hull"><code class="docutils literal notranslate"><span class="pre">GeoSeries.concave_hull()</span></code></a></li>
@@ -287,8 +288,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.offset_curve"><code class="docutils literal notranslate"><span class="pre">GeoSeries.offset_curve()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.overlaps"><code class="docutils literal notranslate"><span class="pre">GeoSeries.overlaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.plot"><code class="docutils literal notranslate"><span class="pre">GeoSeries.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.polygonize"><code class="docutils literal notranslate"><span class="pre">GeoSeries.polygonize()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.project"><code class="docutils literal notranslate"><span class="pre">GeoSeries.project()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.relate"><code class="docutils literal notranslate"><span class="pre">GeoSeries.relate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.relate_pattern"><code class="docutils literal notranslate"><span class="pre">GeoSeries.relate_pattern()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.remove_repeated_points"><code class="docutils literal notranslate"><span class="pre">GeoSeries.remove_repeated_points()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.representative_point"><code class="docutils literal notranslate"><span class="pre">GeoSeries.representative_point()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.reverse"><code class="docutils literal notranslate"><span class="pre">GeoSeries.reverse()</span></code></a></li>
@@ -708,6 +711,39 @@ However, ‘right’ may be specified to use a right-sided buffer.</p></li>
 </div>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.build_area">
+<span class="sig-name descname"><span class="pre">build_area</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.build_area"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.build_area" title="Permalink to this definition"></a></dt>
+<dd><p>Create an areal geometry formed by the constituent linework.</p>
+<p>Builds areas from the GeoSeries that contain linework which represents
+the edges of a planar graph.  All geometries within the GeoSeries are
+considered together and the resulting polygons therefore do not map 1:1
+to input geometries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default True</em>) – If True, the linework is noded together before building areas.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiLineString</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">MultiLineString</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="p">[[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]]</span>
+<span class="gp">... </span>        <span class="p">),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">build_area</span><span class="p">()</span>
+<span class="go">0    POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))</span>
+<span class="go">Name: polygons, dtype: geometry</span>
+</pre></div>
+</div>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.centroid">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">centroid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></em><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.centroid" title="Permalink to this definition"></a></dt>
@@ -901,8 +937,59 @@ of one GeoSeries <code class="docutils literal notranslate"><span class="pre">co
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.contains_properly">
-<span class="sig-name descname"><span class="pre">contains_properly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">align</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.contains_properly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.contains_properly" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">contains_properly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">align</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.pandas/api/pyspark.pandas.Series.html#pyspark.pandas.Series" title="(in PySpark vmaster)"><span class="pre">pyspark.pandas.Series</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.contains_properly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.contains_properly" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a <code class="docutils literal notranslate"><span class="pre">Series</span></code> of <code class="docutils literal notranslate"><span class="pre">dtype('bool')</span></code> with value <code class="docutils literal notranslate"><span class="pre">True</span></code> for
+each aligned geometry that properly contains <cite>other</cite>.</p>
+<p>An object is said to properly contain <cite>other</cite> if the <cite>other</cite> object
+lies entirely within the <cite>interior</cite> of the object (no shared boundary
+points).</p>
+<p>The operation works on a 1-to-1 row-wise manner.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries"><em>GeoSeries</em></a><em> or </em><em>geometric object</em>) – The GeoSeries (elementwise) or geometric object to test whether
+it is properly contained.</p></li>
+<li><p><strong>align</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em> | </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+If False, the order of elements is preserved.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Series (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a>)</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">contains_properly</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span>
+<span class="go">0     True</span>
+<span class="go">1    False</span>
+<span class="go">dtype: bool</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This method works in a row-wise manner. It does not check if an element
+of one GeoSeries <code class="docutils literal notranslate"><span class="pre">contains_properly</span></code> any element of the other one.</p>
+<p>The difference from <code class="docutils literal notranslate"><span class="pre">contains</span></code> is that <code class="docutils literal notranslate"><span class="pre">contains_properly</span></code> returns
+<code class="docutils literal notranslate"><span class="pre">False</span></code> when the <cite>other</cite> geometry touches the boundary of the object.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.contains" title="sedona.spark.geopandas.GeoSeries.contains"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.contains</span></code></a>, <a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.within" title="sedona.spark.geopandas.GeoSeries.within"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.within</span></code></a></p>
+</div>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.convex_hull">
@@ -3709,6 +3796,45 @@ as <code class="docutils literal notranslate"><span class="pre">edgecolor</span>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.polygonize">
+<span class="sig-name descname"><span class="pre">polygonize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.polygonize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.polygonize" title="Permalink to this definition"></a></dt>
+<dd><p>Create polygons formed from the linework of a GeoSeries.</p>
+<p>Polygonizes the GeoSeries that contain linework which represents the
+edges of a planar graph.  All geometries within the GeoSeries are
+considered together and the resulting polygons therefore do not map 1:1
+to input geometries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default True</em>) – If True, the linework is noded together before polygonizing.</p></li>
+<li><p><strong>full</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default False</em>) – If True, return the full polygonization result including cut edges,
+dangles, and invalid rings.
+Not supported in Sedona; passing <code class="docutils literal notranslate"><span class="pre">True</span></code> will raise
+<code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiLineString</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">MultiLineString</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="p">[[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]]</span>
+<span class="gp">... </span>        <span class="p">),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">polygonize</span><span class="p">()</span>
+<span class="go">0    POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))</span>
+<span class="go">Name: polygons, dtype: geometry</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.project">
 <span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalized</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">align</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.pandas/api/pyspark.pandas.Series.html#pyspark.pandas.Series" title="(in PySpark vmaster)"><span class="pre">pyspark.pandas.Series</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.project"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.project" title="Permalink to this definition"></a></dt>
 <dd><p>Return the distance along each geometry nearest to <cite>other</cite>.</p>
@@ -3823,6 +3949,60 @@ of an element of one GeoSeries with <em>all</em> elements of the other one.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.contains" title="sedona.spark.geopandas.GeoSeries.contains"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.contains</span></code></a>, <a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.intersects" title="sedona.spark.geopandas.GeoSeries.intersects"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.intersects</span></code></a>, <a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.within" title="sedona.spark.geopandas.GeoSeries.within"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.within</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.relate_pattern">
+<span class="sig-name descname"><span class="pre">relate_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">align</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.pandas/api/pyspark.pandas.Series.html#pyspark.pandas.Series" title="(in PySpark vmaster)"><span class="pre">pyspark.pandas.Series</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.relate_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.relate_pattern" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a <code class="docutils literal notranslate"><span class="pre">Series</span></code> of <code class="docutils literal notranslate"><span class="pre">dtype('bool')</span></code> with value <code class="docutils literal notranslate"><span class="pre">True</span></code> if the
+DE-9IM relationship between each geometry and <cite>other</cite> matches the
+specified <cite>pattern</cite>.</p>
+<p>The operation works on a 1-to-1 row-wise manner.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries"><em>GeoSeries</em></a><em> or </em><em>geometric object</em>) – The GeoSeries (elementwise) or geometric object to relate to.</p></li>
+<li><p><strong>pattern</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The DE-9IM pattern to match. A 9-character string where each
+character is one of: ‘T’ (matches any non-empty intersection),
+‘F’ (matches empty intersection), ‘*’ (matches anything),
+‘0’, ‘1’, ‘2’ (matches specific dimensions).</p></li>
+<li><p><strong>align</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em> | </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+If False, the order of elements is preserved.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Series (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a>)</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">relate_pattern</span><span class="p">(</span><span class="n">s2</span><span class="p">,</span> <span class="s2">&quot;T*F**FFF*&quot;</span><span class="p">)</span>
+<span class="go">0     True</span>
+<span class="go">1    False</span>
+<span class="go">dtype: bool</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This method works in a row-wise manner.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.relate" title="sedona.spark.geopandas.GeoSeries.relate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.relate</span></code></a>, <a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.contains" title="sedona.spark.geopandas.GeoSeries.contains"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.contains</span></code></a>, <a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.intersects" title="sedona.spark.geopandas.GeoSeries.intersects"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.intersects</span></code></a></p>
 </div>
 </dd></dl>
 

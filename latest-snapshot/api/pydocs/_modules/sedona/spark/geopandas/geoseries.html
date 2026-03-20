@@ -214,6 +214,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.boundary"><code class="docutils literal notranslate"><span class="pre">GeoSeries.boundary</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.bounds"><code class="docutils literal notranslate"><span class="pre">GeoSeries.bounds</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.buffer"><code class="docutils literal notranslate"><span class="pre">GeoSeries.buffer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.build_area"><code class="docutils literal notranslate"><span class="pre">GeoSeries.build_area()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.centroid"><code class="docutils literal notranslate"><span class="pre">GeoSeries.centroid</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.clip"><code class="docutils literal notranslate"><span class="pre">GeoSeries.clip()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.concave_hull"><code class="docutils literal notranslate"><span class="pre">GeoSeries.concave_hull()</span></code></a></li>
@@ -284,8 +285,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.offset_curve"><code class="docutils literal notranslate"><span class="pre">GeoSeries.offset_curve()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.overlaps"><code class="docutils literal notranslate"><span class="pre">GeoSeries.overlaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.plot"><code class="docutils literal notranslate"><span class="pre">GeoSeries.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.polygonize"><code class="docutils literal notranslate"><span class="pre">GeoSeries.polygonize()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.project"><code class="docutils literal notranslate"><span class="pre">GeoSeries.project()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.relate"><code class="docutils literal notranslate"><span class="pre">GeoSeries.relate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.relate_pattern"><code class="docutils literal notranslate"><span class="pre">GeoSeries.relate_pattern()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.remove_repeated_points"><code class="docutils literal notranslate"><span class="pre">GeoSeries.remove_repeated_points()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.representative_point"><code class="docutils literal notranslate"><span class="pre">GeoSeries.representative_point()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.reverse"><code class="docutils literal notranslate"><span class="pre">GeoSeries.reverse()</span></code></a></li>
@@ -1604,6 +1607,75 @@
             <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+<div class="viewcode-block" id="GeoSeries.build_area"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.build_area">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">build_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">([],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;polygons&quot;</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">aggr_expr</span> <span class="o">=</span> <span class="n">sta</span><span class="o">.</span><span class="n">ST_Union_Aggr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">aggr_expr</span> <span class="o">=</span> <span class="n">sta</span><span class="o">.</span><span class="n">ST_Collect_Agg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
+
+        <span class="n">build_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_BuildArea</span><span class="p">(</span><span class="n">aggr_expr</span><span class="p">)</span>
+        <span class="n">dump_expr</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">explode</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_Dump</span><span class="p">(</span><span class="n">build_expr</span><span class="p">))</span>
+
+        <span class="n">sdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">dump_expr</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;polygons&quot;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sdf</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">([],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;polygons&quot;</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.internal</span><span class="w"> </span><span class="kn">import</span> <span class="n">InternalField</span>
+
+        <span class="n">internal</span> <span class="o">=</span> <span class="n">InternalFrame</span><span class="p">(</span>
+            <span class="n">spark_frame</span><span class="o">=</span><span class="n">sdf</span><span class="p">,</span>
+            <span class="n">index_spark_columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">column_labels</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;polygons&quot;</span><span class="p">,)],</span>
+            <span class="n">data_spark_columns</span><span class="o">=</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="s2">&quot;polygons&quot;</span><span class="p">)],</span>
+            <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span><span class="n">InternalField</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">),</span> <span class="n">sdf</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="s2">&quot;polygons&quot;</span><span class="p">])],</span>
+            <span class="n">column_label_names</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;polygons&quot;</span><span class="p">,)],</span>
+        <span class="p">)</span>
+        <span class="n">ps_series</span> <span class="o">=</span> <span class="n">first_series</span><span class="p">(</span><span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">))</span>
+        <span class="n">ps_series</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;polygons&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">ps_series</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="GeoSeries.polygonize"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.polygonize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">polygonize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">full</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Sedona does not support full=True for polygonize.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">([],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;polygons&quot;</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">aggr_expr</span> <span class="o">=</span> <span class="n">sta</span><span class="o">.</span><span class="n">ST_Union_Aggr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">aggr_expr</span> <span class="o">=</span> <span class="n">sta</span><span class="o">.</span><span class="n">ST_Collect_Agg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
+
+        <span class="n">poly_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Polygonize</span><span class="p">(</span><span class="n">aggr_expr</span><span class="p">)</span>
+        <span class="n">dump_expr</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">explode</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_Dump</span><span class="p">(</span><span class="n">poly_expr</span><span class="p">))</span>
+
+        <span class="n">sdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">dump_expr</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;polygons&quot;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sdf</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">([],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;polygons&quot;</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.internal</span><span class="w"> </span><span class="kn">import</span> <span class="n">InternalField</span>
+
+        <span class="n">internal</span> <span class="o">=</span> <span class="n">InternalFrame</span><span class="p">(</span>
+            <span class="n">spark_frame</span><span class="o">=</span><span class="n">sdf</span><span class="p">,</span>
+            <span class="n">index_spark_columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">column_labels</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;polygons&quot;</span><span class="p">,)],</span>
+            <span class="n">data_spark_columns</span><span class="o">=</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="s2">&quot;polygons&quot;</span><span class="p">)],</span>
+            <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span><span class="n">InternalField</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">),</span> <span class="n">sdf</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="s2">&quot;polygons&quot;</span><span class="p">])],</span>
+            <span class="n">column_label_names</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;polygons&quot;</span><span class="p">,)],</span>
+        <span class="p">)</span>
+        <span class="n">ps_series</span> <span class="o">=</span> <span class="n">first_series</span><span class="p">(</span><span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">))</span>
+        <span class="n">ps_series</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;polygons&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">ps_series</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
     <span class="c1"># ============================================================================</span>
     <span class="c1"># GEOMETRIC OPERATIONS</span>
     <span class="c1"># ============================================================================</span>
@@ -2003,6 +2075,20 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
+<div class="viewcode-block" id="GeoSeries.relate_pattern"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.relate_pattern">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">relate_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="n">other</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
+
+        <span class="n">spark_col</span> <span class="o">=</span> <span class="n">stp</span><span class="o">.</span><span class="n">ST_Relate</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">pattern</span><span class="p">))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
+            <span class="n">spark_col</span><span class="p">,</span>
+            <span class="n">other</span><span class="p">,</span>
+            <span class="n">align</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">default_val</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">_to_bool</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+
     <span class="c1"># ============================================================================</span>
     <span class="c1"># SPATIAL PREDICATES</span>
     <span class="c1"># ============================================================================</span>
@@ -2021,14 +2107,19 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">_to_bool</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GeoSeries.contains_properly"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.contains_properly">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">contains_properly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method.</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="n">_not_implemented_error</span><span class="p">(</span>
-                <span class="s2">&quot;contains_properly&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;Tests if geometries properly contain other geometries (no boundary contact).&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="p">)</span></div>
+<div class="viewcode-block" id="GeoSeries.contains_properly"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.contains_properly">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">contains_properly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="n">other</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
+
+        <span class="n">spark_col</span> <span class="o">=</span> <span class="n">stp</span><span class="o">.</span><span class="n">ST_Relate</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;T**FF*FF*&quot;</span><span class="p">))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
+            <span class="n">spark_col</span><span class="p">,</span>
+            <span class="n">other</span><span class="p">,</span>
+            <span class="n">align</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">default_val</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">_to_bool</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.buffer"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.buffer">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">buffer</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
