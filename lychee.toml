@@ -20,9 +20,8 @@ accept = ['200', '301', '401', '403', '406', '429']
 exclude = [
     '^file:///.*$',
     '^https?://localhost.*$',
-    '^https://sedona\.apache\.org/latest-snapshot/api/sql/Function/#st_flipcoordinates$',
-    '^https://www\.datasyslab\.net/$',
-    '^http://www\.kr/$'
+    '^https://dist\.apache\.org/repos/dist/dev/sedona/KEYS$',
+    '^https://dist\.apache\.org/repos/dist/release/sedona/KEYS$'
 ]
 
 timeout = 20
