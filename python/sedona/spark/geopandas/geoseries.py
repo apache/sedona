@@ -341,6 +341,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         if crs:
             self.set_crs(crs, inplace=True)
 
+    def _is_empty(self) -> bool:
+        """Check if this GeoSeries has no rows without triggering a full Spark scan."""
+        return not self._internal.spark_frame.take(1)
+
     # ============================================================================
     # COORDINATE REFERENCE SYSTEM (CRS) OPERATIONS
     # ============================================================================
@@ -382,7 +386,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         from pyproj import CRS
 
-        if len(self) == 0:
+        if self._is_empty():
             return None
 
         # F.first is non-deterministic, but it doesn't matter because all non-null values should be the same.
@@ -1152,7 +1156,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def build_area(self, node=True):
-        if len(self) == 0:
+        if self._is_empty():
             return GeoSeries([], name="polygons", crs=self.crs)
 
         if node:
@@ -1189,7 +1193,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 "Sedona does not support full=True for polygonize."
             )
 
-        if len(self) == 0:
+        if self._is_empty():
             return GeoSeries([], name="polygons", crs=self.crs)
 
         if node:
@@ -1245,7 +1249,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 f"Sedona does not support manually specifying different union methods. Ignoring non-default method argument of {method}"
             )
 
-        if len(self) == 0:
+        if self._is_empty():
             # While it's not explicitly defined in GeoPandas docs, this is what GeoPandas returns for empty GeoSeries.
             # If it ever changes for some reason, we'll catch that with the test
             from shapely.geometry import GeometryCollection
@@ -1260,7 +1264,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         return geom
 
     def intersection_all(self) -> BaseGeometry:
-        if len(self) == 0:
+        if self._is_empty():
             from shapely.geometry import GeometryCollection
 
             return GeometryCollection()
@@ -2645,7 +2649,7 @@ class GeoSeries(GeoFrame, pspd.Series):
     def total_bounds(self):
         import warnings
 
-        if len(self) == 0:
+        if self._is_empty():
             # numpy 'min' cannot handle empty arrays
             # TODO with numpy >= 1.15, the 'initial' argument can be used
             return np.array([np.nan, np.nan, np.nan, np.nan])
