@@ -26,23 +26,42 @@ public class DenseNodeExtractor implements Extractor {
   long latOffset;
   long lonOffset;
   long granularity;
+  int dateGranularity;
   long firstId;
   long firstLat;
   long firstLon;
   Integer keyIndex;
 
+  // DenseInfo delta accumulators
+  boolean hasDenseInfo;
+  long firstTimestamp;
+  long firstChangeset;
+  int firstUid;
+  int firstUserSid;
+
   Osmformat.DenseNodes nodes;
 
   public DenseNodeExtractor(
-      Osmformat.DenseNodes nodes, long latOffset, long lonOffset, long granularity) {
+      Osmformat.DenseNodes nodes,
+      long latOffset,
+      long lonOffset,
+      long granularity,
+      int dateGranularity) {
     this.firstId = 0;
     this.firstLat = 0;
     this.firstLon = 0;
     this.latOffset = latOffset;
     this.lonOffset = lonOffset;
     this.granularity = granularity;
+    this.dateGranularity = dateGranularity;
     this.nodes = nodes;
     this.keyIndex = 0;
+
+    this.hasDenseInfo = nodes.hasDenseinfo() && nodes.getDenseinfo().getVersionCount() > 0;
+    this.firstTimestamp = 0;
+    this.firstChangeset = 0;
+    this.firstUid = 0;
+    this.firstUserSid = 0;
   }
 
   public OsmNode extract(int idx, Osmformat.StringTable stringTable) {
@@ -63,7 +82,39 @@ public class DenseNodeExtractor implements Extractor {
 
     HashMap<String, String> tags = parseTags(stringTable);
 
-    return new OsmNode(id, lat, lon, tags);
+    OsmNode node = new OsmNode(id, lat, lon, tags);
+
+    if (hasDenseInfo) {
+      Osmformat.DenseInfo denseInfo = nodes.getDenseinfo();
+
+      // version is NOT delta-encoded
+      node.setVersion(denseInfo.getVersion(idx));
+
+      // timestamp, changeset, uid, user_sid are delta-encoded
+      long timestamp = denseInfo.getTimestamp(idx) + firstTimestamp;
+      long changeset = denseInfo.getChangeset(idx) + firstChangeset;
+      int uid = denseInfo.getUid(idx) + firstUid;
+      int userSid = denseInfo.getUserSid(idx) + firstUserSid;
+
+      firstTimestamp = timestamp;
+      firstChangeset = changeset;
+      firstUid = uid;
+      firstUserSid = userSid;
+
+      node.setTimestamp(timestamp * dateGranularity);
+      node.setChangeset(changeset);
+      node.setUid(uid);
+      if (userSid > 0) {
+        node.setUser(stringTable.getS(userSid).toStringUtf8());
+      }
+
+      // visible is NOT delta-encoded, and may not be present
+      if (denseInfo.getVisibleCount() > idx) {
+        node.setVisible(denseInfo.getVisible(idx));
+      }
+    }
+
+    return node;
   }
 
   HashMap<String, String> parseTags(Osmformat.StringTable stringTable) {

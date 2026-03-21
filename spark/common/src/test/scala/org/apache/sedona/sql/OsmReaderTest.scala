@@ -232,6 +232,90 @@ class OsmReaderTest extends TestBaseScala with Matchers {
       relationsList should contain theSameElementsAs expectedRelationsList
     }
 
+    it("should parse metadata fields (changeset, timestamp, uid, user, version)") {
+      val osmData = sparkSession.read
+        .format("osmpbf")
+        .load(monacoPath)
+
+      // All entities should have version, timestamp, changeset populated
+      val totalCount = osmData.count()
+      val withMetadata = osmData
+        .filter("version is not null and timestamp is not null and changeset is not null")
+        .count()
+
+      withMetadata shouldEqual totalCount
+
+      // Verify timestamp values are reasonable (after year 2000, before year 2100)
+      val timestamps = osmData
+        .selectExpr("min(timestamp)", "max(timestamp)")
+        .collect()
+        .head
+
+      val minTimestamp = timestamps.getTimestamp(0)
+      val maxTimestamp = timestamps.getTimestamp(1)
+
+      minTimestamp.after(java.sql.Timestamp.valueOf("2000-01-01 00:00:00")) shouldBe true
+      maxTimestamp.before(java.sql.Timestamp.valueOf("2100-01-01 00:00:00")) shouldBe true
+
+      // Verify version is positive
+      val minVersion = osmData
+        .selectExpr("min(version)")
+        .collect()
+        .head
+        .getInt(0)
+
+      minVersion should be >= 1
+
+      // Verify changeset is non-negative
+      val minChangeset = osmData
+        .selectExpr("min(changeset)")
+        .collect()
+        .head
+        .getLong(0)
+
+      minChangeset should be >= 0L
+
+      // Verify metadata works for each entity kind
+      for (kind <- Seq("node", "way", "relation")) {
+        val kindData = osmData.filter(s"kind == '$kind'")
+        val kindWithMeta = kindData
+          .filter("version is not null and timestamp is not null")
+          .count()
+
+        kindWithMeta shouldEqual kindData.count()
+      }
+    }
+
+    it("should include metadata fields in schema for dense nodes") {
+      val denseData = sparkSession.read
+        .format("osmpbf")
+        .load(densePath)
+
+      // Verify schema includes the new fields
+      val fieldNames = denseData.schema.fieldNames
+      fieldNames should contain("changeset")
+      fieldNames should contain("timestamp")
+      fieldNames should contain("uid")
+      fieldNames should contain("user")
+      fieldNames should contain("version")
+      fieldNames should contain("visible")
+    }
+
+    it("should include metadata fields in schema for normal nodes") {
+      val nodesData = sparkSession.read
+        .format("osmpbf")
+        .load(nodesPath)
+
+      // Verify schema includes the new fields
+      val fieldNames = nodesData.schema.fieldNames
+      fieldNames should contain("changeset")
+      fieldNames should contain("timestamp")
+      fieldNames should contain("uid")
+      fieldNames should contain("user")
+      fieldNames should contain("version")
+      fieldNames should contain("visible")
+    }
+
     it("should not lose precision due to float to double conversion") {
       // Test for accuracy loss bug in NodeExtractor and DenseNodeExtractor
       val node = sparkSession.read
