@@ -37,6 +37,7 @@ from PIL import Image
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SOURCE_PNG = REPO_ROOT / "docs" / "image" / "sedona_logo_symbol.png"
 DOCS_ROOT = REPO_ROOT / "docs"
+FAVICONS_DIR = DOCS_ROOT / "favicons"
 
 SIZES = {
     "favicon-16x16.png": (16, 16),
@@ -120,15 +121,17 @@ def main():
     print(f"Loading source: {SOURCE_PNG.relative_to(REPO_ROOT)}")
     source = Image.open(SOURCE_PNG).convert("RGBA")
 
+    FAVICONS_DIR.mkdir(parents=True, exist_ok=True)
+
     print("Generating PNG favicons...")
     for filename, size in SIZES.items():
-        generate_png(source, size, DOCS_ROOT / filename)
+        generate_png(source, size, FAVICONS_DIR / filename)
 
     print("Generating favicon.ico...")
     generate_ico(source, DOCS_ROOT / "favicon.ico")
 
     print("Generating safari-pinned-tab.svg...")
-    generate_safari_pinned_tab_svg(source, DOCS_ROOT / "safari-pinned-tab.svg")
+    generate_safari_pinned_tab_svg(source, FAVICONS_DIR / "safari-pinned-tab.svg")
 
     print("Done.")
 
