@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import sys
 import typing
 from typing import Any, Union, Literal, List
 
@@ -1077,9 +1078,14 @@ class GeoSeries(GeoFrame, pspd.Series):
             returns_geom=False,
         )
 
-    def minimum_clearance(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+    def minimum_clearance(self) -> pspd.Series:
+        spark_col = stf.ST_MinimumClearance(self.spark.column)
+        # JTS returns Double.MAX_VALUE for degenerate geometries (e.g. Point, empty);
+        # convert to float('inf') to match geopandas/shapely behaviour.
+        spark_expr = F.when(
+            spark_col >= sys.float_info.max, F.lit(float("inf"))
+        ).otherwise(spark_col)
+        return self._query_geometry_column(spark_expr, returns_geom=False)
 
     def normalize(self):
         spark_expr = stf.ST_Normalize(self.spark.column)

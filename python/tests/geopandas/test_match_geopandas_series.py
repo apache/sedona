@@ -851,7 +851,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_minimum_clearance(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).minimum_clearance()
+            gpd_result = gpd.GeoSeries(geom).minimum_clearance()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_normalize(self):
         for geom in self.geoms:
