@@ -797,6 +797,10 @@
         <span class="k">if</span> <span class="n">crs</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if this GeoSeries has no rows without triggering a full Spark scan.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
     <span class="c1"># ============================================================================</span>
     <span class="c1"># COORDINATE REFERENCE SYSTEM (CRS) OPERATIONS</span>
     <span class="c1"># ============================================================================</span>
@@ -838,7 +842,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_empty</span><span class="p">():</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># F.first is non-deterministic, but it doesn&#39;t matter because all non-null values should be the same.</span>
@@ -1608,8 +1612,8 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.build_area"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.build_area">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">build_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">([],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;polygons&quot;</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_empty</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">([],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;polygons&quot;</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">node</span><span class="p">:</span>
             <span class="n">aggr_expr</span> <span class="o">=</span> <span class="n">sta</span><span class="o">.</span><span class="n">ST_Union_Aggr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
@@ -1645,8 +1649,8 @@
                 <span class="s2">&quot;Sedona does not support full=True for polygonize.&quot;</span>
             <span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">([],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;polygons&quot;</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_empty</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">([],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;polygons&quot;</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">node</span><span class="p">:</span>
             <span class="n">aggr_expr</span> <span class="o">=</span> <span class="n">sta</span><span class="o">.</span><span class="n">ST_Union_Aggr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
@@ -1701,7 +1705,7 @@
                 <span class="sa">f</span><span class="s2">&quot;Sedona does not support manually specifying different union methods. Ignoring non-default method argument of </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_empty</span><span class="p">():</span>
             <span class="c1"># While it&#39;s not explicitly defined in GeoPandas docs, this is what GeoPandas returns for empty GeoSeries.</span>
             <span class="c1"># If it ever changes for some reason, we&#39;ll catch that with the test</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryCollection</span>
@@ -1716,7 +1720,7 @@
         <span class="k">return</span> <span class="n">geom</span></div>
 
 <div class="viewcode-block" id="GeoSeries.intersection_all"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.intersection_all">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">intersection_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseGeometry</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_empty</span><span class="p">():</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryCollection</span>
 
             <span class="k">return</span> <span class="n">GeometryCollection</span><span class="p">()</span>
@@ -3101,7 +3105,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">total_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_empty</span><span class="p">():</span>
             <span class="c1"># numpy &#39;min&#39; cannot handle empty arrays</span>
             <span class="c1"># TODO with numpy &gt;= 1.15, the &#39;initial&#39; argument can be used</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">])</span>
