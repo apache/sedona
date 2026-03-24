@@ -65,14 +65,14 @@ jobs:
           persist-credentials: false
       - name: Set up QEMU
         if: runner.os == 'Linux'
-        uses: docker/setup-qemu-action@v4
+        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
         with:
           # temporarily pin to qemu@v8 to workaround non-determininstic gcc segfaults
           # https://github.com/docker/setup-qemu-action/issues/188
           image: tonistiigi/binfmt:qemu-v8.1.5
           platforms: all
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.4.0
+        uses: pypa/cibuildwheel@ee02a1537ce3071a004a6b08c41e72f0fdc42d9a # v3.4.0
         env:
           CIBW_SKIP: 'pp* *musl*'
           CIBW_ARCHS_LINUX: 'x86_64 aarch64'
