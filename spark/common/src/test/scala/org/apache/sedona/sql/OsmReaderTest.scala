@@ -307,10 +307,11 @@ class OsmReaderTest extends TestBaseScala with Matchers {
         .head()
 
       val changeset = nodeWithMetadata.getAs[Long]("changeset")
-      val timestamp = nodeWithMetadata.getAs[Long]("timestamp")
-      val uid = nodeWithMetadata.getAs[Long]("uid")
+      val timestampValue = nodeWithMetadata.getAs[java.sql.Timestamp]("timestamp")
+      val timestamp = timestampValue.getTime
+      val uid = nodeWithMetadata.getAs[Int]("uid").toLong
       val user = nodeWithMetadata.getAs[String]("user")
-      val version = nodeWithMetadata.getAs[Long]("version")
+      val version = nodeWithMetadata.getAs[Int]("version").toLong
       val visible = nodeWithMetadata.getAs[Boolean]("visible")
 
       // Basic range/non-null checks to ensure delta-decoded metadata is populated
