@@ -88,29 +88,43 @@ public class DenseNodeExtractor implements Extractor {
       Osmformat.DenseInfo denseInfo = nodes.getDenseinfo();
 
       // version is NOT delta-encoded
-      node.setVersion(denseInfo.getVersion(idx));
+      if (denseInfo.getVersionCount() > idx) {
+        node.setVersion(denseInfo.getVersion(idx));
+      }
 
       // timestamp, changeset, uid, user_sid are delta-encoded
-      long timestamp = denseInfo.getTimestamp(idx) + firstTimestamp;
-      long changeset = denseInfo.getChangeset(idx) + firstChangeset;
-      int uid = denseInfo.getUid(idx) + firstUid;
-      int userSid = denseInfo.getUserSid(idx) + firstUserSid;
+      if (denseInfo.getTimestampCount() > idx) {
+        long timestamp = denseInfo.getTimestamp(idx) + firstTimestamp;
+        firstTimestamp = timestamp;
+        node.setTimestamp(timestamp * dateGranularity);
+      }
 
-      firstTimestamp = timestamp;
-      firstChangeset = changeset;
-      firstUid = uid;
-      firstUserSid = userSid;
+      if (denseInfo.getChangesetCount() > idx) {
+        long changeset = denseInfo.getChangeset(idx) + firstChangeset;
+        firstChangeset = changeset;
+        node.setChangeset(changeset);
+      }
 
-      node.setTimestamp(timestamp * dateGranularity);
-      node.setChangeset(changeset);
-      node.setUid(uid);
-      if (userSid > 0) {
-        node.setUser(stringTable.getS(userSid).toStringUtf8());
+      if (denseInfo.getUidCount() > idx) {
+        int uid = denseInfo.getUid(idx) + firstUid;
+        firstUid = uid;
+        node.setUid(uid);
+      }
+
+      if (denseInfo.getUserSidCount() > idx) {
+        int userSid = denseInfo.getUserSid(idx) + firstUserSid;
+        firstUserSid = userSid;
+        if (userSid > 0) {
+          node.setUser(stringTable.getS(userSid).toStringUtf8());
+        }
       }
 
       // visible is NOT delta-encoded, and may not be present
       if (denseInfo.getVisibleCount() > idx) {
         node.setVisible(denseInfo.getVisible(idx));
+      } else {
+        // Per OSM PBF spec, missing 'visible' must be treated as true (especially in history files)
+        node.setVisible(true);
       }
     }
 

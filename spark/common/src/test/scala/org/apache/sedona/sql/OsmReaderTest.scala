@@ -299,6 +299,28 @@ class OsmReaderTest extends TestBaseScala with Matchers {
       fieldNames should contain("user")
       fieldNames should contain("version")
       fieldNames should contain("visible")
+
+      // Verify that at least one dense node has populated metadata values
+      val nodeWithMetadata = denseData
+        .where(col("kind") === "node")
+        .select("changeset", "timestamp", "uid", "user", "version", "visible")
+        .head()
+
+      val changeset = nodeWithMetadata.getAs[Long]("changeset")
+      val timestamp = nodeWithMetadata.getAs[Long]("timestamp")
+      val uid = nodeWithMetadata.getAs[Long]("uid")
+      val user = nodeWithMetadata.getAs[String]("user")
+      val version = nodeWithMetadata.getAs[Long]("version")
+      val visible = nodeWithMetadata.getAs[Boolean]("visible")
+
+      // Basic range/non-null checks to ensure delta-decoded metadata is populated
+      changeset should be > 0L
+      timestamp should be > 0L
+      uid should be >= 0L
+      version should be > 0L
+      user should not be null
+      user.trim.isEmpty shouldBe false
+      (visible == true || visible == false) shouldBe true
     }
 
     it("should include metadata fields in schema for normal nodes") {

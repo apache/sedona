@@ -40,6 +40,10 @@ public class InfoResolver {
     }
     if (info.hasVisible()) {
       entity.setVisible(info.getVisible());
+    } else {
+      // Per OSM PBF spec, when HistoricalInformation is a required_feature,
+      // missing "visible" must be treated as true. Default to true when absent.
+      entity.setVisible(true);
     }
   }
 }
