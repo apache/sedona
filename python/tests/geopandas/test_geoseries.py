@@ -1614,7 +1614,20 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_pd_series_equal(df_result, expected)
 
     def test_minimum_clearance(self):
-        pass
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (0.5, 0), (0.5, 0.5), (0, 0.5)]),
+                MultiPoint([(1, 1), (1, 1)]),
+            ]
+        )
+        expected = pd.Series([1.0, 0.5, float("inf")])
+        result = s.minimum_clearance()
+        self.check_pd_series_equal(result, expected)
+
+        gdf = s.to_geoframe()
+        df_result = gdf.minimum_clearance()
+        self.check_pd_series_equal(df_result, expected)
 
     def test_normalize(self):
         s = GeoSeries(

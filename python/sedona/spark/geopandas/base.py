@@ -1129,8 +1129,32 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("minimum_bounding_radius", self)
 
-    # def minimum_clearance(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    def minimum_clearance(self) -> ps.Series:
+        """Return a ``Series`` containing the minimum clearance distance,
+        which is the smallest distance by which a vertex of the geometry
+        could be moved to produce an invalid geometry.
+
+        If no minimum clearance exists for a geometry (for example,
+        a single point, or an empty geometry), infinity is returned.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+        ...         LineString([(0, 0), (1, 1), (3, 2)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s.minimum_clearance()
+        0    0.707107
+        1    1.414214
+        2         inf
+        dtype: float64
+        """
+        return _delegate_to_geometry_column("minimum_clearance", self)
 
     def normalize(self):
         """Return a ``GeoSeries`` of normalized geometries.
