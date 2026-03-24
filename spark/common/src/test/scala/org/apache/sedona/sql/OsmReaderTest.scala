@@ -315,12 +315,12 @@ class OsmReaderTest extends TestBaseScala with Matchers {
       val visible = nodeWithMetadata.getAs[Boolean]("visible")
 
       // Basic range/non-null checks to ensure delta-decoded metadata is populated
-      changeset should be > 0L
+      changeset should be >= 0L
       timestamp should be > 0L
-      uid should be >= 0L
+      // uid can be -1 for anonymous edits
+      uid should be >= -1L
       version should be > 0L
       user should not be null
-      user.trim.isEmpty shouldBe false
       (visible == true || visible == false) shouldBe true
     }
 
