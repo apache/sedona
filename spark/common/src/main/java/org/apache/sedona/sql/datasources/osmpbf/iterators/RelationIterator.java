@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.sedona.sql.datasources.osmpbf.build.Osmformat;
+import org.apache.sedona.sql.datasources.osmpbf.features.InfoResolver;
 import org.apache.sedona.sql.datasources.osmpbf.features.TagsResolver;
 import org.apache.sedona.sql.datasources.osmpbf.model.OSMEntity;
 import org.apache.sedona.sql.datasources.osmpbf.model.Relation;
@@ -32,12 +33,15 @@ public class RelationIterator implements Iterator<OSMEntity> {
   long relationCount;
   List<Osmformat.Relation> relations;
   Osmformat.StringTable stringTable;
+  Osmformat.PrimitiveBlock primitiveBlock;
 
-  public RelationIterator(List<Osmformat.Relation> relations, Osmformat.StringTable stringTable) {
+  public RelationIterator(
+      List<Osmformat.Relation> relations, Osmformat.PrimitiveBlock primitiveBlock) {
     this.idx = 0;
     this.relationCount = 0;
     this.relations = relations;
-    this.stringTable = stringTable;
+    this.stringTable = primitiveBlock.getStringtable();
+    this.primitiveBlock = primitiveBlock;
 
     if (relations != null) {
       this.relationCount = relations.size();
@@ -79,7 +83,14 @@ public class RelationIterator implements Iterator<OSMEntity> {
         TagsResolver.resolveTags(
             relation.getKeysCount(), relation::getKeys, relation::getVals, stringTable);
 
-    return new Relation(relation.getId(), tags, refs, refTypes, roles);
+    Relation relationEntity = new Relation(relation.getId(), tags, refs, refTypes, roles);
+
+    if (relation.hasInfo()) {
+      InfoResolver.populateInfo(
+          relationEntity, relation.getInfo(), stringTable, primitiveBlock.getDateGranularity());
+    }
+
+    return relationEntity;
   }
 
   private String[] resolveRefRoles(Osmformat.Relation relation) {

@@ -89,6 +89,16 @@ case class OsmPartitionReader(
           if (entity.getRefTypes != null)
             ArrayData.toArrayData(entity.getRefTypes.map(x => UTF8String.fromString(x)))
           else null
+        case "changeset" => entity.getChangeset
+        case "timestamp" =>
+          if (entity.getTimestamp != null)
+            entity.getTimestamp * 1000L // ms to microseconds for Spark TimestampType
+          else null
+        case "uid" => entity.getUid
+        case "user" =>
+          if (entity.getUser != null) UTF8String.fromString(entity.getUser) else null
+        case "version" => entity.getVersion
+        case "visible" => entity.getVisible
       }
     }))
   }
