@@ -50,6 +50,11 @@ case class OsmPartitionReader(
 
     val offset = findOffset(fs, status, file.start)
 
+    if (offset < 0) {
+      f.close()
+      return Iterator.empty
+    }
+
     f.seek(file.start + offset)
 
     new PbfIterator(new StartEndStream(f, (file.length - offset) + HEADER_SIZE_LENGTH)).map(
