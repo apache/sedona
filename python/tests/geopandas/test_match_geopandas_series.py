@@ -495,6 +495,19 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
     def test_clip(self):
         pass
 
+    def test_clip_by_rect(self):
+        # Use rect (0.3, 0.3, 1.7, 1.7) so no test-geometry vertex or hole
+        # coordinate (0, 0.1, 0.2, 1, 2, …) lands on a rectangle boundary.
+        # This avoids boundary-handling differences between JTS and GEOS.
+        for geom in self.geoms:
+            if isinstance(geom[0], (LinearRing, GeometryCollection)):
+                continue
+            if not gpd.GeoSeries(geom).is_valid.all():
+                continue
+            sgpd_result = GeoSeries(geom).clip_by_rect(0.3, 0.3, 1.7, 1.7)
+            gpd_result = gpd.GeoSeries(geom).clip_by_rect(0.3, 0.3, 1.7, 1.7)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_geom_type(self):
         for geom in self.geoms:
             # Sedona converts it to LineString, so the outputs will be different

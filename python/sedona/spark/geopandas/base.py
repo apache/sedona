@@ -3049,6 +3049,55 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("dwithin", self, other, distance, align)
 
+    def clip_by_rect(self, xmin, ymin, xmax, ymax):
+        """Returns a ``GeoSeries`` of the portions of geometry within the
+        given rectangle.
+
+        The geometry is clipped to the rectangle defined by the given
+        coordinates.  Geometries that do not intersect the rectangle are
+        returned as empty geometry collections.
+
+        Parameters
+        ----------
+        xmin : float
+            Minimum x value of the rectangle.
+        ymin : float
+            Minimum y value of the rectangle.
+        xmax : float
+            Maximum x value of the rectangle.
+        ymax : float
+            Maximum y value of the rectangle.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         Point(1, 1),
+        ...     ],
+        ... )
+
+        >>> s.clip_by_rect(0, 0, 1, 1)
+        0    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))
+        1                   LINESTRING (0 0, 1 1)
+        2                             POINT (1 1)
+        dtype: geometry
+
+        See also
+        --------
+        GeoSeries.intersection
+        """
+        return _delegate_to_geometry_column(
+            "clip_by_rect", self, xmin, ymin, xmax, ymax
+        )
+
     def difference(self, other, align=None):
         """Returns a ``GeoSeries`` of the points in each aligned geometry that
         are not in `other`.
