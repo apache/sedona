@@ -7,4 +7,19 @@
   --color-violet: #7142FF;
 
   --font-inter: 'Inter', sans-serif;
+
+  // Added variables for dark mode support
+  --hero-bg: linear-gradient(182.44deg, #9FD2F4 -17.31%, #F3F3F3 97.95%);
+  --section-bg-light: #E2ECF3;
+  --text-primary: #1C1C1C;
+  --text-secondary: rgba(28, 28, 28, 0.8);
+  --card-bg: #fff;
+}
+
+[data-md-color-scheme="slate"] {
+  --hero-bg: linear-gradient(182.44deg, #132f4c -17.31%, #0a1929 97.95%) !important;
+  --section-bg-light: #161b22 !important;
+  --text-primary: #f5f5f5 !important;
+  --text-secondary: rgba(245, 245, 245, 0.8) !important;
+  --card-bg: #161b22 !important;
 }

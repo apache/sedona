@@ -14,6 +14,7 @@
       display: flex;
       justify-content: flex-start;
       align-items: center;
+      gap: 20px;
     }
 
     .right-part {
@@ -44,6 +45,15 @@
     // Title
     .md-header__title {
       font-size: 0;
+      display: none !important;
+
+      @media (min-width: 1220px) {
+        // Only show page title on non-homepage if you want
+        body:not(:has(.page-home)) & {
+           display: block !important;
+           font-size: 1rem;
+        }
+      }
     }
   }
 
@@ -199,4 +209,16 @@
     }
 
   }
+}
+// Fix palette toggle icons visibility (Material theme integration)
+// Fix palette toggle icons visibility (Material theme integration)
+[data-md-color-media] .md-header__option {
+  display: none !important;
+}
+
+// Show the option that matches the CURRENTLY ACTIVE scheme on the body
+[data-md-color-scheme="default"] .md-header__option[data-md-color-scheme="default"],
+[data-md-color-scheme="slate"] .md-header__option[data-md-color-scheme="slate"],
+body:not([data-md-color-scheme]) .md-header__option[data-md-color-media="(prefers-color-scheme)"] {
+  display: block !important;
 }

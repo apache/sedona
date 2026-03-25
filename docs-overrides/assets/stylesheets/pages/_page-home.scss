@@ -32,7 +32,7 @@ body:has(.page-home) {
 
 // Section Hero
 .section-hero {
-  background: linear-gradient(182.44deg, #9FD2F4 -17.31%, #F3F3F3 97.95%);
+  background: var(--hero-bg);
   padding-top: 50px;
   overflow: hidden;
 
@@ -66,7 +66,7 @@ body:has(.page-home) {
       line-height: 1.25;
       text-align: center;
       letter-spacing: -0.02em;
-      color: #1A191C;
+      color: var(--text-primary);
       margin: 0;
     }
   }
@@ -79,7 +79,7 @@ body:has(.page-home) {
     line-height: 1.5;
     text-align: center;
     letter-spacing: -0.015em;
-    color: #1C1C1C;
+    color: var(--text-primary);
     max-width: 450px;
     margin-left: auto;
     margin-right: auto;
@@ -417,7 +417,7 @@ body:has(.page-home) {
 .section-deploy {
   padding-top: clamp-property(48, 100);
   padding-bottom: clamp-property(48, 100);
-  background-color: var(--color-light-blue);
+  background-color: var(--section-bg-light);
 
   .section-title {
     text-align: center;
@@ -432,7 +432,7 @@ body:has(.page-home) {
     font-size: clamp-property(26, 36);
     line-height: 1.4;
     letter-spacing: -0.02em;
-    color: var(--color-dark);
+    color: var(--text-primary);
   }
 
   .section-description {
@@ -518,7 +518,7 @@ body:has(.page-home) {
         font-weight: 400;
         font-size: 16px;
         line-height: 1.5;
-        color: rgba(28, 28, 28, 0.8);
+        color: var(--text-secondary);
       }
 
       &__cta {
@@ -540,7 +540,7 @@ body:has(.page-home) {
 .section-industries-tabs {
   padding-top: clamp-property(48, 100);
   padding-bottom: clamp-property(48, 100);
-  background-color: var(--color-light-blue);
+  background-color: var(--section-bg-light);
 
   .content-box {
     background-color: var(--color-white);
@@ -562,7 +562,7 @@ body:has(.page-home) {
     font-size: clamp-property(26, 36);
     line-height: 1.4;
     letter-spacing: -0.02em;
-    color: var(--color-dark);
+    color: var(--text-primary);
     max-width: 640px;
     margin-left: auto;
     margin-right: auto;
@@ -720,7 +720,7 @@ body:has(.page-home) {
 .section-community {
   padding-top: clamp-property(48, 100);
   padding-bottom: clamp-property(48, 100);
-  background-color: var(--color-light-blue);
+  background-color: var(--section-bg-light);
 
   .section-title {
     text-align: center;
@@ -735,7 +735,7 @@ body:has(.page-home) {
     font-size: clamp-property(26, 36);
     line-height: 1.4;
     letter-spacing: -0.02em;
-    color: var(--color-dark);
+    color: var(--text-primary);
   }
 
   .section-description {
@@ -772,7 +772,7 @@ body:has(.page-home) {
       padding-bottom: 24px;
       padding-left: 28px;
       padding-right: 28px;
-      background: var(--color-white);
+      background: var(--card-bg);
       border-radius: 16px;
       max-width: calc(100% / 3 - 24px * 2 / 3);
 
@@ -796,7 +796,7 @@ body:has(.page-home) {
             font-weight: 500;
             font-size: 16px;
             line-height: 1.5;
-            color: var(--color-dark);
+            color: var(--text-primary);
           }
 
           .author-tag {
