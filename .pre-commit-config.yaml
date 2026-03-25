@@ -40,6 +40,14 @@ repos:
         files: ^README\.md$
   - repo: local
     hooks:
+      - id: npm-install
+        name: Install Zeppelin Node dependencies
+        entry: bash -c "cd zeppelin && npm install"
+        language: system
+        pass_filenames: false
+        files: ^zeppelin/(package\.json|package-lock\.json)$
+        description: Ensures local node_modules match the lockfile
+        stages: [manual]
       - id: prettier
         name: run prettier
         description: format files with prettier
