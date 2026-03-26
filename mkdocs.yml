@@ -24,23 +24,24 @@ nav:
   - SedonaSpark:
       - Home: sedonaspark.md
       - Install:
-          - Install Sedona Scala/Java: setup/install-scala.md
-          - Install Sedona Python: setup/install-python.md
-          - Install Sedona R: api/rdocs
-          - Sedona Python: api/pydocs
-          - Install Sedona-Zeppelin: setup/zeppelin.md
-          - Play Sedona in Docker: setup/docker.md
-          - Install on Wherobots: setup/wherobots.md
-          - Install on Databricks: setup/databricks.md
-          - Install on AWS EMR: setup/emr.md
-          - Install on AWS Glue: setup/glue.md
-          - Install on Microsoft Fabric: setup/fabric.md
-          - Set up Spark cluster manually: setup/cluster.md
-          - Install on Azure Synapse Analytics: setup/azure-synapse-analytics.md
           - Overview: setup/overview.md
           - Modules: setup/modules.md
           - Language wrappers: setup/platform.md
           - Maven Central coordinate: setup/maven-coordinates.md
+          - Use Sedona in Docker: setup/docker.md
+          - Install Sedona in your local Spark cluster:
+              - Install Sedona Scala/Java: setup/install-scala.md
+              - Install Sedona Python: setup/install-python.md
+              - Install Sedona R: api/rdocs
+              - Install Sedona-Zeppelin: setup/zeppelin.md
+              - Set up Spark cluster manually: setup/cluster.md
+          - Cloud platforms:
+              - Install on Wherobots: setup/wherobots.md
+              - Install on Databricks: setup/databricks.md
+              - Install on AWS EMR: setup/emr.md
+              - Install on AWS Glue: setup/glue.md
+              - Install on Microsoft Fabric: setup/fabric.md
+              - Install on Azure Synapse Analytics: setup/azure-synapse-analytics.md
       - Programming Guide:
           - Spatial DataFrame / SQL app: tutorial/sql.md
           - Raster DataFrame / SQL app: tutorial/raster.md
