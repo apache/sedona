@@ -339,6 +339,19 @@ class OsmReaderTest extends TestBaseScala with Matchers {
       fieldNames should contain("visible")
     }
 
+    it("should handle file splits where last partition has no block boundary (GH-2781)") {
+      // Force small splits so the last partition starts inside the final PBF block,
+      // where no OSMData header exists. Without the fix, this causes EOFException.
+      withConf(Map("spark.sql.files.maxPartitionBytes" -> "100000")) {
+        val df = sparkSession.read
+          .format("osmpbf")
+          .load(monacoPath)
+
+        assert(df.rdd.getNumPartitions > 1)
+        assert(df.count() > 0)
+      }
+    }
+
     it("should not lose precision due to float to double conversion") {
       // Test for accuracy loss bug in NodeExtractor and DenseNodeExtractor
       val node = sparkSession.read

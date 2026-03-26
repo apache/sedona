@@ -23,7 +23,7 @@ import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 import org.apache.sedona.sql.datasources.osmpbf.{HeaderFinder, StartEndStream}
 import org.apache.sedona.sql.datasources.osmpbf.iterators.PbfIterator
 import org.apache.sedona.sql.datasources.osmpbf.model.OSMEntity
-import org.apache.spark.SerializableWritable
+import org.apache.spark.{SerializableWritable, TaskContext}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.InternalRow
@@ -46,16 +46,39 @@ case class OsmPartitionReader(
     val path = new Path(new URI(file.filePath.toString()))
     val fs = path.getFileSystem(broadcastedHadoopConf.value.value)
     val status = fs.getFileStatus(path)
-    val f = fs.open(status.getPath)
 
     val offset = findOffset(fs, status, file.start)
 
-    f.seek(file.start + offset)
+    if (offset < 0) {
+      Iterator.empty
+    } else {
+      val f = fs.open(status.getPath)
+      f.seek(file.start + offset)
 
-    new PbfIterator(new StartEndStream(f, (file.length - offset) + HEADER_SIZE_LENGTH)).map(
-      record => {
-        resolveEntity(record, requiredSchema)
-      })
+      Option(TaskContext.get()).foreach(_.addTaskCompletionListener[Unit](_ => f.close()))
+
+      val iter =
+        new PbfIterator(new StartEndStream(f, (file.length - offset) + HEADER_SIZE_LENGTH)).map(
+          record => {
+            resolveEntity(record, requiredSchema)
+          })
+
+      new Iterator[InternalRow] {
+        private var closed = false
+        private def closeIfNeeded(): Unit = {
+          if (!closed) {
+            closed = true
+            f.close()
+          }
+        }
+        override def hasNext: Boolean = {
+          val has = iter.hasNext
+          if (!has) closeIfNeeded()
+          has
+        }
+        override def next(): InternalRow = iter.next()
+      }
+    }
   }
 
   def findOffset(fs: FileSystem, status: FileStatus, start: Long): Long = {
