@@ -46,21 +46,30 @@ case class OsmPartitionReader(
     val path = new Path(new URI(file.filePath.toString()))
     val fs = path.getFileSystem(broadcastedHadoopConf.value.value)
     val status = fs.getFileStatus(path)
-    val f = fs.open(status.getPath)
 
     val offset = findOffset(fs, status, file.start)
 
     if (offset < 0) {
-      f.close()
       return Iterator.empty
     }
 
+    val f = fs.open(status.getPath)
     f.seek(file.start + offset)
 
-    new PbfIterator(new StartEndStream(f, (file.length - offset) + HEADER_SIZE_LENGTH)).map(
-      record => {
-        resolveEntity(record, requiredSchema)
-      })
+    val iter =
+      new PbfIterator(new StartEndStream(f, (file.length - offset) + HEADER_SIZE_LENGTH)).map(
+        record => {
+          resolveEntity(record, requiredSchema)
+        })
+
+    new Iterator[InternalRow] {
+      override def hasNext: Boolean = {
+        val has = iter.hasNext
+        if (!has) f.close()
+        has
+      }
+      override def next(): InternalRow = iter.next()
+    }
   }
 
   def findOffset(fs: FileSystem, status: FileStatus, start: Long): Long = {

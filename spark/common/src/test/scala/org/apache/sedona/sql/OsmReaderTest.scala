@@ -340,20 +340,15 @@ class OsmReaderTest extends TestBaseScala with Matchers {
     }
 
     it("should handle file splits where last partition has no block boundary (GH-2781)") {
-      val originalMaxPartBytes = sparkSession.conf.get("spark.sql.files.maxPartitionBytes")
-      try {
-        // Force small splits so the last partition starts inside the final PBF block,
-        // where no OSMData header exists. Without the fix, this causes EOFException.
-        sparkSession.conf.set("spark.sql.files.maxPartitionBytes", "100000")
-
-        val cnt = sparkSession.read
+      // Force small splits so the last partition starts inside the final PBF block,
+      // where no OSMData header exists. Without the fix, this causes EOFException.
+      withConf(Map("spark.sql.files.maxPartitionBytes" -> "100000")) {
+        val df = sparkSession.read
           .format("osmpbf")
           .load(monacoPath)
-          .count()
 
-        assert(cnt > 0)
-      } finally {
-        sparkSession.conf.set("spark.sql.files.maxPartitionBytes", originalMaxPartBytes)
+        assert(df.rdd.getNumPartitions > 1)
+        assert(df.count() > 0)
       }
     }
 
