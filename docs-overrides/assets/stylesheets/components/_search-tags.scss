@@ -1,0 +1,27 @@
+.search-tag {
+  display: inline-block;
+  margin-left: 0.5em;
+  padding: 0.1em 0.5em;
+  border-radius: 3px;
+  font-size: 0.65em;
+  font-weight: 700;
+  line-height: 1.6;
+  vertical-align: middle;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+
+  &--spark {
+    background-color: #fff3e0;
+    color: #e65100;
+  }
+
+  &--flink {
+    background-color: #e3f2fd;
+    color: #1565c0;
+  }
+
+  &--snow {
+    background-color: #e0f7fa;
+    color: #00695c;
+  }
+}
