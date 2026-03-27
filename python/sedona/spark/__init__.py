@@ -81,14 +81,13 @@ def to_sedonadb(self, connection=None):
     :param connection: Optional SedonaDB connection object. If None, a new connection will be created.
     :return: SedonaDB DataFrame
     """
-    try:
-        import sedona.db
-    except ImportError:
-        raise ImportError(
-            "SedonaDB is not installed. Please install it using `pip install sedona-db`."
-        )
-
     if connection is None:
+        try:
+            import sedona.db
+        except ImportError:
+            raise ImportError(
+                "SedonaDB is not installed. Please install it using `pip install sedona-db`."
+            )
         connection = sedona.db.connect()
 
     return connection.create_data_frame(dataframe_to_arrow(self))

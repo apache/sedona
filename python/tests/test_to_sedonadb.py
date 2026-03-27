@@ -25,20 +25,33 @@ from sedona.spark import *
 class TestToSedonaDB(unittest.TestCase):
 
     def setUp(self):
+        # Preserve any existing sedona.db module and sedona.db attribute
+        self._original_sedona_db_module = sys.modules.get("sedona.db")
+        import sedona
+
+        self._had_sedona_db_attr = hasattr(sedona, "db")
+        self._original_sedona_db_attr = getattr(sedona, "db", None)
+
         # Mock sedona.db to avoid ImportError
         self.mock_sedona_db = MagicMock()
         sys.modules["sedona.db"] = self.mock_sedona_db
-        import sedona
-
         sedona.db = self.mock_sedona_db
         self.spark = SparkSession.builder.getOrCreate()
 
     def tearDown(self):
-        if "sedona.db" in sys.modules:
+        self.spark.stop()
+        # Restore prior sys.modules['sedona.db'] state
+        if self._original_sedona_db_module is not None:
+            sys.modules["sedona.db"] = self._original_sedona_db_module
+        elif "sedona.db" in sys.modules:
             del sys.modules["sedona.db"]
+
         import sedona
 
-        if hasattr(sedona, "db"):
+        # Restore prior sedona.db attribute state
+        if self._had_sedona_db_attr:
+            sedona.db = self._original_sedona_db_attr
+        elif hasattr(sedona, "db"):
             del sedona.db
 
     @patch("sedona.spark.dataframe_to_arrow")
@@ -85,6 +98,27 @@ class TestToSedonaDB(unittest.TestCase):
         mock_dataframe_to_arrow.assert_called_once_with(df)
         mock_connection.create_data_frame.assert_called_once_with(mock_arrow_table)
         self.assertEqual(result, mock_sedonadb_df)
+
+    def test_to_sedonadb_import_error(self):
+        # Temporarily remove sedona.db from sys.modules and sedona
+        if "sedona.db" in sys.modules:
+            del sys.modules["sedona.db"]
+        import sedona
+
+        if hasattr(sedona, "db"):
+            del sedona.db
+
+        # Create a dummy Spark DataFrame
+        df = self.spark.range(1)
+
+        # Call the method and expect ImportError
+        with self.assertRaises(ImportError) as cm:
+            df.to_sedonadb()
+
+        self.assertEqual(
+            str(cm.exception),
+            "SedonaDB is not installed. Please install it using `pip install sedona-db`.",
+        )
 
 
 if __name__ == "__main__":
