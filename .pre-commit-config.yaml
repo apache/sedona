@@ -86,6 +86,11 @@ repos:
         pass_filenames: true # <-- Crucial change: pass filenames to the script
         types: [file] # Ensure only regular files are passed, not directories
         stages: [manual]
+      - id: validate-dependabot-yml
+        name: Validate dependabot.yml
+        entry: npx @bugron/validate-dependabot-yaml@0.3.3
+        language: system
+        files: ^\.github/dependabot\.yml$
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.6
     hooks:
