@@ -17,37 +17,32 @@
 
 import unittest
 import sys
+import sedona
+import sedona.spark
 from unittest.mock import MagicMock, patch
-from pyspark.sql import SparkSession, DataFrame
-from sedona.spark import *
+from pyspark.sql import SparkSession
 
 
 class TestToSedonaDB(unittest.TestCase):
 
     def setUp(self):
-        # Preserve any existing sedona.db module and sedona.db attribute
+        # Preserve original state
         self._original_sedona_db_module = sys.modules.get("sedona.db")
-        import sedona
-
         self._had_sedona_db_attr = hasattr(sedona, "db")
         self._original_sedona_db_attr = getattr(sedona, "db", None)
-
-        # Mock sedona.db to avoid ImportError
-        self.mock_sedona_db = MagicMock()
-        sys.modules["sedona.db"] = self.mock_sedona_db
-        sedona.db = self.mock_sedona_db
+        
+        # Use getOrCreate without stopping it in tearDown to avoid CI crashes/hangs
+        # when other tests might be sharing the same JVM/session.
         self.spark = SparkSession.builder.getOrCreate()
 
     def tearDown(self):
-        self.spark.stop()
         # Restore prior sys.modules['sedona.db'] state
+        if "sedona.db" in sys.modules:
+            del sys.modules["sedona.db"]
         if self._original_sedona_db_module is not None:
             sys.modules["sedona.db"] = self._original_sedona_db_module
-        elif "sedona.db" in sys.modules:
-            del sys.modules["sedona.db"]
 
         import sedona
-
         # Restore prior sedona.db attribute state
         if self._had_sedona_db_attr:
             sedona.db = self._original_sedona_db_attr
@@ -56,12 +51,16 @@ class TestToSedonaDB(unittest.TestCase):
 
     @patch("sedona.spark.dataframe_to_arrow")
     def test_to_sedonadb_no_connection(self, mock_dataframe_to_arrow):
-        # Mock dependencies
+        # Mock sedona.db
+        mock_sedona_db = MagicMock()
+        sys.modules["sedona.db"] = mock_sedona_db
+        sedona.db = mock_sedona_db
+
         mock_arrow_table = MagicMock()
         mock_dataframe_to_arrow.return_value = mock_arrow_table
 
         mock_connection = MagicMock()
-        self.mock_sedona_db.connect.return_value = mock_connection
+        mock_sedona_db.connect.return_value = mock_connection
 
         mock_sedonadb_df = MagicMock()
         mock_connection.create_data_frame.return_value = mock_sedonadb_df
@@ -73,14 +72,18 @@ class TestToSedonaDB(unittest.TestCase):
         result = df.to_sedonadb()
 
         # Verify calls
-        self.mock_sedona_db.connect.assert_called_once()
+        mock_sedona_db.connect.assert_called_once()
         mock_dataframe_to_arrow.assert_called_once_with(df)
         mock_connection.create_data_frame.assert_called_once_with(mock_arrow_table)
         self.assertEqual(result, mock_sedonadb_df)
 
     @patch("sedona.spark.dataframe_to_arrow")
     def test_to_sedonadb_with_connection(self, mock_dataframe_to_arrow):
-        # Mock dependencies
+        # Force sedona.db to be missing to ensure it's not required when connection is provided
+        sys.modules["sedona.db"] = None
+        if hasattr(sedona, "db"):
+            del sedona.db
+
         mock_arrow_table = MagicMock()
         mock_dataframe_to_arrow.return_value = mock_arrow_table
 
@@ -100,11 +103,8 @@ class TestToSedonaDB(unittest.TestCase):
         self.assertEqual(result, mock_sedonadb_df)
 
     def test_to_sedonadb_import_error(self):
-        # Temporarily remove sedona.db from sys.modules and sedona
-        if "sedona.db" in sys.modules:
-            del sys.modules["sedona.db"]
-        import sedona
-
+        # Force ImportError by setting the module to None in sys.modules
+        sys.modules["sedona.db"] = None
         if hasattr(sedona, "db"):
             del sedona.db
 
@@ -117,7 +117,7 @@ class TestToSedonaDB(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            "SedonaDB is not installed. Please install it using `pip install sedona-db`.",
+            "SedonaDB is not installed. Please install it using `pip install sedona-db`."
         )
 
 
