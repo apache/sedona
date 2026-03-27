@@ -47,14 +47,30 @@ function tagResult(item) {
   }
 }
 
-function tagAllResults() {
-  document.querySelectorAll('.md-search-result__item').forEach(tagResult);
+function handleMutations(mutationsList) {
+  for (const mutation of mutationsList) {
+    for (const node of mutation.addedNodes) {
+      if (!(node instanceof HTMLElement)) continue;
+
+      if (node.matches('.md-search-result__item')) {
+        tagResult(node);
+        continue;
+      }
+
+      const items = node.querySelectorAll
+        ? node.querySelectorAll('.md-search-result__item')
+        : [];
+      items.forEach(tagResult);
+    }
+  }
 }
 
 export const searchTags = () => {
   const resultList = document.querySelector('.md-search-result__list');
   if (!resultList) return;
 
-  const observer = new MutationObserver(tagAllResults);
+  resultList.querySelectorAll('.md-search-result__item').forEach(tagResult);
+
+  const observer = new MutationObserver(handleMutations);
   observer.observe(resultList, {childList: true, subtree: true});
 };
