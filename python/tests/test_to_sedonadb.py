@@ -30,7 +30,7 @@ class TestToSedonaDB(unittest.TestCase):
         self._original_sedona_db_module = sys.modules.get("sedona.db")
         self._had_sedona_db_attr = hasattr(sedona, "db")
         self._original_sedona_db_attr = getattr(sedona, "db", None)
-        
+
         # Use getOrCreate without stopping it in tearDown to avoid CI crashes/hangs
         # when other tests might be sharing the same JVM/session.
         self.spark = SparkSession.builder.getOrCreate()
@@ -43,6 +43,7 @@ class TestToSedonaDB(unittest.TestCase):
             sys.modules["sedona.db"] = self._original_sedona_db_module
 
         import sedona
+
         # Restore prior sedona.db attribute state
         if self._had_sedona_db_attr:
             sedona.db = self._original_sedona_db_attr
@@ -117,7 +118,7 @@ class TestToSedonaDB(unittest.TestCase):
 
         self.assertEqual(
             str(cm.exception),
-            "SedonaDB is not installed. Please install it using `pip install sedona-db`."
+            "SedonaDB is not installed. Please install it using `pip install sedona-db`.",
         )
 
 
