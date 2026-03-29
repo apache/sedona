@@ -85,9 +85,7 @@ nav:
                       - SedonaPyDeck: api/sql/Visualization-SedonaPyDeck.md
                       - SedonaKepler: api/sql/Visualization-SedonaKepler.md
               - Raster data:
-                  - Raster loader: api/sql/Raster-loader.md
                   - Raster Functions: api/sql/Raster-Functions.md
-                  - Raster writer: api/sql/Raster-writer.md
                   - Raster map algebra: api/sql/Raster-map-algebra.md
                   - Raster affine transformation: api/sql/Raster-affine-transformation.md
               - Parameter: api/sql/Parameter.md
