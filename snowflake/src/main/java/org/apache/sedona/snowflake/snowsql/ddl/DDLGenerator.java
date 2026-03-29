@@ -22,12 +22,8 @@ import static java.lang.System.exit;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DDLGenerator {
-
-  private static final Logger log = LoggerFactory.getLogger(DDLGenerator.class);
 
   public static Map<String, String> parseArgs(String[] args) {
     Map<String, String> argMap = new HashMap<>();
@@ -54,26 +50,28 @@ public class DDLGenerator {
         DDLGenerator.class.getPackage().getImplementationVersion() == null
             ? "unknown"
             : DDLGenerator.class.getPackage().getImplementationVersion());
-    if (!argMap.containsKey(Constants.GEOTOOLS_VERSION)) {
-      log.error("Missing required arguments");
+    try {
+      assert argMap.containsKey(Constants.GEOTOOLS_VERSION);
+    } catch (AssertionError e) {
+      System.out.println("Missing required arguments");
       printUsage();
     }
     return argMap;
   }
 
   public static void printUsage() {
-    log.info("Usage: java -jar snowflake/target/sedona-snowflake-1.5.1.jar [options]");
-    log.info("Must have Arguments");
-    log.info("  --geotools-version <version>");
-    log.info("Optional have Arguments");
-    log.info("  --schema <schema>  register functions to this schema. Default to sedona");
-    log.info(
+    System.out.println("Usage: java -jar snowflake/target/sedona-snowflake-1.5.1.jar [options]");
+    System.out.println("Must have Arguments");
+    System.out.println("  --geotools-version <version>");
+    System.out.println("Optional have Arguments");
+    System.out.println("  --schema <schema>  register functions to this schema. Default to sedona");
+    System.out.println(
         "  --stageName <stageName>  snowflake stage name to upload jar files. Not needed if isNativeApp is true");
-    log.info(
+    System.out.println(
         "  --isNativeApp <true/false>  whether to generate DDL for Snowflake Native App. Default to false");
-    log.info(
+    System.out.println(
         "  --appRoleName <appRoleName>  application role name. Required when isNativeApp is true. Default to app_public");
-    log.info("  -h  Print this help message");
+    System.out.println("  --h  Print this help message");
     exit(0);
   }
 
@@ -92,7 +90,7 @@ public class DDLGenerator {
       argMap.put("stageName", "");
       appRoleName = argMap.getOrDefault("appRoleName", "app_public");
       if (!argMap.containsKey("appRoleName")) {
-        log.info(
+        System.out.println(
             "-- AppRoleName is required when isNativeApp is true. If not provided, default to app_public");
       }
       stageName = "";
@@ -110,7 +108,7 @@ public class DDLGenerator {
           "-- IsNativeApp is false. Generating DDL for User-Managed Snowflake Account");
       stageName = argMap.getOrDefault("stageName", "@ApacheSedona");
       if (!stageName.startsWith("@")) {
-        log.error("-- StageName must start with @");
+        System.out.println("-- StageName must start with @");
         exit(0);
       }
     }

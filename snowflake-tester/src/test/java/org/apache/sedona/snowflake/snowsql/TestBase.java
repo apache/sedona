@@ -80,7 +80,7 @@ public class TestBase extends TestCase {
               "@ApacheSedona",
               false,
               "");
-      logger.info("DDL: {}", ddl);
+      System.out.println(ddl);
       ResultSet res = snowClient.executeQuery(ddl);
       res.next();
       assert res.getString(1).contains("successfully created");
@@ -126,11 +126,11 @@ public class TestBase extends TestCase {
     buildDDLConfigs = new HashMap<>();
     buildDDLConfigs.put(Constants.SEDONA_VERSION, sedonaVersion);
     buildDDLConfigs.put(Constants.GEOTOOLS_VERSION, geotoolsVersion);
-    logger.info("Using Snowflake DB: {}", snowflake_db_name);
+    System.out.println("Using Snowflake DB: " + snowflake_db_name);
     // upload libraries
     if (!jarUploaded) {
       snowflake_db_name = "TMP_TESTDB_" + generateRandomString(8);
-      logger.info("Creating Snowflake DB: {}", snowflake_db_name);
+      System.out.println("Creating Snowflake DB: " + snowflake_db_name);
       // drop then create db to make sure test env fresh
       snowClient.executeQuery("drop database if exists " + snowflake_db_name);
       snowClient.executeQuery("create database " + snowflake_db_name);
@@ -144,7 +144,7 @@ public class TestBase extends TestCase {
           String.format("tmp/geotools-wrapper-%s.jar", geotoolsVersion), "ApacheSedona");
       jarUploaded = true;
     } else {
-      logger.info("Using Snowflake DB: {}", snowflake_db_name);
+      System.out.println("Using Snowflake DB: " + snowflake_db_name);
       snowClient.executeQuery("use database " + snowflake_db_name);
       snowClient.executeQuery("use schema " + System.getenv("SNOWFLAKE_SCHEMA"));
     }
@@ -153,7 +153,7 @@ public class TestBase extends TestCase {
 
   public void tearDown() {
     try {
-      logger.info("Dropping Snowflake DB: {}", snowflake_db_name);
+      System.out.println("Dropping Snowflake DB: " + snowflake_db_name);
       snowClient.executeQuery("drop database if exists " + snowflake_db_name);
       jarUploaded = false;
     } catch (SQLException e) {

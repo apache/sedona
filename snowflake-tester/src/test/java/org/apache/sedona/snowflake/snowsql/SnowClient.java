@@ -49,7 +49,7 @@ public class SnowClient {
 
   public void initConnection() throws SQLException {
     if (conn == null || conn.isClosed()) {
-      logger.info("connect to {}", connUrl);
+      System.out.println("connect to " + connUrl);
       conn = DriverManager.getConnection(connUrl, props);
     }
   }
@@ -76,7 +76,8 @@ public class SnowClient {
     String[] pList = path.split("/");
     String fileName = pList[pList.length - 1];
     try {
-      logger.info("upload file {} to stage {}", path, stage);
+      System.out.printf("upload file %s to stage %s%n", path, stage);
+      logger.info(String.format("upload file %s to stage %s", path, stage));
       FileInputStream fileInputStream = new FileInputStream(jarFile);
       conn.unwrap(SnowflakeConnection.class)
           .uploadStream(stage, "", fileInputStream, fileName, false);
