@@ -188,18 +188,18 @@ The output contains the following columns:
 
 ### Tiling options
 
-The size of the tile is determined by the internal tiling scheme of the raster data. It is recommended to use [Cloud Optimized GeoTIFF (COG)](https://www.cogeo.org/) format for raster data since they usually organize pixel data as square tiles.
+By default, tiling is enabled (`retile = true`) and the tile size is determined by the GeoTiff file's internal tiling scheme — you do not need to specify `tileWidth` or `tileHeight`. It is recommended to use [Cloud Optimized GeoTIFF (COG)](https://www.cogeo.org/) format for raster data since they usually organize pixel data as square tiles.
 
-The options for the `raster` data source are as follows:
+You can optionally override the tile size, or disable tiling entirely:
 
 | Option | Default | Description |
 | :--- | :--- | :--- |
 | `retile` | `true` | Whether to enable tiling. Set to `false` to load the entire raster as a single row. |
-| `tileWidth` | Internal tile width | The width of each tile in pixels. |
-| `tileHeight` | `tileWidth` if set, otherwise internal tile height | The height of each tile in pixels. |
+| `tileWidth` | GeoTiff's internal tile width | Optional. Override the width of each tile in pixels. |
+| `tileHeight` | Same as `tileWidth` if set, otherwise GeoTiff's internal tile height | Optional. Override the height of each tile in pixels. |
 | `padWithNoData` | `false` | Pad the right and bottom tiles with NODATA values if they are smaller than the specified tile size. |
 
-You can also disable automatic tiling using `option("retile", "false")`, or specify the tile size manually:
+To override the tile size:
 
 === "Python"
     ```python
