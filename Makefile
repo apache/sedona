@@ -18,7 +18,7 @@
 PYTHON := $(shell command -v python || command -v python3 || echo python)
 PIP := $(PYTHON) -m pip
 
-.PHONY: check checkinstall checkupdate install docsinstall genfavicons docsbuild clean run-docs
+.PHONY: check checkinstall checkupdate install docsinstall docsbuild clean run-docs
 
 check:
 	@echo "Running pre-commit checks..."
@@ -45,10 +45,6 @@ docsinstall:
 	@echo "Installing documentation dependencies..."
 	@command -v uv >/dev/null 2>&1 || (echo 'uv not found, install via: curl -LsSf https://astral.sh/uv/install.sh | sh' && exit 1)
 	uv sync --group docs
-
-genfavicons: docsinstall
-	@echo "Generating favicon assets from docs/image/sedona_logo_symbol.png..."
-	uv run python scripts/generate_favicons.py
 
 docsbuild: docsinstall
 	@echo "Building documentation..."
