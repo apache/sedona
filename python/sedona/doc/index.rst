@@ -30,10 +30,5 @@ This documentation covers the Python API for Apache Sedona, providing comprehens
    :maxdepth: 2
    :caption: Contents:
 
-   modules
    sedona.flink
    sedona.spark
-   sedona.spark.geopandas
-   sedona.stac
-   sedona.stats
-   sedona.utils
