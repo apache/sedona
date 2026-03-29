@@ -445,6 +445,16 @@ test_configurations = [
         "POINT (0 1)",
     ),
     (
+        stf.ST_ShortestLine,
+        (
+            "point",
+            "line",
+        ),
+        "point_and_line",
+        "",
+        "LINESTRING (0 1, 0 0)",
+    ),
+    (
         stf.ST_CollectionExtract,
         ("geom",),
         "geom_collection",

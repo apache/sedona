@@ -156,6 +156,9 @@ object st_functions {
   def ST_ClosestPoint(a: Column, b: Column): Column = wrapExpression[ST_ClosestPoint](a, b)
   def ST_ClosestPoint(a: String, b: String): Column = wrapExpression[ST_ClosestPoint](a, b)
 
+  def ST_ShortestLine(a: Column, b: Column): Column = wrapExpression[ST_ShortestLine](a, b)
+  def ST_ShortestLine(a: String, b: String): Column = wrapExpression[ST_ShortestLine](a, b)
+
   def ST_Collect(geoms: Column): Column = wrapExpression[ST_Collect](geoms)
   def ST_Collect(geoms: String): Column = wrapExpression[ST_Collect](geoms)
   def ST_Collect(geoms: Any*): Column = wrapVarArgExpression[ST_Collect](geoms)

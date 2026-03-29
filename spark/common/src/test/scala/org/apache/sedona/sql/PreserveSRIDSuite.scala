@@ -74,6 +74,7 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
       ("ST_RemoveRepeatedPoints(geom3, 1)", 1000),
       ("ST_SetPoint(geom3, 1, ST_Point(0.5, 0.5))", 1000),
       ("ST_ClosestPoint(geom1, geom2)", 1000),
+      ("ST_ShortestLine(geom1, geom2)", 1000),
       ("ST_FlipCoordinates(geom1)", 1000),
       ("ST_SubDivide(geom4, 5)", 1000),
       ("ST_Segmentize(geom4, 0.1)", 1000),

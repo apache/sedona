@@ -193,6 +193,7 @@ These functions compute measurements of distance, area, length, and angles.
 | [ST_MinimumClearanceLine](Measurement-Functions/ST_MinimumClearanceLine.md) | This function returns a two-point LineString geometry representing the minimum clearance distance of the input geometry. If the input geometry does not have a defined minimum clearance, such as for... |
 | [ST_Perimeter](Measurement-Functions/ST_Perimeter.md) | This function calculates the 2D perimeter of a given geometry. It supports Polygon, MultiPolygon, and GeometryCollection geometries (as long as the GeometryCollection contains polygonal geometries)... |
 | [ST_Perimeter2D](Measurement-Functions/ST_Perimeter2D.md) | This function calculates the 2D perimeter of a given geometry. It supports Polygon, MultiPolygon, and GeometryCollection geometries (as long as the GeometryCollection contains polygonal geometries)... |
+| [ST_ShortestLine](Measurement-Functions/ST_ShortestLine.md) | Returns the shortest LineString between two geometries. The line starts on geom1 and ends on geom2. If either geometry is empty, returns null. |
 
 ## Geometry Processing
 
