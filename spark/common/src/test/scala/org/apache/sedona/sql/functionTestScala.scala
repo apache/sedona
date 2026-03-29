@@ -3047,6 +3047,26 @@ class functionTestScala
     assert(result == null)
   }
 
+  it("should pass ST_OffsetCurve") {
+    // Positive distance offsets to the left
+    var df = sparkSession.sql(
+      "SELECT ST_AsText(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0)'), 5.0))")
+    var actual = df.take(1)(0).get(0).asInstanceOf[String]
+    assertEquals("LINESTRING (0 5, 10 5)", actual)
+
+    // Negative distance offsets to the right
+    df = sparkSession.sql(
+      "SELECT ST_AsText(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0)'), -5.0))")
+    actual = df.take(1)(0).get(0).asInstanceOf[String]
+    assertEquals("LINESTRING (0 -5, 10 -5)", actual)
+
+    // With quadrantSegments parameter
+    df = sparkSession.sql(
+      "SELECT ST_AsText(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0)'), 5.0, 4))")
+    actual = df.take(1)(0).get(0).asInstanceOf[String]
+    assertEquals("LINESTRING (0 5, 10 5)", actual)
+  }
+
   it("Should pass ST_AreaSpheroid") {
     val geomTestCases = Map(
       ("'POINT (-0.56 51.3168)'") -> "0.0",

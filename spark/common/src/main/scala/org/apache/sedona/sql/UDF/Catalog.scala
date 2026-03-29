@@ -137,6 +137,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[ST_Snap](),
     function[ST_ClosestPoint](),
     function[ST_ShortestLine](),
+    function[ST_OffsetCurve](),
     function[ST_Boundary](),
     function[ST_HasZ](),
     function[ST_HasM](),

@@ -4251,6 +4251,52 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void offsetCurvePositiveDistance() throws ParseException {
+    // Offset to the left of a horizontal line
+    Geometry line = Constructors.geomFromWKT("LINESTRING (0 0, 10 0)", 0);
+    Geometry result = Functions.offsetCurve(line, 5.0);
+    String actual = Functions.asWKT(result);
+    assertEquals("LINESTRING (0 5, 10 5)", actual);
+  }
+
+  @Test
+  public void offsetCurveNegativeDistance() throws ParseException {
+    // Offset to the right of a horizontal line
+    Geometry line = Constructors.geomFromWKT("LINESTRING (0 0, 10 0)", 0);
+    Geometry result = Functions.offsetCurve(line, -5.0);
+    String actual = Functions.asWKT(result);
+    assertEquals("LINESTRING (0 -5, 10 -5)", actual);
+  }
+
+  @Test
+  public void offsetCurveZeroDistance() throws ParseException {
+    // Zero distance returns a copy of the input
+    Geometry line = Constructors.geomFromWKT("LINESTRING (0 0, 10 0)", 0);
+    Geometry result = Functions.offsetCurve(line, 0.0);
+    String actual = Functions.asWKT(result);
+    assertEquals("LINESTRING (0 0, 10 0)", actual);
+  }
+
+  @Test
+  public void offsetCurveEmptyGeometry() throws ParseException {
+    // Empty geometry returns null
+    Geometry empty = Constructors.geomFromWKT("LINESTRING EMPTY", 0);
+    Geometry result = Functions.offsetCurve(empty, 5.0);
+    assertNull(result);
+  }
+
+  @Test
+  public void offsetCurveWithQuadrantSegments() throws ParseException {
+    // Test with custom quadrant segments
+    Geometry line = Constructors.geomFromWKT("LINESTRING (0 0, 10 0)", 0);
+    Geometry result = Functions.offsetCurve(line, 5.0, 4);
+    assertNotNull(result);
+    // The result should still be a simple offset for a straight line
+    String actual = Functions.asWKT(result);
+    assertEquals("LINESTRING (0 5, 10 5)", actual);
+  }
+
+  @Test
   public void testZmFlag() throws ParseException {
     int _2D = 0, _3DM = 1, _3DZ = 2, _4D = 3;
     Geometry geom = Constructors.geomFromWKT("POINT (1 2)", 0);

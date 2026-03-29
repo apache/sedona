@@ -566,6 +566,15 @@ object st_functions {
   def ST_OrientedEnvelope(geometry: String): Column =
     wrapExpression[ST_OrientedEnvelope](geometry)
 
+  def ST_OffsetCurve(geometry: Column, distance: Column): Column =
+    wrapExpression[ST_OffsetCurve](geometry, distance)
+  def ST_OffsetCurve(geometry: String, distance: Double): Column =
+    wrapExpression[ST_OffsetCurve](geometry, distance)
+  def ST_OffsetCurve(geometry: Column, distance: Column, quadrantSegments: Column): Column =
+    wrapExpression[ST_OffsetCurve](geometry, distance, quadrantSegments)
+  def ST_OffsetCurve(geometry: String, distance: Double, quadrantSegments: Int): Column =
+    wrapExpression[ST_OffsetCurve](geometry, distance, quadrantSegments)
+
   def ST_IsPolygonCCW(geometry: Column): Column = wrapExpression[ST_IsPolygonCCW](geometry)
   def ST_IsPolygonCCW(geometry: String): Column = wrapExpression[ST_IsPolygonCCW](geometry)
 

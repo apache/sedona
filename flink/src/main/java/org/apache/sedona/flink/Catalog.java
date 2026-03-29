@@ -70,6 +70,7 @@ public class Catalog {
       new Functions.ST_BestSRID(),
       new Functions.ST_ClosestPoint(),
       new Functions.ST_ShortestLine(),
+      new Functions.ST_OffsetCurve(),
       new Functions.ST_Centroid(),
       new Functions.ST_Collect(),
       new Functions.ST_CollectionExtract(),
