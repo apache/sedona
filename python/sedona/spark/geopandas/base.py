@@ -3055,7 +3055,18 @@ class GeoFrame(metaclass=ABCMeta):
 
         The geometry is clipped to the rectangle defined by the given
         coordinates.  Geometries that do not intersect the rectangle are
-        returned as empty geometry collections.
+        returned as empty polygons (``POLYGON EMPTY``).
+
+        .. note::
+            This implementation uses ``ST_Intersection`` with a rectangle
+            envelope, which may produce slightly different results from
+            geopandas' ``clip_by_rect`` in edge cases:
+
+            - Non-intersecting geometries are returned as ``POLYGON EMPTY``,
+              whereas geopandas returns ``GEOMETRYCOLLECTION EMPTY``.
+            - Points on the boundary of the rectangle are considered
+              intersecting and are returned unchanged, whereas geopandas
+              returns ``GEOMETRYCOLLECTION EMPTY``.
 
         Parameters
         ----------
@@ -3080,14 +3091,21 @@ class GeoFrame(metaclass=ABCMeta):
         ...     [
         ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
         ...         LineString([(0, 0), (2, 2)]),
-        ...         Point(1, 1),
+        ...         Point(0.5, 0.5),
         ...     ],
         ... )
 
         >>> s.clip_by_rect(0, 0, 1, 1)
-        0    POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))
+        0    POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
         1                   LINESTRING (0 0, 1 1)
-        2                             POINT (1 1)
+        2                         POINT (0.5 0.5)
+        dtype: geometry
+
+        Geometries that do not intersect the rectangle are returned as
+        empty:
+
+        >>> GeoSeries([Point(5, 5)]).clip_by_rect(0, 0, 1, 1)
+        0    POLYGON EMPTY
         dtype: geometry
 
         See also

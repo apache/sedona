@@ -500,8 +500,16 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         # coordinate (0, 0.1, 0.2, 1, 2, …) lands on a rectangle boundary.
         # This avoids boundary-handling differences between JTS and GEOS.
         for geom in self.geoms:
-            if isinstance(geom[0], (LinearRing, GeometryCollection)):
+            # Sedona converts LinearRing to LineString, so geometry types
+            # will differ from geopandas results.
+            if isinstance(geom[0], LinearRing):
                 continue
+            # ST_Intersection returns different results for
+            # GeometryCollection inputs compared to GEOS clip_by_rect.
+            if isinstance(geom[0], GeometryCollection):
+                continue
+            # JTS and GEOS handle invalid geometries differently in
+            # intersection operations, so skip them.
             if not gpd.GeoSeries(geom).is_valid.all():
                 continue
             sgpd_result = GeoSeries(geom).clip_by_rect(0.3, 0.3, 1.7, 1.7)

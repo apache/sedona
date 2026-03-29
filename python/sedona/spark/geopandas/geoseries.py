@@ -836,6 +836,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def clip_by_rect(self, xmin, ymin, xmax, ymax) -> "GeoSeries":
+        if not all(
+            isinstance(val, (int, float, np.integer, np.floating))
+            for val in [xmin, ymin, xmax, ymax]
+        ):
+            raise TypeError(
+                "clip_by_rect only accepts scalar numeric values for xmin/ymin/xmax/ymax"
+            )
         rect = stc.ST_PolygonFromEnvelope(
             float(xmin), float(ymin), float(xmax), float(ymax)
         )
