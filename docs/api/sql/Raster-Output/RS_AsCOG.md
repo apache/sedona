@@ -19,7 +19,7 @@
 
 # RS_AsCOG
 
-Introduction: Returns a binary DataFrame from a Raster DataFrame. Each raster object in the resulting DataFrame is a [Cloud Optimized GeoTIFF](https://www.cogeo.org/) (COG) image in binary format. COG is a GeoTIFF that is internally organized to enable efficient range-read access over HTTP, making it ideal for cloud-hosted raster data.
+Introduction: Returns a binary value (byte array) encoding the input raster as a [Cloud Optimized GeoTIFF](https://www.cogeo.org/) (COG). COG is a GeoTIFF that is internally organized to enable efficient range-read access over HTTP, making it ideal for cloud-hosted raster data.
 
 Possible values for `compression`: `Deflate` (default), `LZW`, `JPEG`, `PackBits`. Case-insensitive.
 

@@ -603,9 +603,9 @@ The writer data source options are:
 
 | Option | Default | Description |
 | :--- | :--- | :--- |
-| `rasterField` | The `binary` type column | The name of the binary column to write. Required if the DataFrame has multiple binary columns. |
+| `rasterField` | Last `binary` column in the schema | The name of the binary column to write. When the DataFrame has multiple binary columns, setting this explicitly is strongly recommended. |
 | `fileExtension` | `.tiff` | File extension for output files (e.g., `.png`, `.asc`). |
-| `pathField` | None | Column name containing the output file paths. If not set, each file gets a random UUID name. |
+| `pathField` | None | Column name containing the output file names. Only the base name is used (directory components are stripped), and any existing file extension is replaced by `fileExtension`. If not set, each file gets a random UUID name. |
 | `useDirectCommitter` | `true` | If `true`, files are written directly to the target location. If `false`, files are written to a temp location first. Writing with `false` is slower, especially on object stores like S3. |
 
 Example with all options:
@@ -615,7 +615,7 @@ Example with all options:
     rasterDf.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)"))
       .write.format("raster")
       .option("rasterField", "raster_binary")
-      .option("pathField", "path")
+      .option("pathField", "name")
       .option("fileExtension", ".tiff")
       .mode("overwrite")
       .save("my_raster_file")
@@ -625,7 +625,7 @@ Example with all options:
     ```python
     rasterDf.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)")).write.format(
         "raster"
-    ).option("rasterField", "raster_binary").option("pathField", "path").option(
+    ).option("rasterField", "raster_binary").option("pathField", "name").option(
         "fileExtension", ".tiff"
     ).mode(
         "overwrite"
@@ -668,7 +668,9 @@ The raster objects are represented as `SedonaRaster` objects in Python, which ca
     ```
 
 ```python
-df_raster = sedona.read.format("raster").load("/path/to/raster.tif")
+df_raster = (
+    sedona.read.format("raster").option("retile", "false").load("/path/to/raster.tif")
+)
 rows = df_raster.collect()
 raster = rows[0].rast
 raster  # <sedona.raster.sedona_raster.InDbSedonaRaster at 0x1618fb1f0>

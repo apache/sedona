@@ -19,7 +19,7 @@
 
 # RS_AsArcGrid
 
-Introduction: Returns a binary DataFrame from a Raster DataFrame. Each raster object in the resulting DataFrame is an ArcGrid image in binary format. ArcGrid only takes 1 source band. If your raster has multiple bands, you need to specify which band you want to use as the source.
+Introduction: Returns a binary value (byte array) representing an ArcGrid image for each input raster. ArcGrid only supports a single band. If your raster has multiple bands, you need to specify which band to use as the source.
 
 Possible values for `sourceBand`: any non-negative value (>=0). If not given, it will use Band 0.
 

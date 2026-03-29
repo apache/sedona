@@ -19,7 +19,7 @@
 
 # RS_AsGeoTiff
 
-Introduction: Returns a binary DataFrame from a Raster DataFrame. Each raster object in the resulting DataFrame is a GeoTiff image in binary format.
+Introduction: Returns a binary value (byte array) encoding the input raster as a GeoTiff image.
 
 Possible values for `compressionType`: `None`, `PackBits`, `Deflate`, `Huffman`, `LZW` and `JPEG`
 

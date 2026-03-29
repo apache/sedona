@@ -63,7 +63,7 @@ Since: `v1.5.0`
     SkewX != 0
     SkewY != 0
     ```
-    If a raster is provided with anyone of these properties then IllegalArgumentException is thrown.
+    If a raster is provided with any one of these properties, then an IllegalArgumentException is thrown.
 
 For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Affine Transformations](../Raster-affine-transformation.md) section.
 
