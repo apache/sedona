@@ -41,8 +41,11 @@ import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FunctionsTest extends TestBase {
+  private static final Logger log = LoggerFactory.getLogger(FunctionsTest.class);
   public static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
   protected static final double FP_TOLERANCE = 1e-12;
@@ -376,7 +379,7 @@ public class FunctionsTest extends TestBase {
     PreparedGeometryFactory factory = new PreparedGeometryFactory();
     PreparedGeometry prepLineString = factory.create(lineString);
     boolean intersects = prepLineString.intersects(point);
-    System.out.println(intersects);
+    log.debug("intersects: {}", intersects);
   }
 
   @Test

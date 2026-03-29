@@ -29,8 +29,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import org.locationtech.jts.io.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestHelper {
+
+  private static final Logger log = LoggerFactory.getLogger(TestHelper.class);
 
   private static final double EPS = 1e-6;
 
@@ -172,8 +176,8 @@ public class TestHelper {
 
     boolean isEqual = compareTo(geoWKT, geoWKT) == 0;
     if (!isEqual) {
-      System.out.println(geoWKB);
-      System.out.println(geoWKT);
+      log.debug("geoWKB: {}", geoWKB);
+      log.debug("geoWKT: {}", geoWKT);
     }
     assertTrue(isEqual);
   }

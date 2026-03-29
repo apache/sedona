@@ -41,8 +41,12 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.index.SpatialIndex;
 import org.locationtech.jts.index.quadtree.Quadtree;
 import org.locationtech.jts.index.strtree.STRtree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SpatialIndexSerdeTest {
+
+  private static final Logger log = LoggerFactory.getLogger(SpatialIndexSerdeTest.class);
 
   private final Kryo kryo = new Kryo();
 
@@ -76,7 +80,7 @@ public class SpatialIndexSerdeTest {
     // get expect result
     SpatialIndex dtree = deserializeIndexKryo(serializeIndexKryo(tree));
 
-    System.out.println("\n==== test correctness of " + aClass.toString() + "====");
+    log.info("==== test correctness of {} ====", aClass);
 
     // test query all object
     assertThat(queryIndex(tree, null), is(queryIndex(dtree, null)));
@@ -105,14 +109,14 @@ public class SpatialIndexSerdeTest {
     }
     byte[] withSerde = serializeIndexKryo(tree);
 
-    System.out.println("\n==== test size of " + aClass.toString() + "====");
-    System.out.println("original size : " + noSerde.length);
-    System.out.println("with serde kryo size : " + withSerde.length);
-    System.out.println("percent : " + (double) withSerde.length / (double) noSerde.length);
+    log.info("==== test size of {} ====", aClass);
+    log.info("original size : {}", noSerde.length);
+    log.info("with serde kryo size : {}", withSerde.length);
+    log.info("percent : {}", (double) withSerde.length / (double) noSerde.length);
   }
 
   public void compareTime(Class aClass) throws Exception {
-    System.out.println("\n==== test Serialize time of " + aClass.toString() + "====");
+    log.info("==== test Serialize time of {} ====", aClass);
     final int indexSize = 1000000;
     SpatialIndex tree = generateIndex(indexSize, aClass);
     double before, after;
@@ -121,12 +125,12 @@ public class SpatialIndexSerdeTest {
     before = System.currentTimeMillis();
     byte[] noSerde = serializeIndexNoKryo(tree);
     after = System.currentTimeMillis();
-    System.out.println("originalserialize time : " + (after - before) / 1000);
+    log.info("original serialize time : {}", (after - before) / 1000);
 
     before = System.currentTimeMillis();
     deserializeIndexNoKryo(noSerde);
     after = System.currentTimeMillis();
-    System.out.println("original deserialize time : " + (after - before) / 1000);
+    log.info("original deserialize time : {}", (after - before) / 1000);
     // do with serde
     if (aClass == Quadtree.class) {
       kryo.register(Quadtree.class, new SpatialIndexSerde());
@@ -137,12 +141,12 @@ public class SpatialIndexSerdeTest {
     before = System.currentTimeMillis();
     byte[] withSerde = serializeIndexKryo(tree);
     after = System.currentTimeMillis();
-    System.out.println("with serde kryo serialize time : " + (after - before) / 1000);
+    log.info("with serde kryo serialize time : {}", (after - before) / 1000);
 
     before = System.currentTimeMillis();
     deserializeIndexKryo(withSerde);
     after = System.currentTimeMillis();
-    System.out.println("with serde kryo deserialize time : " + (after - before) / 1000);
+    log.info("with serde kryo deserialize time : {}", (after - before) / 1000);
   }
 
   private byte[] serializeIndexNoKryo(SpatialIndex index) throws IOException {

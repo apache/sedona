@@ -163,7 +163,7 @@ public class ChoroplethMap extends VisualizationOperator {
     logger.debug("[VisualizationOperator][GenerateColorMatrix][Start]");
     final long maxWeight = this.distributedCountMatrix.max(new PixelCountComparator())._2;
     final long minWeight = 0;
-    System.out.println("Max weight "+maxWeight);
+    logger.debug("Max weight " + maxWeight);
     JavaPairRDD<Integer, Long> normalizedPixelWeights = this.distributedCountMatrix.mapToPair(new PairFunction<Tuple2<Integer,Long>, Integer, Long>(){
       @Override
       public Tuple2<Integer, Long> call(Tuple2<Integer, Long> pixelWeight) throws Exception {

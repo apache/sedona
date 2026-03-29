@@ -23,8 +23,12 @@ import java.sql.SQLException;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SnowTestRunner extends BlockJUnit4ClassRunner {
+
+  private static final Logger log = LoggerFactory.getLogger(SnowTestRunner.class);
 
   private TestBase testObject;
 
@@ -44,7 +48,7 @@ public class SnowTestRunner extends BlockJUnit4ClassRunner {
   @Override
   public void run(RunNotifier notifier) {
     super.run(notifier);
-    System.out.println("Closing SnowClient");
+    log.info("Closing SnowClient");
     testObject.tearDown();
   }
 }

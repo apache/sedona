@@ -31,11 +31,12 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.serializer.KryoSerializer;
 import org.apache.spark.storage.StorageLevel;
 import org.locationtech.jts.geom.Envelope;
-
 // TODO: Auto-generated Javadoc
 
 /** The Class EarthdataMapperRunnableExample. */
 public class EarthdataMapperRunnableExample {
+
+  private static final Logger log = Logger.getLogger(EarthdataMapperRunnableExample.class);
 
   /** The sc. */
   public static JavaSparkContext sc;
@@ -103,7 +104,7 @@ public class EarthdataMapperRunnableExample {
     testSpatialRangeQuery();
     testSpatialRangeQueryUsingIndex();
     sc.stop();
-    System.out.println("All Earthdata DEMOs passed!");
+    log.info("All Earthdata DEMOs passed!");
   }
 
   /** Test spatial range query. */

@@ -47,7 +47,7 @@ object ScalaEarthdataMapperRunnableExample extends App {
   testSpatialRangeQuery()
   testSpatialRangeQueryUsingIndex()
   sc.stop()
-  System.out.println("All Earthdata DEMOs passed!")
+  println("All Earthdata DEMOs passed!")
 
   /**
    * Test spatial range query.

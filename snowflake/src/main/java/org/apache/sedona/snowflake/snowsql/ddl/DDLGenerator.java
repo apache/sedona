@@ -22,8 +22,12 @@ import static java.lang.System.exit;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DDLGenerator {
+
+  private static final Logger log = LoggerFactory.getLogger(DDLGenerator.class);
 
   public static Map<String, String> parseArgs(String[] args) {
     Map<String, String> argMap = new HashMap<>();
@@ -53,25 +57,25 @@ public class DDLGenerator {
     try {
       assert argMap.containsKey(Constants.GEOTOOLS_VERSION);
     } catch (AssertionError e) {
-      System.out.println("Missing required arguments");
+      log.error("Missing required arguments");
       printUsage();
     }
     return argMap;
   }
 
   public static void printUsage() {
-    System.out.println("Usage: java -jar snowflake/target/sedona-snowflake-1.5.1.jar [options]");
-    System.out.println("Must have Arguments");
-    System.out.println("  --geotools-version <version>");
-    System.out.println("Optional have Arguments");
-    System.out.println("  --schema <schema>  register functions to this schema. Default to sedona");
-    System.out.println(
+    log.info("Usage: java -jar snowflake/target/sedona-snowflake-1.5.1.jar [options]");
+    log.info("Must have Arguments");
+    log.info("  --geotools-version <version>");
+    log.info("Optional have Arguments");
+    log.info("  --schema <schema>  register functions to this schema. Default to sedona");
+    log.info(
         "  --stageName <stageName>  snowflake stage name to upload jar files. Not needed if isNativeApp is true");
-    System.out.println(
+    log.info(
         "  --isNativeApp <true/false>  whether to generate DDL for Snowflake Native App. Default to false");
-    System.out.println(
+    log.info(
         "  --appRoleName <appRoleName>  application role name. Required when isNativeApp is true. Default to app_public");
-    System.out.println("  --h  Print this help message");
+    log.info("  --h  Print this help message");
     exit(0);
   }
 
@@ -90,34 +94,33 @@ public class DDLGenerator {
       argMap.put("stageName", "");
       appRoleName = argMap.getOrDefault("appRoleName", "app_public");
       if (!argMap.containsKey("appRoleName")) {
-        System.out.println(
+        log.info(
             "-- AppRoleName is required when isNativeApp is true. If not provided, default to app_public");
       }
       stageName = "";
-      System.out.println("-- Generating DDL for Snowflake Native App");
-      System.out.println("CREATE APPLICATION ROLE IF NOT EXISTS " + appRoleName + ";");
-      System.out.println("CREATE OR ALTER VERSIONED SCHEMA sedona;");
-      System.out.println("GRANT USAGE ON SCHEMA sedona TO APPLICATION ROLE " + appRoleName + ";");
+      log.info("-- Generating DDL for Snowflake Native App");
+      log.info("CREATE APPLICATION ROLE IF NOT EXISTS {};", appRoleName);
+      log.info("CREATE OR ALTER VERSIONED SCHEMA sedona;");
+      log.info("GRANT USAGE ON SCHEMA sedona TO APPLICATION ROLE {};", appRoleName);
     } else {
       // If isNativeApp is false, set stageName to the provided value. Also set appRoleName to empty
       // string since it is not needed.
       // If stageName is not provided, default to @ApacheSedona. The name must start with @.
       isNativeApp = false;
       appRoleName = "";
-      System.out.println(
-          "-- IsNativeApp is false. Generating DDL for User-Managed Snowflake Account");
+      log.info("-- IsNativeApp is false. Generating DDL for User-Managed Snowflake Account");
       stageName = argMap.getOrDefault("stageName", "@ApacheSedona");
       if (!stageName.startsWith("@")) {
-        System.out.println("-- StageName must start with @");
+        log.error("-- StageName must start with @");
         exit(0);
       }
     }
     try {
-      System.out.println("-- UDFs --");
-      System.out.println(
+      log.info("-- UDFs --");
+      log.info(
           String.join("\n", UDFDDLGenerator.buildAll(argMap, stageName, isNativeApp, appRoleName)));
-      System.out.println("-- UDTFs --");
-      System.out.println(
+      log.info("-- UDTFs --");
+      log.info(
           String.join(
               "\n", UDTFDDLGenerator.buildAll(argMap, stageName, isNativeApp, appRoleName)));
     } catch (Exception e) {

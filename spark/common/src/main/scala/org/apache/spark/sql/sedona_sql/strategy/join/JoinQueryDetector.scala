@@ -786,6 +786,9 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
         case (Some(_), _, true, _, false) => "ST_Distance (Geography) <"
         case (None, _, false, _, false) => s"ST_$spatialPredicate"
         case (None, _, false, _, true) => s"RS_$spatialPredicate"
+        case (None, _, true, _, false) => s"ST_$spatialPredicate (Geography)"
+        case (None, _, true, _, true) => s"RS_$spatialPredicate"
+        case (Some(_), _, _, _, true) => s"RS_$spatialPredicate"
       }
     val (distanceOnIndexSide, distanceOnStreamSide) = distance
       .map { distanceExpr =>
