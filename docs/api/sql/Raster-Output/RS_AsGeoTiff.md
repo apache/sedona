@@ -44,7 +44,7 @@ SELECT RS_AsGeoTiff(raster) FROM my_raster_table
 SQL Example
 
 ```sql
-SELECT RS_AsGeoTiff(raster, 'LZW', '0.75') FROM my_raster_table
+SELECT RS_AsGeoTiff(raster, 'LZW', 0.75) FROM my_raster_table
 ```
 
 Output:

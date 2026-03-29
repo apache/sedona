@@ -131,7 +131,7 @@ These functions perform operations on raster objects.
 | [RS_Union](Raster-Operators/RS_Union.md) | Raster | Returns a combined multi-band raster from 2 or more input Rasters. The order of bands in the resultant raster will be in the order of the input rasters. For example if `RS_Union` is called on two 2... | v1.6.0 |
 | [RS_Value](Raster-Operators/RS_Value.md) | Double | Returns the value at the given point in the raster. If no band number is specified it defaults to 1. | v1.4.0 |
 | [RS_Values](Raster-Operators/RS_Values.md) | `Array<Double>` | Returns the values at the given points or grid coordinates in the raster. If no band number is specified it defaults to 1. | v1.4.0 |
-| [RS_AsRaster](Raster-Output/RS_AsRaster.md) | Raster | Converts a vector geometry into a raster dataset by assigning a specified value to all pixels covered by the geometry. | v1.5.0 |
+| [RS_AsRaster](Raster-Operators/RS_AsRaster.md) | Raster | Converts a vector geometry into a raster dataset by assigning a specified value to all pixels covered by the geometry. | v1.5.0 |
 
 ## Raster Tiles
 

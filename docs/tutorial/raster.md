@@ -305,7 +305,7 @@ See [RS_FromNetCDF](../api/sql/Raster-Constructors/RS_FromNetCDF.md) for details
 
 To verify the raster column was created successfully:
 
-```sql
+```python
 rasterDf.printSchema()
 ```
 
@@ -472,7 +472,7 @@ For more information please refer to [Map Algebra API](../api/sql/Raster-map-alg
 
 ### Geometry As Raster
 
-Sedona allows you to rasterize a geometry by using [RS_AsRaster](../api/sql/Raster-Output/RS_AsRaster.md).
+Sedona allows you to rasterize a geometry by using [RS_AsRaster](../api/sql/Raster-Operators/RS_AsRaster.md).
 
 ```sql
 SELECT RS_AsRaster(
@@ -588,15 +588,15 @@ Use Sedona's built-in `raster` data source to write the binary DataFrame:
 
 === "Scala"
     ```scala
-    df.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)"))
+    rasterDf.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)"))
       .write.format("raster").mode("overwrite").save("my_raster_file")
     ```
 
 === "Python"
     ```python
-    df.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)")).write.format("raster").mode(
-        "overwrite"
-    ).save("my_raster_file")
+    rasterDf.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)")).write.format(
+        "raster"
+    ).mode("overwrite").save("my_raster_file")
     ```
 
 The writer data source options are:
@@ -612,7 +612,7 @@ Example with all options:
 
 === "Scala"
     ```scala
-    df.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)"))
+    rasterDf.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)"))
       .write.format("raster")
       .option("rasterField", "raster_binary")
       .option("pathField", "path")
@@ -623,7 +623,7 @@ Example with all options:
 
 === "Python"
     ```python
-    df.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)")).write.format(
+    rasterDf.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)")).write.format(
         "raster"
     ).option("rasterField", "raster_binary").option("pathField", "path").option(
         "fileExtension", ".tiff"

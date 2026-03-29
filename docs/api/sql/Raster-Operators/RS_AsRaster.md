@@ -24,8 +24,8 @@ Introduction: `RS_AsRaster` converts a vector geometry into a raster dataset by 
 * `geom`: The geometry to be rasterized.
 * `raster`: The reference raster to be used for overlaying the `geom` on.
 * `pixelType`: Defines data type of the output raster. This can be one of the following, D (double), F (float), I (integer), S (short), US (unsigned short) or B (byte).
-* `allTouched` (Since: `v1.7.1`): Decides the pixel selection criteria. If set to `true`, the function selects all pixels touched by the geometry, else, selects only pixels who's centroids intersect the geometry. Defaults to `false`.
-* `Value`: The value to be used for assigning pixels covered by the geometry. Defaults to using `1.0` for cell `value` if not provided.
+* `allTouched` (Since: `v1.7.1`): Decides the pixel selection criteria. If set to `true`, the function selects all pixels touched by the geometry, else, selects only pixels whose centroids intersect the geometry. Defaults to `false`.
+* `value`: The value to be used for assigning pixels covered by the geometry. Defaults to using `1.0` if not provided.
 * `noDataValue`: Used for assigning the no data value of the resultant raster. Defaults to `null` if not provided.
 * `useGeometryExtent`: Defines the extent of the resultant raster. When set to `true`, it corresponds to the extent of `geom`, and when set to false, it corresponds to the extent of `raster`. Default value is `true` if not set.
 
