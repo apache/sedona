@@ -54,9 +54,7 @@ public class DDLGenerator {
         DDLGenerator.class.getPackage().getImplementationVersion() == null
             ? "unknown"
             : DDLGenerator.class.getPackage().getImplementationVersion());
-    try {
-      assert argMap.containsKey(Constants.GEOTOOLS_VERSION);
-    } catch (AssertionError e) {
+    if (!argMap.containsKey(Constants.GEOTOOLS_VERSION)) {
       log.error("Missing required arguments");
       printUsage();
     }
@@ -75,7 +73,7 @@ public class DDLGenerator {
         "  --isNativeApp <true/false>  whether to generate DDL for Snowflake Native App. Default to false");
     log.info(
         "  --appRoleName <appRoleName>  application role name. Required when isNativeApp is true. Default to app_public");
-    log.info("  --h  Print this help message");
+    log.info("  -h  Print this help message");
     exit(0);
   }
 
@@ -98,17 +96,18 @@ public class DDLGenerator {
             "-- AppRoleName is required when isNativeApp is true. If not provided, default to app_public");
       }
       stageName = "";
-      log.info("-- Generating DDL for Snowflake Native App");
-      log.info("CREATE APPLICATION ROLE IF NOT EXISTS {};", appRoleName);
-      log.info("CREATE OR ALTER VERSIONED SCHEMA sedona;");
-      log.info("GRANT USAGE ON SCHEMA sedona TO APPLICATION ROLE {};", appRoleName);
+      System.out.println("-- Generating DDL for Snowflake Native App");
+      System.out.println("CREATE APPLICATION ROLE IF NOT EXISTS " + appRoleName + ";");
+      System.out.println("CREATE OR ALTER VERSIONED SCHEMA sedona;");
+      System.out.println("GRANT USAGE ON SCHEMA sedona TO APPLICATION ROLE " + appRoleName + ";");
     } else {
       // If isNativeApp is false, set stageName to the provided value. Also set appRoleName to empty
       // string since it is not needed.
       // If stageName is not provided, default to @ApacheSedona. The name must start with @.
       isNativeApp = false;
       appRoleName = "";
-      log.info("-- IsNativeApp is false. Generating DDL for User-Managed Snowflake Account");
+      System.out.println(
+          "-- IsNativeApp is false. Generating DDL for User-Managed Snowflake Account");
       stageName = argMap.getOrDefault("stageName", "@ApacheSedona");
       if (!stageName.startsWith("@")) {
         log.error("-- StageName must start with @");
@@ -116,11 +115,11 @@ public class DDLGenerator {
       }
     }
     try {
-      log.info("-- UDFs --");
-      log.info(
+      System.out.println("-- UDFs --");
+      System.out.println(
           String.join("\n", UDFDDLGenerator.buildAll(argMap, stageName, isNativeApp, appRoleName)));
-      log.info("-- UDTFs --");
-      log.info(
+      System.out.println("-- UDTFs --");
+      System.out.println(
           String.join(
               "\n", UDTFDDLGenerator.buildAll(argMap, stageName, isNativeApp, appRoleName)));
     } catch (Exception e) {
