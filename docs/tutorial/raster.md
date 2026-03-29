@@ -249,7 +249,7 @@ For non-GeoTiff raster formats such as NetCDF or Arc Info ASCII Grid, use the Sp
 
 === "Java"
     ```java
-    Dataset<Row> rawDf = sedona.read.format("binaryFile").load(path_to_raster_data);
+    Dataset<Row> rawDf = sedona.read().format("binaryFile").load(path_to_raster_data);
     rawDf.createOrReplaceTempView("rawdf");
     rawDf.show();
     ```
