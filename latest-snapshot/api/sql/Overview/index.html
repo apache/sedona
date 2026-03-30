@@ -2348,6 +2348,28 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
+  <a href="#raster-function-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Raster function list
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#raster-quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Raster quick start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2820,34 +2842,6 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../Raster-loader/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Raster loader
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../Raster-Functions/" class="md-nav__link">
         
   
@@ -2856,34 +2850,6 @@ You're not viewing the latest stable version.
     
   
     Raster Functions
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Raster-writer/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Raster writer
   
 
     
@@ -5385,6 +5351,28 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
+  <a href="#raster-function-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Raster function list
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#raster-quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Raster quick start
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5473,6 +5461,34 @@ You're not viewing the latest stable version.
 </ul>
 <p>Sedona also provides an Adapter to convert SpatialRDD &lt;-&gt; DataFrame. Please read <a href="../../scaladoc/spark/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a></p>
 <p>SedonaSQL supports SparkSQL query optimizer, documentation is <a href="../Optimizer/">Here</a></p>
+<h2 id="raster-function-list">Raster function list<a class="headerlink" href="#raster-function-list" title="Permanent link">&para;</a></h2>
+<p>SedonaSQL also supports raster data processing. Raster functions use the <code>RS_</code> prefix. All raster operators can be called in the same way as vector operators:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">myDataFrame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;YOUR_SQL&quot;</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>Constructor: Construct a Raster given an input file or parameters<ul>
+<li>Example: RS_FromGeoTiff (binary). Create a Raster from a GeoTiff binary.</li>
+<li>Documentation: <a href="../Raster-Functions/#raster-constructors">Here</a></li>
+</ul>
+</li>
+<li>Function: Execute a function on the given Raster column or columns<ul>
+<li>Example: RS_Value (raster, point). Given a Raster and a Point geometry, return the pixel value at that location.</li>
+<li>Documentation: Functions are organized by category. See <a href="../Raster-Functions/#raster-accessors">Raster Accessors</a>, <a href="../Raster-Functions/#raster-operators">Raster Operators</a>, <a href="../Raster-Functions/#raster-band-accessors">Raster Band Accessors</a>, <a href="../Raster-Functions/#raster-output">Raster Output</a>, and other categories in the sidebar.</li>
+</ul>
+</li>
+<li>Aggregate function: Return the aggregated value on the given Raster column<ul>
+<li>Example: RS_Union_Aggr (Raster column). Given a Raster column, combine all rasters into a single multiband raster.</li>
+<li>Documentation: <a href="../Raster-Functions/#raster-aggregate-functions">Here</a></li>
+</ul>
+</li>
+<li>Predicate: Execute a logic judgement on the given columns and return true or false<ul>
+<li>Example: RS_Intersects (raster, geometry). Check if a raster intersects a geometry. Return "True" if yes, else return "False".</li>
+<li>Documentation: <a href="../Raster-Functions/#raster-predicates">Here</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="raster-quick-start">Raster quick start<a class="headerlink" href="#raster-quick-start" title="Permanent link">&para;</a></h2>
+<p>The detailed explanation is here <a href="../../../tutorial/raster/">Write a Raster DataFrame/SQL application</a>.</p>
 <h2 id="quick-start">Quick start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
 <p>The detailed explanation is here <a href="../../../tutorial/sql/">Write a SQL/DataFrame application</a>.</p>
 <ol>
@@ -5510,7 +5526,7 @@ You're not viewing the latest stable version.
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 27, 2026 06:37:29 UTC">February 27, 2026 06:37:29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 30, 2026 06:14:22 UTC">March 30, 2026 06:14:22</span>
   </span>
 
     

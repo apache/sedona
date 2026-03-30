@@ -13,10 +13,10 @@
         <link rel="canonical" href="https://sedona.apache.org/latest/api/sql/Raster-Functions/">
       
       
-        <link rel="prev" href="../Raster-loader/">
+        <link rel="prev" href="../Visualization-SedonaKepler/">
       
       
-        <link rel="next" href="../Raster-writer/">
+        <link rel="next" href="../Raster-map-algebra/">
       
       
         
@@ -2750,34 +2750,6 @@ You're not viewing the latest stable version.
                 
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../Raster-loader/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Raster loader
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
     
   
   
@@ -2976,34 +2948,6 @@ You're not viewing the latest stable version.
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Raster-writer/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Raster writer
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -6144,6 +6088,12 @@ You're not viewing the latest stable version.
 <td style="text-align: left;">Returns the values at the given points or grid coordinates in the raster. If no band number is specified it defaults to 1.</td>
 <td style="text-align: left;">v1.4.0</td>
 </tr>
+<tr>
+<td style="text-align: left;"><a href="../Raster-Operators/RS_AsRaster/">RS_AsRaster</a></td>
+<td style="text-align: left;">Raster</td>
+<td style="text-align: left;">Converts a vector geometry into a raster dataset by assigning a specified value to all pixels covered by the geometry.</td>
+<td style="text-align: left;">v1.5.0</td>
+</tr>
 </tbody>
 </table>
 <h2 id="raster-tiles">Raster Tiles<a class="headerlink" href="#raster-tiles" title="Permanent link">&para;</a></h2>
@@ -6400,6 +6350,30 @@ You're not viewing the latest stable version.
 <td style="text-align: left;">Returns a string, that when printed, outputs the raster band as a pretty printed 2D matrix. All the values of the raster are cast to double for the string. RS_AsMatrix allows specifying the number ...</td>
 <td style="text-align: left;"></td>
 </tr>
+<tr>
+<td style="text-align: left;"><a href="../Raster-Output/RS_AsArcGrid/">RS_AsArcGrid</a></td>
+<td style="text-align: left;">Binary</td>
+<td style="text-align: left;">Returns a binary value (byte array) representing the raster as an ArcGrid image. Single band only.</td>
+<td style="text-align: left;">v1.4.1</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Raster-Output/RS_AsGeoTiff/">RS_AsGeoTiff</a></td>
+<td style="text-align: left;">Binary</td>
+<td style="text-align: left;">Returns a binary value (byte array) encoding the raster as a GeoTiff image.</td>
+<td style="text-align: left;">v1.4.1</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Raster-Output/RS_AsCOG/">RS_AsCOG</a></td>
+<td style="text-align: left;">Binary</td>
+<td style="text-align: left;">Returns a binary value (byte array) encoding the raster as a Cloud Optimized GeoTiff (COG).</td>
+<td style="text-align: left;">v1.9.0</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Raster-Output/RS_AsPNG/">RS_AsPNG</a></td>
+<td style="text-align: left;">Binary</td>
+<td style="text-align: left;">Returns a binary value (byte array) encoding the raster as a PNG image. Only accepts unsigned integer pixel types.</td>
+<td style="text-align: left;">v1.5.0</td>
+</tr>
 </tbody>
 </table>
 
@@ -6422,7 +6396,7 @@ You're not viewing the latest stable version.
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 4, 2026 08:31:50 UTC">March 4, 2026 08:31:50</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 30, 2026 06:14:22 UTC">March 30, 2026 06:14:22</span>
   </span>
 
     
