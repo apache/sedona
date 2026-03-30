@@ -131,6 +131,7 @@ These functions perform operations on raster objects.
 | [RS_Union](Raster-Operators/RS_Union.md) | Raster | Returns a combined multi-band raster from 2 or more input Rasters. The order of bands in the resultant raster will be in the order of the input rasters. For example if `RS_Union` is called on two 2... | v1.6.0 |
 | [RS_Value](Raster-Operators/RS_Value.md) | Double | Returns the value at the given point in the raster. If no band number is specified it defaults to 1. | v1.4.0 |
 | [RS_Values](Raster-Operators/RS_Values.md) | `Array<Double>` | Returns the values at the given points or grid coordinates in the raster. If no band number is specified it defaults to 1. | v1.4.0 |
+| [RS_AsRaster](Raster-Operators/RS_AsRaster.md) | Raster | Converts a vector geometry into a raster dataset by assigning a specified value to all pixels covered by the geometry. | v1.5.0 |
 
 ## Raster Tiles
 
@@ -197,3 +198,7 @@ These functions convert raster data to various output formats for visualization.
 | [RS_AsBase64](Raster-Output/RS_AsBase64.md) | String | Returns a base64 encoded string of the given raster. If the datatype is integral then this function internally takes the first 4 bands as RGBA, and converts them to the PNG format, finally produces... | v1.5.0 |
 | [RS_AsImage](Raster-Output/RS_AsImage.md) | String | Returns a HTML that when rendered using an HTML viewer or via a Jupyter Notebook, displays the raster as a square image of side length `imageWidth`. Optionally, an imageWidth parameter can be passe... | v1.5.0 |
 | [RS_AsMatrix](Raster-Output/RS_AsMatrix.md) | String | Returns a string, that when printed, outputs the raster band as a pretty printed 2D matrix. All the values of the raster are cast to double for the string. RS_AsMatrix allows specifying the number ... |  |
+| [RS_AsArcGrid](Raster-Output/RS_AsArcGrid.md) | Binary | Returns a binary value (byte array) representing the raster as an ArcGrid image. Single band only. | v1.4.1 |
+| [RS_AsGeoTiff](Raster-Output/RS_AsGeoTiff.md) | Binary | Returns a binary value (byte array) encoding the raster as a GeoTiff image. | v1.4.1 |
+| [RS_AsCOG](Raster-Output/RS_AsCOG.md) | Binary | Returns a binary value (byte array) encoding the raster as a Cloud Optimized GeoTiff (COG). | v1.9.0 |
+| [RS_AsPNG](Raster-Output/RS_AsPNG.md) | Binary | Returns a binary value (byte array) encoding the raster as a PNG image. Only accepts unsigned integer pixel types. | v1.5.0 |

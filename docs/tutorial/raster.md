@@ -142,11 +142,103 @@ Add the following line after creating the Sedona config. If you already have a S
 
 You can also register everything by passing `--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions` to `spark-submit` or `spark-shell`.
 
-## Load data from files
+## Load GeoTiff data
 
-Assume we have a single raster data file called rasterData.tiff, [at Path](https://github.com/apache/sedona/blob/0eae42576c2588fe278f75cef3b17fee600eac90/spark/common/src/test/resources/raster/raster_with_no_data/test5.tiff).
+The recommended way to load GeoTiff raster data is the `raster` data source. It loads GeoTiff files and automatically splits them into smaller tiles. Each tile becomes a row in the resulting DataFrame stored in `Raster` format.
 
-Use the following code to load the data and create a raw Dataframe.
+=== "Scala"
+    ```scala
+    var rasterDf = sedona.read.format("raster").load("/some/path/*.tif")
+    rasterDf.createOrReplaceTempView("rasterDf")
+    rasterDf.show()
+    ```
+
+=== "Java"
+    ```java
+    Dataset<Row> rasterDf = sedona.read().format("raster").load("/some/path/*.tif");
+    rasterDf.createOrReplaceTempView("rasterDf");
+    rasterDf.show();
+    ```
+
+=== "Python"
+    ```python
+    rasterDf = sedona.read.format("raster").load("/some/path/*.tif")
+    rasterDf.createOrReplaceTempView("rasterDf")
+    rasterDf.show()
+    ```
+
+The output will look like this:
+
+```
++--------------------+---+---+----+
+|                rast|  x|  y|name|
++--------------------+---+---+----+
+|GridCoverage2D["g...|  0|  0| ...|
+|GridCoverage2D["g...|  1|  0| ...|
+|GridCoverage2D["g...|  2|  0| ...|
+...
+```
+
+The output contains the following columns:
+
+- `rast`: The raster data in `Raster` format.
+- `x`: The 0-based x-coordinate of the tile. This column is only present when retile is not disabled.
+- `y`: The 0-based y-coordinate of the tile. This column is only present when retile is not disabled.
+- `name`: The name of the raster file.
+
+### Tiling options
+
+By default, tiling is enabled (`retile = true`) and the tile size is determined by the GeoTiff file's internal tiling scheme — you do not need to specify `tileWidth` or `tileHeight`. It is recommended to use [Cloud Optimized GeoTIFF (COG)](https://www.cogeo.org/) format for raster data since they usually organize pixel data as square tiles.
+
+You can optionally override the tile size, or disable tiling entirely:
+
+| Option | Default | Description |
+| :--- | :--- | :--- |
+| `retile` | `true` | Whether to enable tiling. Set to `false` to load the entire raster as a single row. |
+| `tileWidth` | GeoTiff's internal tile width | Optional. Override the width of each tile in pixels. |
+| `tileHeight` | Same as `tileWidth` if set, otherwise GeoTiff's internal tile height | Optional. Override the height of each tile in pixels. |
+| `padWithNoData` | `false` | Pad the right and bottom tiles with NODATA values if they are smaller than the specified tile size. |
+
+To override the tile size:
+
+=== "Python"
+    ```python
+    rasterDf = (
+        sedona.read.format("raster")
+        .option("tileWidth", "256")
+        .option("tileHeight", "256")
+        .load("/some/path/*.tif")
+    )
+    ```
+
+!!!note
+    If the internal tiling scheme of raster data is not friendly for tiling, the `raster` data source will throw an error, and you can disable automatic tiling using `option("retile", "false")`, or specify the tile size manually to workaround this issue. A better solution is to translate the raster data into COG format using `gdal_translate` or other tools.
+
+### Loading raster files from directories
+
+The `raster` data source also works with Spark generic file source options, such as `option("pathGlobFilter", "*.tif*")` and `option("recursiveFileLookup", "true")`. For instance, you can load all the `.tif` files recursively in a directory using:
+
+=== "Python"
+    ```python
+    rasterDf = (
+        sedona.read.format("raster")
+        .option("recursiveFileLookup", "true")
+        .option("pathGlobFilter", "*.tif*")
+        .load(path_to_raster_data_folder)
+    )
+    ```
+
+!!!tip
+    When the loaded path ends with `/`, the `raster` data source will look up raster files in the directory and all its subdirectories recursively. This is equivalent to specifying a path without trailing `/` and setting `option("recursiveFileLookup", "true")`.
+
+!!!tip
+    After loading rasters, you can quickly visualize them in a Jupyter notebook using `SedonaUtils.display_image(df)`. It automatically detects raster columns and renders them as images. See [Raster visualizer docs](../api/sql/Raster-Functions.md#raster-output) for details.
+
+## Load non-GeoTiff data (NetCDF, Arc Grid)
+
+For non-GeoTiff raster formats such as NetCDF or Arc Info ASCII Grid, use the Spark built-in `binaryFile` data source together with Sedona raster constructors.
+
+### Step 1: Load to a binary DataFrame
 
 === "Scala"
     ```scala
@@ -157,9 +249,9 @@ Use the following code to load the data and create a raw Dataframe.
 
 === "Java"
     ```java
-    Dataset<Row> rawDf = sedona.read.format("binaryFile").load(path_to_raster_data)
-    rawDf.createOrReplaceTempView("rawdf")
-    rawDf.show()
+    Dataset<Row> rawDf = sedona.read().format("binaryFile").load(path_to_raster_data);
+    rawDf.createOrReplaceTempView("rawdf");
+    rawDf.show();
     ```
 
 === "Python"
@@ -177,67 +269,45 @@ The output will look like this:
 |file:/Download/ra...|2023-09-06 16:24:...|174803|[49 49 2A 00 08 0...|
 ```
 
-For multiple raster data files use the following code to load the data [from path](https://github.com/apache/sedona/blob/0eae42576c2588fe278f75cef3b17fee600eac90/spark/common/src/test/resources/raster/) and create raw DataFrame.
-
-!!!note
-    The above code works too for loading multiple raster data files. If the raster files are in separate directories and the option also makes sure that only `.tif` or `.tiff` files are being loaded.
-
-=== "Scala"
-    ```scala
-    var rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load(path_to_raster_data_folder)
-    rawDf.createOrReplaceTempView("rawdf")
-    rawDf.show()
-    ```
-
-=== "Java"
-    ```java
-    Dataset<Row> rawDf = sedona.read.format("binaryFile").option("recursiveFileLookup", "true").option("pathGlobFilter", "*.tif*").load(path_to_raster_data_folder);
-    rawDf.createOrReplaceTempView("rawdf");
-    rawDf.show();
-    ```
+For multiple raster data files, you can load them recursively:
 
 === "Python"
     ```python
     rawDf = (
         sedona.read.format("binaryFile")
         .option("recursiveFileLookup", "true")
-        .option("pathGlobFilter", "*.tif*")
+        .option("pathGlobFilter", "*.asc*")
         .load(path_to_raster_data_folder)
     )
     rawDf.createOrReplaceTempView("rawdf")
     rawDf.show()
     ```
 
-The output will look like this:
+### Step 2: Create a Raster type column
 
-```
-|                path|    modificationTime|length|             content|
-+--------------------+--------------------+------+--------------------+
-|file:/Download/ra...|2023-09-06 16:24:...|209199|[4D 4D 00 2A 00 0...|
-|file:/Download/ra...|2023-09-06 16:24:...|174803|[49 49 2A 00 08 0...|
-|file:/Download/ra...|2023-09-06 16:24:...|174803|[49 49 2A 00 08 0...|
-|file:/Download/ra...|2023-09-06 16:24:...|  6619|[49 49 2A 00 08 0...|
-```
+All raster operations in SedonaSQL require Raster type objects. Use one of the following constructors:
 
-The content column in the raster table is still in the raw form, binary form.
-
-## Create a Raster type column
-
-All raster operations in SedonaSQL require Raster type objects. Therefore, this should be the next step after loading the data.
-
-### From Geotiff
+#### From GeoTiff
 
 ```sql
 SELECT RS_FromGeoTiff(content) AS rast, modificationTime, length, path FROM rawdf
 ```
 
-To verify this, use the following code to print the schema of the DataFrame:
+#### From Arc Grid
 
 ```sql
-rasterDf.printSchema()
+SELECT RS_FromArcInfoAsciiGrid(content) AS rast, modificationTime, length, path FROM rawdf
 ```
 
-The output will be like this:
+#### From NetCDF
+
+See [RS_FromNetCDF](../api/sql/Raster-Constructors/RS_FromNetCDF.md) for details on loading NetCDF files.
+
+To verify the raster column was created successfully:
+
+```python
+rasterDf.printSchema()
+```
 
 ```
 root
@@ -245,14 +315,6 @@ root
  |-- modificationTime: timestamp (nullable = true)
  |-- length: long (nullable = true)
  |-- path: string (nullable = true)
-```
-
-### From Arc Grid
-
-The raster data is loaded the same way as `tiff` file, but the raster data is stored with the extension `.asc`, ASCII format. The following code creates a Raster type objects from binary data:
-
-```sql
-SELECT RS_FromArcInfoAsciiGrid(content) AS rast, modificationTime, length, path FROM rawdf
 ```
 
 ## Raster's metadata
@@ -410,7 +472,7 @@ For more information please refer to [Map Algebra API](../api/sql/Raster-map-alg
 
 ### Geometry As Raster
 
-Sedona allows you to rasterize a geometry by using [RS_AsRaster](../api/sql/Raster-writer.md#rs_asraster).
+Sedona allows you to rasterize a geometry by using [RS_AsRaster](../api/sql/Raster-Operators/RS_AsRaster.md).
 
 ```sql
 SELECT RS_AsRaster(
@@ -503,47 +565,93 @@ Please refer to [Raster visualizer docs](../api/sql/Raster-Functions.md#raster-o
 
 ## Save to permanent storage
 
-Sedona has APIs that can save an entire raster column to files in a specified location. Before saving, the raster type column needs to be converted to a binary format. Sedona provides several functions to convert a raster column into a binary column suitable for file storage. Once in binary format, the raster data can then be written to files on disk using the Sedona file storage APIs.
+Saving raster data is a two-step process: (1) convert the Raster column to binary format using an `RS_AsXXX` function, and (2) write the binary DataFrame to files using Sedona's `raster` data source writer.
 
-```sparksql
-rasterDf.write.format("raster").option("rasterField", "raster").option("fileExtension", ".tiff").mode(SaveMode.Overwrite).save(dirPath)
-```
+### Step 1: Convert to binary format
 
-Sedona has a few writer functions that create the binary DataFrame necessary for saving the raster images.
+Choose one of the following output format functions:
 
-### As Arc Grid
-
-Use [RS_AsArcGrid](../api/sql/Raster-writer.md#rs_asarcgrid) to get the binary Dataframe of the raster in Arc Grid format.
-
-```sql
-SELECT RS_AsArcGrid(raster)
-```
-
-### As GeoTiff
-
-Use [RS_AsGeoTiff](../api/sql/Raster-writer.md#rs_asgeotiff) to get the binary Dataframe of the raster in GeoTiff format.
+| Function | Format | Description |
+| :--- | :--- | :--- |
+| [RS_AsGeoTiff](../api/sql/Raster-Output/RS_AsGeoTiff.md) | GeoTiff | General-purpose raster format with optional compression |
+| [RS_AsCOG](../api/sql/Raster-Output/RS_AsCOG.md) | Cloud Optimized GeoTiff | Ideal for cloud storage with efficient range-read access |
+| [RS_AsArcGrid](../api/sql/Raster-Output/RS_AsArcGrid.md) | Arc Grid | ASCII-based format, single band only |
+| [RS_AsPNG](../api/sql/Raster-Output/RS_AsPNG.md) | PNG | Image format, unsigned integer pixel types only |
 
 ```sql
-SELECT RS_AsGeoTiff(raster)
+SELECT RS_AsGeoTiff(rast) AS raster_binary FROM rasterDf
 ```
 
-### As Cloud Optimized GeoTiff
+### Step 2: Write to files
 
-Use [RS_AsCOG](../api/sql/Raster-writer.md#rs_ascog) to get the binary Dataframe of the raster in [Cloud Optimized GeoTiff](https://www.cogeo.org/) (COG) format. COG is ideal for cloud-hosted raster data because it supports efficient range-read access over HTTP.
+Use Sedona's built-in `raster` data source to write the binary DataFrame:
 
-```sql
-SELECT RS_AsCOG(raster)
+=== "Scala"
+    ```scala
+    rasterDf.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)"))
+      .write.format("raster").mode("overwrite").save("my_raster_file")
+    ```
+
+=== "Python"
+    ```python
+    rasterDf.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)")).write.format(
+        "raster"
+    ).mode("overwrite").save("my_raster_file")
+    ```
+
+The writer data source options are:
+
+| Option | Default | Description |
+| :--- | :--- | :--- |
+| `rasterField` | Last `binary` column in the schema | The name of the binary column to write. When the DataFrame has multiple binary columns, setting this explicitly is strongly recommended. |
+| `fileExtension` | `.tiff` | File extension for output files (e.g., `.png`, `.asc`). |
+| `pathField` | None | Column name containing the output file names. Only the base name is used (directory components are stripped), and any existing file extension is replaced by `fileExtension`. If not set, each file gets a random UUID name. |
+| `useDirectCommitter` | `true` | If `true`, files are written directly to the target location. If `false`, files are written to a temp location first. Writing with `false` is slower, especially on object stores like S3. |
+
+Example with all options:
+
+=== "Scala"
+    ```scala
+    rasterDf.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)"))
+      .write.format("raster")
+      .option("rasterField", "raster_binary")
+      .option("pathField", "name")
+      .option("fileExtension", ".tiff")
+      .mode("overwrite")
+      .save("my_raster_file")
+    ```
+
+=== "Python"
+    ```python
+    rasterDf.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)")).write.format(
+        "raster"
+    ).option("rasterField", "raster_binary").option("pathField", "name").option(
+        "fileExtension", ".tiff"
+    ).mode(
+        "overwrite"
+    ).save(
+        "my_raster_file"
+    )
+    ```
+
+The produced file structure will look like this:
+
+```
+my_raster_file
+- part-00000-6c7af016-c371-4564-886d-1690f3b27ca8-c000
+	- test1.tiff
+	- .test1.tiff.crc
+- part-00001-6c7af016-c371-4564-886d-1690f3b27ca8-c000
+	- test2.tiff
+	- .test2.tiff.crc
+- _SUCCESS
 ```
 
-### As PNG
+To read the saved rasters back:
 
-Use [RS_AsPNG](../api/sql/Raster-writer.md#rs_aspng) to get the binary Dataframe of the raster in PNG format.
-
-```sql
-SELECT RS_AsPNG(raster)
+```python
+rasterDf = sedona.read.format("raster").load("my_raster_file/*/*.tiff")
 ```
-
-Please refer to [Raster writer docs](../api/sql/Raster-writer.md) for more details.
 
 ## Collecting raster Dataframes and working with them locally in Python
 
@@ -561,9 +669,7 @@ The raster objects are represented as `SedonaRaster` objects in Python, which ca
 
 ```python
 df_raster = (
-    sedona.read.format("binaryFile")
-    .load("/path/to/raster.tif")
-    .selectExpr("RS_FromGeoTiff(content) as rast")
+    sedona.read.format("raster").option("retile", "false").load("/path/to/raster.tif")
 )
 rows = df_raster.collect()
 raster = rows[0].rast
