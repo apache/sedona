@@ -118,7 +118,8 @@ case class BroadcastIndexJoinExec(
     case (Some(r), _, false) => s"ST_Distance($windowExpression, $objectExpression) < $r"
     case (None, _, false) => s"ST_$spatialPredicate($windowExpression, $objectExpression)"
     case (None, _, true) => s"RS_$spatialPredicate($windowExpression, $objectExpression)"
-    case (Some(r), _, true) => s"RS_$spatialPredicate($windowExpression, $objectExpression)"
+    case (Some(r), _, true) =>
+      throw new UnsupportedOperationException("Distance joins are not supported for raster predicates")
   }
 
   override def simpleString(maxFields: Int): String =
