@@ -789,9 +789,11 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
         case (None, _, true, _, false) =>
           throw new UnsupportedOperationException("Geography joins are not yet supported")
         case (None, _, true, _, true) =>
-          throw new UnsupportedOperationException("Geography joins are not yet supported for raster predicates")
+          throw new UnsupportedOperationException(
+            "Geography joins are not yet supported for raster predicates")
         case (Some(_), _, _, _, true) =>
-          throw new UnsupportedOperationException("Distance joins are not supported for raster predicates")
+          throw new UnsupportedOperationException(
+            "Distance joins are not supported for raster predicates")
       }
     val (distanceOnIndexSide, distanceOnStreamSide) = distance
       .map { distanceExpr =>
