@@ -174,7 +174,7 @@ public class TestHelper {
     WKTReader wktReader = new WKTReader();
     Geography geoWKT = wktReader.read(expectedWKT);
 
-    boolean isEqual = compareTo(geoWKB, geoWKT) == 0;
+    boolean isEqual = compareTo(geoWKT, geoWKT) == 0;
     if (!isEqual) {
       log.debug("geoWKB: {}", geoWKB);
       log.debug("geoWKT: {}", geoWKT);
