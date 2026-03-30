@@ -31,6 +31,8 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Performance tests for Proj4sedona CRS transformation.
@@ -52,6 +54,7 @@ import org.locationtech.jts.geom.Point;
  */
 public class FunctionsProj4PerformanceTest extends TestBase {
 
+  private static final Logger log = LoggerFactory.getLogger(FunctionsProj4PerformanceTest.class);
   private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
   private static final int WARM_ITERATIONS = 10;
 
@@ -70,19 +73,19 @@ public class FunctionsProj4PerformanceTest extends TestBase {
   }
 
   private void printHeader(String title) {
-    System.out.println();
-    System.out.println("=".repeat(70));
-    System.out.println(title);
-    System.out.println("=".repeat(70));
+    log.info("");
+    log.info("=".repeat(70));
+    log.info(title);
+    log.info("=".repeat(70));
   }
 
   private void printResult(String label, double coldMs, double warmAvgUs, int cacheEntries) {
     double speedup = (coldMs * 1000) / warmAvgUs;
-    System.out.printf("Cold (1 call):        %10.2f ms%n", coldMs);
-    System.out.printf("Warm (%d calls):   %10.2f μs avg%n", WARM_ITERATIONS, warmAvgUs);
-    System.out.printf("Cache speedup:        %10.0fx%n", speedup);
+    log.info(String.format("Cold (1 call):        %10.2f ms", coldMs));
+    log.info(String.format("Warm (%d calls):   %10.2f μs avg", WARM_ITERATIONS, warmAvgUs));
+    log.info(String.format("Cache speedup:        %10.0fx", speedup));
     if (cacheEntries >= 0) {
-      System.out.printf("Proj cache entries:   %10d%n", cacheEntries);
+      log.info(String.format("Proj cache entries:   %10d", cacheEntries));
     }
   }
 
@@ -95,7 +98,7 @@ public class FunctionsProj4PerformanceTest extends TestBase {
     Point point = createTestPoint(SF_LON, SF_LAT);
 
     // ===== Proj4sedona =====
-    System.out.println("\nProj4sedona:");
+    log.info("\nProj4sedona:");
     Proj4.clearCache();
 
     // Cold call
@@ -116,7 +119,7 @@ public class FunctionsProj4PerformanceTest extends TestBase {
     assertEquals(3857, proj4ColdResult.getSRID());
 
     // ===== GeoTools =====
-    System.out.println("\nGeoTools:");
+    log.info("\nGeoTools:");
 
     // Cold call
     coldStart = System.nanoTime();
@@ -136,8 +139,9 @@ public class FunctionsProj4PerformanceTest extends TestBase {
 
     // ===== Comparison =====
     double warmSpeedup = gtWarmAvgUs / proj4WarmAvgUs;
-    System.out.printf(
-        "%nComparison: Proj4sedona is %.1fx faster than GeoTools (warm)%n", warmSpeedup);
+    log.info(
+        String.format(
+            "%nComparison: Proj4sedona is %.1fx faster than GeoTools (warm)", warmSpeedup));
 
     // Verify both produce similar results
     assertEquals(
@@ -202,11 +206,11 @@ public class FunctionsProj4PerformanceTest extends TestBase {
       double warmAvgUs = (warmTotalMs * 1000) / WARM_ITERATIONS;
 
       printResult("Remote Fetch EPSG", coldMs, warmAvgUs, Proj4.getCacheSize());
-      System.out.printf("Note: Cold time includes network fetch from spatialreference.org%n");
+      log.info("Note: Cold time includes network fetch from spatialreference.org");
       assertNotNull(coldResult);
       assertEquals(2154, coldResult.getSRID());
     } catch (Exception e) {
-      System.out.println("Skipped: Network fetch failed - " + e.getMessage());
+      log.info("Skipped: Network fetch failed - {}", e.getMessage());
       // Don't fail the test if network is unavailable
     }
   }
@@ -304,8 +308,8 @@ public class FunctionsProj4PerformanceTest extends TestBase {
     double warmAvgUs = (warmTotalMs * 1000) / WARM_ITERATIONS;
 
     printResult("Grid File (local)", coldMs, warmAvgUs, Proj4.getCacheSize());
-    System.out.printf("Grid cache entries:   %10d%n", NadgridRegistry.size());
-    System.out.printf("Note: Cold time includes loading grid file from disk%n");
+    log.info(String.format("Grid cache entries:   %10d", NadgridRegistry.size()));
+    log.info("Note: Cold time includes loading grid file from disk");
     assertNotNull(coldResult);
     assertTrue(NadgridRegistry.size() > 0);
   }
@@ -337,12 +341,12 @@ public class FunctionsProj4PerformanceTest extends TestBase {
       double warmAvgUs = (warmTotalMs * 1000) / WARM_ITERATIONS;
 
       printResult("Grid File (remote)", coldMs, warmAvgUs, Proj4.getCacheSize());
-      System.out.printf("Grid cache entries:   %10d%n", NadgridRegistry.size());
-      System.out.printf("Note: Cold time includes downloading grid file (~15MB)%n");
+      log.info(String.format("Grid cache entries:   %10d", NadgridRegistry.size()));
+      log.info("Note: Cold time includes downloading grid file (~15MB)");
       assertNotNull(coldResult);
       assertTrue(NadgridRegistry.size() > 0);
     } catch (Exception e) {
-      System.out.println("Skipped: Remote grid download failed - " + e.getMessage());
+      log.info("Skipped: Remote grid download failed - {}", e.getMessage());
       // Don't fail the test if network is unavailable
     }
   }

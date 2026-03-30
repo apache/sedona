@@ -42,11 +42,12 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-
 // TODO: Auto-generated Javadoc
 
 /** The Class Example. */
 public class Example implements Serializable {
+
+  private static final Logger log = Logger.getLogger(Example.class);
 
   /** The sc. */
   public static JavaSparkContext sc;
@@ -152,11 +153,11 @@ public class Example implements Serializable {
       testLoadShapefileIntoPolygonRDD();
     } catch (Exception e) {
       e.printStackTrace();
-      System.out.println("DEMOs failed!");
+      log.error("DEMOs failed!");
       return;
     }
     sc.stop();
-    System.out.println("All DEMOs passed!");
+    log.info("All DEMOs passed!");
   }
 
   /**

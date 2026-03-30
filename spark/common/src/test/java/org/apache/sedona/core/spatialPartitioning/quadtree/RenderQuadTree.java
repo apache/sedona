@@ -22,9 +22,13 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 public class RenderQuadTree extends QuadTreePanel {
+
+  private static final Logger log = LoggerFactory.getLogger(RenderQuadTree.class);
 
   protected StandardQuadTree<QuadRectangle> standardQuadTree;
   int resolutionX = 600;
@@ -105,7 +109,7 @@ public class RenderQuadTree extends QuadTreePanel {
     List<QuadRectangle> matchedPartitions = standardQuadTree.findZones(quadRectangle);
     for (QuadRectangle q : matchedPartitions) {
       g.drawRect((int) q.x, (int) q.y, (int) q.width, (int) q.height);
-      System.out.println(q.partitionId);
+      log.debug("partitionId: {}", q.partitionId);
     }
   }
 }

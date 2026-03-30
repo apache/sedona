@@ -40,8 +40,11 @@ import org.junit.Test;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.operation.buffer.BufferParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FunctionTest extends TestBase {
+  private static final Logger log = LoggerFactory.getLogger(FunctionTest.class);
 
   @BeforeClass
   public static void onceExecutedBeforeAll() {
@@ -2800,7 +2803,7 @@ public class FunctionTest extends TestBase {
     Table bowTieTable = tableEnv.sqlQuery("SELECT ST_GeomFromText('" + bowTieWKT + "') AS geom");
     Table bowTieValidityTable = bowTieTable.select(call("ST_IsValidReason", $("geom")));
     String bowTieValidityReason = (String) first(bowTieValidityTable).getField(0);
-    System.out.println(bowTieValidityReason);
+    log.debug("bowTieValidityReason: {}", bowTieValidityReason);
     assertTrue(bowTieValidityReason.contains("Self-intersection"));
 
     // Test with a valid geometry (simple linestring)

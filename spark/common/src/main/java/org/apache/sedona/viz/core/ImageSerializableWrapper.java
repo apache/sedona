@@ -69,7 +69,7 @@ public class ImageSerializableWrapper implements Serializable {
     in.defaultReadObject();
     image = ImageIO.read(in);
     if (image == null) {
-      System.out.println("I got nothing from the stream!");
+      log.warn("I got nothing from the stream!");
     }
   }
 
