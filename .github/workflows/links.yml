@@ -25,7 +25,7 @@ on:
   workflow_dispatch:
   pull_request:
   schedule:
-    - cron: '00 18 * * *'
+    - cron: '7 1 * * 0' # At 01:07 on Sunday.
 
 jobs:
   check-links:
