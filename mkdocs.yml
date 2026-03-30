@@ -165,7 +165,7 @@ theme:
   palette:
     primary: 'deep orange'
     accent: 'green'
-  favicon: image/sedona_logo_symbol.png
+  favicon: favicon.ico
   logo: image/logo.svg
   icon:
     logo: fontawesome/solid/earth-americas
