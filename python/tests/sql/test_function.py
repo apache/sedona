@@ -1966,6 +1966,23 @@ class TestPredicateJoin(TestBase):
         actual = actual_df.take(1)[0][0]
         assert expected == actual
 
+    def test_st_shortest_line(self):
+        expected = "LINESTRING (0 1, 0 0)"
+        actual_df = self.spark.sql(
+            "select ST_AsText(ST_ShortestLine(ST_GeomFromText('POINT (0 1)'), "
+            "ST_GeomFromText('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)')))"
+        )
+        actual = actual_df.take(1)[0][0]
+        assert expected == actual
+
+    def test_st_shortest_line_empty(self):
+        actual_df = self.spark.sql(
+            "select ST_ShortestLine(ST_GeomFromText('POINT (0 1)'), "
+            "ST_GeomFromText('GEOMETRYCOLLECTION EMPTY'))"
+        )
+        actual = actual_df.take(1)[0][0]
+        assert actual is None
+
     def test_st_collect_on_array_type(self):
         # given
         geometry_df = self.spark.createDataFrame(

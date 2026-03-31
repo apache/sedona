@@ -472,6 +472,20 @@ def ST_ClosestPoint(a: ColumnOrName, b: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_ShortestLine(a: ColumnOrName, b: ColumnOrName) -> Column:
+    """Return the shortest line between two geometries.
+
+    :param a: One geometry column.
+    :type a: ColumnOrName
+    :param b: Other geometry column.
+    :type b: ColumnOrName
+    :return: Shortest LineString connecting the two geometries as a geometry column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_ShortestLine", (a, b))
+
+
+@validate_argument_types
 def ST_ConcaveHull(
     geometry: ColumnOrName,
     pctConvex: Union[ColumnOrName, float],

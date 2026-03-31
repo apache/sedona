@@ -4196,6 +4196,61 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void shortestLinePointToPoint() {
+    Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    Point point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(3, 4));
+    String expected = "LINESTRING (0 0, 3 4)";
+    String actual = Functions.shortestLine(point1, point2).toText();
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void shortestLinePointToLineString() {
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(160, 40));
+    LineString lineString =
+        GEOMETRY_FACTORY.createLineString(
+            coordArray(10, 30, 50, 50, 30, 110, 70, 90, 180, 140, 130, 190));
+    Geometry result = Functions.shortestLine(point, lineString);
+    assertNotNull(result);
+    assertEquals("LineString", result.getGeometryType());
+    // First point should be on the point geometry, second on the linestring
+    assertEquals(160.0, result.getCoordinates()[0].x, 1e-6);
+    assertEquals(40.0, result.getCoordinates()[0].y, 1e-6);
+  }
+
+  @Test
+  public void shortestLinePolygonToPolygon() {
+    Polygon polygonA =
+        GEOMETRY_FACTORY.createPolygon(coordArray(190, 150, 20, 10, 160, 70, 190, 150));
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(80, 160));
+    Geometry polygonB = Functions.buffer(point, 30);
+    Geometry result = Functions.shortestLine(polygonA, polygonB);
+    assertNotNull(result);
+    assertEquals("LineString", result.getGeometryType());
+    // The length of the shortest line should equal the distance between the polygons
+    assertEquals(Functions.distance(polygonA, polygonB), result.getLength(), 1e-6);
+  }
+
+  @Test
+  public void shortestLineEmptyGeometry() {
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+    LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
+    assertNull(Functions.shortestLine(point, emptyLineString));
+
+    Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+    assertNull(Functions.shortestLine(emptyPolygon, emptyLineString));
+  }
+
+  @Test
+  public void shortestLineSameGeometry() {
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(5, 5));
+    Geometry result = Functions.shortestLine(point, point);
+    assertNotNull(result);
+    assertEquals("LINESTRING (5 5, 5 5)", result.toText());
+    assertEquals(0.0, result.getLength(), 1e-6);
+  }
+
+  @Test
   public void testZmFlag() throws ParseException {
     int _2D = 0, _3DM = 1, _3DZ = 2, _4D = 3;
     Geometry geom = Constructors.geomFromWKT("POINT (1 2)", 0);

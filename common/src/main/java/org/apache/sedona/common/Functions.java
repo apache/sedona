@@ -1115,6 +1115,15 @@ public class Functions {
     }
   }
 
+  public static Geometry shortestLine(Geometry left, Geometry right) {
+    if (left.isEmpty() || right.isEmpty()) {
+      return null;
+    }
+    DistanceOp distanceOp = new DistanceOp(left, right);
+    Coordinate[] closestPoints = distanceOp.nearestPoints();
+    return left.getFactory().createLineString(closestPoints);
+  }
+
   public static Geometry delaunayTriangle(Geometry geometry) {
     return delaunayTriangle(geometry, 0.0, 0);
   }
