@@ -19,9 +19,9 @@
 
 # ST_ShortestLine
 
-![ST_ShortestLine](../../../image/ST_ShortestLine/ST_ShortestLine.svg "ST_ShortestLine")
-
 Introduction: Returns the shortest LineString between two geometries. The line starts on geom1 and ends on geom2. If either geometry is empty, the function returns null.
+
+![ST_ShortestLine](../../../image/ST_ShortestLine/ST_ShortestLine.svg "ST_ShortestLine")
 
 Format: `ST_ShortestLine(geom1: Geometry, geom2: Geometry)`
 
