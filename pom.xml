@@ -649,6 +649,7 @@
                 </executions>
                 <configuration>
                     <additionalparam>-Xdoclint:none</additionalparam>
+                    <detectOfflineLinks>false</detectOfflineLinks>
                     <excludePackageNames>org.apache.spark.sql.execution.datasources.geoparquet.internal</excludePackageNames>
                 </configuration>
             </plugin>
