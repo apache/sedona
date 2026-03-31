@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowGrev" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <path d="M8,0 L0,3 L8,6" fill="#2ecc71" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_ShortestLine — Point to LineString</text>
+  <!-- Point A at (0,1) mapped to canvas ~(80,110) -->
+  <circle cx="80" cy="110" r="7" fill="rgba(74,144,217,0.3)" stroke="#4a90d9" stroke-width="2.5" />
+  <circle cx="80" cy="110" r="3" fill="#4a90d9" />
+  <text x="80" y="95" text-anchor="middle" font-size="13" fill="#4a90d9">POINT (0 1)</text>
+  <!-- LineString B from (0,0) to (5,0) mapped to canvas (80,200) to (480,200) -->
+  <polyline points="80,200 160,200 240,200 320,200 400,200 480,200" fill="none" stroke="#d94a4a" stroke-width="2.5" stroke-linecap="round" />
+  <!-- Vertices of linestring -->
+  <circle cx="80" cy="200" r="3" fill="#d94a4a" />
+  <circle cx="160" cy="200" r="3" fill="#d94a4a" />
+  <circle cx="240" cy="200" r="3" fill="#d94a4a" />
+  <circle cx="320" cy="200" r="3" fill="#d94a4a" />
+  <circle cx="400" cy="200" r="3" fill="#d94a4a" />
+  <circle cx="480" cy="200" r="3" fill="#d94a4a" />
+  <!-- Vertex labels -->
+  <text x="80" y="222" text-anchor="middle" font-size="11" fill="#d94a4a">(0,0)</text>
+  <text x="160" y="222" text-anchor="middle" font-size="11" fill="#d94a4a">(1,0)</text>
+  <text x="240" y="222" text-anchor="middle" font-size="11" fill="#d94a4a">(2,0)</text>
+  <text x="320" y="222" text-anchor="middle" font-size="11" fill="#d94a4a">(3,0)</text>
+  <text x="400" y="222" text-anchor="middle" font-size="11" fill="#d94a4a">(4,0)</text>
+  <text x="480" y="222" text-anchor="middle" font-size="11" fill="#d94a4a">(5,0)</text>
+  <!-- Shortest line from (0,1) to (0,0) -->
+  <line x1="80" y1="110" x2="80" y2="200" stroke="#2ecc71" stroke-width="3" marker-start="url(#arrowGrev)" marker-end="url(#arrowG)" />
+  <!-- Endpoints -->
+  <circle cx="80" cy="110" r="5" fill="white" stroke="#2ecc71" stroke-width="2.5" />
+  <circle cx="80" cy="110" r="2.5" fill="#2ecc71" />
+  <circle cx="80" cy="200" r="5" fill="white" stroke="#2ecc71" stroke-width="2.5" />
+  <circle cx="80" cy="200" r="2.5" fill="#2ecc71" />
+  <!-- Caption -->
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">LINESTRING (0 1, 0 0)</text>
+  <!-- Legend -->
+  <rect x="73" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="89" y="266" font-size="13" fill="#333333">Point A</text>
+  <rect x="183" y="255" width="12" height="12" rx="2" fill="#d94a4a" stroke="#d94a4a" stroke-width="1" />
+  <text x="199" y="266" font-size="13" fill="#333333">LineString B</text>
+  <rect x="323" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="339" y="266" font-size="13" fill="#333333">Shortest line</text>
+</svg>

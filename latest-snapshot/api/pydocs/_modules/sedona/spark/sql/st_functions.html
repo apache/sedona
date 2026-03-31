@@ -680,6 +680,20 @@
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_ClosestPoint&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span></div>
 
 
+<div class="viewcode-block" id="ST_ShortestLine"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_ShortestLine">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_ShortestLine</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the shortest line between two geometries.</span>
+
+<span class="sd">    :param a: One geometry column.</span>
+<span class="sd">    :type a: ColumnOrName</span>
+<span class="sd">    :param b: Other geometry column.</span>
+<span class="sd">    :type b: ColumnOrName</span>
+<span class="sd">    :return: Shortest LineString connecting the two geometries as a geometry column.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_ShortestLine&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span></div>
+
+
 <div class="viewcode-block" id="ST_ConcaveHull"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_ConcaveHull">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_ConcaveHull</span><span class="p">(</span>
     <span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span>
