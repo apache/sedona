@@ -31,6 +31,8 @@ Since: `v1.9.0`
 
 SQL Example:
 
+![ST_ShortestLine Point to Point](../../../image/ST_ShortestLine/ST_ShortestLine_point_point.svg "ST_ShortestLine Point to Point")
+
 ```sql
 SELECT ST_ShortestLine(
         ST_GeomFromText('POINT (0 0)'),
@@ -45,6 +47,8 @@ LINESTRING (0 0, 3 4)
 ```
 
 SQL Example:
+
+![ST_ShortestLine Point to LineString](../../../image/ST_ShortestLine/ST_ShortestLine_point_linestring.svg "ST_ShortestLine Point to LineString")
 
 ```sql
 SELECT ST_ShortestLine(

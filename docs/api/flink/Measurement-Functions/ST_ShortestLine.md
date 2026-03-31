@@ -19,6 +19,8 @@
 
 # ST_ShortestLine
 
+![ST_ShortestLine](../../../image/ST_ShortestLine/ST_ShortestLine.svg "ST_ShortestLine")
+
 Introduction: Returns the shortest LineString between two geometries. The line starts on geom1 and ends on geom2. If either geometry is empty, the function returns null.
 
 Format: `ST_ShortestLine(geom1: Geometry, geom2: Geometry)`
@@ -28,6 +30,8 @@ Return type: `Geometry`
 Since: `v1.9.0`
 
 SQL Example:
+
+![ST_ShortestLine Point to Point](../../../image/ST_ShortestLine/ST_ShortestLine_point_point.svg "ST_ShortestLine Point to Point")
 
 ```sql
 SELECT ST_ShortestLine(
@@ -43,6 +47,8 @@ LINESTRING (0 0, 3 4)
 ```
 
 SQL Example:
+
+![ST_ShortestLine Point to LineString](../../../image/ST_ShortestLine/ST_ShortestLine_point_linestring.svg "ST_ShortestLine Point to LineString")
 
 ```sql
 SELECT ST_ShortestLine(
