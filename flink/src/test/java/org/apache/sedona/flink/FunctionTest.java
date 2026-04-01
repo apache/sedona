@@ -261,10 +261,21 @@ public class FunctionTest extends TestBase {
 
   @Test
   public void testOffsetCurveWithQuadrantSegments() {
-    Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(0 0, 10 0)') AS geom");
-    table = table.select(call(Functions.ST_OffsetCurve.class.getSimpleName(), $("geom"), 5.0, 4));
-    Geometry result = (Geometry) first(table).getField(0);
-    assertEquals("LINESTRING (0 5, 10 5)", result.toString());
+    Table table =
+        tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)') AS geom");
+    Table defaultTable =
+        table.select(
+            call(
+                "ST_NPoints",
+                call(Functions.ST_OffsetCurve.class.getSimpleName(), $("geom"), -3.0)));
+    Table customTable =
+        table.select(
+            call(
+                "ST_NPoints",
+                call(Functions.ST_OffsetCurve.class.getSimpleName(), $("geom"), -3.0, 16)));
+    int defaultPts = (int) first(defaultTable).getField(0);
+    int customPts = (int) first(customTable).getField(0);
+    assertTrue(customPts > defaultPts);
   }
 
   @Test

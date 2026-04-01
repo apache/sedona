@@ -583,10 +583,13 @@ class dataFrameAPITestScala extends TestBaseScala {
     }
 
     it("Passed ST_OffsetCurve with quadrantSegments") {
-      val lineDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(0 0, 10 0)') AS geom")
-      val df = lineDf.select(ST_OffsetCurve("geom", 5.0, 4))
-      val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
-      assertEquals("LINESTRING (0 5, 10 5)", actual)
+      val lineDf =
+        sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)') AS geom")
+      val defaultDf = lineDf.select(ST_NPoints(ST_OffsetCurve("geom", -3.0)))
+      val customDf = lineDf.select(ST_NPoints(ST_OffsetCurve("geom", -3.0, 16)))
+      val defaultPts = defaultDf.take(1)(0).getInt(0)
+      val customPts = customDf.take(1)(0).getInt(0)
+      assertTrue(customPts > defaultPts)
     }
 
     it("Passed ST_BestSRID") {

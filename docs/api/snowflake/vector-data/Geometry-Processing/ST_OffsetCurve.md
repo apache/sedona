@@ -19,8 +19,6 @@
 
 # ST_OffsetCurve
 
-![ST_OffsetCurve](../../../../image/ST_OffsetCurve/ST_OffsetCurve.svg "ST_OffsetCurve")
-
 Introduction: Returns a line at a given offset distance from a linear geometry. If the distance is positive, the offset is on the left side of the input line; if it is negative, it is on the right side. Returns null for empty geometries.
 
 The optional third parameter `quadrantSegments` controls the number of line segments used to approximate a quarter circle at round joins. The default value is 8.

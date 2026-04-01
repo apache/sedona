@@ -5,40 +5,48 @@
     </style>
   </defs>
   <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_OffsetCurve — Negative Offset on L-shape</text>
-  <!-- Geometry range: x[-1,14] y[-4,11]. Canvas: x[40,470] y[35,255]. -->
-  <!-- Scale: xS=430/15≈28.7, yS=220/15≈14.7 -->
-  <!-- Map: cx = (val+1)*28.7+40, cy = 255-(val+4)*14.7 -->
-  <!-- (0,0)→(69,196) (10,0)→(356,196) (10,10)→(356,49) -->
-  <!-- (0,-3)→(69,240) (13,0)→(413,196) (13,10)→(413,49) -->
-  <!-- Arc points at corner (rounded): -->
-  <!-- (10.59,-2.94)→(373,239) (11.15,-2.77)→(389,237) (11.67,-2.49)→(404,233) -->
-  <!-- (12.12,-2.12)→(417,227) (12.49,-1.67)→(427,221) (12.77,-1.15)→(435,213) -->
-  <!-- (12.94,-0.59)→(440,205) -->
+  <!-- Mapping: x range [0,13] → [60,450], y range [-3,10] → [245,35] -->
+  <!-- cx = x*30+60, cy = 245 - (y+3)*16.15 -->
+
   <!-- Input: LINESTRING(0 0, 10 0, 10 10) -->
-  <polyline points="69,196 356,196 356,49" fill="none" stroke="#4a90d9" stroke-width="3" />
-  <circle cx="69" cy="196" r="4" fill="#4a90d9" />
-  <circle cx="356" cy="196" r="4" fill="#4a90d9" />
-  <circle cx="356" cy="49" r="4" fill="#4a90d9" />
+  <polyline points="60,196 360,196 360,35" fill="none" stroke="#4a90d9" stroke-width="3" />
+  <circle cx="60" cy="196" r="4" fill="#4a90d9" />
+  <circle cx="360" cy="196" r="4" fill="#4a90d9" />
+  <circle cx="360" cy="35" r="4" fill="#4a90d9" />
   <text x="40" y="192" font-size="11" fill="#4a90d9">(0, 0)</text>
-  <text x="320" y="192" font-size="11" fill="#4a90d9">(10, 0)</text>
-  <text x="360" y="47" font-size="11" fill="#4a90d9">(10, 10)</text>
-  <!-- Result: offset curve with arc at outer corner -->
-  <!-- Straight segment: (0,-3)→(10,-3), then arc, then (13,0)→(13,10) -->
-  <polyline points="69,240 356,240 373,239 389,237 404,233 417,227 427,221 435,213 440,205 413,196 413,49"
-    fill="none" stroke="#e67e22" stroke-width="3" stroke-dasharray="8,4" />
-  <circle cx="69" cy="240" r="4" fill="#e67e22" />
-  <circle cx="413" cy="49" r="4" fill="#e67e22" />
-  <text x="40" y="248" font-size="11" fill="#e67e22">(0, -3)</text>
-  <text x="416" y="55" font-size="11" fill="#e67e22">(13, 10)</text>
-  <!-- Distance markers -->
-  <line x1="200" y1="196" x2="200" y2="240" stroke="#999" stroke-width="1" stroke-dasharray="3,2" />
+  <text x="324" y="192" font-size="11" fill="#4a90d9">(10, 0)</text>
+  <text x="364" y="33" font-size="11" fill="#4a90d9">(10, 10)</text>
+
+  <!-- Result: actual JTS output with 9 arc segments (default qs=8) -->
+  <polyline points="60,245 360,245 377,244 394,240 410,235 424,228 435,219 443,209 448,199 450,196 450,35"
+    fill="none" stroke="#e67e22" stroke-width="3" />
+  <!-- Vertex dots on arc segments -->
+  <circle cx="60" cy="245" r="4" fill="#e67e22" />
+  <circle cx="360" cy="245" r="3" fill="#e67e22" />
+  <circle cx="377" cy="244" r="3" fill="#e67e22" />
+  <circle cx="394" cy="240" r="3" fill="#e67e22" />
+  <circle cx="410" cy="235" r="3" fill="#e67e22" />
+  <circle cx="424" cy="228" r="3" fill="#e67e22" />
+  <circle cx="435" cy="219" r="3" fill="#e67e22" />
+  <circle cx="443" cy="209" r="3" fill="#e67e22" />
+  <circle cx="448" cy="199" r="3" fill="#e67e22" />
+  <circle cx="450" cy="196" r="3" fill="#e67e22" />
+  <circle cx="450" cy="35" r="4" fill="#e67e22" />
+  <text x="40" y="253" font-size="11" fill="#e67e22">(0, -3)</text>
+  <text x="453" y="41" font-size="11" fill="#e67e22">(13, 10)</text>
+
+  <!-- Distance marker -->
+  <line x1="200" y1="196" x2="200" y2="245" stroke="#999" stroke-width="1" stroke-dasharray="3,2" />
   <line x1="196" y1="196" x2="204" y2="196" stroke="#999" stroke-width="1" />
-  <line x1="196" y1="240" x2="204" y2="240" stroke="#999" stroke-width="1" />
-  <text x="207" y="222" font-size="12" font-weight="bold" fill="#999">d</text>
-  <!-- Arc label -->
-  <text x="445" y="230" font-size="11" font-style="italic" fill="#e67e22">arc</text>
+  <line x1="196" y1="245" x2="204" y2="245" stroke="#999" stroke-width="1" />
+  <text x="207" y="224" font-size="12" font-weight="bold" fill="#999">d = 3</text>
+
+  <!-- Point count annotation -->
+  <text x="460" y="224" font-size="11" fill="#e67e22">11 points</text>
+  <text x="460" y="237" font-size="11" fill="#e67e22">(9 on arc)</text>
+
   <!-- Caption -->
-  <text x="250" y="290" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Negative offset creates a smooth arc at the outer corner</text>
+  <text x="250" y="290" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Negative offset creates a segmented arc at the outer corner</text>
   <!-- Legend -->
   <rect x="73" y="265" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
   <text x="89" y="276" font-size="13" fill="#333333">Input line</text>

@@ -4,39 +4,80 @@
       text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
     </style>
   </defs>
-  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_OffsetCurve — quadrantSegments Effect</text>
-  <!-- Same L-shape with outer offset, comparing default vs qs=16 -->
-  <!-- Using same mapping as negative SVG -->
-  <!-- Input: LINESTRING(0 0, 10 0, 10 10) -->
-  <polyline points="69,196 356,196 356,49" fill="none" stroke="#4a90d9" stroke-width="3" />
-  <circle cx="69" cy="196" r="4" fill="#4a90d9" />
-  <circle cx="356" cy="196" r="4" fill="#4a90d9" />
-  <circle cx="356" cy="49" r="4" fill="#4a90d9" />
-  <text x="40" y="192" font-size="11" fill="#4a90d9">(0, 0)</text>
-  <text x="320" y="192" font-size="11" fill="#4a90d9">(10, 0)</text>
-  <text x="360" y="47" font-size="11" fill="#4a90d9">(10, 10)</text>
-  <!-- Default (qs=8): 9 arc points → coarser arc -->
-  <polyline points="69,240 356,240 373,239 389,237 404,233 417,227 427,221 435,213 440,205 413,196 413,49"
-    fill="none" stroke="#e67e22" stroke-width="2.5" stroke-dasharray="6,4" />
-  <!-- qs=16: 17 arc points → smoother arc (interpolated between the 9 default points) -->
-  <polyline points="69,240 356,240 364,240 373,239 381,238 389,237 397,235 404,233 410,230 417,227 422,224 427,221 431,217 435,213 438,209 440,205 441,200 413,196 413,49"
-    fill="none" stroke="#9b59b6" stroke-width="2.5" />
-  <!-- Zoom circle on the arc corner area -->
-  <circle cx="413" cy="218" r="45" fill="none" stroke="#ccc" stroke-width="1" stroke-dasharray="3,2" />
-  <text x="460" y="218" font-size="11" fill="#999">corner arc</text>
-  <!-- Annotations -->
-  <text x="69" y="254" font-size="11" fill="#e67e22">(0, -3)</text>
-  <text x="416" y="55" font-size="11" fill="#9b59b6">(13, 10)</text>
-  <!-- Point count labels -->
-  <text x="260" y="42" font-size="12" fill="#e67e22">default (8): 11 points</text>
-  <text x="260" y="57" font-size="12" fill="#9b59b6">quadrantSegments=16: 19 points</text>
+  <text x="250" y="18" text-anchor="middle" font-size="15" font-weight="bold" fill="#333333">ST_OffsetCurve — quadrantSegments Effect</text>
+
+  <!-- LEFT CHART: default qs=8 -->
+  <!-- Mapping: x[0,13]→[20,230], y[-3,10]→[230,40] -->
+  <!-- cx = x*16.2+20, cy = 230 - (y+3)*14.6 -->
+  <!-- (0,0)→(20,186) (10,0)→(182,186) (10,10)→(182,40) -->
+  <!-- (0,-3)→(20,230) (13,0)→(231,186) (13,10)→(231,40) -->
+
+  <text x="125" y="36" text-anchor="middle" font-size="13" font-weight="bold" fill="#e67e22">default (qs=8): 11 points</text>
+
+  <!-- Input -->
+  <polyline points="20,186 182,186 182,40" fill="none" stroke="#4a90d9" stroke-width="2" />
+
+  <!-- Default arc: 9 arc points from JTS -->
+  <!-- (10,-3)→(182,230) (10.59,-2.94)→(192,229) (11.15,-2.77)→(201,226) (11.67,-2.49)→(209,222) -->
+  <!-- (12.12,-2.12)→(216,217) (12.49,-1.67)→(222,211) (12.77,-1.15)→(227,203) (12.94,-0.59)→(230,195) (13,0)→(231,186) -->
+  <polyline points="20,230 182,230 192,229 201,226 209,222 216,217 222,211 227,203 230,195 231,186 231,40"
+    fill="none" stroke="#e67e22" stroke-width="2" />
+  <circle cx="182" cy="230" r="2.5" fill="#e67e22" />
+  <circle cx="192" cy="229" r="2.5" fill="#e67e22" />
+  <circle cx="201" cy="226" r="2.5" fill="#e67e22" />
+  <circle cx="209" cy="222" r="2.5" fill="#e67e22" />
+  <circle cx="216" cy="217" r="2.5" fill="#e67e22" />
+  <circle cx="222" cy="211" r="2.5" fill="#e67e22" />
+  <circle cx="227" cy="203" r="2.5" fill="#e67e22" />
+  <circle cx="230" cy="195" r="2.5" fill="#e67e22" />
+  <circle cx="231" cy="186" r="2.5" fill="#e67e22" />
+
+  <!-- Divider -->
+  <line x1="250" y1="30" x2="250" y2="250" stroke="#ddd" stroke-width="1" />
+
+  <!-- RIGHT CHART: qs=16 -->
+  <!-- Mapping: x[0,13]→[270,480], y[-3,10]→[230,40] -->
+  <!-- cx = x*16.2+270, cy = 230 - (y+3)*14.6 -->
+  <!-- (0,0)→(270,186) (10,0)→(432,186) (10,10)→(432,40) -->
+  <!-- (13,0)→(481,186) (13,10)→(481,40) -->
+
+  <text x="375" y="36" text-anchor="middle" font-size="13" font-weight="bold" fill="#9b59b6">qs=16: 19 points</text>
+
+  <!-- Input -->
+  <polyline points="270,186 432,186 432,40" fill="none" stroke="#4a90d9" stroke-width="2" />
+
+  <!-- qs=16 arc: 17 arc points from JTS -->
+  <!-- (10,-3)→(432,230) (10.29,-2.99)→(437,230) (10.59,-2.94)→(442,229) (10.87,-2.87)→(448,228) -->
+  <!-- (11.15,-2.77)→(451,226) (11.41,-2.65)→(455,223) (11.67,-2.49)→(459,222) (11.90,-2.32)→(463,219) -->
+  <!-- (12.12,-2.12)→(466,217) (12.32,-1.90)→(470,214) (12.49,-1.67)→(472,211) (12.65,-1.41)→(475,207) -->
+  <!-- (12.77,-1.15)→(477,203) (12.87,-0.87)→(478,199) (12.94,-0.59)→(480,195) (12.99,-0.29)→(481,190) (13,0)→(481,186) -->
+  <polyline points="270,230 432,230 437,230 442,229 448,228 451,226 455,223 459,222 463,219 466,217 470,214 472,211 475,207 477,203 478,199 480,195 481,190 481,186 481,40"
+    fill="none" stroke="#9b59b6" stroke-width="2" />
+  <circle cx="432" cy="230" r="2" fill="#9b59b6" />
+  <circle cx="437" cy="230" r="2" fill="#9b59b6" />
+  <circle cx="442" cy="229" r="2" fill="#9b59b6" />
+  <circle cx="448" cy="228" r="2" fill="#9b59b6" />
+  <circle cx="451" cy="226" r="2" fill="#9b59b6" />
+  <circle cx="455" cy="223" r="2" fill="#9b59b6" />
+  <circle cx="459" cy="222" r="2" fill="#9b59b6" />
+  <circle cx="463" cy="219" r="2" fill="#9b59b6" />
+  <circle cx="466" cy="217" r="2" fill="#9b59b6" />
+  <circle cx="470" cy="214" r="2" fill="#9b59b6" />
+  <circle cx="472" cy="211" r="2" fill="#9b59b6" />
+  <circle cx="475" cy="207" r="2" fill="#9b59b6" />
+  <circle cx="477" cy="203" r="2" fill="#9b59b6" />
+  <circle cx="478" cy="199" r="2" fill="#9b59b6" />
+  <circle cx="480" cy="195" r="2" fill="#9b59b6" />
+  <circle cx="481" cy="190" r="2" fill="#9b59b6" />
+  <circle cx="481" cy="186" r="2" fill="#9b59b6" />
+
   <!-- Caption -->
-  <text x="250" y="290" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Higher quadrantSegments produces smoother arcs at outer corners</text>
+  <text x="250" y="280" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Higher quadrantSegments adds more line segments to approximate the arc</text>
   <!-- Legend -->
-  <rect x="43" y="265" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
-  <text x="59" y="276" font-size="13" fill="#333333">Input</text>
-  <rect x="133" y="265" width="12" height="12" rx="2" fill="#e67e22" stroke="#e67e22" stroke-width="1" />
-  <text x="149" y="276" font-size="13" fill="#333333">Default (qs=8)</text>
-  <rect x="293" y="265" width="12" height="12" rx="2" fill="#9b59b6" stroke="#9b59b6" stroke-width="1" />
-  <text x="309" y="276" font-size="13" fill="#333333">Smoother (qs=16)</text>
+  <rect x="73" y="258" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="89" y="269" font-size="12" fill="#333333">Input</text>
+  <rect x="163" y="258" width="12" height="12" rx="2" fill="#e67e22" stroke="#e67e22" stroke-width="1" />
+  <text x="179" y="269" font-size="12" fill="#333333">Offset (qs=8)</text>
+  <rect x="293" y="258" width="12" height="12" rx="2" fill="#9b59b6" stroke="#9b59b6" stroke-width="1" />
+  <text x="309" y="269" font-size="12" fill="#333333">Offset (qs=16)</text>
 </svg>

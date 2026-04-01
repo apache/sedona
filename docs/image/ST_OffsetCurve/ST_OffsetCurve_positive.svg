@@ -5,30 +5,35 @@
     </style>
   </defs>
   <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_OffsetCurve — Positive Offset on L-shape</text>
-  <!-- Geometry range: x[0,10] y[0,10]. Canvas: x[60,440] y[40,240]. Scale: 38x, 20y (inverted) -->
-  <!-- (0,0)→(60,240) (10,0)→(440,240) (10,10)→(440,40) (5,5)→(250,140) -->
+  <!-- Mapping: x range [0,13] → [60,450], y range [-1,10] → [230,35] -->
+  <!-- cx = x*30+60, cy = 230 - y*17.7 -->
+  <!-- (0,0)→(60,230) (10,0)→(360,230) (10,10)→(360,53) -->
+  <!-- (0,5)→(60,141) (5,5)→(210,141) (5,10)→(210,53) -->
+
   <!-- Input: LINESTRING(0 0, 10 0, 10 10) -->
-  <polyline points="60,240 440,240 440,40" fill="none" stroke="#4a90d9" stroke-width="3" />
-  <circle cx="60" cy="240" r="4" fill="#4a90d9" />
-  <circle cx="440" cy="240" r="4" fill="#4a90d9" />
-  <circle cx="440" cy="40" r="4" fill="#4a90d9" />
-  <text x="36" y="245" font-size="11" fill="#4a90d9">(0, 0)</text>
-  <text x="443" y="255" font-size="11" fill="#4a90d9">(10, 0)</text>
-  <text x="443" y="38" font-size="11" fill="#4a90d9">(10, 10)</text>
-  <!-- Result: LINESTRING(0 5, 5 5, 5 10) = positive offset clips inner corner -->
-  <!-- (0,5)→(60,140) (5,5)→(250,140) (5,10)→(250,40) -->
-  <polyline points="60,140 250,140 250,40" fill="none" stroke="#2ecc71" stroke-width="3" />
-  <circle cx="60" cy="140" r="4" fill="#2ecc71" />
-  <circle cx="250" cy="140" r="4" fill="#2ecc71" />
-  <circle cx="250" cy="40" r="4" fill="#2ecc71" />
-  <text x="36" y="135" font-size="11" fill="#2ecc71">(0, 5)</text>
-  <text x="253" y="155" font-size="11" fill="#2ecc71">(5, 5)</text>
-  <text x="218" y="38" font-size="11" fill="#2ecc71">(5, 10)</text>
+  <polyline points="60,230 360,230 360,53" fill="none" stroke="#4a90d9" stroke-width="3" />
+  <circle cx="60" cy="230" r="4" fill="#4a90d9" />
+  <circle cx="360" cy="230" r="4" fill="#4a90d9" />
+  <circle cx="360" cy="53" r="4" fill="#4a90d9" />
+  <text x="36" y="235" font-size="11" fill="#4a90d9">(0, 0)</text>
+  <text x="363" y="245" font-size="11" fill="#4a90d9">(10, 0)</text>
+  <text x="363" y="50" font-size="11" fill="#4a90d9">(10, 10)</text>
+
+  <!-- Result: LINESTRING(0 5, 5 5, 5 10) — inner corner is clipped, no arc -->
+  <polyline points="60,141 210,141 210,53" fill="none" stroke="#2ecc71" stroke-width="3" />
+  <circle cx="60" cy="141" r="4" fill="#2ecc71" />
+  <circle cx="210" cy="141" r="4" fill="#2ecc71" />
+  <circle cx="210" cy="53" r="4" fill="#2ecc71" />
+  <text x="36" y="136" font-size="11" fill="#2ecc71">(0, 5)</text>
+  <text x="213" y="155" font-size="11" fill="#2ecc71">(5, 5)</text>
+  <text x="178" y="50" font-size="11" fill="#2ecc71">(5, 10)</text>
+
   <!-- Distance marker -->
-  <line x1="150" y1="140" x2="150" y2="240" stroke="#999" stroke-width="1" stroke-dasharray="3,2" />
-  <line x1="146" y1="140" x2="154" y2="140" stroke="#999" stroke-width="1" />
-  <line x1="146" y1="240" x2="154" y2="240" stroke="#999" stroke-width="1" />
-  <text x="156" y="195" font-size="12" font-weight="bold" fill="#999">d = 5</text>
+  <line x1="150" y1="141" x2="150" y2="230" stroke="#999" stroke-width="1" stroke-dasharray="3,2" />
+  <line x1="146" y1="141" x2="154" y2="141" stroke="#999" stroke-width="1" />
+  <line x1="146" y1="230" x2="154" y2="230" stroke="#999" stroke-width="1" />
+  <text x="156" y="190" font-size="12" font-weight="bold" fill="#999">d = 5</text>
+
   <!-- Caption -->
   <text x="250" y="290" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">LINESTRING (0 5, 5 5, 5 10)</text>
   <!-- Legend -->

@@ -4287,13 +4287,13 @@ public class FunctionsTest extends TestBase {
 
   @Test
   public void offsetCurveWithQuadrantSegments() throws ParseException {
-    // Test with custom quadrant segments
-    Geometry line = Constructors.geomFromWKT("LINESTRING (0 0, 10 0)", 0);
-    Geometry result = Functions.offsetCurve(line, 5.0, 4);
-    assertNotNull(result);
-    // The result should still be a simple offset for a straight line
-    String actual = Functions.asWKT(result);
-    assertEquals("LINESTRING (0 5, 10 5)", actual);
+    // Test with custom quadrant segments on a line with a corner
+    Geometry line = Constructors.geomFromWKT("LINESTRING (0 0, 10 0, 10 10)", 0);
+    Geometry defaultResult = Functions.offsetCurve(line, -3.0);
+    Geometry customResult = Functions.offsetCurve(line, -3.0, 16);
+    assertNotNull(customResult);
+    // Higher quadrantSegments produces more points on the arc at outer corners
+    assertTrue(customResult.getNumPoints() > defaultResult.getNumPoints());
   }
 
   @Test

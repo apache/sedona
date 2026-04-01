@@ -3060,11 +3060,14 @@ class functionTestScala
     actual = df.take(1)(0).get(0).asInstanceOf[String]
     assertEquals("LINESTRING (0 -5, 10 -5)", actual)
 
-    // With quadrantSegments parameter
-    df = sparkSession.sql(
-      "SELECT ST_AsText(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0)'), 5.0, 4))")
-    actual = df.take(1)(0).get(0).asInstanceOf[String]
-    assertEquals("LINESTRING (0 5, 10 5)", actual)
+    // With quadrantSegments parameter on a line with a corner
+    val defaultDf = sparkSession.sql(
+      "SELECT ST_NPoints(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)'), -3.0))")
+    val defaultPts = defaultDf.take(1)(0).get(0).asInstanceOf[Int]
+    val customDf = sparkSession.sql(
+      "SELECT ST_NPoints(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)'), -3.0, 16))")
+    val customPts = customDf.take(1)(0).get(0).asInstanceOf[Int]
+    assertTrue(customPts > defaultPts)
   }
 
   it("Should pass ST_AreaSpheroid") {

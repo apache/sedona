@@ -1998,12 +1998,16 @@ class TestPredicateJoin(TestBase):
         actual = actual_df.take(1)[0][0]
         assert actual == "LINESTRING (0 -5, 10 -5)"
 
-        # With quadrantSegments parameter
-        actual_df = self.spark.sql(
-            "SELECT ST_AsText(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0)'), 5.0, 4))"
+        # With quadrantSegments parameter on a line with a corner
+        default_df = self.spark.sql(
+            "SELECT ST_NPoints(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)'), -3.0))"
         )
-        actual = actual_df.take(1)[0][0]
-        assert actual == "LINESTRING (0 5, 10 5)"
+        default_pts = default_df.take(1)[0][0]
+        custom_df = self.spark.sql(
+            "SELECT ST_NPoints(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)'), -3.0, 16))"
+        )
+        custom_pts = custom_df.take(1)[0][0]
+        assert custom_pts > default_pts
 
     def test_st_collect_on_array_type(self):
         # given
