@@ -298,6 +298,15 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
+      - id: forbid-tabs
+        name: run forbid-tabs
+        description: check the codebase for tabs
+        exclude: ^python/sedona/doc/make\.bat$|^python/sedona/doc/Makefile$|^spark/common/src/test/resources/.*$|^Makefile$|\.csv$|\.md$|\.tsv$
+      - id: remove-tabs
+        name: run remove-tabs
+        description: find and convert tabs to spaces
+        args: [--whitespaces-count, '2']
+        exclude: ^python/sedona/doc/make\.bat$|^python/sedona/doc/Makefile$|^spark/common/src/test/resources/.*$|^Makefile$|\.csv$|\.md$|\.tsv$
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.21.2
     hooks:

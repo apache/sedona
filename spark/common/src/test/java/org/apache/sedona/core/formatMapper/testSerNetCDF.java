@@ -37,7 +37,7 @@ public class testSerNetCDF {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
-    //		filename = System.getProperty("user.dir")+"/src/test/resources/" +
+    // filename = System.getProperty("user.dir")+"/src/test/resources/" +
     // "MYD11_L2.A2017091.0155.006.2017094143610.hdf";
   }
 
