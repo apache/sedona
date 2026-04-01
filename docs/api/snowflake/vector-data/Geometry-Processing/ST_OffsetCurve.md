@@ -19,6 +19,8 @@
 
 # ST_OffsetCurve
 
+![ST_OffsetCurve](../../../../image/ST_OffsetCurve/ST_OffsetCurve.svg "ST_OffsetCurve")
+
 Introduction: Returns a line at a given offset distance from a linear geometry. If the distance is positive, the offset is on the left side of the input line; if it is negative, it is on the right side. Returns null for empty geometries.
 
 The optional third parameter `quadrantSegments` controls the number of line segments used to approximate a quarter circle at round joins. The default value is 8.
@@ -29,22 +31,32 @@ Format: `ST_OffsetCurve(geometry: Geometry, distance: Double)`
 
 Return type: `Geometry`
 
-SQL Example
+SQL Example:
+
+![ST_OffsetCurve Positive](../../../../image/ST_OffsetCurve/ST_OffsetCurve_positive.svg "ST_OffsetCurve Positive Offset")
 
 ```sql
-SELECT ST_AsText(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0)'), 5.0))
+SELECT ST_AsText(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)'), 5.0))
 ```
 
-Output: `LINESTRING (0 5, 10 5)`
+Output: `LINESTRING (0 5, 5 5, 5 10)`
+
+SQL Example:
+
+![ST_OffsetCurve Negative](../../../../image/ST_OffsetCurve/ST_OffsetCurve_negative.svg "ST_OffsetCurve Negative Offset")
 
 ```sql
-SELECT ST_AsText(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0)'), -5.0))
+SELECT ST_NPoints(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)'), -3.0))
 ```
 
-Output: `LINESTRING (0 -5, 10 -5)`
+Output: `11`
+
+SQL Example:
+
+![ST_OffsetCurve QuadrantSegments](../../../../image/ST_OffsetCurve/ST_OffsetCurve_quadrant.svg "ST_OffsetCurve with quadrantSegments")
 
 ```sql
-SELECT ST_AsText(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0)'), 5.0, 4))
+SELECT ST_NPoints(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)'), -3.0, 16))
 ```
 
-Output: `LINESTRING (0 5, 10 5)`
+Output: `19`
