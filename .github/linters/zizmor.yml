@@ -19,7 +19,6 @@ rules:
   unpinned-uses:
     config:
       policies:
-        actions/*: any
         github/*: any
         r-lib/actions/check-r-package: any
         r-lib/actions/setup-r: any
