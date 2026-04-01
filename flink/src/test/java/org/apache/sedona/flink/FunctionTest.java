@@ -252,6 +252,33 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testOffsetCurve() {
+    Table table = tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(0 0, 10 0)') AS geom");
+    table = table.select(call(Functions.ST_OffsetCurve.class.getSimpleName(), $("geom"), 5.0));
+    Geometry result = (Geometry) first(table).getField(0);
+    assertEquals("LINESTRING (0 5, 10 5)", result.toString());
+  }
+
+  @Test
+  public void testOffsetCurveWithQuadrantSegments() {
+    Table table =
+        tableEnv.sqlQuery("SELECT ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)') AS geom");
+    Table defaultTable =
+        table.select(
+            call(
+                "ST_NPoints",
+                call(Functions.ST_OffsetCurve.class.getSimpleName(), $("geom"), -3.0)));
+    Table customTable =
+        table.select(
+            call(
+                "ST_NPoints",
+                call(Functions.ST_OffsetCurve.class.getSimpleName(), $("geom"), -3.0, 16)));
+    int defaultPts = (int) first(defaultTable).getField(0);
+    int customPts = (int) first(customTable).getField(0);
+    assertTrue(customPts > defaultPts);
+  }
+
+  @Test
   public void testCentroid() {
     Table polygonTable =
         tableEnv.sqlQuery("SELECT ST_GeomFromText('POLYGON ((2 2, 0 0, 2 0, 0 2, 2 2))') as geom");

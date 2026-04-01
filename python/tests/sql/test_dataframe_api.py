@@ -907,6 +907,20 @@ test_configurations = [
         "",
         "POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))",
     ),
+    (
+        stf.ST_OffsetCurve,
+        ("line", 1.0),
+        "linestring_geom",
+        "ST_AsText(geom)",
+        "LINESTRING (0 1, 5 1)",
+    ),
+    (
+        stf.ST_OffsetCurve,
+        ("line", 1.0, 4),
+        "linestring_geom",
+        "ST_AsText(geom)",
+        "LINESTRING (0 1, 5 1)",
+    ),
     (stf.ST_PointN, ("line", 2), "linestring_geom", "", "POINT (1 0)"),
     (stf.ST_PointOnSurface, ("line",), "linestring_geom", "", "POINT (2 0)"),
     (
@@ -1444,6 +1458,7 @@ wrong_type_configurations = [
     (stf.ST_MinimumBoundingCircle, (None,)),
     (stf.ST_MinimumBoundingRadius, (None,)),
     (stf.ST_OrientedEnvelope, (None,)),
+    (stf.ST_OffsetCurve, (None, 1.0)),
     (stf.ST_Multi, (None,)),
     (stf.ST_Normalize, (None,)),
     (stf.ST_NPoints, (None,)),

@@ -214,6 +214,7 @@ These functions compute geometric constructions, or alter geometry size or shape
 | [ST_MaximumInscribedCircle](Geometry-Processing/ST_MaximumInscribedCircle.md) | Finds the largest circle that is contained within a (multi)polygon, or which does not overlap any lines and points. Returns a row with fields: |
 | [ST_MinimumBoundingCircle](Geometry-Processing/ST_MinimumBoundingCircle.md) | Returns the smallest circle polygon that contains a geometry. |
 | [ST_MinimumBoundingRadius](Geometry-Processing/ST_MinimumBoundingRadius.md) | Returns two columns containing the center point and radius of the smallest circle that contains a geometry. |
+| [ST_OffsetCurve](Geometry-Processing/ST_OffsetCurve.md) | Returns a line at a given offset distance from a linear geometry. Positive distance offsets to the left, negative to the right. |
 | [ST_OrientedEnvelope](Geometry-Processing/ST_OrientedEnvelope.md) | Returns the minimum-area rotated rectangle enclosing a geometry. The rectangle may be rotated relative to the coordinate axes. Degenerate inputs may result in a Point or LineString being returned. |
 | [ST_PointOnSurface](Geometry-Processing/ST_PointOnSurface.md) | Returns a POINT guaranteed to lie on the surface. |
 | [ST_Polygonize](Geometry-Processing/ST_Polygonize.md) | Generates a GeometryCollection composed of polygons that are formed from the linework of an input GeometryCollection. When the input does not contain any linework that forms a polygon, the function... |

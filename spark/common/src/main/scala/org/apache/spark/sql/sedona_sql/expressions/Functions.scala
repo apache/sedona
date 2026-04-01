@@ -1012,6 +1012,16 @@ private[apache] case class ST_ShortestLine(inputExpressions: Seq[Expression])
   }
 }
 
+private[apache] case class ST_OffsetCurve(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction2(Functions.offsetCurve),
+      inferrableFunction3(Functions.offsetCurve)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 private[apache] case class ST_IsPolygonCW(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.isPolygonCW _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

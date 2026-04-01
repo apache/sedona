@@ -1983,6 +1983,32 @@ class TestPredicateJoin(TestBase):
         actual = actual_df.take(1)[0][0]
         assert actual is None
 
+    def test_st_offset_curve(self):
+        # Positive distance offsets to the left
+        actual_df = self.spark.sql(
+            "SELECT ST_AsText(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0)'), 5.0))"
+        )
+        actual = actual_df.take(1)[0][0]
+        assert actual == "LINESTRING (0 5, 10 5)"
+
+        # Negative distance offsets to the right
+        actual_df = self.spark.sql(
+            "SELECT ST_AsText(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0)'), -5.0))"
+        )
+        actual = actual_df.take(1)[0][0]
+        assert actual == "LINESTRING (0 -5, 10 -5)"
+
+        # With quadrantSegments parameter on a line with a corner
+        default_df = self.spark.sql(
+            "SELECT ST_NPoints(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)'), -3.0))"
+        )
+        default_pts = default_df.take(1)[0][0]
+        custom_df = self.spark.sql(
+            "SELECT ST_NPoints(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)'), -3.0, 16))"
+        )
+        custom_pts = custom_df.take(1)[0][0]
+        assert custom_pts > default_pts
+
     def test_st_collect_on_array_type(self):
         # given
         geometry_df = self.spark.createDataFrame(
