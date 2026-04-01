@@ -962,6 +962,24 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "distance"},
+      argTypes = {"Geometry", "double"},
+      returnTypes = "Geometry")
+  public static String ST_OffsetCurve(String geometry, double distance) {
+    return GeometrySerde.serGeoJson(
+        Functions.offsetCurve(GeometrySerde.deserGeoJson(geometry), distance));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "distance", "quadrantSegments"},
+      argTypes = {"Geometry", "double", "int"},
+      returnTypes = "Geometry")
+  public static String ST_OffsetCurve(String geometry, double distance, int quadrantSegments) {
+    return GeometrySerde.serGeoJson(
+        Functions.offsetCurve(GeometrySerde.deserGeoJson(geometry), distance, quadrantSegments));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"})
   public static int ST_NumGeometries(String geometry) {

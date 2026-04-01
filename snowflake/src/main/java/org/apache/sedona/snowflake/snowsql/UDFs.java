@@ -798,6 +798,18 @@ public class UDFs {
     return GeometrySerde.serialize(Functions.normalize(GeometrySerde.deserialize(geometry)));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "distance"})
+  public static byte[] ST_OffsetCurve(byte[] geometry, double distance) {
+    return GeometrySerde.serialize(
+        Functions.offsetCurve(GeometrySerde.deserialize(geometry), distance));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "distance", "quadrantSegments"})
+  public static byte[] ST_OffsetCurve(byte[] geometry, double distance, int quadrantSegments) {
+    return GeometrySerde.serialize(
+        Functions.offsetCurve(GeometrySerde.deserialize(geometry), distance, quadrantSegments));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static int ST_NumGeometries(byte[] geometry) {
     return Functions.numGeometries(GeometrySerde.deserialize(geometry));

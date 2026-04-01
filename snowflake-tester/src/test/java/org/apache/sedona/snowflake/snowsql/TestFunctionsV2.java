@@ -717,6 +717,18 @@ public class TestFunctionsV2 extends TestBase {
   }
 
   @Test
+  public void test_ST_OffsetCurve() {
+    registerUDFV2("ST_OffsetCurve", String.class, double.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_OffsetCurve(ST_GeometryFromWKT('LINESTRING(0 0, 10 0)'), 5.0))",
+        "LINESTRING (0 5, 10 5)");
+    registerUDFV2("ST_OffsetCurve", String.class, double.class, int.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_OffsetCurve(ST_GeometryFromWKT('LINESTRING(0 0, 10 0)'), 5.0, 4))",
+        "LINESTRING (0 5, 10 5)");
+  }
+
+  @Test
   public void test_ST_NumGeometries() {
     registerUDFV2("ST_NumGeometries", String.class);
     verifySqlSingleRes(
