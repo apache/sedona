@@ -504,12 +504,9 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             # will differ from geopandas results.
             if isinstance(geom[0], LinearRing):
                 continue
-            # ST_Intersection returns different results for
-            # GeometryCollection inputs compared to GEOS clip_by_rect.
-            if isinstance(geom[0], GeometryCollection):
-                continue
-            # JTS and GEOS handle invalid geometries differently in
-            # intersection operations, so skip them.
+            # JTS throws TopologyException on invalid geometries (e.g.
+            # self-intersecting polygons) during ST_Intersection, while
+            # GEOS handles them gracefully.
             if not gpd.GeoSeries(geom).is_valid.all():
                 continue
             sgpd_result = GeoSeries(geom).clip_by_rect(0.3, 0.3, 1.7, 1.7)

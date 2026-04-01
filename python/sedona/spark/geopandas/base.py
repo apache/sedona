@@ -3066,7 +3066,8 @@ class GeoFrame(metaclass=ABCMeta):
               whereas geopandas returns ``GEOMETRYCOLLECTION EMPTY``.
             - Points on the boundary of the rectangle are considered
               intersecting and are returned unchanged, whereas geopandas
-              returns ``GEOMETRYCOLLECTION EMPTY``.
+              returns ``GEOMETRYCOLLECTION EMPTY`` for boundary-only
+              intersections.
 
         Parameters
         ----------
