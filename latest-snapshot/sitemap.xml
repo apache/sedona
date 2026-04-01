@@ -585,6 +585,10 @@
          <lastmod>2026-04-01</lastmod>
     </url>
     <url>
+         <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_OffsetCurve/</loc>
+         <lastmod>2026-04-01</lastmod>
+    </url>
+    <url>
          <loc>https://sedona.apache.org/latest/api/flink/Geometry-Processing/ST_OrientedEnvelope/</loc>
          <lastmod>2026-04-01</lastmod>
     </url>
@@ -1458,6 +1462,10 @@
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_MinimumBoundingRadius/</loc>
+         <lastmod>2026-04-01</lastmod>
+    </url>
+    <url>
+         <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Processing/ST_OffsetCurve/</loc>
          <lastmod>2026-04-01</lastmod>
     </url>
     <url>
@@ -2406,6 +2414,10 @@
     </url>
     <url>
          <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_MinimumBoundingRadius/</loc>
+         <lastmod>2026-04-01</lastmod>
+    </url>
+    <url>
+         <loc>https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_OffsetCurve/</loc>
          <lastmod>2026-04-01</lastmod>
     </url>
     <url>
