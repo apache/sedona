@@ -56,6 +56,7 @@ nav:
               - GeoParquet: tutorial/files/geoparquet-sedona-spark.md
               - GeoJSON: tutorial/files/geojson-sedona-spark.md
               - Shapefiles: tutorial/files/shapefiles-sedona-spark.md
+              - Raster metadata (SedonaInfo): tutorial/files/sedonainfo-sedona-spark.md
               - STAC catalog: tutorial/files/stac-sedona-spark.md
           - Concepts:
               - Spatial Joins: tutorial/concepts/spatial-joins.md

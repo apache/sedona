@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.io.geotiffmetadata
+package org.apache.spark.sql.sedona_sql.io.sedonainfo
 
 import org.apache.spark.sql.connector.catalog.Table
 import org.apache.spark.sql.connector.catalog.TableProvider
@@ -29,10 +29,12 @@ import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
 import scala.collection.JavaConverters._
 
-class GeoTiffMetadataDataSource
-    extends FileDataSourceV2
-    with TableProvider
-    with DataSourceRegister {
+/**
+ * A Spark SQL data source that reads raster file metadata without decoding pixel data, similar to
+ * gdalinfo. Currently supports GeoTIFF files. Additional formats can be added by implementing
+ * [[RasterFileMetadataExtractor]].
+ */
+class SedonaInfoDataSource extends FileDataSourceV2 with TableProvider with DataSourceRegister {
 
   override def shortName(): String = "sedonainfo"
 
@@ -66,7 +68,7 @@ class GeoTiffMetadataDataSource
       }
     }
 
-    new GeoTiffMetadataTable(
+    new SedonaInfoTable(
       tableName,
       sparkSession,
       optionsWithoutPaths,
@@ -84,7 +86,7 @@ class GeoTiffMetadataDataSource
   }
 
   override def inferSchema(options: CaseInsensitiveStringMap): StructType = {
-    GeoTiffMetadataTable.SCHEMA
+    SedonaInfoTable.SCHEMA
   }
 
   override def fallbackFileFormat: Class[_ <: FileFormat] = classOf[RasterFileFormat]

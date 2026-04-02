@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.io.geotiffmetadata
+package org.apache.spark.sql.sedona_sql.io.sedonainfo
 
 import org.apache.hadoop.fs.FileStatus
 import org.apache.spark.sql.SparkSession
@@ -33,7 +33,7 @@ import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
 import java.util.{Set => JSet}
 
-case class GeoTiffMetadataTable(
+case class SedonaInfoTable(
     name: String,
     sparkSession: SparkSession,
     options: CaseInsensitiveStringMap,
@@ -45,21 +45,21 @@ case class GeoTiffMetadataTable(
     with SupportsWrite {
 
   override def inferSchema(files: Seq[FileStatus]): Option[StructType] =
-    Some(GeoTiffMetadataTable.SCHEMA)
+    Some(SedonaInfoTable.SCHEMA)
 
-  override def formatName: String = "GeoTiffMetadata"
+  override def formatName: String = "SedonaInfo"
 
   override def capabilities(): JSet[TableCapability] =
     java.util.EnumSet.of(TableCapability.BATCH_READ)
 
   override def newScanBuilder(options: CaseInsensitiveStringMap): ScanBuilder = {
-    GeoTiffMetadataScanBuilder(sparkSession, fileIndex, schema, dataSchema, options)
+    SedonaInfoScanBuilder(sparkSession, fileIndex, schema, dataSchema, options)
   }
 
   override def newWriteBuilder(info: LogicalWriteInfo): WriteBuilder = null
 }
 
-object GeoTiffMetadataTable {
+object SedonaInfoTable {
 
   val GEO_TRANSFORM_TYPE: StructType = StructType(
     Seq(
