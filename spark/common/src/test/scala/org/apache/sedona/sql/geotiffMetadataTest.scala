@@ -18,12 +18,23 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfter
+
+import java.io.File
+import java.nio.file.Files
 
 class geotiffMetadataTest extends TestBaseScala with BeforeAndAfter {
 
   val rasterDir: String = resourceFolder + "raster/"
   val singleFileLocation: String = resourceFolder + "raster/test1.tiff"
+  val tempDir: String =
+    Files.createTempDirectory("sedona_sedonainfo_test_").toFile.getAbsolutePath
+
+  override def afterAll(): Unit = {
+    FileUtils.deleteDirectory(new File(tempDir))
+    super.afterAll()
+  }
 
   describe("GeoTiff Metadata (sedonainfo) data source") {
 
@@ -79,7 +90,6 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfter {
           "geoTransform.skewX",
           "geoTransform.skewY")
         .first()
-      // scaleX should be positive, scaleY should be negative (north-up convention)
       assert(row.getAs[Double]("scaleX") != 0.0)
       assert(row.getAs[Double]("scaleY") != 0.0)
     }
@@ -159,10 +169,7 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfter {
     it("should report isTiled correctly") {
       val df = sparkSession.read.format("sedonainfo").load(singleFileLocation)
       val row = df.first()
-      // isTiled should be a boolean
       val isTiled = row.getAs[Boolean]("isTiled")
-      val width = row.getAs[Int]("width")
-      // If the raster is small, it's likely not tiled (strip-based)
       assert(isTiled == true || isTiled == false)
     }
 
@@ -176,9 +183,92 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfter {
     it("should return overviews array") {
       val df = sparkSession.read.format("sedonainfo").load(singleFileLocation)
       val row = df.first()
-      // Test rasters likely don't have overviews, so empty array is expected
       val overviews = row.getAs[Seq[Any]]("overviews")
       assert(overviews != null)
+    }
+
+    it("should detect COG properties from a generated COG file") {
+      // Generate a COG from test1.tiff using RS_AsCOG and write to disk
+      val cogBytes = sparkSession.read
+        .format("binaryFile")
+        .load(singleFileLocation)
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+        .selectExpr("RS_AsCOG(raster, 'LZW', 256, 0.5, 'Nearest', 2) as cog")
+        .first()
+        .getAs[Array[Byte]]("cog")
+
+      val cogFile = new File(tempDir, "test_cog.tiff")
+      val fos = new java.io.FileOutputStream(cogFile)
+      try { fos.write(cogBytes) }
+      finally { fos.close() }
+
+      // Read the COG with sedonainfo
+      val df = sparkSession.read.format("sedonainfo").load(cogFile.getAbsolutePath)
+      assert(df.count() == 1)
+
+      val row = df.first()
+
+      // COGs should be tiled
+      assert(row.getAs[Boolean]("isTiled") == true)
+
+      // COGs should have overviews
+      val overviews = row.getAs[Seq[Any]]("overviews")
+      assert(overviews != null)
+      assert(overviews.nonEmpty, "COG should have at least one overview level")
+
+      // Verify overview struct fields are accessible
+      val overviewDf = df
+        .selectExpr("explode(overviews) as ovr")
+        .selectExpr("ovr.level", "ovr.width", "ovr.height")
+      val ovrRow = overviewDf.first()
+      assert(ovrRow.getAs[Int]("level") >= 1)
+      assert(ovrRow.getAs[Int]("width") > 0)
+      assert(ovrRow.getAs[Int]("height") > 0)
+
+      // Overview dimensions should be smaller than full resolution
+      val fullWidth = row.getAs[Int]("width")
+      val fullHeight = row.getAs[Int]("height")
+      assert(ovrRow.getAs[Int]("width") < fullWidth)
+      assert(ovrRow.getAs[Int]("height") < fullHeight)
+
+      // Band block size should match the COG tile size (256)
+      val bandDf = df
+        .selectExpr("explode(bands) as band")
+        .selectExpr("band.blockWidth", "band.blockHeight")
+      val bandRow = bandDf.first()
+      assert(bandRow.getAs[Int]("blockWidth") == 256)
+      assert(bandRow.getAs[Int]("blockHeight") == 256)
+    }
+
+    it("should correctly report non-COG vs COG differences") {
+      // Read the original non-COG test file
+      val nonCogDf =
+        sparkSession.read.format("sedonainfo").load(singleFileLocation).select("isTiled")
+      val nonCogTiled = nonCogDf.first().getAs[Boolean]("isTiled")
+
+      // Generate a COG and write directly to file
+      val cogBytes = sparkSession.read
+        .format("binaryFile")
+        .load(singleFileLocation)
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+        .selectExpr("RS_AsCOG(raster, 'Deflate', 256) as cog")
+        .first()
+        .getAs[Array[Byte]]("cog")
+
+      val cogFile = new File(tempDir, "test_cog_compare.tiff")
+      val fos = new java.io.FileOutputStream(cogFile)
+      try { fos.write(cogBytes) }
+      finally { fos.close() }
+
+      val cogDf = sparkSession.read
+        .format("sedonainfo")
+        .load(cogFile.getAbsolutePath)
+        .select("isTiled", "overviews")
+      val cogRow = cogDf.first()
+
+      // COG should be tiled with overviews
+      assert(cogRow.getAs[Boolean]("isTiled") == true)
+      assert(cogRow.getAs[Seq[Any]]("overviews").nonEmpty)
     }
   }
 }
