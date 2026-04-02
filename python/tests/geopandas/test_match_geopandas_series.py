@@ -500,10 +500,6 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         # coordinate (0, 0.1, 0.2, 1, 2, …) lands on a rectangle boundary.
         # This avoids boundary-handling differences between JTS and GEOS.
         for geom in self.geoms:
-            # Sedona converts LinearRing to LineString, so geometry types
-            # will differ from geopandas results.
-            if isinstance(geom[0], LinearRing):
-                continue
             # JTS throws TopologyException on invalid geometries (e.g.
             # self-intersecting polygons) during ST_Intersection, while
             # GEOS handles them gracefully.
