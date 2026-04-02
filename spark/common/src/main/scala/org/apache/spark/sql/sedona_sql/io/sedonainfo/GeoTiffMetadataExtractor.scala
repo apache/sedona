@@ -148,20 +148,27 @@ object GeoTiffMetadataExtractor extends RasterFileMetadataExtractor {
       fullWidth: Int,
       fullHeight: Int): Seq[OverviewMetadata] = {
     try {
+      // Use DatasetLayout to get actual internal overview count (not synthetic tile-based levels)
+      val layout = reader.getDatasetLayout
+      if (layout == null) return Seq.empty
+
+      val numOverviews = layout.getNumInternalOverviews
+      if (numOverviews <= 0) return Seq.empty
+
       val resolutionLevels = reader.getResolutionLevels
-      if (resolutionLevels == null || resolutionLevels.length <= 1) {
-        Seq.empty
-      } else {
-        val fullResX = resolutionLevels(0)(0)
-        val fullResY = resolutionLevels(0)(1)
-        (1 until resolutionLevels.length).map { level =>
-          val overviewResX = resolutionLevels(level)(0)
-          val overviewResY = resolutionLevels(level)(1)
-          OverviewMetadata(
-            level = level,
-            width = Math.round(fullWidth.toDouble * fullResX / overviewResX).toInt,
-            height = Math.round(fullHeight.toDouble * fullResY / overviewResY).toInt)
-        }
+      if (resolutionLevels == null || resolutionLevels.length <= 1) return Seq.empty
+
+      // Only report the actual internal overviews, not synthetic resolution levels
+      val count = Math.min(numOverviews, resolutionLevels.length - 1)
+      val fullResX = resolutionLevels(0)(0)
+      val fullResY = resolutionLevels(0)(1)
+      (1 to count).map { level =>
+        val overviewResX = resolutionLevels(level)(0)
+        val overviewResY = resolutionLevels(level)(1)
+        OverviewMetadata(
+          level = level,
+          width = Math.round(fullWidth.toDouble * fullResX / overviewResX).toInt,
+          height = Math.round(fullHeight.toDouble * fullResY / overviewResY).toInt)
       }
     } catch {
       case _: Exception => Seq.empty

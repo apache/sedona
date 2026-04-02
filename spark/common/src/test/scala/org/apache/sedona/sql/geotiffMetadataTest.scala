@@ -19,12 +19,13 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.io.FileUtils
-import org.scalatest.BeforeAndAfter
+import org.junit.Assert.assertEquals
+import org.scalatest.BeforeAndAfterAll
 
 import java.io.File
 import java.nio.file.Files
 
-class geotiffMetadataTest extends TestBaseScala with BeforeAndAfter {
+class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
 
   val rasterDir: String = resourceFolder + "raster/"
   val singleFileLocation: String = resourceFolder + "raster/test1.tiff"
@@ -36,52 +37,28 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfter {
     super.afterAll()
   }
 
-  describe("GeoTiff Metadata (sedonainfo) data source") {
+  describe("SedonaInfo data source") {
 
-    it("should read a single GeoTIFF file and return one row") {
+    it("should read test1.tiff with exact metadata values") {
       val df = sparkSession.read.format("sedonainfo").load(singleFileLocation)
       assert(df.count() == 1)
+
       val row = df.first()
-      assert(row.getAs[String]("path").contains("test1.tiff"))
-      assert(row.getAs[String]("driver") == "GTiff")
-      assert(row.getAs[Int]("width") > 0)
-      assert(row.getAs[Int]("height") > 0)
-      assert(row.getAs[Int]("numBands") > 0)
+      assert(row.getAs[String]("path").endsWith("test1.tiff"))
+      assertEquals("GTiff", row.getAs[String]("driver"))
+      assertEquals(174803L, row.getAs[Long]("fileSize"))
+      assertEquals(512, row.getAs[Int]("width"))
+      assertEquals(517, row.getAs[Int]("height"))
+      assertEquals(1, row.getAs[Int]("numBands"))
+      assertEquals(3857, row.getAs[Int]("srid"))
+      assert(row.getAs[String]("crs").contains("EPSG"))
+      assertEquals(true, row.getAs[Boolean]("isTiled"))
     }
 
-    it("should read multiple GeoTIFF files via glob pattern") {
-      val df = sparkSession.read.format("sedonainfo").load(rasterDir + "*.tiff")
-      assert(df.count() > 1)
-    }
-
-    it("should read GeoTIFF files from directory with trailing slash") {
-      val df = sparkSession.read.format("sedonainfo").load(rasterDir)
-      assert(df.count() > 1)
-    }
-
-    it("should return correct schema") {
-      val df = sparkSession.read.format("sedonainfo").load(singleFileLocation)
-      val schema = df.schema
-      assert(schema.fieldNames.contains("path"))
-      assert(schema.fieldNames.contains("driver"))
-      assert(schema.fieldNames.contains("fileSize"))
-      assert(schema.fieldNames.contains("width"))
-      assert(schema.fieldNames.contains("height"))
-      assert(schema.fieldNames.contains("numBands"))
-      assert(schema.fieldNames.contains("srid"))
-      assert(schema.fieldNames.contains("crs"))
-      assert(schema.fieldNames.contains("geoTransform"))
-      assert(schema.fieldNames.contains("cornerCoordinates"))
-      assert(schema.fieldNames.contains("bands"))
-      assert(schema.fieldNames.contains("overviews"))
-      assert(schema.fieldNames.contains("metadata"))
-      assert(schema.fieldNames.contains("isTiled"))
-      assert(schema.fieldNames.contains("compression"))
-    }
-
-    it("should return correct geoTransform struct") {
-      val df = sparkSession.read.format("sedonainfo").load(singleFileLocation)
-      val row = df
+    it("should return exact geoTransform for test1.tiff") {
+      val row = sparkSession.read
+        .format("sedonainfo")
+        .load(singleFileLocation)
         .selectExpr(
           "geoTransform.upperLeftX",
           "geoTransform.upperLeftY",
@@ -90,48 +67,68 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfter {
           "geoTransform.skewX",
           "geoTransform.skewY")
         .first()
-      assert(row.getAs[Double]("scaleX") != 0.0)
-      assert(row.getAs[Double]("scaleY") != 0.0)
+      assertEquals(-1.3095817809482181e7, row.getAs[Double]("upperLeftX"), 0.01)
+      assertEquals(4021262.7487925636, row.getAs[Double]("upperLeftY"), 0.01)
+      assertEquals(72.32861272132695, row.getAs[Double]("scaleX"), 1e-10)
+      assertEquals(-72.32861272132695, row.getAs[Double]("scaleY"), 1e-10)
+      assertEquals(0.0, row.getAs[Double]("skewX"), 1e-15)
+      assertEquals(0.0, row.getAs[Double]("skewY"), 1e-15)
     }
 
-    it("should return correct cornerCoordinates struct") {
-      val df = sparkSession.read.format("sedonainfo").load(singleFileLocation)
-      val row = df
+    it("should return exact cornerCoordinates for test1.tiff") {
+      val row = sparkSession.read
+        .format("sedonainfo")
+        .load(singleFileLocation)
         .selectExpr(
           "cornerCoordinates.minX",
           "cornerCoordinates.minY",
           "cornerCoordinates.maxX",
           "cornerCoordinates.maxY")
         .first()
-      assert(row.getAs[Double]("maxX") > row.getAs[Double]("minX"))
-      assert(row.getAs[Double]("maxY") > row.getAs[Double]("minY"))
+      assertEquals(-1.3095817809482181e7, row.getAs[Double]("minX"), 0.01)
+      assertEquals(3983868.8560156375, row.getAs[Double]("minY"), 0.01)
+      assertEquals(-1.3058785559768861e7, row.getAs[Double]("maxX"), 0.01)
+      assertEquals(4021262.7487925636, row.getAs[Double]("maxY"), 0.01)
     }
 
-    it("should return correct bands array") {
-      val df = sparkSession.read.format("sedonainfo").load(singleFileLocation)
-      val row = df.first()
-      val numBands = row.getAs[Int]("numBands")
-      val bands = row.getAs[Seq[Any]]("bands")
-      assert(bands != null)
-      assert(bands.size == numBands)
-    }
-
-    it("should return band metadata with correct fields") {
-      val df = sparkSession.read
+    it("should return exact band metadata for test1.tiff") {
+      val row = sparkSession.read
         .format("sedonainfo")
         .load(singleFileLocation)
-        .selectExpr("explode(bands) as band")
-        .selectExpr("band.band", "band.dataType", "band.blockWidth", "band.blockHeight")
-      val row = df.first()
-      assert(row.getAs[Int]("band") == 1)
-      assert(row.getAs[String]("dataType") != null)
-      assert(row.getAs[Int]("blockWidth") > 0)
-      assert(row.getAs[Int]("blockHeight") > 0)
+        .selectExpr("explode(bands) as b")
+        .selectExpr(
+          "b.band",
+          "b.dataType",
+          "b.colorInterpretation",
+          "b.noDataValue",
+          "b.blockWidth",
+          "b.blockHeight",
+          "b.description",
+          "b.unit")
+        .first()
+      assertEquals(1, row.getAs[Int]("band"))
+      assertEquals("UNSIGNED_8BITS", row.getAs[String]("dataType"))
+      assertEquals("GRAY_INDEX", row.getAs[String]("colorInterpretation"))
+      assert(row.isNullAt(row.fieldIndex("noDataValue")))
+      assertEquals(256, row.getAs[Int]("blockWidth"))
+      assertEquals(256, row.getAs[Int]("blockHeight"))
+      assertEquals("GRAY_INDEX", row.getAs[String]("description"))
+      assert(row.isNullAt(row.fieldIndex("unit")))
     }
 
-    it("should cross-validate metadata against raster data source") {
-      val metaDf = sparkSession.read.format("sedonainfo").load(singleFileLocation)
-      val rasterDf = sparkSession.read
+    it("should return empty overviews for non-COG test1.tiff") {
+      // test1.tiff has only 1 IFD (no internal overviews)
+      val row = sparkSession.read
+        .format("sedonainfo")
+        .load(singleFileLocation)
+        .selectExpr("size(overviews) as overviewCount")
+        .first()
+      assertEquals(0, row.getAs[Int]("overviewCount"))
+    }
+
+    it("should cross-validate against raster data source") {
+      val metaRow = sparkSession.read.format("sedonainfo").load(singleFileLocation).first()
+      val rasterRow = sparkSession.read
         .format("raster")
         .option("retile", "false")
         .load(singleFileLocation)
@@ -140,55 +137,43 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfter {
           "RS_Height(rast) as height",
           "RS_NumBands(rast) as numBands",
           "RS_SRID(rast) as srid")
+        .first()
+      assertEquals(metaRow.getAs[Int]("width"), rasterRow.getAs[Int]("width"))
+      assertEquals(metaRow.getAs[Int]("height"), rasterRow.getAs[Int]("height"))
+      assertEquals(metaRow.getAs[Int]("numBands"), rasterRow.getAs[Int]("numBands"))
+      assertEquals(metaRow.getAs[Int]("srid"), rasterRow.getAs[Int]("srid"))
+    }
 
-      val metaRow = metaDf.first()
-      val rasterRow = rasterDf.first()
-      assert(metaRow.getAs[Int]("width") == rasterRow.getAs[Int]("width"))
-      assert(metaRow.getAs[Int]("height") == rasterRow.getAs[Int]("height"))
-      assert(metaRow.getAs[Int]("numBands") == rasterRow.getAs[Int]("numBands"))
-      assert(metaRow.getAs[Int]("srid") == rasterRow.getAs[Int]("srid"))
+    it("should read multiple files via glob") {
+      val df = sparkSession.read.format("sedonainfo").load(rasterDir + "*.tiff")
+      // 7 .tiff files in the raster directory (excludes test3.tif)
+      assertEquals(7L, df.count())
+    }
+
+    it("should read files from directory with trailing slash") {
+      val df = sparkSession.read.format("sedonainfo").load(rasterDir)
+      // Recursive lookup finds all .tif/.tiff files including subdirectories
+      assertEquals(9L, df.count())
     }
 
     it("should support LIMIT pushdown") {
-      val df = sparkSession.read.format("sedonainfo").load(rasterDir)
-      val totalCount = df.count()
-      assert(totalCount > 2, "Need at least 3 files for this test")
-      val limitedDf = df.limit(2)
-      assert(limitedDf.count() == 2)
+      val df = sparkSession.read.format("sedonainfo").load(rasterDir).limit(2)
+      assertEquals(2L, df.count())
     }
 
-    it("should support column selection") {
+    it("should support column pruning") {
       val df = sparkSession.read
         .format("sedonainfo")
         .load(singleFileLocation)
         .select("path", "width", "height")
-      assert(df.schema.fieldNames.length == 3)
-      assert(df.count() == 1)
-    }
-
-    it("should report isTiled correctly") {
-      val df = sparkSession.read.format("sedonainfo").load(singleFileLocation)
+      assertEquals(3, df.schema.fieldNames.length)
       val row = df.first()
-      val isTiled = row.getAs[Boolean]("isTiled")
-      assert(isTiled == true || isTiled == false)
+      assertEquals(512, row.getAs[Int]("width"))
+      assertEquals(517, row.getAs[Int]("height"))
     }
 
-    it("should return fileSize") {
-      val df = sparkSession.read.format("sedonainfo").load(singleFileLocation)
-      val row = df.first()
-      val fileSize = row.getAs[Long]("fileSize")
-      assert(fileSize > 0)
-    }
-
-    it("should return overviews array") {
-      val df = sparkSession.read.format("sedonainfo").load(singleFileLocation)
-      val row = df.first()
-      val overviews = row.getAs[Seq[Any]]("overviews")
-      assert(overviews != null)
-    }
-
-    it("should detect COG properties from a generated COG file") {
-      // Generate a COG from test1.tiff using RS_AsCOG and write to disk
+    it("should detect COG properties from a generated COG") {
+      // Generate a COG with known parameters: LZW compression, 256 tile size, 2 overviews
       val cogBytes = sparkSession.read
         .format("binaryFile")
         .load(singleFileLocation)
@@ -202,73 +187,35 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfter {
       try { fos.write(cogBytes) }
       finally { fos.close() }
 
-      // Read the COG with sedonainfo
       val df = sparkSession.read.format("sedonainfo").load(cogFile.getAbsolutePath)
-      assert(df.count() == 1)
-
       val row = df.first()
 
-      // COGs should be tiled
-      assert(row.getAs[Boolean]("isTiled") == true)
+      // COG preserves original dimensions and CRS
+      assertEquals(512, row.getAs[Int]("width"))
+      assertEquals(517, row.getAs[Int]("height"))
+      assertEquals(1, row.getAs[Int]("numBands"))
+      assertEquals(3857, row.getAs[Int]("srid"))
 
-      // COGs should have overviews
-      val overviews = row.getAs[Seq[Any]]("overviews")
-      assert(overviews != null)
-      assert(overviews.nonEmpty, "COG should have at least one overview level")
+      // COG must be tiled
+      assertEquals(true, row.getAs[Boolean]("isTiled"))
 
-      // Verify overview struct fields are accessible
-      val overviewDf = df
-        .selectExpr("explode(overviews) as ovr")
-        .selectExpr("ovr.level", "ovr.width", "ovr.height")
-      val ovrRow = overviewDf.first()
-      assert(ovrRow.getAs[Int]("level") >= 1)
-      assert(ovrRow.getAs[Int]("width") > 0)
-      assert(ovrRow.getAs[Int]("height") > 0)
+      // COG must have overviews (requested 2)
+      val overviews = df
+        .selectExpr("explode(overviews) as o")
+        .selectExpr("o.level", "o.width", "o.height")
+        .collect()
+      assertEquals(2, overviews.length)
+      // Each overview is progressively smaller
+      assert(overviews(0).getAs[Int]("width") < 512)
+      assert(overviews(1).getAs[Int]("width") < overviews(0).getAs[Int]("width"))
 
-      // Overview dimensions should be smaller than full resolution
-      val fullWidth = row.getAs[Int]("width")
-      val fullHeight = row.getAs[Int]("height")
-      assert(ovrRow.getAs[Int]("width") < fullWidth)
-      assert(ovrRow.getAs[Int]("height") < fullHeight)
-
-      // Band block size should match the COG tile size (256)
-      val bandDf = df
-        .selectExpr("explode(bands) as band")
-        .selectExpr("band.blockWidth", "band.blockHeight")
-      val bandRow = bandDf.first()
-      assert(bandRow.getAs[Int]("blockWidth") == 256)
-      assert(bandRow.getAs[Int]("blockHeight") == 256)
-    }
-
-    it("should correctly report non-COG vs COG differences") {
-      // Read the original non-COG test file
-      val nonCogDf =
-        sparkSession.read.format("sedonainfo").load(singleFileLocation).select("isTiled")
-      val nonCogTiled = nonCogDf.first().getAs[Boolean]("isTiled")
-
-      // Generate a COG and write directly to file
-      val cogBytes = sparkSession.read
-        .format("binaryFile")
-        .load(singleFileLocation)
-        .selectExpr("RS_FromGeoTiff(content) as raster")
-        .selectExpr("RS_AsCOG(raster, 'Deflate', 256) as cog")
+      // Block size should match the requested 256
+      val bandRow = df
+        .selectExpr("explode(bands) as b")
+        .selectExpr("b.blockWidth", "b.blockHeight")
         .first()
-        .getAs[Array[Byte]]("cog")
-
-      val cogFile = new File(tempDir, "test_cog_compare.tiff")
-      val fos = new java.io.FileOutputStream(cogFile)
-      try { fos.write(cogBytes) }
-      finally { fos.close() }
-
-      val cogDf = sparkSession.read
-        .format("sedonainfo")
-        .load(cogFile.getAbsolutePath)
-        .select("isTiled", "overviews")
-      val cogRow = cogDf.first()
-
-      // COG should be tiled with overviews
-      assert(cogRow.getAs[Boolean]("isTiled") == true)
-      assert(cogRow.getAs[Seq[Any]]("overviews").nonEmpty)
+      assertEquals(256, bandRow.getAs[Int]("blockWidth"))
+      assertEquals(256, bandRow.getAs[Int]("blockHeight"))
     }
   }
 }
