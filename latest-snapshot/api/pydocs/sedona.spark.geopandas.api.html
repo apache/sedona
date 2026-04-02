@@ -540,6 +540,73 @@ geometry.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.clip_by_rect">
+<span class="sig-name descname"><span class="pre">clip_by_rect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ymax</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.clip_by_rect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.clip_by_rect" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a <code class="docutils literal notranslate"><span class="pre">GeoSeries</span></code> of the portions of geometry within the
+given rectangle.</p>
+<p>The geometry is clipped to the rectangle defined by the given
+coordinates.  Geometries that do not intersect the rectangle are
+returned as empty polygons (<code class="docutils literal notranslate"><span class="pre">POLYGON</span> <span class="pre">EMPTY</span></code>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This implementation uses <code class="docutils literal notranslate"><span class="pre">ST_Intersection</span></code> with a rectangle
+envelope, which may produce slightly different results from
+geopandas’ <code class="docutils literal notranslate"><span class="pre">clip_by_rect</span></code> in edge cases:</p>
+<ul class="simple">
+<li><p>Non-intersecting geometries are returned as <code class="docutils literal notranslate"><span class="pre">POLYGON</span> <span class="pre">EMPTY</span></code>,
+whereas geopandas returns <code class="docutils literal notranslate"><span class="pre">GEOMETRYCOLLECTION</span> <span class="pre">EMPTY</span></code>.</p></li>
+<li><p>Points on the boundary of the rectangle are considered
+intersecting and are returned unchanged, whereas geopandas
+returns <code class="docutils literal notranslate"><span class="pre">GEOMETRYCOLLECTION</span> <span class="pre">EMPTY</span></code> for boundary-only
+intersections.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Minimum x value of the rectangle.</p></li>
+<li><p><strong>ymin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Minimum y value of the rectangle.</p></li>
+<li><p><strong>xmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Maximum x value of the rectangle.</p></li>
+<li><p><strong>ymax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Maximum y value of the rectangle.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">],</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">clip_by_rect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">0    POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))</span>
+<span class="go">1                   LINESTRING (0 0, 1 1)</span>
+<span class="go">2                         POINT (0.5 0.5)</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+<p>Geometries that do not intersect the rectangle are returned as
+empty:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">GeoSeries</span><span class="p">([</span><span class="n">Point</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)])</span><span class="o">.</span><span class="n">clip_by_rect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="go">0    POLYGON EMPTY</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.intersection" title="sedona.spark.geopandas.GeoSeries.intersection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.intersection</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.concave_hull">
 <span class="sig-name descname"><span class="pre">concave_hull</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_holes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.concave_hull"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.concave_hull" title="Permalink to this definition"></a></dt>
 <dd><p>Return the concave hull of each geometry.</p>

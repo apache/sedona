@@ -276,6 +276,7 @@
         <span class="s2">&quot;convex_hull&quot;</span><span class="p">,</span>
         <span class="s2">&quot;explode&quot;</span><span class="p">,</span>
         <span class="s2">&quot;clip&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;clip_by_rect&quot;</span><span class="p">,</span>
         <span class="s2">&quot;from_shapely&quot;</span><span class="p">,</span>
         <span class="s2">&quot;count_coordinates&quot;</span><span class="p">,</span>
         <span class="s2">&quot;count_geometries&quot;</span><span class="p">,</span>
@@ -1042,6 +1043,23 @@
             <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">,</span>
             <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">default_val</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeoSeries.clip_by_rect"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.clip_by_rect">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">clip_by_rect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;clip_by_rect only accepts scalar numeric values for xmin/ymin/xmax/ymax&quot;</span>
+            <span class="p">)</span>
+        <span class="n">rect</span> <span class="o">=</span> <span class="n">stc</span><span class="o">.</span><span class="n">ST_PolygonFromEnvelope</span><span class="p">(</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">xmin</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">ymin</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">xmax</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">ymax</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Intersection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">rect</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+            <span class="n">spark_expr</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.difference"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.difference">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">difference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
