@@ -51,6 +51,7 @@ IMPLEMENTATION_PRIORITY = {
         "_to_geopandas",
         "contains",
         "contains_properly",
+        "clip_by_rect",
         "convex_hull",
         "count_coordinates",
         "count_geometries",

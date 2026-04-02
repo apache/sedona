@@ -67,6 +67,7 @@ IMPLEMENTATION_PRIORITY = {
         "convex_hull",
         "explode",
         "clip",
+        "clip_by_rect",
         "from_shapely",
         "count_coordinates",
         "count_geometries",
@@ -833,6 +834,23 @@ class GeoSeries(GeoFrame, pspd.Series):
             align=align,
             returns_geom=False,
             default_val=False,
+        )
+
+    def clip_by_rect(self, xmin, ymin, xmax, ymax) -> "GeoSeries":
+        if not all(
+            isinstance(val, (int, float, np.integer, np.floating))
+            for val in [xmin, ymin, xmax, ymax]
+        ):
+            raise TypeError(
+                "clip_by_rect only accepts scalar numeric values for xmin/ymin/xmax/ymax"
+            )
+        rect = stc.ST_PolygonFromEnvelope(
+            float(xmin), float(ymin), float(xmax), float(ymax)
+        )
+        spark_expr = stf.ST_Intersection(self.spark.column, rect)
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
         )
 
     def difference(self, other, align=None) -> "GeoSeries":

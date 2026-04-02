@@ -3073,6 +3073,74 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("dwithin", self, other, distance, align)
 
+    def clip_by_rect(self, xmin, ymin, xmax, ymax):
+        """Returns a ``GeoSeries`` of the portions of geometry within the
+        given rectangle.
+
+        The geometry is clipped to the rectangle defined by the given
+        coordinates.  Geometries that do not intersect the rectangle are
+        returned as empty polygons (``POLYGON EMPTY``).
+
+        .. note::
+            This implementation uses ``ST_Intersection`` with a rectangle
+            envelope, which may produce slightly different results from
+            geopandas' ``clip_by_rect`` in edge cases:
+
+            - Non-intersecting geometries are returned as ``POLYGON EMPTY``,
+              whereas geopandas returns ``GEOMETRYCOLLECTION EMPTY``.
+            - Points on the boundary of the rectangle are considered
+              intersecting and are returned unchanged, whereas geopandas
+              returns ``GEOMETRYCOLLECTION EMPTY`` for boundary-only
+              intersections.
+
+        Parameters
+        ----------
+        xmin : float
+            Minimum x value of the rectangle.
+        ymin : float
+            Minimum y value of the rectangle.
+        xmax : float
+            Maximum x value of the rectangle.
+        ymax : float
+            Maximum y value of the rectangle.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+        ...         LineString([(0, 0), (2, 2)]),
+        ...         Point(0.5, 0.5),
+        ...     ],
+        ... )
+
+        >>> s.clip_by_rect(0, 0, 1, 1)
+        0    POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))
+        1                   LINESTRING (0 0, 1 1)
+        2                         POINT (0.5 0.5)
+        dtype: geometry
+
+        Geometries that do not intersect the rectangle are returned as
+        empty:
+
+        >>> GeoSeries([Point(5, 5)]).clip_by_rect(0, 0, 1, 1)
+        0    POLYGON EMPTY
+        dtype: geometry
+
+        See also
+        --------
+        GeoSeries.intersection
+        """
+        return _delegate_to_geometry_column(
+            "clip_by_rect", self, xmin, ymin, xmax, ymax
+        )
+
     def difference(self, other, align=None):
         """Returns a ``GeoSeries`` of the points in each aligned geometry that
         are not in `other`.

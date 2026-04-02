@@ -616,6 +616,36 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
     def test_clip(self):
         pass
 
+    def test_clip_by_rect(self):
+        s = GeoSeries(
+            [
+                Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+                LineString([(0, 0), (2, 2)]),
+                Point(0.5, 0.5),
+                Point(5, 5),
+                None,
+            ],
+        )
+        result = s.clip_by_rect(0, 0, 1, 1)
+        expected = gpd.GeoSeries(
+            [
+                Polygon([(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)]),
+                LineString([(0, 0), (1, 1)]),
+                Point(0.5, 0.5),
+                Polygon(),  # Sedona returns POLYGON EMPTY for non-intersecting
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Check that GeoDataFrame works too
+        df_result = s.to_geoframe().clip_by_rect(0, 0, 1, 1)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
+        # Test invalid input types
+        with pytest.raises(TypeError):
+            s.clip_by_rect("a", 0, 1, 1)
+
     def test_geom_type(self):
         geoseries = sgpd.GeoSeries(
             [
