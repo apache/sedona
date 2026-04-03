@@ -52,6 +52,7 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assertEquals(1, row.getAs[Int]("numBands"))
       assertEquals(3857, row.getAs[Int]("srid"))
       assert(row.getAs[String]("crs").contains("EPSG"))
+      // test1.tiff has TileWidth/TileLength TIFF tags (internally tiled)
       assertEquals(true, row.getAs[Boolean]("isTiled"))
     }
 
@@ -108,7 +109,7 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
         .first()
       assertEquals(1, row.getAs[Int]("band"))
       assertEquals("UNSIGNED_8BITS", row.getAs[String]("dataType"))
-      assertEquals("GRAY_INDEX", row.getAs[String]("colorInterpretation"))
+      assertEquals("Gray", row.getAs[String]("colorInterpretation"))
       assert(row.isNullAt(row.fieldIndex("noDataValue")))
       assertEquals(256, row.getAs[Int]("blockWidth"))
       assertEquals(256, row.getAs[Int]("blockHeight"))

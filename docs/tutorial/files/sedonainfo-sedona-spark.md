@@ -172,9 +172,9 @@ df.selectExpr("path", "explode(overviews) as ovr").selectExpr(
 ).show()
 ```
 
-### Column pruning for performance
+### Select specific columns
 
-Select only the columns you need. SedonaInfo uses column pruning to skip extracting unused metadata:
+Select only the columns you need:
 
 ```python
 df = (

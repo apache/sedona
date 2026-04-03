@@ -57,6 +57,13 @@ object GeoTiffMetadataExtractor extends RasterFileMetadataExtractor {
         new org.geotools.util.factory.Hints(
           org.geotools.util.factory.Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER,
           java.lang.Boolean.TRUE))
+
+      // Extract TIFF IIO metadata BEFORE read() which may alter stream state
+      val isTiled = hasTiffTag(reader, TAG_TILE_WIDTH)
+      val photometric = extractPhotometricInterpretation(reader)
+      val tiffMetadata = extractMetadata(reader)
+      val compression = extractCompression(reader)
+
       raster = reader.read(null)
 
       val width = RasterAccessors.getWidth(raster)
@@ -76,12 +83,9 @@ object GeoTiffMetadataExtractor extends RasterFileMetadataExtractor {
       val image = raster.getRenderedImage
       val tileWidth = image.getTileWidth
       val tileHeight = image.getTileHeight
-      val isTiled = tileWidth < width || tileHeight < height
 
-      val bands = extractBands(raster, numBands, tileWidth, tileHeight)
+      val bands = extractBands(raster, numBands, tileWidth, tileHeight, photometric)
       val overviews = extractOverviews(reader, width, height)
-      val metadata = extractMetadata(reader)
-      val compression = extractCompression(reader)
 
       RasterFileMetadata(
         path = path.toString,
@@ -104,7 +108,7 @@ object GeoTiffMetadataExtractor extends RasterFileMetadataExtractor {
         envelopeMaxY = env.getMaxY,
         bands = bands,
         overviews = overviews,
-        metadata = metadata,
+        metadata = tiffMetadata,
         isTiled = isTiled,
         compression = compression)
     } finally {
@@ -114,11 +118,21 @@ object GeoTiffMetadataExtractor extends RasterFileMetadataExtractor {
     }
   }
 
+  // TIFF tag constants
+  private val TAG_TILE_WIDTH = 322
+
+  // TIFF Photometric Interpretation values
+  private val PHOTOMETRIC_MIN_IS_WHITE = 0
+  private val PHOTOMETRIC_MIN_IS_BLACK = 1
+  private val PHOTOMETRIC_RGB = 2
+  private val PHOTOMETRIC_PALETTE = 3
+
   private def extractBands(
       raster: GridCoverage2D,
       numBands: Int,
       tileWidth: Int,
-      tileHeight: Int): Seq[BandMetadata] = {
+      tileHeight: Int,
+      photometric: Int): Seq[BandMetadata] = {
     (1 to numBands).map { i =>
       val dataType = Try(RasterBandAccessors.getBandType(raster, i)).getOrElse(null)
       val noDataValue = Try(RasterBandAccessors.getBandNoDataValue(raster, i)).getOrElse(null)
@@ -130,16 +144,39 @@ object GeoTiffMetadataExtractor extends RasterFileMetadataExtractor {
         val units = raster.getSampleDimension(i - 1).getUnits
         if (units != null) units.toString else null
       }.getOrElse(null)
+      val colorInterp = resolveColorInterpretation(photometric, i, numBands)
 
       BandMetadata(
         band = i,
         dataType = dataType,
-        colorInterpretation = description,
+        colorInterpretation = colorInterp,
         noDataValue = noDataValue,
         blockWidth = tileWidth,
         blockHeight = tileHeight,
         description = description,
         unit = unit)
+    }
+  }
+
+  /**
+   * Derive per-band color interpretation from the TIFF Photometric Interpretation tag.
+   */
+  private def resolveColorInterpretation(photometric: Int, band: Int, numBands: Int): String = {
+    photometric match {
+      case PHOTOMETRIC_MIN_IS_WHITE | PHOTOMETRIC_MIN_IS_BLACK =>
+        if (numBands == 1) "Gray"
+        else if (band <= numBands) s"Gray${band}" // multi-band grayscale
+        else "Undefined"
+      case PHOTOMETRIC_RGB =>
+        band match {
+          case 1 => "Red"
+          case 2 => "Green"
+          case 3 => "Blue"
+          case 4 => "Alpha"
+          case _ => "Undefined"
+        }
+      case PHOTOMETRIC_PALETTE => "Palette"
+      case _ => "Undefined"
     }
   }
 
@@ -224,38 +261,174 @@ object GeoTiffMetadataExtractor extends RasterFileMetadataExtractor {
     }
   }
 
+  /**
+   * Extract compression type from TIFF tag 259. Returns the human-readable description (e.g.,
+   * "LZW", "Deflate") from the TIFFShort description attribute if available, otherwise returns
+   * the raw numeric value.
+   */
   private def extractCompression(reader: GeoTiffReader): String = {
     try {
       val metadata = reader.getMetadata
       if (metadata == null) return null
-
       val rootNode = metadata.getRootNode
       if (rootNode == null) return null
 
-      findCompressionInNode(rootNode)
+      // Tag 259 = Compression
+      val desc = findTiffFieldDescription(rootNode, 259)
+      if (desc != null) return desc
+      findTiffFieldValue(rootNode, 259)
     } catch {
       case _: Exception => null
     }
   }
 
-  private def findCompressionInNode(node: org.w3c.dom.Node): String = {
-    if (node == null) return null
+  /**
+   * Check if a TIFF tag exists in the IIO metadata tree by its tag number. Uses the "number"
+   * attribute of TIFFField elements.
+   */
+  private def hasTiffTag(reader: GeoTiffReader, tagNumber: Int): Boolean = {
+    try {
+      val metadata = reader.getMetadata
+      if (metadata == null) return false
+      val rootNode = metadata.getRootNode
+      if (rootNode == null) return false
+      findTiffFieldByNumber(rootNode, tagNumber)
+    } catch {
+      case _: Exception => false
+    }
+  }
 
-    val attrs = node.getAttributes
-    if (attrs != null) {
-      val nameAttr = attrs.getNamedItem("name")
-      val valueAttr = attrs.getNamedItem("value")
-      if (nameAttr != null && valueAttr != null &&
-        nameAttr.getNodeValue.equalsIgnoreCase("Compression")) {
-        return valueAttr.getNodeValue
+  private def findTiffFieldByNumber(node: org.w3c.dom.Node, tagNumber: Int): Boolean = {
+    if (node == null) return false
+
+    if (node.getNodeName == "TIFFField") {
+      val attrs = node.getAttributes
+      if (attrs != null) {
+        val numAttr = attrs.getNamedItem("number")
+        if (numAttr != null && Try(numAttr.getNodeValue.toInt).getOrElse(-1) == tagNumber) {
+          return true
+        }
       }
     }
 
     val children = node.getChildNodes
     if (children != null) {
       for (i <- 0 until children.getLength) {
-        val result = findCompressionInNode(children.item(i))
+        if (findTiffFieldByNumber(children.item(i), tagNumber)) return true
+      }
+    }
+    false
+  }
+
+  /**
+   * Extract the TIFF Photometric Interpretation tag value (tag 262). Returns -1 if not found.
+   */
+  private def extractPhotometricInterpretation(reader: GeoTiffReader): Int = {
+    try {
+      val metadata = reader.getMetadata
+      if (metadata == null) return -1
+      val rootNode = metadata.getRootNode
+      if (rootNode == null) return -1
+      val value = findTiffFieldValue(rootNode, 262) // PhotometricInterpretation
+      if (value != null) value.toInt else -1
+    } catch {
+      case _: Exception => -1
+    }
+  }
+
+  /**
+   * Find the value of a TIFF field by tag number in the IIO metadata tree. Looks for TIFFField
+   * elements with matching "number" attribute and extracts the value.
+   */
+  private def findTiffFieldValue(node: org.w3c.dom.Node, tagNumber: Int): String = {
+    if (node == null) return null
+
+    if (node.getNodeName == "TIFFField") {
+      val attrs = node.getAttributes
+      if (attrs != null) {
+        val numAttr = attrs.getNamedItem("number")
+        if (numAttr != null && Try(numAttr.getNodeValue.toInt).getOrElse(-1) == tagNumber) {
+          return extractValueFromTiffField(node)
+        }
+      }
+    }
+
+    val children = node.getChildNodes
+    if (children != null) {
+      for (i <- 0 until children.getLength) {
+        val result = findTiffFieldValue(children.item(i), tagNumber)
         if (result != null) return result
+      }
+    }
+    null
+  }
+
+  /**
+   * Extract the value from a TIFFField node. Handles TIFFShorts, TIFFLongs, TIFFAscii, etc.
+   * Returns the "value" attribute from the first leaf element (e.g., TIFFShort, TIFFLong).
+   */
+  private def extractValueFromTiffField(fieldNode: org.w3c.dom.Node): String = {
+    val children = fieldNode.getChildNodes
+    if (children == null) return null
+    for (i <- 0 until children.getLength) {
+      val child = children.item(i)
+      val grandchildren = child.getChildNodes
+      if (grandchildren != null) {
+        for (j <- 0 until grandchildren.getLength) {
+          val gc = grandchildren.item(j)
+          val attrs = gc.getAttributes
+          if (attrs != null) {
+            val valueAttr = attrs.getNamedItem("value")
+            if (valueAttr != null) return valueAttr.getNodeValue
+          }
+        }
+      }
+    }
+    null
+  }
+
+  /**
+   * Find the human-readable "description" attribute of a TIFF field by tag number. For example,
+   * tag 259 (Compression) has description="LZW" on the TIFFShort element.
+   */
+  private def findTiffFieldDescription(node: org.w3c.dom.Node, tagNumber: Int): String = {
+    if (node == null) return null
+
+    if (node.getNodeName == "TIFFField") {
+      val attrs = node.getAttributes
+      if (attrs != null) {
+        val numAttr = attrs.getNamedItem("number")
+        if (numAttr != null && Try(numAttr.getNodeValue.toInt).getOrElse(-1) == tagNumber) {
+          return extractDescriptionFromTiffField(node)
+        }
+      }
+    }
+
+    val children = node.getChildNodes
+    if (children != null) {
+      for (i <- 0 until children.getLength) {
+        val result = findTiffFieldDescription(children.item(i), tagNumber)
+        if (result != null) return result
+      }
+    }
+    null
+  }
+
+  private def extractDescriptionFromTiffField(fieldNode: org.w3c.dom.Node): String = {
+    val children = fieldNode.getChildNodes
+    if (children == null) return null
+    for (i <- 0 until children.getLength) {
+      val child = children.item(i)
+      val grandchildren = child.getChildNodes
+      if (grandchildren != null) {
+        for (j <- 0 until grandchildren.getLength) {
+          val gc = grandchildren.item(j)
+          val attrs = gc.getAttributes
+          if (attrs != null) {
+            val descAttr = attrs.getNamedItem("description")
+            if (descAttr != null) return descAttr.getNodeValue
+          }
+        }
       }
     }
     null

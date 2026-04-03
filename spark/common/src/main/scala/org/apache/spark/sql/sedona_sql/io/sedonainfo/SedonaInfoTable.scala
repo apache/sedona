@@ -21,7 +21,6 @@ package org.apache.spark.sql.sedona_sql.io.sedonainfo
 import org.apache.hadoop.fs.FileStatus
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.catalog.SupportsRead
-import org.apache.spark.sql.connector.catalog.SupportsWrite
 import org.apache.spark.sql.connector.catalog.TableCapability
 import org.apache.spark.sql.connector.read.ScanBuilder
 import org.apache.spark.sql.connector.write.LogicalWriteInfo
@@ -41,8 +40,7 @@ case class SedonaInfoTable(
     userSpecifiedSchema: Option[StructType],
     fallbackFileFormat: Class[_ <: FileFormat])
     extends FileTable(sparkSession, options, paths, userSpecifiedSchema)
-    with SupportsRead
-    with SupportsWrite {
+    with SupportsRead {
 
   override def inferSchema(files: Seq[FileStatus]): Option[StructType] =
     Some(SedonaInfoTable.SCHEMA)
@@ -56,7 +54,8 @@ case class SedonaInfoTable(
     SedonaInfoScanBuilder(sparkSession, fileIndex, schema, dataSchema, options)
   }
 
-  override def newWriteBuilder(info: LogicalWriteInfo): WriteBuilder = null
+  override def newWriteBuilder(info: LogicalWriteInfo): WriteBuilder =
+    throw new UnsupportedOperationException("SedonaInfo is a read-only data source")
 }
 
 object SedonaInfoTable {
