@@ -81,17 +81,13 @@ object SedonaInfoPartitionReader {
   }
 
   def toInternalRow(meta: RasterFileMetadata, readDataSchema: StructType): InternalRow = {
+    val gt = meta.geoTransform
     val geoTransformRow = new GenericInternalRow(
-      Array[Any](
-        meta.upperLeftX,
-        meta.upperLeftY,
-        meta.scaleX,
-        meta.scaleY,
-        meta.skewX,
-        meta.skewY))
+      Array[Any](gt.upperLeftX, gt.upperLeftY, gt.scaleX, gt.scaleY, gt.skewX, gt.skewY))
 
-    val cornerCoordinatesRow = new GenericInternalRow(
-      Array[Any](meta.envelopeMinX, meta.envelopeMinY, meta.envelopeMaxX, meta.envelopeMaxY))
+    val cc = meta.cornerCoordinates
+    val cornerCoordinatesRow =
+      new GenericInternalRow(Array[Any](cc.minX, cc.minY, cc.maxX, cc.maxY))
 
     lazy val bandsArray: ArrayData = {
       val bands = meta.bands.map { b =>

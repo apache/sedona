@@ -52,21 +52,23 @@ case class RasterFileMetadata(
     numBands: Int,
     srid: Int,
     crs: String,
-    upperLeftX: Double,
-    upperLeftY: Double,
-    scaleX: Double,
-    scaleY: Double,
-    skewX: Double,
-    skewY: Double,
-    envelopeMinX: Double,
-    envelopeMinY: Double,
-    envelopeMaxX: Double,
-    envelopeMaxY: Double,
+    geoTransform: GeoTransformMetadata,
+    cornerCoordinates: CornerCoordinatesMetadata,
     bands: Seq[BandMetadata],
     overviews: Seq[OverviewMetadata],
     metadata: Map[String, String],
     isTiled: Boolean,
     compression: String)
+
+case class GeoTransformMetadata(
+    upperLeftX: Double,
+    upperLeftY: Double,
+    scaleX: Double,
+    scaleY: Double,
+    skewX: Double,
+    skewY: Double)
+
+case class CornerCoordinatesMetadata(minX: Double, minY: Double, maxX: Double, maxY: Double)
 
 case class BandMetadata(
     band: Int,
