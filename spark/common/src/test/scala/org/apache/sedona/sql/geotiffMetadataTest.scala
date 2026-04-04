@@ -153,8 +153,8 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
 
     it("should read files from directory with trailing slash") {
       val df = sparkSession.read.format("sedonainfo").load(rasterDir)
-      // Recursive lookup finds all .tif/.tiff files including subdirectories
-      assertEquals(9L, df.count())
+      // Recursive lookup finds all .tif/.tiff/.nc files including subdirectories
+      assertEquals(10L, df.count())
     }
 
     it("should support LIMIT pushdown") {
@@ -217,6 +217,139 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
         .first()
       assertEquals(256, bandRow.getAs[Int]("blockWidth"))
       assertEquals(256, bandRow.getAs[Int]("blockHeight"))
+    }
+  }
+
+  describe("SedonaInfo NetCDF support") {
+    val netcdfFile: String = resourceFolder + "raster/netcdf/test.nc"
+
+    it("should read test.nc with exact metadata values") {
+      val df = sparkSession.read.format("sedonainfo").load(netcdfFile)
+      assertEquals(1L, df.count())
+
+      val row = df.first()
+      assert(row.getAs[String]("path").endsWith("test.nc"))
+      assertEquals("NetCDF", row.getAs[String]("driver"))
+      assertEquals(80, row.getAs[Int]("width"))
+      assertEquals(48, row.getAs[Int]("height"))
+      // O3 and NO2 are the two data variables
+      assertEquals(2, row.getAs[Int]("numBands"))
+      assertEquals(0, row.getAs[Int]("srid"))
+      assert(row.isNullAt(row.fieldIndex("crs")))
+      assertEquals(false, row.getAs[Boolean]("isTiled"))
+      assert(row.isNullAt(row.fieldIndex("compression")))
+    }
+
+    it("should return exact geoTransform for test.nc") {
+      // Values match RS_Metadata output for RS_FromNetCDF(content, 'O3')
+      val row = sparkSession.read
+        .format("sedonainfo")
+        .load(netcdfFile)
+        .selectExpr(
+          "geoTransform.upperLeftX",
+          "geoTransform.upperLeftY",
+          "geoTransform.scaleX",
+          "geoTransform.scaleY",
+          "geoTransform.skewX",
+          "geoTransform.skewY")
+        .first()
+      // Cell-center coordinates: lon=[5.0..14.875], lat=[50.875..44.9375] (decreasing)
+      assertEquals(5.0, row.getAs[Double]("upperLeftX"), 1e-6)
+      assertEquals(50.875, row.getAs[Double]("upperLeftY"), 1e-6)
+      assertEquals(0.125, row.getAs[Double]("scaleX"), 1e-6)
+      assertEquals(-0.125, row.getAs[Double]("scaleY"), 1e-6)
+      assertEquals(0.0, row.getAs[Double]("skewX"), 1e-15)
+      assertEquals(0.0, row.getAs[Double]("skewY"), 1e-15)
+    }
+
+    it("should return exact cornerCoordinates for test.nc") {
+      // Envelope includes half-pixel borders around cell centers
+      val row = sparkSession.read
+        .format("sedonainfo")
+        .load(netcdfFile)
+        .selectExpr(
+          "cornerCoordinates.minX",
+          "cornerCoordinates.minY",
+          "cornerCoordinates.maxX",
+          "cornerCoordinates.maxY")
+        .first()
+      assertEquals(4.9375, row.getAs[Double]("minX"), 1e-6) // 5.0 - 0.0625
+      assertEquals(44.9375, row.getAs[Double]("minY"), 1e-6) // 45.0 - 0.0625
+      assertEquals(14.9375, row.getAs[Double]("maxX"), 1e-6) // 14.875 + 0.0625
+      assertEquals(50.9375, row.getAs[Double]("maxY"), 1e-6) // 50.875 + 0.0625
+    }
+
+    it("should return exact band metadata for test.nc") {
+      val rows = sparkSession.read
+        .format("sedonainfo")
+        .load(netcdfFile)
+        .selectExpr("explode(bands) as b")
+        .selectExpr(
+          "b.band",
+          "b.dataType",
+          "b.colorInterpretation",
+          "b.noDataValue",
+          "b.blockWidth",
+          "b.blockHeight",
+          "b.description",
+          "b.unit")
+        .collect()
+      assertEquals(2, rows.length)
+
+      // Band 1: O3
+      assertEquals(1, rows(0).getAs[Int]("band"))
+      assertEquals("float", rows(0).getAs[String]("dataType"))
+      assertEquals("Undefined", rows(0).getAs[String]("colorInterpretation"))
+      assert(rows(0).getAs[String]("description").startsWith("O3("))
+      assertEquals(80, rows(0).getAs[Int]("blockWidth"))
+      assertEquals(48, rows(0).getAs[Int]("blockHeight"))
+
+      // Band 2: NO2
+      assertEquals(2, rows(1).getAs[Int]("band"))
+      assert(rows(1).getAs[String]("description").startsWith("NO2("))
+    }
+
+    it("should return empty overviews for test.nc") {
+      val row = sparkSession.read
+        .format("sedonainfo")
+        .load(netcdfFile)
+        .selectExpr("size(overviews) as overviewCount")
+        .first()
+      assertEquals(0, row.getAs[Int]("overviewCount"))
+    }
+
+    it("should include dimensions and variables in metadata map") {
+      val row = sparkSession.read.format("sedonainfo").load(netcdfFile).first()
+      val meta = row.getAs[Map[String, String]]("metadata")
+      assert(meta != null)
+      assert(meta.contains("dimensions"))
+      assert(meta("dimensions").contains("lat=48"))
+      assert(meta("dimensions").contains("lon=80"))
+      assert(meta.contains("variables"))
+      assert(meta("variables").contains("O3"))
+      assert(meta("variables").contains("NO2"))
+    }
+
+    it("should cross-validate spatial extent against RS_FromNetCDF") {
+      // Load via RS_FromNetCDF and extract metadata
+      val rasterRow = sparkSession.read
+        .format("binaryFile")
+        .load(netcdfFile)
+        .selectExpr("RS_FromNetCDF(content, 'O3') as raster")
+        .selectExpr(
+          "RS_Width(raster) as width",
+          "RS_Height(raster) as height",
+          "RS_NumBands(raster) as numBands")
+        .first()
+
+      // Load via sedonainfo
+      val metaRow = sparkSession.read.format("sedonainfo").load(netcdfFile).first()
+      assertEquals(metaRow.getAs[Int]("width"), rasterRow.getAs[Int]("width"))
+      assertEquals(metaRow.getAs[Int]("height"), rasterRow.getAs[Int]("height"))
+      // RS_FromNetCDF for O3 returns 4 bands (time=2 * z=2), sedonainfo returns 2 (O3, NO2)
+      // These represent different things: sedonainfo counts data variables, not flattened bands
+      assertEquals(2, metaRow.getAs[Int]("numBands"))
+      assertEquals(4, rasterRow.getAs[Int]("numBands"))
     }
   }
 }

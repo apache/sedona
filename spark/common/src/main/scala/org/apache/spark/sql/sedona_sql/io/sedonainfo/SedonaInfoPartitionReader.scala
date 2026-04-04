@@ -70,7 +70,8 @@ class SedonaInfoPartitionReader(
 object SedonaInfoPartitionReader {
 
   /** Registered metadata extractors. Add new format extractors here. */
-  private val extractors: Seq[RasterFileMetadataExtractor] = Seq(GeoTiffMetadataExtractor)
+  private val extractors: Seq[RasterFileMetadataExtractor] =
+    Seq(GeoTiffMetadataExtractor, NetCdfMetadataExtractor)
 
   def findExtractor(path: Path): RasterFileMetadataExtractor = {
     extractors

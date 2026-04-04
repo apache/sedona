@@ -51,11 +51,11 @@ class SedonaInfoDataSource extends FileDataSourceV2 with TableProvider with Data
           new java.util.HashMap[String, String](optionsWithoutPaths.asCaseSensitiveMap())
         newOptions.put("recursiveFileLookup", "true")
         if (!newOptions.containsKey("pathGlobFilter")) {
-          newOptions.put("pathGlobFilter", "*.{tif,tiff,TIF,TIFF}")
+          newOptions.put("pathGlobFilter", "*.{tif,tiff,TIF,TIFF,nc,nc4,NC,NC4}")
         }
         optionsWithoutPaths = new CaseInsensitiveStringMap(newOptions)
       } else {
-        val loadTifPattern = "(.*)/([^/]*\\*[^/]*\\.(?i:tif|tiff))$".r
+        val loadTifPattern = "(.*)/([^/]*\\*[^/]*\\.(?i:tif|tiff|nc|nc4))$".r
         paths.head match {
           case loadTifPattern(prefix, glob) =>
             paths = Seq(prefix)
