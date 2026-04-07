@@ -41,7 +41,8 @@ object NetCdfMetadataExtractor extends RasterFileMetadataExtractor {
   override def extract(
       path: Path,
       fileSize: Long,
-      configuration: Configuration): RasterFileMetadata = {
+      configuration: Configuration,
+      requiredFields: Set[String] = Set.empty): RasterFileMetadata = {
     // Read file bytes via Hadoop FS, then open in memory
     val fs = path.getFileSystem(configuration)
     val status = fs.getFileStatus(path)

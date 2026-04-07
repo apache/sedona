@@ -47,7 +47,8 @@ object GeoTiffMetadataExtractor extends RasterFileMetadataExtractor {
   override def extract(
       path: Path,
       fileSize: Long,
-      configuration: Configuration): RasterFileMetadata = {
+      configuration: Configuration,
+      requiredFields: Set[String] = Set.empty): RasterFileMetadata = {
     val imageStream = new HadoopImageInputStream(path, configuration)
     var reader: GeoTiffReader = null
     var raster: GridCoverage2D = null
@@ -58,11 +59,16 @@ object GeoTiffMetadataExtractor extends RasterFileMetadataExtractor {
           org.geotools.util.factory.Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER,
           java.lang.Boolean.TRUE))
 
+      val needAll = requiredFields.isEmpty
+      def need(field: String): Boolean = needAll || requiredFields.contains(field)
+
       // Extract TIFF IIO metadata BEFORE read() which may alter stream state
-      val isTiled = hasTiffTag(reader, TAG_TILE_WIDTH)
-      val photometric = extractPhotometricInterpretation(reader)
-      val tiffMetadata = extractMetadata(reader)
-      val compression = extractCompression(reader)
+      val isTiled = if (need("isTiled")) hasTiffTag(reader, TAG_TILE_WIDTH) else false
+      val photometric =
+        if (need("bands")) extractPhotometricInterpretation(reader) else -1
+      val tiffMetadata =
+        if (need("metadata")) extractMetadata(reader) else Map.empty[String, String]
+      val compression = if (need("compression")) extractCompression(reader) else null
 
       raster = reader.read(null)
 
@@ -71,11 +77,13 @@ object GeoTiffMetadataExtractor extends RasterFileMetadataExtractor {
       val numBands = RasterAccessors.numBands(raster)
       val srid = RasterAccessors.srid(raster)
 
-      val crsStr = Try {
-        val crs = raster.getCoordinateReferenceSystem
-        if (crs == null || crs.isInstanceOf[DefaultEngineeringCRS]) null
-        else crs.toWKT
-      }.getOrElse(null)
+      val crsStr = if (need("crs")) {
+        Try {
+          val crs = raster.getCoordinateReferenceSystem
+          if (crs == null || crs.isInstanceOf[DefaultEngineeringCRS]) null
+          else crs.toWKT
+        }.getOrElse(null)
+      } else null
 
       val affine = RasterUtils.getGDALAffineTransform(raster)
       val env = raster.getEnvelope2D
@@ -84,8 +92,11 @@ object GeoTiffMetadataExtractor extends RasterFileMetadataExtractor {
       val tileWidth = image.getTileWidth
       val tileHeight = image.getTileHeight
 
-      val bands = extractBands(raster, numBands, tileWidth, tileHeight, photometric)
-      val overviews = extractOverviews(reader, width, height)
+      val bands =
+        if (need("bands")) extractBands(raster, numBands, tileWidth, tileHeight, photometric)
+        else Seq.empty
+      val overviews =
+        if (need("overviews")) extractOverviews(reader, width, height) else Seq.empty
 
       RasterFileMetadata(
         path = path.toString,

@@ -61,7 +61,8 @@ class SedonaInfoPartitionReader(
   private def readFileMetadata(partition: PartitionedFile): InternalRow = {
     val path = new Path(new URI(partition.filePath.toString()))
     val extractor = SedonaInfoPartitionReader.findExtractor(path)
-    val meta = extractor.extract(path, partition.fileSize, configuration)
+    val requiredFields = readDataSchema.fieldNames.toSet
+    val meta = extractor.extract(path, partition.fileSize, configuration, requiredFields)
     SedonaInfoPartitionReader.toInternalRow(meta, readDataSchema)
   }
 }

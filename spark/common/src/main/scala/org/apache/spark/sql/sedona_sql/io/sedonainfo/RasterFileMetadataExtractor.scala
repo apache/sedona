@@ -33,8 +33,16 @@ trait RasterFileMetadataExtractor {
   /**
    * Extract metadata from the file at the given path. Implementations must not decode pixel data
    * — only headers/metadata should be read.
+   *
+   * @param requiredFields
+   *   Column names requested by Spark's column pruning. Extractors may skip expensive work for
+   *   fields not in this set. When empty, all fields are extracted.
    */
-  def extract(path: Path, fileSize: Long, configuration: Configuration): RasterFileMetadata
+  def extract(
+      path: Path,
+      fileSize: Long,
+      configuration: Configuration,
+      requiredFields: Set[String] = Set.empty): RasterFileMetadata
 
   /** Returns true if this extractor can handle the given file path (by extension). */
   def canHandle(path: Path): Boolean
