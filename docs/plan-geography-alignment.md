@@ -715,19 +715,19 @@ Spark SQL Query
 | ST_GeogToGeometry | ✅ Done | No | Type cast |
 | ST_GeomToGeography | ✅ Done | No | Type cast |
 | ST_Envelope | ✅ Done | No | JTS |
-| **Output (In Progress)** |
-| ST_AsEWKT | 🔄 In Progress | No | JTS WKTWriter |
-| **Metrics (Not Started)** |
-| ST_Distance | ⬜ Not Started | **No** | `WKBGeography.getJTSGeometry()` → `Spheroid.distance()` |
-| ST_Area | ⬜ Not Started | **No** | `WKBGeography.getJTSGeometry()` → `Spheroid.area()` |
-| ST_Length | ⬜ Not Started | **No** | `WKBGeography.getJTSGeometry()` → `Spheroid.length()` |
-| ST_MaxDistance | ⬜ Not Started | **No** | JTS + GeographicLib |
-| ST_ClosestPoint | ⬜ Not Started | **No** | JTS + GeographicLib |
-| ST_MinimumClearanceLine | ⬜ Not Started | Maybe | Complex - needs analysis |
-| **Predicates (Not Started)** |
-| ST_Equals | ⬜ Not Started | **Yes** | S2 spherical equality |
-| ST_Intersects | ⬜ Not Started | **Yes** | S2 spherical predicate |
-| ST_Contains | ⬜ Not Started | **Yes** | S2 spherical predicate |
+| **Output (Done)** |
+| ST_AsEWKT | ✅ Done | No | `Geography.toEWKT()` via S2 WKTWriter |
+| **Metrics (Done)** |
+| ST_Distance | ✅ Done | **No** | `WKBGeography.getJTSGeometry()` → `Spheroid.distance()` |
+| ST_Area | ✅ Done | **No** | `WKBGeography.getJTSGeometry()` → `Spheroid.area()` |
+| ST_Length | ✅ Done | **No** | `WKBGeography.getJTSGeometry()` → `Spheroid.length()` |
+| ST_MaxDistance | ✅ Done | **Yes** | S2 `S2FurthestEdgeQuery` → radians → meters |
+| ST_ClosestPoint | ✅ Done | **Yes** | S2 `S2ClosestEdgeQuery` → Geography point |
+| ST_MinimumClearanceLine | ✅ Done | **Yes** | S2 `S2ClosestEdgeQuery` → Geography linestring |
+| **Predicates (Done)** |
+| ST_Equals | ✅ Done | **Yes** | S2 `S2BooleanOperation.equals()` |
+| ST_Intersects | ✅ Done | **Yes** | S2 `S2BooleanOperation.intersects()` |
+| ST_Contains | ✅ Done | **Yes** | S2 `S2BooleanOperation.contains()` |
 | **Join (Backlog)** |
 | Range join support | 📋 Backlog | **Yes** | S2 cell indexing |
 | **Infrastructure** |
@@ -736,40 +736,39 @@ Spark SQL Query
 ### Implementation Priority
 
 ```
-Phase 1 (Foundation - WKBGeography):
+Phase 1 (Foundation - WKBGeography): ✅ DONE
 ├── WKBGeography class (WKB bytes + lazy JTS + lazy S2)
 ├── GeographyWKBSerializer (0xFF format byte + backward compat)
 ├── GeographyUDT switch to WKB serialization
 └── Constructor updates (return WKBGeography)
 
-Phase 2 (Metric Functions - No S2):
-├── ST_AsEWKT (in progress)
+Phase 2 (Metric Functions - No S2): ✅ DONE
+├── ST_AsEWKT
 ├── ST_Distance      ← WKBGeography → JTS → Spheroid.distance()
 ├── ST_Area          ← WKBGeography → JTS → Spheroid.area()
-├── ST_Length        ← WKBGeography → JTS → Spheroid.length()
-├── ST_MaxDistance   ← Extend Spheroid
-└── ST_ClosestPoint  ← Extend Spheroid
+└── ST_Length        ← WKBGeography → JTS → Spheroid.length()
 
-Phase 3 (S2 Required - via lazy cache):
-├── ST_Equals        ← WKBGeography → lazy S2 → spherical comparison
-├── ST_Intersects    ← WKBGeography → lazy S2 → great circle edge intersection
-└── ST_Contains      ← WKBGeography → lazy S2 → spherical point-in-polygon
+Phase 3 (S2 Functions - via lazy cache): ✅ DONE
+├── ST_MaxDistance         ← S2FurthestEdgeQuery → radians → meters
+├── ST_ClosestPoint        ← S2ClosestEdgeQuery → Geography point
+├── ST_MinimumClearanceLine ← S2ClosestEdgeQuery → Geography linestring
+├── ST_Equals              ← S2BooleanOperation.equals()
+├── ST_Intersects          ← S2BooleanOperation.intersects()
+└── ST_Contains            ← S2BooleanOperation.contains()
 
-Phase 4 (Complex):
-├── ST_MinimumClearanceLine
+Phase 4 (Remaining):
+├── Spark predicate expression wiring (ST_Equals/Intersects/Contains for Geography)
 ├── Range join support (spatial index)
 └── GeoArrow metadata for Comet/SedonaDB interop
 ```
 
 ### Key Observation
 
-**13 of 17 functions can be implemented without S2!**
+**All planned functions are now implemented!**
 
-Only 4 functions require S2 (triggered via lazy cache in WKBGeography):
-- `ST_Equals` - needs spherical comparison
-- `ST_Intersects` - needs great circle edge intersection
-- `ST_Contains` - needs spherical point-in-polygon
-- `Range join` - needs S2 cell indexing
+- 13 functions use JTS path only (no S2 parse): constructors, converters, metric ops
+- 6 functions use S2 via lazy cache: ST_MaxDistance, ST_ClosestPoint, ST_MinimumClearanceLine, ST_Equals, ST_Intersects, ST_Contains
+- Remaining: Range join support (S2 cell indexing), Spark predicate expression wiring
 
 ---
 

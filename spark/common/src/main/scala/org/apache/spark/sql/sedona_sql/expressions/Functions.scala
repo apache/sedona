@@ -1003,7 +1003,9 @@ private[apache] case class ST_SetPoint(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_ClosestPoint(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.closestPoint _) {
+    extends InferredExpression(
+      inferrableFunction2(Functions.closestPoint),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.closestPoint)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1245,7 +1247,9 @@ private[apache] case class ST_MaximumInscribedCircle(children: Seq[Expression])
 }
 
 private[apache] case class ST_MaxDistance(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.maxDistance _) {
+    extends InferredExpression(
+      inferrableFunction2(Functions.maxDistance),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.maxDistance)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

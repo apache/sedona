@@ -26,6 +26,7 @@ import com.google.common.geometry.S2Loop;
 import com.google.common.geometry.S2Point;
 import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.S2Geography.PolygonGeography;
+import org.apache.sedona.common.S2Geography.WKBGeography;
 import org.apache.sedona.common.geography.Constructors;
 import org.apache.sedona.common.geography.Functions;
 import org.apache.sedona.common.sphere.Spheroid;
@@ -190,6 +191,124 @@ public class FunctionTest {
     Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", 4326);
     // Spheroid.length returns 0 for polygon types
     assertEquals(0.0, Functions.length(g), 1e-10);
+  }
+
+  @Test
+  public void maxDistance_twoPoints() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (1 1)", 4326);
+
+    Double result = Functions.maxDistance(g1, g2);
+    assertNotNull(result);
+    // For two points, maxDistance should be approximately equal to distance.
+    // S2 uses sphere model while Spheroid uses ellipsoid — allow ~0.5% tolerance.
+    Double dist = Functions.distance(g1, g2);
+    assertEquals(dist, result, dist * 0.005);
+  }
+
+  @Test
+  public void maxDistance_lineAndPoint() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("LINESTRING (0 0, 2 0)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (1 1)", 4326);
+
+    Double result = Functions.maxDistance(g1, g2);
+    assertNotNull(result);
+    // Max distance should be from one endpoint of the line to the point
+    assertTrue(result > Functions.distance(g1, g2));
+  }
+
+  @Test
+  public void maxDistance_nullHandling() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    assertNull(Functions.maxDistance(g1, null));
+    assertNull(Functions.maxDistance(null, g1));
+  }
+
+  @Test
+  public void closestPoint_twoPoints() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (1 1)", 4326);
+
+    Geography result = Functions.closestPoint(g1, g2);
+    assertNotNull(result);
+    assertTrue(result instanceof WKBGeography);
+    // Closest point on g1 to g2 should be g1 itself
+    assertEquals("POINT (0 0)", result.toString());
+  }
+
+  @Test
+  public void closestPoint_lineAndPoint() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("LINESTRING (0 0, 2 0)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (1 1)", 4326);
+
+    Geography result = Functions.closestPoint(g1, g2);
+    assertNotNull(result);
+    // Closest point on the line to POINT(1 1) should be near POINT(1 0)
+    String wkt = result.toString();
+    assertTrue(wkt.startsWith("POINT ("));
+  }
+
+  @Test
+  public void minimumClearanceLine_twoPoints() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (1 1)", 4326);
+
+    Geography result = Functions.minimumClearanceLine(g1, g2);
+    assertNotNull(result);
+    assertTrue(result instanceof WKBGeography);
+    String wkt = result.toString();
+    assertTrue(wkt.startsWith("LINESTRING ("));
+  }
+
+  // ─── Predicate functions ─────────────────────────────────────────────────
+
+  @Test
+  public void equals_sameGeography() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (1 1)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (1 1)", 4326);
+    assertTrue(Functions.equals(g1, g2));
+  }
+
+  @Test
+  public void equals_differentGeography() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (1 1)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (2 2)", 4326);
+    assertFalse(Functions.equals(g1, g2));
+  }
+
+  @Test
+  public void intersects_overlappingPolygons() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))", 4326);
+    Geography g2 = Constructors.geogFromWKT("POLYGON ((1 1, 3 1, 3 3, 1 3, 1 1))", 4326);
+    assertTrue(Functions.intersects(g1, g2));
+  }
+
+  @Test
+  public void intersects_disjointPolygons() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    Geography g2 = Constructors.geogFromWKT("POLYGON ((10 10, 11 10, 11 11, 10 11, 10 10))", 4326);
+    assertFalse(Functions.intersects(g1, g2));
+  }
+
+  @Test
+  public void contains_pointInPolygon() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (0.5 0.5)", 4326);
+    assertTrue(Functions.contains(g1, g2));
+  }
+
+  @Test
+  public void contains_pointOutsidePolygon() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (2 2)", 4326);
+    assertFalse(Functions.contains(g1, g2));
+  }
+
+  @Test
+  public void contains_nullHandling() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (1 1)", 4326);
+    assertFalse(Functions.contains(g1, null));
+    assertFalse(Functions.contains(null, g1));
   }
 
   @Test
