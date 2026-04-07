@@ -114,9 +114,8 @@ public class Functions {
   public static Geography closestPoint(Geography g1, Geography g2) {
     if (g1 == null || g2 == null) return null;
     try {
-      Distance dist = new Distance();
-      S2Point pt = dist.S2_closestPoint(toShapeIndex(g1), toShapeIndex(g2));
-      Geography result = new SinglePointGeography(pt);
+      Pair<S2Point, S2Point> pair = findClosestPair(g1, g2);
+      Geography result = new SinglePointGeography(pair.getLeft());
       result.setSRID(g1.getSRID());
       return WKBGeography.fromS2Geography(result);
     } catch (Exception e) {
@@ -131,9 +130,7 @@ public class Functions {
   public static Geography minimumClearanceLine(Geography g1, Geography g2) {
     if (g1 == null || g2 == null) return null;
     try {
-      Distance dist = new Distance();
-      Pair<S2Point, S2Point> pair =
-          dist.S2_minimumClearanceLineBetween(toShapeIndex(g1), toShapeIndex(g2));
+      Pair<S2Point, S2Point> pair = findClosestPair(g1, g2);
       S2Polyline line = new S2Polyline(List.of(pair.getLeft(), pair.getRight()));
       Geography result = new SinglePolylineGeography(line);
       result.setSRID(g1.getSRID());
@@ -142,6 +139,74 @@ public class Functions {
       throw new RuntimeException(
           "ST_MinimumClearanceLine failed for geography: " + e.getMessage(), e);
     }
+  }
+
+  /**
+   * Find the closest pair of points between two geographies. Uses S2ClosestEdgeQuery with interiors
+   * included to handle point geometries correctly.
+   */
+  private static Pair<S2Point, S2Point> findClosestPair(Geography g1, Geography g2)
+      throws Exception {
+    Geography s2g1 = toS2(g1);
+    Geography s2g2 = toS2(g2);
+
+    // For point geometries, return the points directly
+    boolean g1IsPoint = s2g1 instanceof SinglePointGeography || s2g1 instanceof PointGeography;
+    boolean g2IsPoint = s2g2 instanceof SinglePointGeography || s2g2 instanceof PointGeography;
+
+    if (g1IsPoint && g2IsPoint) {
+      S2Point p1 = getFirstPoint(s2g1);
+      S2Point p2 = getFirstPoint(s2g2);
+      return Pair.of(p1, p2);
+    }
+
+    if (g1IsPoint) {
+      // Closest point on g1 (a point) to g2 is always the point itself
+      S2Point p1 = getFirstPoint(s2g1);
+      // Find the closest point on g2 to p1 using edge query with interiors
+      S2Point p2 = findClosestPointOnTarget(toShapeIndex(g2), p1);
+      return Pair.of(p1, p2);
+    }
+
+    if (g2IsPoint) {
+      S2Point p2 = getFirstPoint(s2g2);
+      S2Point p1 = findClosestPointOnTarget(toShapeIndex(g1), p2);
+      return Pair.of(p1, p2);
+    }
+
+    // Both have edges — use the full edge-pair closest points algorithm
+    Distance dist = new Distance();
+    return dist.S2_minimumClearanceLineBetween(toShapeIndex(g1), toShapeIndex(g2));
+  }
+
+  private static S2Point getFirstPoint(Geography g) {
+    if (g instanceof SinglePointGeography) {
+      return ((SinglePointGeography) g).getPoints().get(0);
+    } else if (g instanceof PointGeography) {
+      return ((PointGeography) g).getPoints().get(0);
+    }
+    throw new IllegalArgumentException("Expected point geography, got: " + g.getClass());
+  }
+
+  private static S2Point findClosestPointOnTarget(ShapeIndexGeography target, S2Point queryPoint) {
+    S2ClosestEdgeQuery query = S2ClosestEdgeQuery.builder().build(target.shapeIndex);
+    S2ClosestEdgeQuery.PointTarget pointTarget = new S2ClosestEdgeQuery.PointTarget(queryPoint);
+    java.util.Optional<S2BestEdgesQueryBase.Result> result = query.findClosestEdge(pointTarget);
+    if (!result.isPresent()) {
+      return queryPoint; // fallback: no edges found
+    }
+    // The result contains the closest point on the target geometry
+    S2BestEdgesQueryBase.Result edge = result.get();
+    int shapeId = edge.shapeId();
+    int edgeId = edge.edgeId();
+    if (edgeId == -1) {
+      // Interior match (point inside polygon) — return the query point itself
+      return queryPoint;
+    }
+    S2Shape.MutableEdge mutableEdge = new S2Shape.MutableEdge();
+    target.shapeIndex.getShapes().get(shapeId).getEdge(edgeId, mutableEdge);
+    // Project the query point onto the edge to find the closest point
+    return S2EdgeUtil.getClosestPoint(queryPoint, mutableEdge.getStart(), mutableEdge.getEnd());
   }
 
   /** Spherical equality test using S2 boolean operations. */
@@ -175,6 +240,11 @@ public class Functions {
   private static Geometry toJTS(Geography g) {
     if (g instanceof WKBGeography) return ((WKBGeography) g).getJTSGeometry();
     return Constructors.geogToGeometry(g);
+  }
+
+  private static Geography toS2(Geography g) {
+    if (g instanceof WKBGeography) return ((WKBGeography) g).getS2Geography();
+    return g;
   }
 
   private static ShapeIndexGeography toShapeIndex(Geography g) {
