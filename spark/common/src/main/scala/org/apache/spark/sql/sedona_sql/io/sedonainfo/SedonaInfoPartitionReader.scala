@@ -117,9 +117,10 @@ object SedonaInfoPartitionReader {
     lazy val metadataMap: Any = {
       if (meta.metadata.isEmpty) null
       else {
+        val entries = meta.metadata.toSeq
         org.apache.spark.sql.catalyst.util.ArrayBasedMapData(
-          meta.metadata.keys.map(UTF8String.fromString).toArray,
-          meta.metadata.values.map(UTF8String.fromString).toArray)
+          entries.map { case (k, _) => UTF8String.fromString(k) }.toArray,
+          entries.map { case (_, v) => UTF8String.fromString(v) }.toArray)
       }
     }
 
