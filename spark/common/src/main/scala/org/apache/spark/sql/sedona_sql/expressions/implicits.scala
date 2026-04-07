@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.sedona.common.S2Geography.{Geography, GeographySerializer}
+import org.apache.sedona.common.S2Geography.{Geography, GeographyWKBSerializer}
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
@@ -67,7 +67,7 @@ object implicits {
           serdeAware.evalWithoutSerialization(input).asInstanceOf[Geography]
         case _ =>
           inputExpression.eval(input).asInstanceOf[Array[Byte]] match {
-            case binary: Array[Byte] => GeographySerializer.deserialize(binary)
+            case binary: Array[Byte] => GeographyWKBSerializer.deserialize(binary)
             case _ => null
           }
       }
@@ -180,7 +180,7 @@ object implicits {
     }
     def toGeography: Geography =
       arrayData match {
-        case binary: Array[Byte] => GeographySerializer.deserialize(binary)
+        case binary: Array[Byte] => GeographyWKBSerializer.deserialize(binary)
         case _ => null
       }
   }
@@ -198,7 +198,7 @@ object implicits {
 
   implicit class GeographyEnhancer(geog: Geography) {
 
-    def toGenericArrayData: Array[Byte] = GeographySerializer.serialize(geog)
+    def toGenericArrayData: Array[Byte] = GeographyWKBSerializer.serialize(geog)
   }
 
 }
