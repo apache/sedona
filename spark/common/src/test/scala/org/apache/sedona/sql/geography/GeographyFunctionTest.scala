@@ -38,7 +38,7 @@ import org.locationtech.jts.geom.Geometry
  *     ST_ClosestPoint
  *   - Serialization round-trip: WKBGeography through Spark DataFrame write/read
  */
-class GeographyFunctionIntegrationTest extends TestBaseScala {
+class GeographyFunctionTest extends TestBaseScala {
 
   import sparkSession.implicits._
 
@@ -74,8 +74,7 @@ class GeographyFunctionIntegrationTest extends TestBaseScala {
     it("ST_GeogFromWKB round-trip") {
       // Create WKB from a Geometry, then read as Geography
       val row = sparkSession
-        .sql(
-          "SELECT ST_GeogFromWKB(ST_AsBinary(ST_GeomFromWKT('POINT (30 10)'))) AS geog")
+        .sql("SELECT ST_GeogFromWKB(ST_AsBinary(ST_GeomFromWKT('POINT (30 10)'))) AS geog")
         .first()
       val geog = row.get(0).asInstanceOf[Geography]
       assertTrue(geog.isInstanceOf[WKBGeography])
@@ -149,6 +148,38 @@ class GeographyFunctionIntegrationTest extends TestBaseScala {
         .first()
       val env = row.get(0).asInstanceOf[Geography]
       assertNotNull(env)
+    }
+
+    it("ST_Envelope antarctica with split") {
+      val antarctica =
+        "POLYGON ((-180 -90, -180 -63.27066, 180 -63.27066, 180 -90, -180 -90))"
+      val row = sparkSession
+        .sql(s"SELECT ST_Envelope(ST_GeogFromWKT('$antarctica'), true) AS env")
+        .first()
+      val env = row.get(0).asInstanceOf[Geography]
+      assertEquals(
+        "POLYGON ((-180 -63.3, 180 -63.3, 180 -90, -180 -90, -180 -63.3))",
+        env.toString)
+    }
+
+    it("ST_Envelope Fiji without split") {
+      val fiji =
+        "MULTIPOLYGON (" +
+          "((177.285 -18.28799, 180 -18.28799, 180 -16.02088, 177.285 -16.02088, 177.285 -18.28799))," +
+          "((-180 -18.28799, -179.7933 -18.28799, -179.7933 -16.02088, -180 -16.02088, -180 -18.28799))" +
+          ")"
+      val row = sparkSession
+        .sql(s"SELECT ST_Envelope(ST_GeogFromEWKT('$fiji'), false) AS env")
+        .first()
+      val env = row.get(0).asInstanceOf[Geography]
+      assertEquals(
+        "POLYGON ((177.3 -18.3, -179.8 -18.3, -179.8 -16, 177.3 -16, 177.3 -18.3))",
+        env.toString)
+    }
+
+    it("ST_Envelope null") {
+      val row = sparkSession.sql("SELECT ST_Envelope(null, false)").first()
+      assertTrue(row.isNullAt(0))
     }
   }
 
@@ -396,8 +427,7 @@ class GeographyFunctionIntegrationTest extends TestBaseScala {
 
     it("ST_Intersects via DataFrame API") {
       val df = sparkSession
-        .sql(
-          "SELECT 'POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))' AS a, 'POLYGON ((1 1, 3 1, 3 3, 1 3, 1 1))' AS b")
+        .sql("SELECT 'POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))' AS a, 'POLYGON ((1 1, 3 1, 3 3, 1 3, 1 1))' AS b")
         .select(
           st_constructors.ST_GeogFromWKT(col("a"), lit(4326)).as("a"),
           st_constructors.ST_GeogFromWKT(col("b"), lit(4326)).as("b"))
