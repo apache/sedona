@@ -88,9 +88,73 @@ java -jar benchmark/target/sedona-benchmark-1.9.0-SNAPSHOT.jar -rf json -rff res
 | `-rf json` | text | Output format (json, csv, text) |
 | `-rff file` | stdout | Output file |
 
+### SerializerComparisonBench
+
+Compares end-to-end performance of ST functions using the new WKB serializer vs the legacy S2-native serializer. Each benchmark simulates the real Spark UDT path: deserialize bytes into a Geography object, then execute the ST function.
+
+**Geometry types** (parameterized via `geometryType`): `point`, `polygon_16`, `polygon_64`
+
+**Functions benchmarked** (each measured with both serializers):
+- `distance_wkb` vs `distance_s2native`
+- `area_wkb` vs `area_s2native`
+- `length_wkb` vs `length_s2native`
+- `contains_wkb` vs `contains_s2native`
+- `intersects_wkb` vs `intersects_s2native`
+- `equals_wkb` vs `equals_s2native`
+
+## Sample results
+
+> Environment: macOS Darwin 24.2.0, Apple M-series, JDK 11, JMH 1.37, 3 warmup + 5 measurement iterations, 1 fork.
+> Results will vary by hardware. Run your own benchmarks to get numbers for your environment.
+
+### WKB Serializer vs S2-Native Serializer (deserialize + execute)
+
+#### Point
+
+| Function | WKB (ns/op) | S2-native (ns/op) | WKB speedup |
+|----------|------------:|-------------------:|------------:|
+| ST_Distance | 1,241 | 1,825 | **1.5x faster** |
+| ST_Area | 56 | 339 | **6.1x faster** |
+| ST_Length | 53 | 331 | **6.2x faster** |
+| ST_Contains | 7,934 | 2,155 | 3.7x slower |
+| ST_Intersects | 7,396 | 1,370 | 5.4x slower |
+| ST_Equals | 4,021 | 914 | 4.4x slower |
+
+#### Polygon (16 vertices)
+
+| Function | WKB (ns/op) | S2-native (ns/op) | WKB speedup |
+|----------|------------:|-------------------:|------------:|
+| ST_Distance | 2,347 | 5,114 | **2.2x faster** |
+| ST_Area | 23,070 | 24,078 | **1.04x faster** |
+| ST_Length | 329 | 1,708 | **5.2x faster** |
+| ST_Contains | 8,070 | 2,090 | 3.9x slower |
+| ST_Intersects | 7,344 | 1,337 | 5.5x slower |
+| ST_Equals | 22,986 | 4,088 | 5.6x slower |
+
+#### Polygon (64 vertices)
+
+| Function | WKB (ns/op) | S2-native (ns/op) | WKB speedup |
+|----------|------------:|-------------------:|------------:|
+| ST_Distance | 5,290 | 12,870 | **2.4x faster** |
+| ST_Area | 90,141 | 93,992 | **1.04x faster** |
+| ST_Length | 1,166 | 5,031 | **4.3x faster** |
+| ST_Contains | 8,153 | 2,096 | 3.9x slower |
+| ST_Intersects | 7,324 | 1,353 | 5.4x slower |
+| ST_Equals | 80,429 | 18,508 | 4.3x slower |
+
+#### Analysis
+
+**WKB wins for Level 2 (JTS + Spheroid) metric functions:**
+- ST_Distance, ST_Length, ST_Area are **1.04x to 6.2x faster** with WKB. The WKB path benefits from near-zero deserialization cost — it just stores the byte array, then lazily parses to JTS only when needed. The S2-native path pays for full S2 object reconstruction on every deserialization.
+
+**S2-native wins for Level 3 (S2 predicate) functions:**
+- ST_Contains, ST_Intersects, ST_Equals are **3.7x to 5.6x slower** with WKB. The WKB path must parse WKB to S2 Geography and then build a ShapeIndex on every call, while S2-native already has S2 objects ready after deserialization.
+
+**Why WKB is the right default:** Most analytics workloads are dominated by metric operations (distance, area, length), which are the most common Geography functions. For predicate-heavy workloads, the lazy S2 cache in `WKBGeography` amortizes the parse cost across repeated operations on the same object — these benchmarks measure the worst case (fresh deserialize on every call, no cache reuse).
+
 ## Interpreting results
 
 - **Geography vs Geometry ratios** are expected to be high for metric functions (ST_Distance, ST_Area, ST_Length) because Geography uses geodesic math on the WGS84 ellipsoid while Geometry uses trivial planar Euclidean math. These measure fundamentally different computations, not WKBGeography overhead.
-- **Serialization benchmarks** directly measure the overhead of the WKB format vs S2-native format.
+- **Serializer comparison** measures the combined cost of deserialization + function execution, which is what matters in practice (the Spark UDT path).
 - **Lazy cache benchmarks** measure the one-time cost of parsing WKB to JTS or S2, and the near-zero cost of subsequent cached access.
 - Results are in nanoseconds per operation (ns/op). Lower is better.
