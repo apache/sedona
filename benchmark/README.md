@@ -6,7 +6,7 @@ JMH microbenchmarks measuring the performance of all Geography ST functions.
 
 ### GeographyFunctionsBench
 
-Benchmarks every function from the Geography roadmap across multiple geometry types.
+Benchmarks every function from the Geography roadmap across multiple geometry types. Geography objects are pre-constructed — this measures **function execution cost** with cached lazy state (JTS, S2, ShapeIndex all warmed up).
 
 **Geometry types** (parameterized via `geometryType`):
 - `point` — single points
@@ -39,7 +39,7 @@ Measures serialization/deserialization performance and lazy caching overhead.
 
 ### SerializerComparisonBench
 
-Compares end-to-end performance of ST functions using the new WKB serializer vs the legacy S2-native serializer. Each benchmark simulates the real Spark UDT path: deserialize bytes into a Geography object, then execute the ST function.
+Compares end-to-end performance of ST functions using the new WKB serializer vs the legacy S2-native serializer. Each benchmark **freshly deserializes** bytes into a Geography object, then executes the ST function — no cache reuse. This simulates the real Spark UDT cold path.
 
 **Geometry types** (parameterized): `point`, `polygon_16`, `polygon_64`
 
@@ -96,19 +96,21 @@ java -jar benchmark/target/sedona-benchmark-1.9.0-SNAPSHOT.jar -rf json -rff res
 
 ## Sample results
 
-> Environment: macOS Darwin 24.2.0, Apple M-series, JDK 11, JMH 1.37, 2-3 warmup + 3-5 measurement iterations, 1 fork.
+> Environment: macOS Darwin 24.2.0, Apple M-series, JDK 11, JMH 1.37, 2-3 warmup + 3 measurement iterations, 1 fork.
 > Results will vary by hardware. Run your own benchmarks to get numbers for your environment.
 
-### Geography Function Performance
+### Geography Function Performance (cached objects)
+
+These benchmarks operate on pre-constructed Geography objects where the lazy JTS, S2, and ShapeIndex caches are already warmed up. This represents the steady-state performance after the first access.
 
 #### Constructors
 
 | Function | Point (ns/op) | Polygon_16 (ns/op) | Notes |
 |----------|:-------------:|:-------------------:|-------|
 | ST_GeogFromWKB | 3 | 3 | Zero-parse, just wraps byte array |
-| ST_GeogFromWKT | 1,958 | 12,391 | S2 WKT parse + WKB conversion |
-| ST_GeogFromEWKT | 1,986 | 12,617 | Same as WKT + SRID extraction |
-| ST_GeomToGeography | 278 | 10,052 | S2 builder normalization + WKB wrap |
+| ST_GeogFromWKT | 2,003 | 12,286 | S2 WKT parse + WKB conversion |
+| ST_GeogFromEWKT | 2,146 | 12,463 | Same as WKT + SRID extraction |
+| ST_GeomToGeography | 264 | 10,173 | S2 builder normalization + WKB wrap |
 | ST_GeogToGeometry | 2 | 2 | Returns cached JTS, near-zero cost |
 
 #### Level 0+1: Structural (JTS-only path)
@@ -118,98 +120,102 @@ java -jar benchmark/target/sedona-benchmark-1.9.0-SNAPSHOT.jar -rf json -rff res
 | ST_NPoints | 2 | 2 | JTS cached, trivial accessor |
 | ST_GeometryType | 5 | 5 | JTS cached, trivial accessor |
 | ST_NumGeometries | 2 | 2 | JTS cached, trivial accessor |
-| ST_Centroid | 42 | 316 | JTS centroid computation + WKB wrap |
-| ST_Envelope | 139 | 1,108 | S2 region bounds (Level 3 internally) |
-| ST_AsText | 455 | 5,206 | JTS WKT writer |
-| ST_AsEWKT | 982 | 6,042 | S2 WKT writer (includes SRID) |
+| ST_Centroid | 47 | 317 | JTS centroid computation + WKB wrap |
+| ST_Envelope | 139 | 1,118 | S2 region bounds (Level 3 internally) |
+| ST_AsText | 450 | 5,292 | JTS WKT writer |
+| ST_AsEWKT | 961 | 6,354 | S2 WKT writer (includes SRID) |
 
 #### Level 2: JTS + Spheroid (geodesic metrics)
 
 | Function | Geography | Geometry baseline | Ratio | Notes |
 |----------|:---------:|:-----------------:|:-----:|-------|
 | **Point** |
-| ST_Distance | 1,149 | 12 | 96x | Geodesic vs Euclidean — different computation |
+| ST_Distance | 245 | 12 | 21x | S2ClosestEdgeQuery (geometry-to-geometry) |
 | ST_Area | 2 | 2 | 1x | No-op for points |
-| ST_Length | 2 | 2 | 1x | No-op for points |
+| ST_Length | 2 | 1 | 1x | No-op for points |
 | **Polygon (16 vertices)** |
-| ST_Distance | 1,632 | 621 | 2.6x | Centroid extraction + geodesic |
-| ST_Area | 23,062 | 11 | 2,096x | Geodesic area vs planar area |
-| ST_Length | 2 | 1 | 1x | No-op for polygons (perimeter = ST_Perimeter) |
+| ST_Distance | 1,625 | 620 | 2.6x | S2ClosestEdgeQuery (geometry-to-geometry) |
+| ST_Area | 23,466 | 11 | 2,133x | Geodesic area vs planar area |
+| ST_Length | 2 | 1 | 1x | No-op for polygons |
 
-#### Level 3: S2 required
+#### Level 3: S2 required (with cached ShapeIndex)
 
 | Function | Geography | Geometry baseline | Ratio | Notes |
 |----------|:---------:|:-----------------:|:-----:|-------|
 | **Point** |
-| ST_MaxDistance | 604 | 23 | 26x | S2 furthest edge query |
-| ST_ClosestPoint | 106 | 29 | 3.6x | Point fast-path |
-| ST_MinimumClearanceLine | 186 | — | — | No Geometry equivalent (2-arg) |
-| ST_Contains (true) | 723 | 8 | 90x | S2 boolean op + ShapeIndex build |
-| ST_Intersects (true) | 1,765 | 9 | 196x | S2 boolean op + ShapeIndex build |
-| ST_Equals | 342 | 271 | 1.3x | S2 vs JTS topological equality |
+| ST_MaxDistance | 233 | 22 | 11x | S2 furthest edge query |
+| ST_ClosestPoint | 69 | 36 | 1.9x | Point fast-path |
+| ST_MinimumClearanceLine | 122 | — | — | No Geometry equivalent (2-arg) |
+| ST_Contains (true) | 287 | 8 | 36x | S2BooleanOperation + cached ShapeIndex |
+| ST_Contains (false) | 236 | 7 | 34x | |
+| ST_Intersects (true) | 958 | 9 | 106x | S2BooleanOperation |
+| ST_Intersects (false) | 644 | 2 | 322x | |
+| ST_Equals | 56 | 242 | **0.23x** | **Geography 4x faster!** |
 | **Polygon (16 vertices)** |
-| ST_MaxDistance | 24,588 | 3,208 | 7.7x | S2 furthest edge, scales with vertices |
-| ST_ClosestPoint | 2,634 | 654 | 4x | S2 edge query |
-| ST_MinimumClearanceLine | 2,815 | — | — | |
-| ST_Contains (true) | 1,249 | 8 | 156x | S2 boolean op + ShapeIndex build |
-| ST_Intersects (true) | 637 | 9 | 71x | S2 boolean op |
-| ST_Equals | 2,607 | 16,268 | **0.16x** | **Geography 6x faster!** S2 O(n) vs JTS O(n^2) |
+| ST_MaxDistance | 21,023 | 3,224 | 6.5x | S2 furthest edge, scales with vertices |
+| ST_ClosestPoint | 1,429 | 623 | 2.3x | S2 edge query |
+| ST_MinimumClearanceLine | 1,660 | — | — | |
+| ST_Contains (true) | 681 | 8 | 85x | S2BooleanOperation + cached ShapeIndex |
+| ST_Contains (false) | 225 | 7 | 32x | |
+| ST_Intersects (true) | 245 | 9 | 27x | |
+| ST_Intersects (false) | 613 | 2 | 307x | |
+| ST_Equals | 153 | 16,523 | **0.009x** | **Geography 108x faster!** |
 
 All values in nanoseconds per operation (ns/op). Lower is better.
 
 ---
 
-### WKB Serializer vs S2-Native Serializer (deserialize + execute)
+### WKB Serializer vs S2-Native Serializer (deserialize + execute, no cache)
 
-Measures the end-to-end cost of deserializing Geography from stored bytes and then executing an ST function. This simulates the real Spark UDT execution path.
+These benchmarks **freshly deserialize** Geography from stored bytes on every iteration, then execute the ST function. No ShapeIndex cache reuse. This simulates the worst-case Spark UDT path where each row is deserialized independently.
 
 #### Point
 
 | Function | WKB (ns/op) | S2-native (ns/op) | WKB speedup |
 |----------|:-----------:|:------------------:|:-----------:|
-| ST_Distance | 1,257 | 1,833 | **1.5x faster** |
-| ST_Area | 54 | 334 | **6.2x faster** |
-| ST_Length | 57 | 327 | **5.7x faster** |
-| ST_Contains | 8,030 | 2,095 | 3.8x slower |
-| ST_Intersects | 7,496 | 1,357 | 5.5x slower |
-| ST_Equals | 4,108 | 922 | 4.5x slower |
+| ST_Distance | 4,556 | 1,255 | 3.6x slower |
+| ST_Area | 58 | 334 | **5.8x faster** |
+| ST_Length | 58 | 336 | **5.8x faster** |
+| ST_Contains | 7,995 | 2,154 | 3.7x slower |
+| ST_Intersects | 7,315 | 1,358 | 5.4x slower |
+| ST_Equals | 4,110 | 938 | 4.4x slower |
 
 #### Polygon (16 vertices)
 
 | Function | WKB (ns/op) | S2-native (ns/op) | WKB speedup |
 |----------|:-----------:|:------------------:|:-----------:|
-| ST_Distance | 2,296 | 5,035 | **2.2x faster** |
-| ST_Area | 23,739 | 24,977 | **1.05x faster** |
-| ST_Length | 334 | 1,705 | **5.1x faster** |
-| ST_Contains | 8,047 | 2,080 | 3.9x slower |
-| ST_Intersects | 7,328 | 1,335 | 5.5x slower |
-| ST_Equals | 22,363 | 3,983 | 5.6x slower |
+| ST_Distance | 24,396 | 5,656 | 4.3x slower |
+| ST_Area | 24,674 | 25,523 | **1.03x faster** |
+| ST_Length | 337 | 1,711 | **5.1x faster** |
+| ST_Contains | 8,088 | 2,119 | 3.8x slower |
+| ST_Intersects | 7,287 | 1,364 | 5.3x slower |
+| ST_Equals | 22,090 | 4,074 | 5.4x slower |
 
 #### Polygon (64 vertices)
 
 | Function | WKB (ns/op) | S2-native (ns/op) | WKB speedup |
 |----------|:-----------:|:------------------:|:-----------:|
-| ST_Distance | 5,147 | 12,954 | **2.5x faster** |
-| ST_Area | 88,551 | 92,152 | **1.04x faster** |
-| ST_Length | 1,191 | 5,037 | **4.2x faster** |
-| ST_Contains | 8,017 | 2,086 | 3.8x slower |
-| ST_Intersects | 7,367 | 1,370 | 5.4x slower |
-| ST_Equals | 83,273 | 18,438 | 4.5x slower |
+| ST_Distance | 153,298 | 90,545 | 1.7x slower |
+| ST_Area | 94,010 | 98,764 | **1.05x faster** |
+| ST_Length | 1,191 | 5,031 | **4.2x faster** |
+| ST_Contains | 8,153 | 2,114 | 3.9x slower |
+| ST_Intersects | 7,376 | 1,360 | 5.4x slower |
+| ST_Equals | 84,547 | 18,741 | 4.5x slower |
 
 #### Analysis
 
-**WKB wins for Level 2 (JTS + Spheroid) metric functions:**
-- ST_Distance, ST_Length, ST_Area are **1.04x to 6.2x faster** with WKB. The WKB path benefits from near-zero deserialization cost — it just stores the byte array, then lazily parses to JTS only when needed. The S2-native path pays for full S2 object reconstruction on every deserialization.
+**WKB wins for Level 1-2 functions** that only need JTS (ST_Area, ST_Length, structural accessors). Near-zero deserialization cost makes these 1-6x faster.
 
-**S2-native wins for Level 3 (S2 predicate) functions:**
-- ST_Contains, ST_Intersects, ST_Equals are **3.8x to 5.6x slower** with WKB. The WKB path must parse WKB to S2 Geography and then build a ShapeIndex on every call, while S2-native already has S2 objects ready after deserialization.
+**S2-native wins for Level 3 functions** (predicates, distance) in the cold path. S2-native data arrives pre-parsed — no WKB→S2→ShapeIndex conversion needed. The WKB path must build a fresh ShapeIndex on every deserialization, which costs ~4-8 microseconds.
 
-**Why WKB is the right default:** Most analytics workloads are dominated by metric operations (distance, area, length), which are the most common Geography functions. For predicate-heavy workloads, the lazy S2 cache in `WKBGeography` amortizes the parse cost across repeated operations on the same object — these benchmarks measure the worst case (fresh deserialize on every call, no cache reuse).
+**ST_Distance changed**: Now uses S2ClosestEdgeQuery for true geometry-to-geometry minimum distance (consistent with sedona-db), instead of centroid-to-centroid. This is more correct but slower in the cold path because it requires ShapeIndex construction.
+
+**In practice, the cold-path overhead is amortized**: When the same Geography object is used multiple times (e.g., spatial filter on a column, join condition), the ShapeIndex cache in WKBGeography eliminates redundant index construction. The "cached objects" benchmark above shows the steady-state performance.
 
 ## Interpreting results
 
-- **Geography vs Geometry ratios** are expected to be high for metric functions (ST_Distance, ST_Area) because Geography uses geodesic math on the WGS84 ellipsoid while Geometry uses trivial planar Euclidean math. These measure fundamentally different computations, not WKBGeography overhead.
-- **Serializer comparison** measures the combined cost of deserialization + function execution, which is what matters in practice (the Spark UDT path).
-- **Constructor benchmarks** show that `ST_GeogFromWKB` at 3 ns is ~600x faster than `ST_GeogFromWKT` — the zero-parse WKB path is a major advantage of the WKBGeography architecture.
-- **Level 1 structural functions** (ST_NPoints, ST_GeometryType, ST_NumGeometries) run at 2-5 ns because they hit the cached JTS Geometry — effectively free after the first access.
+- **Cached vs cold path**: The `GeographyFunctionsBench` measures steady-state (cached) performance. The `SerializerComparisonBench` measures cold-path (fresh deserialization) performance. Real workloads fall between these two extremes.
+- **Geography vs Geometry ratios** are expected to be high for functions that do fundamentally different work (geodesic vs Euclidean). These are not overhead ratios.
+- **ST_Equals is faster on Geography** for complex geometries: S2's `S2BooleanOperation::Equals()` is O(n) with spatial indexing, while JTS `equalsTopo()` is O(n^2).
+- **Constructor cost**: `ST_GeogFromWKB` at 3 ns is ~650x faster than `ST_GeogFromWKT` — the zero-parse WKB path is a major advantage of the WKBGeography architecture.
 - Results are in nanoseconds per operation (ns/op). Lower is better.
