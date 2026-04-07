@@ -102,6 +102,42 @@ public class Functions {
     return Spheroid.length(toJTS(g));
   }
 
+  // ─── Level 1: JTS-only structural operations ─────────────────────────────
+
+  /** Return WKT text representation of a geography. */
+  public static String asText(Geography g) {
+    if (g == null) return null;
+    return toJTS(g).toText();
+  }
+
+  /** Return the number of points in a geography. */
+  public static int nPoints(Geography g) {
+    if (g == null) return 0;
+    return toJTS(g).getNumPoints();
+  }
+
+  /** Return the geometry type string (e.g., "ST_Point", "ST_Polygon"). */
+  public static String geometryType(Geography g) {
+    if (g == null) return null;
+    return "ST_" + toJTS(g).getGeometryType();
+  }
+
+  /** Return the number of sub-geometries in a geography. */
+  public static int numGeometries(Geography g) {
+    if (g == null) return 0;
+    return toJTS(g).getNumGeometries();
+  }
+
+  /** Return the centroid of a geography as a Geography point (planar centroid). */
+  public static Geography centroid(Geography g) {
+    if (g == null) return null;
+    org.locationtech.jts.geom.Geometry centroid = toJTS(g).getCentroid();
+    centroid.setSRID(g.getSRID());
+    return WKBGeography.fromJTS(centroid);
+  }
+
+  // ─── Level 2+: Metric and S2 operations ─────────────────────────────────
+
   /** Maximum geodesic distance between two geographies in meters. Uses S2 furthest edge query. */
   public static Double maxDistance(Geography g1, Geography g2) {
     if (g1 == null || g2 == null) return null;
