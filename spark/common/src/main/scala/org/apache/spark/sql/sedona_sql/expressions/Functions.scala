@@ -59,7 +59,9 @@ private[apache] case class ST_LabelPoint(inputExpressions: Seq[Expression])
  *   This function takes two geometries and calculates the distance between two objects.
  */
 private[apache] case class ST_Distance(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.distance _) {
+    extends InferredExpression(
+      Functions.distance _,
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.distance)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -243,7 +245,9 @@ private[apache] case class ST_Expand(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Length(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.length _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.length),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.length)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -269,7 +273,9 @@ private[apache] case class ST_Length2D(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Area(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.area _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.area),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.area)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

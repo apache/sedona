@@ -18,8 +18,7 @@
  */
 package org.apache.sedona.common.Geography;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2LatLngRect;
@@ -29,7 +28,9 @@ import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.S2Geography.PolygonGeography;
 import org.apache.sedona.common.geography.Constructors;
 import org.apache.sedona.common.geography.Functions;
+import org.apache.sedona.common.sphere.Spheroid;
 import org.junit.Test;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 
 public class FunctionTest {
@@ -129,6 +130,66 @@ public class FunctionTest {
     Geography geography = Constructors.geogFromWKT(wkt, 0);
     Geography envelope = Functions.getEnvelope(geography, false);
     assertEquals("POINT (180 10)", envelope.toString());
+  }
+
+  // ─── Metric functions ───────────────────────────────────────────────────
+
+  @Test
+  public void distance_twoPoints() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (1 1)", 4326);
+
+    Double result = Functions.distance(g1, g2);
+    assertNotNull(result);
+    // Geodesic distance ~157 km — verify against Spheroid.distance on equivalent JTS
+    Geometry jts1 = Constructors.geogToGeometry(g1);
+    Geometry jts2 = Constructors.geogToGeometry(g2);
+    double expected = Spheroid.distance(jts1, jts2);
+    assertEquals(expected, result, 1e-6);
+    assertTrue(result > 150000 && result < 160000); // sanity check: ~157 km
+  }
+
+  @Test
+  public void distance_nullHandling() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    assertNull(Functions.distance(g1, null));
+    assertNull(Functions.distance(null, g1));
+    assertNull(Functions.distance(null, null));
+  }
+
+  @Test
+  public void area_polygon() throws ParseException {
+    // ~1 degree x 1 degree box near equator — area should be ~12,300 km²
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", 4326);
+    double result = Functions.area(g);
+    Geometry jts = Constructors.geogToGeometry(g);
+    double expected = Spheroid.area(jts);
+    assertEquals(expected, result, 1e-6);
+    assertTrue(result > 1e10); // > 10 billion m² = 10,000+ km²
+  }
+
+  @Test
+  public void area_point_returnsZero() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 1)", 4326);
+    assertEquals(0.0, Functions.area(g), 1e-10);
+  }
+
+  @Test
+  public void length_linestring() throws ParseException {
+    // Line from (0,0) to (1,1) — ~157 km geodesic
+    Geography g = Constructors.geogFromWKT("LINESTRING (0 0, 1 1)", 4326);
+    double result = Functions.length(g);
+    Geometry jts = Constructors.geogToGeometry(g);
+    double expected = Spheroid.length(jts);
+    assertEquals(expected, result, 1e-6);
+    assertTrue(result > 150000 && result < 160000);
+  }
+
+  @Test
+  public void length_polygon_returnsZero() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", 4326);
+    // Spheroid.length returns 0 for polygon types
+    assertEquals(0.0, Functions.length(g), 1e-10);
   }
 
   @Test

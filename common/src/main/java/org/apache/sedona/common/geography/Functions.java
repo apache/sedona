@@ -22,6 +22,8 @@ import com.google.common.geometry.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.sedona.common.S2Geography.*;
+import org.apache.sedona.common.sphere.Spheroid;
+import org.locationtech.jts.geom.Geometry;
 
 public class Functions {
 
@@ -81,8 +83,31 @@ public class Functions {
     return new S2Polygon(loop);
   }
 
+  /** Geodesic distance between two geographies in meters (WGS84 spheroid). */
+  public static Double distance(Geography g1, Geography g2) {
+    if (g1 == null || g2 == null) return null;
+    return Spheroid.distance(toJTS(g1), toJTS(g2));
+  }
+
+  /** Geodesic area of a geography in square meters (WGS84 spheroid). */
+  public static double area(Geography g) {
+    if (g == null) return 0.0;
+    return Spheroid.area(toJTS(g));
+  }
+
+  /** Geodesic length of a geography in meters (WGS84 spheroid). */
+  public static double length(Geography g) {
+    if (g == null) return 0.0;
+    return Spheroid.length(toJTS(g));
+  }
+
   /** Return EWKT for geography object */
   public static String asEWKT(Geography geography) {
     return geography.toEWKT();
+  }
+
+  private static Geometry toJTS(Geography g) {
+    if (g instanceof WKBGeography) return ((WKBGeography) g).getJTSGeometry();
+    return Constructors.geogToGeometry(g);
   }
 }
