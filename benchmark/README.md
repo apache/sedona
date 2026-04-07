@@ -37,6 +37,21 @@ Measures serialization/deserialization performance and lazy caching overhead.
 - `lazyCache_jts_firstAccess` vs `lazyCache_jts_cachedAccess` — JTS lazy parse overhead
 - `lazyCache_s2_firstAccess` vs `lazyCache_s2_cachedAccess` — S2 lazy parse overhead
 
+### BatchBench
+
+Batch-processing benchmarks inspired by sedona-db's Criterion benchmarks. Iterates over arrays of **1024 randomly generated geometries** (via `RandomGeoGenerator`) to measure amortized per-row cost with realistic scattered data.
+
+**Parameters:**
+- `batchSize` — rows per batch (default: 1024)
+- `vertices` — vertex count per geometry: `10`, `100`, `500`
+
+**Patterns:**
+- **Array-Array**: Both inputs are arrays (spatial join: `distance(col_a[i], col_b[i])`)
+- **Array-Scalar**: One array, one constant (spatial filter: `contains(constant_polygon, col[i])`)
+- **Scalar-Array**: Reversed (spatial filter: `contains(col[i], constant_point)`)
+
+**Functions benchmarked:** ST_Distance, ST_Area, ST_Length, ST_Contains, ST_Intersects, ST_Equals, ST_MaxDistance, ST_ClosestPoint — each with Geometry baselines where applicable.
+
 ### SerializerComparisonBench
 
 Compares end-to-end performance of ST functions using the new WKB serializer vs the legacy S2-native serializer. Each benchmark **freshly deserializes** bytes into a Geography object, then executes the ST function — no cache reuse. This simulates the real Spark UDT cold path.
@@ -212,10 +227,55 @@ These benchmarks **freshly deserialize** Geography from stored bytes on every it
 
 **In practice, the cold-path overhead is amortized**: When the same Geography object is used multiple times (e.g., spatial filter on a column, join condition), the ShapeIndex cache in WKBGeography eliminates redundant index construction. The "cached objects" benchmark above shows the steady-state performance.
 
+---
+
+### Batch Processing (1024 rows, random data)
+
+Inspired by sedona-db's Criterion benchmarks. These iterate over arrays of randomly generated geometries to measure **amortized per-row cost** in realistic batch-processing scenarios. Uses `RandomGeoGenerator` for scattered geometries with configurable vertex count.
+
+#### Array-Array pattern (e.g., spatial join)
+
+| Function | Geom type | 10 vtx (ns/row) | 500 vtx (ns/row) | Scaling |
+|----------|-----------|:----------------:|:-----------------:|:-------:|
+| ST_Distance (Geography) | point-point | 411 | 388 | O(1) |
+| ST_Distance (Geometry baseline) | point-point | 38 | 25 | O(1) |
+| ST_Equals (Geography) | poly-poly | 366 | 3,245 | O(n) |
+| ST_Equals (Geometry baseline) | poly-poly | 12,516 | 677,355 | O(n^2) |
+| ST_MaxDistance (Geography) | poly-poly | 9,009 | 1,378,957 | O(n^2) |
+
+#### Array-Scalar pattern (e.g., spatial filter)
+
+| Function | Geom type | 10 vtx (ns/row) | 500 vtx (ns/row) | Scaling |
+|----------|-----------|:----------------:|:-----------------:|:-------:|
+| ST_Distance (point vs polygon) | arr-scalar | 495 | 662 | mild |
+| ST_Contains (poly vs point) | scalar-arr | 283 | 250 | O(1) |
+| ST_Contains (Geometry baseline) | scalar-arr | 13 | 7 | O(1) |
+| ST_Intersects (point vs poly) | arr-scalar | 593 | 559 | O(1) |
+| ST_Intersects (Geometry baseline) | arr-scalar | 10 | 6 | O(1) |
+| ST_ClosestPoint (line vs point) | arr-scalar | 525 | 6,011 | O(n) |
+
+#### Unary Array pattern
+
+| Function | Geom type | 10 vtx (ns/row) | 500 vtx (ns/row) | Scaling |
+|----------|-----------|:----------------:|:-----------------:|:-------:|
+| ST_Area (Geography) | polygon | 15,462 | 632,662 | O(n) |
+| ST_Area (Geometry baseline) | polygon | 57 | 2,150 | O(n) |
+| ST_Length (Geography) | linestring | 11,795 | 627,960 | O(n) |
+
+All values in nanoseconds per row (total batch time / 1024). Lower is better.
+
+#### Analysis
+
+- **Scalar-Array predicates are efficient**: When one geometry is constant (e.g., `WHERE ST_Contains(region, point_col)`), the ShapeIndex for the constant is built once and reused across all 1024 rows. ST_Contains costs ~250-283 ns/row regardless of polygon complexity.
+- **ST_Equals Geography massively outscales Geometry**: At 500 vertices, Geography is **209x faster** (3.2 us vs 677 us/row). S2's `S2BooleanOperation::Equals` with spatial indexing is O(n), while JTS `equalsTopo` is O(n^2).
+- **Geodesic area/length scale linearly** with vertex count — one GeographicLib call per edge.
+- **ST_MaxDistance scales O(n^2)** — `S2FurthestEdgeQuery` examines all edge pairs. At 500 vertices this reaches ~1.4 ms/row.
+
 ## Interpreting results
 
-- **Cached vs cold path**: The `GeographyFunctionsBench` measures steady-state (cached) performance. The `SerializerComparisonBench` measures cold-path (fresh deserialization) performance. Real workloads fall between these two extremes.
+- **Three benchmark tiers**: `GeographyFunctionsBench` (single-call, cached), `SerializerComparisonBench` (cold deserialization), `BatchBench` (batch processing with random data). Real workloads fall between these extremes.
 - **Geography vs Geometry ratios** are expected to be high for functions that do fundamentally different work (geodesic vs Euclidean). These are not overhead ratios.
 - **ST_Equals is faster on Geography** for complex geometries: S2's `S2BooleanOperation::Equals()` is O(n) with spatial indexing, while JTS `equalsTopo()` is O(n^2).
+- **Scalar-Array pattern** is the most realistic for spatial filters — one constant geometry against a column of data.
 - **Constructor cost**: `ST_GeogFromWKB` at 3 ns is ~650x faster than `ST_GeogFromWKT` — the zero-parse WKB path is a major advantage of the WKBGeography architecture.
-- Results are in nanoseconds per operation (ns/op). Lower is better.
+- Results are in nanoseconds per operation (ns/op) or nanoseconds per row (ns/row). Lower is better.

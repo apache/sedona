@@ -55,7 +55,7 @@ import org.openjdk.jmh.infra.Blackhole;
 @State(Scope.Thread)
 public class GeographyFunctionsBench {
 
-  @Param({"point", "linestring_16", "polygon_16", "polygon_64"})
+  @Param({"point", "linestring_16", "polygon_16", "polygon_64", "polygon_500"})
   public String geometryType;
 
   // --- Test data (set by geometryType param) ---
@@ -116,6 +116,15 @@ public class GeographyFunctionsBench {
         container = Constructors.geogFromWKT("POLYGON ((-1 -1, 2 -1, 2 2, -1 2, -1 -1))", 4326);
         jtsA = jtsReader.read(wktA);
         jtsB = jtsReader.read(buildCirclePolygonWKT(64, 0.3, 0.2, 0.2));
+        jtsContainer = jtsReader.read("POLYGON ((-1 -1, 2 -1, 2 2, -1 2, -1 -1))");
+        break;
+      case "polygon_500":
+        wktA = buildCirclePolygonWKT(500, 0.5);
+        geogA = Constructors.geogFromWKT(wktA, 4326);
+        geogB = Constructors.geogFromWKT(buildCirclePolygonWKT(500, 0.3, 0.2, 0.2), 4326);
+        container = Constructors.geogFromWKT("POLYGON ((-1 -1, 2 -1, 2 2, -1 2, -1 -1))", 4326);
+        jtsA = jtsReader.read(wktA);
+        jtsB = jtsReader.read(buildCirclePolygonWKT(500, 0.3, 0.2, 0.2));
         jtsContainer = jtsReader.read("POLYGON ((-1 -1, 2 -1, 2 2, -1 2, -1 -1))");
         break;
       default:
