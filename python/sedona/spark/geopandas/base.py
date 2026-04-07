@@ -1001,7 +1001,7 @@ class GeoFrame(metaclass=ABCMeta):
 
         Parameters
         ----------
-        distance : float or array-like
+        distance : float
             The offset distance. Positive offsets to the left, negative to the
             right.
         quad_segs : int, default 8
