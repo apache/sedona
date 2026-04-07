@@ -57,29 +57,236 @@ Storage Layer (Parquet/Arrow with GeoArrow WKB)
 
 ---
 
-## Phase 1: WKB Serialization Support (Mid-term)
+## Phase 1: WKB Serialization with WKBGeography (Mid-term)
 
-### 2.1 Add WKB-based Geography Serializer
-```
-Location: common/src/main/java/org/apache/sedona/common/S2Geography/
-```
-- [ ] Create `GeographyWKBSerializer` using existing `WKBWriter`/`WKBReader`
-- [ ] Support both read and write paths
-- [ ] Handle SRID in EWKB format
+> Full implementation cycle: new classes → UDT switch → constructor updates → unit tests → Spark integration tests
 
-### 2.2 Update GeographyUDT for GeoArrow Compatibility
-```
-Location: spark/common/src/main/scala/org/apache/spark/sql/sedona_sql/UDT/
-```
-- [ ] Add GeoArrow extension metadata to schema
-- [ ] Support configuration to choose serialization mode:
-  - `WKB` (GeoArrow compatible, default for new deployments)
-  - `NATIVE` (current S2-based format, for backward compatibility)
+### 1.1 New Class: `WKBGeography`
 
-### 2.3 Conversion Functions
-- [ ] `ST_GeogFromWKB` - WKB bytes → Geography (validate spherical)
-- [ ] `ST_AsBinary` for Geography - Geography → WKB bytes
-- [ ] Ensure round-trip correctness
+**File (new)**: `common/src/main/java/org/apache/sedona/common/S2Geography/WKBGeography.java`
+
+A `Geography` subclass that stores WKB bytes as primary representation with lazy JTS and S2 caches.
+
+```java
+public class WKBGeography extends Geography {
+    private final byte[] wkbBytes;
+    private volatile Geometry jtsGeometry;      // lazy, via JTS WKBReader
+    private volatile Geography s2Geography;     // lazy, via S2Geography.WKBReader
+
+    // Factory methods
+    public static WKBGeography fromWKB(byte[] wkb, int srid);
+    public static WKBGeography fromJTS(Geometry jts);
+    public static WKBGeography fromS2Geography(Geography s2geog);
+
+    // Lazy accessors (double-checked locking)
+    public byte[] getWKBBytes();
+    public Geometry getJTSGeometry();
+    public Geography getS2Geography();
+
+    // Geography abstract methods — delegate to lazy S2
+    @Override public int dimension();
+    @Override public int numShapes();
+    @Override public S2Shape shape(int id);
+    @Override public S2Region region();
+}
+```
+
+**Implementation details:**
+- Constructor: `super(GeographyKind.UNINITIALIZED)`, stores `wkbBytes` and `srid`
+- `fromWKB(byte[], int)` — wraps raw bytes, zero parse cost
+- `fromJTS(Geometry)` — uses `org.locationtech.jts.io.WKBWriter` to serialize JTS → bytes
+- `fromS2Geography(Geography)` — uses existing `S2Geography.WKBWriter` (with `includeSRID=false`) to convert S2 → bytes
+- `getJTSGeometry()` — lazy parse via `org.locationtech.jts.io.WKBReader` (standard JTS reader)
+- `getS2Geography()` — lazy parse via `org.apache.sedona.common.S2Geography.WKBReader` (existing S2 reader)
+- `dimension()`, `numShapes()`, `shape(id)`, `region()` — delegate to `getS2Geography()` (triggers S2 parse only on first call)
+- `toString()` / `toText()` / `toEWKT()` — delegate to `getS2Geography()` methods (these rely on WKTWriter which operates on S2 Geography)
+
+**Tasks:**
+- [ ] Implement `WKBGeography` class
+- [ ] Implement `fromWKB`, `fromJTS`, `fromS2Geography` factory methods
+- [ ] Implement lazy `getJTSGeometry()` and `getS2Geography()` with double-checked locking
+- [ ] Delegate abstract methods to lazy S2 cache
+
+### 1.2 New Class: `GeographyWKBSerializer`
+
+**File (new)**: `common/src/main/java/org/apache/sedona/common/S2Geography/GeographyWKBSerializer.java`
+
+Replaces `GeographySerializer` as the default serializer with backward-compatible format discrimination.
+
+**Format discrimination** (first byte):
+```
+0xFF         → WKB format (new): rest of buffer = EWKB with SRID
+1-10         → S2-native format (legacy): reinterpret as GeographyKind byte
+0 (UNINIT)   → never produced by either format in practice
+```
+
+**Serialize** (`Geography → byte[]`):
+```java
+public static byte[] serialize(Geography geog) {
+    byte[] wkb;
+    if (geog instanceof WKBGeography) {
+        wkb = ((WKBGeography) geog).getWKBBytes();   // fast path
+    } else {
+        // slow path: S2 Geography → WKB via existing S2Geography.WKBWriter
+        WKBWriter writer = new WKBWriter(2, ByteOrderValues.BIG_ENDIAN, false);
+        wkb = writer.write(geog);
+    }
+    // Prepend: [0xFF][4-byte SRID big-endian][WKB payload]
+    byte[] result = new byte[1 + 4 + wkb.length];
+    result[0] = (byte) 0xFF;
+    int srid = geog.getSRID();
+    result[1] = (byte) (srid >> 24);
+    result[2] = (byte) (srid >> 16);
+    result[3] = (byte) (srid >> 8);
+    result[4] = (byte) srid;
+    System.arraycopy(wkb, 0, result, 5, wkb.length);
+    return result;
+}
+```
+
+**Deserialize** (`byte[] → Geography`):
+```java
+public static Geography deserialize(byte[] buffer) {
+    if ((buffer[0] & 0xFF) == 0xFF) {
+        // New format: extract SRID and WKB
+        int srid = ((buffer[1] & 0xFF) << 24) | ((buffer[2] & 0xFF) << 16)
+                 | ((buffer[3] & 0xFF) << 8)  |  (buffer[4] & 0xFF);
+        byte[] wkb = Arrays.copyOfRange(buffer, 5, buffer.length);
+        return WKBGeography.fromWKB(wkb, srid);
+    }
+    // Legacy S2-native format
+    return GeographySerializer.deserialize(buffer);
+}
+```
+
+**Note**: SRID is stored separately (not in EWKB) because the WKB payload should be pure ISO WKB for GeoArrow compatibility. The `S2Geography.WKBWriter` is called with `includeSRID=false`.
+
+**Tasks:**
+- [ ] Implement `GeographyWKBSerializer` with `serialize` and `deserialize`
+- [ ] Ensure backward compat: S2-native bytes (first byte 1-10) route to `GeographySerializer`
+- [ ] Ensure forward compat: new WKB bytes (first byte 0xFF) produce `WKBGeography`
+
+### 1.3 Update `GeographyUDT` (The Switch)
+
+**File (modify)**: `spark/common/src/main/scala/org/apache/spark/sql/sedona_sql/UDT/GeographyUDT.scala`
+
+```scala
+// Change import: add GeographyWKBSerializer
+// Change serialize/deserialize to use GeographyWKBSerializer
+override def serialize(obj: Geography): Array[Byte] =
+    GeographyWKBSerializer.serialize(obj)
+override def deserialize(datum: Any): Geography =
+    datum match { case value: Array[Byte] => GeographyWKBSerializer.deserialize(value) }
+```
+
+**Effect**: All new Geography data written as WKB. Existing S2-native data still readable via format byte check.
+
+**Tasks:**
+- [ ] Switch `GeographyUDT` to use `GeographyWKBSerializer`
+
+### 1.4 Update Constructors to Return `WKBGeography`
+
+**File (modify)**: `common/src/main/java/org/apache/sedona/common/geography/Constructors.java`
+
+| Constructor | Current | New |
+|-------------|---------|-----|
+| `geogFromWKB(byte[])` | `WKBReader().read(wkb)` → S2 Geography | `WKBGeography.fromWKB(wkb, 0)` — **zero parse** |
+| `geogFromWKB(byte[], int)` | `WKBReader().read(wkb)` + setSRID | `WKBGeography.fromWKB(wkb, srid)` — **zero parse** |
+| `geogFromWKT(String, int)` | `WKTReader().read(wkt)` → S2 Geography | Parse WKT to JTS via `org.locationtech.jts.io.WKTReader` → `WKBGeography.fromJTS(jts)` |
+| `geogFromEWKT(String)` | Delegates to geogFromWKT | Same delegation, returns WKBGeography |
+| `geomToGeography(Geometry)` | Build S2 shapes manually | `WKBGeography.fromJTS(geom)` — **skip S2 build** |
+| `geogToGeometry(Geography)` | S2→JTS via coordinate extraction | If WKBGeography → `getJTSGeometry()` (fast); else existing S2→JTS path |
+
+**Tasks:**
+- [ ] Update `geogFromWKB` to return `WKBGeography.fromWKB()`
+- [ ] Update `geogFromWKT` to go through JTS intermediate → `WKBGeography.fromJTS()`
+- [ ] Update `geomToGeography` to return `WKBGeography.fromJTS()`
+- [ ] Add fast path in `geogToGeometry` for `WKBGeography`
+- [ ] Keep existing S2-based `geomToGeography` as private helper (still needed by `fromS2Geography`)
+
+### 1.5 Unit Tests
+
+**File (new)**: `common/src/test/java/org/apache/sedona/common/S2Geography/WKBGeographyTest.java`
+
+Tests following existing patterns in `WKBReaderTest.java` and `WKBWriterTest.java`:
+
+```java
+public class WKBGeographyTest {
+    // 1) WKBGeography creation and lazy parsing
+    @Test public void fromWKB_point_lazyParse();         // WKB bytes → WKBGeography, verify JTS is null until accessed
+    @Test public void fromWKB_polygon_lazyParse();
+    @Test public void fromJTS_point();                   // JTS Point → WKBGeography → getJTSGeometry() round-trip
+    @Test public void fromJTS_linestring();
+    @Test public void fromJTS_polygon();
+    @Test public void fromJTS_multiPolygon();
+    @Test public void fromJTS_collection();
+    @Test public void fromS2Geography_point();           // S2 Geography → WKBGeography → getS2Geography() round-trip
+
+    // 2) Lazy S2 delegation
+    @Test public void dimension_triggersS2Parse();       // dimension() should work via lazy S2
+    @Test public void numShapes_triggersS2Parse();
+    @Test public void region_triggersS2Parse();
+    @Test public void toString_works();                  // toString/toEWKT delegates to S2
+
+    // 3) Serializer round-trip
+    @Test public void serialize_deserialize_point();
+    @Test public void serialize_deserialize_polygon_withSRID();
+    @Test public void serialize_deserialize_collection();
+    @Test public void serialize_deserialize_emptyCases();
+
+    // 4) Backward compat: S2-native bytes → new deserializer
+    @Test public void deserialize_legacyS2Native_point();
+    @Test public void deserialize_legacyS2Native_polygon();
+
+    // 5) SRID preservation
+    @Test public void srid_preservedThroughRoundTrip();
+    @Test public void srid_zero_default();
+
+    // 6) Constructor integration
+    @Test public void geogFromWKB_returnsWKBGeography();
+    @Test public void geogFromWKT_returnsWKBGeography();
+    @Test public void geomToGeography_returnsWKBGeography();
+    @Test public void geogToGeometry_fastPath();         // WKBGeography → JTS without S2 parse
+}
+```
+
+**Tasks:**
+- [ ] Implement all unit tests above
+- [ ] Verify 1e-12 precision tolerance for coordinate round-trips (matching `WKBWriterTest` patterns)
+- [ ] Verify backward compat by creating S2-native bytes via `GeographySerializer.serialize()` and reading via `GeographyWKBSerializer.deserialize()`
+
+### 1.6 Spark Integration Tests
+
+**File (modify)**: `spark/common/src/test/scala/org/apache/sedona/sql/geography/ConstructorsTest.scala`
+
+Add tests to verify the UDT switch works end-to-end through Spark SQL:
+
+```scala
+// New test cases to add:
+test("WKB round-trip through Spark DataFrame") {
+  // Create Geography via ST_GeogFromWKT → write to DataFrame → read back → verify
+}
+test("WKB serialization backward compat") {
+  // Manually create S2-native serialized bytes → verify GeographyUDT.deserialize reads them
+}
+test("ST_GeogFromWKB returns WKBGeography type") {
+  // Verify the returned object is instanceof WKBGeography
+}
+```
+
+**File (modify)**: `spark/common/src/test/scala/org/apache/sedona/sql/geography/FunctionsTest.scala`
+
+Add test to verify existing Geography functions (ST_Envelope, ST_AsEWKT) still work with WKBGeography:
+
+```scala
+test("ST_Envelope works with WKBGeography") { ... }
+test("ST_AsEWKT works with WKBGeography") { ... }
+```
+
+**Tasks:**
+- [ ] Add Spark SQL round-trip test through DataFrame write/read
+- [ ] Add backward compatibility test with S2-native bytes
+- [ ] Verify existing `ConstructorsTest` and `FunctionsTest` pass without changes (regression)
 
 ---
 
