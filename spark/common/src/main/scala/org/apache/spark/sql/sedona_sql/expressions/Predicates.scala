@@ -74,17 +74,15 @@ abstract class ST_Predicate
 }
 
 /**
- * Test if leftGeometry full contains rightGeometry
+ * Test if leftGeometry full contains rightGeometry. Supports both Geometry (JTS) and Geography
+ * (S2) inputs via InferredExpression dual dispatch.
  *
  * @param inputExpressions
  */
 private[apache] case class ST_Contains(inputExpressions: Seq[Expression])
-    extends ST_Predicate
-    with CodegenFallback {
-
-  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    Predicates.contains(leftGeometry, rightGeometry)
-  }
+    extends InferredExpression(
+      inferrableFunction2(Predicates.contains),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.contains)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -92,17 +90,15 @@ private[apache] case class ST_Contains(inputExpressions: Seq[Expression])
 }
 
 /**
- * Test if leftGeometry full intersects rightGeometry
+ * Test if leftGeometry full intersects rightGeometry. Supports both Geometry (JTS) and Geography
+ * (S2) inputs via InferredExpression dual dispatch.
  *
  * @param inputExpressions
  */
 private[apache] case class ST_Intersects(inputExpressions: Seq[Expression])
-    extends ST_Predicate
-    with CodegenFallback {
-
-  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    Predicates.intersects(leftGeometry, rightGeometry)
-  }
+    extends InferredExpression(
+      inferrableFunction2(Predicates.intersects),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.intersects)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -236,18 +232,15 @@ private[apache] case class ST_RelateMatch(inputExpressions: Seq[Expression])
 }
 
 /**
- * Test if leftGeometry is equal to rightGeometry
+ * Test if leftGeometry is equal to rightGeometry. Supports both Geometry (JTS) and Geography (S2)
+ * inputs via InferredExpression dual dispatch.
  *
  * @param inputExpressions
  */
 private[apache] case class ST_Equals(inputExpressions: Seq[Expression])
-    extends ST_Predicate
-    with CodegenFallback {
-
-  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    // Returns GeometryCollection object
-    Predicates.equals(leftGeometry, rightGeometry)
-  }
+    extends InferredExpression(
+      inferrableFunction2(Predicates.equals),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.equals)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

@@ -60,26 +60,6 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
       predicate: ST_Predicate,
       extraCondition: Option[Expression] = None): Option[JoinQueryDetection] = {
     predicate match {
-      case ST_Contains(Seq(leftShape, rightShape)) =>
-        Some(
-          JoinQueryDetection(
-            left,
-            right,
-            leftShape,
-            rightShape,
-            SpatialPredicate.CONTAINS,
-            false,
-            extraCondition))
-      case ST_Intersects(Seq(leftShape, rightShape)) =>
-        Some(
-          JoinQueryDetection(
-            left,
-            right,
-            leftShape,
-            rightShape,
-            SpatialPredicate.INTERSECTS,
-            false,
-            extraCondition))
       case ST_Within(Seq(leftShape, rightShape)) =>
         Some(
           JoinQueryDetection(
@@ -128,16 +108,6 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
             leftShape,
             rightShape,
             SpatialPredicate.TOUCHES,
-            false,
-            extraCondition))
-      case ST_Equals(Seq(leftShape, rightShape)) =>
-        Some(
-          JoinQueryDetection(
-            left,
-            right,
-            leftShape,
-            rightShape,
-            SpatialPredicate.EQUALS,
             false,
             extraCondition))
       case ST_Crosses(Seq(leftShape, rightShape)) =>
@@ -209,6 +179,36 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
       val queryDetection: Option[JoinQueryDetection] = condition.flatMap {
         case joinConditionMatcher(predicate, extraCondition) =>
           predicate match {
+            case ST_Contains(Seq(leftShape, rightShape)) =>
+              Some(
+                JoinQueryDetection(
+                  left,
+                  right,
+                  leftShape,
+                  rightShape,
+                  SpatialPredicate.CONTAINS,
+                  false,
+                  extraCondition))
+            case ST_Intersects(Seq(leftShape, rightShape)) =>
+              Some(
+                JoinQueryDetection(
+                  left,
+                  right,
+                  leftShape,
+                  rightShape,
+                  SpatialPredicate.INTERSECTS,
+                  false,
+                  extraCondition))
+            case ST_Equals(Seq(leftShape, rightShape)) =>
+              Some(
+                JoinQueryDetection(
+                  left,
+                  right,
+                  leftShape,
+                  rightShape,
+                  SpatialPredicate.EQUALS,
+                  false,
+                  extraCondition))
             case pred: ST_Predicate =>
               getJoinDetection(left, right, pred, extraCondition)
             case pred: RS_Predicate =>
