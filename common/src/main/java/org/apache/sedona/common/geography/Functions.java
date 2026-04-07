@@ -84,10 +84,16 @@ public class Functions {
     return new S2Polygon(loop);
   }
 
-  /** Geodesic distance between two geographies in meters (WGS84 spheroid). */
+  /**
+   * Geometry-to-geometry geodesic distance in meters. Uses S2ClosestEdgeQuery for true minimum
+   * distance between any two points on the geometries (not centroid-to-centroid). Consistent with
+   * sedona-db's s2_distance implementation.
+   */
   public static Double distance(Geography g1, Geography g2) {
     if (g1 == null || g2 == null) return null;
-    return Spheroid.distance(toJTS(g1), toJTS(g2));
+    Distance dist = new Distance();
+    double radians = dist.S2_distance(toShapeIndex(g1), toShapeIndex(g2));
+    return radiansToMeters(radians);
   }
 
   /** Geodesic area of a geography in square meters (WGS84 spheroid). */
@@ -285,7 +291,7 @@ public class Functions {
 
   private static ShapeIndexGeography toShapeIndex(Geography g) {
     if (g instanceof WKBGeography) {
-      return new ShapeIndexGeography(((WKBGeography) g).getS2Geography());
+      return ((WKBGeography) g).getShapeIndexGeography();
     }
     return new ShapeIndexGeography(g);
   }

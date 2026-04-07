@@ -37,6 +37,7 @@ public class WKBGeography extends Geography {
   // Lazy caches — volatile for thread safety with double-checked locking
   private volatile Geometry jtsGeometry;
   private volatile Geography s2Geography;
+  private volatile ShapeIndexGeography shapeIndexGeography;
 
   private WKBGeography(byte[] wkbBytes, int srid) {
     super(GeographyKind.UNINITIALIZED);
@@ -89,6 +90,25 @@ public class WKBGeography extends Geography {
             throw new RuntimeException("Failed to parse WKB to JTS Geometry", e);
           }
           jtsGeometry = result;
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Returns a ShapeIndexGeography wrapping the S2 Geography, lazily built on first access. The
+   * ShapeIndex is cached for reuse across multiple predicate/distance operations on the same
+   * object.
+   */
+  public ShapeIndexGeography getShapeIndexGeography() {
+    ShapeIndexGeography result = shapeIndexGeography;
+    if (result == null) {
+      synchronized (this) {
+        result = shapeIndexGeography;
+        if (result == null) {
+          result = new ShapeIndexGeography(getS2Geography());
+          shapeIndexGeography = result;
         }
       }
     }
