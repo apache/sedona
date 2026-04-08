@@ -82,14 +82,10 @@ object FunctionResolver {
         if (ambiguousMatches.length == 1) {
           function
         } else {
-          // Detected ambiguous matches, throw exception
-          val candidateTypesMsg = ambiguousMatches
-            .map { case (function, _) =>
-              "  (" + function.sparkInputTypes.mkString(", ") + ")"
-            }
-            .mkString("\n")
-          throw new IllegalArgumentException(
-            "Ambiguous function call. Candidates are: \n" + candidateTypesMsg)
+          // Multiple candidates match equally (e.g., null inputs matching both Geometry and
+          // Geography overloads). Prefer the first candidate — for null inputs all overloads
+          // return null, so the choice is irrelevant.
+          ambiguousMatches.head._1
         }
     }
   }

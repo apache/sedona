@@ -160,7 +160,9 @@ private[apache] case class ST_CrossesDateLine(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_NPoints(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.nPoints _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.nPoints),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.nPoints)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -288,7 +290,9 @@ private[apache] case class ST_Area(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Centroid(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.getCentroid _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.getCentroid),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.centroid)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -573,7 +577,9 @@ private[apache] case class ST_SimplifyPolygonHull(inputExpressions: Seq[Expressi
 }
 
 private[apache] case class ST_AsText(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.asWKT _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.asWKT),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.asText)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -633,7 +639,9 @@ private[apache] case class ST_SetSRID(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_GeometryType(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.geometryType _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.geometryType),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.geometryType)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1064,7 +1072,9 @@ private[apache] object ST_IsRing {
  *   Geometry
  */
 private[apache] case class ST_NumGeometries(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.numGeometries _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.numGeometries),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.numGeometries)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
