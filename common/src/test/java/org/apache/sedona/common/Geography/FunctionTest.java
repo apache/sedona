@@ -302,6 +302,20 @@ public class FunctionTest {
   }
 
   @Test
+  public void within_pointInPolygon() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (0.5 0.5)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    assertTrue(Functions.within(g1, g2));
+  }
+
+  @Test
+  public void within_pointOutsidePolygon() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (2 2)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    assertFalse(Functions.within(g1, g2));
+  }
+
+  @Test
   public void contains_nullHandling() throws ParseException {
     Geography g1 = Constructors.geogFromWKT("POINT (1 1)", 4326);
     assertFalse(Functions.contains(g1, null));

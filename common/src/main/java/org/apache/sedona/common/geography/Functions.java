@@ -265,6 +265,13 @@ public class Functions {
     return pred.S2_intersects(toShapeIndex(g1), toShapeIndex(g2), s2Options());
   }
 
+  /** Spherical within test — returns true if g1 is fully within g2. Inverse of contains. */
+  public static boolean within(Geography g1, Geography g2) {
+    if (g1 == null || g2 == null) return false;
+    Predicates pred = new Predicates();
+    return pred.S2_contains(toShapeIndex(g2), toShapeIndex(g1), s2Options());
+  }
+
   /** Spherical containment test using S2 boolean operations. */
   public static boolean contains(Geography g1, Geography g2) {
     if (g1 == null || g2 == null) return false;

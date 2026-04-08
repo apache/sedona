@@ -71,5 +71,6 @@ These functions operate on geography type objects.
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
 | [ST_Contains](Geography-Functions/ST_Contains.md) | Boolean | Test whether geography A fully contains geography B. | v1.9.0 |
+| [ST_Within](Geography-Functions/ST_Within.md) | Boolean | Test whether geography A is fully within geography B. | v1.9.0 |
 | [ST_Intersects](Geography-Functions/ST_Intersects.md) | Boolean | Test whether two geographies intersect. | v1.9.0 |
 | [ST_Equals](Geography-Functions/ST_Equals.md) | Boolean | Test whether two geographies are spatially equal. | v1.9.0 |
