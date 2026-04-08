@@ -37,18 +37,16 @@ import org.openjdk.jmh.infra.Blackhole;
 /**
  * Compares end-to-end ST function performance under different serialization scenarios.
  *
- * <p>Two source format scenarios:
+ * Two source format scenarios:
  *
- * <ul>
- *   <li><b>wkb_source</b> (GeoParquet scenario): Raw data is WKB bytes (as stored in GeoParquet).
- *       Both the WKB path and the "S2 from WKB" path must parse WKB. The WKB path wraps bytes
- *       lazily; the S2 path fully parses WKB → S2 Geography upfront.
- *   <li><b>s2native_source</b> (legacy scenario): Raw data is S2-native serialized bytes. The S2
- *       path deserializes directly to S2 Geography; the WKB path must go through WKB
- *       deserialization.
- * </ul>
+ * - wkb_source (GeoParquet scenario): Raw data is WKB bytes (as stored in GeoParquet).
+ *   Both the WKB path and the "S2 from WKB" path must parse WKB. The WKB path wraps bytes
+ *   lazily; the S2 path fully parses WKB to S2 Geography upfront.
+ * - s2native_source (legacy scenario): Raw data is S2-native serialized bytes. The S2
+ *   path deserializes directly to S2 Geography; the WKB path must go through WKB
+ *   deserialization.
  *
- * <p>Run: {@code java -jar benchmark/target/sedona-benchmark-*.jar SerializerComparisonBench}
+ * Run: java -jar benchmark/target/sedona-benchmark-*.jar SerializerComparisonBench
  */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)

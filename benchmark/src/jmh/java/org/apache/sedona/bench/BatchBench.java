@@ -31,13 +31,11 @@ import org.openjdk.jmh.infra.Blackhole;
  * single function call, these iterate over arrays of random geometries to measure amortized per-row
  * cost.
  *
- * <p>Patterns:
- * <ul>
- *   <li><b>Array-Array</b>: Both inputs are arrays (e.g., spatial join: distance(col_a[i], col_b[i]))</li>
- *   <li><b>Array-Scalar</b>: One array, one constant (e.g., spatial filter: contains(constant_polygon, col[i]))</li>
- * </ul>
+ * Patterns:
+ * - Array-Array: Both inputs are arrays (e.g., spatial join: distance(col_a[i], col_b[i]))
+ * - Array-Scalar: One array, one constant (e.g., spatial filter: contains(constant_polygon, col[i]))
  *
- * <p>Run: {@code java -jar benchmark/target/sedona-benchmark-*.jar BatchBench}
+ * Run: java -jar benchmark/target/sedona-benchmark-*.jar BatchBench
  */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)

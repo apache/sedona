@@ -31,21 +31,19 @@ import org.openjdk.jmh.infra.Blackhole;
 /**
  * JMH benchmarks for all planned Geography ST functions.
  *
- * <p>Covers every function from the Geography roadmap:
- * <ul>
- *   <li>Constructors: ST_GeogFromWKB, ST_GeogFromEWKB, ST_GeogFromWKT, ST_GeogFromEWKT,
- *       ST_GeogFromText, ST_GeogFromGeohash</li>
- *   <li>Converters: ST_GeogToGeometry, ST_GeomToGeography</li>
- *   <li>Level 0 (WKB only): ST_Envelope</li>
- *   <li>Level 1 (JTS only): ST_AsEWKT, ST_AsText, ST_NPoints, ST_GeometryType,
- *       ST_NumGeometries, ST_Centroid</li>
- *   <li>Level 2 (JTS + Spheroid): ST_Distance, ST_Area, ST_Length</li>
- *   <li>Level 3 (S2 required): ST_MaxDistance, ST_ClosestPoint, ST_MinimumClearanceLine,
- *       ST_Equals, ST_Intersects, ST_Contains</li>
- * </ul>
+ * Covers every function from the Geography roadmap:
+ * - Constructors: ST_GeogFromWKB, ST_GeogFromEWKB, ST_GeogFromWKT, ST_GeogFromEWKT,
+ *   ST_GeogFromText, ST_GeogFromGeohash
+ * - Converters: ST_GeogToGeometry, ST_GeomToGeography
+ * - Level 0 (WKB only): ST_Envelope
+ * - Level 1 (JTS only): ST_AsEWKT, ST_AsText, ST_NPoints, ST_GeometryType,
+ *   ST_NumGeometries, ST_Centroid
+ * - Level 2 (JTS + Spheroid): ST_Distance, ST_Area, ST_Length
+ * - Level 3 (S2 required): ST_MaxDistance, ST_ClosestPoint, ST_MinimumClearanceLine,
+ *   ST_Equals, ST_Intersects, ST_Contains
  *
- * <p>Run: {@code mvn package -pl benchmark -am && java -jar benchmark/target/sedona-benchmark-*.jar
- * GeographyFunctionsBench}
+ * Run: mvn package -pl benchmark -am && java -jar benchmark/target/sedona-benchmark-*.jar
+ * GeographyFunctionsBench
  */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)

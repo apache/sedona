@@ -24,14 +24,8 @@ import org.locationtech.jts.io.ByteOrderValues;
 
 /**
  * Serializer for Geography objects using WKB as the primary format. Supports backward-compatible
- * reading of legacy S2-native serialized data.
- *
- * <p>Format discrimination (first byte):
- *
- * <ul>
- *   <li>{@code 0xFF} — WKB format (new): [0xFF][4-byte SRID big-endian][WKB payload]
- *   <li>{@code 1-10} — S2-native format (legacy): delegates to {@link GeographySerializer}
- * </ul>
+ * reading of legacy S2-native serialized data. Format discrimination by first byte: 0xFF for WKB
+ * format [0xFF][4-byte SRID big-endian][WKB payload], or 1-10 for legacy S2-native format.
  */
 public class GeographyWKBSerializer {
 

@@ -33,15 +33,13 @@ import org.openjdk.jmh.infra.Blackhole;
 /**
  * JMH benchmarks for Geography serialization: WKBGeography (new) vs S2-native (legacy).
  *
- * <p>Measures:
- * <ul>
- *   <li>Serialize: Geography -> bytes (WKB vs S2-native)</li>
- *   <li>Deserialize: bytes -> Geography (WKB vs S2-native)</li>
- *   <li>Constructor: geogFromWKB (zero-parse) vs geogFromWKT</li>
- *   <li>Lazy cache: first vs subsequent access to JTS and S2</li>
- * </ul>
+ * Measures:
+ * - Serialize: Geography -> bytes (WKB vs S2-native)
+ * - Deserialize: bytes -> Geography (WKB vs S2-native)
+ * - Constructor: geogFromWKB (zero-parse) vs geogFromWKT
+ * - Lazy cache: first vs subsequent access to JTS and S2
  *
- * <p>Run: {@code java -jar benchmark/target/sedona-benchmark-*.jar SerializationBench}
+ * Run: java -jar benchmark/target/sedona-benchmark-*.jar SerializationBench
  */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)

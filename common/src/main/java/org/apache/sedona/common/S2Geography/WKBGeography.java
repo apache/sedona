@@ -33,15 +33,11 @@ import org.locationtech.jts.io.ParseException;
 public class WKBGeography extends Geography {
 
   /**
-   * When true, {@link #fromWKB(byte[], int)} eagerly builds the S2 Geography and ShapeIndex at
-   * construction time instead of lazily on first access. This eliminates cold-path overhead for
-   * predicate-heavy workloads (ST_Contains, ST_Intersects, etc.) at the cost of slower
-   * deserialization for metric-only workloads.
-   *
-   * <p>Set via {@code spark.sedona.geography.eagerShapeIndex = true} or directly via {@link
-   * #setEagerShapeIndex(boolean)}.
-   *
-   * <p>Default: {@code false} (lazy parsing).
+   * When true, fromWKB() eagerly builds the S2 Geography and ShapeIndex at construction time
+   * instead of lazily on first access. This eliminates cold-path overhead for predicate-heavy
+   * workloads (ST_Contains, ST_Intersects) at the cost of slower deserialization for metric-only
+   * workloads. Set via spark.sedona.geography.eagerShapeIndex or setEagerShapeIndex(). Default
+   * false.
    */
   private static volatile boolean eagerShapeIndex = false;
 
@@ -69,9 +65,9 @@ public class WKBGeography extends Geography {
   }
 
   /**
-   * Create a WKBGeography from raw WKB bytes. When {@link #isEagerShapeIndex()} is false (default),
-   * this is zero-parse — just wraps the byte array. When eager mode is enabled, this also parses
-   * the WKB to S2 Geography and builds the ShapeIndex upfront.
+   * Create a WKBGeography from raw WKB bytes. When eagerShapeIndex is false (default), this is
+   * zero-parse — just wraps the byte array. When eager mode is enabled, this also parses the WKB to
+   * S2 Geography and builds the ShapeIndex upfront.
    */
   public static WKBGeography fromWKB(byte[] wkb, int srid) {
     WKBGeography geog = new WKBGeography(wkb, srid);
