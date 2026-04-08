@@ -178,8 +178,9 @@ class ConstructorsTest extends TestBaseScala {
         ST_GeogToGeometry(ST_GeogFromWKT('$wkt')) AS geom
         """)
     val geom = df.first().getAs[Geometry](0)
+    // S2 normalizes polygon loop orientation, so hole winding may differ from input
     val expected =
-      "POLYGON ((0 0, 95 20, 95 85, 10 85, 0 0), " + "(20 30, 30 40, 35 25, 20 30), " + "(50 50, 50 65, 65 65, 65 50, 50 50), " + "(25 60, 22 66, 30 72, 38 66, 35 58, 25 60))"
+      "POLYGON ((0 0, 95 20, 95 85, 10 85, 0 0), " + "(20 30, 35 25, 30 40, 20 30), " + "(50 50, 65 50, 65 65, 50 65, 50 50), " + "(25 60, 35 58, 38 66, 30 72, 22 66, 25 60))"
     assert(geom.getGeometryType == "Polygon")
     val writer = new WKTWriter()
     writer.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED))
@@ -197,9 +198,10 @@ class ConstructorsTest extends TestBaseScala {
         ST_GeogToGeometry(ST_GeogFromWKT('$wkt', 4326)) AS geom
         """)
     val geom = df.first().getAs[Geometry](0)
+    // S2 normalizes polygon loop orientation, so hole winding may differ from input
     val expected = "MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), " +
-      "(20 20, 20 60, 60 60, 60 20, 20 20)), " + "((30 30, 50 30, 50 50, 30 50, 30 30), " +
-      "(36 36, 36 44, 44 44, 44 36, 36 36)))";
+      "(20 20, 60 20, 60 60, 20 60, 20 20)), " + "((30 30, 50 30, 50 50, 30 50, 30 30), " +
+      "(36 36, 44 36, 44 44, 36 44, 36 36)))";
     assert(geom.getGeometryType == "MultiPolygon")
     val writer = new WKTWriter()
     writer.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED))
