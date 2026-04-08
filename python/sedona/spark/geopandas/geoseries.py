@@ -1058,8 +1058,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def offset_curve(self, distance, quad_segs=8, join_style="round", mitre_limit=5.0):
-        # ST_OffsetCurve returns null for empty geometries, but GeoPandas returns LINESTRING EMPTY
-        empty_line = stc.ST_GeomFromText(F.lit("LINESTRING EMPTY"))
+        # ST_OffsetCurve returns null for empty geometries, but GeoPandas returns LINESTRING EMPTY.
+        # Preserve the input's SRID on the empty fallback so CRS is not silently dropped.
+        empty_line = stf.ST_SetSRID(
+            stc.ST_GeomFromText(F.lit("LINESTRING EMPTY")),
+            stf.ST_SRID(self.spark.column),
+        )
         spark_col = F.when(
             stf.ST_IsEmpty(self.spark.column),
             empty_line,
