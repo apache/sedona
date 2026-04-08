@@ -28,6 +28,7 @@ JMH microbenchmarks measuring the performance of all Geography ST functions.
 Benchmarks every function from the Geography roadmap across multiple geometry types. Geography objects are pre-constructed — this measures **function execution cost** with cached lazy state (JTS, S2, ShapeIndex all warmed up).
 
 **Geometry types** (parameterized via `geometryType`):
+
 - `point` — single points
 - `linestring_16` — linestring with 16 vertices
 - `polygon_16` — circular polygon with 16 vertices
@@ -50,6 +51,7 @@ Measures serialization/deserialization performance and lazy caching overhead.
 **Geometry types** (parameterized): `point`, `polygon_small`, `polygon_large` (64 vertices)
 
 **Operations benchmarked:**
+
 - `serialize_wkb` vs `serialize_s2native` — WKBGeography (new) vs S2-native (legacy) serialization
 - `deserialize_wkb` vs `deserialize_s2native` — deserialization round-trip
 - `construct_fromWKB` vs `construct_fromWKT` — zero-parse WKB path vs WKT parsing
@@ -61,10 +63,12 @@ Measures serialization/deserialization performance and lazy caching overhead.
 Batch-processing benchmarks inspired by sedona-db's Criterion benchmarks. Iterates over arrays of **1024 randomly generated geometries** (via `RandomGeoGenerator`) to measure amortized per-row cost with realistic scattered data.
 
 **Parameters:**
+
 - `batchSize` — rows per batch (default: 1024)
 - `vertices` — vertex count per geometry: `10`, `100`, `500`
 
 **Patterns:**
+
 - **Array-Array**: Both inputs are arrays (spatial join: `distance(col_a[i], col_b[i])`)
 - **Array-Scalar**: One array, one constant (spatial filter: `contains(constant_polygon, col[i])`)
 - **Scalar-Array**: Reversed (spatial filter: `contains(col[i], constant_point)`)
@@ -78,6 +82,7 @@ Compares end-to-end performance of ST functions using the new WKB serializer vs 
 **Geometry types** (parameterized): `point`, `polygon_16`, `polygon_64`
 
 **Functions benchmarked** (each measured with both serializers):
+
 - ST_Distance, ST_Area, ST_Length, ST_Contains, ST_Intersects, ST_Equals
 
 ## How to build
@@ -163,11 +168,11 @@ These benchmarks operate on pre-constructed Geography objects where the lazy JTS
 
 | Function | Geography | Geometry baseline | Ratio | Notes |
 |----------|:---------:|:-----------------:|:-----:|-------|
-| **Point** |
+| **Point** | | | | |
 | ST_Distance | 245 | 12 | 21x | S2ClosestEdgeQuery (geometry-to-geometry) |
 | ST_Area | 2 | 2 | 1x | No-op for points |
 | ST_Length | 2 | 1 | 1x | No-op for points |
-| **Polygon (16 vertices)** |
+| **Polygon (16 vertices)** | | | | |
 | ST_Distance | 1,625 | 620 | 2.6x | S2ClosestEdgeQuery (geometry-to-geometry) |
 | ST_Area | 23,466 | 11 | 2,133x | Geodesic area vs planar area |
 | ST_Length | 2 | 1 | 1x | No-op for polygons |
@@ -176,7 +181,7 @@ These benchmarks operate on pre-constructed Geography objects where the lazy JTS
 
 | Function | Geography | Geometry baseline | Ratio | Notes |
 |----------|:---------:|:-----------------:|:-----:|-------|
-| **Point** |
+| **Point** | | | | |
 | ST_MaxDistance | 233 | 22 | 11x | S2 furthest edge query |
 | ST_ClosestPoint | 69 | 36 | 1.9x | Point fast-path |
 | ST_MinimumClearanceLine | 122 | — | — | No Geometry equivalent (2-arg) |
@@ -185,7 +190,7 @@ These benchmarks operate on pre-constructed Geography objects where the lazy JTS
 | ST_Intersects (true) | 958 | 9 | 106x | S2BooleanOperation |
 | ST_Intersects (false) | 644 | 2 | 322x | |
 | ST_Equals | 56 | 242 | **0.23x** | **Geography 4x faster!** |
-| **Polygon (16 vertices)** |
+| **Polygon (16 vertices)** | | | | |
 | ST_MaxDistance | 21,023 | 3,224 | 6.5x | S2 furthest edge, scales with vertices |
 | ST_ClosestPoint | 1,429 | 623 | 2.3x | S2 edge query |
 | ST_MinimumClearanceLine | 1,660 | — | — | |
@@ -289,6 +294,7 @@ This is the realistic scenario for data stored in GeoParquet, where the source d
 **When source data is GeoParquet (WKB), the WKB serializer has zero performance penalty.** Both paths pay the same WKB → S2 parse cost for predicates (ST_Contains, ST_Intersects, ST_Distance). The WKB path is faster for ST_Area because it routes through JTS + Spheroid, skipping S2 entirely.
 
 This is the strongest justification for WKB as the default format:
+
 - **For GeoParquet data**: WKB is never slower and sometimes 1.4-68x faster
 - **For legacy S2-native data**: backward compatibility is maintained via format byte detection
 - **For interoperability**: WKB is the universal standard (GeoParquet, PostGIS, BigQuery, DuckDB)
