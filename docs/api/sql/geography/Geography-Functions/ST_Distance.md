@@ -1,0 +1,47 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
+# ST_Distance
+
+Introduction: Returns the minimum geodesic distance between two geography objects in meters. Uses S2 geometry-to-geometry distance (S2ClosestEdgeQuery), which computes the true minimum distance between any two points on the geometries — not centroid-to-centroid. Consistent with sedona-db's implementation.
+
+Format:
+
+`ST_Distance (A: Geography, B: Geography)`
+
+Return type: `Double`
+
+Since: `v1.9.0`
+
+SQL Example
+
+```sql
+SELECT ST_Distance(
+  ST_GeogFromWKT('POINT (0 0)'),
+  ST_GeogFromWKT('POINT (1 1)')
+);
+```
+
+Output:
+
+```
+157249.59847404022
+```
+
+The result is approximately 157 km, the great-circle distance between (0,0) and (1,1) on the WGS84 sphere.
