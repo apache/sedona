@@ -471,8 +471,7 @@ class GeographyFunctionTest extends TestBaseScala {
 
     it("ST_Within via DataFrame API") {
       val df = sparkSession
-        .sql(
-          "SELECT 'POINT (0.5 0.5)' AS pt, 'POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))' AS poly")
+        .sql("SELECT 'POINT (0.5 0.5)' AS pt, 'POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))' AS poly")
         .select(
           st_constructors.ST_GeogFromWKT(col("pt"), lit(4326)).as("pt"),
           st_constructors.ST_GeogFromWKT(col("poly"), lit(4326)).as("poly"))
