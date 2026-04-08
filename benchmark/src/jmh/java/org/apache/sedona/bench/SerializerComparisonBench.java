@@ -23,219 +23,272 @@ import java.util.concurrent.TimeUnit;
 import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.S2Geography.GeographySerializer;
 import org.apache.sedona.common.S2Geography.GeographyWKBSerializer;
+import org.apache.sedona.common.S2Geography.ShapeIndexGeography;
 import org.apache.sedona.common.S2Geography.WKBGeography;
+import org.apache.sedona.common.S2Geography.WKBReader;
+import org.apache.sedona.common.S2Geography.WKBWriter;
 import org.apache.sedona.common.S2Geography.WKTReader;
 import org.apache.sedona.common.geography.Functions;
+import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.ParseException;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
 /**
- * Compares end-to-end ST function performance using the old S2-native serializer vs the new WKB
- * serializer.
+ * Compares end-to-end ST function performance under different serialization scenarios.
  *
- * <p>Each benchmark simulates the real Spark UDT path:
- * <ol>
- *   <li>Deserialize bytes → Geography object</li>
- *   <li>Execute an ST function</li>
- * </ol>
+ * <p>Two source format scenarios:
  *
- * <p>This measures what matters in practice: the combined cost of deserialization + function
- * execution, not just the function in isolation.
+ * <ul>
+ *   <li><b>wkb_source</b> (GeoParquet scenario): Raw data is WKB bytes (as stored in GeoParquet).
+ *       Both the WKB path and the "S2 from WKB" path must parse WKB. The WKB path wraps bytes
+ *       lazily; the S2 path fully parses WKB → S2 Geography upfront.
+ *   <li><b>s2native_source</b> (legacy scenario): Raw data is S2-native serialized bytes. The S2
+ *       path deserializes directly to S2 Geography; the WKB path must go through WKB
+ *       deserialization.
+ * </ul>
  *
  * <p>Run: {@code java -jar benchmark/target/sedona-benchmark-*.jar SerializerComparisonBench}
  */
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-@Warmup(iterations = 3, time = 1)
-@Measurement(iterations = 5, time = 1)
+@Warmup(iterations = 2, time = 1)
+@Measurement(iterations = 3, time = 1)
 @Fork(1)
 @State(Scope.Thread)
 public class SerializerComparisonBench {
 
-    @Param({"point", "polygon_16", "polygon_64"})
-    public String geometryType;
+  @Param({"point", "polygon_16", "polygon_64"})
+  public String geometryType;
 
-    /**
-     * When true, WKBGeography eagerly builds ShapeIndex at deserialization time. Note: in this
-     * single-call benchmark the eager flag shows no significant difference because the ShapeIndex
-     * cost is paid either way (at construction or at first use). The real benefit of eager mode is
-     * in Spark queries where the same Geography is used for multiple operations.
-     */
-    @Param({"false"})
-    public boolean eager;
+  // ─── Pre-serialized bytes ──────────────────────────────────────────────
 
-    // Pre-serialized bytes in both formats
-    private byte[] wkbBytesA;
-    private byte[] wkbBytesB;
-    private byte[] s2BytesA;
-    private byte[] s2BytesB;
+  // WKB format (as stored in GeoParquet): [0xFF][SRID][WKB payload]
+  private byte[] wkbSerializedA;
+  private byte[] wkbSerializedB;
+  private byte[] wkbSerializedContainer;
+  private byte[] wkbSerializedPointInside;
 
-    // Container polygon for predicate tests (both formats)
-    private byte[] wkbBytesContainer;
-    private byte[] s2BytesContainer;
-    private byte[] wkbBytesPointInside;
-    private byte[] s2BytesPointInside;
+  // S2-native format (legacy Sedona format)
+  private byte[] s2SerializedA;
+  private byte[] s2SerializedB;
+  private byte[] s2SerializedContainer;
+  private byte[] s2SerializedPointInside;
 
-    @Setup(Level.Trial)
-    public void setup() throws ParseException, IOException {
-        WKBGeography.setEagerShapeIndex(eager);
-        String wktA, wktB;
-        switch (geometryType) {
-            case "point":
-                wktA = "POINT (0 0)";
-                wktB = "POINT (1 1)";
-                break;
-            case "polygon_16":
-                wktA = buildCirclePolygonWKT(16, 0.5, 0, 0);
-                wktB = buildCirclePolygonWKT(16, 0.3, 0.2, 0.2);
-                break;
-            case "polygon_64":
-                wktA = buildCirclePolygonWKT(64, 0.5, 0, 0);
-                wktB = buildCirclePolygonWKT(64, 0.3, 0.2, 0.2);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown type: " + geometryType);
-        }
+  // Raw WKB bytes (pure ISO WKB, no header — as stored in GeoParquet Binary column)
+  private byte[] rawWkbA;
+  private byte[] rawWkbB;
+  private byte[] rawWkbContainer;
+  private byte[] rawWkbPointInside;
 
-        String wktContainer = "POLYGON ((-1 -1, 2 -1, 2 2, -1 2, -1 -1))";
-        String wktPointInside = "POINT (0 0)";
-
-        // Build S2 Geography objects (via WKTReader for S2 normalization)
-        WKTReader s2Reader = new WKTReader();
-        Geography s2A = s2Reader.read(wktA); s2A.setSRID(4326);
-        Geography s2B = s2Reader.read(wktB); s2B.setSRID(4326);
-        Geography s2Container = s2Reader.read(wktContainer); s2Container.setSRID(4326);
-        Geography s2PointInside = s2Reader.read(wktPointInside); s2PointInside.setSRID(4326);
-
-        // Build WKBGeography objects
-        Geography wkbA = WKBGeography.fromS2Geography(s2A);
-        Geography wkbB = WKBGeography.fromS2Geography(s2B);
-        Geography wkbContainer = WKBGeography.fromS2Geography(s2Container);
-        Geography wkbPointInside = WKBGeography.fromS2Geography(s2PointInside);
-
-        // Serialize to bytes in both formats
-        s2BytesA = GeographySerializer.serialize(s2A);
-        s2BytesB = GeographySerializer.serialize(s2B);
-        s2BytesContainer = GeographySerializer.serialize(s2Container);
-        s2BytesPointInside = GeographySerializer.serialize(s2PointInside);
-
-        wkbBytesA = GeographyWKBSerializer.serialize(wkbA);
-        wkbBytesB = GeographyWKBSerializer.serialize(wkbB);
-        wkbBytesContainer = GeographyWKBSerializer.serialize(wkbContainer);
-        wkbBytesPointInside = GeographyWKBSerializer.serialize(wkbPointInside);
+  @Setup(Level.Trial)
+  public void setup() throws ParseException, IOException {
+    String wktA, wktB;
+    switch (geometryType) {
+      case "point":
+        wktA = "POINT (0 0)";
+        wktB = "POINT (1 1)";
+        break;
+      case "polygon_16":
+        wktA = buildCirclePolygonWKT(16, 0.5, 0, 0);
+        wktB = buildCirclePolygonWKT(16, 0.3, 0.2, 0.2);
+        break;
+      case "polygon_64":
+        wktA = buildCirclePolygonWKT(64, 0.5, 0, 0);
+        wktB = buildCirclePolygonWKT(64, 0.3, 0.2, 0.2);
+        break;
+      default:
+        throw new IllegalArgumentException("Unknown type: " + geometryType);
     }
 
-    @TearDown(Level.Trial)
-    public void tearDown() {
-        WKBGeography.setEagerShapeIndex(false);
+    String wktContainer = "POLYGON ((-1 -1, 2 -1, 2 2, -1 2, -1 -1))";
+    String wktPointInside = "POINT (0 0)";
+
+    // Build S2 Geography objects
+    WKTReader s2Reader = new WKTReader();
+    Geography s2A = s2Reader.read(wktA);
+    s2A.setSRID(4326);
+    Geography s2B = s2Reader.read(wktB);
+    s2B.setSRID(4326);
+    Geography s2Container = s2Reader.read(wktContainer);
+    s2Container.setSRID(4326);
+    Geography s2PointInside = s2Reader.read(wktPointInside);
+    s2PointInside.setSRID(4326);
+
+    // Serialize to WKB format (GeographyWKBSerializer: 0xFF header)
+    Geography wkbA = WKBGeography.fromS2Geography(s2A);
+    Geography wkbB = WKBGeography.fromS2Geography(s2B);
+    Geography wkbContainer = WKBGeography.fromS2Geography(s2Container);
+    Geography wkbPointInside = WKBGeography.fromS2Geography(s2PointInside);
+
+    wkbSerializedA = GeographyWKBSerializer.serialize(wkbA);
+    wkbSerializedB = GeographyWKBSerializer.serialize(wkbB);
+    wkbSerializedContainer = GeographyWKBSerializer.serialize(wkbContainer);
+    wkbSerializedPointInside = GeographyWKBSerializer.serialize(wkbPointInside);
+
+    // Serialize to S2-native format (legacy)
+    s2SerializedA = GeographySerializer.serialize(s2A);
+    s2SerializedB = GeographySerializer.serialize(s2B);
+    s2SerializedContainer = GeographySerializer.serialize(s2Container);
+    s2SerializedPointInside = GeographySerializer.serialize(s2PointInside);
+
+    // Raw WKB bytes (pure ISO WKB — what GeoParquet stores)
+    WKBWriter wkbWriter = new WKBWriter(2, ByteOrderValues.BIG_ENDIAN, false);
+    rawWkbA = wkbWriter.write(s2A);
+    rawWkbB = wkbWriter.write(s2B);
+    rawWkbContainer = wkbWriter.write(s2Container);
+    rawWkbPointInside = wkbWriter.write(s2PointInside);
+  }
+
+  @TearDown(Level.Trial)
+  public void tearDown() {
+    WKBGeography.setEagerShapeIndex(false);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // GeoParquet scenario: source data is raw WKB bytes
+  // This is the realistic scenario for data stored in GeoParquet.
+  // Both paths start from the same WKB bytes.
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // ─── ST_Distance from GeoParquet ───────────────────────────────────────
+
+  /** WKB path: raw WKB → WKBGeography (zero-parse) → lazy S2 → S2ClosestEdgeQuery */
+  @Benchmark
+  public void geoparquet_distance_wkb(Blackhole bh) {
+    Geography a = WKBGeography.fromWKB(rawWkbA, 4326);
+    Geography b = WKBGeography.fromWKB(rawWkbB, 4326);
+    bh.consume(Functions.distance(a, b));
+  }
+
+  /** S2 path: raw WKB → full S2 parse → ShapeIndex → S2ClosestEdgeQuery */
+  @Benchmark
+  public void geoparquet_distance_s2parse(Blackhole bh) throws ParseException {
+    WKBReader reader = new WKBReader();
+    Geography a = reader.read(rawWkbA);
+    Geography b = reader.read(rawWkbB);
+    ShapeIndexGeography idxA = new ShapeIndexGeography(a);
+    ShapeIndexGeography idxB = new ShapeIndexGeography(b);
+    bh.consume(
+        new org.apache.sedona.common.S2Geography.Distance()
+                .S2_distance(idxA, idxB)
+            * 6371008.8);
+  }
+
+  // ─── ST_Area from GeoParquet ───────────────────────────────────────────
+
+  @Benchmark
+  public void geoparquet_area_wkb(Blackhole bh) {
+    Geography a = WKBGeography.fromWKB(rawWkbA, 4326);
+    bh.consume(Functions.area(a));
+  }
+
+  @Benchmark
+  public void geoparquet_area_s2parse(Blackhole bh) throws ParseException {
+    WKBReader reader = new WKBReader();
+    Geography a = reader.read(rawWkbA);
+    bh.consume(org.apache.sedona.common.sphere.Spheroid.area(toJTS(a)));
+  }
+
+  // ─── ST_Contains from GeoParquet ───────────────────────────────────────
+
+  @Benchmark
+  public void geoparquet_contains_wkb(Blackhole bh) {
+    Geography container = WKBGeography.fromWKB(rawWkbContainer, 4326);
+    Geography pt = WKBGeography.fromWKB(rawWkbPointInside, 4326);
+    bh.consume(Functions.contains(container, pt));
+  }
+
+  @Benchmark
+  public void geoparquet_contains_s2parse(Blackhole bh) throws ParseException {
+    WKBReader reader = new WKBReader();
+    Geography container = reader.read(rawWkbContainer);
+    Geography pt = reader.read(rawWkbPointInside);
+    ShapeIndexGeography idxC = new ShapeIndexGeography(container);
+    ShapeIndexGeography idxP = new ShapeIndexGeography(pt);
+    bh.consume(
+        new org.apache.sedona.common.S2Geography.Predicates()
+            .S2_contains(
+                idxC,
+                idxP,
+                new com.google.common.geometry.S2BooleanOperation.Options()));
+  }
+
+  // ─── ST_Intersects from GeoParquet ─────────────────────────────────────
+
+  @Benchmark
+  public void geoparquet_intersects_wkb(Blackhole bh) {
+    Geography container = WKBGeography.fromWKB(rawWkbContainer, 4326);
+    Geography pt = WKBGeography.fromWKB(rawWkbPointInside, 4326);
+    bh.consume(Functions.intersects(container, pt));
+  }
+
+  @Benchmark
+  public void geoparquet_intersects_s2parse(Blackhole bh) throws ParseException {
+    WKBReader reader = new WKBReader();
+    Geography container = reader.read(rawWkbContainer);
+    Geography pt = reader.read(rawWkbPointInside);
+    ShapeIndexGeography idxC = new ShapeIndexGeography(container);
+    ShapeIndexGeography idxP = new ShapeIndexGeography(pt);
+    bh.consume(
+        new org.apache.sedona.common.S2Geography.Predicates()
+            .S2_intersects(
+                idxC,
+                idxP,
+                new com.google.common.geometry.S2BooleanOperation.Options()));
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // Legacy scenario: source data is pre-serialized in each format
+  // WKB path uses GeographyWKBSerializer; S2 path uses GeographySerializer
+  // ═══════════════════════════════════════════════════════════════════════
+
+  @Benchmark
+  public void legacy_distance_wkb(Blackhole bh) throws IOException {
+    Geography a = GeographyWKBSerializer.deserialize(wkbSerializedA);
+    Geography b = GeographyWKBSerializer.deserialize(wkbSerializedB);
+    bh.consume(Functions.distance(a, b));
+  }
+
+  @Benchmark
+  public void legacy_distance_s2native(Blackhole bh) throws IOException {
+    Geography a = GeographySerializer.deserialize(s2SerializedA);
+    Geography b = GeographySerializer.deserialize(s2SerializedB);
+    bh.consume(Functions.distance(a, b));
+  }
+
+  @Benchmark
+  public void legacy_contains_wkb(Blackhole bh) throws IOException {
+    Geography container = GeographyWKBSerializer.deserialize(wkbSerializedContainer);
+    Geography pt = GeographyWKBSerializer.deserialize(wkbSerializedPointInside);
+    bh.consume(Functions.contains(container, pt));
+  }
+
+  @Benchmark
+  public void legacy_contains_s2native(Blackhole bh) throws IOException {
+    Geography container = GeographySerializer.deserialize(s2SerializedContainer);
+    Geography pt = GeographySerializer.deserialize(s2SerializedPointInside);
+    bh.consume(Functions.contains(container, pt));
+  }
+
+  // ─── Helpers ───────────────────────────────────────────────────────────
+
+  private static org.locationtech.jts.geom.Geometry toJTS(Geography g) {
+    return org.apache.sedona.common.geography.Constructors.geogToGeometry(g);
+  }
+
+  private static String buildCirclePolygonWKT(
+      int vertices, double radius, double centerLon, double centerLat) {
+    StringBuilder sb = new StringBuilder("POLYGON ((");
+    for (int i = 0; i <= vertices; i++) {
+      if (i > 0) sb.append(", ");
+      double angle = 2.0 * Math.PI * (i % vertices) / vertices;
+      sb.append(
+          String.format(
+              "%.6f %.6f",
+              centerLon + radius * Math.cos(angle), centerLat + radius * Math.sin(angle)));
     }
-
-    // ─── ST_Distance: deserialize + compute ──────────────────────────────────
-
-    @Benchmark
-    public void distance_wkb(Blackhole bh) throws IOException {
-        Geography a = GeographyWKBSerializer.deserialize(wkbBytesA);
-        Geography b = GeographyWKBSerializer.deserialize(wkbBytesB);
-        bh.consume(Functions.distance(a, b));
-    }
-
-    @Benchmark
-    public void distance_s2native(Blackhole bh) throws IOException {
-        Geography a = GeographySerializer.deserialize(s2BytesA);
-        Geography b = GeographySerializer.deserialize(s2BytesB);
-        bh.consume(Functions.distance(a, b));
-    }
-
-    // ─── ST_Area: deserialize + compute ──────────────────────────────────────
-
-    @Benchmark
-    public void area_wkb(Blackhole bh) throws IOException {
-        Geography a = GeographyWKBSerializer.deserialize(wkbBytesA);
-        bh.consume(Functions.area(a));
-    }
-
-    @Benchmark
-    public void area_s2native(Blackhole bh) throws IOException {
-        Geography a = GeographySerializer.deserialize(s2BytesA);
-        bh.consume(Functions.area(a));
-    }
-
-    // ─── ST_Length: deserialize + compute ─────────────────────────────────────
-
-    @Benchmark
-    public void length_wkb(Blackhole bh) throws IOException {
-        Geography a = GeographyWKBSerializer.deserialize(wkbBytesA);
-        bh.consume(Functions.length(a));
-    }
-
-    @Benchmark
-    public void length_s2native(Blackhole bh) throws IOException {
-        Geography a = GeographySerializer.deserialize(s2BytesA);
-        bh.consume(Functions.length(a));
-    }
-
-    // ─── ST_Contains: deserialize + compute ──────────────────────────────────
-
-    @Benchmark
-    public void contains_wkb(Blackhole bh) throws IOException {
-        Geography container = GeographyWKBSerializer.deserialize(wkbBytesContainer);
-        Geography pt = GeographyWKBSerializer.deserialize(wkbBytesPointInside);
-        bh.consume(Functions.contains(container, pt));
-    }
-
-    @Benchmark
-    public void contains_s2native(Blackhole bh) throws IOException {
-        Geography container = GeographySerializer.deserialize(s2BytesContainer);
-        Geography pt = GeographySerializer.deserialize(s2BytesPointInside);
-        bh.consume(Functions.contains(container, pt));
-    }
-
-    // ─── ST_Intersects: deserialize + compute ────────────────────────────────
-
-    @Benchmark
-    public void intersects_wkb(Blackhole bh) throws IOException {
-        Geography container = GeographyWKBSerializer.deserialize(wkbBytesContainer);
-        Geography pt = GeographyWKBSerializer.deserialize(wkbBytesPointInside);
-        bh.consume(Functions.intersects(container, pt));
-    }
-
-    @Benchmark
-    public void intersects_s2native(Blackhole bh) throws IOException {
-        Geography container = GeographySerializer.deserialize(s2BytesContainer);
-        Geography pt = GeographySerializer.deserialize(s2BytesPointInside);
-        bh.consume(Functions.intersects(container, pt));
-    }
-
-    // ─── ST_Equals: deserialize + compute ────────────────────────────────────
-
-    @Benchmark
-    public void equals_wkb(Blackhole bh) throws IOException {
-        Geography a = GeographyWKBSerializer.deserialize(wkbBytesA);
-        Geography a2 = GeographyWKBSerializer.deserialize(wkbBytesA);
-        bh.consume(Functions.equals(a, a2));
-    }
-
-    @Benchmark
-    public void equals_s2native(Blackhole bh) throws IOException {
-        Geography a = GeographySerializer.deserialize(s2BytesA);
-        Geography a2 = GeographySerializer.deserialize(s2BytesA);
-        bh.consume(Functions.equals(a, a2));
-    }
-
-    // ─── Helpers ─────────────────────────────────────────────────────────────
-
-    private static String buildCirclePolygonWKT(int vertices, double radius,
-                                                 double centerLon, double centerLat) {
-        StringBuilder sb = new StringBuilder("POLYGON ((");
-        for (int i = 0; i <= vertices; i++) {
-            if (i > 0) sb.append(", ");
-            double angle = 2.0 * Math.PI * (i % vertices) / vertices;
-            sb.append(String.format("%.6f %.6f",
-                    centerLon + radius * Math.cos(angle),
-                    centerLat + radius * Math.sin(angle)));
-        }
-        sb.append("))");
-        return sb.toString();
-    }
+    sb.append("))");
+    return sb.toString();
+  }
 }

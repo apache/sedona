@@ -227,6 +227,53 @@ These benchmarks **freshly deserialize** Geography from stored bytes on every it
 
 **In practice, the cold-path overhead is amortized**: When the same Geography object is used multiple times (e.g., spatial filter on a column, join condition), the ShapeIndex cache in WKBGeography eliminates redundant index construction. The "cached objects" benchmark above shows the steady-state performance.
 
+**Important**: This comparison is biased toward S2-native because the S2 path starts from pre-parsed S2 bytes. In the GeoParquet scenario below, both paths start from WKB — which tells a very different story.
+
+---
+
+### GeoParquet Scenario: Both paths start from WKB
+
+This is the realistic scenario for data stored in GeoParquet, where the source data is always WKB bytes. Both the WKB path and the S2-parse-from-WKB path start from the same raw WKB bytes — a fair apples-to-apples comparison.
+
+- **WKB path**: raw WKB → `WKBGeography` (zero-parse wrap) → lazy S2/JTS on demand
+- **S2 parse path**: raw WKB → `WKBReader.read()` (full S2 parse) → `ShapeIndexGeography` → execute
+
+#### Point
+
+| Function | WKB path (ns/op) | S2 parse path (ns/op) | Comparison |
+|----------|:----------------:|:---------------------:|:----------:|
+| ST_Distance | 4,435 | 4,552 | **~same** |
+| ST_Area | 50 | 3,371 | **68x faster** |
+| ST_Contains | 8,229 | 8,108 | **~same** |
+| ST_Intersects | 7,375 | 7,437 | **~same** |
+
+#### Polygon (16 vertices)
+
+| Function | WKB path (ns/op) | S2 parse path (ns/op) | Comparison |
+|----------|:----------------:|:---------------------:|:----------:|
+| ST_Distance | 24,962 | 24,864 | **~same** |
+| ST_Area | 23,767 | 36,464 | **1.5x faster** |
+| ST_Contains | 8,285 | 8,136 | **~same** |
+| ST_Intersects | 7,370 | 7,330 | **~same** |
+
+#### Polygon (64 vertices)
+
+| Function | WKB path (ns/op) | S2 parse path (ns/op) | Comparison |
+|----------|:----------------:|:---------------------:|:----------:|
+| ST_Distance | 154,501 | 155,380 | **~same** |
+| ST_Area | 96,072 | 134,015 | **1.4x faster** |
+| ST_Contains | 8,186 | 8,197 | **~same** |
+| ST_Intersects | 7,380 | 7,570 | **~same** |
+
+#### Analysis
+
+**When source data is GeoParquet (WKB), the WKB serializer has zero performance penalty.** Both paths pay the same WKB → S2 parse cost for predicates (ST_Contains, ST_Intersects, ST_Distance). The WKB path is faster for ST_Area because it routes through JTS + Spheroid, skipping S2 entirely.
+
+This is the strongest justification for WKB as the default format:
+- **For GeoParquet data**: WKB is never slower and sometimes 1.4-68x faster
+- **For legacy S2-native data**: backward compatibility is maintained via format byte detection
+- **For interoperability**: WKB is the universal standard (GeoParquet, PostGIS, BigQuery, DuckDB)
+
 ---
 
 ### Batch Processing (1024 rows, random data)
