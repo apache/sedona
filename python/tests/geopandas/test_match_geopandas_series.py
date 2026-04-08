@@ -832,7 +832,21 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_offset_curve(self):
-        pass
+        for geom in self.geoms:
+            # offset_curve only works on linear geometries
+            if not all(
+                isinstance(g, (LineString, LinearRing, MultiLineString))
+                for g in geom
+                if not g.is_empty
+            ):
+                continue
+            sgpd_result = GeoSeries(geom).offset_curve(1.0)
+            gpd_result = gpd.GeoSeries(geom).offset_curve(1.0)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+            sgpd_result = GeoSeries(geom).offset_curve(-0.5)
+            gpd_result = gpd.GeoSeries(geom).offset_curve(-0.5)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_interiors(self):
         pass
@@ -1187,6 +1201,23 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 gpd.GeoSeries(geom2), tol, align=align
             )
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_shortest_line(self):
+        for geom, geom2 in self.pairs:
+            if self.contains_any_geom_collection(geom, geom2):
+                continue
+            sgpd_result = GeoSeries(geom).shortest_line(GeoSeries(geom2))
+            gpd_result = gpd.GeoSeries(geom).shortest_line(gpd.GeoSeries(geom2))
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).shortest_line(
+                    GeoSeries(geom2), align=False
+                )
+                gpd_result = gpd.GeoSeries(geom).shortest_line(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_intersection_all(self):
         pass
