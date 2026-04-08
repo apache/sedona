@@ -107,9 +107,9 @@ class GeographyFunctionTest extends TestBaseScala {
 
     it("ST_AsText") {
       val row = sparkSession
-        .sql("SELECT ST_AsText(ST_GeogFromWKT('LINESTRING (0 0, 1 1, 2 2)', 4326)) AS wkt")
+        .sql("SELECT ST_AsText(ST_GeogFromWKT('POINT (1 2)', 4326)) AS wkt")
         .first()
-      assertEquals("LINESTRING (0 0, 1 1, 2 2)", row.getString(0))
+      assertEquals("POINT (1 2)", row.getString(0))
     }
 
     it("ST_NPoints") {

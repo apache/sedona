@@ -112,11 +112,12 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     val geom = df.head().getAs[Geometry]("geom")
     assert(geom.getGeometryType == "MultiPolygon")
 
+    // S2 normalizes polygon loop orientation, so hole winding may differ from input
     val expectedWkt =
       "MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), " +
-        "(20 20, 20 60, 60 60, 60 20, 20 20)), " +
+        "(20 20, 60 20, 60 60, 20 60, 20 20)), " +
         "((30 30, 50 30, 50 50, 30 50, 30 30), " +
-        "(36 36, 36 44, 44 44, 44 36, 36 36)))"
+        "(36 36, 44 36, 44 44, 36 44, 36 36)))"
 
     val writer = new WKTWriter()
     writer.setFormatted(false)

@@ -85,15 +85,16 @@ class FunctionResolverSuite extends AnyFunSpec {
       assert(result.sparkInputTypes == Seq(LongType, StringType))
     }
 
-    it("Multiple functions match input arity, ambiguity") {
+    it("Multiple functions match input arity, ambiguity prefers first candidate") {
       val functions = Seq(
         createTestFunction(Seq(LongType, StringType)),
         createTestFunction(Seq(DoubleType, StringType)))
       val expressions = Seq(createTestExpression(IntegerType), createTestExpression(StringType))
 
-      assertThrows[IllegalArgumentException] {
-        FunctionResolver.resolveFunction(expressions, functions)
-      }
+      // When multiple candidates match equally, the first one is preferred
+      // (e.g., null inputs matching both Geometry and Geography overloads)
+      val result = FunctionResolver.resolveFunction(expressions, functions)
+      assert(result.sparkInputTypes == Seq(LongType, StringType))
     }
   }
 }
