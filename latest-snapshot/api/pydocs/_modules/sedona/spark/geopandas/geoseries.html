@@ -1267,8 +1267,17 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.offset_curve"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.offset_curve">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">offset_curve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">quad_segs</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">join_style</span><span class="o">=</span><span class="s2">&quot;round&quot;</span><span class="p">,</span> <span class="n">mitre_limit</span><span class="o">=</span><span class="mf">5.0</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method.</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span></div>
+        <span class="c1"># ST_OffsetCurve returns null for empty geometries, but GeoPandas returns LINESTRING EMPTY.</span>
+        <span class="c1"># Preserve the input&#39;s SRID on the empty fallback so CRS is not silently dropped.</span>
+        <span class="n">empty_line</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span>
+            <span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;LINESTRING EMPTY&quot;</span><span class="p">)),</span>
+            <span class="n">stf</span><span class="o">.</span><span class="n">ST_SRID</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">spark_col</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+            <span class="n">stf</span><span class="o">.</span><span class="n">ST_IsEmpty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">),</span>
+            <span class="n">empty_line</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_OffsetCurve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">quad_segs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span><span class="n">spark_col</span><span class="p">,</span> <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">interiors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1736,6 +1745,18 @@
             <span class="n">default_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="GeoSeries.shortest_line"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.shortest_line">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">shortest_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
+        <span class="n">other_series</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
+
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_ShortestLine</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
+            <span class="n">spark_expr</span><span class="p">,</span>
+            <span class="n">other_series</span><span class="p">,</span>
+            <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.snap"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.snap">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">snap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tolerance</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>

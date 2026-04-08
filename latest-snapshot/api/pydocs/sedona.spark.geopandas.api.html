@@ -3502,7 +3502,43 @@ which can be useful for comparison purposes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.offset_curve">
 <span class="sig-name descname"><span class="pre">offset_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quad_segs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">join_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'round'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mitre_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.offset_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.offset_curve" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Returns a line at a given offset distance from each linear geometry.</p>
+<p>Positive distance offsets to the left, negative to the right.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – The offset distance. Positive offsets to the left, negative to the
+right.</p></li>
+<li><p><strong>quad_segs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default 8</em>) – Number of segments to approximate a quarter circle.</p></li>
+<li><p><strong>join_style</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default &quot;round&quot;</em>) – <p>Accepted values are “round”, “mitre”, and “bevel”.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">join_style</span></code> and <code class="docutils literal notranslate"><span class="pre">mitre_limit</span></code> are accepted for API
+compatibility but are currently ignored by Sedona’s
+<code class="docutils literal notranslate"><span class="pre">ST_OffsetCurve</span></code>.</p>
+</div>
+</p></li>
+<li><p><strong>mitre_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default 5.0</em>) – Limit on the mitre ratio.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">offset_curve</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="go">0    LINESTRING (0 1, 10 1)</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.overlaps">
@@ -4055,6 +4091,49 @@ override CRS.</p>
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.set_precision">
 <span class="sig-name descname"><span class="pre">set_precision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'valid_output'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.set_precision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.set_precision" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.shortest_line">
+<span class="sig-name descname"><span class="pre">shortest_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">align</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.shortest_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.shortest_line" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the shortest line between each geometry in the <code class="docutils literal notranslate"><span class="pre">GeoSeries</span></code>
+and <cite>other</cite>.</p>
+<p>The resulting line starts on this geometry and ends on <cite>other</cite>.</p>
+<p>The operation works on a 1-to-1 row-wise manner:</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries"><em>GeoSeries</em></a><em> or </em><em>geometric object</em>) – The GeoSeries (elementwise) or geometric object to find the
+shortest line to.</p></li>
+<li><p><strong>align</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em> | </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – If True, automatically aligns GeoSeries based on their indices. None defaults to True.
+If False, the order of elements is preserved.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">LineString</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span><span class="o">.</span><span class="n">shortest_line</span><span class="p">(</span><span class="n">s2</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="go">0    LINESTRING (0 0, 1 1)</span>
+<span class="go">1    LINESTRING (0 0, 0 1)</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.simplify">
