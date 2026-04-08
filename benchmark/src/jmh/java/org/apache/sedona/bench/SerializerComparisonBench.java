@@ -56,6 +56,15 @@ public class SerializerComparisonBench {
     @Param({"point", "polygon_16", "polygon_64"})
     public String geometryType;
 
+    /**
+     * When true, WKBGeography eagerly builds ShapeIndex at deserialization time. Note: in this
+     * single-call benchmark the eager flag shows no significant difference because the ShapeIndex
+     * cost is paid either way (at construction or at first use). The real benefit of eager mode is
+     * in Spark queries where the same Geography is used for multiple operations.
+     */
+    @Param({"false"})
+    public boolean eager;
+
     // Pre-serialized bytes in both formats
     private byte[] wkbBytesA;
     private byte[] wkbBytesB;
@@ -70,6 +79,7 @@ public class SerializerComparisonBench {
 
     @Setup(Level.Trial)
     public void setup() throws ParseException, IOException {
+        WKBGeography.setEagerShapeIndex(eager);
         String wktA, wktB;
         switch (geometryType) {
             case "point":
@@ -114,6 +124,11 @@ public class SerializerComparisonBench {
         wkbBytesB = GeographyWKBSerializer.serialize(wkbB);
         wkbBytesContainer = GeographyWKBSerializer.serialize(wkbContainer);
         wkbBytesPointInside = GeographyWKBSerializer.serialize(wkbPointInside);
+    }
+
+    @TearDown(Level.Trial)
+    public void tearDown() {
+        WKBGeography.setEagerShapeIndex(false);
     }
 
     // ─── ST_Distance: deserialize + compute ──────────────────────────────────

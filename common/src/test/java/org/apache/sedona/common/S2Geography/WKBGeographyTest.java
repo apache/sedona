@@ -382,4 +382,40 @@ public class WKBGeographyTest {
     assertEquals(4269, geog.getSRID());
     assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT());
   }
+
+  // ─── Eager ShapeIndex mode ───────────────────────────────────────────────
+
+  @Test
+  public void eagerShapeIndex_prebuildsS2AndIndex() throws ParseException {
+    boolean original = WKBGeography.isEagerShapeIndex();
+    try {
+      WKBGeography.setEagerShapeIndex(true);
+
+      // Create WKB bytes for a polygon
+      org.locationtech.jts.io.WKTReader jtsReader = new org.locationtech.jts.io.WKTReader();
+      Geometry jts = jtsReader.read("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))");
+      org.locationtech.jts.io.WKBWriter jtsWkbWriter = new org.locationtech.jts.io.WKBWriter();
+      byte[] wkb = jtsWkbWriter.write(jts);
+
+      // fromWKB should eagerly build ShapeIndex
+      WKBGeography geog = WKBGeography.fromWKB(wkb, 4326);
+
+      // ShapeIndex should already be built — getShapeIndexGeography() should return cached
+      ShapeIndexGeography idx = geog.getShapeIndexGeography();
+      assertNotNull(idx);
+      assertTrue(idx.numShapes() >= 1);
+
+      // S2 Geography should also be cached
+      Geography s2 = geog.getS2Geography();
+      assertNotNull(s2);
+      assertEquals(2, s2.dimension()); // polygon = 2
+    } finally {
+      WKBGeography.setEagerShapeIndex(original);
+    }
+  }
+
+  @Test
+  public void eagerShapeIndex_defaultIsLazy() {
+    assertFalse(WKBGeography.isEagerShapeIndex());
+  }
 }
