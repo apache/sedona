@@ -37,40 +37,12 @@ These functions create geography objects from various formats.
 
 ## Geography Functions
 
-These functions operate on geography type objects.
-
-### Output
+These functions operate on geography type objects. One representative function per architecture level is included in this release; additional functions will be added in follow-up releases.
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
 | [ST_AsEWKT](Geography-Functions/ST_AsEWKT.md) | String | Return the Extended Well-Known Text representation of a geography. | v1.8.0 |
-| [ST_AsText](Geography-Functions/ST_AsText.md) | String | Return the Well-Known Text (WKT) representation of a geography. | v1.9.0 |
 | [ST_Envelope](Geography-Functions/ST_Envelope.md) | Geography | Return the bounding box (envelope) of a geography. Supports anti-meridian splitting. | v1.8.0 |
-
-### Accessors
-
-| Function | Return type | Description | Since |
-| :--- | :--- | :--- | :--- |
 | [ST_NPoints](Geography-Functions/ST_NPoints.md) | Integer | Return the number of points (vertices) in a geography. | v1.9.0 |
-| [ST_GeometryType](Geography-Functions/ST_GeometryType.md) | String | Return the type of the geography (e.g., "ST_Point", "ST_Polygon"). | v1.9.0 |
-| [ST_NumGeometries](Geography-Functions/ST_NumGeometries.md) | Integer | Return the number of sub-geometries in a geography. | v1.9.0 |
-| [ST_Centroid](Geography-Functions/ST_Centroid.md) | Geography | Return the planar centroid of a geography as a Geography point. | v1.9.0 |
-
-### Measurement
-
-| Function | Return type | Description | Since |
-| :--- | :--- | :--- | :--- |
 | [ST_Distance](Geography-Functions/ST_Distance.md) | Double | Return the minimum geodesic distance between two geographies in meters. | v1.9.0 |
-| [ST_Area](Geography-Functions/ST_Area.md) | Double | Return the geodesic area of a geography in square meters. | v1.9.0 |
-| [ST_Length](Geography-Functions/ST_Length.md) | Double | Return the geodesic length of a geography in meters. | v1.9.0 |
-| [ST_MaxDistance](Geography-Functions/ST_MaxDistance.md) | Double | Return the maximum geodesic distance between two geographies in meters. | v1.9.0 |
-| [ST_ClosestPoint](Geography-Functions/ST_ClosestPoint.md) | Geography | Return the point on A that is closest to B. | v1.9.0 |
-
-### Predicates
-
-| Function | Return type | Description | Since |
-| :--- | :--- | :--- | :--- |
 | [ST_Contains](Geography-Functions/ST_Contains.md) | Boolean | Test whether geography A fully contains geography B. | v1.9.0 |
-| [ST_Within](Geography-Functions/ST_Within.md) | Boolean | Test whether geography A is fully within geography B. | v1.9.0 |
-| [ST_Intersects](Geography-Functions/ST_Intersects.md) | Boolean | Test whether two geographies intersect. | v1.9.0 |
-| [ST_Equals](Geography-Functions/ST_Equals.md) | Boolean | Test whether two geographies are spatially equal. | v1.9.0 |

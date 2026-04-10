@@ -96,9 +96,12 @@ private[apache] case class ST_Contains(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Intersects(inputExpressions: Seq[Expression])
-    extends InferredExpression(
-      inferrableFunction2(Predicates.intersects),
-      inferrableFunction2(org.apache.sedona.common.geography.Functions.intersects)) {
+    extends ST_Predicate
+    with CodegenFallback {
+
+  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
+    Predicates.intersects(leftGeometry, rightGeometry)
+  }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -111,9 +114,12 @@ private[apache] case class ST_Intersects(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Within(inputExpressions: Seq[Expression])
-    extends InferredExpression(
-      inferrableFunction2(Predicates.within),
-      inferrableFunction2(org.apache.sedona.common.geography.Functions.within)) {
+    extends ST_Predicate
+    with CodegenFallback {
+
+  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
+    Predicates.within(leftGeometry, rightGeometry)
+  }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -235,9 +241,12 @@ private[apache] case class ST_RelateMatch(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Equals(inputExpressions: Seq[Expression])
-    extends InferredExpression(
-      inferrableFunction2(Predicates.equals),
-      inferrableFunction2(org.apache.sedona.common.geography.Functions.equals)) {
+    extends ST_Predicate
+    with CodegenFallback {
+
+  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
+    Predicates.equals(leftGeometry, rightGeometry)
+  }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

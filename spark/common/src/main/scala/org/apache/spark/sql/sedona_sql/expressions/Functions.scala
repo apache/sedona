@@ -247,9 +247,7 @@ private[apache] case class ST_Expand(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Length(inputExpressions: Seq[Expression])
-    extends InferredExpression(
-      inferrableFunction1(Functions.length),
-      inferrableFunction1(org.apache.sedona.common.geography.Functions.length)) {
+    extends InferredExpression(Functions.length _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -275,9 +273,7 @@ private[apache] case class ST_Length2D(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Area(inputExpressions: Seq[Expression])
-    extends InferredExpression(
-      inferrableFunction1(Functions.area),
-      inferrableFunction1(org.apache.sedona.common.geography.Functions.area)) {
+    extends InferredExpression(Functions.area _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -290,9 +286,7 @@ private[apache] case class ST_Area(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Centroid(inputExpressions: Seq[Expression])
-    extends InferredExpression(
-      inferrableFunction1(Functions.getCentroid),
-      inferrableFunction1(org.apache.sedona.common.geography.Functions.centroid)) {
+    extends InferredExpression(Functions.getCentroid _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -577,9 +571,7 @@ private[apache] case class ST_SimplifyPolygonHull(inputExpressions: Seq[Expressi
 }
 
 private[apache] case class ST_AsText(inputExpressions: Seq[Expression])
-    extends InferredExpression(
-      inferrableFunction1(Functions.asWKT),
-      inferrableFunction1(org.apache.sedona.common.geography.Functions.asText)) {
+    extends InferredExpression(Functions.asWKT _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -639,9 +631,7 @@ private[apache] case class ST_SetSRID(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_GeometryType(inputExpressions: Seq[Expression])
-    extends InferredExpression(
-      inferrableFunction1(Functions.geometryType),
-      inferrableFunction1(org.apache.sedona.common.geography.Functions.geometryType)) {
+    extends InferredExpression(Functions.geometryType _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1011,9 +1001,7 @@ private[apache] case class ST_SetPoint(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_ClosestPoint(inputExpressions: Seq[Expression])
-    extends InferredExpression(
-      inferrableFunction2(Functions.closestPoint),
-      inferrableFunction2(org.apache.sedona.common.geography.Functions.closestPoint)) {
+    extends InferredExpression(Functions.closestPoint _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1072,9 +1060,7 @@ private[apache] object ST_IsRing {
  *   Geometry
  */
 private[apache] case class ST_NumGeometries(inputExpressions: Seq[Expression])
-    extends InferredExpression(
-      inferrableFunction1(Functions.numGeometries),
-      inferrableFunction1(org.apache.sedona.common.geography.Functions.numGeometries)) {
+    extends InferredExpression(Functions.numGeometries _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1257,9 +1243,7 @@ private[apache] case class ST_MaximumInscribedCircle(children: Seq[Expression])
 }
 
 private[apache] case class ST_MaxDistance(inputExpressions: Seq[Expression])
-    extends InferredExpression(
-      inferrableFunction2(Functions.maxDistance),
-      inferrableFunction2(org.apache.sedona.common.geography.Functions.maxDistance)) {
+    extends InferredExpression(Functions.maxDistance _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

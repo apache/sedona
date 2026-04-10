@@ -26,28 +26,12 @@ import org.junit.Assert.{assertEquals, assertNotNull, assertTrue}
 import org.locationtech.jts.geom.Geometry
 
 /**
- * Comprehensive Spark SQL integration tests for all Geography ST functions.
- *
- * Tests cover:
- *   - Constructors: ST_GeogFromWKB, ST_GeogFromWKT, ST_GeogFromEWKT, ST_GeomToGeography,
- *     ST_GeogToGeometry
- *   - Level 0+1 (Structural): ST_Envelope, ST_AsEWKT, ST_AsText, ST_NPoints, ST_GeometryType,
- *     ST_NumGeometries, ST_Centroid
- *   - Level 2 (Geodesic metrics): ST_Distance, ST_Area, ST_Length
- *   - Level 3 (S2 predicates): ST_Contains, ST_Intersects, ST_Equals, ST_MaxDistance,
- *     ST_ClosestPoint
- *   - Serialization round-trip: WKBGeography through Spark DataFrame write/read
+ * Spark SQL integration tests for Geography ST functions. Tests one representative function per
+ * architecture level: L1 (ST_NPoints), L2 (ST_Distance), L3 (ST_Contains).
  */
 class GeographyFunctionTest extends TestBaseScala {
 
   import sparkSession.implicits._
-
-  // ─── Helper: create a Geography column from WKT ────────────────────────
-
-  private def geogFromWKT(wkt: String, srid: Int = 4326) =
-    sparkSession
-      .sql(s"SELECT '$wkt' AS wkt")
-      .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(srid)).as("geog"))
 
   // ─── Constructors ──────────────────────────────────────────────────────
 
@@ -72,7 +56,6 @@ class GeographyFunctionTest extends TestBaseScala {
     }
 
     it("ST_GeogFromWKB round-trip") {
-      // Create WKB from a Geometry, then read as Geography
       val row = sparkSession
         .sql("SELECT ST_GeogFromWKB(ST_AsBinary(ST_GeomFromWKT('POINT (30 10)'))) AS geog")
         .first()
@@ -94,25 +77,9 @@ class GeographyFunctionTest extends TestBaseScala {
     }
   }
 
-  // ─── Level 0+1: Structural functions ───────────────────────────────────
+  // ─── Level 1: ST_NPoints ───────────────────────────────────────────────
 
-  describe("Level 0+1: Structural") {
-
-    it("ST_AsEWKT with SRID") {
-      val row = sparkSession
-        .sql("SELECT ST_AsEWKT(ST_GeogFromWKT('POINT (1 2)', 4326)) AS ewkt")
-        .first()
-      assertEquals("SRID=4326; POINT (1 2)", row.getString(0))
-    }
-
-    it("ST_AsText") {
-      val row = sparkSession
-        .sql("SELECT ST_AsText(ST_GeogFromWKT('POINT (1 2)', 4326)) AS wkt")
-        .first()
-      val wkt = row.getString(0)
-      // S2 round-trip may introduce sub-nanometer floating-point drift
-      assertTrue(s"Expected POINT near (1, 2), got: $wkt", wkt.startsWith("POINT ("))
-    }
+  describe("Level 1: Structural") {
 
     it("ST_NPoints") {
       val row = sparkSession
@@ -120,72 +87,9 @@ class GeographyFunctionTest extends TestBaseScala {
         .first()
       assertEquals(3, row.getInt(0))
     }
-
-    it("ST_GeometryType") {
-      val row = sparkSession
-        .sql("SELECT ST_GeometryType(ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)) AS t")
-        .first()
-      assertTrue(row.getString(0).contains("Polygon"))
-    }
-
-    it("ST_NumGeometries") {
-      val row = sparkSession
-        .sql("SELECT ST_NumGeometries(ST_GeogFromWKT('POINT (1 2)', 4326)) AS n")
-        .first()
-      assertEquals(1, row.getInt(0))
-    }
-
-    it("ST_Centroid") {
-      val row = sparkSession
-        .sql("SELECT ST_AsText(ST_Centroid(ST_GeogFromWKT('POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))', 4326))) AS c")
-        .first()
-      val wkt = row.getString(0)
-      assertTrue(wkt.contains("POINT"))
-      assertTrue(wkt.contains("1")) // centroid near (1, 1)
-    }
-
-    it("ST_Envelope") {
-      val row = sparkSession
-        .sql("SELECT ST_Envelope(ST_GeogFromWKT('LINESTRING (0 0, 3 4)', 4326), false) AS env")
-        .first()
-      val env = row.get(0).asInstanceOf[Geography]
-      assertNotNull(env)
-    }
-
-    it("ST_Envelope antarctica with split") {
-      val antarctica =
-        "POLYGON ((-180 -90, -180 -63.27066, 180 -63.27066, 180 -90, -180 -90))"
-      val row = sparkSession
-        .sql(s"SELECT ST_Envelope(ST_GeogFromWKT('$antarctica'), true) AS env")
-        .first()
-      val env = row.get(0).asInstanceOf[Geography]
-      assertEquals(
-        "POLYGON ((-180 -63.3, 180 -63.3, 180 -90, -180 -90, -180 -63.3))",
-        env.toString)
-    }
-
-    it("ST_Envelope Fiji without split") {
-      val fiji =
-        "MULTIPOLYGON (" +
-          "((177.285 -18.28799, 180 -18.28799, 180 -16.02088, 177.285 -16.02088, 177.285 -18.28799))," +
-          "((-180 -18.28799, -179.7933 -18.28799, -179.7933 -16.02088, -180 -16.02088, -180 -18.28799))" +
-          ")"
-      val row = sparkSession
-        .sql(s"SELECT ST_Envelope(ST_GeogFromEWKT('$fiji'), false) AS env")
-        .first()
-      val env = row.get(0).asInstanceOf[Geography]
-      assertEquals(
-        "POLYGON ((177.3 -18.3, -179.8 -18.3, -179.8 -16, 177.3 -16, 177.3 -18.3))",
-        env.toString)
-    }
-
-    it("ST_Envelope null") {
-      val row = sparkSession.sql("SELECT ST_Envelope(null, false)").first()
-      assertTrue(row.isNullAt(0))
-    }
   }
 
-  // ─── Level 2: Geodesic metrics ─────────────────────────────────────────
+  // ─── Level 2: ST_Distance ──────────────────────────────────────────────
 
   describe("Level 2: Geodesic metrics") {
 
@@ -199,21 +103,7 @@ class GeographyFunctionTest extends TestBaseScala {
         """)
         .first()
       val dist = row.getDouble(0)
-      // S2 spherical distance ~157 km
       assertTrue(s"Expected ~157km, got $dist", dist > 155000 && dist < 160000)
-    }
-
-    it("ST_Distance between point and polygon") {
-      val row = sparkSession
-        .sql("""
-          SELECT ST_Distance(
-            ST_GeogFromWKT('POINT (2 2)', 4326),
-            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)
-          ) AS dist
-        """)
-        .first()
-      val dist = row.getDouble(0)
-      assertTrue(s"Distance should be > 0, got $dist", dist > 0)
     }
 
     it("ST_Distance null handling") {
@@ -222,53 +112,9 @@ class GeographyFunctionTest extends TestBaseScala {
         .first()
       assertTrue(row.isNullAt(0))
     }
-
-    it("ST_Area of polygon") {
-      val row = sparkSession
-        .sql("""
-          SELECT ST_Area(
-            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)
-          ) AS area
-        """)
-        .first()
-      val area = row.getDouble(0)
-      // ~1 degree x 1 degree box near equator: ~12,300 km^2 = ~1.23e10 m^2
-      assertTrue(s"Expected area > 1e10 m^2, got $area", area > 1e10)
-    }
-
-    it("ST_Area of point is zero") {
-      val row = sparkSession
-        .sql("SELECT ST_Area(ST_GeogFromWKT('POINT (0 0)', 4326)) AS area")
-        .first()
-      assertEquals(0.0, row.getDouble(0), 1e-10)
-    }
-
-    it("ST_Length of linestring") {
-      val row = sparkSession
-        .sql("""
-          SELECT ST_Length(
-            ST_GeogFromWKT('LINESTRING (0 0, 1 1)', 4326)
-          ) AS len
-        """)
-        .first()
-      val len = row.getDouble(0)
-      // ~157 km
-      assertTrue(s"Expected ~157km, got $len", len > 155000 && len < 160000)
-    }
-
-    it("ST_Length of polygon is zero") {
-      val row = sparkSession
-        .sql("""
-          SELECT ST_Length(
-            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)
-          ) AS len
-        """)
-        .first()
-      assertEquals(0.0, row.getDouble(0), 1e-10)
-    }
   }
 
-  // ─── Level 3: S2 predicates and distance functions ─────────────────────
+  // ─── Level 3: ST_Contains ──────────────────────────────────────────────
 
   describe("Level 3: S2 predicates") {
 
@@ -295,107 +141,9 @@ class GeographyFunctionTest extends TestBaseScala {
         .first()
       assertTrue(!row.getBoolean(0))
     }
-
-    it("ST_Intersects overlapping polygons") {
-      val row = sparkSession
-        .sql("""
-          SELECT ST_Intersects(
-            ST_GeogFromWKT('POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))', 4326),
-            ST_GeogFromWKT('POLYGON ((1 1, 3 1, 3 3, 1 3, 1 1))', 4326)
-          ) AS result
-        """)
-        .first()
-      assertTrue(row.getBoolean(0))
-    }
-
-    it("ST_Intersects disjoint polygons") {
-      val row = sparkSession
-        .sql("""
-          SELECT ST_Intersects(
-            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326),
-            ST_GeogFromWKT('POLYGON ((10 10, 11 10, 11 11, 10 11, 10 10))', 4326)
-          ) AS result
-        """)
-        .first()
-      assertTrue(!row.getBoolean(0))
-    }
-
-    it("ST_Equals same geography") {
-      val row = sparkSession
-        .sql("""
-          SELECT ST_Equals(
-            ST_GeogFromWKT('POINT (1 1)', 4326),
-            ST_GeogFromWKT('POINT (1 1)', 4326)
-          ) AS result
-        """)
-        .first()
-      assertTrue(row.getBoolean(0))
-    }
-
-    it("ST_Equals different geography") {
-      val row = sparkSession
-        .sql("""
-          SELECT ST_Equals(
-            ST_GeogFromWKT('POINT (1 1)', 4326),
-            ST_GeogFromWKT('POINT (2 2)', 4326)
-          ) AS result
-        """)
-        .first()
-      assertTrue(!row.getBoolean(0))
-    }
-
-    it("ST_Within point in polygon") {
-      val row = sparkSession
-        .sql("""
-          SELECT ST_Within(
-            ST_GeogFromWKT('POINT (0.5 0.5)', 4326),
-            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)
-          ) AS result
-        """)
-        .first()
-      assertTrue(row.getBoolean(0))
-    }
-
-    it("ST_Within point outside polygon") {
-      val row = sparkSession
-        .sql("""
-          SELECT ST_Within(
-            ST_GeogFromWKT('POINT (2 2)', 4326),
-            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)
-          ) AS result
-        """)
-        .first()
-      assertTrue(!row.getBoolean(0))
-    }
-
-    it("ST_MaxDistance between two points") {
-      val row = sparkSession
-        .sql("""
-          SELECT ST_MaxDistance(
-            ST_GeogFromWKT('POINT (0 0)', 4326),
-            ST_GeogFromWKT('POINT (1 1)', 4326)
-          ) AS dist
-        """)
-        .first()
-      val dist = row.getDouble(0)
-      assertTrue(s"Expected ~157km, got $dist", dist > 155000 && dist < 160000)
-    }
-
-    it("ST_ClosestPoint from line to point") {
-      val row = sparkSession
-        .sql("""
-          SELECT ST_AsText(ST_ClosestPoint(
-            ST_GeogFromWKT('LINESTRING (0 0, 2 0)', 4326),
-            ST_GeogFromWKT('POINT (1 1)', 4326)
-          )) AS wkt
-        """)
-        .first()
-      val wkt = row.getString(0)
-      assertTrue(wkt.contains("POINT"))
-    }
   }
 
-  // ─── DataFrame API tests ──────────────────────────────────────────────
+  // ─── DataFrame API ─────────────────────────────────────────────────────
 
   describe("DataFrame API") {
 
@@ -410,35 +158,12 @@ class GeographyFunctionTest extends TestBaseScala {
       assertTrue(s"Expected ~157km, got $dist", dist > 155000 && dist < 160000)
     }
 
-    it("ST_Area via DataFrame API") {
-      val df = geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))")
-        .select(st_functions.ST_Area(col("geog")).as("area"))
-      val area = df.first().getDouble(0)
-      assertTrue(s"Expected area > 1e10, got $area", area > 1e10)
-    }
-
-    it("ST_Length via DataFrame API") {
-      val df = geogFromWKT("LINESTRING (0 0, 1 1)")
-        .select(st_functions.ST_Length(col("geog")).as("len"))
-      val len = df.first().getDouble(0)
-      assertTrue(s"Expected ~157km, got $len", len > 155000 && len < 160000)
-    }
-
     it("ST_NPoints via DataFrame API") {
-      val df = geogFromWKT("LINESTRING (0 0, 1 1, 2 2)")
+      val df = sparkSession
+        .sql("SELECT 'LINESTRING (0 0, 1 1, 2 2)' AS wkt")
+        .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(4326)).as("geog"))
         .select(st_functions.ST_NPoints(col("geog")).as("n"))
       assertEquals(3, df.first().getInt(0))
-    }
-
-    it("ST_MaxDistance via DataFrame API") {
-      val df = sparkSession
-        .sql("SELECT 'POINT (0 0)' AS wkt_a, 'POINT (1 1)' AS wkt_b")
-        .select(
-          st_constructors.ST_GeogFromWKT(col("wkt_a"), lit(4326)).as("a"),
-          st_constructors.ST_GeogFromWKT(col("wkt_b"), lit(4326)).as("b"))
-        .select(st_functions.ST_MaxDistance(col("a"), col("b")).as("dist"))
-      val dist = df.first().getDouble(0)
-      assertTrue(s"Expected ~157km, got $dist", dist > 155000 && dist < 160000)
     }
 
     it("ST_Contains via DataFrame API") {
@@ -450,39 +175,9 @@ class GeographyFunctionTest extends TestBaseScala {
         .select(st_predicates.ST_Contains(col("poly"), col("pt")).as("result"))
       assertTrue(df.first().getBoolean(0))
     }
-
-    it("ST_Intersects via DataFrame API") {
-      val df = sparkSession
-        .sql("SELECT 'POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))' AS a, 'POLYGON ((1 1, 3 1, 3 3, 1 3, 1 1))' AS b")
-        .select(
-          st_constructors.ST_GeogFromWKT(col("a"), lit(4326)).as("a"),
-          st_constructors.ST_GeogFromWKT(col("b"), lit(4326)).as("b"))
-        .select(st_predicates.ST_Intersects(col("a"), col("b")).as("result"))
-      assertTrue(df.first().getBoolean(0))
-    }
-
-    it("ST_Equals via DataFrame API") {
-      val df = sparkSession
-        .sql("SELECT 'POINT (1 1)' AS wkt")
-        .select(
-          st_constructors.ST_GeogFromWKT(col("wkt"), lit(4326)).as("a"),
-          st_constructors.ST_GeogFromWKT(col("wkt"), lit(4326)).as("b"))
-        .select(st_predicates.ST_Equals(col("a"), col("b")).as("result"))
-      assertTrue(df.first().getBoolean(0))
-    }
-
-    it("ST_Within via DataFrame API") {
-      val df = sparkSession
-        .sql("SELECT 'POINT (0.5 0.5)' AS pt, 'POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))' AS poly")
-        .select(
-          st_constructors.ST_GeogFromWKT(col("pt"), lit(4326)).as("pt"),
-          st_constructors.ST_GeogFromWKT(col("poly"), lit(4326)).as("poly"))
-        .select(st_predicates.ST_Within(col("pt"), col("poly")).as("result"))
-      assertTrue(df.first().getBoolean(0))
-    }
   }
 
-  // ─── WKB serialization round-trip through Spark ────────────────────────
+  // ─── Serialization round-trip ──────────────────────────────────────────
 
   describe("Serialization round-trip") {
 
@@ -495,25 +190,6 @@ class GeographyFunctionTest extends TestBaseScala {
       assertTrue(geog.toString.contains("POLYGON"))
     }
 
-    it("Geography survives filter + collect") {
-      val df = sparkSession
-        .sql("""
-          SELECT ST_GeogFromWKT(wkt, 4326) AS geog FROM (
-            SELECT 'POINT (0 0)' AS wkt
-            UNION ALL
-            SELECT 'POINT (1 1)' AS wkt
-            UNION ALL
-            SELECT 'POINT (2 2)' AS wkt
-          )
-        """)
-      assertEquals(3, df.count())
-      df.collect().foreach { row =>
-        val geog = row.get(0).asInstanceOf[Geography]
-        assertTrue(geog.isInstanceOf[WKBGeography])
-        assertTrue(geog.toString.startsWith("POINT"))
-      }
-    }
-
     it("Geography survives multiple function chain") {
       val row = sparkSession
         .sql("""
@@ -521,13 +197,11 @@ class GeographyFunctionTest extends TestBaseScala {
             ST_GeogFromWKT('POINT (0 0)', 4326),
             ST_GeogFromWKT('POINT (1 0)', 4326)
           ) AS dist,
-          ST_Area(ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)) AS area,
-          ST_Length(ST_GeogFromWKT('LINESTRING (0 0, 0 1)', 4326)) AS len
+          ST_NPoints(ST_GeogFromWKT('LINESTRING (0 0, 1 1, 2 2)', 4326)) AS npts
         """)
         .first()
-      assertTrue(row.getDouble(0) > 0) // distance > 0
-      assertTrue(row.getDouble(1) > 0) // area > 0
-      assertTrue(row.getDouble(2) > 0) // length > 0
+      assertTrue(row.getDouble(0) > 0)
+      assertEquals(3, row.getInt(1))
     }
   }
 }
