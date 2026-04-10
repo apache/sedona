@@ -37,7 +37,7 @@ These functions create geography objects from various formats.
 
 ## Geography Functions
 
-These functions operate on geography type objects. One representative function per architecture level is included in this release; additional functions will be added in follow-up releases.
+These functions operate on geography type objects.
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
