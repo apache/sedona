@@ -17,18 +17,18 @@
  under the License.
  -->
 
-To install Apache Sedona Python, you need to install the following steps:
+To install Apache Sedona Python, follow these steps:
 
-Install the required Python packages.
+1. Install the required Python packages.
 
 ```
 pip install apache-sedona[flink] shapely attr
 ```
 
-Download the required JAR files from Maven Central:
+2. Download the required JAR files from Maven Central:
 
 * sedona-flink-shaded_2.12:jar:{{ sedona.current_version }}
 * geotools-wrapper-{{ sedona.current_geotools }}.jar
 
-Follow the official Flink documentation to install the JAR files in your Flink cluster or PyFlink application.
+To install the JAR files in your Flink cluster or PyFlink application, follow the official Flink documentation:
 https://nightlies.apache.org/flink/flink-docs-master/docs/dev/python/dependency_management/
