@@ -18,8 +18,14 @@
  */
 package org.apache.sedona.common.S2Geography;
 
+import com.google.common.geometry.S2CellId;
+import com.google.common.geometry.S2LatLng;
+import com.google.common.geometry.S2Point;
+import com.google.common.geometry.S2PointRegion;
 import com.google.common.geometry.S2Region;
 import com.google.common.geometry.S2Shape;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.List;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.PrecisionModel;
@@ -29,6 +35,11 @@ import org.locationtech.jts.io.ParseException;
  * A Geography implementation that stores WKB bytes as the primary representation, with lazy-parsed
  * JTS Geometry and S2 Geography caches. This enables zero-parse construction from WKB and deferred
  * S2 parsing only when spherical operations are needed.
+ *
+ * <p>Key optimizations (per paleolimbot's review): - dimension() reads WKB type byte directly (no
+ * S2 parse) - region()/getCellUnionBound() for points read coordinates from WKB (no S2 parse) -
+ * shape()/numShapes() use WkbS2Shape for simple types (no S2Polygon construction) - ShapeIndex is
+ * built from WkbS2Shape directly (skips Geography layer)
  */
 public class WKBGeography extends Geography {
 
@@ -41,12 +52,10 @@ public class WKBGeography extends Geography {
    */
   private static volatile boolean eagerShapeIndex = false;
 
-  /** Enable or disable eager ShapeIndex building at deserialization time. */
   public static void setEagerShapeIndex(boolean eager) {
     eagerShapeIndex = eager;
   }
 
-  /** Returns whether eager ShapeIndex building is enabled. */
   public static boolean isEagerShapeIndex() {
     return eagerShapeIndex;
   }
@@ -66,13 +75,12 @@ public class WKBGeography extends Geography {
 
   /**
    * Create a WKBGeography from raw WKB bytes. When eagerShapeIndex is false (default), this is
-   * zero-parse — just wraps the byte array. When eager mode is enabled, this also parses the WKB to
-   * S2 Geography and builds the ShapeIndex upfront.
+   * zero-parse — just wraps the byte array. When eager mode is enabled, this also builds the
+   * ShapeIndex upfront.
    */
   public static WKBGeography fromWKB(byte[] wkb, int srid) {
     WKBGeography geog = new WKBGeography(wkb, srid);
     if (eagerShapeIndex) {
-      // Pre-build S2 and ShapeIndex to eliminate cold-path overhead for predicates
       geog.getShapeIndexGeography();
     }
     return geog;
@@ -82,19 +90,20 @@ public class WKBGeography extends Geography {
   public static WKBGeography fromJTS(Geometry jts) {
     org.locationtech.jts.io.WKBWriter writer =
         new org.locationtech.jts.io.WKBWriter(
-            2, org.locationtech.jts.io.ByteOrderValues.BIG_ENDIAN);
+            2, org.locationtech.jts.io.ByteOrderValues.LITTLE_ENDIAN);
     byte[] wkb = writer.write(jts);
     WKBGeography geog = new WKBGeography(wkb, jts.getSRID());
-    geog.jtsGeometry = jts; // cache the JTS we already have
+    geog.jtsGeometry = jts;
     return geog;
   }
 
   /** Create a WKBGeography from an existing S2 Geography by converting it to WKB. */
   public static WKBGeography fromS2Geography(Geography s2geog) {
-    WKBWriter writer = new WKBWriter(2, org.locationtech.jts.io.ByteOrderValues.BIG_ENDIAN, false);
+    WKBWriter writer =
+        new WKBWriter(2, org.locationtech.jts.io.ByteOrderValues.LITTLE_ENDIAN, false);
     byte[] wkb = writer.write(s2geog);
     WKBGeography geog = new WKBGeography(wkb, s2geog.getSRID());
-    geog.s2Geography = s2geog; // cache the S2 we already have
+    geog.s2Geography = s2geog;
     return geog;
   }
 
@@ -125,9 +134,9 @@ public class WKBGeography extends Geography {
   }
 
   /**
-   * Returns a ShapeIndexGeography wrapping the S2 Geography, lazily built on first access. The
-   * ShapeIndex is cached for reuse across multiple predicate/distance operations on the same
-   * object.
+   * Returns a ShapeIndexGeography, lazily built on first access. For simple types (Point,
+   * LineString, Polygon), builds the index directly from WkbS2Shape — no S2 Geography construction
+   * needed.
    */
   public ShapeIndexGeography getShapeIndexGeography() {
     ShapeIndexGeography result = shapeIndexGeography;
@@ -135,7 +144,15 @@ public class WKBGeography extends Geography {
       synchronized (this) {
         result = shapeIndexGeography;
         if (result == null) {
-          result = new ShapeIndexGeography(getS2Geography());
+          int type = wkbBaseType();
+          if (type >= 1 && type <= 3) {
+            // Build ShapeIndex directly from WKB — skip S2 Geography construction
+            result = new ShapeIndexGeography();
+            result.shapeIndex.add(new WkbS2Shape(wkbBytes));
+          } else {
+            // Multi-types and collections fall back to full S2 parse
+            result = new ShapeIndexGeography(getS2Geography());
+          }
           shapeIndexGeography = result;
         }
       }
@@ -164,30 +181,94 @@ public class WKBGeography extends Geography {
     return result;
   }
 
-  // --- Geography abstract method delegation to lazy S2 ---
+  // ─── WKB-direct optimizations (no S2 parse needed) ─────────────────────
+
+  /** Returns the base WKB geometry type (1-7), masking off Z/M/SRID flags. */
+  private int wkbBaseType() {
+    boolean le = (wkbBytes[0] == 0x01);
+    int raw;
+    if (le) {
+      raw =
+          (wkbBytes[1] & 0xFF)
+              | ((wkbBytes[2] & 0xFF) << 8)
+              | ((wkbBytes[3] & 0xFF) << 16)
+              | ((wkbBytes[4] & 0xFF) << 24);
+    } else {
+      raw =
+          ((wkbBytes[1] & 0xFF) << 24)
+              | ((wkbBytes[2] & 0xFF) << 16)
+              | ((wkbBytes[3] & 0xFF) << 8)
+              | (wkbBytes[4] & 0xFF);
+    }
+    return raw & 0xFF;
+  }
+
+  /** Returns true if this WKB represents a single Point (type 1). */
+  public boolean isPoint() {
+    return wkbBaseType() == 1;
+  }
+
+  /** Extract the S2Point from a Point WKB without full S2 parse. */
+  public S2Point extractPoint() {
+    boolean le = (wkbBytes[0] == 0x01);
+    ByteBuffer bb =
+        ByteBuffer.wrap(wkbBytes).order(le ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+    double lon = bb.getDouble(5);
+    double lat = bb.getDouble(13);
+    return S2LatLng.fromDegrees(lat, lon).toPoint();
+  }
+
+  // ─── Geography abstract method overrides ───────────────────────────────
 
   @Override
   public int dimension() {
-    return getS2Geography().dimension();
+    // Read directly from WKB type byte — no S2 parse
+    int type = wkbBaseType();
+    switch (type) {
+      case 1:
+      case 4:
+        return 0; // Point, MultiPoint
+      case 2:
+      case 5:
+        return 1; // LineString, MultiLineString
+      case 3:
+      case 6:
+        return 2; // Polygon, MultiPolygon
+      default:
+        return -1; // GeometryCollection or unknown
+    }
   }
 
   @Override
   public int numShapes() {
+    int type = wkbBaseType();
+    if (type >= 1 && type <= 3) return 1;
     return getS2Geography().numShapes();
   }
 
   @Override
   public S2Shape shape(int id) {
+    int type = wkbBaseType();
+    if (type >= 1 && type <= 3) {
+      return new WkbS2Shape(wkbBytes);
+    }
     return getS2Geography().shape(id);
   }
 
   @Override
   public S2Region region() {
+    if (isPoint()) {
+      return new S2PointRegion(extractPoint());
+    }
     return getS2Geography().region();
   }
 
   @Override
-  public void getCellUnionBound(List<com.google.common.geometry.S2CellId> cellIds) {
+  public void getCellUnionBound(List<S2CellId> cellIds) {
+    if (isPoint()) {
+      cellIds.add(S2CellId.fromPoint(extractPoint()));
+      return;
+    }
     getS2Geography().getCellUnionBound(cellIds);
   }
 
@@ -208,7 +289,6 @@ public class WKBGeography extends Geography {
 
   @Override
   public String toEWKT() {
-    // Delegate to S2 but ensure SRID comes from this object
     Geography s2 = getS2Geography();
     s2.setSRID(getSRID());
     return s2.toEWKT();

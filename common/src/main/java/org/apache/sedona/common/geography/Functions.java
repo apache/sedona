@@ -93,6 +93,16 @@ public class Functions {
    */
   public static Double distance(Geography g1, Geography g2) {
     if (g1 == null || g2 == null) return null;
+    // Fast path: point-to-point distance without building ShapeIndex
+    if (g1 instanceof WKBGeography && g2 instanceof WKBGeography) {
+      WKBGeography w1 = (WKBGeography) g1;
+      WKBGeography w2 = (WKBGeography) g2;
+      if (w1.isPoint() && w2.isPoint()) {
+        S1Angle angle = new S1Angle(w1.extractPoint(), w2.extractPoint());
+        return angle.radians() * EARTH_RADIUS_METERS;
+      }
+    }
+    // General path via ShapeIndex
     Distance dist = new Distance();
     double radians = dist.S2_distance(toShapeIndex(g1), toShapeIndex(g2));
     return radiansToMeters(radians);
