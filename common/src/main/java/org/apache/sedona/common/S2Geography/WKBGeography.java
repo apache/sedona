@@ -146,7 +146,8 @@ public class WKBGeography extends Geography {
         if (result == null) {
           int type = wkbBaseType();
           if (type >= 1 && type <= 3) {
-            // Build ShapeIndex directly from WKB — skip S2 Geography construction
+            // Point/LineString/Polygon: build ShapeIndex from WkbS2Shape
+            // Avoids S2Loop/S2Polygon internal index builds
             result = new ShapeIndexGeography();
             result.shapeIndex.add(new WkbS2Shape(wkbBytes));
           } else {
