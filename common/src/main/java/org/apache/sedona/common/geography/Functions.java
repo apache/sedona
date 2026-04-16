@@ -93,13 +93,22 @@ public class Functions {
    */
   public static Double distance(Geography g1, Geography g2) {
     if (g1 == null || g2 == null) return null;
-    // Fast path: point-to-point distance without building ShapeIndex
     if (g1 instanceof WKBGeography && g2 instanceof WKBGeography) {
       WKBGeography w1 = (WKBGeography) g1;
       WKBGeography w2 = (WKBGeography) g2;
+      // Fast path: point-to-point distance without building ShapeIndex
       if (w1.isPoint() && w2.isPoint()) {
         S1Angle angle = new S1Angle(w1.extractPoint(), w2.extractPoint());
         return angle.radians() * EARTH_RADIUS_METERS;
+      }
+      // Fast path: point-to-complex uses PointTarget (avoids building ShapeIndex for point side)
+      if (w1.isPoint()) {
+        double radians = Distance.S2_distancePointToIndex(w1.extractPoint(), toShapeIndex(w2));
+        return radiansToMeters(radians);
+      }
+      if (w2.isPoint()) {
+        double radians = Distance.S2_distancePointToIndex(w2.extractPoint(), toShapeIndex(w1));
+        return radiansToMeters(radians);
       }
     }
     // General path via ShapeIndex
@@ -113,6 +122,9 @@ public class Functions {
   /** Spherical containment test using S2 boolean operations. */
   public static boolean contains(Geography g1, Geography g2) {
     if (g1 == null || g2 == null) return false;
+    // A point (dimension 0) cannot contain anything
+    if (g1.dimension() == 0) return false;
+
     Predicates pred = new Predicates();
     return pred.S2_contains(toShapeIndex(g1), toShapeIndex(g2), s2Options());
   }
