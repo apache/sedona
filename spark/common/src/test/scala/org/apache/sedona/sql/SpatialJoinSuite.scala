@@ -22,7 +22,7 @@ import org.apache.spark.sql.{Column, DataFrame, Row}
 import org.apache.spark.sql.functions.{col, expr}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors.ST_GeomFromText
-import org.apache.spark.sql.sedona_sql.strategy.join.{BroadcastIndexJoinExec, DistanceJoinExec, RangeJoinExec}
+import org.apache.spark.sql.sedona_sql.strategy.join.{BroadcastIndexJoinExec, DistanceJoinExec, RangeJoinExec, RangeLeftOuterJoinExec}
 import org.apache.spark.sql.types.{IntegerType, StructField, StructType}
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
@@ -280,6 +280,172 @@ class SpatialJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
         "SELECT * FROM df2 WHERE ST_Distance(df2.geom, ST_GeomFromText('POINT EMPTY')) < 1")
       assert(result2.count() == 0)
     }
+  }
+
+  describe("Non-broadcast Left Outer Spatial Join") {
+    val noBroadcastConf = Map(
+      "spark.sql.autoBroadcastJoinThreshold" -> "-1",
+      "sedona.join.autoBroadcastJoinThreshold" -> "-1",
+      spatialJoinPartitionSideConfKey -> "left")
+
+    val leftOuterJoinConditions = Table(
+      "join condition",
+      "ST_Contains(df1.geom, df2.geom)",
+      "ST_Intersects(df1.geom, df2.geom)",
+      "ST_Within(df1.geom, df2.geom)",
+      "ST_Covers(df1.geom, df2.geom)",
+      "ST_CoveredBy(df1.geom, df2.geom)",
+      "ST_Touches(df1.geom, df2.geom)",
+      "ST_Crosses(df1.geom, df2.geom)",
+      "ST_Overlaps(df1.geom, df2.geom)",
+      "ST_Equals(df1.geom, df2.geom)")
+
+    forAll(leftOuterJoinConditions) { joinCondition =>
+      it(s"should left outer join two dataframes with $joinCondition") {
+        withConf(noBroadcastConf) {
+          val result = sparkSession.sql(
+            s"SELECT df1.id, df2.id FROM df1 LEFT OUTER JOIN df2 ON $joinCondition")
+          assertUsesRangeLeftOuterJoinExec(result)
+          val expected = buildExpectedLeftOuterResult(joinCondition)
+          verifyLeftOuterResult(expected, result)
+        }
+      }
+
+      it(
+        s"should left outer join two dataframes with $joinCondition, right side as dominant side") {
+        withConf(noBroadcastConf ++ Map(spatialJoinPartitionSideConfKey -> "right")) {
+          val result = sparkSession.sql(
+            s"SELECT df1.id, df2.id FROM df1 LEFT OUTER JOIN df2 ON $joinCondition")
+          assertUsesRangeLeftOuterJoinExec(result)
+          val expected = buildExpectedLeftOuterResult(joinCondition)
+          verifyLeftOuterResult(expected, result)
+        }
+      }
+    }
+
+    it("should produce correct results with SELECT *") {
+      withConf(noBroadcastConf) {
+        val resultAll = sparkSession
+          .sql("SELECT * FROM df1 LEFT OUTER JOIN df2 ON ST_Intersects(df1.geom, df2.geom)")
+          .collect()
+        val expected = buildExpectedLeftOuterResult("ST_Intersects(df1.geom, df2.geom)")
+        // Matched rows should have non-null df2.id (column index 3)
+        val matched =
+          resultAll.filter(_.get(3) != null).map(row => (row.getInt(0), row.getInt(3)))
+        val unmatched = resultAll.filter(_.get(3) == null).map(row => row.getInt(0))
+        val expectedMatched = expected.collect { case (id1, Some(id2)) => (id1, id2) }
+        val expectedUnmatched = expected.collect { case (id1, None) => id1 }
+        assert(matched.sorted === expectedMatched.sorted)
+        assert(unmatched.sorted === expectedUnmatched.sorted)
+      }
+    }
+
+    it("should produce correct result count with SELECT COUNT(*)") {
+      withConf(noBroadcastConf) {
+        val result = sparkSession
+          .sql(
+            "SELECT COUNT(*) FROM df1 LEFT OUTER JOIN df2 ON ST_Intersects(df1.geom, df2.geom)")
+          .collect()
+          .head
+          .getLong(0)
+        val expected = buildExpectedLeftOuterResult("ST_Intersects(df1.geom, df2.geom)")
+        assert(result === expected.length)
+      }
+    }
+
+    it("should handle extra conditions correctly") {
+      withConf(noBroadcastConf) {
+        val result = sparkSession.sql("""SELECT df1.id, df2.id FROM df1 LEFT OUTER JOIN df2
+            |ON ST_Intersects(df1.geom, df2.geom) AND df1.id > df2.id""".stripMargin)
+        assertUsesRangeLeftOuterJoinExec(result)
+        // Build expected: inner join with spatial + extra condition, then add unmatched left rows
+        val innerExpected = buildExpectedResult("ST_Intersects(df1.geom, df2.geom)")
+          .filter { case (id1, id2) => id1 > id2 }
+        val matchedLeftIds = innerExpected.map(_._1).toSet
+        val allLeftIds = loadTestData(spatialJoinLeftInputLocation).map(_._1)
+        val expected: Seq[(Int, Option[Int])] =
+          innerExpected.map { case (id1, id2) => (id1, Some(id2)) } ++
+            allLeftIds.filterNot(matchedLeftIds.contains).map(id => (id, None))
+        verifyLeftOuterResult(expected, result)
+      }
+    }
+
+    it("should return all left rows with nulls when no matches exist") {
+      withConf(noBroadcastConf) {
+        // Create a right table with geometries far from the left table
+        sparkSession
+          .range(0, 5)
+          .toDF("id")
+          .withColumn("geom", expr("ST_Point(id + 9999, id + 9999)"))
+          .createOrReplaceTempView("dfFarAway")
+
+        val result = sparkSession.sql(
+          "SELECT df1.id, dfFarAway.id FROM df1 LEFT OUTER JOIN dfFarAway ON ST_Intersects(df1.geom, dfFarAway.geom)")
+        val rows = result.collect()
+        val allLeftIds = loadTestData(spatialJoinLeftInputLocation).map(_._1)
+        assert(rows.length === allLeftIds.length)
+        assert(rows.forall(_.isNullAt(1)))
+      }
+    }
+
+    it("should match inner join result when all left rows have matches") {
+      withConf(noBroadcastConf) {
+        val leftOuterResult = sparkSession
+          .sql("SELECT df1.id, df2.id FROM df1 LEFT OUTER JOIN df2 ON ST_Intersects(df1.geom, df2.geom)")
+          .collect()
+          .filter(!_.isNullAt(1))
+          .map(row => (row.getInt(0), row.getInt(1)))
+          .sorted
+
+        val innerResult = sparkSession
+          .sql("SELECT df1.id, df2.id FROM df1 JOIN df2 ON ST_Intersects(df1.geom, df2.geom)")
+          .collect()
+          .map(row => (row.getInt(0), row.getInt(1)))
+          .sorted
+
+        assert(leftOuterResult === innerResult)
+      }
+    }
+
+    it("should handle swapped predicate arguments") {
+      withConf(noBroadcastConf) {
+        val result = sparkSession.sql(
+          "SELECT df1.id, df2.id FROM df1 LEFT OUTER JOIN df2 ON ST_Intersects(df2.geom, df1.geom)")
+        assertUsesRangeLeftOuterJoinExec(result)
+        val expected = buildExpectedLeftOuterResult("ST_Intersects(df1.geom, df2.geom)")
+        verifyLeftOuterResult(expected, result)
+      }
+    }
+  }
+
+  private def buildExpectedLeftOuterResult(joinCondition: String): Seq[(Int, Option[Int])] = {
+    val innerResult = buildExpectedResult(joinCondition)
+    val matchedLeftIds = innerResult.map(_._1).toSet
+    val allLeftIds = loadTestData(spatialJoinLeftInputLocation).map(_._1)
+    val matched = innerResult.map { case (id1, id2) => (id1, Some(id2)) }
+    val unmatched = allLeftIds.filterNot(matchedLeftIds.contains).map(id => (id, None))
+    (matched ++ unmatched).sortBy(r => (r._1, r._2.getOrElse(Int.MaxValue)))
+  }
+
+  private def verifyLeftOuterResult(
+      expected: Seq[(Int, Option[Int])],
+      result: DataFrame): Unit = {
+    val actual = result
+      .collect()
+      .map { row =>
+        val id1 = row.getInt(0)
+        val id2 = if (row.isNullAt(1)) None else Some(row.getInt(1))
+        (id1, id2)
+      }
+      .sortBy(r => (r._1, r._2.getOrElse(Int.MaxValue)))
+    assert(actual === expected)
+  }
+
+  private def assertUsesRangeLeftOuterJoinExec(df: DataFrame): Unit = {
+    val usesOptimized = df.queryExecution.executedPlan.collect { case _: RangeLeftOuterJoinExec =>
+      true
+    }.nonEmpty
+    assert(usesOptimized, "Expected RangeLeftOuterJoinExec in execution plan but not found")
   }
 
   private def withOptimizationMode(mode: String)(body: => Unit): Unit = {

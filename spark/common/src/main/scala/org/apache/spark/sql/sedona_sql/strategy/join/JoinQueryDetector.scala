@@ -184,9 +184,9 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
 
       /*
        * If either side is small we can automatically broadcast just like Spark does.
-       * This only applies to inner joins as there are no optimized fallback plan for other join types.
-       * It's better that users are explicit about broadcasting for other join types than seeing wildly different behavior
-       * depending on data size.
+       * For inner joins, either side can be broadcast.
+       * For left outer joins, only the right side can be broadcast (the left side must be preserved).
+       * For other join types, users must be explicit about broadcasting.
        */
       if (!broadcastLeft && !broadcastRight && joinType == Inner) {
         val canAutoBroadCastLeft = canAutoBroadcastBySize(left)
@@ -199,6 +199,10 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
           broadcastLeft = canAutoBroadCastLeft
           broadcastRight = canAutoBroadCastRight
         }
+      }
+
+      if (!broadcastLeft && !broadcastRight && joinType == LeftOuter) {
+        broadcastRight = canAutoBroadcastBySize(right)
       }
 
       // Check if the filters in the plans are supported
@@ -530,7 +534,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
       spatialPredicate: SpatialPredicate,
       extraCondition: Option[Expression] = None): Seq[SparkPlan] = {
 
-    if (joinType != Inner) {
+    if (joinType != Inner && joinType != LeftOuter) {
       return Nil
     }
 
@@ -542,24 +546,44 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
     matchExpressionsToPlans(a, b, left, right) match {
       case Some((_, _, false)) =>
         logInfo(s"Planning spatial join for $relationship relationship")
-        RangeJoinExec(
-          planLater(left),
-          planLater(right),
-          a,
-          b,
-          spatialPredicate,
-          extraCondition) :: Nil
+        if (joinType == LeftOuter) {
+          RangeLeftOuterJoinExec(
+            planLater(left),
+            planLater(right),
+            a,
+            b,
+            spatialPredicate,
+            extraCondition) :: Nil
+        } else {
+          RangeJoinExec(
+            planLater(left),
+            planLater(right),
+            a,
+            b,
+            spatialPredicate,
+            extraCondition) :: Nil
+        }
       case Some((_, _, true)) =>
         logInfo(
           s"Planning spatial join for $relationship relationship with swapped left and right shapes")
         val invSpatialPredicate = SpatialPredicate.inverse(spatialPredicate)
-        RangeJoinExec(
-          planLater(left),
-          planLater(right),
-          b,
-          a,
-          invSpatialPredicate,
-          extraCondition) :: Nil
+        if (joinType == LeftOuter) {
+          RangeLeftOuterJoinExec(
+            planLater(left),
+            planLater(right),
+            b,
+            a,
+            invSpatialPredicate,
+            extraCondition) :: Nil
+        } else {
+          RangeJoinExec(
+            planLater(left),
+            planLater(right),
+            b,
+            a,
+            invSpatialPredicate,
+            extraCondition) :: Nil
+        }
       case None =>
         logInfo(
           s"Spatial join for $relationship with arguments not aligned " +
