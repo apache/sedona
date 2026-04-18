@@ -41,20 +41,16 @@ This is a major release that includes bug fixes, new features, and improvements.
 ### Highlights
 
 * [X] [<a href='https://github.com/apache/sedona/issues/2609'>GH-2609</a>] - Support Spark 4.1
-* [X] [<a href='https://github.com/apache/sedona/issues/2610'>GH-2610</a>] - Integrate proj4sedona for CRS transformation
+* [X] [<a href='https://github.com/apache/sedona/issues/2610'>GH-2610</a>] - Integrate proj4sedona for CRS transformation, with full support for PROJJSON, PROJ strings, WKT2, and other CRS formats, plus grid file support for high-accuracy datum shifts
 * [X] [<a href='https://github.com/apache/sedona/issues/1327'>GH-1327</a>] - Add Bing Tile functions
 * [X] [<a href='https://github.com/apache/sedona/issues/908'>GH-908</a>] - Add ST_GeoHashNeighbors and ST_GeoHashNeighbor functions
-* [X] [<a href='https://github.com/apache/sedona/issues/2799'>GH-2799</a>] - Add ST_OffsetCurve function
-* [X] [<a href='https://github.com/apache/sedona/issues/2798'>GH-2798</a>] - Add ST_ShortestLine function
 * [X] [<a href='https://github.com/apache/sedona/issues/2652'>GH-2652</a>] - Add RS_AsCOG SQL function for Cloud Optimized GeoTiff output
 * [X] [<a href='https://github.com/apache/sedona/issues/2674'>GH-2674</a>] - Add RS_SetCRS and RS_CRS for custom CRS string support
-* [X] [<a href='https://github.com/apache/sedona/issues/2672'>GH-2672</a>] - Add a new raster data source reader that can automatically tile GeoTiffs
+* [X] [<a href='https://github.com/apache/sedona/issues/2672'>GH-2672</a>] - Add a new raster data source reader that automatically tiles GeoTiffs to bypass Spark's 2GB record size limit and avoid OOM issues when loading single large rasters
 * [X] [<a href='https://github.com/apache/sedona/issues/2646'>GH-2646</a>] - Auto-populate covering metadata for GeoParquet 1.1.0 writes
-* [X] [<a href='https://github.com/apache/sedona/issues/2376'>GH-2376</a>] - Preserve CRS SRID from GeoParquet metadata when reading geometries
 * [X] [<a href='https://github.com/apache/sedona/issues/2664'>GH-2664</a>] - GeoParquet writer utilizes geometry SRID to produce projjson CRS metadata
 * [X] Multiple GeoPandas API improvements including clip_by_rect, shortest_line, offset_curve, minimum_clearance, and more
 * [X] [<a href='https://github.com/apache/sedona/issues/2678'>GH-2678</a>] - SVG visual illustrations for SQL function documentation
-* [X] [<a href='https://github.com/apache/sedona/issues/2760'>GH-2760</a>] - Extend OSM PBF reader to support additional metadata fields
 
 ### New Features
 
