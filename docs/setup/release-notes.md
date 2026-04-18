@@ -76,7 +76,7 @@ This is a major release that includes bug fixes, new features, and improvements.
 #### Data Source Readers
 
 * [<a href='https://github.com/apache/sedona/issues/2760'>GH-2760</a>] - Extend OSM PBF reader to support additional metadata fields
-* [SEDONA-729] - Add _metadata hidden column support for shapefile DataSource V2 reader
+* [<a href='https://issues.apache.org/jira/browse/SEDONA-729'>SEDONA-729</a>] - Add _metadata hidden column support for shapefile DataSource V2 reader
 * [<a href='https://github.com/apache/sedona/issues/2651'>GH-2651</a>] - Add _metadata hidden column support for GeoPackage DataSource V2 reader
 
 #### GeoPandas API
@@ -127,7 +127,7 @@ This is a major release that includes bug fixes, new features, and improvements.
 * [<a href='https://github.com/apache/sedona/issues/2769'>GH-2769</a>] - Improve raster loader, writer, and viz docs
 * [<a href='https://github.com/apache/sedona/issues/2791'>GH-2791</a>] - Add platform tags to docs search results
 * [<a href='https://github.com/apache/sedona/issues/2815'>GH-2815</a>] - Disable offline link detection in maven-javadoc-plugin
-* [<a href='https://github.com/apache/sedona/issues/652'>GH-2652</a>] - Add a pure Java single-thread COG writer
+* [<a href='https://github.com/apache/sedona/issues/2652'>GH-2652</a>] - Add a pure Java single-thread COG writer
 
 ## Sedona 1.8.1
 
