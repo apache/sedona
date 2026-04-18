@@ -98,6 +98,7 @@ nav:
               - RDD: api/viz/java-api.md
           - Sedona R: api/rdocs
           - Sedona Python: api/pydocs
+      - Release notes: setup/release-notes.md
 
   - SedonaFlink:
       - Home: sedonaflink.md
@@ -117,6 +118,7 @@ nav:
           - SQL:
               - Overview (Flink): api/flink/Overview.md
               - Geometry Functions: api/flink/Geometry-Functions.md
+      - Release notes: setup/release-notes.md
 
   - SedonaSnow:
       - Home: sedonasnow.md
@@ -128,6 +130,7 @@ nav:
           - SQL:
               - Overview (Snowflake): api/snowflake/vector-data/Overview.md
               - Geometry Functions: api/snowflake/vector-data/Geometry-Functions.md
+      - Release notes: setup/release-notes.md
   - SpatialBench: 'https://sedona.apache.org/spatialbench/'
   - Blog: blog/index.md
   - Community:
@@ -199,11 +202,11 @@ extra:
     current_version: 1.8.0
     current_geotools: 1.8.0-33.1
   sedona_create_release:
-    current_version: 1.8.1
-    current_git_tag: sedona-1.8.1-rc2
-    current_rc: 1.8.1-rc2
-    current_snapshot: 1.9.0-SNAPSHOT
-    next_version: 1.9.0
+    current_version: 1.9.0
+    current_git_tag: sedona-1.9.0-rc1
+    current_rc: 1.9.0-rc1
+    current_snapshot: 1.9.1-SNAPSHOT
+    next_version: 1.9.1
 copyright: Copyright © 2026 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="https://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" /><img referrerpolicy="no-referrer-when-downgrade" src="https://analytics.apache.org/matomo.php?idsite=74&rec=1" />
 
 markdown_extensions:
