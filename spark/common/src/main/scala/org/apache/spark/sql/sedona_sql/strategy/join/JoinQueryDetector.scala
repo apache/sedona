@@ -27,7 +27,7 @@ import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.execution.{SparkPlan, SparkStrategy}
 import org.apache.spark.sql.execution.datasources.LogicalRelation
 import org.apache.spark.sql.execution.datasources.v2.DataSourceV2ScanRelation
-import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
+import org.apache.spark.sql.sedona_sql.UDT.{GeographyUDT, RasterUDT}
 import org.apache.spark.sql.sedona_sql.expressions.{ST_KNN, _}
 import org.apache.spark.sql.sedona_sql.expressions.raster._
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
@@ -53,6 +53,13 @@ case class JoinQueryDetection(
  * Plans `BroadcastIndexJoinExec` for inner joins on spatial relationships with a broadcast hint.
  */
 class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
+
+  // Geography spatial joins are not yet supported — TraitJoinQueryBase.toSpatialRDD deserializes
+  // join keys with GeometrySerializer, which would fail on Geography bytes. When either side of a
+  // dual-dispatch predicate (e.g. ST_Contains) is GeographyUDT, skip join planning and let Spark
+  // evaluate the predicate row-by-row via InferredExpression.
+  private def isGeographyInput(shape: Expression): Boolean =
+    shape.dataType.isInstanceOf[GeographyUDT]
 
   private def getJoinDetection(
       left: LogicalPlan,
@@ -199,7 +206,8 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
       val queryDetection: Option[JoinQueryDetection] = condition.flatMap {
         case joinConditionMatcher(predicate, extraCondition) =>
           predicate match {
-            case ST_Contains(Seq(leftShape, rightShape)) =>
+            case ST_Contains(Seq(leftShape, rightShape))
+                if !isGeographyInput(leftShape) && !isGeographyInput(rightShape) =>
               Some(
                 JoinQueryDetection(
                   left,

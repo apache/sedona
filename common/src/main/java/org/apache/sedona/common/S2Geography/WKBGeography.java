@@ -184,24 +184,60 @@ public class WKBGeography extends Geography {
 
   // ─── WKB-direct optimizations (no S2 parse needed) ─────────────────────
 
-  /** Returns the base WKB geometry type (1-7), masking off Z/M/SRID flags. */
-  private int wkbBaseType() {
+  /** EWKB SRID flag (PostGIS convention). */
+  private static final int EWKB_SRID_FLAG = 0x20000000;
+  /** EWKB Z flag (PostGIS convention). */
+  private static final int EWKB_Z_FLAG = 0x80000000;
+  /** EWKB M flag (PostGIS convention). */
+  private static final int EWKB_M_FLAG = 0x40000000;
+
+  /** Read the raw 32-bit WKB type word at offset 1 (after the byte-order byte). */
+  private int wkbRawType() {
     boolean le = (wkbBytes[0] == 0x01);
-    int raw;
     if (le) {
-      raw =
-          (wkbBytes[1] & 0xFF)
-              | ((wkbBytes[2] & 0xFF) << 8)
-              | ((wkbBytes[3] & 0xFF) << 16)
-              | ((wkbBytes[4] & 0xFF) << 24);
+      return (wkbBytes[1] & 0xFF)
+          | ((wkbBytes[2] & 0xFF) << 8)
+          | ((wkbBytes[3] & 0xFF) << 16)
+          | ((wkbBytes[4] & 0xFF) << 24);
     } else {
-      raw =
-          ((wkbBytes[1] & 0xFF) << 24)
-              | ((wkbBytes[2] & 0xFF) << 16)
-              | ((wkbBytes[3] & 0xFF) << 8)
-              | (wkbBytes[4] & 0xFF);
+      return ((wkbBytes[1] & 0xFF) << 24)
+          | ((wkbBytes[2] & 0xFF) << 16)
+          | ((wkbBytes[3] & 0xFF) << 8)
+          | (wkbBytes[4] & 0xFF);
     }
-    return raw & 0xFF;
+  }
+
+  /**
+   * Returns the base WKB geometry type (1-7) after stripping EWKB flags and ISO Z/M offsets. Uses
+   * the same {@code (typeInt & 0xffff) % 1000} pattern as {@link WKBReader}.
+   */
+  private int wkbBaseType() {
+    return (wkbRawType() & 0xffff) % 1000;
+  }
+
+  /** Returns true if this WKB has an embedded SRID (EWKB convention). */
+  private boolean wkbHasSRID() {
+    return (wkbRawType() & EWKB_SRID_FLAG) != 0;
+  }
+
+  /**
+   * Byte offset where the geometry payload begins (after the 5-byte header, plus 4 bytes if EWKB
+   * SRID is embedded).
+   */
+  private int wkbPayloadOffset() {
+    return wkbHasSRID() ? 9 : 5;
+  }
+
+  /** Throws if the stored WKB uses Z or M dimensions (EWKB flag or ISO type {@code >= 1000}). */
+  private void requireXYOnly() {
+    int raw = wkbRawType();
+    boolean ewkbZ = (raw & EWKB_Z_FLAG) != 0;
+    boolean ewkbM = (raw & EWKB_M_FLAG) != 0;
+    boolean isoZM = (raw & 0xffff) >= 1000;
+    if (ewkbZ || ewkbM || isoZM) {
+      throw new UnsupportedOperationException(
+          "WKBGeography only supports 2D WKB; got Z/M type: 0x" + Integer.toHexString(raw));
+    }
   }
 
   /** Returns true if this WKB represents a single Point (type 1). */
@@ -211,11 +247,13 @@ public class WKBGeography extends Geography {
 
   /** Extract the S2Point from a Point WKB without full S2 parse. */
   public S2Point extractPoint() {
+    requireXYOnly();
     boolean le = (wkbBytes[0] == 0x01);
+    int coordOffset = wkbPayloadOffset();
     ByteBuffer bb =
         ByteBuffer.wrap(wkbBytes).order(le ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
-    double lon = bb.getDouble(5);
-    double lat = bb.getDouble(13);
+    double lon = bb.getDouble(coordOffset);
+    double lat = bb.getDouble(coordOffset + 8);
     return S2LatLng.fromDegrees(lat, lon).toPoint();
   }
 

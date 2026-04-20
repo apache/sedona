@@ -418,4 +418,56 @@ public class WKBGeographyTest {
   public void eagerShapeIndex_defaultIsLazy() {
     assertFalse(WKBGeography.isEagerShapeIndex());
   }
+
+  // ─── EWKB / ISO Z-M decoding ─────────────────────────────────────────────
+
+  /** Builds a PostGIS-style EWKB Point (little-endian) with the SRID flag set. */
+  private static byte[] buildEwkbPointWithSRID(double lon, double lat, int srid) {
+    java.nio.ByteBuffer buf = java.nio.ByteBuffer.allocate(25);
+    buf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+    buf.put((byte) 0x01); // little endian
+    buf.putInt(1 | 0x20000000); // POINT with EWKB SRID flag
+    buf.putInt(srid); // SRID
+    buf.putDouble(lon);
+    buf.putDouble(lat);
+    return buf.array();
+  }
+
+  /** Builds an ISO WKB PointZ (little-endian) with type 1001. */
+  private static byte[] buildIsoPointZ(double lon, double lat, double z) {
+    java.nio.ByteBuffer buf = java.nio.ByteBuffer.allocate(29);
+    buf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+    buf.put((byte) 0x01);
+    buf.putInt(1001); // ISO PointZ
+    buf.putDouble(lon);
+    buf.putDouble(lat);
+    buf.putDouble(z);
+    return buf.array();
+  }
+
+  @Test
+  public void ewkbPoint_withSRIDFlag_decodesCorrectly() throws ParseException {
+    byte[] ewkb = buildEwkbPointWithSRID(30.0, 10.0, 4326);
+    WKBGeography geog = WKBGeography.fromWKB(ewkb, 4326);
+
+    // isPoint() must recognize the base type after stripping the EWKB SRID flag.
+    assertTrue(geog.isPoint());
+    assertEquals(0, geog.dimension());
+
+    // extractPoint() must skip the 4 SRID bytes; lon/lat should be the original values.
+    S2Point p = geog.extractPoint();
+    S2LatLng ll = new S2LatLng(p);
+    assertEquals(10.0, ll.latDegrees(), EPS);
+    assertEquals(30.0, ll.lngDegrees(), EPS);
+  }
+
+  @Test
+  public void isoPointZ_throwsUnsupported() {
+    byte[] wkbZ = buildIsoPointZ(30.0, 10.0, 5.0);
+    WKBGeography geog = WKBGeography.fromWKB(wkbZ, 0);
+    // isPoint() is safe — just tests base type — but extractPoint/shape must refuse Z/M.
+    assertTrue(geog.isPoint());
+    assertThrows(UnsupportedOperationException.class, geog::extractPoint);
+    assertThrows(UnsupportedOperationException.class, () -> new WkbS2Shape(wkbZ));
+  }
 }

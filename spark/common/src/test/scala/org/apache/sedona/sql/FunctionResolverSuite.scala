@@ -85,16 +85,31 @@ class FunctionResolverSuite extends AnyFunSpec {
       assert(result.sparkInputTypes == Seq(LongType, StringType))
     }
 
-    it("Multiple functions match input arity, ambiguity prefers first candidate") {
+    it("All-null inputs with ambiguous overloads prefer first candidate") {
       val functions = Seq(
         createTestFunction(Seq(LongType, StringType)),
         createTestFunction(Seq(DoubleType, StringType)))
-      val expressions = Seq(createTestExpression(IntegerType), createTestExpression(StringType))
+      // Null literals with NullType — both overloads match equally via implicit cast.
+      val expressions = Seq(createTestExpression(NullType), createTestExpression(NullType))
 
-      // When multiple candidates match equally, the first one is preferred
-      // (e.g., null inputs matching both Geometry and Geography overloads)
+      // When every argument is NullType, all overloads return null for null input, so selecting
+      // the first candidate is semantically safe.
       val result = FunctionResolver.resolveFunction(expressions, functions)
       assert(result.sparkInputTypes == Seq(LongType, StringType))
+    }
+
+    it("Ambiguous overloads with non-null inputs throw") {
+      val functions = Seq(
+        createTestFunction(Seq(LongType, StringType)),
+        createTestFunction(Seq(DoubleType, StringType)))
+      // Integer coerces to both Long and Double with equal cost; ambiguity without NullType
+      // must be a hard error to avoid silently picking the wrong overload semantics.
+      val expressions = Seq(createTestExpression(IntegerType), createTestExpression(StringType))
+
+      val ex = intercept[IllegalArgumentException] {
+        FunctionResolver.resolveFunction(expressions, functions)
+      }
+      assert(ex.getMessage.contains("Ambiguous function call"))
     }
   }
 }

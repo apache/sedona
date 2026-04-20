@@ -20,6 +20,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.catalyst.analysis.TypeCoercion
 import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.types.NullType
 
 /**
  * A utility object for resolving functions based on input argument types. See
@@ -81,11 +82,19 @@ object FunctionResolver {
         }
         if (ambiguousMatches.length == 1) {
           function
-        } else {
-          // Multiple candidates match equally (e.g., null inputs matching both Geometry and
-          // Geography overloads). Prefer the first candidate — for null inputs all overloads
-          // return null, so the choice is irrelevant.
+        } else if (expressions.forall(_.dataType == NullType)) {
+          // All arguments are NullType literals; every overload returns null, so the choice
+          // between equally-good matches is semantically irrelevant. Prefer the first candidate.
           ambiguousMatches.head._1
+        } else {
+          val ambiguousTypesMsg = ambiguousMatches
+            .map { case (function, _) =>
+              "  (" + function.sparkInputTypes.mkString(", ") + ")"
+            }
+            .mkString("\n")
+          throw new IllegalArgumentException(
+            "Ambiguous function call: multiple overloads match equally. Candidates are:\n"
+              + ambiguousTypesMsg)
         }
     }
   }

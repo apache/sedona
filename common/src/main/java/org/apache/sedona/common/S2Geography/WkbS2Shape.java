@@ -38,6 +38,10 @@ import java.nio.ByteOrder;
  */
 public class WkbS2Shape implements S2Shape {
 
+  private static final int EWKB_SRID_FLAG = 0x20000000;
+  private static final int EWKB_Z_FLAG = 0x80000000;
+  private static final int EWKB_M_FLAG = 0x40000000;
+
   private final int dim; // S2 dimension: 0=point, 1=line, 2=polygon
   private final S2Point[] vertices; // all vertices, pre-converted from WKB
   private final int totalEdges;
@@ -52,14 +56,24 @@ public class WkbS2Shape implements S2Shape {
     boolean le = (wkb[0] == 0x01);
     ByteBuffer buf =
         ByteBuffer.wrap(wkb).order(le ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
-    int wkbType = buf.getInt(1) & 0xFF;
+    int typeInt = buf.getInt(1);
+    int wkbType = (typeInt & 0xffff) % 1000;
+    if ((typeInt & EWKB_Z_FLAG) != 0
+        || (typeInt & EWKB_M_FLAG) != 0
+        || (typeInt & 0xffff) >= 1000) {
+      throw new UnsupportedOperationException(
+          "WkbS2Shape only supports 2D WKB; got Z/M type: 0x" + Integer.toHexString(typeInt));
+    }
+    // Payload begins after the 5-byte header (byte-order + type). EWKB with SRID inserts a 4-byte
+    // SRID immediately after the type, so coordinates/counts start at offset 9 in that case.
+    int payloadOffset = ((typeInt & EWKB_SRID_FLAG) != 0) ? 9 : 5;
 
     switch (wkbType) {
       case 1: // Point
         {
           this.dim = 0;
-          double lon = buf.getDouble(5);
-          double lat = buf.getDouble(13);
+          double lon = buf.getDouble(payloadOffset);
+          double lat = buf.getDouble(payloadOffset + 8);
           S2Point p = S2LatLng.fromDegrees(lat, lon).toPoint();
           this.vertices = new S2Point[] {p};
           this.totalEdges = 1;
@@ -73,8 +87,8 @@ public class WkbS2Shape implements S2Shape {
       case 2: // LineString
         {
           this.dim = 1;
-          int numCoords = buf.getInt(5);
-          this.vertices = readVertices(buf, 9, numCoords);
+          int numCoords = buf.getInt(payloadOffset);
+          this.vertices = readVertices(buf, payloadOffset + 4, numCoords);
           this.totalEdges = Math.max(0, numCoords - 1);
           this.chainStarts = new int[] {0};
           this.chainLengths = new int[] {totalEdges};
@@ -86,7 +100,7 @@ public class WkbS2Shape implements S2Shape {
       case 3: // Polygon
         {
           this.dim = 2;
-          int numRings = buf.getInt(5);
+          int numRings = buf.getInt(payloadOffset);
           this.chainStarts = new int[numRings];
           this.chainLengths = new int[numRings];
           this.vertexOffsets = new int[numRings];
@@ -94,7 +108,7 @@ public class WkbS2Shape implements S2Shape {
           // First pass: count total vertices and compute offsets
           int totalVerts = 0;
           int edgeCount = 0;
-          int byteOffset = 9;
+          int byteOffset = payloadOffset + 4;
           int[] ringCoordCounts = new int[numRings];
           int[] ringByteOffsets = new int[numRings];
           for (int r = 0; r < numRings; r++) {
