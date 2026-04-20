@@ -200,7 +200,6 @@ public class WKBGeographyTest {
     WKBGeography original = WKBGeography.fromJTS(jts);
 
     byte[] bytes = GeographyWKBSerializer.serialize(original);
-    assertEquals((byte) 0xFF, bytes[0]); // format marker
 
     Geography deserialized = GeographyWKBSerializer.deserialize(bytes);
     assertTrue(deserialized instanceof WKBGeography);
@@ -248,39 +247,6 @@ public class WKBGeographyTest {
     assertTrue(deserialized instanceof WKBGeography);
   }
 
-  // ─── Backward compatibility: S2-native bytes ─────────────────────────────
-
-  @Test
-  public void deserialize_legacyS2Native_point() throws IOException {
-    S2Point s2Pt = S2LatLng.fromDegrees(10.0, 30.0).toPoint();
-    Geography s2Geog = new SinglePointGeography(s2Pt);
-    s2Geog.setSRID(4326);
-
-    // Serialize with old S2-native format
-    byte[] legacyBytes = GeographySerializer.serialize(s2Geog);
-    // First byte should be GeographyKind (SINGLEPOINT = 8)
-    assertTrue((legacyBytes[0] & 0xFF) >= 1 && (legacyBytes[0] & 0xFF) <= 10);
-
-    // Deserialize with new serializer — should detect legacy format
-    Geography deserialized = GeographyWKBSerializer.deserialize(legacyBytes);
-    assertNotNull(deserialized);
-    // Legacy deserialization returns S2 Geography, not WKBGeography
-    assertFalse(deserialized instanceof WKBGeography);
-    assertEquals(4326, deserialized.getSRID());
-  }
-
-  @Test
-  public void deserialize_legacyS2Native_polygon() throws IOException, ParseException {
-    WKTReader wktReader = new WKTReader();
-    Geography s2Geog = wktReader.read("POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))");
-    s2Geog.setSRID(4326);
-
-    byte[] legacyBytes = GeographySerializer.serialize(s2Geog);
-    Geography deserialized = GeographyWKBSerializer.deserialize(legacyBytes);
-    assertNotNull(deserialized);
-    assertEquals(4326, deserialized.getSRID());
-  }
-
   // ─── Serialize S2 Geography via new serializer ────────────────────────────
 
   @Test
@@ -291,7 +257,6 @@ public class WKBGeographyTest {
 
     // Serialize S2 Geography (not WKBGeography) via new serializer
     byte[] bytes = GeographyWKBSerializer.serialize(s2Geog);
-    assertEquals((byte) 0xFF, bytes[0]); // should use new WKB format
 
     // Deserialize and verify
     Geography deserialized = GeographyWKBSerializer.deserialize(bytes);

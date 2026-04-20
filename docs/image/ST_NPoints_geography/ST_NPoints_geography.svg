@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Equirectangular map frame: lon [-180,180] -> x [60,440], lat [90,-90] -> y [60,240] -->
+  <rect x="60" y="60" width="380" height="180" fill="#f7f9fb" stroke="#c9d4df" stroke-width="1" />
+  <!-- Meridians every 60 deg -->
+  <line x1="123.3" y1="60" x2="123.3" y2="240" stroke="#d8e0e8" stroke-width="0.75" stroke-dasharray="2,3" />
+  <line x1="186.7" y1="60" x2="186.7" y2="240" stroke="#d8e0e8" stroke-width="0.75" stroke-dasharray="2,3" />
+  <line x1="250" y1="60" x2="250" y2="240" stroke="#c0cbd6" stroke-width="1" />
+  <line x1="313.3" y1="60" x2="313.3" y2="240" stroke="#d8e0e8" stroke-width="0.75" stroke-dasharray="2,3" />
+  <line x1="376.7" y1="60" x2="376.7" y2="240" stroke="#d8e0e8" stroke-width="0.75" stroke-dasharray="2,3" />
+  <!-- Parallels every 30 deg -->
+  <line x1="60" y1="90" x2="440" y2="90" stroke="#d8e0e8" stroke-width="0.75" stroke-dasharray="2,3" />
+  <line x1="60" y1="120" x2="440" y2="120" stroke="#d8e0e8" stroke-width="0.75" stroke-dasharray="2,3" />
+  <line x1="60" y1="150" x2="440" y2="150" stroke="#c0cbd6" stroke-width="1" />
+  <line x1="60" y1="180" x2="440" y2="180" stroke="#d8e0e8" stroke-width="0.75" stroke-dasharray="2,3" />
+  <line x1="60" y1="210" x2="440" y2="210" stroke="#d8e0e8" stroke-width="0.75" stroke-dasharray="2,3" />
+
+  <!-- Polyline SF -> NYC -> Lisbon -> Tokyo as great-circle-like curved segments -->
+  <path d="M 120.8 112.2 Q 146 100 171.9 109.3 Q 206 90 240.4 111.3 Q 319 70 397.5 114.3"
+        fill="none" stroke="#4a90d9" stroke-width="2.5" />
+
+  <!-- Vertices -->
+  <circle cx="120.8" cy="112.2" r="5" fill="#2ecc71" stroke="#ffffff" stroke-width="1.2" />
+  <circle cx="171.9" cy="109.3" r="5" fill="#2ecc71" stroke="#ffffff" stroke-width="1.2" />
+  <circle cx="240.4" cy="111.3" r="5" fill="#2ecc71" stroke="#ffffff" stroke-width="1.2" />
+  <circle cx="397.5" cy="114.3" r="5" fill="#2ecc71" stroke="#ffffff" stroke-width="1.2" />
+
+  <!-- NPoints label -->
+  <rect x="180" y="8" width="140" height="28" rx="14" fill="#2ecc71" fill-opacity="0.15" stroke="#2ecc71" stroke-width="1.5" />
+  <text x="250" y="27" text-anchor="middle" fill="#2ecc71" font-size="15" font-weight="bold">NPoints = 4</text>
+
+  <text x="250" y="258" text-anchor="middle" font-size="12" fill="#333333" font-style="italic">Counts the vertices of a geography; same convention as ST_NPoints on geometries</text>
+
+  <text x="490" y="290" text-anchor="end" fill="#999" font-size="11">ST_NPoints</text>
+</svg>

@@ -21,13 +21,15 @@
 
 Introduction: Returns the minimum geodesic distance between two geography objects in meters. Uses S2 geometry-to-geometry distance (S2ClosestEdgeQuery), which computes the true minimum distance between any two points on the geometries — not centroid-to-centroid. Consistent with sedona-db's implementation.
 
+![ST_Distance on a sphere: great-circle distance between two points](../../../../image/ST_Distance_geography/ST_Distance_geography.svg "ST_Distance on a sphere: great-circle distance between two points")
+
 Format:
 
 `ST_Distance (A: Geography, B: Geography)`
 
 Return type: `Double`
 
-Since: `v1.9.0`
+Since: `v1.9.1`
 
 SQL Example
 

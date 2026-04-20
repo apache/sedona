@@ -23,23 +23,19 @@ import java.util.Arrays;
 import org.locationtech.jts.io.ByteOrderValues;
 
 /**
- * Serializer for Geography objects using WKB as the primary format. Supports backward-compatible
- * reading of legacy S2-native serialized data. Format discrimination by first byte: 0xFF for WKB
- * format [0xFF][4-byte SRID big-endian][WKB payload], or 1-10 for legacy S2-native format.
+ * Serializer for Geography objects using WKB as the primary format. Byte layout: [4-byte SRID
+ * big-endian][WKB payload].
  */
 public class GeographyWKBSerializer {
 
-  /** Version marker for the WKB format. No GeographyKind has value 255. */
-  private static final int FORMAT_WKB = 0xFF;
-
-  /** Header size: 1 byte version + 4 bytes SRID. */
-  private static final int HEADER_SIZE = 5;
+  /** Header size: 4 bytes SRID. */
+  private static final int HEADER_SIZE = 4;
 
   /**
    * Serialize a Geography to bytes using WKB format.
    *
    * @param geog the Geography to serialize
-   * @return byte array with format: [0xFF][SRID 4 bytes big-endian][WKB payload]
+   * @return byte array with format: [SRID 4 bytes big-endian][WKB payload]
    */
   public static byte[] serialize(Geography geog) throws IOException {
     byte[] wkb;
@@ -51,34 +47,28 @@ public class GeographyWKBSerializer {
     }
 
     byte[] result = new byte[HEADER_SIZE + wkb.length];
-    result[0] = (byte) FORMAT_WKB;
     int srid = geog.getSRID();
-    result[1] = (byte) (srid >> 24);
-    result[2] = (byte) (srid >> 16);
-    result[3] = (byte) (srid >> 8);
-    result[4] = (byte) srid;
+    result[0] = (byte) (srid >> 24);
+    result[1] = (byte) (srid >> 16);
+    result[2] = (byte) (srid >> 8);
+    result[3] = (byte) srid;
     System.arraycopy(wkb, 0, result, HEADER_SIZE, wkb.length);
     return result;
   }
 
   /**
-   * Deserialize bytes to a Geography. Supports both WKB format (0xFF prefix) and legacy S2-native
-   * format (GeographyKind prefix 1-10).
+   * Deserialize bytes to a Geography using the WKB format.
    *
    * @param buffer the byte array to deserialize
    * @return the deserialized Geography
    */
   public static Geography deserialize(byte[] buffer) throws IOException {
-    if ((buffer[0] & 0xFF) == FORMAT_WKB) {
-      int srid =
-          ((buffer[1] & 0xFF) << 24)
-              | ((buffer[2] & 0xFF) << 16)
-              | ((buffer[3] & 0xFF) << 8)
-              | (buffer[4] & 0xFF);
-      byte[] wkb = Arrays.copyOfRange(buffer, HEADER_SIZE, buffer.length);
-      return WKBGeography.fromWKB(wkb, srid);
-    }
-    // Legacy S2-native format: first byte is GeographyKind (1-10)
-    return GeographySerializer.deserialize(buffer);
+    int srid =
+        ((buffer[0] & 0xFF) << 24)
+            | ((buffer[1] & 0xFF) << 16)
+            | ((buffer[2] & 0xFF) << 8)
+            | (buffer[3] & 0xFF);
+    byte[] wkb = Arrays.copyOfRange(buffer, HEADER_SIZE, buffer.length);
+    return WKBGeography.fromWKB(wkb, srid);
   }
 }

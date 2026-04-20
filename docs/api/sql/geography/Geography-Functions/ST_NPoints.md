@@ -21,13 +21,15 @@
 
 Introduction: Returns the number of points (vertices) in a geography object.
 
+![ST_NPoints on a global polyline with 4 vertices](../../../../image/ST_NPoints_geography/ST_NPoints_geography.svg "ST_NPoints on a global polyline with 4 vertices")
+
 Format:
 
 `ST_NPoints (A: Geography)`
 
 Return type: `Integer`
 
-Since: `v1.9.0`
+Since: `v1.9.1`
 
 SQL Example
 

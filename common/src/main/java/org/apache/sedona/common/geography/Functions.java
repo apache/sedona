@@ -22,6 +22,7 @@ import com.google.common.geometry.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.sedona.common.S2Geography.*;
+import org.apache.sedona.common.sphere.Haversine;
 import org.locationtech.jts.geom.Geometry;
 
 public class Functions {
@@ -99,7 +100,7 @@ public class Functions {
       // Fast path: point-to-point distance without building ShapeIndex
       if (w1.isPoint() && w2.isPoint()) {
         S1Angle angle = new S1Angle(w1.extractPoint(), w2.extractPoint());
-        return angle.radians() * EARTH_RADIUS_METERS;
+        return angle.radians() * Haversine.AVG_EARTH_RADIUS;
       }
       // Fast path: point-to-complex uses PointTarget (avoids building ShapeIndex for point side)
       if (w1.isPoint()) {
@@ -152,10 +153,7 @@ public class Functions {
     return new S2BooleanOperation.Options();
   }
 
-  /** Mean Earth radius in meters (WGS84 mean radius). */
-  private static final double EARTH_RADIUS_METERS = 6371008.8;
-
   private static double radiansToMeters(double radians) {
-    return radians * EARTH_RADIUS_METERS;
+    return radians * Haversine.AVG_EARTH_RADIUS;
   }
 }

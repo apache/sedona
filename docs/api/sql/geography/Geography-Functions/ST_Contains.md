@@ -21,13 +21,16 @@
 
 Introduction: Tests whether geography A fully contains geography B using S2 spherical boolean operations. Returns true if every point of B is inside or on the boundary of A.
 
+![ST_Contains returning true](../../../../image/ST_Contains_geography/ST_Contains_geography_true.svg "ST_Contains returning true")
+![ST_Contains returning false](../../../../image/ST_Contains_geography/ST_Contains_geography_false.svg "ST_Contains returning false")
+
 Format:
 
 `ST_Contains (A: Geography, B: Geography)`
 
 Return type: `Boolean`
 
-Since: `v1.9.0`
+Since: `v1.9.1`
 
 SQL Example
 
