@@ -3221,7 +3221,19 @@
          <lastmod>2026-04-21</lastmod>
     </url>
     <url>
+         <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Functions/ST_Contains/</loc>
+         <lastmod>2026-04-21</lastmod>
+    </url>
+    <url>
+         <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Functions/ST_Distance/</loc>
+         <lastmod>2026-04-21</lastmod>
+    </url>
+    <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Functions/ST_Envelope/</loc>
+         <lastmod>2026-04-21</lastmod>
+    </url>
+    <url>
+         <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Functions/ST_NPoints/</loc>
          <lastmod>2026-04-21</lastmod>
     </url>
     <url>
