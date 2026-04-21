@@ -5024,10 +5024,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-update-mkdocsyml" class="md-nav__link">
+  <a href="#3-update-release-notes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Update mkdocs.yml
+        3. Update release notes
       
     </span>
   </a>
@@ -5035,10 +5035,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-stage-and-upload-release-candidates" class="md-nav__link">
+  <a href="#4-update-mkdocsyml" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Stage and upload release candidates
+        4. Update mkdocs.yml
       
     </span>
   </a>
@@ -5046,15 +5046,26 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-vote-in-dev-sedonaapacheorg" class="md-nav__link">
+  <a href="#5-stage-and-upload-release-candidates" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Vote in dev sedona.apache.org
+        5. Stage and upload release candidates
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="5. Vote in dev sedona.apache.org">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-vote-in-dev-sedonaapacheorg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Vote in dev sedona.apache.org
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Vote in dev sedona.apache.org">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5617,10 +5628,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-update-mkdocsyml" class="md-nav__link">
+  <a href="#3-update-release-notes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Update mkdocs.yml
+        3. Update release notes
       
     </span>
   </a>
@@ -5628,10 +5639,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-stage-and-upload-release-candidates" class="md-nav__link">
+  <a href="#4-update-mkdocsyml" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Stage and upload release candidates
+        4. Update mkdocs.yml
       
     </span>
   </a>
@@ -5639,15 +5650,26 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-vote-in-dev-sedonaapacheorg" class="md-nav__link">
+  <a href="#5-stage-and-upload-release-candidates" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Vote in dev sedona.apache.org
+        5. Stage and upload release candidates
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="5. Vote in dev sedona.apache.org">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-vote-in-dev-sedonaapacheorg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Vote in dev sedona.apache.org
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Vote in dev sedona.apache.org">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5870,11 +5892,18 @@ rm<span class="w"> </span>report.txt
 <p>Make sure the Sedona version in the following files are 1.9.0.</p>
 <ol>
 <li><a href="https://github.com/apache/sedona/blob/master/python/sedona/version.py">https://github.com/apache/sedona/blob/master/python/sedona/version.py</a></li>
+<li><a href="https://github.com/apache/sedona/blob/master/python/pyproject.toml">https://github.com/apache/sedona/blob/master/python/pyproject.toml</a> (the <code>version</code> field under <code>[project]</code>)</li>
 <li><a href="https://github.com/apache/sedona/blob/master/R/DESCRIPTION">https://github.com/apache/sedona/blob/master/R/DESCRIPTION</a></li>
 <li><a href="https://github.com/apache/sedona/blob/99239524f17389fc4ae9548ea88756f8ea538bb9/R/R/dependencies.R#L42">https://github.com/apache/sedona/blob/99239524f17389fc4ae9548ea88756f8ea538bb9/R/R/dependencies.R#L42</a></li>
 <li><a href="https://github.com/apache/sedona/blob/master/zeppelin/package.json">https://github.com/apache/sedona/blob/master/zeppelin/package.json</a></li>
 </ol>
-<h2 id="3-update-mkdocsyml">3. Update mkdocs.yml<a class="headerlink" href="#3-update-mkdocsyml" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code>version</code> field in <code>python/pyproject.toml</code> is what <code>setuptools</code> uses when building the Python sdist and wheel. If this is not bumped, the PyPI artifact will carry the old version even if <code>python/sedona/version.py</code> is correct.</p>
+</div>
+<h2 id="3-update-release-notes">3. Update release notes<a class="headerlink" href="#3-update-release-notes" title="Permanent link">&para;</a></h2>
+<p>Before cutting the release candidate, make sure <code>docs/setup/release-notes.md</code> has an entry for 1.9.0 summarizing all changes since the previous release. This file is linked directly from the vote email and the announce email, so it must be in place on the release tag.</p>
+<h2 id="4-update-mkdocsyml">4. Update mkdocs.yml<a class="headerlink" href="#4-update-mkdocsyml" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Please change the following variables in <code>mkdocs.yml</code> to the version you want to publish.<ul>
 <li><code>sedona_create_release.current_version</code></li>
@@ -5886,7 +5915,7 @@ rm<span class="w"> </span>report.txt
 <li>Then compile the website by <code>mkdocs serve</code>. This will generate the scripts listed on this page in your local browser.</li>
 <li>You can also publish this website if needed. See the instruction at bottom.</li>
 </ul>
-<h2 id="4-stage-and-upload-release-candidates">4. Stage and upload release candidates<a class="headerlink" href="#4-stage-and-upload-release-candidates" title="Permanent link">&para;</a></h2>
+<h2 id="5-stage-and-upload-release-candidates">5. Stage and upload release candidates<a class="headerlink" href="#5-stage-and-upload-release-candidates" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 
 git<span class="w"> </span>checkout<span class="w"> </span>master
@@ -6251,7 +6280,7 @@ rm<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="n
 rm<span class="w"> </span>-rf<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-src
 rm<span class="w"> </span>-rf<span class="w"> </span>apache-sedona-<span class="si">${</span><span class="nv">SEDONA_VERSION</span><span class="si">}</span>-bin
 </code></pre></div>
-<h2 id="5-vote-in-dev-sedonaapacheorg">5. Vote in dev sedona.apache.org<a class="headerlink" href="#5-vote-in-dev-sedonaapacheorg" title="Permanent link">&para;</a></h2>
+<h2 id="6-vote-in-dev-sedonaapacheorg">6. Vote in dev sedona.apache.org<a class="headerlink" href="#6-vote-in-dev-sedonaapacheorg" title="Permanent link">&para;</a></h2>
 <h3 id="vote-email">Vote email<a class="headerlink" href="#vote-email" title="Permanent link">&para;</a></h3>
 <p>Please add changes at the end if needed:</p>
 <div class="highlight"><pre><span></span><code>Subject: [VOTE] Release Apache Sedona 1.9.0-rc1
@@ -6364,7 +6393,7 @@ Apache Sedona Team
 <p>If a vote failed, do the following:</p>
 <ol>
 <li>In the vote email, say that we will create another release candidate.</li>
-<li>Restart from Step 3 <code>Update mkdocs.yml</code>. Please increment the release candidate ID (e.g., <code>1.9.0-rc2</code>) and update <code>sedona_create_release.current_rc</code> and <code>sedona_create_release.current_git_tag</code> in <code>mkdocs.yml</code> to generate the script listed on this webpage.</li>
+<li>Restart from Step 4 <code>Update mkdocs.yml</code>. Please increment the release candidate ID (e.g., <code>1.9.0-rc2</code>) and update <code>sedona_create_release.current_rc</code> and <code>sedona_create_release.current_git_tag</code> in <code>mkdocs.yml</code> to generate the script listed on this webpage.</li>
 </ol>
 <h2 id="8-release-source-code-and-maven-package">8. Release source code and Maven package<a class="headerlink" href="#8-release-source-code-and-maven-package" title="Permanent link">&para;</a></h2>
 <h3 id="upload-releases">Upload releases<a class="headerlink" href="#upload-releases" title="Permanent link">&para;</a></h3>
@@ -6446,7 +6475,7 @@ R<span class="w"> </span>CMD<span class="w"> </span>check<span class="w"> </span
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 16, 2026 05:04:45 UTC">March 16, 2026 05:04:45</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="April 21, 2026 17:13:55 UTC">April 21, 2026 17:13:55</span>
   </span>
 
     
