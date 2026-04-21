@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.io.geotiffinfo
+package org.apache.spark.sql.sedona_sql.io.geotiffmetadata
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
@@ -39,7 +39,7 @@ import java.net.URI
 import scala.collection.mutable
 import scala.util.Try
 
-class GeoTiffInfoPartitionReader(
+class GeoTiffMetadataPartitionReader(
     configuration: Configuration,
     partitionedFiles: Array[PartitionedFile],
     readDataSchema: StructType)
@@ -75,10 +75,10 @@ class GeoTiffInfoPartitionReader(
           java.lang.Boolean.TRUE))
 
       // Extract TIFF IIO metadata BEFORE read() to avoid stream state issues
-      val isTiled = GeoTiffInfoPartitionReader.hasTiffTag(reader, 322)
-      val photometric = GeoTiffInfoPartitionReader.extractPhotometricInterpretation(reader)
-      val tiffMetadata = GeoTiffInfoPartitionReader.extractMetadata(reader)
-      val compression = GeoTiffInfoPartitionReader.extractCompression(reader)
+      val isTiled = GeoTiffMetadataPartitionReader.hasTiffTag(reader, 322)
+      val photometric = GeoTiffMetadataPartitionReader.extractPhotometricInterpretation(reader)
+      val tiffMetadata = GeoTiffMetadataPartitionReader.extractMetadata(reader)
+      val compression = GeoTiffMetadataPartitionReader.extractCompression(reader)
 
       raster = reader.read(null)
 
@@ -111,11 +111,11 @@ class GeoTiffInfoPartitionReader(
       lazy val tileWidth = image.getTileWidth
       lazy val tileHeight = image.getTileHeight
 
-      lazy val bandsArray = GeoTiffInfoPartitionReader
+      lazy val bandsArray = GeoTiffMetadataPartitionReader
         .buildBandsArray(raster, numBands, tileWidth, tileHeight, photometric)
       lazy val overviewsArray =
-        GeoTiffInfoPartitionReader.buildOverviewsArray(reader, width, height)
-      lazy val metadataMap = GeoTiffInfoPartitionReader.buildMetadataMap(tiffMetadata)
+        GeoTiffMetadataPartitionReader.buildOverviewsArray(reader, width, height)
+      lazy val metadataMap = GeoTiffMetadataPartitionReader.buildMetadataMap(tiffMetadata)
 
       val fields = readDataSchema.fieldNames.map {
         case "path" => UTF8String.fromString(path.toString)
@@ -148,7 +148,7 @@ class GeoTiffInfoPartitionReader(
   }
 }
 
-object GeoTiffInfoPartitionReader {
+object GeoTiffMetadataPartitionReader {
 
   // TIFF Photometric Interpretation values
   private val PHOTOMETRIC_MIN_IS_WHITE = 0

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.io.geotiffinfo
+package org.apache.spark.sql.sedona_sql.io.geotiffmetadata
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.expressions.Expression
@@ -37,7 +37,7 @@ import org.apache.spark.util.SerializableConfiguration
 
 import scala.collection.JavaConverters._
 
-case class GeoTiffInfoScanBuilder(
+case class GeoTiffMetadataScanBuilder(
     sparkSession: SparkSession,
     fileIndex: PartitioningAwareFileIndex,
     schema: StructType,
@@ -49,7 +49,7 @@ case class GeoTiffInfoScanBuilder(
   private var pushedLimit: Option[Int] = None
 
   override def build(): Scan = {
-    GeoTiffInfoScan(
+    GeoTiffMetadataScan(
       sparkSession,
       fileIndex,
       dataSchema,
@@ -70,7 +70,7 @@ case class GeoTiffInfoScanBuilder(
   override def isPartiallyPushed: Boolean = false
 }
 
-case class GeoTiffInfoScan(
+case class GeoTiffMetadataScan(
     sparkSession: SparkSession,
     fileIndex: PartitioningAwareFileIndex,
     dataSchema: StructType,
@@ -127,7 +127,7 @@ case class GeoTiffInfoScan(
     val broadcastedConf =
       sparkSession.sparkContext.broadcast(new SerializableConfiguration(hadoopConf))
 
-    GeoTiffInfoPartitionReaderFactory(
+    GeoTiffMetadataPartitionReaderFactory(
       broadcastedConf,
       dataSchema,
       readDataSchema,

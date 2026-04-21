@@ -17,9 +17,9 @@
  under the License.
  -->
 
-# GeoTiffInfo - GeoTIFF File Metadata
+# GeoTiffMetadata - GeoTIFF File Metadata
 
-GeoTiffInfo is a Spark data source that reads GeoTIFF file metadata without decoding pixel data, similar to [gdalinfo](https://gdal.org/en/stable/programs/gdalinfo.html). It returns one row per file with metadata including dimensions, coordinate system, band information, tiling, overviews, and compression.
+GeoTiffMetadata is a Spark data source that reads GeoTIFF file metadata without decoding pixel data, similar to [gdalinfo](https://gdal.org/en/stable/programs/gdalinfo.html). It returns one row per file with metadata including dimensions, coordinate system, band information, tiling, overviews, and compression.
 
 This is useful for:
 

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.io.geotiffinfo
+package org.apache.spark.sql.sedona_sql.io.geotiffmetadata
 
 import org.apache.hadoop.fs.FileStatus
 import org.apache.spark.sql.SparkSession
@@ -32,7 +32,7 @@ import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
 import java.util.{Set => JSet}
 
-case class GeoTiffInfoTable(
+case class GeoTiffMetadataTable(
     name: String,
     sparkSession: SparkSession,
     options: CaseInsensitiveStringMap,
@@ -43,22 +43,22 @@ case class GeoTiffInfoTable(
     with SupportsRead {
 
   override def inferSchema(files: Seq[FileStatus]): Option[StructType] =
-    Some(userSpecifiedSchema.getOrElse(GeoTiffInfoTable.SCHEMA))
+    Some(userSpecifiedSchema.getOrElse(GeoTiffMetadataTable.SCHEMA))
 
-  override def formatName: String = "GeoTiffInfo"
+  override def formatName: String = "GeoTiffMetadata"
 
   override def capabilities(): JSet[TableCapability] =
     java.util.EnumSet.of(TableCapability.BATCH_READ)
 
   override def newScanBuilder(options: CaseInsensitiveStringMap): ScanBuilder = {
-    GeoTiffInfoScanBuilder(sparkSession, fileIndex, schema, dataSchema, options)
+    GeoTiffMetadataScanBuilder(sparkSession, fileIndex, schema, dataSchema, options)
   }
 
   def newWriteBuilder(info: LogicalWriteInfo): WriteBuilder =
-    throw new UnsupportedOperationException("GeoTiffInfo is a read-only data source")
+    throw new UnsupportedOperationException("GeoTiffMetadata is a read-only data source")
 }
 
-object GeoTiffInfoTable {
+object GeoTiffMetadataTable {
 
   val GEO_TRANSFORM_TYPE: StructType = StructType(
     Seq(

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.io.geotiffinfo
+package org.apache.spark.sql.sedona_sql.io.geotiffmetadata
 
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.catalyst.InternalRow
@@ -28,7 +28,7 @@ import org.apache.spark.sql.sedona_sql.io.raster.RasterInputPartition
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.util.SerializableConfiguration
 
-case class GeoTiffInfoPartitionReaderFactory(
+case class GeoTiffMetadataPartitionReaderFactory(
     broadcastedConf: Broadcast[SerializableConfiguration],
     dataSchema: StructType,
     readDataSchema: StructType,
@@ -38,7 +38,10 @@ case class GeoTiffInfoPartitionReaderFactory(
   private def buildReader(partition: RasterInputPartition): PartitionReader[InternalRow] = {
 
     val fileReader =
-      new GeoTiffInfoPartitionReader(broadcastedConf.value.value, partition.files, readDataSchema)
+      new GeoTiffMetadataPartitionReader(
+        broadcastedConf.value.value,
+        partition.files,
+        readDataSchema)
 
     new PartitionReaderWithPartitionValues(
       fileReader,

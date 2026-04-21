@@ -25,19 +25,19 @@ import org.scalatest.BeforeAndAfterAll
 import java.io.File
 import java.nio.file.Files
 
-class geotiffInfoTest extends TestBaseScala with BeforeAndAfterAll {
+class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
 
   val rasterDir: String = resourceFolder + "raster/"
   val singleFileLocation: String = resourceFolder + "raster/test1.tiff"
   val tempDir: String =
-    Files.createTempDirectory("sedona_geotiffinfo_test_").toFile.getAbsolutePath
+    Files.createTempDirectory("sedona_geotiffmetadata_test_").toFile.getAbsolutePath
 
   override def afterAll(): Unit = {
     FileUtils.deleteDirectory(new File(tempDir))
     super.afterAll()
   }
 
-  describe("GeoTiffInfo data source") {
+  describe("GeoTiffMetadata data source") {
 
     it("should read test1.tiff with exact metadata values") {
       val df = sparkSession.read.format("geotiff.metadata").load(singleFileLocation)

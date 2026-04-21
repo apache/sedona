@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.spark.sql.sedona_sql.io.geotiffinfo
+package org.apache.spark.sql.sedona_sql.io.geotiffmetadata
 
 import org.apache.spark.sql.connector.catalog.Table
 import org.apache.spark.sql.connector.catalog.TableProvider
@@ -33,7 +33,10 @@ import scala.collection.JavaConverters._
  * A read-only Spark SQL data source that extracts GeoTIFF file metadata (dimensions, CRS, bands,
  * overviews, compression, etc.) without loading raster pixel data into memory.
  */
-class GeoTiffInfoDataSource extends FileDataSourceV2 with TableProvider with DataSourceRegister {
+class GeoTiffMetadataDataSource
+    extends FileDataSourceV2
+    with TableProvider
+    with DataSourceRegister {
 
   override def shortName(): String = "geotiff.metadata"
 
@@ -71,7 +74,7 @@ class GeoTiffInfoDataSource extends FileDataSourceV2 with TableProvider with Dat
       }
     }
 
-    new GeoTiffInfoTable(
+    new GeoTiffMetadataTable(
       tableName,
       sparkSession,
       optionsWithoutPaths,
@@ -89,7 +92,7 @@ class GeoTiffInfoDataSource extends FileDataSourceV2 with TableProvider with Dat
   }
 
   override def inferSchema(options: CaseInsensitiveStringMap): StructType =
-    GeoTiffInfoTable.SCHEMA
+    GeoTiffMetadataTable.SCHEMA
 
   override def fallbackFileFormat: Class[_ <: FileFormat] = classOf[RasterFileFormat]
 }
