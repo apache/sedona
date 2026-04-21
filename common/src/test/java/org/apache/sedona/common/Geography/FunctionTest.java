@@ -18,8 +18,7 @@
  */
 package org.apache.sedona.common.Geography;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2LatLngRect;
@@ -45,25 +44,22 @@ public class FunctionTest {
     assertDegAlmostEqual(ll.lngDegrees(), expLngDeg);
   }
 
-  /** Assert a *single* rectangular envelope polygon has these 4 corners in SW→SE→NE→NW order. */
   private static void assertRectLoopVertices(
       S2Loop loop, double latLo, double lngLo, double latHi, double lngHi) {
     assertEquals("rect must have 4 vertices", 4, loop.numVertices());
-    // SW
     assertLatLng(loop.vertex(0), latLo, lngLo);
-    // SE
     assertLatLng(loop.vertex(1), latLo, lngHi);
-    // NE
     assertLatLng(loop.vertex(2), latHi, lngHi);
-    // NW
     assertLatLng(loop.vertex(3), latHi, lngLo);
   }
+
+  // ─── Envelope tests (pre-existing) ───────────────────────────────────────
 
   @Test
   public void envelope_noSplit_antimeridian() throws Exception {
     String wkt = "MULTIPOINT ((-179 0), (179 1), (-180 10))";
     Geography g = Constructors.geogFromWKT(wkt, 4326);
-    PolygonGeography env = (PolygonGeography) Functions.getEnvelope(g, /*split*/ false);
+    PolygonGeography env = (PolygonGeography) Functions.getEnvelope(g, false);
 
     S2LatLngRect r = g.region().getRectBound();
     assertTrue(r.lng().isInverted());
@@ -73,7 +69,7 @@ public class FunctionTest {
     assertDegAlmostEqual(r.lngHi().degrees(), -179.0);
 
     S2Loop loop = env.polygon.getLoops().get(0);
-    assertRectLoopVertices(loop, /*latLo*/ 0, /*lngLo*/ 179, /*latHi*/ 10, /*lngHi*/ -179);
+    assertRectLoopVertices(loop, 0, 179, 10, -179);
   }
 
   @Test
@@ -89,38 +85,22 @@ public class FunctionTest {
 
   @Test
   public void envelope_fiji_split_perVertex() throws Exception {
-    //    <-------------------- WESTERN HEMISPHERE | EASTERN HEMISPHERE -------------------->
-    //
-    //            Longitude: ... -179.8°      -180°| 180°      177.3° ...
-    //    ----------------------------------+--------------------------------------------
-    //            |
-    //            Latitude                         |
-    //            -16°   +------------------------+ +------------------------+
-    //                   |                        | |                        |
-    //                   |       POLYGON 2        | |       POLYGON 1        |
-    //                   |                        | |                        |
-    //            -18.3° +------------------------+ +------------------------+
-    //                                             |
-    //                                             |
-    //                                             ^
-    //                                             |
-    //                                          Antimeridian
-    //                                    (The map's seam at 180°)
     String fiji =
         "MULTIPOLYGON ("
             + "((177.285 -18.28799, 180 -18.28799, 180 -16.02088, 177.285 -16.02088, 177.285 -18.28799)),"
             + "((-180 -18.28799, -179.7933 -18.28799, -179.7933 -16.02088, -180 -16.02088, -180 -18.28799))"
             + ")";
     Geography g = Constructors.geogFromWKT(fiji, 4326);
-    Geography env = Functions.getEnvelope(g, /*split*/ true);
+    Geography env = Functions.getEnvelope(g, true);
     String expectedWKT =
         "MULTIPOLYGON (((177.3 -18.3, 180 -18.3, 180 -16, 177.3 -16, 177.3 -18.3)), "
             + "((-180 -18.3, -179.8 -18.3, -179.8 -16, -180 -16, -180 -18.3)))";
     assertEquals(expectedWKT, env.toString());
 
-    expectedWKT = "POLYGON ((177.3 -18.3, -179.8 -18.3, -179.8 -16, 177.3 -16, 177.3 -18.3))";
-    env = Functions.getEnvelope(g, /*split*/ false);
-    assertEquals(expectedWKT, env.toString());
+    String expectedWKT2 =
+        "POLYGON ((177.3 -18.3, -179.8 -18.3, -179.8 -16, 177.3 -16, 177.3 -18.3))";
+    env = Functions.getEnvelope(g, false);
+    assertEquals(expectedWKT2, env.toString());
   }
 
   @Test
@@ -148,5 +128,63 @@ public class FunctionTest {
 
     String expectedWKT2 = "POLYGON ((-180 53.5, 180 53.5, 180 -90, -180 -90, -180 53.5))";
     assertEquals((expectedWKT2), (env.toString()));
+  }
+
+  // ─── Level 1: ST_NPoints ─────────────────────────────────────────────────
+
+  @Test
+  public void nPoints_linestring() throws ParseException {
+    Geography g = Constructors.geogFromWKT("LINESTRING (0 0, 1 1, 2 2)", 4326);
+    assertEquals(3, Functions.nPoints(g));
+  }
+
+  @Test
+  public void nPoints_polygon() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    assertEquals(5, Functions.nPoints(g));
+  }
+
+  // ─── Level 2: ST_Distance ────────────────────────────────────────────────
+
+  @Test
+  public void distance_twoPoints() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (1 1)", 4326);
+
+    Double result = Functions.distance(g1, g2);
+    assertNotNull(result);
+    // S2 geometry-to-geometry distance ~157 km (spherical model)
+    assertTrue("Distance should be ~157 km, got " + result, result > 155000 && result < 160000);
+  }
+
+  @Test
+  public void distance_nullHandling() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    assertNull(Functions.distance(g1, null));
+    assertNull(Functions.distance(null, g1));
+    assertNull(Functions.distance(null, null));
+  }
+
+  // ─── Level 3: ST_Contains ────────────────────────────────────────────────
+
+  @Test
+  public void contains_pointInPolygon() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (0.5 0.5)", 4326);
+    assertTrue(Functions.contains(g1, g2));
+  }
+
+  @Test
+  public void contains_pointOutsidePolygon() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (2 2)", 4326);
+    assertFalse(Functions.contains(g1, g2));
+  }
+
+  @Test
+  public void contains_nullHandling() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (1 1)", 4326);
+    assertFalse(Functions.contains(g1, null));
+    assertFalse(Functions.contains(null, g1));
   }
 }

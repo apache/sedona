@@ -24,6 +24,22 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class Distance {
 
+  /**
+   * Compute distance from a single point to a ShapeIndex using PointTarget. This avoids building a
+   * ShapeIndex for the point side — only the complex geometry needs an index.
+   */
+  public static double S2_distancePointToIndex(S2Point point, ShapeIndexGeography geo) {
+    S2ClosestEdgeQuery query = S2ClosestEdgeQuery.builder().build(geo.shapeIndex);
+    S2ClosestEdgeQuery.PointTarget<S1ChordAngle> target =
+        new S2ClosestEdgeQuery.PointTarget<>(point);
+    Optional<S2BestEdgesQueryBase.Result> result = query.findClosestEdge(target);
+    if (!result.isPresent()) {
+      return Double.POSITIVE_INFINITY;
+    }
+    S1ChordAngle chordAngle = (S1ChordAngle) result.get().distance();
+    return chordAngle.toAngle().radians();
+  }
+
   public double S2_distance(ShapeIndexGeography geo1, ShapeIndexGeography geo2) {
     S2ShapeIndex index1 = geo1.shapeIndex;
     S2ShapeIndex index2 = geo2.shapeIndex;

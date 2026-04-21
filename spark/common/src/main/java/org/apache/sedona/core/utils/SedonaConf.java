@@ -240,6 +240,14 @@ public class SedonaConf implements Serializable {
     this.crsTransformMode =
         CRSTransformMode.fromString(confGetter.get("spark.sedona.crs.geotools", "raster"));
 
+    // Geography eager ShapeIndex configuration
+    // When true, WKBGeography eagerly builds S2 Geography and ShapeIndex at deserialization time.
+    // This eliminates cold-path overhead for predicate-heavy workloads (ST_Contains, ST_Intersects)
+    // at the cost of slower deserialization for metric-only workloads.
+    boolean eagerShapeIndex =
+        Boolean.parseBoolean(confGetter.get("spark.sedona.geography.eagerShapeIndex", "false"));
+    org.apache.sedona.common.S2Geography.WKBGeography.setEagerShapeIndex(eagerShapeIndex);
+
     // URL-based CRS provider configuration
     // When spark.sedona.crs.url.base is set, a UrlCRSProvider is registered to resolve
     // SRID definitions from the given HTTP(S) endpoint before falling back to built-in defs.

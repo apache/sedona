@@ -59,7 +59,9 @@ private[apache] case class ST_LabelPoint(inputExpressions: Seq[Expression])
  *   This function takes two geometries and calculates the distance between two objects.
  */
 private[apache] case class ST_Distance(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.distance _) {
+    extends InferredExpression(
+      Functions.distance _,
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.distance)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -158,7 +160,9 @@ private[apache] case class ST_CrossesDateLine(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_NPoints(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.nPoints _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.nPoints),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.nPoints)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
