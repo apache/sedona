@@ -28,6 +28,20 @@ This is useful for:
 * Inspecting file properties before loading full raster data
 * Building spatial indexes over raster file collections
 
+![Schema Overview](../../image/geotiff_metadata/schema_overview.svg "geotiff.metadata output schema")
+
+## COG detection
+
+Cloud Optimized GeoTIFFs (COGs) are GeoTIFF files with internal tiling and overviews optimized for cloud access. The `geotiff.metadata` data source reports these properties directly:
+
+![COG Structure](../../image/geotiff_metadata/cog_structure.svg "How COG properties map to geotiff.metadata fields")
+
+```python
+df = sedona.read.format("geotiff.metadata").load("/path/to/rasters/")
+cogs = df.filter("isTiled AND size(overviews) > 0")
+cogs.select("path", "compression", "overviews").show(truncate=False)
+```
+
 ## Read GeoTIFF metadata
 
 === "Scala"
@@ -127,16 +141,6 @@ Each row represents one GeoTIFF file with the following columns:
 | `height` | Int | Overview height in pixels |
 
 ## Examples
-
-### Detect Cloud Optimized GeoTIFFs (COGs)
-
-A COG is a GeoTIFF that is internally tiled and has overview levels:
-
-```python
-df = sedona.read.format("geotiff.metadata").load("/path/to/rasters/")
-cogs = df.filter("isTiled AND size(overviews) > 0")
-cogs.select("path", "compression", "overviews").show(truncate=False)
-```
 
 ### Inspect band information
 

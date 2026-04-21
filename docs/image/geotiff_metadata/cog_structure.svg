@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 420" width="620" height="420" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="310" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">Cloud Optimized GeoTIFF (COG) Structure</text>
+  <text x="310" y="46" text-anchor="middle" font-size="12" fill="#666666">How geotiff.metadata maps file properties to schema fields</text>
+
+  <!-- Full resolution image -->
+  <rect x="30" y="65" width="240" height="200" rx="3" fill="rgba(74,144,217,0.1)" stroke="#4a90d9" stroke-width="2"/>
+  <text x="150" y="85" text-anchor="middle" font-size="13" font-weight="bold" fill="#4a90d9">Full Resolution</text>
+  <text x="150" y="100" text-anchor="middle" font-size="11" fill="#666666">width=4096  height=4096</text>
+
+  <!-- Tile grid -->
+  <g stroke="#4a90d9" stroke-width="0.5" stroke-dasharray="3,2" opacity="0.5">
+    <line x1="90" y1="110" x2="90" y2="255"/>
+    <line x1="150" y1="110" x2="150" y2="255"/>
+    <line x1="210" y1="110" x2="210" y2="255"/>
+    <line x1="30" y1="146" x2="270" y2="146"/>
+    <line x1="30" y1="182" x2="270" y2="182"/>
+    <line x1="30" y1="218" x2="270" y2="218"/>
+  </g>
+
+  <!-- Tile label -->
+  <rect x="38" y="115" width="44" height="25" rx="2" fill="rgba(74,144,217,0.2)" stroke="#4a90d9" stroke-width="1"/>
+  <text x="60" y="132" text-anchor="middle" font-size="9" fill="#4a90d9">256×256</text>
+
+  <!-- isTiled annotation -->
+  <line x1="275" y1="130" x2="320" y2="130" stroke="#d94a4a" stroke-width="1.5" marker-end="none"/>
+  <rect x="322" y="118" width="120" height="24" rx="4" fill="rgba(217,74,74,0.1)" stroke="#d94a4a" stroke-width="1"/>
+  <text x="382" y="134" text-anchor="middle" font-size="11" font-weight="bold" fill="#d94a4a">isTiled = true</text>
+
+  <!-- blockSize annotation -->
+  <line x1="275" y1="160" x2="320" y2="160" stroke="#d94a4a" stroke-width="1.5"/>
+  <rect x="322" y="148" width="120" height="24" rx="4" fill="rgba(217,74,74,0.1)" stroke="#d94a4a" stroke-width="1"/>
+  <text x="382" y="164" text-anchor="middle" font-size="11" font-weight="bold" fill="#d94a4a">blockSize 256×256</text>
+
+  <!-- Compression annotation -->
+  <rect x="322" y="178" width="120" height="24" rx="4" fill="rgba(217,74,74,0.1)" stroke="#d94a4a" stroke-width="1"/>
+  <text x="382" y="194" text-anchor="middle" font-size="11" font-weight="bold" fill="#d94a4a">compression: LZW</text>
+
+  <!-- Overview 1 -->
+  <rect x="30" y="280" width="120" height="100" rx="3" fill="rgba(39,174,96,0.1)" stroke="#27ae60" stroke-width="2"/>
+  <text x="90" y="300" text-anchor="middle" font-size="12" font-weight="bold" fill="#27ae60">Overview 1</text>
+  <text x="90" y="316" text-anchor="middle" font-size="10" fill="#666666">2048 × 2048</text>
+
+  <!-- Tile grid in overview -->
+  <g stroke="#27ae60" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.4">
+    <line x1="60" y1="322" x2="60" y2="370"/>
+    <line x1="90" y1="322" x2="90" y2="370"/>
+    <line x1="120" y1="322" x2="120" y2="370"/>
+    <line x1="30" y1="338" x2="150" y2="338"/>
+    <line x1="30" y1="354" x2="150" y2="354"/>
+  </g>
+
+  <!-- Overview 2 -->
+  <rect x="170" y="280" width="60" height="50" rx="3" fill="rgba(39,174,96,0.1)" stroke="#27ae60" stroke-width="2"/>
+  <text x="200" y="300" text-anchor="middle" font-size="11" font-weight="bold" fill="#27ae60">Ovr 2</text>
+  <text x="200" y="314" text-anchor="middle" font-size="9" fill="#666666">1024×1024</text>
+
+  <!-- Overview 3 -->
+  <rect x="170" y="340" width="30" height="25" rx="3" fill="rgba(39,174,96,0.1)" stroke="#27ae60" stroke-width="2"/>
+  <text x="185" y="357" text-anchor="middle" font-size="8" font-weight="bold" fill="#27ae60">Ovr 3</text>
+
+  <!-- Overviews annotation -->
+  <line x1="235" y1="310" x2="320" y2="310" stroke="#27ae60" stroke-width="1.5"/>
+  <rect x="322" y="295" width="270" height="68" rx="4" fill="rgba(39,174,96,0.08)" stroke="#27ae60" stroke-width="1"/>
+  <text x="330" y="312" font-size="11" font-weight="bold" fill="#27ae60">overviews:</text>
+  <text x="338" y="328" font-size="10" fill="#333333" font-family="monospace">{level:1, width:2048, height:2048}</text>
+  <text x="338" y="343" font-size="10" fill="#333333" font-family="monospace">{level:2, width:1024, height:1024}</text>
+  <text x="338" y="358" font-size="10" fill="#333333" font-family="monospace">{level:3, width:512,  height:512}</text>
+
+  <!-- GeoTransform box -->
+  <rect x="450" y="65" width="155" height="90" rx="4" fill="rgba(74,144,217,0.08)" stroke="#4a90d9" stroke-width="1"/>
+  <text x="527" y="82" text-anchor="middle" font-size="11" font-weight="bold" fill="#4a90d9">geoTransform</text>
+  <text x="458" y="98" font-size="10" fill="#333333" font-family="monospace">upperLeftX: -117.5</text>
+  <text x="458" y="112" font-size="10" fill="#333333" font-family="monospace">upperLeftY:   34.2</text>
+  <text x="458" y="126" font-size="10" fill="#333333" font-family="monospace">scaleX:     0.001</text>
+  <text x="458" y="140" font-size="10" fill="#333333" font-family="monospace">scaleY:    -0.001</text>
+
+  <!-- Band info box -->
+  <rect x="450" y="165" width="155" height="80" rx="4" fill="rgba(142,68,173,0.08)" stroke="#8e44ad" stroke-width="1"/>
+  <text x="527" y="182" text-anchor="middle" font-size="11" font-weight="bold" fill="#8e44ad">bands[0]</text>
+  <text x="458" y="198" font-size="10" fill="#333333" font-family="monospace">dataType: REAL_32BITS</text>
+  <text x="458" y="212" font-size="10" fill="#333333" font-family="monospace">colorInterp: Gray</text>
+  <text x="458" y="226" font-size="10" fill="#333333" font-family="monospace">noDataValue: -9999</text>
+
+  <!-- Bottom caption -->
+  <text x="310" y="405" text-anchor="middle" font-size="11" font-style="italic" fill="#666666">A COG has internal tiling, overviews, and compression — all reported by geotiff.metadata</text>
+</svg>
