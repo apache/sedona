@@ -65,11 +65,19 @@ rm report.txt
 Make sure the Sedona version in the following files are {{ sedona_create_release.current_version }}.
 
 1. https://github.com/apache/sedona/blob/master/python/sedona/version.py
-2. https://github.com/apache/sedona/blob/master/R/DESCRIPTION
-3. https://github.com/apache/sedona/blob/99239524f17389fc4ae9548ea88756f8ea538bb9/R/R/dependencies.R#L42
-4. https://github.com/apache/sedona/blob/master/zeppelin/package.json
+2. https://github.com/apache/sedona/blob/master/python/pyproject.toml (the `version` field under `[project]`)
+3. https://github.com/apache/sedona/blob/master/R/DESCRIPTION
+4. https://github.com/apache/sedona/blob/99239524f17389fc4ae9548ea88756f8ea538bb9/R/R/dependencies.R#L42
+5. https://github.com/apache/sedona/blob/master/zeppelin/package.json
 
-## 3. Update mkdocs.yml
+!!!warning
+    The `version` field in `python/pyproject.toml` is what `setuptools` uses when building the Python sdist and wheel. If this is not bumped, the PyPI artifact will carry the old version even if `python/sedona/version.py` is correct.
+
+## 3. Update release notes
+
+Before cutting the release candidate, make sure `docs/setup/release-notes.md` has an entry for {{ sedona_create_release.current_version }} summarizing all changes since the previous release. This file is linked directly from the vote email and the announce email, so it must be in place on the release tag.
+
+## 4. Update mkdocs.yml
 
 * Please change the following variables in `mkdocs.yml` to the version you want to publish.
     * `sedona_create_release.current_version`
@@ -79,7 +87,7 @@ Make sure the Sedona version in the following files are {{ sedona_create_release
 * Then compile the website by `mkdocs serve`. This will generate the scripts listed on this page in your local browser.
 * You can also publish this website if needed. See the instruction at bottom.
 
-## 4. Stage and upload release candidates
+## 5. Stage and upload release candidates
 
 ```bash
 #!/bin/bash
@@ -448,7 +456,7 @@ rm -rf apache-sedona-${SEDONA_VERSION}-bin
 
 ```
 
-## 5. Vote in dev sedona.apache.org
+## 6. Vote in dev sedona.apache.org
 
 ### Vote email
 
@@ -576,7 +584,7 @@ Apache Sedona Team
 If a vote failed, do the following:
 
 1. In the vote email, say that we will create another release candidate.
-2. Restart from Step 3 `Update mkdocs.yml`. Please increment the release candidate ID (e.g., `{{ sedona_create_release.current_version}}-rc2`) and update `sedona_create_release.current_rc` and `sedona_create_release.current_git_tag` in `mkdocs.yml` to generate the script listed on this webpage.
+2. Restart from Step 4 `Update mkdocs.yml`. Please increment the release candidate ID (e.g., `{{ sedona_create_release.current_version}}-rc2`) and update `sedona_create_release.current_rc` and `sedona_create_release.current_git_tag` in `mkdocs.yml` to generate the script listed on this webpage.
 
 ## 8. Release source code and Maven package
 
