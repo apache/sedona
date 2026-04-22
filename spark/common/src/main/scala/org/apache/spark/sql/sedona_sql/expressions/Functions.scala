@@ -631,7 +631,9 @@ private[apache] case class ST_SetSRID(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_GeometryType(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.geometryType _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.geometryType),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.geometryType)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

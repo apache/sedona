@@ -85,6 +85,12 @@ public class Functions {
     return toJTS(g).getNumPoints();
   }
 
+  /** Return the geometry type string of a geography, prefixed with "ST_". */
+  public static String geometryType(Geography g) {
+    if (g == null) return null;
+    return "ST_" + toJTS(g).getGeometryType();
+  }
+
   // ─── Level 2: JTS + S2 geodesic metrics ──────────────────────────────────
 
   /**
