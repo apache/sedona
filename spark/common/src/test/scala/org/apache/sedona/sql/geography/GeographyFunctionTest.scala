@@ -97,7 +97,8 @@ class GeographyFunctionTest extends TestBaseScala {
 
     it("ST_NumGeometries multipoint") {
       val row = sparkSession
-        .sql("SELECT ST_NumGeometries(ST_GeogFromWKT('MULTIPOINT ((0 0), (1 1), (2 2))', 4326)) AS n")
+        .sql(
+          "SELECT ST_NumGeometries(ST_GeogFromWKT('MULTIPOINT ((0 0), (1 1), (2 2))', 4326)) AS n")
         .first()
       assertEquals(3, row.getInt(0))
     }
