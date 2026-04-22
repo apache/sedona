@@ -23,7 +23,8 @@ import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.sedona_sql.expressions.{st_constructors, st_functions, st_predicates}
 import org.junit.Assert.{assertEquals, assertNotNull, assertTrue}
-import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.{Geometry, Point}
+import org.locationtech.jts.io.WKTReader
 
 /**
  * Spark SQL integration tests for Geography ST functions. Tests one representative function per
@@ -77,7 +78,7 @@ class GeographyFunctionTest extends TestBaseScala {
     }
   }
 
-  // ─── Level 1: ST_NPoints ───────────────────────────────────────────────
+  // ─── Level 1: ST_NPoints, ST_Centroid ──────────────────────────────────
 
   describe("Level 1: Structural") {
 
@@ -86,6 +87,16 @@ class GeographyFunctionTest extends TestBaseScala {
         .sql("SELECT ST_NPoints(ST_GeogFromWKT('LINESTRING (0 0, 1 1, 2 2)', 4326)) AS n")
         .first()
       assertEquals(3, row.getInt(0))
+    }
+
+    it("ST_Centroid square polygon") {
+      val row = sparkSession
+        .sql("SELECT ST_AsText(ST_Centroid(ST_GeogFromWKT('POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))', 4326))) AS c")
+        .first()
+      val point = new WKTReader().read(row.getString(0)).asInstanceOf[Point]
+      // Planar centroid of unit square from (0,0) to (2,2) is (1,1)
+      assertEquals(1.0, point.getX, 1e-9)
+      assertEquals(1.0, point.getY, 1e-9)
     }
   }
 

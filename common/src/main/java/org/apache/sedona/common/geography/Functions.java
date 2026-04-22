@@ -85,6 +85,17 @@ public class Functions {
     return toJTS(g).getNumPoints();
   }
 
+  /**
+   * Return the planar centroid of a geography as a Geography point. The centroid is computed in the
+   * projected (lon/lat) coordinate space, not on the sphere.
+   */
+  public static Geography centroid(Geography g) {
+    if (g == null) return null;
+    org.locationtech.jts.geom.Geometry centroid = toJTS(g).getCentroid();
+    centroid.setSRID(g.getSRID());
+    return WKBGeography.fromJTS(centroid);
+  }
+
   // ─── Level 2: JTS + S2 geodesic metrics ──────────────────────────────────
 
   /**

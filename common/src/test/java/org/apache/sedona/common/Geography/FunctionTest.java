@@ -144,6 +144,45 @@ public class FunctionTest {
     assertEquals(5, Functions.nPoints(g));
   }
 
+  @Test
+  public void centroid_squarePolygon() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    assertEquals(4326, c.getSRID());
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    assertEquals(1.0, p.getX(), 1e-9);
+    assertEquals(1.0, p.getY(), 1e-9);
+  }
+
+  @Test
+  public void centroid_linestring() throws ParseException {
+    Geography g = Constructors.geogFromWKT("LINESTRING (0 0, 2 0)", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    assertEquals(1.0, p.getX(), 1e-9);
+    assertEquals(0.0, p.getY(), 1e-9);
+  }
+
+  @Test
+  public void centroid_point() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (3 4)", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    assertEquals(3.0, p.getX(), 1e-9);
+    assertEquals(4.0, p.getY(), 1e-9);
+  }
+
+  @Test
+  public void centroid_nullHandling() {
+    assertNull(Functions.centroid(null));
+  }
+
   // ─── Level 2: ST_Distance ────────────────────────────────────────────────
 
   @Test
