@@ -89,9 +89,25 @@ class GeographyFunctionTest extends TestBaseScala {
     }
   }
 
-  // ─── Level 2: ST_Distance ──────────────────────────────────────────────
+  // ─── Level 2: ST_Length, ST_Distance ───────────────────────────────────
 
   describe("Level 2: Geodesic metrics") {
+
+    it("ST_Length along the equator") {
+      val row = sparkSession
+        .sql("SELECT ST_Length(ST_GeogFromWKT('LINESTRING (0 0, 1 0)', 4326)) AS l")
+        .first()
+      val len = row.getDouble(0)
+      // WGS84 spheroid: 1° along the equator is ~111,319 meters
+      assertEquals(111319.0, len, 5.0)
+    }
+
+    it("ST_Length of a point returns 0") {
+      val row = sparkSession
+        .sql("SELECT ST_Length(ST_GeogFromWKT('POINT (1 2)', 4326)) AS l")
+        .first()
+      assertEquals(0.0, row.getDouble(0), 0.0)
+    }
 
     it("ST_Distance between two points") {
       val row = sparkSession

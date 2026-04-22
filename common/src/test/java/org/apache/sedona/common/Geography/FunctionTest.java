@@ -144,7 +144,34 @@ public class FunctionTest {
     assertEquals(5, Functions.nPoints(g));
   }
 
-  // ─── Level 2: ST_Distance ────────────────────────────────────────────────
+  // ─── Level 2: ST_Length, ST_Distance ─────────────────────────────────────
+
+  @Test
+  public void length_equatorDegree() throws ParseException {
+    Geography g = Constructors.geogFromWKT("LINESTRING (0 0, 1 0)", 4326);
+    double len = Functions.length(g);
+    // WGS84 spheroid: 1° along the equator is ~111,319 meters
+    assertEquals(111319.0, len, 5.0);
+  }
+
+  @Test
+  public void length_meridianDegree() throws ParseException {
+    Geography g = Constructors.geogFromWKT("LINESTRING (0 0, 0 1)", 4326);
+    double len = Functions.length(g);
+    // WGS84 spheroid: 1° along a meridian is ~110,574 meters (at the equator)
+    assertEquals(110574.0, len, 50.0);
+  }
+
+  @Test
+  public void length_point_returnsZero() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    assertEquals(0.0, Functions.length(g), 0.0);
+  }
+
+  @Test
+  public void length_nullHandling() {
+    assertEquals(0.0, Functions.length(null), 0.0);
+  }
 
   @Test
   public void distance_twoPoints() throws ParseException {
