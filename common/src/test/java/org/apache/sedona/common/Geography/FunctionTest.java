@@ -144,6 +144,37 @@ public class FunctionTest {
     assertEquals(5, Functions.nPoints(g));
   }
 
+  @Test
+  public void numGeometries_point() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    assertEquals(1, Functions.numGeometries(g));
+  }
+
+  @Test
+  public void numGeometries_polygon() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    assertEquals(1, Functions.numGeometries(g));
+  }
+
+  @Test
+  public void numGeometries_multipoint() throws ParseException {
+    Geography g = Constructors.geogFromWKT("MULTIPOINT ((0 0), (1 1), (2 2))", 4326);
+    assertEquals(3, Functions.numGeometries(g));
+  }
+
+  @Test
+  public void numGeometries_multipolygon() throws ParseException {
+    Geography g =
+        Constructors.geogFromWKT(
+            "MULTIPOLYGON (((0 0, 1 0, 1 1, 0 1, 0 0)), ((2 2, 3 2, 3 3, 2 3, 2 2)))", 4326);
+    assertEquals(2, Functions.numGeometries(g));
+  }
+
+  @Test
+  public void numGeometries_nullHandling() {
+    assertEquals(0, Functions.numGeometries(null));
+  }
+
   // ─── Level 2: ST_Distance ────────────────────────────────────────────────
 
   @Test

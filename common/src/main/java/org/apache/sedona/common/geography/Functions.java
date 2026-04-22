@@ -85,6 +85,12 @@ public class Functions {
     return toJTS(g).getNumPoints();
   }
 
+  /** Return the number of sub-geometries in a geography (1 for singles). */
+  public static int numGeometries(Geography g) {
+    if (g == null) return 0;
+    return toJTS(g).getNumGeometries();
+  }
+
   // ─── Level 2: JTS + S2 geodesic metrics ──────────────────────────────────
 
   /**

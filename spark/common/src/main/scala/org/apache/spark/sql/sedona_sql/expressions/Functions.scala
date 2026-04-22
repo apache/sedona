@@ -1060,7 +1060,9 @@ private[apache] object ST_IsRing {
  *   Geometry
  */
 private[apache] case class ST_NumGeometries(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.numGeometries _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.numGeometries),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.numGeometries)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
