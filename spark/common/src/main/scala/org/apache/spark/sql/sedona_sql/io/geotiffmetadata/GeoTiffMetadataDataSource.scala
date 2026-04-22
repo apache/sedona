@@ -100,9 +100,10 @@ class GeoTiffMetadataDataSource
   override def fallbackFileFormat: Class[_ <: FileFormat] = null
 
   /**
-   * Check if a path points to a directory via Hadoop FileSystem, falling back to trailing-slash
-   * heuristic if FS access fails (e.g., path doesn't exist yet or glob patterns). Uses the same
-   * per-read options (e.g., `fs.s3a.*`) as the scan to ensure directory detection works on the
+   * Check if a path points to a directory. A trailing `/` is treated as a directory without any
+   * FS call; otherwise, Hadoop `FileSystem.getFileStatus(path).isDirectory` is consulted. Returns
+   * `false` if the FS call fails (e.g., path does not exist or is a glob pattern). Uses the same
+   * per-read options (e.g., `fs.s3a.*`) as the scan so directory detection works on the
    * configured filesystem.
    */
   private def isDirectory(pathStr: String, options: CaseInsensitiveStringMap): Boolean = {
