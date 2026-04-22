@@ -157,6 +157,12 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assertEquals(9L, df.count())
     }
 
+    it("should read files from directory without trailing slash") {
+      // Directory detection via Hadoop FS should apply recursive lookup regardless of slash
+      val df = sparkSession.read.format("geotiff.metadata").load(rasterDir.stripSuffix("/"))
+      assertEquals(9L, df.count())
+    }
+
     it("should support LIMIT pushdown") {
       val df = sparkSession.read.format("geotiff.metadata").load(rasterDir).limit(2)
       assertEquals(2L, df.count())

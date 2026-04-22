@@ -62,8 +62,35 @@ class GeoTiffMetadataPartitionReader(
 
   override def close(): Unit = {}
 
+  // Fields requiring reader.read() to build a GridCoverage2D
+  private val COVERAGE_FIELDS = Set(
+    "width",
+    "height",
+    "numBands",
+    "srid",
+    "crs",
+    "geoTransform",
+    "cornerCoordinates",
+    "bands")
+
   private def readFileMetadata(partition: PartitionedFile): InternalRow = {
+    val requested = readDataSchema.fieldNames.toSet
+    val needCoverage = requested.exists(COVERAGE_FIELDS.contains)
+    val needIsTiled = requested.contains("isTiled")
+    val needBands = requested.contains("bands")
+    val needTiffMetadata = requested.contains("metadata")
+    val needCompression = requested.contains("compression")
+    val needReader =
+      needCoverage || needIsTiled || needBands || needTiffMetadata || needCompression ||
+        requested.contains("overviews")
+
     val path = new Path(new URI(partition.filePath.toString()))
+
+    // Skip all I/O if only cheap fields (path, driver, fileSize) are requested
+    if (!needReader) {
+      return buildRow(path, partition, null, null, false, -1, Map.empty, null)
+    }
+
     val imageStream = new HadoopImageInputStream(path, configuration)
     var reader: GeoTiffReader = null
     var raster: GridCoverage2D = null
@@ -74,77 +101,97 @@ class GeoTiffMetadataPartitionReader(
           org.geotools.util.factory.Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER,
           java.lang.Boolean.TRUE))
 
-      // Extract TIFF IIO metadata BEFORE read() to avoid stream state issues
-      val isTiled = GeoTiffMetadataPartitionReader.hasTiffTag(reader, 322)
-      val photometric = GeoTiffMetadataPartitionReader.extractPhotometricInterpretation(reader)
-      val tiffMetadata = GeoTiffMetadataPartitionReader.extractMetadata(reader)
-      val compression = GeoTiffMetadataPartitionReader.extractCompression(reader)
+      // Extract TIFF IIO metadata BEFORE read() to avoid stream state issues.
+      // Only extract fields actually requested.
+      val isTiled =
+        if (needIsTiled) GeoTiffMetadataPartitionReader.hasTiffTag(reader, 322) else false
+      val photometric =
+        if (needBands) GeoTiffMetadataPartitionReader.extractPhotometricInterpretation(reader)
+        else -1
+      val tiffMetadata =
+        if (needTiffMetadata) GeoTiffMetadataPartitionReader.extractMetadata(reader)
+        else Map.empty[String, String]
+      val compression =
+        if (needCompression) GeoTiffMetadataPartitionReader.extractCompression(reader) else null
 
-      raster = reader.read(null)
-
-      lazy val width = RasterAccessors.getWidth(raster)
-      lazy val height = RasterAccessors.getHeight(raster)
-      lazy val numBands = RasterAccessors.numBands(raster)
-      lazy val srid = RasterAccessors.srid(raster)
-
-      lazy val crsStr = Try {
-        val crs = raster.getCoordinateReferenceSystem
-        if (crs == null || crs.isInstanceOf[DefaultEngineeringCRS]) null
-        else crs.toWKT
-      }.getOrElse(null)
-
-      lazy val affine = RasterUtils.getGDALAffineTransform(raster)
-      lazy val geoTransformRow = new GenericInternalRow(
-        Array[Any](
-          affine.getTranslateX,
-          affine.getTranslateY,
-          affine.getScaleX,
-          affine.getScaleY,
-          affine.getShearX,
-          affine.getShearY))
-
-      lazy val env = raster.getEnvelope2D
-      lazy val cornerCoordinatesRow = new GenericInternalRow(
-        Array[Any](env.getMinX, env.getMinY, env.getMaxX, env.getMaxY))
-
-      lazy val image = raster.getRenderedImage
-      lazy val tileWidth = image.getTileWidth
-      lazy val tileHeight = image.getTileHeight
-
-      lazy val bandsArray = GeoTiffMetadataPartitionReader
-        .buildBandsArray(raster, numBands, tileWidth, tileHeight, photometric)
-      lazy val overviewsArray =
-        GeoTiffMetadataPartitionReader.buildOverviewsArray(reader, width, height)
-      lazy val metadataMap = GeoTiffMetadataPartitionReader.buildMetadataMap(tiffMetadata)
-
-      val fields = readDataSchema.fieldNames.map {
-        case "path" => UTF8String.fromString(path.toString)
-        case "driver" => UTF8String.fromString("GTiff")
-        case "fileSize" => partition.fileSize: Any
-        case "width" => width: Any
-        case "height" => height: Any
-        case "numBands" => numBands: Any
-        case "srid" => srid: Any
-        case "crs" =>
-          if (crsStr != null) UTF8String.fromString(crsStr) else null
-        case "geoTransform" => geoTransformRow
-        case "cornerCoordinates" => cornerCoordinatesRow
-        case "bands" => bandsArray
-        case "overviews" => overviewsArray
-        case "metadata" => metadataMap
-        case "isTiled" => isTiled: Any
-        case "compression" =>
-          if (compression != null) UTF8String.fromString(compression) else null
-        case other =>
-          throw new IllegalArgumentException(s"Unsupported field name: $other")
+      if (needCoverage) {
+        raster = reader.read(null)
       }
 
-      new GenericInternalRow(fields)
+      buildRow(path, partition, reader, raster, isTiled, photometric, tiffMetadata, compression)
     } finally {
       if (raster != null) raster.dispose(true)
       if (reader != null) reader.dispose()
       imageStream.close()
     }
+  }
+
+  private def buildRow(
+      path: Path,
+      partition: PartitionedFile,
+      reader: GeoTiffReader,
+      raster: GridCoverage2D,
+      isTiled: Boolean,
+      photometric: Int,
+      tiffMetadata: Map[String, String],
+      compression: String): InternalRow = {
+    lazy val width = RasterAccessors.getWidth(raster)
+    lazy val height = RasterAccessors.getHeight(raster)
+    lazy val numBands = RasterAccessors.numBands(raster)
+    lazy val srid = RasterAccessors.srid(raster)
+
+    lazy val crsStr = Try {
+      val crs = raster.getCoordinateReferenceSystem
+      if (crs == null || crs.isInstanceOf[DefaultEngineeringCRS]) null
+      else crs.toWKT
+    }.getOrElse(null)
+
+    lazy val affine = RasterUtils.getGDALAffineTransform(raster)
+    lazy val geoTransformRow = new GenericInternalRow(
+      Array[Any](
+        affine.getTranslateX,
+        affine.getTranslateY,
+        affine.getScaleX,
+        affine.getScaleY,
+        affine.getShearX,
+        affine.getShearY))
+
+    lazy val env = raster.getEnvelope2D
+    lazy val cornerCoordinatesRow = new GenericInternalRow(
+      Array[Any](env.getMinX, env.getMinY, env.getMaxX, env.getMaxY))
+
+    lazy val image = raster.getRenderedImage
+    lazy val tileWidth = image.getTileWidth
+    lazy val tileHeight = image.getTileHeight
+
+    lazy val bandsArray = GeoTiffMetadataPartitionReader
+      .buildBandsArray(raster, numBands, tileWidth, tileHeight, photometric)
+    lazy val overviewsArray = GeoTiffMetadataPartitionReader.buildOverviewsArray(reader)
+    lazy val metadataMap = GeoTiffMetadataPartitionReader.buildMetadataMap(tiffMetadata)
+
+    val fields = readDataSchema.fieldNames.map {
+      case "path" => UTF8String.fromString(path.toString)
+      case "driver" => UTF8String.fromString("GTiff")
+      case "fileSize" => partition.fileSize: Any
+      case "width" => width: Any
+      case "height" => height: Any
+      case "numBands" => numBands: Any
+      case "srid" => srid: Any
+      case "crs" =>
+        if (crsStr != null) UTF8String.fromString(crsStr) else null
+      case "geoTransform" => geoTransformRow
+      case "cornerCoordinates" => cornerCoordinatesRow
+      case "bands" => bandsArray
+      case "overviews" => overviewsArray
+      case "metadata" => metadataMap
+      case "isTiled" => isTiled: Any
+      case "compression" =>
+        if (compression != null) UTF8String.fromString(compression) else null
+      case other =>
+        throw new IllegalArgumentException(s"Unsupported field name: $other")
+    }
+
+    new GenericInternalRow(fields)
   }
 }
 
@@ -207,10 +254,7 @@ object GeoTiffMetadataPartitionReader {
     }
   }
 
-  def buildOverviewsArray(
-      reader: GeoTiffReader,
-      fullWidth: Int,
-      fullHeight: Int): GenericArrayData = {
+  def buildOverviewsArray(reader: GeoTiffReader): GenericArrayData = {
     try {
       val layout = reader.getDatasetLayout
       if (layout == null) return new GenericArrayData(Array.empty[InternalRow])
@@ -221,6 +265,11 @@ object GeoTiffMetadataPartitionReader {
       val resolutionLevels = reader.getResolutionLevels
       if (resolutionLevels == null || resolutionLevels.length <= 1)
         return new GenericArrayData(Array.empty[InternalRow])
+
+      // Get full dimensions from the reader without loading the coverage
+      val gridRange = reader.getOriginalGridRange
+      val fullWidth = gridRange.getSpan(0)
+      val fullHeight = gridRange.getSpan(1)
 
       val count = Math.min(numOverviews, resolutionLevels.length - 1)
       val fullResX = resolutionLevels(0)(0)

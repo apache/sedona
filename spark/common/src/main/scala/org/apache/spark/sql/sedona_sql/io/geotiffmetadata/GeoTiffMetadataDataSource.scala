@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.io.geotiffmetadata
 
+import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.connector.catalog.Table
 import org.apache.spark.sql.connector.catalog.TableProvider
 import org.apache.spark.sql.execution.datasources.FileFormat
@@ -27,6 +28,7 @@ import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 /**
  * A read-only Spark SQL data source that extracts GeoTIFF file metadata (dimensions, CRS, bands,
@@ -49,8 +51,9 @@ class GeoTiffMetadataDataSource
     val tableName = getTableName(options, paths)
 
     if (paths.size == 1) {
-      if (paths.head.endsWith("/")) {
-        // Trailing-slash directories: recurse and filter to GeoTIFF files
+      val head = paths.head
+      if (isDirectory(head)) {
+        // Directory (with or without trailing slash): recurse and filter to GeoTIFF files
         val newOptions =
           new java.util.HashMap[String, String](optionsWithoutPaths.asCaseSensitiveMap())
         newOptions.put("recursiveFileLookup", "true")
@@ -61,7 +64,7 @@ class GeoTiffMetadataDataSource
       } else {
         // Rewrite glob patterns like /path/to/some*glob*.tif into /path/to with
         // pathGlobFilter="some*glob*.tif" to avoid listing .tif files as directories
-        paths.head match {
+        head match {
           case loadTifPattern(prefix, glob) =>
             paths = Seq(prefix)
             val newOptions =
@@ -95,4 +98,18 @@ class GeoTiffMetadataDataSource
 
   // Read-only data source — no V1 fallback needed
   override def fallbackFileFormat: Class[_ <: FileFormat] = null
+
+  /**
+   * Check if a path points to a directory via Hadoop FileSystem, falling back to trailing-slash
+   * heuristic if FS access fails (e.g., path doesn't exist yet or glob patterns).
+   */
+  private def isDirectory(pathStr: String): Boolean = {
+    if (pathStr.endsWith("/")) return true
+    Try {
+      val hadoopConf = sparkSession.sessionState.newHadoopConf()
+      val path = new Path(pathStr)
+      val fs = path.getFileSystem(hadoopConf)
+      fs.getFileStatus(path).isDirectory
+    }.getOrElse(false)
+  }
 }
