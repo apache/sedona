@@ -203,6 +203,38 @@ public class FunctionTest {
   }
 
   @Test
+  public void intersects_pointToPoint_samePoint() throws ParseException {
+    // Exercises the point-to-point fast path (no ShapeIndex built on either side)
+    Geography g1 = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    assertTrue(Functions.intersects(g1, g2));
+  }
+
+  @Test
+  public void intersects_pointToPoint_differentPoints() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (3 4)", 4326);
+    assertFalse(Functions.intersects(g1, g2));
+  }
+
+  @Test
+  public void intersects_pointOnLinestring() throws ParseException {
+    // Exercises the point-to-complex fast path
+    Geography line = Constructors.geogFromWKT("LINESTRING (0 0, 2 0)", 4326);
+    Geography pt = Constructors.geogFromWKT("POINT (1 0)", 4326);
+    assertTrue(Functions.intersects(line, pt));
+    assertTrue(Functions.intersects(pt, line));
+  }
+
+  @Test
+  public void intersects_pointOffLinestring() throws ParseException {
+    Geography line = Constructors.geogFromWKT("LINESTRING (0 0, 2 0)", 4326);
+    Geography pt = Constructors.geogFromWKT("POINT (5 5)", 4326);
+    assertFalse(Functions.intersects(line, pt));
+    assertFalse(Functions.intersects(pt, line));
+  }
+
+  @Test
   public void intersects_nullHandling() throws ParseException {
     Geography g = Constructors.geogFromWKT("POINT (1 1)", 4326);
     assertFalse(Functions.intersects(g, null));
