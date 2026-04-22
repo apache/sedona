@@ -163,7 +163,7 @@ public class FunctionTest {
   }
 
   @Test
-  public void geometryType_multiPoint() throws ParseException {
+  public void geometryType_multipoint() throws ParseException {
     Geography g = Constructors.geogFromWKT("MULTIPOINT ((0 0), (1 1))", 4326);
     assertEquals("ST_MultiPoint", Functions.geometryType(g));
   }
