@@ -102,17 +102,26 @@ class GeoTiffMetadataPartitionReader(
           java.lang.Boolean.TRUE))
 
       // Extract TIFF IIO metadata BEFORE read() to avoid stream state issues.
-      // Only extract fields actually requested.
+      // Fetch the metadata root once and reuse for all TIFF tag lookups to avoid
+      // duplicate DOM traversals per file.
+      val tiffRoot: org.w3c.dom.Node =
+        if (needIsTiled || needBands || needTiffMetadata || needCompression) {
+          Try {
+            val md = reader.getMetadata
+            if (md != null) md.getRootNode else null
+          }.getOrElse(null)
+        } else null
+
       val isTiled =
-        if (needIsTiled) GeoTiffMetadataPartitionReader.hasTiffTag(reader, 322) else false
+        if (needIsTiled) GeoTiffMetadataPartitionReader.hasTiffTagInRoot(tiffRoot, 322) else false
       val photometric =
-        if (needBands) GeoTiffMetadataPartitionReader.extractPhotometricInterpretation(reader)
-        else -1
+        if (needBands) GeoTiffMetadataPartitionReader.extractPhotometricFromRoot(tiffRoot) else -1
       val tiffMetadata =
-        if (needTiffMetadata) GeoTiffMetadataPartitionReader.extractMetadata(reader)
+        if (needTiffMetadata) GeoTiffMetadataPartitionReader.extractMetadataFromRoot(tiffRoot)
         else Map.empty[String, String]
       val compression =
-        if (needCompression) GeoTiffMetadataPartitionReader.extractCompression(reader) else null
+        if (needCompression) GeoTiffMetadataPartitionReader.extractCompressionFromRoot(tiffRoot)
+        else null
 
       if (needCoverage) {
         raster = reader.read(null)
@@ -308,45 +317,34 @@ object GeoTiffMetadataPartitionReader {
   }
 
   // ---- TIFF IIO metadata helpers ----
+  // The `*FromRoot` variants take a pre-fetched root node so the caller can walk the
+  // metadata tree once per file when multiple tags are requested.
 
-  def hasTiffTag(reader: GeoTiffReader, tagNumber: Int): Boolean = {
-    try {
-      val md = reader.getMetadata
-      if (md == null) return false
-      val root = md.getRootNode
-      if (root == null) return false
-      findTiffFieldByNumber(root, tagNumber)
-    } catch { case _: Exception => false }
+  def hasTiffTagInRoot(root: org.w3c.dom.Node, tagNumber: Int): Boolean = {
+    if (root == null) return false
+    try findTiffFieldByNumber(root, tagNumber)
+    catch { case _: Exception => false }
   }
 
-  def extractPhotometricInterpretation(reader: GeoTiffReader): Int = {
+  def extractPhotometricFromRoot(root: org.w3c.dom.Node): Int = {
+    if (root == null) return -1
     try {
-      val md = reader.getMetadata
-      if (md == null) return -1
-      val root = md.getRootNode
-      if (root == null) return -1
       val v = findTiffFieldValue(root, 262)
       if (v != null) v.toInt else -1
     } catch { case _: Exception => -1 }
   }
 
-  def extractCompression(reader: GeoTiffReader): String = {
+  def extractCompressionFromRoot(root: org.w3c.dom.Node): String = {
+    if (root == null) return null
     try {
-      val md = reader.getMetadata
-      if (md == null) return null
-      val root = md.getRootNode
-      if (root == null) return null
       val desc = findTiffFieldDescription(root, 259)
       if (desc != null) desc else findTiffFieldValue(root, 259)
     } catch { case _: Exception => null }
   }
 
-  def extractMetadata(reader: GeoTiffReader): Map[String, String] = {
+  def extractMetadataFromRoot(root: org.w3c.dom.Node): Map[String, String] = {
+    if (root == null) return Map.empty
     try {
-      val md = reader.getMetadata
-      if (md == null) return Map.empty
-      val root = md.getRootNode
-      if (root == null) return Map.empty
       // Collect each TIFFField as a key/value entry, using the field's `name` attribute
       // (e.g., "Compression", "ImageWidth") as the key and the leaf TIFFShort/TIFFLong/TIFFAscii
       // `value` attribute as the value.
