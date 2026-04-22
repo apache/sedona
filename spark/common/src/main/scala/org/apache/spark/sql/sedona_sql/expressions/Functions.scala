@@ -1051,13 +1051,14 @@ private[apache] object ST_IsRing {
 }
 
 /**
- * Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the
- * number of geometries, for single geometries will return 1
+ * Returns the number of sub-geometries. For a GEOMETRYCOLLECTION or MULTI* input, returns the
+ * number of component geometries; for single geometries returns 1. Supports both Geometry (JTS)
+ * and Geography (S2) inputs via InferredExpression dual dispatch.
  *
- * This method implements the SQL/MM specification. SQL-MM 3: 9.1.4
+ * For Geometry inputs this method implements the SQL/MM specification (SQL-MM 3: 9.1.4).
  *
  * @param inputExpressions
- *   Geometry
+ *   Geometry or Geography
  */
 private[apache] case class ST_NumGeometries(inputExpressions: Seq[Expression])
     extends InferredExpression(
