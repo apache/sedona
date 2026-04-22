@@ -19,7 +19,7 @@
 
 # ST_Length
 
-Introduction: Returns the geodesic length of a geography object in meters, calculated on the WGS84 spheroid using GeographicLib. Only linestring and multilinestring geographies have non-zero length. Returns 0 for points and polygons.
+Introduction: Returns the geodesic length of a geography object in meters, calculated on the WGS84 spheroid using GeographicLib. Linestring and multilinestring geographies have non-zero length, and geometrycollection geographies return the sum of the lengths of their linear components. Returns 0 for points and polygons.
 
 Format:
 

@@ -86,7 +86,7 @@ public class Functions {
     return toJTS(g).getNumPoints();
   }
 
-  // ─── Level 2: JTS + S2 geodesic metrics ──────────────────────────────────
+  // ─── Level 2: Geodesic metrics (mix of S2 and WGS84 spheroid backends) ──
 
   /** Geodesic length in meters (WGS84 spheroid). Returns 0 for non-linear geographies. */
   public static double length(Geography g) {

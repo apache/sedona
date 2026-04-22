@@ -26,8 +26,8 @@ import org.junit.Assert.{assertEquals, assertNotNull, assertTrue}
 import org.locationtech.jts.geom.Geometry
 
 /**
- * Spark SQL integration tests for Geography ST functions. Tests one representative function per
- * architecture level: L1 (ST_NPoints), L2 (ST_Distance), L3 (ST_Contains).
+ * Spark SQL integration tests for Geography ST functions. Representative functions per
+ * architecture level: L1 (ST_NPoints), L2 (ST_Distance, ST_Length), L3 (ST_Contains).
  */
 class GeographyFunctionTest extends TestBaseScala {
 
