@@ -141,6 +141,30 @@ class GeographyFunctionTest extends TestBaseScala {
         .first()
       assertTrue(!row.getBoolean(0))
     }
+
+    it("ST_Equals same point") {
+      val row = sparkSession
+        .sql("""
+          SELECT ST_Equals(
+            ST_GeogFromWKT('POINT (1 2)', 4326),
+            ST_GeogFromWKT('POINT (1 2)', 4326)
+          ) AS result
+        """)
+        .first()
+      assertTrue(row.getBoolean(0))
+    }
+
+    it("ST_Equals different points") {
+      val row = sparkSession
+        .sql("""
+          SELECT ST_Equals(
+            ST_GeogFromWKT('POINT (1 2)', 4326),
+            ST_GeogFromWKT('POINT (3 4)', 4326)
+          ) AS result
+        """)
+        .first()
+      assertTrue(!row.getBoolean(0))
+    }
   }
 
   // ─── DataFrame API ─────────────────────────────────────────────────────
