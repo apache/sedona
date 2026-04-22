@@ -273,7 +273,9 @@ private[apache] case class ST_Length2D(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Area(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.area _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.area),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.area)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

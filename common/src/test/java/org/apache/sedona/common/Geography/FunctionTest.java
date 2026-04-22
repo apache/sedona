@@ -144,7 +144,32 @@ public class FunctionTest {
     assertEquals(5, Functions.nPoints(g));
   }
 
-  // ─── Level 2: ST_Distance ────────────────────────────────────────────────
+  // ─── Level 2: ST_Area, ST_Distance ───────────────────────────────────────
+
+  @Test
+  public void area_unitBoxAtEquator() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    double area = Functions.area(g);
+    // WGS84 spheroid area of a 1°x1° box near equator is ~12,308,778,361 m² (~12,309 km²)
+    assertEquals(1.2308778361e10, area, 1e6);
+  }
+
+  @Test
+  public void area_point_returnsZero() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    assertEquals(0.0, Functions.area(g), 0.0);
+  }
+
+  @Test
+  public void area_linestring_returnsZero() throws ParseException {
+    Geography g = Constructors.geogFromWKT("LINESTRING (0 0, 1 1)", 4326);
+    assertEquals(0.0, Functions.area(g), 0.0);
+  }
+
+  @Test
+  public void area_nullHandling() {
+    assertEquals(0.0, Functions.area(null), 0.0);
+  }
 
   @Test
   public void distance_twoPoints() throws ParseException {

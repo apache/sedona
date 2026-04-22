@@ -89,9 +89,25 @@ class GeographyFunctionTest extends TestBaseScala {
     }
   }
 
-  // ─── Level 2: ST_Distance ──────────────────────────────────────────────
+  // ─── Level 2: ST_Area, ST_Distance ─────────────────────────────────────
 
   describe("Level 2: Geodesic metrics") {
+
+    it("ST_Area unit box at equator") {
+      val row = sparkSession
+        .sql("SELECT ST_Area(ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)) AS a")
+        .first()
+      val area = row.getDouble(0)
+      // WGS84 spheroid area of a 1°x1° box near equator is ~12,308,778,361 m²
+      assertEquals(1.2308778361e10, area, 1e6)
+    }
+
+    it("ST_Area of a point returns 0") {
+      val row = sparkSession
+        .sql("SELECT ST_Area(ST_GeogFromWKT('POINT (1 2)', 4326)) AS a")
+        .first()
+      assertEquals(0.0, row.getDouble(0), 0.0)
+    }
 
     it("ST_Distance between two points") {
       val row = sparkSession

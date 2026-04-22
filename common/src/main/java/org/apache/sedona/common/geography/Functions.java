@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.sedona.common.S2Geography.*;
 import org.apache.sedona.common.sphere.Haversine;
+import org.apache.sedona.common.sphere.Spheroid;
 import org.locationtech.jts.geom.Geometry;
 
 public class Functions {
@@ -86,6 +87,12 @@ public class Functions {
   }
 
   // ─── Level 2: JTS + S2 geodesic metrics ──────────────────────────────────
+
+  /** Geodesic area in square meters (WGS84 spheroid). Returns 0 for non-polygon geographies. */
+  public static double area(Geography g) {
+    if (g == null) return 0.0;
+    return Spheroid.area(toJTS(g));
+  }
 
   /**
    * Geometry-to-geometry geodesic distance in meters. Uses S2ClosestEdgeQuery for true minimum
