@@ -243,9 +243,18 @@ object GeoTiffMetadataPartitionReader {
   def buildMetadataMap(
       metadata: Map[String, String]): org.apache.spark.sql.catalyst.util.MapData = {
     if (metadata.isEmpty) return null
-    org.apache.spark.sql.catalyst.util.ArrayBasedMapData(
-      metadata.keys.map(UTF8String.fromString).toArray,
-      metadata.values.map(UTF8String.fromString).toArray)
+    // Build key/value arrays from a single traversal to guarantee index alignment
+    val entries = metadata.toSeq
+    val keys = new Array[Any](entries.size)
+    val values = new Array[Any](entries.size)
+    var i = 0
+    while (i < entries.size) {
+      val (k, v) = entries(i)
+      keys(i) = UTF8String.fromString(k)
+      values(i) = UTF8String.fromString(v)
+      i += 1
+    }
+    org.apache.spark.sql.catalyst.util.ArrayBasedMapData(keys, values)
   }
 
   // ---- TIFF IIO metadata helpers ----

@@ -97,7 +97,7 @@ object GeoTiffMetadataTable {
     Seq(
       StructField("path", StringType, nullable = false),
       StructField("driver", StringType, nullable = false),
-      StructField("fileSize", LongType, nullable = true),
+      StructField("fileSize", LongType, nullable = false),
       StructField("width", IntegerType, nullable = false),
       StructField("height", IntegerType, nullable = false),
       StructField("numBands", IntegerType, nullable = false),
