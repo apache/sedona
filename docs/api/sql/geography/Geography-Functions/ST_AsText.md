@@ -27,7 +27,7 @@ Format:
 
 Return type: `String`
 
-Since: `v1.9.0`
+Since: `v1.9.1`
 
 SQL Example
 

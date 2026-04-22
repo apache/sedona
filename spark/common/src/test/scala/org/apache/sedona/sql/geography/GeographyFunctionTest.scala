@@ -23,7 +23,8 @@ import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.sedona_sql.expressions.{st_constructors, st_functions, st_predicates}
 import org.junit.Assert.{assertEquals, assertNotNull, assertTrue}
-import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.{Geometry, Point}
+import org.locationtech.jts.io.WKTReader
 
 /**
  * Spark SQL integration tests for Geography ST functions. Tests one representative function per
@@ -93,8 +94,10 @@ class GeographyFunctionTest extends TestBaseScala {
         .sql("SELECT ST_AsText(ST_GeogFromWKT('POINT (1 2)', 4326)) AS wkt")
         .first()
       val wkt = row.getString(0)
-      // S2 round-trip may introduce sub-nanometer floating-point drift
-      assertTrue(s"Expected POINT near (1, 2), got: $wkt", wkt.startsWith("POINT ("))
+      val point = new WKTReader().read(wkt).asInstanceOf[Point]
+      // S2 round-trip may introduce sub-nanometer floating-point drift; use a loose tolerance.
+      assertEquals(1.0, point.getX, 1e-9)
+      assertEquals(2.0, point.getY, 1e-9)
     }
   }
 

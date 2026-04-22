@@ -29,7 +29,11 @@ import org.apache.sedona.common.S2Geography.PolygonGeography;
 import org.apache.sedona.common.geography.Constructors;
 import org.apache.sedona.common.geography.Functions;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 
 public class FunctionTest {
   private static final double EPS = 1e-9;
@@ -149,7 +153,10 @@ public class FunctionTest {
     Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);
     String wkt = Functions.asText(g);
     assertNotNull(wkt);
-    assertTrue("Expected POINT, got: " + wkt, wkt.startsWith("POINT ("));
+    Point p = (Point) new WKTReader().read(wkt);
+    // S2 round-trip may introduce sub-nanometer floating-point drift; use a loose tolerance.
+    assertEquals(1.0, p.getX(), 1e-9);
+    assertEquals(2.0, p.getY(), 1e-9);
   }
 
   @Test
@@ -157,7 +164,14 @@ public class FunctionTest {
     Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
     String wkt = Functions.asText(g);
     assertNotNull(wkt);
-    assertTrue("Expected POLYGON, got: " + wkt, wkt.startsWith("POLYGON ("));
+    Polygon poly = (Polygon) new WKTReader().read(wkt);
+    Coordinate[] ring = poly.getExteriorRing().getCoordinates();
+    assertEquals(5, ring.length);
+    double[][] expected = {{0, 0}, {1, 0}, {1, 1}, {0, 1}, {0, 0}};
+    for (int i = 0; i < expected.length; i++) {
+      assertEquals("ring[" + i + "].x", expected[i][0], ring[i].x, 1e-9);
+      assertEquals("ring[" + i + "].y", expected[i][1], ring[i].y, 1e-9);
+    }
   }
 
   @Test
