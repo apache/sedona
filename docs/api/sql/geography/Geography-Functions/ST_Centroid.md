@@ -32,7 +32,7 @@ Since: `v1.9.1`
 SQL Example
 
 ```sql
-SELECT ST_AsText(ST_Centroid(ST_GeogFromWKT('POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))')));
+SELECT ST_AsEWKT(ST_Centroid(ST_GeogFromWKT('POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))')));
 ```
 
 Output:
