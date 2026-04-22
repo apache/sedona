@@ -165,6 +165,30 @@ class GeographyFunctionTest extends TestBaseScala {
         .first()
       assertTrue(!row.getBoolean(0))
     }
+
+    it("ST_Equals same polygon") {
+      val row = sparkSession
+        .sql("""
+          SELECT ST_Equals(
+            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326),
+            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)
+          ) AS result
+        """)
+        .first()
+      assertTrue(row.getBoolean(0))
+    }
+
+    it("ST_Equals different polygons") {
+      val row = sparkSession
+        .sql("""
+          SELECT ST_Equals(
+            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326),
+            ST_GeogFromWKT('POLYGON ((10 10, 11 10, 11 11, 10 11, 10 10))', 4326)
+          ) AS result
+        """)
+        .first()
+      assertTrue(!row.getBoolean(0))
+    }
   }
 
   // ─── DataFrame API ─────────────────────────────────────────────────────
@@ -197,6 +221,16 @@ class GeographyFunctionTest extends TestBaseScala {
           st_constructors.ST_GeogFromWKT(col("poly"), lit(4326)).as("poly"),
           st_constructors.ST_GeogFromWKT(col("pt"), lit(4326)).as("pt"))
         .select(st_predicates.ST_Contains(col("poly"), col("pt")).as("result"))
+      assertTrue(df.first().getBoolean(0))
+    }
+
+    it("ST_Equals via DataFrame API") {
+      val df = sparkSession
+        .sql("SELECT 'POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))' AS a, 'POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))' AS b")
+        .select(
+          st_constructors.ST_GeogFromWKT(col("a"), lit(4326)).as("a"),
+          st_constructors.ST_GeogFromWKT(col("b"), lit(4326)).as("b"))
+        .select(st_predicates.ST_Equals(col("a"), col("b")).as("result"))
       assertTrue(df.first().getBoolean(0))
     }
   }
