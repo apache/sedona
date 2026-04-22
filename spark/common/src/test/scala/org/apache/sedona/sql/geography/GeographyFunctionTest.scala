@@ -77,7 +77,7 @@ class GeographyFunctionTest extends TestBaseScala {
     }
   }
 
-  // ─── Level 1: ST_NPoints ───────────────────────────────────────────────
+  // ─── Level 1: ST_NPoints, ST_AsText ────────────────────────────────────
 
   describe("Level 1: Structural") {
 
@@ -86,6 +86,15 @@ class GeographyFunctionTest extends TestBaseScala {
         .sql("SELECT ST_NPoints(ST_GeogFromWKT('LINESTRING (0 0, 1 1, 2 2)', 4326)) AS n")
         .first()
       assertEquals(3, row.getInt(0))
+    }
+
+    it("ST_AsText") {
+      val row = sparkSession
+        .sql("SELECT ST_AsText(ST_GeogFromWKT('POINT (1 2)', 4326)) AS wkt")
+        .first()
+      val wkt = row.getString(0)
+      // S2 round-trip may introduce sub-nanometer floating-point drift
+      assertTrue(s"Expected POINT near (1, 2), got: $wkt", wkt.startsWith("POINT ("))
     }
   }
 

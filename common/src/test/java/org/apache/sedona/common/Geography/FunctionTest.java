@@ -144,6 +144,27 @@ public class FunctionTest {
     assertEquals(5, Functions.nPoints(g));
   }
 
+  @Test
+  public void asText_point() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    String wkt = Functions.asText(g);
+    assertNotNull(wkt);
+    assertTrue("Expected POINT, got: " + wkt, wkt.startsWith("POINT ("));
+  }
+
+  @Test
+  public void asText_polygon() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    String wkt = Functions.asText(g);
+    assertNotNull(wkt);
+    assertTrue("Expected POLYGON, got: " + wkt, wkt.startsWith("POLYGON ("));
+  }
+
+  @Test
+  public void asText_nullHandling() {
+    assertNull(Functions.asText(null));
+  }
+
   // ─── Level 2: ST_Distance ────────────────────────────────────────────────
 
   @Test
