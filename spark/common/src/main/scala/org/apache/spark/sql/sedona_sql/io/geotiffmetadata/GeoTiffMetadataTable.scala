@@ -54,7 +54,7 @@ case class GeoTiffMetadataTable(
     GeoTiffMetadataScanBuilder(sparkSession, fileIndex, schema, dataSchema, options)
   }
 
-  def newWriteBuilder(info: LogicalWriteInfo): WriteBuilder =
+  override def newWriteBuilder(info: LogicalWriteInfo): WriteBuilder =
     throw new UnsupportedOperationException("GeoTiffMetadata is a read-only data source")
 }
 

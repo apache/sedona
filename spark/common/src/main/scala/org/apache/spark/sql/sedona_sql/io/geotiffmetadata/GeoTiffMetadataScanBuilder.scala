@@ -94,17 +94,20 @@ case class GeoTiffMetadataScan(
       var remaining = limit
       partitions = partitions.iterator
         .takeWhile(_ => remaining > 0)
-        .map { partition =>
-          val filePartition = partition.asInstanceOf[FilePartition]
-          val files = filePartition.files
-          if (files.length <= remaining) {
-            remaining -= files.length
-            filePartition
-          } else {
-            val selectedFiles = files.take(remaining)
-            remaining = 0
-            FilePartition(filePartition.index, selectedFiles)
-          }
+        .map {
+          case filePartition: FilePartition =>
+            val files = filePartition.files
+            if (files.length <= remaining) {
+              remaining -= files.length
+              filePartition
+            } else {
+              val selectedFiles = files.take(remaining)
+              remaining = 0
+              FilePartition(filePartition.index, selectedFiles)
+            }
+          case partition =>
+            throw new IllegalArgumentException(
+              s"Unexpected partition type: ${partition.getClass.getCanonicalName}")
         }
         .toArray
     }

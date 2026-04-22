@@ -22,7 +22,6 @@ import org.apache.spark.sql.connector.catalog.Table
 import org.apache.spark.sql.connector.catalog.TableProvider
 import org.apache.spark.sql.execution.datasources.FileFormat
 import org.apache.spark.sql.execution.datasources.v2.FileDataSourceV2
-import org.apache.spark.sql.sedona_sql.io.raster.RasterFileFormat
 import org.apache.spark.sql.sources.DataSourceRegister
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
@@ -94,5 +93,6 @@ class GeoTiffMetadataDataSource
   override def inferSchema(options: CaseInsensitiveStringMap): StructType =
     GeoTiffMetadataTable.SCHEMA
 
-  override def fallbackFileFormat: Class[_ <: FileFormat] = classOf[RasterFileFormat]
+  // Read-only data source — no V1 fallback needed
+  override def fallbackFileFormat: Class[_ <: FileFormat] = null
 }
