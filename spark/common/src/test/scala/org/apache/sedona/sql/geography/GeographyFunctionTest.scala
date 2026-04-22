@@ -97,8 +97,7 @@ class GeographyFunctionTest extends TestBaseScala {
 
     it("ST_GeometryType polygon") {
       val row = sparkSession
-        .sql(
-          "SELECT ST_GeometryType(ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)) AS t")
+        .sql("SELECT ST_GeometryType(ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)) AS t")
         .first()
       assertEquals("ST_Polygon", row.getString(0))
     }
