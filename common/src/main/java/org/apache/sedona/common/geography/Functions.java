@@ -130,6 +130,13 @@ public class Functions {
     return pred.S2_contains(toShapeIndex(g1), toShapeIndex(g2), s2Options());
   }
 
+  /** Spherical intersection test using S2 boolean operations. */
+  public static boolean intersects(Geography g1, Geography g2) {
+    if (g1 == null || g2 == null) return false;
+    Predicates pred = new Predicates();
+    return pred.S2_intersects(toShapeIndex(g1), toShapeIndex(g2), s2Options());
+  }
+
   /** Return EWKT for geography object */
   public static String asEWKT(Geography geography) {
     return geography.toEWKT();
