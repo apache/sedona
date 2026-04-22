@@ -268,9 +268,12 @@ private[apache] case class ST_Length2D(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the area measurement of a Geometry.
+ * Return the area measurement of a Geometry or Geography. Supports both Geometry (JTS, planar
+ * area in the input's coordinate units) and Geography (S2, geodesic area in square meters on the
+ * WGS84 spheroid) via InferredExpression dual dispatch.
  *
  * @param inputExpressions
+ *   Geometry or Geography
  */
 private[apache] case class ST_Area(inputExpressions: Seq[Expression])
     extends InferredExpression(
