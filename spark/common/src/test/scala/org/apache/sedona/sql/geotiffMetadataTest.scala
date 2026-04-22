@@ -54,6 +54,13 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assert(row.getAs[String]("crs").contains("EPSG"))
       // test1.tiff has TileWidth/TileLength TIFF tags (internally tiled)
       assertEquals(true, row.getAs[Boolean]("isTiled"))
+      // TIFF tag 259 = LZW compression
+      assertEquals("LZW", row.getAs[String]("compression"))
+
+      // metadata map should be non-null and contain common TIFF tags
+      val metadata = row.getAs[Map[String, String]]("metadata")
+      assert(metadata != null)
+      assert(metadata.nonEmpty)
     }
 
     it("should return exact geoTransform for test1.tiff") {
@@ -205,6 +212,8 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
 
       // COG must be tiled
       assertEquals(true, row.getAs[Boolean]("isTiled"))
+      // Requested LZW compression should be reflected
+      assertEquals("LZW", row.getAs[String]("compression"))
 
       // COG must have overviews (requested 2)
       val overviews = df

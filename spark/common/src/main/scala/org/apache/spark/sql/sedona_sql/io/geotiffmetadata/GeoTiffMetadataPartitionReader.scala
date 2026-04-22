@@ -291,8 +291,9 @@ object GeoTiffMetadataPartitionReader {
 
   def buildMetadataMap(
       metadata: Map[String, String]): org.apache.spark.sql.catalyst.util.MapData = {
-    if (metadata.isEmpty) return null
-    // Build key/value arrays from a single traversal to guarantee index alignment
+    // Return empty MapData (not null) for an empty map to keep collection columns consistent
+    // with other columns like `overviews` that use empty arrays.
+    // Build key/value arrays from a single traversal to guarantee index alignment.
     val entries = metadata.toSeq
     val keys = new Array[Any](entries.size)
     val values = new Array[Any](entries.size)
@@ -346,37 +347,34 @@ object GeoTiffMetadataPartitionReader {
       if (md == null) return Map.empty
       val root = md.getRootNode
       if (root == null) return Map.empty
+      // Collect each TIFFField as a key/value entry, using the field's `name` attribute
+      // (e.g., "Compression", "ImageWidth") as the key and the leaf TIFFShort/TIFFLong/TIFFAscii
+      // `value` attribute as the value.
       val map = new mutable.LinkedHashMap[String, String]()
-      extractMetadataFromNode(root, "", map)
+      collectTiffFields(root, map)
       map.toMap
     } catch { case _: Exception => Map.empty }
   }
 
-  private def extractMetadataFromNode(
+  private def collectTiffFields(
       node: org.w3c.dom.Node,
-      prefix: String,
       map: mutable.LinkedHashMap[String, String]): Unit = {
     if (node == null) return
-    val attrs = node.getAttributes
-    if (attrs != null) {
-      val nameAttr = attrs.getNamedItem("name")
-      val valueAttr = attrs.getNamedItem("value")
-      if (nameAttr != null && valueAttr != null) {
-        val key =
-          if (prefix.nonEmpty) s"$prefix.${nameAttr.getNodeValue}"
-          else nameAttr.getNodeValue
-        map.put(key, valueAttr.getNodeValue)
+    if (node.getNodeName == "TIFFField") {
+      val attrs = node.getAttributes
+      if (attrs != null) {
+        val nameAttr = attrs.getNamedItem("name")
+        if (nameAttr != null) {
+          val v = extractLeafAttr(node, "value")
+          if (v != null) map.put(nameAttr.getNodeValue, v)
+        }
       }
+      return
     }
     val children = node.getChildNodes
     if (children != null) {
-      val childPrefix = if (prefix.nonEmpty && node.getNodeName != "#document") {
-        s"$prefix.${node.getNodeName}"
-      } else if (node.getNodeName != "#document") {
-        node.getNodeName
-      } else prefix
       for (i <- 0 until children.getLength)
-        extractMetadataFromNode(children.item(i), childPrefix, map)
+        collectTiffFields(children.item(i), map)
     }
   }
 

@@ -52,7 +52,7 @@ class GeoTiffMetadataDataSource
 
     if (paths.size == 1) {
       val head = paths.head
-      if (isDirectory(head)) {
+      if (isDirectory(head, optionsWithoutPaths)) {
         // Directory (with or without trailing slash): recurse and filter to GeoTIFF files
         val newOptions =
           new java.util.HashMap[String, String](optionsWithoutPaths.asCaseSensitiveMap())
@@ -101,12 +101,15 @@ class GeoTiffMetadataDataSource
 
   /**
    * Check if a path points to a directory via Hadoop FileSystem, falling back to trailing-slash
-   * heuristic if FS access fails (e.g., path doesn't exist yet or glob patterns).
+   * heuristic if FS access fails (e.g., path doesn't exist yet or glob patterns). Uses the same
+   * per-read options (e.g., `fs.s3a.*`) as the scan to ensure directory detection works on the
+   * configured filesystem.
    */
-  private def isDirectory(pathStr: String): Boolean = {
+  private def isDirectory(pathStr: String, options: CaseInsensitiveStringMap): Boolean = {
     if (pathStr.endsWith("/")) return true
     Try {
-      val hadoopConf = sparkSession.sessionState.newHadoopConf()
+      val hadoopConf =
+        sparkSession.sessionState.newHadoopConfWithOptions(options.asScala.toMap)
       val path = new Path(pathStr)
       val fs = path.getFileSystem(hadoopConf)
       fs.getFileStatus(path).isDirectory
