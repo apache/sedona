@@ -23,7 +23,8 @@ import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.sedona_sql.expressions.{st_constructors, st_functions, st_predicates}
 import org.junit.Assert.{assertEquals, assertNotNull, assertTrue}
-import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.{Geometry, Point}
+import org.locationtech.jts.io.WKTReader
 
 /**
  * Spark SQL integration tests for Geography ST functions. Tests one representative function per
@@ -77,7 +78,7 @@ class GeographyFunctionTest extends TestBaseScala {
     }
   }
 
-  // ─── Level 1: ST_NPoints, ST_NumGeometries ─────────────────────────────
+  // ─── Level 1: ST_NPoints, ST_NumGeometries, ST_AsText ──────────────────
 
   describe("Level 1: Structural") {
 
@@ -101,6 +102,17 @@ class GeographyFunctionTest extends TestBaseScala {
           "SELECT ST_NumGeometries(ST_GeogFromWKT('MULTIPOINT ((0 0), (1 1), (2 2))', 4326)) AS n")
         .first()
       assertEquals(3, row.getInt(0))
+    }
+
+    it("ST_AsText") {
+      val row = sparkSession
+        .sql("SELECT ST_AsText(ST_GeogFromWKT('POINT (1 2)', 4326)) AS wkt")
+        .first()
+      val wkt = row.getString(0)
+      val point = new WKTReader().read(wkt).asInstanceOf[Point]
+      // S2 round-trip may introduce sub-nanometer floating-point drift; use a loose tolerance.
+      assertEquals(1.0, point.getX, 1e-9)
+      assertEquals(2.0, point.getY, 1e-9)
     }
   }
 
