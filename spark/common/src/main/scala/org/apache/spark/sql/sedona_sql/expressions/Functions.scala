@@ -573,7 +573,9 @@ private[apache] case class ST_SimplifyPolygonHull(inputExpressions: Seq[Expressi
 }
 
 private[apache] case class ST_AsText(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.asWKT _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.asWKT),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.asText)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

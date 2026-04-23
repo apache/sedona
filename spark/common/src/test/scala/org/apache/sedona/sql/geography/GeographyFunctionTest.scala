@@ -78,7 +78,7 @@ class GeographyFunctionTest extends TestBaseScala {
     }
   }
 
-  // ─── Level 1: ST_NPoints, ST_Centroid ──────────────────────────────────
+  // ─── Level 1: ST_NPoints, ST_Centroid, ST_AsText ───────────────────────
 
   describe("Level 1: Structural") {
 
@@ -99,6 +99,17 @@ class GeographyFunctionTest extends TestBaseScala {
       // Planar centroid of a 2x2 square from (0,0) to (2,2) is (1,1)
       assertEquals(1.0, point.getX, 1e-9)
       assertEquals(1.0, point.getY, 1e-9)
+    }
+
+    it("ST_AsText") {
+      val row = sparkSession
+        .sql("SELECT ST_AsText(ST_GeogFromWKT('POINT (1 2)', 4326)) AS wkt")
+        .first()
+      val wkt = row.getString(0)
+      val point = new WKTReader().read(wkt).asInstanceOf[Point]
+      // S2 round-trip may introduce sub-nanometer floating-point drift; use a loose tolerance.
+      assertEquals(1.0, point.getX, 1e-9)
+      assertEquals(2.0, point.getY, 1e-9)
     }
   }
 

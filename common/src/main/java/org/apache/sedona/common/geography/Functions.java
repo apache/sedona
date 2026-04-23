@@ -96,6 +96,12 @@ public class Functions {
     return WKBGeography.fromJTS(centroid);
   }
 
+  /** Return the WKT text representation of a geography. */
+  public static String asText(Geography g) {
+    if (g == null) return null;
+    return toJTS(g).toText();
+  }
+
   // ─── Level 2: JTS + S2 geodesic metrics ──────────────────────────────────
 
   /**
