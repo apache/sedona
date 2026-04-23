@@ -1,0 +1,40 @@
+{
+  "name": "@fancyapps/ui",
+  "version": "5.0.36",
+  "description": "Robust JavaScript UI Component Library",
+  "files": [
+    "dist",
+    "l10n",
+    "types",
+    "CHANGELOG.md",
+    "LICENSE.md",
+    "README.md"
+  ],
+  "main": "dist/index.umd.js",
+  "module": "dist/index.esm.js",
+  "types": "types/index.d.ts",
+  "keywords": [
+    "javascript",
+    "modal",
+    "lightbox",
+    "fancybox",
+    "carousel",
+    "panzoom",
+    "pinchzoom",
+    "pinch",
+    "zoom",
+    "gesture",
+    "touch",
+    "drag",
+    "gallery"
+  ],
+  "author": "Janis Skarnelis",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "homepage": "https://fancyapps.com/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fancyapps/ui.git"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}

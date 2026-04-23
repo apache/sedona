@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="200" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_Relate(A, B, 'T*T***T**')</text>
+  <rect x="325" y="8" width="60" height="22" rx="4" fill="#c0392b" />
+  <text x="355" y="24" text-anchor="middle" font-size="12" font-weight="bold" fill="white">FALSE</text>
+  <path d="M 212.09 137.91 L 212.09 65.38 L 284.62 65.38 L 284.62 137.91 L 212.09 137.91 Z" fill="rgba(217,74,74,0.25)" stroke="#d94a4a" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="241.1" y="108.9" text-anchor="middle" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+  <polyline points="115.38,234.62 163.74,186.26" fill="none" stroke="#4a90d9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="115.38" cy="234.62" r="3" fill="#4a90d9" />
+  <circle cx="163.74" cy="186.26" r="3" fill="#4a90d9" />
+  <text x="169.74" y="178.26" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <text x="200" y="270" text-anchor="middle" font-size="13" fill="#333333" font-family="monospace">DE-9IM: FF1FF0102</text>
+  <text x="200" y="290" text-anchor="middle" font-size="12" fill="#666666" font-style="italic">Geometries do not match the DE-9IM pattern</text>
+</svg>

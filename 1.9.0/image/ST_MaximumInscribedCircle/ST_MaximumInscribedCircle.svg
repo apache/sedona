@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_MaximumInscribedCircle</text>
+  <path d="M 112.5 218.75 L 387.5 218.75 L 387.5 81.25 L 112.5 81.25 L 112.5 218.75 Z" fill="rgba(74,144,217,0.15)" stroke="#4a90d9" stroke-width="2" fill-rule="evenodd" />
+  <path d="M 318.75 150.0 L 318.16 141.03 L 316.41 132.21 L 313.52 123.69 L 309.54 115.62 L 304.54 108.15 L 298.61 101.39 L 291.85 95.46 L 284.38 90.46 L 276.31 86.48 L 267.79 83.59 L 258.97 81.84 L 250.0 81.25 L 241.03 81.84 L 232.21 83.59 L 223.69 86.48 L 215.62 90.46 L 208.15 95.46 L 201.39 101.39 L 195.46 108.15 L 190.46 115.62 L 186.48 123.69 L 183.59 132.21 L 181.84 141.03 L 181.25 150.0 L 181.84 158.97 L 183.59 167.79 L 186.48 176.31 L 190.46 184.38 L 195.46 191.85 L 201.39 198.61 L 208.15 204.54 L 215.62 209.54 L 223.69 213.52 L 232.21 216.41 L 241.03 218.16 L 250.0 218.75 L 258.97 218.16 L 267.79 216.41 L 276.31 213.52 L 284.38 209.54 L 291.85 204.54 L 298.61 198.61 L 304.54 191.85 L 309.54 184.38 L 313.52 176.31 L 316.41 167.79 L 318.16 158.97 L 318.75 150.0 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="2.5" fill-rule="evenodd" />
+  <circle cx="250.0" cy="150.0" r="8" fill="white" stroke="#2ecc71" stroke-width="2.5" />
+  <circle cx="250.0" cy="150.0" r="4" fill="#2ecc71" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Finds the largest circle that fits inside the geometry</text>
+  <rect x="176" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="192" y="266" font-size="13" fill="#333333">Input</text>
+  <rect x="246" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="262" y="266" font-size="13" fill="#333333">Result</text>
+</svg>

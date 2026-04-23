@@ -1,0 +1,16 @@
+.swiper.swiper-flip {
+  overflow: visible;
+}
+.swiper-flip ::slotted(swiper-slide) {
+    pointer-events: none;
+    backface-visibility: hidden;
+    z-index: 1;
+  }
+.swiper-flip ::slotted(swiper-slide) ::slotted(swiper-slide) {
+      pointer-events: none;
+    }
+.swiper-flip ::slotted(.swiper-slide-active),
+    .swiper-flip ::slotted(.swiper-slide-active) ::slotted(.swiper-slide-active) {
+      pointer-events: auto;
+    }
+/* Flip slide shadows start *//* Flip slide shadows end */

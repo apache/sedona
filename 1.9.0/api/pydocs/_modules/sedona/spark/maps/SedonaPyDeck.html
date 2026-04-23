@@ -1,0 +1,634 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sedona.spark.maps.SedonaPyDeck &mdash; Apache Sedona Python Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
+
+  
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+     
+    <!-- Google Fonts for Apache Sedona styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Additional meta tags for better rendering -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1565c0">
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #ff5722" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Apache Sedona Python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sedona.flink.html">sedona.flink package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../sedona.flink.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../sedona.flink.html#module-sedona.flink.context">sedona.flink.context module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.flink.html#sedona.flink.context.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.flink.html#sedona.flink.context.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../sedona.flink.html#module-sedona.flink">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sedona.spark.html">sedona.spark package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../sedona.spark.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.core.html">sedona.spark.core package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.core.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.core.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.core.html#module-sedona.spark.core.utils">sedona.spark.core.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.core.html#module-sedona.spark.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.geoarrow.html">sedona.spark.geoarrow package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geoarrow.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geoarrow.html#module-sedona.spark.geoarrow.geoarrow">sedona.spark.geoarrow.geoarrow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geoarrow.html#module-sedona.spark.geoarrow">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.geopandas.html">sedona.spark.geopandas package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html">sedona.spark.geopandas core</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.io.html">sedona.spark.geopandas.io</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.tools.html">sedona.spark.geopandas.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.maps.html">sedona.spark.maps package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.maps.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaKepler">sedona.spark.maps.SedonaKepler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaMapUtils">sedona.spark.maps.SedonaMapUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaPyDeck">sedona.spark.maps.SedonaPyDeck module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.maps.html#module-sedona.spark.maps">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.raster.html">sedona.spark.raster package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#module-sedona.spark.raster.awt_raster">sedona.spark.raster.awt_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#module-sedona.spark.raster.data_buffer">sedona.spark.raster.data_buffer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#module-sedona.spark.raster.meta">sedona.spark.raster.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#module-sedona.spark.raster.raster_serde">sedona.spark.raster.raster_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#module-sedona.spark.raster.sample_model">sedona.spark.raster.sample_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#module-sedona.spark.raster.sedona_raster">sedona.spark.raster.sedona_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#module-sedona.spark.raster">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.raster_utils.html">sedona.spark.raster_utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster_utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster_utils.html#module-sedona.spark.raster_utils.SedonaUtils">sedona.spark.raster_utils.SedonaUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster_utils.html#module-sedona.spark.raster_utils">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.register.html">sedona.spark.register package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.register.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.register.html#module-sedona.spark.register.geo_registrator">sedona.spark.register.geo_registrator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.register.html#module-sedona.spark.register.java_libs">sedona.spark.register.java_libs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.register.html#module-sedona.spark.register">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.sql.html">sedona.spark.sql package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#sedona-spark-sql-connect-module">sedona.spark.sql.connect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.dataframe_api">sedona.spark.sql.dataframe_api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.exceptions">sedona.spark.sql.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.functions">sedona.spark.sql.functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_aggregates">sedona.spark.sql.st_aggregates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_constructors">sedona.spark.sql.st_constructors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_functions">sedona.spark.sql.st_functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_predicates">sedona.spark.sql.st_predicates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.types">sedona.spark.sql.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.stac.html">sedona.spark.stac package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stac.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stac.html#module-sedona.spark.stac.client">sedona.spark.stac.client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stac.html#module-sedona.spark.stac.collection_client">sedona.spark.stac.collection_client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stac.html#module-sedona.spark.stac">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.stats.html">sedona.spark.stats package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stats.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stats.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stats.html#module-sedona.spark.stats.weighting">sedona.spark.stats.weighting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stats.html#module-sedona.spark.stats">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.utils.html">sedona.spark.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.abstract_parser">sedona.spark.utils.abstract_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.adapter">sedona.spark.utils.adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.binary_parser">sedona.spark.utils.binary_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.decorators">sedona.spark.utils.decorators module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_adapter">sedona.spark.utils.geometry_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_serde">sedona.spark.utils.geometry_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_serde_general">sedona.spark.utils.geometry_serde_general module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.geomserde_speedup">sedona.spark.utils.geomserde_speedup module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.jvm">sedona.spark.utils.jvm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.meta">sedona.spark.utils.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.prep">sedona.spark.utils.prep module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.serde">sedona.spark.utils.serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.spatial_rdd_parser">sedona.spark.utils.spatial_rdd_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.structured_adapter">sedona.spark.utils.structured_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.types">sedona.spark.utils.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../sedona.spark.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../sedona.spark.html#module-sedona.spark.SedonaContext">sedona.spark.SedonaContext module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.__init__"><code class="docutils literal notranslate"><span class="pre">SedonaContext.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.builder"><code class="docutils literal notranslate"><span class="pre">SedonaContext.builder()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../sedona.spark.html#module-sedona.spark">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #ff5722" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Apache Sedona Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sedona.spark.maps.SedonaPyDeck</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    <div class="sedona-content-wrapper">
+        
+           <div itemprop="articleBody">
+             
+  <h1>Source code for sedona.spark.maps.SedonaPyDeck</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Licensed to the Apache Software Foundation (ASF) under one</span>
+<span class="c1"># or more contributor license agreements.  See the NOTICE file</span>
+<span class="c1"># distributed with this work for additional information</span>
+<span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
+<span class="c1"># to you under the Apache License, Version 2.0 (the</span>
+<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># with the License.  You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing,</span>
+<span class="c1"># software distributed under the License is distributed on an</span>
+<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># KIND, either express or implied.  See the License for the</span>
+<span class="c1"># specific language governing permissions and limitations</span>
+<span class="c1"># under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleType</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ByteType</span><span class="p">,</span>
+    <span class="n">DecimalType</span><span class="p">,</span>
+    <span class="n">DoubleType</span><span class="p">,</span>
+    <span class="n">FloatType</span><span class="p">,</span>
+    <span class="n">IntegerType</span><span class="p">,</span>
+    <span class="n">LongType</span><span class="p">,</span>
+    <span class="n">ShortType</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.maps.SedonaMapUtils</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaMapUtils</span>
+
+
+<div class="viewcode-block" id="SedonaPyDeck"><a class="viewcode-back" href="../../../../sedona.spark.maps.html#sedona.spark.maps.SedonaPyDeck.SedonaPyDeck">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SedonaPyDeck</span><span class="p">:</span>
+
+    <span class="c1"># User Facing APIs</span>
+<div class="viewcode-block" id="SedonaPyDeck.create_choropleth_map"><a class="viewcode-back" href="../../../../sedona.spark.maps.html#sedona.spark.maps.SedonaPyDeck.SedonaPyDeck.create_choropleth_map">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_choropleth_map</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">,</span>
+        <span class="n">fill_color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">plot_col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">elevation_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">stroked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a pydeck map with a choropleth layer added</span>
+
+<span class="sd">        :param df: SedonaDataFrame to plot on the choropleth map.</span>
+<span class="sd">        :param fill_color: color scheme to fill the map with.</span>
+<span class="sd">            If no color scheme is given, a default color scheme is created using the &#39;plot_col&#39; column as the quantizing column</span>
+<span class="sd">        :param plot_col: Column to be used to create a default color scheme. If fill_color is provided, this parameter is ignored.</span>
+<span class="sd">        :param initial_view_state: Initial view state for the map</span>
+<span class="sd">        :param map_style: Map style to use</span>
+<span class="sd">        :param map_provider: Map provider to use</span>
+<span class="sd">        :param elevation_col: Optional elevation for the polygons</span>
+<span class="sd">        :param api_keys: Optional dictionary of API keys for Map providers</span>
+<span class="sd">        :param stroked: Whether to stroke the polygons</span>
+<span class="sd">        :return: A pydeck Map object with choropleth layer added</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">plot_col</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">dataType</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="n">IntegerType</span><span class="p">(),</span>
+                <span class="n">FloatType</span><span class="p">(),</span>
+                <span class="n">DoubleType</span><span class="p">(),</span>
+                <span class="n">LongType</span><span class="p">(),</span>
+                <span class="n">DecimalType</span><span class="p">(),</span>
+                <span class="n">ShortType</span><span class="p">(),</span>
+                <span class="n">ByteType</span><span class="p">(),</span>
+            <span class="p">]:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; must be of numeric type. </span><span class="se">\n</span><span class="s2">If you are importing data from csv set &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;inferSchema&#39; option as true&quot;</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+        <span class="n">pdk</span> <span class="o">=</span> <span class="n">_try_import_pydeck</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">initial_view_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">gdf</span> <span class="o">=</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_prepare_df_</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">add_coords</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">initial_view_state</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">data_utils</span><span class="o">.</span><span class="n">compute_view</span><span class="p">(</span>
+                <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;coordinate_array_sedona&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">gdf</span> <span class="o">=</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_prepare_df_</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">fill_color</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fill_color</span> <span class="o">=</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_create_default_fill_color_</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">plot_col</span><span class="p">)</span>
+
+        <span class="n">choropleth_layer</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">Layer</span><span class="p">(</span>
+            <span class="s2">&quot;GeoJsonLayer&quot;</span><span class="p">,</span>  <span class="c1"># `type` positional argument is here</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">gdf</span><span class="p">,</span>
+            <span class="n">auto_highlight</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">get_fill_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
+            <span class="n">opacity</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+            <span class="n">get_elevation</span><span class="o">=</span><span class="n">elevation_col</span><span class="p">,</span>
+            <span class="n">stroked</span><span class="o">=</span><span class="n">stroked</span><span class="p">,</span>
+            <span class="n">extruded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">wireframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">pickable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_create_map_obj</span><span class="p">(</span>
+            <span class="n">layer</span><span class="o">=</span><span class="n">choropleth_layer</span><span class="p">,</span>
+            <span class="n">initial_view_state</span><span class="o">=</span><span class="n">initial_view_state</span><span class="p">,</span>
+            <span class="n">map_style</span><span class="o">=</span><span class="n">map_style</span><span class="p">,</span>
+            <span class="n">map_provider</span><span class="o">=</span><span class="n">map_provider</span><span class="p">,</span>
+            <span class="n">api_keys</span><span class="o">=</span><span class="n">api_keys</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SedonaPyDeck.create_geometry_map"><a class="viewcode-back" href="../../../../sedona.spark.maps.html#sedona.spark.maps.SedonaPyDeck.SedonaPyDeck.create_geometry_map">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_geometry_map</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">,</span>
+        <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span>
+        <span class="n">line_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span>
+        <span class="n">elevation_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">stroked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a pydeck map with a GeoJsonLayer added for plotting given geometries.</span>
+<span class="sd">        :param line_color:</span>
+<span class="sd">        :param df: SedonaDataFrame with polygons</span>
+<span class="sd">        :param fill_color: Optional color for the plotted polygons</span>
+<span class="sd">        :param elevation_col: Optional column/numeric value to determine elevation for plotted polygons</span>
+<span class="sd">        :param initial_view_state: optional initial view state of the pydeck map</span>
+<span class="sd">        :param map_style: optional map_style of the pydeck map</span>
+<span class="sd">        :param map_provider: optional map_provider of the pydeck map</span>
+<span class="sd">        :param api_keys: Optional dictionary of API keys for Map providers</span>
+<span class="sd">        :return: A pydeck map with a GeoJsonLayer map added</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pdk</span> <span class="o">=</span> <span class="n">_try_import_pydeck</span><span class="p">()</span>
+
+        <span class="n">geometry_col</span> <span class="o">=</span> <span class="n">SedonaMapUtils</span><span class="o">.</span><span class="n">__get_geometry_col__</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_prepare_df_</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">geometry_col</span><span class="o">=</span><span class="n">geometry_col</span><span class="p">)</span>
+        <span class="n">geom_type</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="n">geometry_col</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">geom_type</span>
+        <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_create_coord_column_</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">geometry_col</span><span class="o">=</span><span class="n">geometry_col</span><span class="p">)</span>
+        <span class="c1"># if len(type_list) &gt;= 2:  # change line colors if any to make it more visible.</span>
+        <span class="c1">#     if line_color == &quot;[85, 183, 177, 255]&quot;:</span>
+        <span class="c1">#         line_color = &quot;[237, 119, 79]&quot;</span>
+
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_create_fat_layer_</span><span class="p">(</span>
+            <span class="n">gdf</span><span class="p">,</span>
+            <span class="n">fill_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
+            <span class="n">elevation_col</span><span class="o">=</span><span class="n">elevation_col</span><span class="p">,</span>
+            <span class="n">line_color</span><span class="o">=</span><span class="n">line_color</span><span class="p">,</span>
+            <span class="n">stroked</span><span class="o">=</span><span class="n">stroked</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">initial_view_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">initial_view_state</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">data_utils</span><span class="o">.</span><span class="n">compute_view</span><span class="p">(</span>
+                <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;coordinate_array_sedona&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">elevation_col</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;Polygon&quot;</span><span class="p">:</span>
+            <span class="n">initial_view_state</span><span class="o">.</span><span class="n">pitch</span> <span class="o">=</span> <span class="mi">45</span>  <span class="c1"># If polygons are elevated, change the pitch to visualize the elevation better</span>
+
+        <span class="k">return</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_create_map_obj</span><span class="p">(</span>
+            <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span>
+            <span class="n">initial_view_state</span><span class="o">=</span><span class="n">initial_view_state</span><span class="p">,</span>
+            <span class="n">map_style</span><span class="o">=</span><span class="n">map_style</span><span class="p">,</span>
+            <span class="n">map_provider</span><span class="o">=</span><span class="n">map_provider</span><span class="p">,</span>
+            <span class="n">api_keys</span><span class="o">=</span><span class="n">api_keys</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SedonaPyDeck.create_scatterplot_map"><a class="viewcode-back" href="../../../../sedona.spark.maps.html#sedona.spark.maps.SedonaPyDeck.SedonaPyDeck.create_scatterplot_map">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_scatterplot_map</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">,</span>
+        <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[255, 140, 0]&quot;</span><span class="p">,</span>
+        <span class="n">radius_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">radius_min_pixels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">radius_max_pixels</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">radius_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a pydeck map with a scatterplot layer</span>
+<span class="sd">        :param radius_scale:</span>
+<span class="sd">        :param radius_max_pixels:</span>
+<span class="sd">        :param radius_min_pixels:</span>
+<span class="sd">        :param radius_col:</span>
+<span class="sd">        :param df: SedonaDataFrame to plot</span>
+<span class="sd">        :param fill_color: color of the points</span>
+<span class="sd">        :param initial_view_state: optional initial view state of a pydeck map</span>
+<span class="sd">        :param map_style: optional map_style to be added to the pydeck map</span>
+<span class="sd">        :param map_provider: optional map_provider to be added to the pydeck map</span>
+<span class="sd">        :param api_keys: Optional dictionary of API keys for Map providers</span>
+<span class="sd">        :return: A pydeck map object with a scatterplot layer added</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pdk</span> <span class="o">=</span> <span class="n">_try_import_pydeck</span><span class="p">()</span>
+
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_prepare_df_</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">add_coords</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">Layer</span><span class="p">(</span>
+            <span class="s2">&quot;ScatterplotLayer&quot;</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">gdf</span><span class="p">,</span>
+            <span class="n">pickable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+            <span class="n">filled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">get_radius</span><span class="o">=</span><span class="n">radius_col</span><span class="p">,</span>
+            <span class="n">radius_min_pixels</span><span class="o">=</span><span class="n">radius_min_pixels</span><span class="p">,</span>
+            <span class="n">radius_max_pixels</span><span class="o">=</span><span class="n">radius_max_pixels</span><span class="p">,</span>
+            <span class="n">radius_scale</span><span class="o">=</span><span class="n">radius_scale</span><span class="p">,</span>
+            <span class="n">get_position</span><span class="o">=</span><span class="s2">&quot;coordinate_array_sedona&quot;</span><span class="p">,</span>
+            <span class="n">get_fill_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">initial_view_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">initial_view_state</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">data_utils</span><span class="o">.</span><span class="n">compute_view</span><span class="p">(</span>
+                <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;coordinate_array_sedona&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_create_map_obj</span><span class="p">(</span>
+            <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span>
+            <span class="n">initial_view_state</span><span class="o">=</span><span class="n">initial_view_state</span><span class="p">,</span>
+            <span class="n">map_style</span><span class="o">=</span><span class="n">map_style</span><span class="p">,</span>
+            <span class="n">map_provider</span><span class="o">=</span><span class="n">map_provider</span><span class="p">,</span>
+            <span class="n">api_keys</span><span class="o">=</span><span class="n">api_keys</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SedonaPyDeck.create_heatmap"><a class="viewcode-back" href="../../../../sedona.spark.maps.html#sedona.spark.maps.SedonaPyDeck.SedonaPyDeck.create_heatmap">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_heatmap</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">,</span>
+        <span class="n">color_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">aggregation</span><span class="o">=</span><span class="s2">&quot;SUM&quot;</span><span class="p">,</span>
+        <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a pydeck map with a heatmap layer added</span>
+<span class="sd">        :param df: SedonaDataFrame to be used to plot the heatmap</span>
+<span class="sd">        :param color_range: Optional color_range for the heatmap</span>
+<span class="sd">        :param weight: Optional column to determine weight of each point while plotting the heatmap</span>
+<span class="sd">        :param aggregation: Optional aggregation to use for the heatmap (used when rendering a zoomed out heatmap)</span>
+<span class="sd">        :param initial_view_state: Optional initial view state of the pydeck map</span>
+<span class="sd">        :param map_style: Optional map_style of the pydeck map</span>
+<span class="sd">        :param map_provider: Optional map_provider for the pydeck map</span>
+<span class="sd">        :param api_keys: Optional dictionary of API keys for Map providers</span>
+<span class="sd">        :return: A pydeck map with a heatmap layer added</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pdk</span> <span class="o">=</span> <span class="n">_try_import_pydeck</span><span class="p">()</span>
+
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_prepare_df_</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">add_coords</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">color_range</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">color_range</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">178</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">254</span><span class="p">,</span> <span class="mi">217</span><span class="p">,</span> <span class="mi">118</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">254</span><span class="p">,</span> <span class="mi">178</span><span class="p">,</span> <span class="mi">76</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">253</span><span class="p">,</span> <span class="mi">141</span><span class="p">,</span> <span class="mi">60</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">240</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span>
+                <span class="p">[</span><span class="mi">240</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span>
+            <span class="p">]</span>
+
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">Layer</span><span class="p">(</span>
+            <span class="s2">&quot;HeatmapLayer&quot;</span><span class="p">,</span>
+            <span class="n">gdf</span><span class="p">,</span>
+            <span class="n">pickable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+            <span class="n">filled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">get_position</span><span class="o">=</span><span class="s2">&quot;coordinate_array_sedona&quot;</span><span class="p">,</span>
+            <span class="n">aggregation</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">aggregation</span><span class="p">),</span>
+            <span class="n">color_range</span><span class="o">=</span><span class="n">color_range</span><span class="p">,</span>
+            <span class="n">get_weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">initial_view_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">initial_view_state</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">data_utils</span><span class="o">.</span><span class="n">compute_view</span><span class="p">(</span>
+                <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;coordinate_array_sedona&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_create_map_obj</span><span class="p">(</span>
+            <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span>
+            <span class="n">initial_view_state</span><span class="o">=</span><span class="n">initial_view_state</span><span class="p">,</span>
+            <span class="n">map_style</span><span class="o">=</span><span class="n">map_style</span><span class="p">,</span>
+            <span class="n">map_provider</span><span class="o">=</span><span class="n">map_provider</span><span class="p">,</span>
+            <span class="n">api_keys</span><span class="o">=</span><span class="n">api_keys</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_df_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">add_coords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">geometry_col</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a SedonaDataFrame to a GeoPandas DataFrame without renaming the column (as it is not necessary while rendering a pydeck map)</span>
+<span class="sd">        :param df: SedonaDataFrame</span>
+<span class="sd">        :param add_coords: Used to decide if a coordinate column containing lists of point coordinates is to be added to the resultant gdf.</span>
+<span class="sd">        :return: GeoPandas DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">geometry_col</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">geometry_col</span> <span class="o">=</span> <span class="n">SedonaMapUtils</span><span class="o">.</span><span class="n">__get_geometry_col__</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">SedonaMapUtils</span><span class="o">.</span><span class="n">__convert_to_gdf_or_pdf__</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span> <span class="n">rename</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">geometry_col</span><span class="o">=</span><span class="n">geometry_col</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">add_coords</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_create_coord_column_</span><span class="p">(</span><span class="n">gdf</span><span class="o">=</span><span class="n">gdf</span><span class="p">,</span> <span class="n">geometry_col</span><span class="o">=</span><span class="n">geometry_col</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">gdf</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_default_fill_color_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">gdf</span><span class="p">,</span> <span class="n">plot_col</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a default color for choropleth layer based on a given max value&quot;</span>
+<span class="sd">        :param plot_col:</span>
+<span class="sd">        :return: fill_color string for pydeck map</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">plot_max</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="n">plot_col</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[85, 183, 177, (</span><span class="si">{</span><span class="n">plot_col</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">plot_max</span><span class="si">}</span><span class="s2">) * 255 + 15]&quot;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_coord_column_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">gdf</span><span class="p">,</span> <span class="n">geometry_col</span><span class="p">,</span> <span class="n">add_points</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a coordinate column in a given GeoPandas Dataframe, this coordinate column contains coordinates of a ST_Point in a list format of [longitude, latitude]</span>
+<span class="sd">        :param gdf: GeoPandas Dataframe</span>
+<span class="sd">        :param geometry_col: column with ST_Points</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">type_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;coordinate_array_sedona&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">val</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="n">SedonaMapUtils</span><span class="o">.</span><span class="n">__extract_coordinate__</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="n">geometry_col</span><span class="p">],</span> <span class="n">type_list</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_fat_layer_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">gdf</span><span class="p">,</span> <span class="n">fill_color</span><span class="p">,</span> <span class="n">line_color</span><span class="p">,</span> <span class="n">elevation_col</span><span class="p">,</span> <span class="n">stroked</span><span class="p">):</span>
+        <span class="n">pdk</span> <span class="o">=</span> <span class="n">_try_import_pydeck</span><span class="p">()</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">Layer</span><span class="p">(</span>
+            <span class="s2">&quot;GeoJsonLayer&quot;</span><span class="p">,</span>  <span class="c1"># `type` positional argument is here</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">gdf</span><span class="p">,</span>
+            <span class="n">auto_highlight</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">get_fill_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
+            <span class="n">opacity</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+            <span class="n">stroked</span><span class="o">=</span><span class="n">stroked</span><span class="p">,</span>
+            <span class="n">extruded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">get_elevation</span><span class="o">=</span><span class="n">elevation_col</span><span class="p">,</span>
+            <span class="n">get_line_color</span><span class="o">=</span><span class="n">line_color</span><span class="p">,</span>
+            <span class="n">pickable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">get_line_width</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">layer</span>
+
+    <span class="c1"># creates the final map object and handles the parameters for pydeck</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_map_obj</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">initial_view_state</span><span class="p">,</span> <span class="n">map_style</span><span class="p">,</span> <span class="n">map_provider</span><span class="p">,</span> <span class="n">api_keys</span>
+    <span class="p">):</span>
+        <span class="n">pdk</span> <span class="o">=</span> <span class="n">_try_import_pydeck</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">map_provider</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">map_provider</span> <span class="o">=</span> <span class="s2">&quot;carto&quot;</span>
+
+        <span class="k">if</span> <span class="n">map_style</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">map_style</span> <span class="o">=</span> <span class="s2">&quot;dark&quot;</span>
+
+        <span class="c1"># Default to mapbox if user selects &#39;satellite&#39; map_style as pydeck uses mapbox and google maps for satellite basemap</span>
+        <span class="k">if</span> <span class="n">map_style</span> <span class="o">==</span> <span class="s2">&quot;satellite&quot;</span> <span class="ow">and</span> <span class="n">map_provider</span> <span class="o">!=</span> <span class="s2">&quot;google_maps&quot;</span><span class="p">:</span>
+            <span class="n">map_provider</span> <span class="o">=</span> <span class="s2">&quot;mapbox&quot;</span>
+
+        <span class="k">if</span> <span class="n">api_keys</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">api_keys</span> <span class="o">=</span> <span class="n">api_keys</span>
+
+        <span class="k">return</span> <span class="n">pdk</span><span class="o">.</span><span class="n">Deck</span><span class="p">(</span>
+            <span class="n">layers</span><span class="o">=</span><span class="p">[</span><span class="n">layer</span><span class="p">],</span>
+            <span class="n">initial_view_state</span><span class="o">=</span><span class="n">initial_view_state</span><span class="p">,</span>
+            <span class="n">map_style</span><span class="o">=</span><span class="n">map_style</span><span class="p">,</span>
+            <span class="n">map_provider</span><span class="o">=</span><span class="n">map_provider</span><span class="p">,</span>
+            <span class="n">api_keys</span><span class="o">=</span><span class="n">api_keys</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_try_import_pydeck</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ModuleType</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pydeck</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pdk</span>
+
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Install apache-sedona[pydeck-map] to convert sedona dataframes to pydeck maps.&quot;</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">pdk</span>
+</pre></div>
+
+           </div>
+          </div>
+    </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Apache Software Foundation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

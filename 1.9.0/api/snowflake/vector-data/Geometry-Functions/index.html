@@ -1,0 +1,6919 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Apache Sedona is a cluster computing system for processing large-scale spatial data. Sedona extends existing cluster computing systems, such as Apache Spark, Apache Flink, and Snowflake, with a set of out-of-the-box distributed Spatial Datasets and Spatial SQL that efficiently load, process, and analyze large-scale spatial data across machines.">
+      
+      
+      
+        <link rel="canonical" href="https://sedona.apache.org/latest/api/snowflake/vector-data/Geometry-Functions/">
+      
+      
+        <link rel="prev" href="../Overview/">
+      
+      
+        <link rel="next" href="../../../../setup/release-notes/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Geometry Functions - Apache Sedona</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/extra.min.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+
+<meta name="google-site-verification" content="o2riomKLozYKc2IQivWGsrI2unuyQs7hXiAD4kGMCTQ" />
+<link rel="apple-touch-icon" sizes="180x180" href="../../../../favicons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../../../favicons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../../../favicons/favicon-16x16.png">
+<link rel="manifest" href="../../../../favicons/site.webmanifest">
+<meta name="msapplication-config" content="../../../../favicons/browserconfig.xml">
+<meta name="msapplication-TileColor" content="#ca463a">
+<meta name="theme-color" content="#ca463a">
+
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#geometry-functions" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+You're not viewing the latest stable version.
+<a href="../../../../..">
+  <strong>Click here to go to the latest stable version.</strong>
+</a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+  <div style="background: #CA463A; color: white; text-align: center; padding: 0.5rem;">
+    <a href="blog/2026/03/01/sedonadb-030-release/" title="Announcement">🌵SedonaDB (Rust) 0.3.0 is out now, featuring larger-than-memory spatial joins, and row-level CRS!</a>
+  </div>
+  
+      <!--
+  Copyright (c) 2016-2025 Martin Donath <martin.donath@squidfunk.com>
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to
+  deal in the Software without restriction, including without limitation the
+  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+  sell copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  IN THE SOFTWARE.
+-->
+
+<!-- Determine classes -->
+
+
+
+
+
+<!-- Header -->
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+    <nav
+      class="md-header__inner md-grid container"
+      aria-label="Header"
+    >
+      <div class="left-part">
+
+        <!-- Button to open drawer -->
+        <label class="md-header__button md-icon" for="__drawer">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+        </label>
+
+        <!-- Link to home -->
+        <a
+          href="../../../.."
+          title="Apache Sedona"
+          class="header-logo"
+          aria-label="Apache Sedona"
+          data-md-component="logo"
+        >
+          
+  <img src="../../../../image/logo.svg" alt="logo">
+
+        </a>
+
+        <!-- Header title -->
+        <div class="md-header__title" data-md-component="header-title">
+          <div class="md-header__ellipsis">
+            <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Apache Sedona
+          </span>
+            </div>
+            <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Geometry Functions
+            
+          </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Color palette toggle -->
+        
+        
+        
+
+        <!-- User preference: color palette -->
+        
+
+        <!-- Site language selector -->
+        
+      </div>
+      <div class="right-part">
+
+        <!-- Button to open search modal -->
+        
+        
+
+        <!-- Check if search is actually enabled - see https://t.ly/DT_0V -->
+        
+        <label class="md-header__button md-icon btn-search" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+
+        <!-- Search interface -->
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        
+        
+
+        <!-- Repository information -->
+        
+        <div class="md-header__source">
+          <a href="https://github.com/apache/sedona" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    apache/sedona
+  </div>
+</a>
+        </div>
+        
+      </div>
+    </nav>
+
+    <!-- Navigation tabs (sticky) -->
+    
+    
+    
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="https://sedona.apache.org/sedonadb/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  SedonaDB
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../sedonaspark/" class="md-tabs__link">
+          
+  
+  
+  SedonaSpark
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../sedonaflink/" class="md-tabs__link">
+          
+  
+  
+  SedonaFlink
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../../../sedonasnow/" class="md-tabs__link">
+          
+  
+  
+  SedonaSnow
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="https://sedona.apache.org/spatialbench/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  SpatialBench
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../../blog/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Blog
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../download/" class="md-tabs__link">
+          
+  
+  
+  Community
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../asf/asf/" class="md-tabs__link">
+          
+  
+  
+  Apache Software Foundation
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+    
+</header>
+     
+
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+
+
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="Apache Sedona" class="logo-link" aria-label="Apache Sedona" data-md-component="logo">
+      <img src="../../../../image/header/logo-mobile.svg" alt="" class="logo">
+    </a>
+  </label>
+
+  
+  <div class="md-nav__source">
+    <a href="https://github.com/apache/sedona" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    apache/sedona
+  </div>
+</a>
+  </div>
+  
+
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+    
+    
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+    
+    
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://sedona.apache.org/sedonadb/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SedonaDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+    
+    
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SedonaSpark
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SedonaSpark
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../sedonaspark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Install
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/modules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/platform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Language wrappers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/maven-coordinates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maven Central coordinate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/docker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Use Sedona in Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2_6" id="__nav_3_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Sedona in your local Spark cluster
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Install Sedona in your local Spark cluster
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/install-scala/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Sedona Scala/Java
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/install-python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Sedona Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rdocs" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Sedona R
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/zeppelin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Sedona-Zeppelin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/cluster/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Set up Spark cluster manually
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2_7" id="__nav_3_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cloud platforms
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cloud platforms
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/wherobots/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install on Wherobots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/databricks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install on Databricks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/emr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install on AWS EMR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/glue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install on AWS Glue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/fabric/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install on Microsoft Fabric
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/azure-synapse-analytics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install on Azure Synapse Analytics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Programming Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Programming Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spatial DataFrame / SQL app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/raster/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Raster DataFrame / SQL app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/sql-pure-sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pure SQL environment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/geopandas-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GeoPandas API on Sedona
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/rdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spatial RDD app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rdocs" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sedona R
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/geopandas-shapely/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Work with GeoPandas and Shapely
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3_8" id="__nav_3_3_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Files
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Files
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/files/csv-geometry-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CSV
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/files/geopackage-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GeoPackage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/files/geoparquet-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GeoParquet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/files/geojson-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GeoJSON
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/files/shapefiles-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shapefiles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/files/stac-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    STAC catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3_9" id="__nav_3_3_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/concepts/spatial-joins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spatial Joins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/concepts/clustering-algorithms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Clustering Algorithms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/concepts/distance-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Distance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3_10" id="__nav_3_3_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Map visualization SQL app
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Map visualization SQL app
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/viz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scala/Java
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/zeppelin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Use Apache Zeppelin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/viz-gallery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gallery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3_11" id="__nav_3_3_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance tuning
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Performance tuning
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/benchmark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/Advanced-Tutorial-Tune-your-Application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tune RDD application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/storing-blobs-in-parquet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Storing large raster geometries in Parquet files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4_1" id="__nav_3_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SQL
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SQL
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/Overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4_1_2" id="__nav_3_4_1_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vector data
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_3_4_1_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_1_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Vector data
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/Geometry-Functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Geometry Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/geography/Geography-Functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Geography Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/DataFrameAPI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataFrame Style functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/Optimizer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query optimization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/CRS-Transformation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CRS Transformation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/NearestNeighbourSearching/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nearest-Neighbour searching
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/Spider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spider:Spatial Data Generator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/Reading-legacy-parquet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reading Legacy Parquet Files
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4_1_2_9" id="__nav_3_4_1_2_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Visualization
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_1_2_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Visualization
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/Visualization-SedonaPyDeck/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SedonaPyDeck
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/Visualization-SedonaKepler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SedonaKepler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4_1_3" id="__nav_3_4_1_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Raster data
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_3_4_1_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_1_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Raster data
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/Raster-Functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Raster Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/Raster-map-algebra/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Raster map algebra
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/Raster-affine-transformation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Raster affine transformation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sql/Parameter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Parameter
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4_2" id="__nav_3_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RDD (core)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    RDD (core)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../java-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scala/Java doc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4_3" id="__nav_3_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stats
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Stats
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../stats/sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataFrame
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4_4" id="__nav_3_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Viz
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Viz
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../viz/sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataFrame/SQL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../viz/java-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RDD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rdocs" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sedona R
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../pydocs" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sedona Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+    
+    
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SedonaFlink
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SedonaFlink
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../sedonaflink/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Install
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/flink/install-scala/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Sedona Scala/Java
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/flink/install-python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Sedona Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/flink/modules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/flink/platform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Language wrappers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Programming Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Programming Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_1" id="__nav_4_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sedona with Apache Flink
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Sedona with Apache Flink
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/flink/sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spatial SQL app (Flink)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/flink/pyflink-sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spatial SQL app (PyFlink)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_2" id="__nav_4_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scala/Java
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/jupyter-notebook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4_1" id="__nav_4_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SQL
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SQL
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../flink/Overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview (Flink)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../flink/Geometry-Functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Geometry Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+    
+    
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SedonaSnow
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SedonaSnow
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../sedonasnow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Install
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/snowflake/install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install Sedona SQL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../tutorial/snowflake/sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spatial SQL app (Snowflake)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/snowflake/modules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5_3_1" id="__nav_5_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SQL
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_3_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SQL
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview (Snowflake)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Geometry Functions
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Geometry Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#geometry-constructors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry Constructors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geometry-accessors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry Accessors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geometry-editors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry Editors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geometry-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#predicates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predicates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#measurement-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Measurement Functions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geometry-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry Processing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overlay-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overlay Functions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#affine-transformations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Affine Transformations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aggregate-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregate Functions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#linear-referencing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linear Referencing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spatial-reference-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spatial Reference System
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geometry-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bounding-box-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bounding Box Functions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spatial-indexing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spatial Indexing
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+    
+    
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://sedona.apache.org/spatialbench/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SpatialBench
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+    
+    
+  
+  
+  
+    
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../blog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+    
+    
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Community
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../download/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Download
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../setup/compile/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compile the code
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../community/contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributor Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contributor Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../community/rule/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../community/develop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Develop
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../community/geopandas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contribute to Geopandas API on Sedona
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../community/contributor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Management Committee
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../community/release-manager/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Become a release manager
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../community/snapshot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Publish a snapshot version
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../community/publish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Make a release
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../community/vote/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vote a release
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../community/publication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Publications
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+    
+    
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Apache Software Foundation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Apache Software Foundation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../asf/asf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Foundation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/licenses/" target="_blank" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/events/current-event" target="_blank" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/foundation/sponsorship.html" target="_blank" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sponsorship
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/foundation/thanks.html" target="_blank" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Thanks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/security/" target="_blank" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://privacy.apache.org/policies/privacy-policy-public.html" target="_blank" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Privacy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../asf/telemetry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Telemetry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+
+    <li class="btn-group">
+      <a href="#" class="btn btn-red">
+        Get started
+      </a>
+    </li>
+
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#geometry-constructors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry Constructors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geometry-accessors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry Accessors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geometry-editors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry Editors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geometry-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#predicates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Predicates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#measurement-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Measurement Functions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geometry-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry Processing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overlay-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overlay Functions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#affine-transformations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Affine Transformations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aggregate-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregate Functions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#linear-referencing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linear Referencing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spatial-reference-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spatial Reference System
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geometry-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry Validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bounding-box-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bounding Box Functions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spatial-indexing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spatial Indexing
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+    
+    
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/apache/sedona/edit/master/docs/api/snowflake/vector-data/Geometry-Functions.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
+<h1 id="geometry-functions">Geometry Functions<a class="headerlink" href="#geometry-functions" title="Permanent link">&para;</a></h1>
+<p>The <code>Geometry</code> type in Sedona represents planar (2D Euclidean) spatial objects such as points, lines, and polygons. All coordinates are treated as Cartesian (x, y) values, and spatial operations — distance, area, intersection, etc. — use flat-plane math.</p>
+<h2 id="geometry-constructors">Geometry Constructors<a class="headerlink" href="#geometry-constructors" title="Permanent link">&para;</a></h2>
+<p>These functions create geometry objects from various textual or binary formats, or from coordinate values.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_GeomCollFromText/">ST_GeomCollFromText</a></td>
+<td style="text-align: left;">Constructs a GeometryCollection from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns <code>null</code> if the WKT is not a <code>GEOMETRYCOLLECTION</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_GeometryFromText/">ST_GeometryFromText</a></td>
+<td style="text-align: left;">Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of <a href="../Geometry-Constructors/ST_GeomFromWKT/">ST_GeomFromWKT</a></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_GeomFromEWKB/">ST_GeomFromEWKB</a></td>
+<td style="text-align: left;">Construct a Geometry from EWKB string or Binary. This function is an alias of <a href="../Geometry-Constructors/ST_GeomFromWKB/">ST_GeomFromWKB</a>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_GeomFromEWKT/">ST_GeomFromEWKT</a></td>
+<td style="text-align: left;">Construct a Geometry from OGC Extended WKT</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_GeomFromGeoHash/">ST_GeomFromGeoHash</a></td>
+<td style="text-align: left;">Create Geometry from geohash string and optional precision</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_GeomFromGeoJSON/">ST_GeomFromGeoJSON</a></td>
+<td style="text-align: left;">Construct a Geometry from GeoJson</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_GeomFromGML/">ST_GeomFromGML</a></td>
+<td style="text-align: left;">Construct a Geometry from GML.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_GeomFromKML/">ST_GeomFromKML</a></td>
+<td style="text-align: left;">Construct a Geometry from KML.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_GeomFromText/">ST_GeomFromText</a></td>
+<td style="text-align: left;">Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown). Alias of <a href="../Geometry-Constructors/ST_GeomFromWKT/">ST_GeomFromWKT</a></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_GeomFromWKB/">ST_GeomFromWKB</a></td>
+<td style="text-align: left;">Construct a Geometry from WKB string or Binary. This function also supports EWKB format.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_GeomFromWKT/">ST_GeomFromWKT</a></td>
+<td style="text-align: left;">Construct a Geometry from WKT. If SRID is not set, it defaults to 0 (unknown).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_LineFromText/">ST_LineFromText</a></td>
+<td style="text-align: left;">Construct a Line from Wkt text</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_LineFromWKB/">ST_LineFromWKB</a></td>
+<td style="text-align: left;">Construct a LineString geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_LineStringFromText/">ST_LineStringFromText</a></td>
+<td style="text-align: left;">Construct a LineString from Text, delimited by Delimiter</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_LinestringFromWKB/">ST_LinestringFromWKB</a></td>
+<td style="text-align: left;">Construct a LineString geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format and it is an alias of <a href="../Geometry-Constructors/ST_LineFromWKB/">ST_LineFromWKB</a>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_MakeEnvelope/">ST_MakeEnvelope</a></td>
+<td style="text-align: left;">Construct a Polygon from MinX, MinY, MaxX, MaxY, and an optional SRID.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_MakePoint/">ST_MakePoint</a></td>
+<td style="text-align: left;">Creates a 2D, 3D Z or 4D ZM Point geometry. Use ST_MakePointM to make points with XYM coordinates. Z and M values are optional.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_MLineFromText/">ST_MLineFromText</a></td>
+<td style="text-align: left;">Construct a MultiLineString from Wkt. If srid is not set, it defaults to 0 (unknown).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_MPointFromText/">ST_MPointFromText</a></td>
+<td style="text-align: left;">Constructs a MultiPoint from the WKT with the given SRID. If SRID is not provided then it defaults to 0. It returns <code>null</code> if the WKT is not a <code>MULTIPOINT</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_MPolyFromText/">ST_MPolyFromText</a></td>
+<td style="text-align: left;">Construct a MultiPolygon from Wkt. If srid is not set, it defaults to 0 (unknown).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_Point/">ST_Point</a></td>
+<td style="text-align: left;">Construct a Point from X and Y</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_PointFromGeoHash/">ST_PointFromGeoHash</a></td>
+<td style="text-align: left;">Generates a Point geometry representing the center of the GeoHash cell defined by the input string. If <code>precision</code> is not specified, the full GeoHash precision is used. Providing a <code>precision</code> value...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_PointFromText/">ST_PointFromText</a></td>
+<td style="text-align: left;">Construct a Point from Text, delimited by Delimiter</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_PointFromWKB/">ST_PointFromWKB</a></td>
+<td style="text-align: left;">Construct a Point geometry from WKB string or Binary and an optional SRID. This function also supports EWKB format.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_PointZ/">ST_PointZ</a></td>
+<td style="text-align: left;">Construct a Point from X, Y and Z and an optional srid. If srid is not set, it defaults to 0 (unknown). Must use ST_AsEWKT function to print the Z coordinate.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_PointZ/">ST_PointZ</a></td>
+<td style="text-align: left;">Construct a Point from X, Y and Z and an optional srid. If srid is not set, it defaults to 0 (unknown). Must use ST_AsEWKT function to print the Z coordinate.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_PolygonFromEnvelope/">ST_PolygonFromEnvelope</a></td>
+<td style="text-align: left;">Construct a Polygon from MinX, MinY, MaxX, MaxY.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Constructors/ST_PolygonFromText/">ST_PolygonFromText</a></td>
+<td style="text-align: left;">Construct a Polygon from Text, delimited by Delimiter. Path must be closed</td>
+</tr>
+</tbody>
+</table>
+<h2 id="geometry-accessors">Geometry Accessors<a class="headerlink" href="#geometry-accessors" title="Permanent link">&para;</a></h2>
+<p>These functions extract information and properties from geometry objects.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/GeometryType/">GeometryType</a></td>
+<td style="text-align: left;">Returns the type of the geometry as a string. Eg: 'LINESTRING', 'POLYGON', 'MULTIPOINT', etc. This function also indicates if the geometry is measured, by returning a string of the form 'POINTM'.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_Boundary/">ST_Boundary</a></td>
+<td style="text-align: left;">Returns the closure of the combinatorial boundary of this Geometry.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_CoordDim/">ST_CoordDim</a></td>
+<td style="text-align: left;">Returns the coordinate dimensions of the geometry. It is an alias of <code>ST_NDims</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_CrossesDateLine/">ST_CrossesDateLine</a></td>
+<td style="text-align: left;">This function determines if a given geometry crosses the International Date Line. It operates by checking if the difference in longitude between any pair of consecutive points in the geometry excee...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_Dimension/">ST_Dimension</a></td>
+<td style="text-align: left;">Return the topological dimension of this Geometry object, which must be less than or equal to the coordinate dimension. OGC SPEC s2.1.1.1 - returns 0 for POINT, 1 for LINESTRING, 2 for POLYGON, and...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_Dump/">ST_Dump</a></td>
+<td style="text-align: left;">This function takes a GeometryCollection/Multi Geometry object and returns a set of geometries containing the individual geometries that make up the input geometry. The function is useful for break...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_DumpPoints/">ST_DumpPoints</a></td>
+<td style="text-align: left;">Returns a MultiPoint geometry which consists of individual points that compose the input line string.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_EndPoint/">ST_EndPoint</a></td>
+<td style="text-align: left;">Returns last point of given linestring.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_ExteriorRing/">ST_ExteriorRing</a></td>
+<td style="text-align: left;">Returns a line string representing the exterior ring of the POLYGON geometry. Return NULL if the geometry is not a polygon.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_GeometryN/">ST_GeometryN</a></td>
+<td style="text-align: left;">Return the 0-based Nth geometry if the geometry is a GEOMETRYCOLLECTION, (MULTI)POINT, (MULTI)LINESTRING, MULTICURVE or (MULTI)POLYGON. Otherwise, return null</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_GeometryType/">ST_GeometryType</a></td>
+<td style="text-align: left;">Returns the type of the geometry as a string. EG: 'ST_Linestring', 'ST_Polygon' etc.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_HasZ/">ST_HasZ</a></td>
+<td style="text-align: left;">Checks for the presence of Z coordinate values representing measures or linear references. Returns true if the input geometry includes an Z coordinate, false otherwise.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_InteriorRingN/">ST_InteriorRingN</a></td>
+<td style="text-align: left;">Returns the Nth interior linestring ring of the polygon geometry. Returns NULL if the geometry is not a polygon or the given N is out of range</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_IsClosed/">ST_IsClosed</a></td>
+<td style="text-align: left;">RETURNS true if the LINESTRING start and end point are the same.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_IsCollection/">ST_IsCollection</a></td>
+<td style="text-align: left;">Returns <code>TRUE</code> if the geometry type of the input is a geometry collection type. Collection types are the following:</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_IsEmpty/">ST_IsEmpty</a></td>
+<td style="text-align: left;">Test if a geometry is empty geometry</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_IsPolygonCCW/">ST_IsPolygonCCW</a></td>
+<td style="text-align: left;">Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_IsPolygonCW/">ST_IsPolygonCW</a></td>
+<td style="text-align: left;">Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_IsRing/">ST_IsRing</a></td>
+<td style="text-align: left;">RETURN true if LINESTRING is ST_IsClosed and ST_IsSimple.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_IsSimple/">ST_IsSimple</a></td>
+<td style="text-align: left;">Test if geometry's only self-intersections are at boundary points.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_NDims/">ST_NDims</a></td>
+<td style="text-align: left;">Returns the coordinate dimension of the geometry.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_NPoints/">ST_NPoints</a></td>
+<td style="text-align: left;">Return points of the geometry</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_NRings/">ST_NRings</a></td>
+<td style="text-align: left;">Returns the number of rings in a Polygon or MultiPolygon. Contrary to ST_NumInteriorRings, this function also takes into account the number of exterior rings.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_NumGeometries/">ST_NumGeometries</a></td>
+<td style="text-align: left;">Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the number of geometries, for single geometries will return 1.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_NumInteriorRing/">ST_NumInteriorRing</a></td>
+<td style="text-align: left;">Returns number of interior rings of polygon geometries. It is an alias of <a href="../Geometry-Accessors/ST_NumInteriorRings/">ST_NumInteriorRings</a>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_NumInteriorRings/">ST_NumInteriorRings</a></td>
+<td style="text-align: left;">RETURNS number of interior rings of polygon geometries.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_NumPoints/">ST_NumPoints</a></td>
+<td style="text-align: left;">Returns number of points in a LineString</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_PointN/">ST_PointN</a></td>
+<td style="text-align: left;">Return the Nth point in a single linestring or circular linestring in the geometry. Negative values are counted backwards from the end of the LineString, so that -1 is the last point. Returns NULL ...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_Points/">ST_Points</a></td>
+<td style="text-align: left;">Returns a MultiPoint geometry consisting of all the coordinates of the input geometry. It preserves duplicate points as well as M and Z coordinates.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_StartPoint/">ST_StartPoint</a></td>
+<td style="text-align: left;">Returns first point of given linestring.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_X/">ST_X</a></td>
+<td style="text-align: left;">Returns X Coordinate of given Point null otherwise.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_Y/">ST_Y</a></td>
+<td style="text-align: left;">Returns Y Coordinate of given Point, null otherwise.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_Z/">ST_Z</a></td>
+<td style="text-align: left;">Returns Z Coordinate of given Point, null otherwise.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="geometry-editors">Geometry Editors<a class="headerlink" href="#geometry-editors" title="Permanent link">&para;</a></h2>
+<p>These functions create modified geometries by changing type, structure, or vertices.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_AddPoint/">ST_AddPoint</a></td>
+<td style="text-align: left;">RETURN Linestring with additional point at the given index, if position is not available the point will be added at the end of line.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_Collect/">ST_Collect</a></td>
+<td style="text-align: left;">Build an appropriate <code>Geometry</code>, <code>MultiGeometry</code>, or <code>GeometryCollection</code> to contain the <code>Geometry</code>s in it. For example:</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_CollectionExtract/">ST_CollectionExtract</a></td>
+<td style="text-align: left;">Returns a homogeneous multi-geometry from a given geometry collection.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_FlipCoordinates/">ST_FlipCoordinates</a></td>
+<td style="text-align: left;">Returns a version of the given geometry with X and Y axis flipped.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_Force2D/">ST_Force2D</a></td>
+<td style="text-align: left;">Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of <a href="../Geometry-Editors/ST_Force_2D/">ST_Force_2D</a>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_Force3D/">ST_Force3D</a></td>
+<td style="text-align: left;">Forces the geometry into a 3-dimensional model so that all output representations will have X, Y and Z coordinates. An optionally given zValue is tacked onto the geometry if the geometry is 2-dimen...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_Force3DZ/">ST_Force3DZ</a></td>
+<td style="text-align: left;">Forces the geometry into a 3-dimensional model so that all output representations will have X, Y and Z coordinates. An optionally given zValue is tacked onto the geometry if the geometry is 2-dimen...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_Force_2D/">ST_Force_2D</a></td>
+<td style="text-align: left;">Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of <a href="../Geometry-Editors/ST_Force2D/">ST_Force2D</a>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_ForceCollection/">ST_ForceCollection</a></td>
+<td style="text-align: left;">This function converts the input geometry into a GeometryCollection, regardless of the original geometry type. If the input is a multipart geometry, such as a MultiPolygon or MultiLineString, it wi...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_ForcePolygonCCW/">ST_ForcePolygonCCW</a></td>
+<td style="text-align: left;">For (Multi)Polygon geometries, this function sets the exterior ring orientation to counter-clockwise and interior rings to clockwise orientation. Non-polygonal geometries are returned unchanged.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_ForcePolygonCW/">ST_ForcePolygonCW</a></td>
+<td style="text-align: left;">For (Multi)Polygon geometries, this function sets the exterior ring orientation to clockwise and interior rings to counter-clockwise orientation. Non-polygonal geometries are returned unchanged.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_ForceRHR/">ST_ForceRHR</a></td>
+<td style="text-align: left;">Sets the orientation of polygon vertex orderings to follow the Right-Hand-Rule convention. The exterior ring will have a clockwise winding order, while any interior rings are oriented counter-clock...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_LineFromMultiPoint/">ST_LineFromMultiPoint</a></td>
+<td style="text-align: left;">Creates a LineString from a MultiPoint geometry.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_LineMerge/">ST_LineMerge</a></td>
+<td style="text-align: left;">Returns a LineString or MultiLineString formed by sewing together the constituent line work of a MULTILINESTRING.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_MakeLine/">ST_MakeLine</a></td>
+<td style="text-align: left;">Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_MakePolygon/">ST_MakePolygon</a></td>
+<td style="text-align: left;">Function to convert closed linestring to polygon including holes. The holes must be a MultiLinestring. If holes are provided, they should be fully contained within the shell. Holes outside the shel...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_Multi/">ST_Multi</a></td>
+<td style="text-align: left;">Returns a MultiGeometry object based on the geometry input. ST_Multi is basically an alias for ST_Collect with one geometry.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_Normalize/">ST_Normalize</a></td>
+<td style="text-align: left;">Returns the input geometry in its normalized form.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_Polygon/">ST_Polygon</a></td>
+<td style="text-align: left;">Function to create a polygon built from the given LineString and sets the spatial reference system from the srid</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_Project/">ST_Project</a></td>
+<td style="text-align: left;">Calculates a new point location given a starting point, distance, and azimuth. The azimuth indicates the direction, expressed in radians, and is measured in a clockwise manner starting from true no...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_RemovePoint/">ST_RemovePoint</a></td>
+<td style="text-align: left;">RETURN Line with removed point at given index, position can be omitted and then last one will be removed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_RemoveRepeatedPoints/">ST_RemoveRepeatedPoints</a></td>
+<td style="text-align: left;">This function eliminates consecutive duplicate points within a geometry, preserving endpoints of LineStrings. It operates on (Multi)LineStrings, (Multi)Polygons, and MultiPoints, processing Geometr...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_Reverse/">ST_Reverse</a></td>
+<td style="text-align: left;">Return the geometry with vertex order reversed</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_Segmentize/">ST_Segmentize</a></td>
+<td style="text-align: left;">Returns a modified geometry having no segment longer than the given max_segment_length.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_SetPoint/">ST_SetPoint</a></td>
+<td style="text-align: left;">Replace Nth point of linestring with given point. Index is 0-based. Negative index are counted backwards, e.g., -1 is last point.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Editors/ST_ShiftLongitude/">ST_ShiftLongitude</a></td>
+<td style="text-align: left;">Modifies longitude coordinates in geometries, shifting values between -180..0 degrees to 180..360 degrees and vice versa. This is useful for normalizing data across the International Date Line and ...</td>
+</tr>
+</tbody>
+</table>
+<h2 id="geometry-output">Geometry Output<a class="headerlink" href="#geometry-output" title="Permanent link">&para;</a></h2>
+<p>These functions convert geometry objects into various textual or binary formats.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Output/ST_AsBinary/">ST_AsBinary</a></td>
+<td style="text-align: left;">Return the Well-Known Binary representation of a geometry</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Output/ST_AsEWKB/">ST_AsEWKB</a></td>
+<td style="text-align: left;">Return the Extended Well-Known Binary representation of a geometry. EWKB is an extended version of WKB which includes the SRID of the geometry. The format originated in PostGIS but is supported by ...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Output/ST_AsEWKT/">ST_AsEWKT</a></td>
+<td style="text-align: left;">Return the Extended Well-Known Text representation of a geometry. EWKT is an extended version of WKT which includes the SRID of the geometry. The format originated in PostGIS but is supported by ma...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Output/ST_AsGeoJSON/">ST_AsGeoJSON</a></td>
+<td style="text-align: left;">Return the <a href="https://geojson.org/">GeoJSON</a> string representation of a geometry</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Output/ST_AsGML/">ST_AsGML</a></td>
+<td style="text-align: left;">Return the <a href="https://www.ogc.org/standards/gml">GML</a> string representation of a geometry</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Output/ST_AsHEXEWKB/">ST_AsHEXEWKB</a></td>
+<td style="text-align: left;">This function returns the input geometry encoded to a text representation in HEXEWKB format. The HEXEWKB encoding can use either little-endian (NDR) or big-endian (XDR) byte ordering. If no encoding...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Output/ST_AsKML/">ST_AsKML</a></td>
+<td style="text-align: left;">Return the <a href="https://www.ogc.org/standards/kml">KML</a> string representation of a geometry</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Output/ST_AsText/">ST_AsText</a></td>
+<td style="text-align: left;">Return the Well-Known Text string representation of a geometry</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Output/ST_GeoHash/">ST_GeoHash</a></td>
+<td style="text-align: left;">Returns GeoHash of the geometry with given precision</td>
+</tr>
+</tbody>
+</table>
+<h2 id="predicates">Predicates<a class="headerlink" href="#predicates" title="Permanent link">&para;</a></h2>
+<p>These functions test spatial relationships between geometries, returning boolean values.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Predicates/ST_Contains/">ST_Contains</a></td>
+<td style="text-align: left;">Return true if A fully contains B</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Predicates/ST_CoveredBy/">ST_CoveredBy</a></td>
+<td style="text-align: left;">Return true if A is covered by B</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Predicates/ST_Covers/">ST_Covers</a></td>
+<td style="text-align: left;">Return true if A covers B</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Predicates/ST_Crosses/">ST_Crosses</a></td>
+<td style="text-align: left;">Return true if A crosses B</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Predicates/ST_Disjoint/">ST_Disjoint</a></td>
+<td style="text-align: left;">Return true if A and B are disjoint</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Predicates/ST_DWithin/">ST_DWithin</a></td>
+<td style="text-align: left;">Returns true if 'leftGeometry' and 'rightGeometry' are within a specified 'distance'. This function essentially checks if the shortest distance between the envelope of the two geometries is &lt;= the ...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Predicates/ST_Equals/">ST_Equals</a></td>
+<td style="text-align: left;">Return true if A equals to B</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Predicates/ST_Intersects/">ST_Intersects</a></td>
+<td style="text-align: left;">Return true if A intersects B</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Predicates/ST_OrderingEquals/">ST_OrderingEquals</a></td>
+<td style="text-align: left;">Returns true if the geometries are equal and the coordinates are in the same order</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Predicates/ST_Overlaps/">ST_Overlaps</a></td>
+<td style="text-align: left;">Return true if A overlaps B</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Predicates/ST_Relate/">ST_Relate</a></td>
+<td style="text-align: left;">The first variant of the function computes and returns the <a href="https://en.wikipedia.org/wiki/DE-9IM">Dimensionally Extended 9-Intersection Model (DE-9IM)</a> matrix string representing the spatial relati...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Predicates/ST_RelateMatch/">ST_RelateMatch</a></td>
+<td style="text-align: left;">This function tests the relationship between two <a href="https://en.wikipedia.org/wiki/DE-9IM">Dimensionally Extended 9-Intersection Model (DE-9IM)</a> matrices representing geometry intersections. It evalua...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Predicates/ST_Touches/">ST_Touches</a></td>
+<td style="text-align: left;">Return true if A touches B</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Predicates/ST_Within/">ST_Within</a></td>
+<td style="text-align: left;">Return true if A is fully contained by B</td>
+</tr>
+</tbody>
+</table>
+<h2 id="measurement-functions">Measurement Functions<a class="headerlink" href="#measurement-functions" title="Permanent link">&para;</a></h2>
+<p>These functions compute measurements of distance, area, length, and angles.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_3DDistance/">ST_3DDistance</a></td>
+<td style="text-align: left;">Return the 3-dimensional minimum cartesian distance between A and B</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_Angle/">ST_Angle</a></td>
+<td style="text-align: left;">Computes and returns the angle between two vectors represented by the provided points or linestrings.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_Area/">ST_Area</a></td>
+<td style="text-align: left;">Return the area of A</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_AreaSpheroid/">ST_AreaSpheroid</a></td>
+<td style="text-align: left;">Return the geodesic area of A using WGS84 spheroid. Unit is square meter. Works better for large geometries (country level) compared to <code>ST_Area</code> + <code>ST_Transform</code>. It is equivalent to PostGIS `ST_A...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_Azimuth/">ST_Azimuth</a></td>
+<td style="text-align: left;">Returns Azimuth for two given points in radians. Returns null if the two points are identical.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_ClosestPoint/">ST_ClosestPoint</a></td>
+<td style="text-align: left;">Returns the 2-dimensional point on geom1 that is closest to geom2. This is the first point of the shortest line between the geometries. If using 3D geometries, the Z coordinates will be ignored. If...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_Degrees/">ST_Degrees</a></td>
+<td style="text-align: left;">Convert an angle in radian to degrees.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_Distance/">ST_Distance</a></td>
+<td style="text-align: left;">Return the Euclidean distance between A and B</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_DistanceSphere/">ST_DistanceSphere</a></td>
+<td style="text-align: left;">Return the haversine / great-circle distance of A using a given earth radius (default radius: 6371008.0). Unit is meter. Compared to <code>ST_Distance</code> + <code>ST_Transform</code>, it works better for datasets that...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_DistanceSpheroid/">ST_DistanceSpheroid</a></td>
+<td style="text-align: left;">Return the geodesic distance of A using WGS84 spheroid. Unit is meter. Compared to <code>ST_Distance</code> + <code>ST_Transform</code>, it works better for datasets that cover large regions such as continents or the en...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_FrechetDistance/">ST_FrechetDistance</a></td>
+<td style="text-align: left;">Computes and returns discrete <a href="https://en.wikipedia.org/wiki/Fr%C3%A9chet_distance">Frechet Distance</a> between the given two geometries, based on <a href="https://www.kr.tuwien.ac.at/staff/eiter/et-archive/files/cdtr9464.pdf">Computing Discrete Frechet Distance</a></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_HausdorffDistance/">ST_HausdorffDistance</a></td>
+<td style="text-align: left;">Returns a discretized (and hence approximate) <a href="https://en.wikipedia.org/wiki/Hausdorff_distance">Hausdorff distance</a> between the given 2 geometries. Optionally, a densityFraction parameter can be s...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_Length/">ST_Length</a></td>
+<td style="text-align: left;">Returns the perimeter of A.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_Length2D/">ST_Length2D</a></td>
+<td style="text-align: left;">Returns the perimeter of A. This function is an alias of <a href="../Measurement-Functions/ST_Length/">ST_Length</a>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_LengthSpheroid/">ST_LengthSpheroid</a></td>
+<td style="text-align: left;">Return the geodesic perimeter of A using WGS84 spheroid. Unit is meter. Works better for large geometries (country level) compared to <code>ST_Length</code> + <code>ST_Transform</code>. It is equivalent to PostGIS `ST_L...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_LongestLine/">ST_LongestLine</a></td>
+<td style="text-align: left;">Returns the LineString geometry representing the maximum distance between any two points from the input geometries.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_MaxDistance/">ST_MaxDistance</a></td>
+<td style="text-align: left;">Calculates and returns the length value representing the maximum distance between any two points across the input geometries. This function is an alias for <code>ST_LongestDistance</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_MinimumClearance/">ST_MinimumClearance</a></td>
+<td style="text-align: left;">The minimum clearance is a metric that quantifies a geometry's tolerance to changes in coordinate precision or vertex positions. It represents the maximum distance by which vertices can be adjusted...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_MinimumClearanceLine/">ST_MinimumClearanceLine</a></td>
+<td style="text-align: left;">This function returns a two-point LineString geometry representing the minimum clearance distance of the input geometry. If the input geometry does not have a defined minimum clearance, such as for...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_Perimeter/">ST_Perimeter</a></td>
+<td style="text-align: left;">This function calculates the 2D perimeter of a given geometry. It supports Polygon, MultiPolygon, and GeometryCollection geometries (as long as the GeometryCollection contains polygonal geometries)...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_Perimeter2D/">ST_Perimeter2D</a></td>
+<td style="text-align: left;">This function calculates the 2D perimeter of a given geometry. It supports Polygon, MultiPolygon, and GeometryCollection geometries (as long as the GeometryCollection contains polygonal geometries)...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Measurement-Functions/ST_ShortestLine/">ST_ShortestLine</a></td>
+<td style="text-align: left;">Returns the shortest LineString between two geometries. The line starts on geom1 and ends on geom2. If either geometry is empty, returns null.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="geometry-processing">Geometry Processing<a class="headerlink" href="#geometry-processing" title="Permanent link">&para;</a></h2>
+<p>These functions compute geometric constructions, or alter geometry size or shape.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_ApproximateMedialAxis/">ST_ApproximateMedialAxis</a></td>
+<td style="text-align: left;">Computes an approximate medial axis of a polygonal geometry. The medial axis is a representation of the "centerline" or "skeleton" of the polygon. This function first computes the straight skeleton...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_Buffer/">ST_Buffer</a></td>
+<td style="text-align: left;">Returns a geometry/geography that represents all points whose distance from this Geometry/geography is less than or equal to distance. The function supports both Planar/Euclidean and Spheroidal/Geo...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_BuildArea/">ST_BuildArea</a></td>
+<td style="text-align: left;">Returns the areal geometry formed by the constituent linework of the input geometry.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_Centroid/">ST_Centroid</a></td>
+<td style="text-align: left;">Return the centroid point of A</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_ConcaveHull/">ST_ConcaveHull</a></td>
+<td style="text-align: left;">Return the Concave Hull of polygon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_ConvexHull/">ST_ConvexHull</a></td>
+<td style="text-align: left;">Return the Convex Hull of polygon A</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_DelaunayTriangles/">ST_DelaunayTriangles</a></td>
+<td style="text-align: left;">This function computes the <a href="https://en.wikipedia.org/wiki/Delaunay_triangulation">Delaunay triangulation</a> for the set of vertices in the input geometry. An optional <code>tolerance</code> parameter allows sna...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_GeneratePoints/">ST_GeneratePoints</a></td>
+<td style="text-align: left;">Generates a specified quantity of pseudo-random points within the boundaries of the provided polygonal geometry. When <code>seed</code> is either zero or not defined then output will be random.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_GeometricMedian/">ST_GeometricMedian</a></td>
+<td style="text-align: left;">Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm. The geometric median provides a centrality measure that is less sensitive to outlier points than th...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_LabelPoint/">ST_LabelPoint</a></td>
+<td style="text-align: left;"><code>ST_LabelPoint</code> computes and returns a label point for a given polygon or geometry collection. The label point is chosen to be sufficiently far from boundaries of the geometry. For a regular Polygo...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_MaximumInscribedCircle/">ST_MaximumInscribedCircle</a></td>
+<td style="text-align: left;">Finds the largest circle that is contained within a (multi)polygon, or which does not overlap any lines and points. Returns a row with fields:</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_MinimumBoundingCircle/">ST_MinimumBoundingCircle</a></td>
+<td style="text-align: left;">Returns the smallest circle polygon that contains a geometry.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_MinimumBoundingRadius/">ST_MinimumBoundingRadius</a></td>
+<td style="text-align: left;">Returns two columns containing the center point and radius of the smallest circle that contains a geometry.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_OffsetCurve/">ST_OffsetCurve</a></td>
+<td style="text-align: left;">Returns a line at a given offset distance from a linear geometry. Positive distance offsets to the left, negative to the right.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_OrientedEnvelope/">ST_OrientedEnvelope</a></td>
+<td style="text-align: left;">Returns the minimum-area rotated rectangle enclosing a geometry. The rectangle may be rotated relative to the coordinate axes. Degenerate inputs may result in a Point or LineString being returned.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_PointOnSurface/">ST_PointOnSurface</a></td>
+<td style="text-align: left;">Returns a POINT guaranteed to lie on the surface.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_Polygonize/">ST_Polygonize</a></td>
+<td style="text-align: left;">Generates a GeometryCollection composed of polygons that are formed from the linework of an input GeometryCollection. When the input does not contain any linework that forms a polygon, the function...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_ReducePrecision/">ST_ReducePrecision</a></td>
+<td style="text-align: left;">Reduce the decimals places in the coordinates of the geometry to the given number of decimal places. The last decimal place will be rounded. This function was called ST_PrecisionReduce in versions ...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_Simplify/">ST_Simplify</a></td>
+<td style="text-align: left;">This function simplifies the input geometry by applying the Douglas-Peucker algorithm.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_SimplifyPolygonHull/">ST_SimplifyPolygonHull</a></td>
+<td style="text-align: left;">This function computes a topology-preserving simplified hull, either outer or inner, for a polygonal geometry input. An outer hull fully encloses the original geometry, while an inner hull lies ent...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_SimplifyPreserveTopology/">ST_SimplifyPreserveTopology</a></td>
+<td style="text-align: left;">Simplifies a geometry and ensures that the result is a valid geometry having the same dimension and number of components as the input, and with the components having the same topological relationship.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_SimplifyVW/">ST_SimplifyVW</a></td>
+<td style="text-align: left;">This function simplifies the input geometry by applying the Visvalingam-Whyatt algorithm.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_Snap/">ST_Snap</a></td>
+<td style="text-align: left;">Snaps the vertices and segments of the <code>input</code> geometry to <code>reference</code> geometry within the specified <code>tolerance</code> distance. The <code>tolerance</code> parameter controls the maximum snap distance.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_StraightSkeleton/">ST_StraightSkeleton</a></td>
+<td style="text-align: left;">Computes the straight skeleton of a polygonal geometry. The straight skeleton is a method of representing a polygon by a topological skeleton, formed by a continuous shrinking process where each ed...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_TriangulatePolygon/">ST_TriangulatePolygon</a></td>
+<td style="text-align: left;">Generates the constrained Delaunay triangulation for the input Polygon. The constrained Delaunay triangulation is a set of triangles created from the Polygon's vertices that covers the Polygon area...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Processing/ST_VoronoiPolygons/">ST_VoronoiPolygons</a></td>
+<td style="text-align: left;">Returns a two-dimensional Voronoi diagram from the vertices of the supplied geometry. The result is a GeometryCollection of Polygons that covers an envelope larger than the extent of the input vert...</td>
+</tr>
+</tbody>
+</table>
+<h2 id="overlay-functions">Overlay Functions<a class="headerlink" href="#overlay-functions" title="Permanent link">&para;</a></h2>
+<p>These functions compute results arising from the overlay of two geometries. These are also known as point-set theoretic boolean operations.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Overlay-Functions/ST_Difference/">ST_Difference</a></td>
+<td style="text-align: left;">Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Overlay-Functions/ST_Intersection/">ST_Intersection</a></td>
+<td style="text-align: left;">Return the intersection geometry of A and B</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Overlay-Functions/ST_Split/">ST_Split</a></td>
+<td style="text-align: left;">Split an input geometry by another geometry (called the blade). Linear (LineString or MultiLineString) geometry can be split by a Point, MultiPoint, LineString, MultiLineString, Polygon, or MultiPo...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Overlay-Functions/ST_SubDivide/">ST_SubDivide</a></td>
+<td style="text-align: left;">Returns a multi-geometry divided based of given maximum number of vertices.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Overlay-Functions/ST_SubDivideExplode/">ST_SubDivideExplode</a></td>
+<td style="text-align: left;">It works the same as ST_SubDivide but returns new rows with geometries instead of a multi-geometry.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Overlay-Functions/ST_SymDifference/">ST_SymDifference</a></td>
+<td style="text-align: left;">Return the symmetrical difference between geometry A and B (return parts of geometries which are in either of the sets, but not in their intersection)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Overlay-Functions/ST_UnaryUnion/">ST_UnaryUnion</a></td>
+<td style="text-align: left;">This variant of <a href="../Overlay-Functions/ST_Union/">ST_Union</a> operates on a single geometry input. The input geometry can be a simple Geometry type, a MultiGeometry, or a GeometryCollection. The function calculates the ge...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Overlay-Functions/ST_Union/">ST_Union</a></td>
+<td style="text-align: left;">Return the union of geometry A and B</td>
+</tr>
+</tbody>
+</table>
+<h2 id="affine-transformations">Affine Transformations<a class="headerlink" href="#affine-transformations" title="Permanent link">&para;</a></h2>
+<p>These functions change the position and shape of geometries using affine transformations.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Affine-Transformations/ST_Affine/">ST_Affine</a></td>
+<td style="text-align: left;">Apply an affine transformation to the given geometry.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Affine-Transformations/ST_Rotate/">ST_Rotate</a></td>
+<td style="text-align: left;">Rotates a geometry by a specified angle in radians counter-clockwise around a given origin point. The origin for rotation can be specified as either a POINT geometry or x and y coordinates. If the ...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Affine-Transformations/ST_RotateX/">ST_RotateX</a></td>
+<td style="text-align: left;">Performs a counter-clockwise rotation of the specified geometry around the X-axis by the given angle measured in radians.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Affine-Transformations/ST_RotateY/">ST_RotateY</a></td>
+<td style="text-align: left;">Performs a counter-clockwise rotation of the specified geometry around the Y-axis by the given angle measured in radians.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Affine-Transformations/ST_Scale/">ST_Scale</a></td>
+<td style="text-align: left;">This function scales the geometry to a new size by multiplying the ordinates with the corresponding scaling factors provided as parameters <code>scaleX</code> and <code>scaleY</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Affine-Transformations/ST_ScaleGeom/">ST_ScaleGeom</a></td>
+<td style="text-align: left;">This function scales the input geometry (<code>geometry</code>) to a new size. It does this by multiplying the coordinates of the input geometry with corresponding values from another geometry (<code>factor</code>) repr...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Affine-Transformations/ST_Translate/">ST_Translate</a></td>
+<td style="text-align: left;">Returns the input geometry with its X, Y and Z coordinates (if present in the geometry) translated by deltaX, deltaY and deltaZ (if specified)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="aggregate-functions">Aggregate Functions<a class="headerlink" href="#aggregate-functions" title="Permanent link">&para;</a></h2>
+<p>These functions perform aggregate operations on groups of geometries.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Aggregate-Functions/ST_Envelope_Agg/">ST_Envelope_Agg</a></td>
+<td style="text-align: left;">Return the entire envelope boundary of all geometries in A. Empty geometries and null values are skipped. If all inputs are empty or null, the result is null. This behavior is consistent with PostG...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Aggregate-Functions/ST_Intersection_Agg/">ST_Intersection_Agg</a></td>
+<td style="text-align: left;">Return the polygon intersection of all polygons in A</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Aggregate-Functions/ST_Union_Agg/">ST_Union_Agg</a></td>
+<td style="text-align: left;">Return the polygon union of all polygons in A</td>
+</tr>
+</tbody>
+</table>
+<h2 id="linear-referencing">Linear Referencing<a class="headerlink" href="#linear-referencing" title="Permanent link">&para;</a></h2>
+<p>These functions work with linear referencing, measures along lines, and trajectory data.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Linear-Referencing/ST_LineInterpolatePoint/">ST_LineInterpolatePoint</a></td>
+<td style="text-align: left;">Returns a point interpolated along a line. First argument must be a LINESTRING. Second argument is a Double between 0 and 1 representing fraction of total linestring length the point has to be loca...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Linear-Referencing/ST_LineLocatePoint/">ST_LineLocatePoint</a></td>
+<td style="text-align: left;">Returns a double between 0 and 1, representing the location of the closest point on the LineString as a fraction of its total length. The first argument must be a LINESTRING, and the second argument...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Linear-Referencing/ST_LineSubstring/">ST_LineSubstring</a></td>
+<td style="text-align: left;">Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are Double values between 0 and 1. This only works w...</td>
+</tr>
+</tbody>
+</table>
+<h2 id="spatial-reference-system">Spatial Reference System<a class="headerlink" href="#spatial-reference-system" title="Permanent link">&para;</a></h2>
+<p>These functions work with the Spatial Reference System of geometries.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Reference-System/ST_BestSRID/">ST_BestSRID</a></td>
+<td style="text-align: left;">Returns the estimated most appropriate Spatial Reference Identifier (SRID) for a given geometry, based on its spatial extent and location. It evaluates the geometry's bounding envelope and selects ...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Reference-System/ST_SetSRID/">ST_SetSRID</a></td>
+<td style="text-align: left;">Sets the spatial reference system identifier (SRID) of the geometry.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Reference-System/ST_SRID/">ST_SRID</a></td>
+<td style="text-align: left;">Return the spatial reference system identifier (SRID) of the geometry.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Reference-System/ST_Transform/">ST_Transform</a></td>
+<td style="text-align: left;">Transform the Spatial Reference System / Coordinate Reference System of A, from SourceCRS to TargetCRS.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="geometry-validation">Geometry Validation<a class="headerlink" href="#geometry-validation" title="Permanent link">&para;</a></h2>
+<p>These functions test whether geometries are valid and can repair invalid geometries.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Validation/ST_IsValid/">ST_IsValid</a></td>
+<td style="text-align: left;">Test if a geometry is well-formed. The function can be invoked with just the geometry or with an additional flag (from <code>v1.5.1</code>). The flag alters the validity checking behavior. The flags parameter...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Validation/ST_IsValidDetail/">ST_IsValidDetail</a></td>
+<td style="text-align: left;">Returns a row, containing a boolean <code>valid</code> stating if a geometry is valid, a string <code>reason</code> stating why it is invalid and a geometry <code>location</code> pointing out where it is invalid.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Validation/ST_IsValidReason/">ST_IsValidReason</a></td>
+<td style="text-align: left;">Returns text stating if the geometry is valid. If not, it provides a reason why it is invalid. The function can be invoked with just the geometry or with an additional flag. The flag alters the val...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Geometry-Validation/ST_MakeValid/">ST_MakeValid</a></td>
+<td style="text-align: left;">Given an invalid geometry, create a valid representation of the geometry.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="bounding-box-functions">Bounding Box Functions<a class="headerlink" href="#bounding-box-functions" title="Permanent link">&para;</a></h2>
+<p>These functions produce or operate on bounding boxes and compute extent values.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Bounding-Box-Functions/ST_BoundingDiagonal/">ST_BoundingDiagonal</a></td>
+<td style="text-align: left;">Returns a linestring spanning minimum and maximum values of each dimension of the given geometry's coordinates as its start and end point respectively. If an empty geometry is provided, the returned...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Bounding-Box-Functions/ST_Envelope/">ST_Envelope</a></td>
+<td style="text-align: left;">Return the envelope boundary of A</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Bounding-Box-Functions/ST_Expand/">ST_Expand</a></td>
+<td style="text-align: left;">Returns a geometry expanded from the bounding box of the input. The expansion can be specified in two ways:</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Bounding-Box-Functions/ST_XMax/">ST_XMax</a></td>
+<td style="text-align: left;">Returns the maximum X coordinate of a geometry</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Bounding-Box-Functions/ST_XMin/">ST_XMin</a></td>
+<td style="text-align: left;">Returns the minimum X coordinate of a geometry</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Bounding-Box-Functions/ST_YMax/">ST_YMax</a></td>
+<td style="text-align: left;">Return the minimum Y coordinate of A</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Bounding-Box-Functions/ST_YMin/">ST_YMin</a></td>
+<td style="text-align: left;">Return the minimum Y coordinate of A</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Bounding-Box-Functions/ST_ZMax/">ST_ZMax</a></td>
+<td style="text-align: left;">Returns Z maxima of the given geometry or null if there is no Z coordinate.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Bounding-Box-Functions/ST_ZMin/">ST_ZMin</a></td>
+<td style="text-align: left;">Returns Z minima of the given geometry or null if there is no Z coordinate.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="spatial-indexing">Spatial Indexing<a class="headerlink" href="#spatial-indexing" title="Permanent link">&para;</a></h2>
+<p>These functions work with spatial indexing systems including Bing Tiles, H3, S2, and GeoHash.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Function</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Indexing/ST_BingTile/">ST_BingTile</a></td>
+<td style="text-align: left;">Creates a Bing Tile quadkey from tile XY coordinates and a zoom level.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Indexing/ST_BingTileAt/">ST_BingTileAt</a></td>
+<td style="text-align: left;">Returns the Bing Tile quadkey for a given point (longitude, latitude) at a specified zoom level.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Indexing/ST_BingTileCellIDs/">ST_BingTileCellIDs</a></td>
+<td style="text-align: left;">Returns an array of Bing Tile quadkey strings that cover the given geometry at the specified zoom level.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Indexing/ST_BingTilePolygon/">ST_BingTilePolygon</a></td>
+<td style="text-align: left;">Returns the bounding polygon (Geometry) of the Bing Tile identified by the given quadkey.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Indexing/ST_BingTilesAround/">ST_BingTilesAround</a></td>
+<td style="text-align: left;">Returns an array of Bing Tile quadkey strings representing the neighborhood tiles around the tile that contains the given point (longitude, latitude) at the specified zoom level. Returns the 3×3 ne...</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Indexing/ST_BingTileToGeom/">ST_BingTileToGeom</a></td>
+<td style="text-align: left;">Returns a GeometryCollection of Polygons for the corresponding Bing Tile quadkeys.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Indexing/ST_BingTileX/">ST_BingTileX</a></td>
+<td style="text-align: left;">Returns the tile X coordinate of the Bing Tile identified by the given quadkey.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Indexing/ST_BingTileY/">ST_BingTileY</a></td>
+<td style="text-align: left;">Returns the tile Y coordinate of the Bing Tile identified by the given quadkey.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Indexing/ST_BingTileZoomLevel/">ST_BingTileZoomLevel</a></td>
+<td style="text-align: left;">Returns the zoom level of the Bing Tile identified by the given quadkey.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Indexing/ST_GeoHashNeighbor/">ST_GeoHashNeighbor</a></td>
+<td style="text-align: left;">Returns the neighbor geohash cell in the given direction. Valid directions are: <code>n</code>, <code>ne</code>, <code>e</code>, <code>se</code>, <code>s</code>, <code>sw</code>, <code>w</code>, <code>nw</code> (case-insensitive).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Indexing/ST_GeoHashNeighbors/">ST_GeoHashNeighbors</a></td>
+<td style="text-align: left;">Returns the 8 neighboring geohash cells of a given geohash string. The result is an array of 8 geohash strings in the order: N, NE, E, SE, S, SW, W, NW.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../Spatial-Indexing/ST_S2CellIDs/">ST_S2CellIDs</a></td>
+<td style="text-align: left;">Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level. The level indicates the <a href="https://s2geometry.io/resources/s2cell_statistics.html">size of cells</a>. With...</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="April 1, 2026 16:03:44 UTC">April 1, 2026 16:03:44</span>
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+    
+
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="footer md-footer">
+  <div class="container">
+
+    <div class="footer__top">
+
+      <div class="col-left">
+        <img src="../../../../image/footer/logo-footer.svg" alt="" class="footer-logo">
+      </div>
+
+      <div class="col-right">
+        
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/apache/sedona" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/ApacheSedona" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M459.4 151.7c.3 4.5.3 9.1.3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53C87.4 130.8 165 172.4 252.1 176.9c-1.6-7.8-2.6-15.9-2.6-24C249.5 95.1 296.3 48 354.4 48c30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://discord.gg/9A3k5dEBsY" target="_blank" rel="noopener" title="discord.gg" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M492.5 69.8c-.2-.3-.4-.6-.8-.7-38.1-17.5-78.4-30-119.7-37.1-.4-.1-.8 0-1.1.1s-.6.4-.8.8c-5.5 9.9-10.5 20.2-14.9 30.6-44.6-6.8-89.9-6.8-134.4 0-4.5-10.5-9.5-20.7-15.1-30.6-.2-.3-.5-.6-.8-.8s-.7-.2-1.1-.2C162.5 39 122.2 51.5 84.1 69c-.3.1-.6.4-.8.7C7.1 183.5-13.8 294.6-3.6 404.2c0 .3.1.5.2.8s.3.4.5.6c44.4 32.9 94 58 146.8 74.2.4.1.8.1 1.1 0s.7-.4.9-.7c11.3-15.4 21.4-31.8 30-48.8.1-.2.2-.5.2-.8s0-.5-.1-.8-.2-.5-.4-.6-.4-.3-.7-.4c-15.8-6.1-31.2-13.4-45.9-21.9-.3-.2-.5-.4-.7-.6s-.3-.6-.3-.9 0-.6.2-.9.3-.5.6-.7c3.1-2.3 6.2-4.7 9.1-7.1.3-.2.6-.4.9-.4s.7 0 1 .1c96.2 43.9 200.4 43.9 295.5 0 .3-.1.7-.2 1-.2s.7.2.9.4c2.9 2.4 6 4.9 9.1 7.2.2.2.4.4.6.7s.2.6.2.9-.1.6-.3.9-.4.5-.6.6c-14.7 8.6-30 15.9-45.9 21.8-.2.1-.5.2-.7.4s-.3.4-.4.7-.1.5-.1.8.1.5.2.8c8.8 17 18.8 33.3 30 48.8.2.3.6.6.9.7s.8.1 1.1 0c52.9-16.2 102.6-41.3 147.1-74.2.2-.2.4-.4.5-.6s.2-.5.2-.8c12.3-126.8-20.5-236.9-86.9-334.5zm-302 267.7c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.4 59.2-52.8 59.2m195.4 0c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.2 59.2-52.8 59.2"/></svg>
+    </a>
+  
+</div>
+        
+      </div>
+    </div>
+
+    <hr class="footer-hr"></hr>
+
+    <div class="footer__bot">
+      <div class="md-copyright">
+  
+      Copyright © 2026 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="https://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" /><img referrerpolicy="no-referrer-when-downgrade" src="https://analytics.apache.org/matomo.php?idsite=74&rec=1" />
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+    </div>
+
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["announce.dismiss", "content.code.copy", "content.action.edit", "search.highlight", "search.share", "search.suggest", "navigation.footer", "navigation.instant", "navigation.instant.prefetch", "navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": ["latest"], "provider": "mike"}}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../../assets/javascripts/main.min.js"></script>
+      
+    
+  </body>
+</html>

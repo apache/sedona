@@ -1,0 +1,15 @@
+@use "sass:math";
+// https://websemantics.uk/tools/responsive-font-calculator/
+// font-size: clamp(18px, calc(1.125rem + (26 - 18) * ((100vw - 575px) / (1440 - 575))), 26px);
+@function clamp-property($min-size, $max-size, $min-width: 575, $max-width: 1440) {
+  // Ensure the min and max sizes are in px
+  $min-size-px: if(math.is-unitless($min-size), $min-size * 1px, $min-size);
+  $max-size-px: if(math.is-unitless($max-size), $max-size * 1px, $max-size);
+  $min-width-px: if(math.is-unitless($min-width), $min-width * 1px, $min-width);
+  $max-width-px: if(math.is-unitless($max-width), $max-width * 1px, $max-width);
+  @return clamp(
+          $min-size-px,
+          calc(#{$min-size-px} + ($max-size - $min-size) * ((100vw - $min-width-px) / ($max-width - $min-width))),
+          $max-size-px
+  );
+}
