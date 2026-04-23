@@ -62,16 +62,14 @@ class GeoTiffMetadataPartitionReader(
 
   override def close(): Unit = {}
 
-  // Fields requiring reader.read() to build a GridCoverage2D
-  private val COVERAGE_FIELDS = Set(
-    "width",
-    "height",
-    "numBands",
-    "srid",
-    "crs",
-    "geoTransform",
-    "cornerCoordinates",
-    "bands")
+  // Fields that truly require reader.read() to build a GridCoverage2D.
+  // `width`/`height` are intentionally NOT in this set — they come from
+  // reader.getOriginalGridRange() without decoding any pixels.
+  private val COVERAGE_FIELDS =
+    Set("numBands", "srid", "crs", "geoTransform", "cornerCoordinates", "bands")
+
+  // Fields that can be served from the reader alone (no GridCoverage2D needed)
+  private val READER_ONLY_FIELDS = Set("width", "height", "overviews")
 
   private def readFileMetadata(partition: PartitionedFile): InternalRow = {
     val requested = readDataSchema.fieldNames.toSet
@@ -82,7 +80,7 @@ class GeoTiffMetadataPartitionReader(
     val needCompression = requested.contains("compression")
     val needReader =
       needCoverage || needIsTiled || needBands || needTiffMetadata || needCompression ||
-        requested.contains("overviews")
+        requested.exists(READER_ONLY_FIELDS.contains)
 
     val path = new Path(new URI(partition.filePath.toString()))
 
@@ -144,8 +142,18 @@ class GeoTiffMetadataPartitionReader(
       photometric: Int,
       tiffMetadata: Map[String, String],
       compression: String): InternalRow = {
-    lazy val width = RasterAccessors.getWidth(raster)
-    lazy val height = RasterAccessors.getHeight(raster)
+    // width/height come from the reader's grid range without decoding any pixels.
+    // If neither reader nor raster is available (cheap-only query), both are -1.
+    lazy val width = {
+      if (raster != null) RasterAccessors.getWidth(raster)
+      else if (reader != null) reader.getOriginalGridRange.getSpan(0)
+      else -1
+    }
+    lazy val height = {
+      if (raster != null) RasterAccessors.getHeight(raster)
+      else if (reader != null) reader.getOriginalGridRange.getSpan(1)
+      else -1
+    }
     lazy val numBands = RasterAccessors.numBands(raster)
     lazy val srid = RasterAccessors.srid(raster)
 
