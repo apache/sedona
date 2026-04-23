@@ -91,6 +91,12 @@ public class Functions {
     return "ST_" + toJTS(g).getGeometryType();
   }
 
+  /** Return the WKT text representation of a geography. */
+  public static String asText(Geography g) {
+    if (g == null) return null;
+    return toJTS(g).toText();
+  }
+
   // ─── Level 2: JTS + S2 geodesic metrics ──────────────────────────────────
 
   /**
