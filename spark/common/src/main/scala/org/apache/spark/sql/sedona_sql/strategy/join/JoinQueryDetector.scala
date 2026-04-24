@@ -79,16 +79,6 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
             SpatialPredicate.INTERSECTS,
             false,
             extraCondition))
-      case ST_Within(Seq(leftShape, rightShape)) =>
-        Some(
-          JoinQueryDetection(
-            left,
-            right,
-            leftShape,
-            rightShape,
-            SpatialPredicate.WITHIN,
-            false,
-            extraCondition))
       case ST_Covers(Seq(leftShape, rightShape)) =>
         Some(
           JoinQueryDetection(
@@ -208,9 +198,9 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
       val queryDetection: Option[JoinQueryDetection] = condition.flatMap {
         case joinConditionMatcher(predicate, extraCondition) =>
           predicate match {
-            // ST_Contains is an InferredExpression (not ST_Predicate) so it can't sit inside
-            // getJoinDetection; it's also the only predicate currently accepting Geography
-            // inputs and therefore the only one needing the Geography guard.
+            // ST_Contains and ST_Within are InferredExpressions (not ST_Predicates) so they can't
+            // sit inside getJoinDetection; they also accept Geography inputs via dual dispatch and
+            // therefore need the Geography guard (join planning deserializes with GeometrySerializer).
             case ST_Contains(Seq(leftShape, rightShape))
                 if !isGeographyInput(leftShape) && !isGeographyInput(rightShape) =>
               Some(
@@ -220,6 +210,17 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   leftShape,
                   rightShape,
                   SpatialPredicate.CONTAINS,
+                  false,
+                  extraCondition))
+            case ST_Within(Seq(leftShape, rightShape))
+                if !isGeographyInput(leftShape) && !isGeographyInput(rightShape) =>
+              Some(
+                JoinQueryDetection(
+                  left,
+                  right,
+                  leftShape,
+                  rightShape,
+                  SpatialPredicate.WITHIN,
                   false,
                   extraCondition))
             case pred: ST_Predicate =>

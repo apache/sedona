@@ -268,4 +268,38 @@ public class FunctionTest {
     assertFalse(Functions.dWithin(null, g, 1e6));
     assertFalse(Functions.dWithin(null, null, 1e6));
   }
+
+  // ─── Level 3: ST_Within ──────────────────────────────────────────────────
+
+  @Test
+  public void within_pointInPolygon() throws ParseException {
+    Geography pt = Constructors.geogFromWKT("POINT (0.5 0.5)", 4326);
+    Geography poly = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    assertTrue(Functions.within(pt, poly));
+  }
+
+  @Test
+  public void within_pointOutsidePolygon() throws ParseException {
+    Geography pt = Constructors.geogFromWKT("POINT (2 2)", 4326);
+    Geography poly = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    assertFalse(Functions.within(pt, poly));
+  }
+
+  @Test
+  public void within_isContainsSwapped() throws ParseException {
+    // OGC parity: within(A, B) == contains(B, A) for every input pair.
+    Geography poly = Constructors.geogFromWKT("POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))", 4326);
+    Geography inside = Constructors.geogFromWKT("POINT (1 1)", 4326);
+    Geography outside = Constructors.geogFromWKT("POINT (3 3)", 4326);
+    assertEquals(Functions.contains(poly, inside), Functions.within(inside, poly));
+    assertEquals(Functions.contains(poly, outside), Functions.within(outside, poly));
+  }
+
+  @Test
+  public void within_nullHandling() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 1)", 4326);
+    assertFalse(Functions.within(g, null));
+    assertFalse(Functions.within(null, g));
+    assertFalse(Functions.within(null, null));
+  }
 }

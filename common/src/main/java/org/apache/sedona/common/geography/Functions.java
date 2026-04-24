@@ -146,6 +146,14 @@ public class Functions {
     return d != null && d <= distanceMeters;
   }
 
+  /**
+   * Spherical "within" test. Returns true iff g1 is fully inside g2 on the sphere. OGC convention:
+   * {@code ST_Within(A, B) == ST_Contains(B, A)}.
+   */
+  public static boolean within(Geography g1, Geography g2) {
+    return contains(g2, g1);
+  }
+
   /** Return EWKT for geography object */
   public static String asEWKT(Geography geography) {
     return geography.toEWKT();

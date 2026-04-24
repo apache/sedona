@@ -184,6 +184,30 @@ class GeographyFunctionTest extends TestBaseScala {
         .first()
       assertTrue(row.isNullAt(0))
     }
+
+    it("ST_Within point in polygon") {
+      val row = sparkSession
+        .sql("""
+          SELECT ST_Within(
+            ST_GeogFromWKT('POINT (0.5 0.5)', 4326),
+            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)
+          ) AS r
+        """)
+        .first()
+      assertTrue(row.getBoolean(0))
+    }
+
+    it("ST_Within point outside polygon") {
+      val row = sparkSession
+        .sql("""
+          SELECT ST_Within(
+            ST_GeogFromWKT('POINT (2 2)', 4326),
+            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)
+          ) AS r
+        """)
+        .first()
+      assertTrue(!row.getBoolean(0))
+    }
   }
 
   // ─── DataFrame API ─────────────────────────────────────────────────────
@@ -226,6 +250,16 @@ class GeographyFunctionTest extends TestBaseScala {
           st_constructors.ST_GeogFromWKT(col("a"), lit(4326)).as("a"),
           st_constructors.ST_GeogFromWKT(col("b"), lit(4326)).as("b"))
         .select(st_predicates.ST_DWithin(col("a"), col("b"), lit(200000.0)).as("r"))
+      assertTrue(df.first().getBoolean(0))
+    }
+
+    it("ST_Within via DataFrame API") {
+      val df = sparkSession
+        .sql("SELECT 'POINT (0.5 0.5)' AS pt, 'POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))' AS poly")
+        .select(
+          st_constructors.ST_GeogFromWKT(col("pt"), lit(4326)).as("pt"),
+          st_constructors.ST_GeogFromWKT(col("poly"), lit(4326)).as("poly"))
+        .select(st_predicates.ST_Within(col("pt"), col("poly")).as("r"))
       assertTrue(df.first().getBoolean(0))
     }
   }
