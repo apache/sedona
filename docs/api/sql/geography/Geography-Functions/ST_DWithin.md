@@ -21,6 +21,9 @@
 
 Introduction: Tests whether two geographies are within a given geodesic distance (in meters) of each other on the sphere. The minimum great-circle distance between any two points on the two geographies is compared against the threshold; the test is inclusive (returns true when the minimum distance equals the threshold).
 
+![ST_DWithin returning true](../../../../image/ST_DWithin_geography/ST_DWithin_geography_true.svg "ST_DWithin returning true")
+![ST_DWithin returning false](../../../../image/ST_DWithin_geography/ST_DWithin_geography_false.svg "ST_DWithin returning false")
+
 Format:
 
 `ST_DWithin (A: Geography, B: Geography, distance: Double)`
