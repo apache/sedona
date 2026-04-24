@@ -269,6 +269,31 @@ public class FunctionTest {
     assertFalse(Functions.dWithin(null, null, 1e6));
   }
 
+  @Test
+  public void dWithin_reflexiveZeroThreshold() throws ParseException {
+    // A point is trivially within distance 0 of itself (distance == 0, threshold == 0, <= is
+    // inclusive).
+    Geography g = Constructors.geogFromWKT("POINT (10 20)", 4326);
+    assertTrue(Functions.dWithin(g, g, 0.0));
+  }
+
+  @Test
+  public void dWithin_negativeDistance() throws ParseException {
+    // No two geographies can be at a negative geodesic distance, so any negative threshold =>
+    // false.
+    Geography g1 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    assertFalse(Functions.dWithin(g1, g2, -1.0));
+  }
+
+  @Test
+  public void dWithin_nanDistance() throws ParseException {
+    // NaN threshold => all comparisons are false.
+    Geography g1 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (0 1)", 4326);
+    assertFalse(Functions.dWithin(g1, g2, Double.NaN));
+  }
+
   // ─── Level 3: ST_Within ──────────────────────────────────────────────────
 
   @Test
@@ -301,5 +326,23 @@ public class FunctionTest {
     assertFalse(Functions.within(g, null));
     assertFalse(Functions.within(null, g));
     assertFalse(Functions.within(null, null));
+  }
+
+  @Test
+  public void within_polygonInPolygon() throws ParseException {
+    Geography inner = Constructors.geogFromWKT("POLYGON ((1 1, 2 1, 2 2, 1 2, 1 1))", 4326);
+    Geography outer = Constructors.geogFromWKT("POLYGON ((0 0, 3 0, 3 3, 0 3, 0 0))", 4326);
+    assertTrue(Functions.within(inner, outer));
+    // Swapped: the outer polygon is NOT within the inner one.
+    assertFalse(Functions.within(outer, inner));
+  }
+
+  @Test
+  public void within_overlappingNotContained() throws ParseException {
+    // Two polygons that intersect but neither is contained in the other.
+    Geography a = Constructors.geogFromWKT("POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))", 4326);
+    Geography b = Constructors.geogFromWKT("POLYGON ((1 1, 3 1, 3 3, 1 3, 1 1))", 4326);
+    assertFalse(Functions.within(a, b));
+    assertFalse(Functions.within(b, a));
   }
 }
