@@ -222,4 +222,50 @@ public class FunctionTest {
     assertFalse(Functions.contains(g1, null));
     assertFalse(Functions.contains(null, g1));
   }
+
+  // ─── Level 3: ST_DWithin ─────────────────────────────────────────────────
+
+  @Test
+  public void dWithin_twoPointsOneDegreeApart() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (0 1)", 4326);
+    // 1° of latitude ≈ 111_195 m on the sphere
+    assertFalse(Functions.dWithin(g1, g2, 100_000.0));
+    assertTrue(Functions.dWithin(g1, g2, 200_000.0));
+  }
+
+  @Test
+  public void dWithin_pointInsidePolygon() throws ParseException {
+    Geography poly = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    Geography pt = Constructors.geogFromWKT("POINT (0.5 0.5)", 4326);
+    // Distance is zero when one contains the other; any positive threshold should pass.
+    assertTrue(Functions.dWithin(poly, pt, 1.0));
+  }
+
+  @Test
+  public void dWithin_boundaryInclusive() throws ParseException {
+    // sedona-db parity: distance == threshold ⇒ true (inclusive <=)
+    Geography g1 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (0 1)", 4326);
+    double actual = Functions.distance(g1, g2);
+    assertTrue(Functions.dWithin(g1, g2, actual));
+    assertFalse(Functions.dWithin(g1, g2, actual - 1.0));
+  }
+
+  @Test
+  public void dWithin_antimeridianCrossing() throws ParseException {
+    // Two points straddling the antimeridian: great-circle distance ~22 km,
+    // planar distance ~40_000 km — succeeding at 50 km proves we use spherical distance.
+    Geography g1 = Constructors.geogFromWKT("POINT (179.9 0)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (-179.9 0)", 4326);
+    assertTrue(Functions.dWithin(g1, g2, 50_000.0));
+  }
+
+  @Test
+  public void dWithin_nullHandling() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    assertFalse(Functions.dWithin(g, null, 1e6));
+    assertFalse(Functions.dWithin(null, g, 1e6));
+    assertFalse(Functions.dWithin(null, null, 1e6));
+  }
 }

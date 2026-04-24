@@ -47,3 +47,4 @@ These functions operate on geography type objects.
 | [ST_NPoints](Geography-Functions/ST_NPoints.md) | Integer | Return the number of points (vertices) in a geography. | v1.9.0 |
 | [ST_Distance](Geography-Functions/ST_Distance.md) | Double | Return the minimum geodesic distance between two geographies in meters. | v1.9.0 |
 | [ST_Contains](Geography-Functions/ST_Contains.md) | Boolean | Test whether geography A fully contains geography B. | v1.9.0 |
+| [ST_DWithin](Geography-Functions/ST_DWithin.md) | Boolean | Test whether two geographies are within a given geodesic distance (in meters) of each other. | v1.9.1 |

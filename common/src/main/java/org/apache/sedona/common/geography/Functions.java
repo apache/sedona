@@ -136,6 +136,16 @@ public class Functions {
     return pred.S2_contains(toShapeIndex(g1), toShapeIndex(g2), s2Options());
   }
 
+  /**
+   * Spherical "distance within" test. Returns true iff the minimum geodesic distance between g1 and
+   * g2 (in meters) is less than or equal to {@code distanceMeters}.
+   */
+  public static boolean dWithin(Geography g1, Geography g2, double distanceMeters) {
+    if (g1 == null || g2 == null) return false;
+    Double d = distance(g1, g2);
+    return d != null && d <= distanceMeters;
+  }
+
   /** Return EWKT for geography object */
   public static String asEWKT(Geography geography) {
     return geography.toEWKT();

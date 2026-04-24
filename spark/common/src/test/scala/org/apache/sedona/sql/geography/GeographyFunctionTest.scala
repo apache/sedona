@@ -153,6 +153,37 @@ class GeographyFunctionTest extends TestBaseScala {
         .first()
       assertTrue(!row.getBoolean(0))
     }
+
+    it("ST_DWithin true when within threshold") {
+      val row = sparkSession
+        .sql("""
+          SELECT ST_DWithin(
+            ST_GeogFromWKT('POINT (0 0)', 4326),
+            ST_GeogFromWKT('POINT (0 1)', 4326),
+            200000.0) AS r
+        """)
+        .first()
+      assertTrue(row.getBoolean(0))
+    }
+
+    it("ST_DWithin false when outside threshold") {
+      val row = sparkSession
+        .sql("""
+          SELECT ST_DWithin(
+            ST_GeogFromWKT('POINT (0 0)', 4326),
+            ST_GeogFromWKT('POINT (0 1)', 4326),
+            100000.0) AS r
+        """)
+        .first()
+      assertTrue(!row.getBoolean(0))
+    }
+
+    it("ST_DWithin null handling") {
+      val row = sparkSession
+        .sql("SELECT ST_DWithin(ST_GeogFromWKT('POINT (0 0)', 4326), null, 1.0) AS r")
+        .first()
+      assertTrue(row.isNullAt(0))
+    }
   }
 
   // ─── DataFrame API ─────────────────────────────────────────────────────
@@ -185,6 +216,16 @@ class GeographyFunctionTest extends TestBaseScala {
           st_constructors.ST_GeogFromWKT(col("poly"), lit(4326)).as("poly"),
           st_constructors.ST_GeogFromWKT(col("pt"), lit(4326)).as("pt"))
         .select(st_predicates.ST_Contains(col("poly"), col("pt")).as("result"))
+      assertTrue(df.first().getBoolean(0))
+    }
+
+    it("ST_DWithin via DataFrame API") {
+      val df = sparkSession
+        .sql("SELECT 'POINT (0 0)' AS a, 'POINT (0 1)' AS b")
+        .select(
+          st_constructors.ST_GeogFromWKT(col("a"), lit(4326)).as("a"),
+          st_constructors.ST_GeogFromWKT(col("b"), lit(4326)).as("b"))
+        .select(st_predicates.ST_DWithin(col("a"), col("b"), lit(200000.0)).as("r"))
       assertTrue(df.first().getBoolean(0))
     }
   }
