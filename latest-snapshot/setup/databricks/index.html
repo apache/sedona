@@ -5634,18 +5634,18 @@ You're not viewing the latest stable version.
 <p>Download the required Sedona packages by executing the following commands:</p>
 <div class="highlight"><pre><span></span><code>%sh
 <span class="c1"># Create JAR directory for Sedona</span>
-mkdir<span class="w"> </span>-p<span class="w"> </span>/Workspace/Shared/sedona/1.8.0
+mkdir<span class="w"> </span>-p<span class="w"> </span>/Workspace/Shared/sedona/1.9.0
 
 <span class="c1"># Download the dependencies from Maven into DBFS</span>
-curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.8.0/geotools-wrapper-1.8.0-33.1.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.8.0-33.1/geotools-wrapper-1.8.0-33.1.jar&quot;</span>
+curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.9.0/geotools-wrapper-1.9.0-33.5.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.9.0-33.5/geotools-wrapper-1.9.0-33.5.jar&quot;</span>
 
-curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.8.0/sedona-spark-shaded-3.5_2.12-1.8.0.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.8.0/sedona-spark-shaded-3.5_2.12-1.8.0.jar&quot;</span>
+curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.9.0/sedona-spark-shaded-3.5_2.12-1.9.0.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.9.0/sedona-spark-shaded-3.5_2.12-1.9.0.jar&quot;</span>
 </code></pre></div>
-<p>Here are the software versions used to compile <code>sedona-spark-shaded-3.5_2.12-1.8.0.jar</code>:</p>
+<p>Here are the software versions used to compile <code>sedona-spark-shaded-3.5_2.12-1.9.0.jar</code>:</p>
 <ul>
 <li>Spark 3.5</li>
 <li>Scala 2.12</li>
-<li>Sedona 1.8.0</li>
+<li>Sedona 1.9.0</li>
 </ul>
 <p>Ensure that you use a Databricks Runtime with versions compatible with this jar.</p>
 <p>You will be able to see these in your Databricks environment after downloading them:</p>
@@ -5669,7 +5669,7 @@ cat &gt; /Workspace/Shared/sedona/sedona-init.sh &lt;&lt;&#39;EOF&#39;
 # Uncomment the following line if you need to use Sedona&#39;s H3 functions (e.g., ST_H3CellIDs).
 # rm -f /databricks/jars/*h3*.jar
 
-cp /Workspace/Shared/sedona/1.8.0/*.jar /databricks/jars
+cp /Workspace/Shared/sedona/1.9.0/*.jar /databricks/jars
 
 EOF
 </code></pre></div>
@@ -5691,7 +5691,7 @@ spark.sedona.enableParserExtension false
 <p>Add the required dependencies in the Library tab:</p>
 <p><img alt="Python libraries" src="../../image/databricks/image7.png" /></p>
 <p>Here’s the full list of libraries:</p>
-<div class="highlight"><pre><span></span><code>apache-sedona==1.8.0
+<div class="highlight"><pre><span></span><code>apache-sedona==1.9.0
 geopandas==1.0.1
 keplergl==0.3.7
 pydeck==0.9.1
