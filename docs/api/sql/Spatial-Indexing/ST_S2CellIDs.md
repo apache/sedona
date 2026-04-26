@@ -52,13 +52,12 @@ Since: `v1.4.0`
 
     ![Planar polygon vs S2's great-circle interpretation](../../../image/ST_S2CellIDs/planar_vs_spherical_edge.svg)
 
-    The plot below shows the empirical effect on a real polygon at level 12: blue is the
+    The plot below shows the empirical effect on a real polygon at level 12. Blue is the
     union of returned cell geometries, dark blue is the input outline, red is planar input
-    area not covered. Without the buffer, slivers concentrate along long non-meridional
-    edges; with the buffer, the cells extend slightly outside the polygon and coverage is
-    complete.
+    area not covered. With the buffer, the cells extend slightly outside the polygon and
+    coverage is complete; without it, slivers concentrate along long non-meridional edges.
 
-    ![Cell coverage of a real polygon, with and without the buffer](../../../image/ST_S2CellIDs/coverage_before_after.png)
+    ![ST_S2CellIDs cell coverage at level 12, with and without the JTS buffer](../../../image/ST_S2CellIDs/coverage_before_after.png)
 
 SQL Example
 
