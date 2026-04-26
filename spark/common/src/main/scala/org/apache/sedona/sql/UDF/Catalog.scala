@@ -367,7 +367,6 @@ object Catalog extends AbstractCatalog with Logging {
   // Raster-Band-Accessors (band-level properties and statistics)
   val rasterBandAccessorExprs: Seq[FunctionDescription] = Seq(
     function[RS_Band](),
-    function[RS_BandAsArray](),
     function[RS_BandIsNoData](),
     function[RS_BandNoDataValue](),
     function[RS_BandPixelType](),
@@ -380,7 +379,6 @@ object Catalog extends AbstractCatalog with Logging {
   // Raster-Operators (configuration, transformation, manipulation)
   val rasterOperatorExprs: Seq[FunctionDescription] = Seq(
     function[RS_AddBand](),
-    function[RS_AddBandFromArray](),
     function[RS_AsRaster](),
     function[RS_Clip](),
     function[RS_CRS](),
@@ -429,7 +427,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[RS_PixelAsPolygon](),
     function[RS_PixelAsPolygons]())
 
-  // Map-Algebra-Operators
+  // Map-Algebra-Operators (per-pixel/per-band math operators)
   val mapAlgebraExprs: Seq[FunctionDescription] = Seq(
     function[RS_Add](),
     function[RS_Array](),
@@ -444,7 +442,6 @@ object Catalog extends AbstractCatalog with Logging {
     function[RS_LessThanEqual](),
     function[RS_LogicalDifference](),
     function[RS_LogicalOver](),
-    function[RS_MapAlgebra](null),
     function[RS_Mean](),
     function[RS_Mode](),
     function[RS_Modulo](),
@@ -454,6 +451,13 @@ object Catalog extends AbstractCatalog with Logging {
     function[RS_NormalizedDifference](),
     function[RS_SquareRoot](),
     function[RS_Subtract]())
+
+  // Raster-Map-Algebra-Operators (the meta map algebra entry point and
+  // band/array conversion helpers used to express map algebra)
+  val rasterMapAlgebraExprs: Seq[FunctionDescription] = Seq(
+    function[RS_AddBandFromArray](),
+    function[RS_BandAsArray](),
+    function[RS_MapAlgebra](null))
 
   // Raster-Tiles
   val rasterTileExprs: Seq[FunctionDescription] =
@@ -521,6 +525,7 @@ object Catalog extends AbstractCatalog with Logging {
     rasterGeometryExprs,
     pixelExprs,
     mapAlgebraExprs,
+    rasterMapAlgebraExprs,
     rasterTileExprs,
     clusteringExprs,
     spatialStatisticsExprs)

@@ -37,7 +37,11 @@ class CatalogCategorizationTest extends AnyFunSpec {
 
     it("each function appears in at most one named category sequence") {
       val flattenedNames = Catalog.categorizedSequences.flatten.map(_._1.funcName)
-      val duplicates = flattenedNames.diff(flattenedNames.distinct).distinct.sorted
+      val duplicates = flattenedNames
+        .groupBy(identity)
+        .collect { case (name, occurrences) if occurrences.size > 1 => name }
+        .toSeq
+        .sorted
       assert(
         duplicates.isEmpty,
         s"Functions appearing in more than one named sequence: ${duplicates.mkString(", ")}")
