@@ -1107,16 +1107,16 @@ public class FunctionsTest extends TestBase {
     Geometry[] polygons =
         Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
     Geometry coverage = Functions.union(polygons);
-    Geometry uncovered = input.difference(coverage);
-    double uncoveredArea = uncovered.getArea();
-    log.info(
-        "S2 cells: {}, input area: {}, uncovered area: {} ({} %)",
-        cellIds.length, input.getArea(), uncoveredArea, (uncoveredArea / input.getArea()) * 100.0);
-    assertTrue(
-        String.format(
-            "Coverage does not contain input. Missing %.8f deg^2 (%.6f%%)",
-            uncoveredArea, (uncoveredArea / input.getArea()) * 100.0),
-        coverage.covers(input));
+    if (!coverage.covers(input)) {
+      // Only compute the (expensive, ~50k-cell) difference on failure, to surface a useful
+      // diagnostic. Happy path skips the full geometric union/difference work.
+      Geometry uncovered = input.difference(coverage);
+      double uncoveredArea = uncovered.getArea();
+      fail(
+          String.format(
+              "Coverage does not contain input. Missing %.8f deg^2 (%.6f%%)",
+              uncoveredArea, (uncoveredArea / input.getArea()) * 100.0));
+    }
   }
 
   @Test
@@ -1201,9 +1201,33 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void testS2CoverageContainsAntimeridianLine() throws ParseException {
+    // Edge crossing the antimeridian. The naive chord midpoint (a.x+b.x)/2 would land at
+    // 0° longitude — the opposite side of the planet — and produce a ~180° bogus deviation.
+    // Verify that the buffer stays small (so we don't blow up the cell count) and that the
+    // returned cells still cover the line.
+    Geometry line = geomFromWKT("LINESTRING (179 5, -179 5)", 0);
+    Long[] cellIds = Functions.s2CellIDs(line, 12);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    // Sanity check: a 2°-long edge near the equator at level 12 should not produce
+    // millions of cells. If antimeridian chord-midpoint handling is wrong the buffer
+    // explodes by ~180° and the cell count would be enormous.
+    assertTrue(
+        "Antimeridian-spanning line produced too many cells (chord midpoint likely wrong): "
+            + cellIds.length,
+        cellIds.length < 5000);
+    assertTrue(
+        "S2 cell coverage of antimeridian-spanning LineString does not contain the line.",
+        coverage.covers(line));
+  }
+
+  @Test
   public void testS2CoverageContainsHighLatitudePolygon() throws ParseException {
-    // Polygon near 80°N: tan(φ) is large, so the buffer cap (1°) and 89° latitude clamp need
-    // to keep the arc-chord bound from blowing up.
+    // Polygon near 80°N with a long east-west edge: the great-circle/chord deviation grows
+    // sharply with latitude, so the arc-chord bound has to stay correct without any rigid
+    // cap on the buffer or latitude clamp on the deviation calculation.
     String wkt = "POLYGON ((-30 80, 30 80, 30 82, -30 82, -30 80))";
     Geometry input = geomFromWKT(wkt, 0);
     Long[] cellIds = Functions.s2CellIDs(input, 8);

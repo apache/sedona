@@ -130,7 +130,15 @@ public class S2Utils {
       throw new IllegalArgumentException(
           "only object of Polygon, LinearRing, LineString type can be converted to S2Region");
     }
-    double eps = arcChordBufferDegrees(geom);
+    // JTS planar buffer doesn't understand antimeridian crossing — for inputs whose
+    // envelope spans more than 180° in longitude (which only happens when the input
+    // straddles the antimeridian, since real-world inputs don't span half the globe in
+    // lng), buffering produces a polygon that goes the wrong way around the globe and
+    // explodes the S2 covering. Skip the buffer for those inputs; the original GH-2857
+    // miscoverage only affects edges that go the "long" way in (lng, lat) space, which
+    // these inputs by definition do not.
+    boolean spansAntimeridian = geom.getEnvelopeInternal().getWidth() > 180.0;
+    double eps = spansAntimeridian ? 0.0 : arcChordBufferDegrees(geom);
     Geometry buffered = (eps > 0) ? geom.buffer(eps) : geom;
     if (buffered instanceof Polygon) {
       return S2Utils.toS2Polygon((Polygon) buffered);
@@ -139,17 +147,19 @@ public class S2Utils {
       // become Polygon corridors after buffer and are handled above.
       return S2Utils.toS2PolyLine((LineString) buffered);
     } else if (buffered instanceof MultiPolygon && buffered.getNumGeometries() > 0) {
-      // JTS buffer of self-touching geometries can collapse to MultiPolygon. We can only
-      // hand a single S2Region back to callers, so cover the largest piece — the smaller
-      // pieces are typically tiny artifacts of the buffer operation rather than real input.
-      Polygon largest = (Polygon) buffered.getGeometryN(0);
-      for (int i = 1; i < buffered.getNumGeometries(); i++) {
+      // JTS buffer of self-touching geometries can collapse to MultiPolygon. Build a single
+      // S2Polygon containing every component's loops so the resulting region still contains
+      // every part of the buffered geometry; dropping components would silently break the
+      // containment guarantee for the discarded shells.
+      List<S2Loop> loops = new ArrayList<>();
+      for (int i = 0; i < buffered.getNumGeometries(); i++) {
         Polygon p = (Polygon) buffered.getGeometryN(i);
-        if (p.getArea() > largest.getArea()) {
-          largest = p;
+        loops.add(toS2Loop(p.getExteriorRing()));
+        for (int j = 0; j < p.getNumInteriorRing(); j++) {
+          loops.add(toS2Loop(p.getInteriorRingN(j)));
         }
       }
-      return S2Utils.toS2Polygon(largest);
+      return new S2Polygon(loops);
     }
     throw new IllegalArgumentException(
         "only object of Polygon, LinearRing, LineString type can be converted to S2Region");
@@ -221,6 +231,15 @@ public class S2Utils {
     if (env.isNull()) {
       return 0.0;
     }
+    if (env.getWidth() > 180.0) {
+      // JTS envelopes don't understand antimeridian crossing — a line from (179, y) to
+      // (-179, y) reports a 358°-wide envelope even though the actual edge is 2° long. The
+      // envelope-corner virtual edges would then describe a near-globe-spanning chord and
+      // produce a meaninglessly huge deviation. For such inputs, fall back to per-segment
+      // analysis, which works directly off the actual edges and is correct regardless of
+      // antimeridian crossings.
+      return ringMaxDeviationDegrees(geom.getCoordinates());
+    }
     Coordinate sw = new Coordinate(env.getMinX(), env.getMinY());
     Coordinate se = new Coordinate(env.getMaxX(), env.getMinY());
     Coordinate ne = new Coordinate(env.getMaxX(), env.getMaxY());
@@ -282,12 +301,22 @@ public class S2Utils {
     double midSphericalLat = midSpherical.latDegrees();
     double midSphericalLng = midSpherical.lngDegrees();
     double midChordLat = (a.y + b.y) / 2.0;
-    double midChordLng = (a.x + b.x) / 2.0;
+    // Compute the chord midpoint longitude on the *shorter* longitudinal interval between
+    // the endpoints. A naive (a.x + b.x) / 2 gives the wrong midpoint for edges crossing
+    // the antimeridian (e.g. 179° → -179° would average to 0° instead of ±180°), and the
+    // resulting deviation would be inflated by ~180°.
+    double dx = b.x - a.x;
+    if (dx > 180.0) dx -= 360.0;
+    else if (dx < -180.0) dx += 360.0;
+    double midChordLng = a.x + dx / 2.0;
+    if (midChordLng > 180.0) midChordLng -= 360.0;
+    else if (midChordLng < -180.0) midChordLng += 360.0;
+
     double dLat = midSphericalLat - midChordLat;
     double dLng = midSphericalLng - midChordLng;
-    // Wrap longitude difference into [-180, 180]. Without this, an edge straddling the
-    // antimeridian (e.g. -179° to +179°) would compute dLng ≈ 358° and produce a bogus
-    // ~360° deviation rather than the small actual deviation.
+    // Wrap the residual longitude difference into [-180, 180] so the squared distance is
+    // taken across the shorter arc (e.g. midpoints at 179.99° vs -179.99° are 0.02° apart,
+    // not 359.98°).
     if (dLng > 180.0) dLng -= 360.0;
     else if (dLng < -180.0) dLng += 360.0;
     return Math.sqrt(dLat * dLat + dLng * dLng);
