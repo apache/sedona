@@ -1082,6 +1082,139 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void testS2CoverageContainsInput() throws ParseException {
+    String wkt =
+        "POLYGON ((-102.060778 39.9999603, -102.0535384 40.0119065, -101.98532 40.0122906, "
+            + "-95.30829 40.009008, -95.2456364 39.9564784, -95.1982467 39.9455019, "
+            + "-95.1964657 39.9113444, -95.1460439 39.9142017, -95.1316877 39.8855881, "
+            + "-95.087643 39.8717975, -95.0389987 39.8749063, -95.0146232 39.9088422, "
+            + "-94.9403146 39.906409, -94.9183761 39.8846514, -94.9329504 39.8578468, "
+            + "-94.8824331 39.8409102, -94.8675709 39.8227528, -94.878404 39.787242, "
+            + "-94.9266292 39.7786779, -94.9070076 39.7679231, -94.8631596 39.779774, "
+            + "-94.8497103 39.7604914, -94.8545514 39.7397163, -94.8985678 39.7150641, "
+            + "-94.9584897 39.7331377, -94.9637588 39.6814526, -95.0187723 39.6615712, "
+            + "-95.0456083 39.6252182, -95.0430365 39.5826542, -95.0650104 39.5677387, "
+            + "-95.0985514 39.570063, -95.1012286 39.5462821, -95.0459187 39.5064755, "
+            + "-95.0320969 39.4709074, -94.976457 39.4475392, -94.9362514 39.3964717, "
+            + "-94.8781205 39.3949417, -94.8733156 39.3663291, -94.9014695 39.3495654, "
+            + "-94.8963639 39.3135051, -94.8237994 39.2609956, -94.8194328 39.2178517, "
+            + "-94.7789019 39.214907, -94.7398645 39.1789812, -94.6785238 39.1931279, "
+            + "-94.6533801 39.1816662, -94.6517728 39.1640754, -94.605515 39.1696807, "
+            + "-94.5791896 39.1504025, -94.5983384 39.1134256, -94.6095667 36.9948123, "
+            + "-102.045765 36.9847897, -102.060778 39.9999603))";
+    Geometry input = geomFromWKT(wkt, 0);
+    Long[] cellIds = Functions.s2CellIDs(input, 12);
+    Geometry[] polygons =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(polygons);
+    Geometry uncovered = input.difference(coverage);
+    double uncoveredArea = uncovered.getArea();
+    log.info(
+        "S2 cells: {}, input area: {}, uncovered area: {} ({} %)",
+        cellIds.length, input.getArea(), uncoveredArea, (uncoveredArea / input.getArea()) * 100.0);
+    assertTrue(
+        String.format(
+            "Coverage does not contain input. Missing %.8f deg^2 (%.6f%%)",
+            uncoveredArea, (uncoveredArea / input.getArea()) * 100.0),
+        coverage.covers(input));
+  }
+
+  @Test
+  public void testS2CoverageContainsLineString() throws ParseException {
+    // Long east-west line at mid-latitude. The great-circle arc bulges poleward of the JTS
+    // chord, so before the buffer fix the cells along the parallel were missed in the middle.
+    Geometry line = geomFromWKT("LINESTRING (-102 37, -94 37)", 0);
+    Long[] cellIds = Functions.s2CellIDs(line, 12);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    assertTrue(
+        "S2 cell coverage of LineString does not contain the line itself.", coverage.covers(line));
+  }
+
+  @Test
+  public void testS2CoverageContainsMultiPolygon() throws ParseException {
+    // Two disjoint polygons, both at mid-northern latitude with long east-west edges.
+    String wkt =
+        "MULTIPOLYGON ("
+            + "((-102 37, -94 37, -94 40, -102 40, -102 37)),"
+            + "((-90 50, -80 50, -80 53, -90 53, -90 50)))";
+    Geometry input = geomFromWKT(wkt, 0);
+    Long[] cellIds = Functions.s2CellIDs(input, 10);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    assertTrue(
+        "S2 cell coverage does not contain every member of the MultiPolygon.",
+        coverage.covers(input));
+  }
+
+  @Test
+  public void testS2CoverageContainsMultiLineString() throws ParseException {
+    // Three disjoint multi-segment lines: northern hemisphere, southern hemisphere, and a
+    // diagonal climb. Each is decomposed and buffered independently before S2 covering.
+    String wkt =
+        "MULTILINESTRING ("
+            + "(-102 37, -98 37, -94 37),"
+            + "(-90 -42, -85 -42, -80 -42),"
+            + "(-100 50, -95 55, -90 60))";
+    Geometry input = geomFromWKT(wkt, 0);
+    Long[] cellIds = Functions.s2CellIDs(input, 10);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    assertTrue(
+        "S2 cell coverage does not contain every member of the MultiLineString.",
+        coverage.covers(input));
+  }
+
+  @Test
+  public void testS2CoverageContainsGeometryCollection() throws ParseException {
+    String wkt =
+        "GEOMETRYCOLLECTION ("
+            + "POLYGON ((-102 37, -94 37, -94 40, -102 40, -102 37)),"
+            + "LINESTRING (10 60, 20 60, 30 60))";
+    Geometry input = geomFromWKT(wkt, 0);
+    Long[] cellIds = Functions.s2CellIDs(input, 10);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    assertTrue(
+        "S2 cell coverage does not contain every member of the GeometryCollection.",
+        coverage.covers(input));
+  }
+
+  @Test
+  public void testS2CoverageContainsPolygonWithHole() throws ParseException {
+    // Outer ring at mid-latitude with long east-west edges; an inner hole. Both rings need
+    // their great-circle bulge accounted for so the buffer applies to interior rings too.
+    String wkt =
+        "POLYGON ("
+            + "(-102 37, -94 37, -94 40, -102 40, -102 37),"
+            + "(-100 38, -96 38, -96 39, -100 39, -100 38))";
+    Geometry input = geomFromWKT(wkt, 0);
+    Long[] cellIds = Functions.s2CellIDs(input, 12);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    assertTrue("S2 cell coverage does not contain a polygon with a hole.", coverage.covers(input));
+  }
+
+  @Test
+  public void testS2CoverageContainsHighLatitudePolygon() throws ParseException {
+    // Polygon near 80°N: tan(φ) is large, so the buffer cap (1°) and 89° latitude clamp need
+    // to keep the arc-chord bound from blowing up.
+    String wkt = "POLYGON ((-30 80, 30 80, 30 82, -30 82, -30 80))";
+    Geometry input = geomFromWKT(wkt, 0);
+    Long[] cellIds = Functions.s2CellIDs(input, 8);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    assertTrue(
+        "S2 cell coverage does not contain a high-latitude polygon.", coverage.covers(input));
+  }
+
+  @Test
   public void testUnion() throws ParseException {
     long[] cellIds =
         new long[] {
