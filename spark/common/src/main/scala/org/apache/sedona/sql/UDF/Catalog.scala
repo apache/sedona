@@ -485,9 +485,14 @@ object Catalog extends AbstractCatalog with Logging {
   val spatialStatisticsExprs: Seq[FunctionDescription] = dbxIncompatibleGroups._2
 
   // ===========================================================================
-  // All named sequences in registration order. The categorization invariant
-  // (every entry in `expressions` lives in exactly one of these sequences) is
-  // checked by `CatalogCategorizationTest`.
+  // All named sequences. `expressions` is defined as the flatten of these.
+  //
+  // Note: this changes the registration order relative to the previous flat
+  // `expressions` list (which had the docs categories interleaved). Order
+  // doesn't affect registration semantics — `AbstractCatalog.registerAll`
+  // registers each function exactly once regardless of order, and there are
+  // no duplicate function identifiers across categories. The duplicate-name
+  // invariant across sequences is checked by `CatalogCategorizationTest`.
   // ===========================================================================
   val categorizedSequences: Seq[Seq[FunctionDescription]] = Seq(
     geometryConstructorExprs,
