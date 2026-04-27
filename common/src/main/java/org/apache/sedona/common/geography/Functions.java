@@ -91,6 +91,12 @@ public class Functions {
     return toJTS(g).getNumGeometries();
   }
 
+  /** Return the geometry type string of a geography, prefixed with "ST_". */
+  public static String geometryType(Geography g) {
+    if (g == null) return null;
+    return "ST_" + toJTS(g).getGeometryType();
+  }
+
   /** Return the WKT text representation of a geography. */
   public static String asText(Geography g) {
     if (g == null) return null;

@@ -78,7 +78,7 @@ class GeographyFunctionTest extends TestBaseScala {
     }
   }
 
-  // ─── Level 1: ST_NPoints, ST_NumGeometries, ST_AsText ──────────────────
+  // ─── Level 1: ST_NPoints, ST_NumGeometries, ST_GeometryType, ST_AsText ──
 
   describe("Level 1: Structural") {
 
@@ -102,6 +102,20 @@ class GeographyFunctionTest extends TestBaseScala {
           "SELECT ST_NumGeometries(ST_GeogFromWKT('MULTIPOINT ((0 0), (1 1), (2 2))', 4326)) AS n")
         .first()
       assertEquals(3, row.getInt(0))
+    }
+
+    it("ST_GeometryType point") {
+      val row = sparkSession
+        .sql("SELECT ST_GeometryType(ST_GeogFromWKT('POINT (1 2)', 4326)) AS t")
+        .first()
+      assertEquals("ST_Point", row.getString(0))
+    }
+
+    it("ST_GeometryType polygon") {
+      val row = sparkSession
+        .sql("SELECT ST_GeometryType(ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)) AS t")
+        .first()
+      assertEquals("ST_Polygon", row.getString(0))
     }
 
     it("ST_AsText") {
