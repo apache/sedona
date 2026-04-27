@@ -1226,11 +1226,12 @@ public class FunctionsTest extends TestBase {
 
   @Test
   public void testS2CoverageContainsWideNonAntimeridianPolygon() throws ParseException {
-    // Polygon spanning >180° in longitude but NOT crossing the antimeridian (every edge has
-    // |Δlng| < 180°). An envelope-width-based antimeridian heuristic would incorrectly skip
-    // the buffer here and reintroduce GH-2857 miscoverage along the long east-west edges;
-    // the per-edge heuristic correctly leaves the buffer on.
-    String wkt = "POLYGON ((-100 30, 100 30, 100 50, -100 50, -100 30))";
+    // Polygon whose envelope spans 200° in longitude but every individual edge has
+    // |Δlng| < 180°. An envelope-width-based antimeridian heuristic would skip the buffer
+    // here and reintroduce GH-2857 miscoverage along the long east-west edges; the
+    // per-edge heuristic correctly leaves the buffer on.  Intermediate vertices on the
+    // east-west edges keep each segment under 180° of longitudinal span.
+    String wkt = "POLYGON ((-100 30, -10 30, 100 30, 100 50, 10 50, -100 50, -100 30))";
     Geometry input = geomFromWKT(wkt, 0);
     Long[] cellIds = Functions.s2CellIDs(input, 6);
     Geometry[] cells =

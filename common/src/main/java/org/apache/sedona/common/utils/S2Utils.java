@@ -133,10 +133,15 @@ public class S2Utils {
     // JTS planar buffer doesn't understand antimeridian crossing — for inputs that
     // straddle the antimeridian, buffering produces a polygon that goes the wrong way
     // around the globe and explodes the S2 covering. Detect antimeridian crossing
-    // per-edge (any edge with |Δlng| > 180° must wrap) rather than via the envelope:
-    // the envelope-width heuristic also fires for wide non-straddling polygons (e.g.
-    // a polygon spanning -100° to +100°), which would incorrectly skip the buffer and
-    // reintroduce the GH-2857 miscoverage along their long non-meridional edges.
+    // per-edge rather than via envelope width: an envelope-width heuristic fires for
+    // any polygon whose bbox spans > 180° of longitude even if no individual edge
+    // does (e.g. a tessellated wide polygon with intermediate vertices), and we'd
+    // incorrectly skip the buffer for those, reintroducing the GH-2857 miscoverage on
+    // their long non-meridional edges. Per-edge |Δlng| > 180° fires only when the
+    // input genuinely contains an edge that wraps the antimeridian. (For a coarse
+    // polygon with a single edge spanning > 180° both heuristics agree, and skipping
+    // the buffer is the safe choice — JTS buffer can't usefully process such an edge
+    // anyway.)
     boolean spansAntimeridian = crossesAntimeridian(geom);
     double eps = spansAntimeridian ? 0.0 : arcChordBufferDegrees(geom);
     Geometry buffered = (eps > 0) ? geom.buffer(eps) : geom;
@@ -316,7 +321,10 @@ public class S2Utils {
    *
    * <p>The great-circle midpoint is computed by averaging the two endpoint S2Points (unit vectors
    * on the sphere) and renormalizing — a standard spherical-midpoint trick. The chord midpoint is
-   * the plain Euclidean mean of the (lng, lat) coordinates.
+   * computed in (lng, lat) space by averaging latitudes directly and averaging longitudes via the
+   * wrapped delta in [-180, 180], so antimeridian-spanning edges (e.g. 179° → -179°) use the
+   * shorter longitudinal interval rather than the naive `(a.x + b.x) / 2` which would land on the
+   * far side of the globe and produce a bogus ~180° deviation.
    */
   private static double edgeDeviationDegrees(Coordinate a, Coordinate b) {
     S2Point aPt = toS2Point(a);
