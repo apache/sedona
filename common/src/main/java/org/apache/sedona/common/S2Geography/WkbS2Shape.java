@@ -105,34 +105,48 @@ public class WkbS2Shape implements S2Shape {
           this.chainLengths = new int[numRings];
           this.vertexOffsets = new int[numRings];
 
-          // First pass: count total vertices and compute offsets
+          // First pass: count total vertices and compute offsets. Sedona's WKBWriter writes
+          // open rings (n unique vertices, no closing duplicate); standard WKB writes closed
+          // rings (n+1 coords with last == first). Detect the closing-duplicate case by
+          // comparing the first and last (lon, lat) pair so we get the right edge count
+          // either way: edges = uniqueVertices = closed ? ringCoords - 1 : ringCoords.
           int totalVerts = 0;
           int edgeCount = 0;
           int byteOffset = payloadOffset + 4;
           int[] ringCoordCounts = new int[numRings];
           int[] ringByteOffsets = new int[numRings];
+          boolean[] ringClosed = new boolean[numRings];
           for (int r = 0; r < numRings; r++) {
             int ringCoords = buf.getInt(byteOffset);
             ringCoordCounts[r] = ringCoords;
             ringByteOffsets[r] = byteOffset + 4;
+            boolean closed =
+                ringCoords >= 2 && firstAndLastEqual(buf, ringByteOffsets[r], ringCoords);
+            ringClosed[r] = closed;
             byteOffset += 4 + ringCoords * 16;
 
-            int ringEdges = Math.max(0, ringCoords - 1);
+            int ringEdges = closed ? Math.max(0, ringCoords - 1) : ringCoords;
+            int storedVerts = closed ? ringCoords : ringCoords;
             chainStarts[r] = edgeCount;
             chainLengths[r] = ringEdges;
             vertexOffsets[r] = totalVerts;
             edgeCount += ringEdges;
-            totalVerts += ringCoords;
+            totalVerts += storedVerts + (closed ? 0 : 1); // append closing duplicate for open rings
           }
           this.totalEdges = edgeCount;
 
-          // Second pass: read all vertices at once
+          // Second pass: read all vertices, appending a closing duplicate for open rings so
+          // the rest of the shape interface (getEdge, getChainEdge, computeContainsOrigin)
+          // can index `vertexOffsets[r] + (i % chainLengths[r])` uniformly.
           this.vertices = new S2Point[totalVerts];
           int vi = 0;
           for (int r = 0; r < numRings; r++) {
             S2Point[] ringVerts = readVertices(buf, ringByteOffsets[r], ringCoordCounts[r]);
             System.arraycopy(ringVerts, 0, vertices, vi, ringVerts.length);
             vi += ringVerts.length;
+            if (!ringClosed[r] && ringVerts.length > 0) {
+              vertices[vi++] = ringVerts[0];
+            }
           }
 
           // Eagerly compute containsOrigin from first ring
@@ -227,6 +241,18 @@ public class WkbS2Shape implements S2Shape {
       if (edgeId >= chainStarts[i]) return i;
     }
     return 0;
+  }
+
+  /**
+   * Returns true when the ring's first and last vertex coordinates are byte-identical (i.e. the
+   * ring is closed in the standard WKB sense). Sedona's own WKBWriter produces open rings, so a
+   * cheap byte-level comparison lets us distinguish the two cases without running through the
+   * S2Point conversion.
+   */
+  private static boolean firstAndLastEqual(ByteBuffer buf, int byteOffset, int numCoords) {
+    int lastOffset = byteOffset + (numCoords - 1) * 16;
+    return buf.getDouble(byteOffset) == buf.getDouble(lastOffset)
+        && buf.getDouble(byteOffset + 8) == buf.getDouble(lastOffset + 8);
   }
 
   /** Read numCoords (lon, lat) doubles from WKB and convert to S2Points. */
