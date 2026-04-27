@@ -5396,6 +5396,32 @@ The level indicates the <a href="https://s2geometry.io/resources/s2cell_statisti
 the cells will be smaller, the coverage will be more accurate, but the result size will be exponentially increasing.</p>
 <p>Format: <code>ST_S2CellIDs(geom: geometry, level: Int)</code></p>
 <p>Return type: <code>Array&lt;Long&gt;</code></p>
+<div class="admonition note">
+<p class="admonition-title">Planar input, spherical cells</p>
+<p>Sedona geometry type objects are planar: an edge between two vertices is a straight line in
+<code>(longitude, latitude)</code> space. S2 cells are spherical: an edge between two vertices is a
+great-circle arc on the unit sphere. The two interpretations agree at the vertices but not
+along the edges — for example, a great-circle arc connecting two points at the same
+non-equatorial latitude bulges <em>toward the nearer pole</em> rather than following the parallel.</p>
+<p>Without compensation this would let the returned cells under-cover the original planar
+geometry along long, non-meridional edges (the bug reported in
+<a href="https://github.com/apache/sedona/issues/2857">GH-2857</a>). To prevent that, <code>ST_S2CellIDs</code>
+JTS-buffers the input by an upper bound on the great-circle/chord deviation before
+converting it to an S2 region. The result is a covering that always <em>contains</em> the
+original planar geometry, at the cost of a small number of extra boundary cells. Inputs
+that are themselves spherical (e.g. polygons whose edges are explicitly meridians or the
+equator) see no additional cells.</p>
+<p>For <code>LineString</code> and <code>MultiLineString</code> inputs the buffer turns the line into a polygon
+corridor, so the returned cells cover a thin strip <em>around</em> the line rather than only
+cells the line geometrically passes through. Use a sufficiently fine <code>level</code> to keep the
+corridor narrow.</p>
+<p><img alt="Planar polygon vs S2's great-circle interpretation" src="../../../../../image/ST_S2CellIDs/planar_vs_spherical_edge.svg" /></p>
+<p>The plot below shows the empirical effect on a real polygon at level 12. Blue is the
+union of returned cell geometries, dark blue is the input outline, red is planar input
+area not covered. With the buffer, the cells extend slightly outside the polygon and
+coverage is complete; without it, slivers concentrate along long non-meridional edges.</p>
+<p><img alt="ST_S2CellIDs cell coverage at level 12, with and without the JTS buffer" src="../../../../../image/ST_S2CellIDs/coverage_before_after.png" /></p>
+</div>
 <p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_S2CellIDs</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(1 3 4, 5 6 7)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span>
 </code></pre></div>
@@ -5427,7 +5453,7 @@ the cells will be smaller, the coverage will be more accurate, but the result si
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 5, 2026 07:52:46 UTC">March 5, 2026 07:52:46</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="April 27, 2026 06:38:47 UTC">April 27, 2026 06:38:47</span>
   </span>
 
     
