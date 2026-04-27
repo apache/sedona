@@ -155,8 +155,8 @@
                         <a href="AbstractCatalog.html" title="">AbstractCatalog</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="object" href="Catalog$.html" title=""></a>
-                        <a href="Catalog$.html" title="">Catalog</a>
+                        <a class="object" href="Catalog$.html" title="Sedona SQL function registry."></a>
+                        <a href="Catalog$.html" title="Sedona SQL function registry.">Catalog</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="object" href="PythonEvalType$.html" title=""></a>
@@ -300,7 +300,7 @@
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="org.apache.sedona.sql.UDF.Catalog" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="org.apache.sedona.sql.UDF.Catalog" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Catalog"></a><a id="Catalog:Catalog"></a>
       <span class="permalink">
       <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html" title="Permalink">
@@ -312,10 +312,15 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Catalog$.html"><span class="name">Catalog</span></a><span class="result"> extends <a href="AbstractCatalog.html" class="extype" name="org.apache.sedona.sql.UDF.AbstractCatalog">AbstractCatalog</a> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span></span>
+        <a title="Sedona SQL function registry." href="Catalog$.html"><span class="name">Catalog</span></a><span class="result"> extends <a href="AbstractCatalog.html" class="extype" name="org.apache.sedona.sql.UDF.AbstractCatalog">AbstractCatalog</a> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Sedona SQL function registry.</p><div class="fullcomment"><div class="comment cmt"><p>Sedona SQL function registry.</p><p>Functions are organized into named sequences whose names mirror the categories used by the
+public docs at https://sedona.apache.org/latest/api/sql/Geometry-Functions/ and the
+corresponding raster docs pages, so the code-level taxonomy stays in lockstep with the docs
+taxonomy. See <code>CatalogCategorizationTest</code> for an invariant that every registered function
+belongs to exactly one named sequence.
+</p></div></div>
     </li><li name="org.apache.sedona.sql.UDF.PythonEvalType" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="PythonEvalType"></a><a id="PythonEvalType:PythonEvalType"></a>
       <span class="permalink">

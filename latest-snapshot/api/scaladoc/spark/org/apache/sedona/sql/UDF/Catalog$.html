@@ -155,8 +155,8 @@
                         <a href="AbstractCatalog.html" title="">AbstractCatalog</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
-                        <a class="object" href="" title=""></a>
-                        <a href="" title="">Catalog</a>
+                        <a class="object" href="" title="Sedona SQL function registry."></a>
+                        <a href="" title="Sedona SQL function registry.">Catalog</a>
                       </li><li class="current-entities indented5">
                         <span class="separator"></span>
                         <a class="object" href="PythonEvalType$.html" title=""></a>
@@ -193,7 +193,12 @@
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Sedona SQL function registry.</p><p>Functions are organized into named sequences whose names mirror the categories used by the
+public docs at https://sedona.apache.org/latest/api/sql/Geometry-Functions/ and the
+corresponding raster docs pages, so the code-level taxonomy stays in lockstep with the docs
+taxonomy. See <code>CatalogCategorizationTest</code> for an invariant that every registered function
+belongs to exactly one named sequence.
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -317,6 +322,38 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#addressExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="addressExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="addressExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#addressExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addressExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#affineTransformationExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="affineTransformationExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="affineTransformationExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#affineTransformationExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">affineTransformationExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
     </li><li name="org.apache.sedona.sql.UDF.Catalog#aggregateExpressions" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="aggregateExpressions:Seq[org.apache.spark.sql.expressions.Aggregator[org.locationtech.jts.geom.Geometry,_,_]]"></a><a id="aggregateExpressions:Seq[Aggregator[Geometry,_,_]]"></a>
       <span class="permalink">
@@ -326,7 +363,7 @@
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
         <span class="name">aggregateExpressions</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.expressions.Aggregator">Aggregator</span>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>, _, _]]</span>
@@ -349,6 +386,38 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#boundingBoxExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="boundingBoxExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="boundingBoxExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#boundingBoxExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">boundingBoxExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#categorizedSequences" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="categorizedSequences:Seq[Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]]"></a><a id="categorizedSequences:Seq[Seq[FunctionDescription]]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#categorizedSequences:Seq[Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">categorizedSequences</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]]</span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
@@ -375,6 +444,22 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#clusteringExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="clusteringExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="clusteringExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#clusteringExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clusteringExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
     </li><li name="org.apache.sedona.sql.UDF.AbstractCatalog#dropAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="dropAll(sparkSession:org.apache.spark.sql.SparkSession):Unit"></a><a id="dropAll(SparkSession):Unit"></a>
       <span class="permalink">
@@ -455,6 +540,118 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="AbstractCatalog.html" class="extype" name="org.apache.sedona.sql.UDF.AbstractCatalog">AbstractCatalog</a></dd></dl></div>
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#geographyExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="geographyExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="geographyExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#geographyExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geographyExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#geometryAccessorExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="geometryAccessorExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="geometryAccessorExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#geometryAccessorExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geometryAccessorExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#geometryConstructorExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="geometryConstructorExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="geometryConstructorExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#geometryConstructorExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geometryConstructorExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#geometryEditorExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="geometryEditorExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="geometryEditorExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#geometryEditorExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geometryEditorExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#geometryOutputExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="geometryOutputExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="geometryOutputExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#geometryOutputExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geometryOutputExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#geometryProcessingExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="geometryProcessingExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="geometryProcessingExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#geometryProcessingExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geometryProcessingExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#geometryValidationExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="geometryValidationExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="geometryValidationExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#geometryValidationExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geometryValidationExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -561,6 +758,22 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#linearReferencingExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="linearReferencingExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="linearReferencingExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#linearReferencingExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">linearReferencingExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.internal.Logging#log" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="log:org.slf4j.Logger"></a><a id="log:Logger"></a>
       <span class="permalink">
@@ -753,6 +966,38 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Logging</dd></dl></div>
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#mapAlgebraExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="mapAlgebraExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="mapAlgebraExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#mapAlgebraExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">mapAlgebraExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#measurementExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="measurementExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="measurementExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#measurementExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">measurementExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -811,6 +1056,214 @@
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#otherExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="otherExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="otherExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#otherExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">otherExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#overlayExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="overlayExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="overlayExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#overlayExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">overlayExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#pixelExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="pixelExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="pixelExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#pixelExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pixelExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#predicateExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="predicateExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="predicateExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#predicateExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">predicateExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#rasterAccessorExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="rasterAccessorExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="rasterAccessorExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#rasterAccessorExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rasterAccessorExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#rasterBandAccessorExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="rasterBandAccessorExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="rasterBandAccessorExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#rasterBandAccessorExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rasterBandAccessorExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#rasterConstructorExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="rasterConstructorExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="rasterConstructorExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#rasterConstructorExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rasterConstructorExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#rasterGeometryExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="rasterGeometryExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="rasterGeometryExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#rasterGeometryExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rasterGeometryExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#rasterMapAlgebraExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="rasterMapAlgebraExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="rasterMapAlgebraExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#rasterMapAlgebraExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rasterMapAlgebraExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#rasterOperatorExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="rasterOperatorExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="rasterOperatorExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#rasterOperatorExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rasterOperatorExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#rasterOutputExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="rasterOutputExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="rasterOutputExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#rasterOutputExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rasterOutputExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#rasterPredicateExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="rasterPredicateExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="rasterPredicateExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#rasterPredicateExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rasterPredicateExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#rasterTileExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="rasterTileExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="rasterTileExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#rasterTileExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rasterTileExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
     </li><li name="org.apache.sedona.sql.UDF.AbstractCatalog#registerAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="registerAll(sparkSession:org.apache.spark.sql.SparkSession):Unit"></a><a id="registerAll(SparkSession):Unit"></a>
       <span class="permalink">
@@ -843,6 +1296,54 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="AbstractCatalog.html" class="extype" name="org.apache.sedona.sql.UDF.AbstractCatalog">AbstractCatalog</a></dd></dl></div>
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#spatialIndexingExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="spatialIndexingExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="spatialIndexingExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#spatialIndexingExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">spatialIndexingExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#spatialReferenceSystemExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="spatialReferenceSystemExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="spatialReferenceSystemExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#spatialReferenceSystemExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">spatialReferenceSystemExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
+    </li><li name="org.apache.sedona.sql.UDF.Catalog#spatialStatisticsExprs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="spatialStatisticsExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]"></a><a id="spatialStatisticsExprs:Seq[FunctionDescription]"></a>
+      <span class="permalink">
+      <a href="../../../../../org/apache/sedona/sql/UDF/Catalog$.html#spatialStatisticsExprs:Seq[org.apache.sedona.sql.UDF.Catalog.FunctionDescription]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">spatialStatisticsExprs</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="#FunctionDescription=(org.apache.spark.sql.catalyst.FunctionIdentifier,org.apache.spark.sql.catalyst.expressions.ExpressionInfo,org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder)" class="extmbr" name="org.apache.sedona.sql.UDF.Catalog.FunctionDescription">FunctionDescription</a>]</span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
