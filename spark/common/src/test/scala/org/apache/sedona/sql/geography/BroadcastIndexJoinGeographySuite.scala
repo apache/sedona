@@ -102,6 +102,15 @@ class BroadcastIndexJoinGeographySuite extends TestBaseScala {
       assert(matched === Set(1, 2))
     }
 
+    it("auto-broadcasts the small side when sedona.join.autoBroadcastJoinThreshold permits") {
+      // Bump the threshold so the small Geography frames qualify for auto-broadcast.
+      withConf(Map("sedona.join.autoBroadcastJoinThreshold" -> "10485760")) {
+        val joined = polygonGeogDf.join(pointGeogDf, expr("ST_Contains(poly_geog, pt_geog)"))
+        assert(planUsesBroadcastIndexJoin(joined))
+        assert(joined.count() === 3)
+      }
+    }
+
     it("does NOT plan BroadcastIndexJoinExec without a broadcast hint") {
       // autoBroadcastJoinThreshold = -1 in TestBaseScala, so neither side auto-broadcasts.
       // Geography ST_Contains has no partition/range-join path, so Spark falls back to a
