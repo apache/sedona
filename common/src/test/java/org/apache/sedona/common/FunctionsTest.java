@@ -1108,8 +1108,9 @@ public class FunctionsTest extends TestBase {
         Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
     Geometry coverage = Functions.union(polygons);
     if (!coverage.covers(input)) {
-      // Only compute the (expensive, ~50k-cell) difference on failure, to surface a useful
-      // diagnostic. Happy path skips the full geometric union/difference work.
+      // The union above is unavoidable for an exact containment check; we additionally
+      // skip the (expensive, ~50k-cell) difference on the happy path and only compute it
+      // on failure to surface a useful diagnostic.
       Geometry uncovered = input.difference(coverage);
       double uncoveredArea = uncovered.getArea();
       fail(
@@ -1221,6 +1222,23 @@ public class FunctionsTest extends TestBase {
     assertTrue(
         "S2 cell coverage of antimeridian-spanning LineString does not contain the line.",
         coverage.covers(line));
+  }
+
+  @Test
+  public void testS2CoverageContainsWideNonAntimeridianPolygon() throws ParseException {
+    // Polygon spanning >180° in longitude but NOT crossing the antimeridian (every edge has
+    // |Δlng| < 180°). An envelope-width-based antimeridian heuristic would incorrectly skip
+    // the buffer here and reintroduce GH-2857 miscoverage along the long east-west edges;
+    // the per-edge heuristic correctly leaves the buffer on.
+    String wkt = "POLYGON ((-100 30, 100 30, 100 50, -100 50, -100 30))";
+    Geometry input = geomFromWKT(wkt, 0);
+    Long[] cellIds = Functions.s2CellIDs(input, 6);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    assertTrue(
+        "S2 cell coverage does not contain a wide non-antimeridian polygon (>180° lng span).",
+        coverage.covers(input));
   }
 
   @Test

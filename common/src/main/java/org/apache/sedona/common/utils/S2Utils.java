@@ -130,14 +130,14 @@ public class S2Utils {
       throw new IllegalArgumentException(
           "only object of Polygon, LinearRing, LineString type can be converted to S2Region");
     }
-    // JTS planar buffer doesn't understand antimeridian crossing — for inputs whose
-    // envelope spans more than 180° in longitude (which only happens when the input
-    // straddles the antimeridian, since real-world inputs don't span half the globe in
-    // lng), buffering produces a polygon that goes the wrong way around the globe and
-    // explodes the S2 covering. Skip the buffer for those inputs; the original GH-2857
-    // miscoverage only affects edges that go the "long" way in (lng, lat) space, which
-    // these inputs by definition do not.
-    boolean spansAntimeridian = geom.getEnvelopeInternal().getWidth() > 180.0;
+    // JTS planar buffer doesn't understand antimeridian crossing — for inputs that
+    // straddle the antimeridian, buffering produces a polygon that goes the wrong way
+    // around the globe and explodes the S2 covering. Detect antimeridian crossing
+    // per-edge (any edge with |Δlng| > 180° must wrap) rather than via the envelope:
+    // the envelope-width heuristic also fires for wide non-straddling polygons (e.g.
+    // a polygon spanning -100° to +100°), which would incorrectly skip the buffer and
+    // reintroduce the GH-2857 miscoverage along their long non-meridional edges.
+    boolean spansAntimeridian = crossesAntimeridian(geom);
     double eps = spansAntimeridian ? 0.0 : arcChordBufferDegrees(geom);
     Geometry buffered = (eps > 0) ? geom.buffer(eps) : geom;
     if (buffered instanceof Polygon) {
@@ -231,7 +231,7 @@ public class S2Utils {
     if (env.isNull()) {
       return 0.0;
     }
-    if (env.getWidth() > 180.0) {
+    if (crossesAntimeridian(geom)) {
       // JTS envelopes don't understand antimeridian crossing — a line from (179, y) to
       // (-179, y) reports a 358°-wide envelope even though the actual edge is 2° long. The
       // envelope-corner virtual edges would then describe a near-globe-spanning chord and
@@ -254,6 +254,40 @@ public class S2Utils {
     max = Math.max(max, edgeDeviationDegrees(nw, se));
     max = Math.max(max, edgeDeviationDegrees(ewWest, ewEast));
     return max;
+  }
+
+  /**
+   * Detect whether {@code geom} crosses the antimeridian by walking its edges and checking whether
+   * any has an absolute longitudinal delta greater than 180°. An edge from (179°, y) to (-179°, y)
+   * is 2° long going across the antimeridian but 358° in raw lng deltas, so |Δlng| > 180° is a
+   * reliable per-edge antimeridian indicator. Using the actual edges (not the envelope width)
+   * avoids false positives for wide non-straddling polygons like one spanning -100° to +100°.
+   */
+  private static boolean crossesAntimeridian(Geometry geom) {
+    if (geom instanceof Polygon) {
+      Polygon poly = (Polygon) geom;
+      if (ringCrossesAntimeridian(poly.getExteriorRing().getCoordinates())) {
+        return true;
+      }
+      for (int i = 0; i < poly.getNumInteriorRing(); i++) {
+        if (ringCrossesAntimeridian(poly.getInteriorRingN(i).getCoordinates())) {
+          return true;
+        }
+      }
+      return false;
+    } else if (geom instanceof LineString) {
+      return ringCrossesAntimeridian(geom.getCoordinates());
+    }
+    return false;
+  }
+
+  private static boolean ringCrossesAntimeridian(Coordinate[] coords) {
+    for (int i = 0; i < coords.length - 1; i++) {
+      if (Math.abs(coords[i + 1].x - coords[i].x) > 180.0) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
