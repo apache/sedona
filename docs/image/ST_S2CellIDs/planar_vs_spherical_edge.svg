@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Conceptual illustration for ST_S2CellIDs.
+
+  Sedona geometry-type objects are planar — an edge between two vertices is
+  a straight line in (longitude, latitude) space. S2 connects the same
+  vertices with a great-circle arc on the unit sphere, which bulges
+  poleward of that planar chord at non-zero latitudes. The planar interior
+  therefore extends slightly outside the spherical interior, and an S2
+  covering that only sees the spherical version misses thin slivers along
+  the planar boundary. ST_S2CellIDs JTS-buffers the input by an upper
+  bound on this deviation before handing it to S2.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 410" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="13">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#444"/>
+    </marker>
+  </defs>
+
+  <text x="440" y="26" text-anchor="middle" font-size="15" font-weight="600">Why a JTS polygon and the S2 covering of it can disagree</text>
+
+  <!-- LEFT panel: before (no buffer) -->
+  <g transform="translate(40, 60)">
+    <text x="180" y="0" text-anchor="middle" font-size="13" font-weight="600">Without buffer</text>
+
+    <!-- Planar polygon (rectangle) -->
+    <path d="M 30 36 L 330 36 L 330 226 L 30 226 Z"
+          fill="#cfe1f2" stroke="#1f4d7a" stroke-width="1.6"/>
+
+    <!-- Great-circle arc bulging poleward (above) the south chord. -->
+    <path d="M 30 226 Q 180 176 330 226"
+          fill="none" stroke="#777" stroke-width="1.6" stroke-dasharray="6 4"/>
+
+    <!-- The sliver: between planar chord and great-circle arc -->
+    <path d="M 30 226 Q 180 176 330 226 L 30 226 Z"
+          fill="#d62728" fill-opacity="0.55" stroke="none"/>
+
+    <!-- Annotations -->
+    <g font-size="11" fill="#333">
+      <text x="180" y="60" text-anchor="middle">Planar polygon (JTS)</text>
+      <text x="180" y="200" text-anchor="middle" fill="#5a5a5a">great-circle arc S2 sees</text>
+      <text x="180" y="270" text-anchor="middle" fill="#a01818" font-weight="600">uncovered sliver</text>
+      <line x1="180" y1="258" x2="180" y2="232" stroke="#a01818" stroke-width="1" marker-end="url(#arrow)"/>
+    </g>
+
+    <!-- Endpoints -->
+    <circle cx="30" cy="226" r="3.5" fill="#1f4d7a"/>
+    <circle cx="330" cy="226" r="3.5" fill="#1f4d7a"/>
+    <text x="30" y="246" font-size="11" fill="#1f4d7a">A</text>
+    <text x="322" y="246" font-size="11" fill="#1f4d7a">B</text>
+  </g>
+
+  <!-- RIGHT panel: after (with buffer) -->
+  <g transform="translate(480, 60)">
+    <text x="180" y="0" text-anchor="middle" font-size="13" font-weight="600">With JTS buffer (current behavior)</text>
+
+    <!-- Buffered polygon: original south edge displaced down by ε. -->
+    <path d="M 30 28 L 330 28 L 330 256 L 30 256 Z"
+          fill="#cfe1f2" stroke="#1f4d7a" stroke-width="1.4"
+          stroke-dasharray="3 3"/>
+
+    <!-- Original (un-buffered) south edge for reference -->
+    <line x1="30" y1="226" x2="330" y2="226"
+          stroke="#1f4d7a" stroke-width="1.6"/>
+    <circle cx="30" cy="226" r="3.5" fill="#1f4d7a"/>
+    <circle cx="330" cy="226" r="3.5" fill="#1f4d7a"/>
+    <text x="30" y="246" font-size="11" fill="#1f4d7a">A</text>
+    <text x="322" y="246" font-size="11" fill="#1f4d7a">B</text>
+
+    <!-- Great-circle arc of the buffered south edge: bulges poleward of the
+         buffered chord at y=256, peaks around y=206 — south of the
+         original south edge at y=226, so the original is fully contained. -->
+    <path d="M 30 256 Q 180 206 330 256"
+          fill="none" stroke="#777" stroke-width="1.6" stroke-dasharray="6 4"/>
+
+    <g font-size="11" fill="#333">
+      <text x="180" y="60" text-anchor="middle">Original polygon (covered)</text>
+      <text x="180" y="20" text-anchor="middle" fill="#1f4d7a">buffered polygon (+ε)</text>
+      <text x="180" y="305" text-anchor="middle" fill="#5a5a5a">great-circle arc of buffered edge</text>
+      <line x1="180" y1="293" x2="180" y2="265" stroke="#5a5a5a" stroke-width="1" marker-end="url(#arrow)"/>
+    </g>
+  </g>
+
+  <!-- Footer caption (split onto two lines so it always fits the viewBox) -->
+  <text x="440" y="378" text-anchor="middle" font-size="11" fill="#555">
+    Left: S2 sees the spherical arc, so a sliver of the planar polygon stays uncovered.
+  </text>
+  <text x="440" y="395" text-anchor="middle" font-size="11" fill="#555">
+    Right: a small outward buffer (ε) makes the buffered polygon's spherical arc still contain the original chord.
+  </text>
+</svg>
