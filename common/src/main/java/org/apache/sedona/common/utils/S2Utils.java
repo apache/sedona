@@ -128,7 +128,7 @@ public class S2Utils {
   public static S2Region toS2Region(Geometry geom) throws IllegalArgumentException {
     if (!(geom instanceof Polygon) && !(geom instanceof LineString)) {
       throw new IllegalArgumentException(
-          "only object of Polygon, LinearRing, LineString type can be converted to S2Region");
+          "only Polygon or LineString (including LinearRing) types can be converted to S2Region");
     }
     // JTS planar buffer doesn't understand antimeridian crossing — for inputs that
     // straddle the antimeridian, buffering produces a polygon that goes the wrong way
@@ -162,7 +162,7 @@ public class S2Utils {
       return new S2Polygon(loops);
     }
     throw new IllegalArgumentException(
-        "only object of Polygon, LinearRing, LineString type can be converted to S2Region");
+        "only Polygon or LineString (including LinearRing) types can be converted to S2Region");
   }
 
   /**
