@@ -266,7 +266,11 @@ public class S2Utils {
    * any has an absolute longitudinal delta greater than 180°. An edge from (179°, y) to (-179°, y)
    * is 2° long going across the antimeridian but 358° in raw lng deltas, so |Δlng| > 180° is a
    * reliable per-edge antimeridian indicator. Using the actual edges (not the envelope width)
-   * avoids false positives for wide non-straddling polygons like one spanning -100° to +100°.
+   * avoids false positives for wide non-straddling geometries whose envelope spans more than 180°
+   * but whose individual edges all stay under 180° — for example, a tessellated polygon whose
+   * envelope runs from -100° to +100° with intermediate vertices that keep each edge short. (For a
+   * coarse polygon with a single edge spanning > 180° both heuristics would agree, since such an
+   * edge is itself indistinguishable from an antimeridian-wrapping edge under planar semantics.)
    */
   private static boolean crossesAntimeridian(Geometry geom) {
     if (geom instanceof Polygon) {
@@ -334,10 +338,13 @@ public class S2Utils {
     double mz = aPt.getZ() + bPt.getZ();
     double norm = Math.sqrt(mx * mx + my * my + mz * mz);
     if (norm < 1e-15) {
-      // Antipodal endpoints — the great circle through them is not unique, so there is no
-      // well-defined midpoint to compare against. Returning 0 effectively skips this edge;
-      // antipodal inputs aren't realistic for S2 covering anyway.
-      return 0.0;
+      // Antipodal (or near-antipodal) endpoints — there is no unique great circle through
+      // them, so the spherical midpoint is undefined. Silently returning 0 would
+      // underestimate the buffer and could break the containment guarantee of toS2Region.
+      // Throw instead; Functions.s2CellIDs already wraps toS2Region in a try/catch and
+      // falls back to per-coordinate cell IDs, so callers degrade gracefully.
+      throw new IllegalArgumentException(
+          "Cannot compute arc-chord deviation for antipodal endpoints: " + a + " to " + b);
     }
     S2LatLng midSpherical = new S2LatLng(new S2Point(mx / norm, my / norm, mz / norm));
     double midSphericalLat = midSpherical.latDegrees();
