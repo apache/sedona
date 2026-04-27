@@ -251,4 +251,66 @@ public class FunctionTest {
     assertFalse(Functions.contains(g1, null));
     assertFalse(Functions.contains(null, g1));
   }
+
+  // ─── Level 4: ST_Buffer ──────────────────────────────────────────────────
+
+  @Test
+  public void buffer_nullInputReturnsNull() throws ParseException {
+    assertNull(Functions.buffer(null, 100.0));
+    assertNull(Functions.buffer(null, 100.0, "quad_segs=4"));
+  }
+
+  @Test
+  public void buffer_pointProducesEnclosingPolygon() throws ParseException {
+    Geography origin = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography buffered = Functions.buffer(origin, 1000.0); // 1 km on the sphere
+    assertNotNull(buffered);
+    assertEquals("ST_Polygon", Functions.geometryType(buffered));
+    // A point ~785 m NE of origin should fall inside the 1 km buffer.
+    Geography near = Constructors.geogFromWKT("POINT (0.005 0.005)", 4326);
+    assertTrue(Functions.contains(buffered, near));
+    // A point ~1.57 km NE should fall outside.
+    Geography far = Constructors.geogFromWKT("POINT (0.01 0.01)", 4326);
+    assertFalse(Functions.contains(buffered, far));
+  }
+
+  @Test
+  public void buffer_polygonContainsOriginalInterior() throws ParseException {
+    Geography poly =
+        Constructors.geogFromWKT("POLYGON ((0 0, 0.01 0, 0.01 0.01, 0 0.01, 0 0))", 4326);
+    Geography buffered = Functions.buffer(poly, 200.0);
+    assertNotNull(buffered);
+    Geography inside = Constructors.geogFromWKT("POINT (0.005 0.005)", 4326);
+    assertTrue("buffered polygon must contain its centroid", Functions.contains(buffered, inside));
+    // A point 500 m beyond the original polygon's edge but inside the 200 m band would still
+    // be outside; pick a point far enough that the buffer cannot reach it.
+    Geography farOutside = Constructors.geogFromWKT("POINT (1 1)", 4326);
+    assertFalse(Functions.contains(buffered, farOutside));
+  }
+
+  @Test
+  public void buffer_parametersStringHonored() throws ParseException {
+    // quad_segs=2 produces a low-fidelity buffer (octagon for a point); quad_segs=64
+    // produces a much smoother boundary. Vertex counts should differ accordingly.
+    Geography origin = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography coarse = Functions.buffer(origin, 1000.0, "quad_segs=2");
+    Geography fine = Functions.buffer(origin, 1000.0, "quad_segs=64");
+    assertNotNull(coarse);
+    assertNotNull(fine);
+    assertTrue(
+        "fine buffer should have more vertices than coarse",
+        Functions.nPoints(fine) > Functions.nPoints(coarse));
+  }
+
+  @Test
+  public void buffer_negativeRadiusShrinksPolygon() throws ParseException {
+    Geography poly =
+        Constructors.geogFromWKT("POLYGON ((0 0, 0.01 0, 0.01 0.01, 0 0.01, 0 0))", 4326);
+    Geography shrunk = Functions.buffer(poly, -100.0);
+    assertNotNull(shrunk);
+    // Shrunk polygon is either smaller or empty; the original boundary point should now
+    // be outside (or contains() returns false on an empty geometry, which is also acceptable).
+    Geography boundary = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    assertFalse(Functions.contains(shrunk, boundary));
+  }
 }

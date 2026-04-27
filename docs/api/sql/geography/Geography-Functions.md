@@ -43,6 +43,7 @@ These functions operate on geography type objects.
 | :--- | :--- | :--- | :--- |
 | [ST_AsEWKT](Geography-Functions/ST_AsEWKT.md) | String | Return the Extended Well-Known Text representation of a geography. | v1.8.0 |
 | [ST_AsText](Geography-Functions/ST_AsText.md) | String | Return the Well-Known Text (WKT) representation of a geography. | v1.9.1 |
+| [ST_Buffer](Geography-Functions/ST_Buffer.md) | Geography | Return the metric ε-buffer of a geography. Distance is always interpreted as meters along the spheroid. | v1.9.1 |
 | [ST_Envelope](Geography-Functions/ST_Envelope.md) | Geography | Return the bounding box (envelope) of a geography. Supports anti-meridian splitting. | v1.8.0 |
 | [ST_GeometryType](Geography-Functions/ST_GeometryType.md) | String | Return the type of a geography as a string (e.g., "ST_Point", "ST_Polygon"). | v1.9.1 |
 | [ST_NPoints](Geography-Functions/ST_NPoints.md) | Integer | Return the number of points (vertices) in a geography. | v1.9.0 |

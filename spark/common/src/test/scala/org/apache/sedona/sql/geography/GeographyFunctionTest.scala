@@ -169,6 +169,91 @@ class GeographyFunctionTest extends TestBaseScala {
     }
   }
 
+  // ─── Level 4: ST_Buffer ────────────────────────────────────────────────
+
+  describe("Level 4: Spherical buffer") {
+
+    it("ST_Buffer of a point produces a polygon containing nearby points") {
+      val row = sparkSession
+        .sql("""
+          SELECT
+            ST_GeometryType(ST_Buffer(ST_GeogFromWKT('POINT(0 0)', 4326), 1000)) AS gtype,
+            ST_Contains(
+              ST_Buffer(ST_GeogFromWKT('POINT(0 0)', 4326), 1000),
+              ST_GeogFromWKT('POINT(0.005 0.005)', 4326)
+            ) AS hits
+        """)
+        .first()
+      assertEquals("ST_Polygon", row.getString(0))
+      assertTrue("buffer should contain a point ~785m away", row.getBoolean(1))
+    }
+
+    it("ST_Buffer of a polygon contains the original interior") {
+      val hits = sparkSession
+        .sql("""
+          SELECT ST_Contains(
+            ST_Buffer(
+              ST_GeogFromWKT('POLYGON((0 0, 0.01 0, 0.01 0.01, 0 0.01, 0 0))', 4326),
+              200
+            ),
+            ST_GeogFromWKT('POINT(0.005 0.005)', 4326)
+          ) AS r
+        """)
+        .first()
+        .getBoolean(0)
+      assertTrue(hits)
+    }
+
+    it("ST_Buffer with parameters string is honored") {
+      // quad_segs=2 produces an octagonal-ish buffer; quad_segs=64 is much smoother.
+      val row = sparkSession
+        .sql("""
+          SELECT
+            ST_NPoints(ST_Buffer(ST_GeogFromWKT('POINT(0 0)', 4326), 1000, 'quad_segs=2')) AS coarse,
+            ST_NPoints(ST_Buffer(ST_GeogFromWKT('POINT(0 0)', 4326), 1000, 'quad_segs=64')) AS fine
+        """)
+        .first()
+      assertTrue(
+        s"fine (${row.getInt(1)}) should have more vertices than coarse (${row.getInt(0)})",
+        row.getInt(1) > row.getInt(0))
+    }
+
+    it("ST_Buffer result survives the GeographyUDT round-trip") {
+      val df = sparkSession
+        .sql("SELECT ST_Buffer(ST_GeogFromWKT('POINT(0 0)', 4326), 500) AS buf")
+      val geog = df.first().get(0).asInstanceOf[Geography]
+      assertTrue(geog.isInstanceOf[WKBGeography])
+      assertEquals(4326, geog.getSRID)
+    }
+
+    it("ST_Buffer with useSpheroid is rejected for Geography inputs") {
+      val ex = intercept[Throwable] {
+        sparkSession
+          .sql("SELECT ST_Buffer(ST_GeogFromWKT('POINT(0 0)', 4326), 1000.0, true) AS b")
+          .first()
+      }
+      // The actual cause may sit one or two layers down inside InferredExpressionException.
+      val msg = Iterator
+        .iterate[Throwable](ex)(t => if (t == null) null else t.getCause)
+        .takeWhile(_ != null)
+        .map(_.getMessage)
+        .mkString(" | ")
+      assert(
+        msg.contains("useSpheroid") && msg.contains("Geography"),
+        s"expected useSpheroid/Geography in message; got: $msg")
+    }
+
+    it("ST_Buffer via DataFrame API") {
+      val df = sparkSession
+        .sql("SELECT 'POINT(0 0)' AS wkt")
+        .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(4326)).as("g"))
+        .select(st_functions.ST_Buffer(col("g"), lit(1000.0)).as("buf"))
+      val geog = df.first().get(0).asInstanceOf[Geography]
+      assertTrue(geog.isInstanceOf[WKBGeography])
+      assertTrue(geog.toString.startsWith("POLYGON"))
+    }
+  }
+
   // ─── DataFrame API ─────────────────────────────────────────────────────
 
   describe("DataFrame API") {

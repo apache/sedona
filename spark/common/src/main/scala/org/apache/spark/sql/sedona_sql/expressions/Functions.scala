@@ -192,7 +192,17 @@ private[apache] case class ST_Buffer(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction2(Functions.buffer),
       inferrableFunction3(Functions.buffer),
-      inferrableFunction4(Functions.buffer)) {
+      inferrableFunction4(Functions.buffer),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.buffer),
+      // Explicit type ascription disambiguates the two 3-arg Geography buffer overloads
+      // (`(Geography, double, String)` for the JTS-style parameters string, and
+      // `(Geography, double, boolean)` which throws a clear error if `useSpheroid` is passed).
+      inferrableFunction3(
+        org.apache.sedona.common.geography.Functions
+          .buffer(_: org.apache.sedona.common.S2Geography.Geography, _: Double, _: String)),
+      inferrableFunction3(
+        org.apache.sedona.common.geography.Functions
+          .buffer(_: org.apache.sedona.common.S2Geography.Geography, _: Double, _: Boolean))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
