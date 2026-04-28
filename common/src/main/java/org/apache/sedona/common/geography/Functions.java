@@ -165,6 +165,12 @@ public class Functions {
     return (sum == null) ? next : S2Point.add(sum, next);
   }
 
+  /** Return the number of sub-geometries in a geography (1 for singles). */
+  public static int numGeometries(Geography g) {
+    if (g == null) return 0;
+    return toJTS(g).getNumGeometries();
+  }
+
   /** Return the geometry type string of a geography, prefixed with "ST_". */
   public static String geometryType(Geography g) {
     if (g == null) return null;
