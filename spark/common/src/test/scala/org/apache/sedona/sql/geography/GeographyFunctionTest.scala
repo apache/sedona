@@ -139,9 +139,9 @@ class GeographyFunctionTest extends TestBaseScala {
         .sql("SELECT ST_Area(ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)) AS a")
         .first()
       val area = row.getDouble(0)
-      // S2 spherical area of a 1°×1° box near equator on a sphere of radius 6371008.0 m;
-      // matches sedona-db / BigQuery / Snowflake. Differs from the WGS84 ellipsoid value
-      // (~1.231e10 m²) by ~0.5%.
+      // Spherical area of a 1°×1° box near the equator on a sphere of radius 6371008.0 m.
+      // Tolerance 1e7 m² (~0.08%) absorbs floating-point drift while staying tight enough to
+      // catch a model swap.
       assertEquals(1.2364e10, area, 1e7)
     }
 

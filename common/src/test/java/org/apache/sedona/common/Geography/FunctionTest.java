@@ -253,12 +253,11 @@ public class FunctionTest {
   }
 
   @Test
-  public void area_sedonaDbParity_triangle() throws ParseException {
-    // Same fixture as sedona-db's `c/sedona-s2geography/src/kernels.rs::area` test.
-    // Their reported result on the C++ s2geography path is 6_182_489_130.907195 m².
-    // Sedona Java uses Haversine.AVG_EARTH_RADIUS = 6371008.0 m and S2's identical
-    // spherical area formula, so the answer is within a fraction of a per cent of theirs
-    // (any difference is the Earth-radius constant choice; sedona-db uses 6371010 m).
+  public void area_rightTriangleAtOrigin() throws ParseException {
+    // Right triangle with vertices (0,0), (0,1), (1,0). The polygon is wound clockwise in
+    // lat/lon space, which would let a naïve sphere area function return the complementary
+    // region (almost the whole Earth, ~5.1e14 m²). Asserting the small-side value (~6.18e9 m²)
+    // proves the orientation-collapse branch is doing its job.
     Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 0 1, 1 0, 0 0))", 4326);
     double area = Functions.area(g);
     assertEquals(6.182489e9, area, 1e6);

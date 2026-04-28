@@ -106,15 +106,11 @@ public class Functions {
   // ─── Level 2: JTS + S2 geodesic metrics ──────────────────────────────────
 
   /**
-   * Spherical area in square meters of a geography. Computed natively on the sphere using S2
-   * ({@link S2Polygon#getArea()} returns steradians; the result is multiplied by the squared
-   * authalic Earth radius {@link Haversine#AVG_EARTH_RADIUS}). Returns {@code 0.0} for point/line
-   * geographies and for {@code null}.
-   *
-   * <p>Consistent with sedona-db's {@code st_area}, BigQuery's {@code ST_AREA(GEOGRAPHY)}, and
-   * Snowflake's {@code ST_AREA(GEOGRAPHY)}, all of which use S2. This differs from PostGIS's {@code
-   * ST_Area(geography)} (and our own {@code ST_Area(geometry, useSpheroid=true)}) by roughly
-   * 0.3–0.5%, since those use the WGS84 spheroid via GeographicLib instead of a sphere.
+   * Spherical area in square meters of a geography, calculated on the sphere. The Earth is modeled
+   * as a sphere of radius {@link Haversine#AVG_EARTH_RADIUS}; the polygon's interior is integrated
+   * along great-circle edges and scaled by R squared. Multi-polygons sum the children's areas;
+   * geography collections recurse. Returns {@code 0.0} for point/line geographies and for {@code
+   * null}.
    */
   public static double area(Geography g) {
     if (g == null) return 0.0;
@@ -122,8 +118,8 @@ public class Functions {
     double steradians = sphericalArea(typed);
     // S2 polygons can be wound either CCW (interior is the small side) or CW (interior is the
     // complement on the sphere). Some WKT inputs land in the latter form after parsing, which
-    // makes S2 report the entire sphere minus the visible polygon. Match the "small side"
-    // convention used by sedona-db, BigQuery, and Snowflake by collapsing both cases.
+    // makes S2 report the entire sphere minus the visible polygon. Always return the smaller
+    // of the two regions so the answer is bounded by half the surface of the sphere.
     if (steradians > 2.0 * Math.PI) {
       steradians = 4.0 * Math.PI - steradians;
     }
