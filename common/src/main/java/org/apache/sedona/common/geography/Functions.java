@@ -85,6 +85,24 @@ public class Functions {
     return toJTS(g).getNumPoints();
   }
 
+  /** Return the number of sub-geometries in a geography (1 for singles). */
+  public static int numGeometries(Geography g) {
+    if (g == null) return 0;
+    return toJTS(g).getNumGeometries();
+  }
+
+  /** Return the geometry type string of a geography, prefixed with "ST_". */
+  public static String geometryType(Geography g) {
+    if (g == null) return null;
+    return "ST_" + toJTS(g).getGeometryType();
+  }
+
+  /** Return the WKT text representation of a geography. */
+  public static String asText(Geography g) {
+    if (g == null) return null;
+    return toJTS(g).toText();
+  }
+
   // ─── Level 2: JTS + S2 geodesic metrics ──────────────────────────────────
 
   /**
