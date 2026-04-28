@@ -148,6 +148,99 @@ public class FunctionTest {
     assertEquals(5, Functions.nPoints(g));
   }
 
+  // S2 area-weighted centroids on small polygons differ from planar by an O(d^2/R^2)
+  // spherical correction. 5e-3 deg (~500 m) is wide enough to absorb that drift on
+  // 1°-scale shapes near origin, while still catching any real bug (a planar/JTS centroid
+  // of an antimeridian polygon would be off by ~180°, not by hundreds of metres).
+  private static final double CENTROID_TOL_DEG = 5e-3;
+
+  @Test
+  public void centroid_squarePolygon() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    assertEquals(4326, c.getSRID());
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    assertEquals(1.0, p.getX(), CENTROID_TOL_DEG);
+    assertEquals(1.0, p.getY(), CENTROID_TOL_DEG);
+  }
+
+  @Test
+  public void centroid_linestring() throws ParseException {
+    Geography g = Constructors.geogFromWKT("LINESTRING (0 0, 2 0)", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    assertEquals(1.0, p.getX(), CENTROID_TOL_DEG);
+    assertEquals(0.0, p.getY(), CENTROID_TOL_DEG);
+  }
+
+  @Test
+  public void centroid_point() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (3 4)", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    // A single point's centroid is the point itself — exact.
+    assertEquals(3.0, p.getX(), 1e-9);
+    assertEquals(4.0, p.getY(), 1e-9);
+  }
+
+  @Test
+  public void centroid_multipoint_meanOfUnitVectors() throws ParseException {
+    Geography g = Constructors.geogFromWKT("MULTIPOINT ((-1 0), (1 0))", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    // Mean of unit vectors at (-1, 0) and (1, 0) lands on (0, 0).
+    assertEquals(0.0, p.getX(), CENTROID_TOL_DEG);
+    assertEquals(0.0, p.getY(), CENTROID_TOL_DEG);
+  }
+
+  @Test
+  public void centroid_multipolygon() throws ParseException {
+    // Two unit squares at (0..1, 0..1) and (10..11, 0..1). Equal area, so the area-weighted
+    // centroid should sit at the midpoint between the per-polygon centroids ≈ (5.5, 0.5).
+    Geography g =
+        Constructors.geogFromWKT(
+            "MULTIPOLYGON (((0 0, 1 0, 1 1, 0 1, 0 0)), ((10 0, 11 0, 11 1, 10 1, 10 0)))", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    assertEquals(5.5, p.getX(), CENTROID_TOL_DEG);
+    assertEquals(0.5, p.getY(), CENTROID_TOL_DEG);
+  }
+
+  @Test
+  public void centroid_antimeridianPolygon_isOnTheAntimeridian() throws ParseException {
+    // Thin band straddling 180°E. A planar JTS centroid would average the lons and land
+    // at lon ≈ 0 (the wrong side of the planet). The spherical centroid stays near ±180.
+    Geography g =
+        Constructors.geogFromWKT("POLYGON ((170 -1, -170 -1, -170 1, 170 1, 170 -1))", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    double lon = p.getX();
+    double lat = p.getY();
+    // |lon| close to 180 (either side of the wrap), lat close to 0.
+    double lonDistFromAntimeridian = Math.min(Math.abs(lon - 180.0), Math.abs(lon + 180.0));
+    assertTrue(
+        "expected centroid near the antimeridian; got (" + lon + ", " + lat + ")",
+        lonDistFromAntimeridian < 0.5);
+    assertEquals(0.0, lat, 0.5);
+  }
+
+  @Test
+  public void centroid_nullHandling() {
+    assertNull(Functions.centroid(null));
+  }
+
   @Test
   public void numGeometries_point() throws ParseException {
     Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);
@@ -239,7 +332,7 @@ public class FunctionTest {
     assertNull(Functions.asText(null));
   }
 
-  // ─── Level 2: ST_Length, ST_Distance ─────────────────────────────────────
+  // ─── Level 2: ST_Length, ST_Area, ST_Distance ────────────────────────────
 
   @Test
   public void length_equatorDegree() throws ParseException {
@@ -283,6 +376,56 @@ public class FunctionTest {
   }
 
   @Test
+  public void area_unitBoxAtEquator() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    double area = Functions.area(g);
+    // S2 spherical area of a 1°x1° box near equator on a sphere of radius
+    // Haversine.AVG_EARTH_RADIUS = 6371008.0 m. Slightly larger than the WGS84-ellipsoid
+    // value (~1.231e10 m²) by the spheroid/sphere correction (~0.5%). Tolerance of 1e7 m²
+    // (~0.08%) is well above floating-point drift but tight enough to catch a model swap.
+    assertEquals(1.2364e10, area, 1e7);
+  }
+
+  @Test
+  public void area_rightTriangleAtOrigin() throws ParseException {
+    // Right triangle with vertices (0,0), (0,1), (1,0). The polygon is wound clockwise in
+    // lat/lon space, which would let a naïve sphere area function return the complementary
+    // region (almost the whole Earth, ~5.1e14 m²). Asserting the small-side value (~6.18e9 m²)
+    // proves the orientation-collapse branch is doing its job.
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 0 1, 1 0, 0 0))", 4326);
+    double area = Functions.area(g);
+    assertEquals(6.182489e9, area, 1e6);
+  }
+
+  @Test
+  public void area_multipolygon_sumsChildren() throws ParseException {
+    Geography g =
+        Constructors.geogFromWKT(
+            "MULTIPOLYGON (((0 0, 1 0, 1 1, 0 1, 0 0)), ((10 10, 11 10, 11 11, 10 11, 10 10)))",
+            4326);
+    double area = Functions.area(g);
+    // ~1.236e10 (1°² near equator) + ~1.216e10 (1°² near 10°N). Tolerance 5e7 m² ~ 0.2%.
+    assertEquals(2.452e10, area, 5e7);
+  }
+
+  @Test
+  public void area_point_returnsZero() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    assertEquals(0.0, Functions.area(g), 0.0);
+  }
+
+  @Test
+  public void area_linestring_returnsZero() throws ParseException {
+    Geography g = Constructors.geogFromWKT("LINESTRING (0 0, 1 1)", 4326);
+    assertEquals(0.0, Functions.area(g), 0.0);
+  }
+
+  @Test
+  public void area_nullHandling() {
+    assertEquals(0.0, Functions.area(null), 0.0);
+  }
+
+  @Test
   public void distance_twoPoints() throws ParseException {
     Geography g1 = Constructors.geogFromWKT("POINT (0 0)", 4326);
     Geography g2 = Constructors.geogFromWKT("POINT (1 1)", 4326);
@@ -322,5 +465,67 @@ public class FunctionTest {
     Geography g1 = Constructors.geogFromWKT("POINT (1 1)", 4326);
     assertFalse(Functions.contains(g1, null));
     assertFalse(Functions.contains(null, g1));
+  }
+
+  // ─── Level 4: ST_Buffer ──────────────────────────────────────────────────
+
+  @Test
+  public void buffer_nullInputReturnsNull() throws ParseException {
+    assertNull(Functions.buffer(null, 100.0));
+    assertNull(Functions.buffer(null, 100.0, "quad_segs=4"));
+  }
+
+  @Test
+  public void buffer_pointProducesEnclosingPolygon() throws ParseException {
+    Geography origin = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography buffered = Functions.buffer(origin, 1000.0); // 1 km on the sphere
+    assertNotNull(buffered);
+    assertEquals("ST_Polygon", Functions.geometryType(buffered));
+    // A point ~785 m NE of origin should fall inside the 1 km buffer.
+    Geography near = Constructors.geogFromWKT("POINT (0.005 0.005)", 4326);
+    assertTrue(Functions.contains(buffered, near));
+    // A point ~1.57 km NE should fall outside.
+    Geography far = Constructors.geogFromWKT("POINT (0.01 0.01)", 4326);
+    assertFalse(Functions.contains(buffered, far));
+  }
+
+  @Test
+  public void buffer_polygonContainsOriginalInterior() throws ParseException {
+    Geography poly =
+        Constructors.geogFromWKT("POLYGON ((0 0, 0.01 0, 0.01 0.01, 0 0.01, 0 0))", 4326);
+    Geography buffered = Functions.buffer(poly, 200.0);
+    assertNotNull(buffered);
+    Geography inside = Constructors.geogFromWKT("POINT (0.005 0.005)", 4326);
+    assertTrue("buffered polygon must contain its centroid", Functions.contains(buffered, inside));
+    // A point 500 m beyond the original polygon's edge but inside the 200 m band would still
+    // be outside; pick a point far enough that the buffer cannot reach it.
+    Geography farOutside = Constructors.geogFromWKT("POINT (1 1)", 4326);
+    assertFalse(Functions.contains(buffered, farOutside));
+  }
+
+  @Test
+  public void buffer_parametersStringHonored() throws ParseException {
+    // quad_segs=2 produces a low-fidelity buffer (octagon for a point); quad_segs=64
+    // produces a much smoother boundary. Vertex counts should differ accordingly.
+    Geography origin = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography coarse = Functions.buffer(origin, 1000.0, "quad_segs=2");
+    Geography fine = Functions.buffer(origin, 1000.0, "quad_segs=64");
+    assertNotNull(coarse);
+    assertNotNull(fine);
+    assertTrue(
+        "fine buffer should have more vertices than coarse",
+        Functions.nPoints(fine) > Functions.nPoints(coarse));
+  }
+
+  @Test
+  public void buffer_negativeRadiusShrinksPolygon() throws ParseException {
+    Geography poly =
+        Constructors.geogFromWKT("POLYGON ((0 0, 0.01 0, 0.01 0.01, 0 0.01, 0 0))", 4326);
+    Geography shrunk = Functions.buffer(poly, -100.0);
+    assertNotNull(shrunk);
+    // Shrunk polygon is either smaller or empty; the original boundary point should now
+    // be outside (or contains() returns false on an empty geometry, which is also acceptable).
+    Geography boundary = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    assertFalse(Functions.contains(shrunk, boundary));
   }
 }

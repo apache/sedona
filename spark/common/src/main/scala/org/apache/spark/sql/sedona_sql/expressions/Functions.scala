@@ -192,7 +192,17 @@ private[apache] case class ST_Buffer(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction2(Functions.buffer),
       inferrableFunction3(Functions.buffer),
-      inferrableFunction4(Functions.buffer)) {
+      inferrableFunction4(Functions.buffer),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.buffer),
+      // Explicit type ascription disambiguates the two 3-arg Geography buffer overloads
+      // (`(Geography, double, String)` for the JTS-style parameters string, and
+      // `(Geography, double, boolean)` which throws a clear error if `useSpheroid` is passed).
+      inferrableFunction3(
+        org.apache.sedona.common.geography.Functions
+          .buffer(_: org.apache.sedona.common.S2Geography.Geography, _: Double, _: String)),
+      inferrableFunction3(
+        org.apache.sedona.common.geography.Functions
+          .buffer(_: org.apache.sedona.common.S2Geography.Geography, _: Double, _: Boolean))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -273,12 +283,17 @@ private[apache] case class ST_Length2D(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the area measurement of a Geometry.
+ * Return the area measurement of a Geometry or Geography. Supports both Geometry (JTS, planar
+ * area in the input's coordinate units) and Geography (S2, geodesic area in square meters on the
+ * WGS84 spheroid) via InferredExpression dual dispatch.
  *
  * @param inputExpressions
+ *   Geometry or Geography
  */
 private[apache] case class ST_Area(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.area _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.area),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.area)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -291,7 +306,9 @@ private[apache] case class ST_Area(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Centroid(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.getCentroid _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.getCentroid),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.centroid)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
