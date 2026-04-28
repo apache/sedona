@@ -78,7 +78,7 @@ class GeographyFunctionTest extends TestBaseScala {
     }
   }
 
-  // ─── Level 1: ST_NPoints, ST_Centroid, ST_AsText ───────────────────────
+  // ─── Level 1: ST_NPoints, ST_Centroid, ST_GeometryType, ST_AsText ──────
 
   describe("Level 1: Structural") {
 
@@ -96,9 +96,24 @@ class GeographyFunctionTest extends TestBaseScala {
         .first()
       val centroid = row.get(0).asInstanceOf[Geography]
       val point = new WKTReader().read(centroid.toString).asInstanceOf[Point]
-      // Planar centroid of a 2x2 square from (0,0) to (2,2) is (1,1)
-      assertEquals(1.0, point.getX, 1e-9)
-      assertEquals(1.0, point.getY, 1e-9)
+      // Spherical area-weighted centroid of a 2x2° square at origin is ~(1, 1) with an
+      // O(d^2/R^2) spherical correction; 5e-3° is well within that band.
+      assertEquals(1.0, point.getX, 5e-3)
+      assertEquals(1.0, point.getY, 5e-3)
+    }
+
+    it("ST_GeometryType point") {
+      val row = sparkSession
+        .sql("SELECT ST_GeometryType(ST_GeogFromWKT('POINT (1 2)', 4326)) AS t")
+        .first()
+      assertEquals("ST_Point", row.getString(0))
+    }
+
+    it("ST_GeometryType polygon") {
+      val row = sparkSession
+        .sql("SELECT ST_GeometryType(ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)) AS t")
+        .first()
+      assertEquals("ST_Polygon", row.getString(0))
     }
 
     it("ST_AsText") {

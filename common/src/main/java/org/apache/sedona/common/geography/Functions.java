@@ -165,6 +165,12 @@ public class Functions {
     return (sum == null) ? next : S2Point.add(sum, next);
   }
 
+  /** Return the geometry type string of a geography, prefixed with "ST_". */
+  public static String geometryType(Geography g) {
+    if (g == null) return null;
+    return "ST_" + toJTS(g).getGeometryType();
+  }
+
   /** Return the WKT text representation of a geography. */
   public static String asText(Geography g) {
     if (g == null) return null;

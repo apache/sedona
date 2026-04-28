@@ -242,6 +242,35 @@ public class FunctionTest {
   }
 
   @Test
+  public void geometryType_point() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    assertEquals("ST_Point", Functions.geometryType(g));
+  }
+
+  @Test
+  public void geometryType_linestring() throws ParseException {
+    Geography g = Constructors.geogFromWKT("LINESTRING (0 0, 1 1, 2 2)", 4326);
+    assertEquals("ST_LineString", Functions.geometryType(g));
+  }
+
+  @Test
+  public void geometryType_polygon() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    assertEquals("ST_Polygon", Functions.geometryType(g));
+  }
+
+  @Test
+  public void geometryType_multipoint() throws ParseException {
+    Geography g = Constructors.geogFromWKT("MULTIPOINT ((0 0), (1 1))", 4326);
+    assertEquals("ST_MultiPoint", Functions.geometryType(g));
+  }
+
+  @Test
+  public void geometryType_nullHandling() {
+    assertNull(Functions.geometryType(null));
+  }
+
+  @Test
   public void asText_point() throws ParseException {
     Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);
     String wkt = Functions.asText(g);
