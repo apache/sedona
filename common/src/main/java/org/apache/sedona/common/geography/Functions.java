@@ -199,6 +199,53 @@ public class Functions {
     return geography.toEWKT();
   }
 
+  // ─── Level 4: spherical buffer ───────────────────────────────────────────
+
+  /**
+   * Returns a Geography that represents the metric ε-buffer of {@code g} on the sphere, where
+   * {@code radiusMeters} is interpreted as meters along the spheroid. Implementation reuses the
+   * existing geometry-side spheroidal buffer (UTM project → JTS planar buffer → unproject), which
+   * gives accurate sub-UTM-zone results; for very large geographies the UTM round-trip's accuracy
+   * caveats apply (see ST_Buffer's docs).
+   */
+  public static Geography buffer(Geography g, double radiusMeters) {
+    return buffer(g, radiusMeters, "");
+  }
+
+  /**
+   * Geography is inherently spheroidal, so the {@code useSpheroid} flag (only meaningful for the
+   * planar Geometry version of ST_Buffer) is rejected for Geography inputs. This overload exists to
+   * give a clear, actionable error when callers try to pass it; without it the resolver would
+   * coerce the boolean to a string and fail later inside the buffer-parameters parser with a
+   * confusing message.
+   */
+  public static Geography buffer(Geography g, double radiusMeters, boolean useSpheroid) {
+    throw new IllegalArgumentException(
+        "ST_Buffer does not accept a useSpheroid argument for Geography inputs (Geography is "
+            + "always spheroidal). Use ST_Buffer(geog, distance) or "
+            + "ST_Buffer(geog, distance, parameters) instead.");
+  }
+
+  /**
+   * Same as {@link #buffer(Geography, double)} but allows a JTS-style buffer parameters string
+   * ({@code "quad_segs=8 endcap=round join=round mitre_limit=5.0 side=both"}). The string is parsed
+   * by the existing geometry-side parser.
+   */
+  public static Geography buffer(Geography g, double radiusMeters, String parameters) {
+    if (g == null) return null;
+    Geometry jts = toJTS(g);
+    if (jts == null) return null;
+    int srid = g.getSRID();
+    // Geography is always lon/lat; default to WGS84 when the source has no SRID set.
+    jts.setSRID(srid != 0 ? srid : 4326);
+    Geometry buffered =
+        org.apache.sedona.common.Functions.buffer(jts, radiusMeters, true, parameters);
+    if (buffered == null) return null;
+    Geography result = Constructors.geomToGeography(buffered);
+    result.setSRID(srid);
+    return result;
+  }
+
   // ─── Helpers ───────────────────────────────────────────────────────────────
 
   private static Geometry toJTS(Geography g) {
