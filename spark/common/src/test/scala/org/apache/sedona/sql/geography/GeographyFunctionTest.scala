@@ -130,9 +130,27 @@ class GeographyFunctionTest extends TestBaseScala {
     }
   }
 
-  // ─── Level 2: ST_Distance ──────────────────────────────────────────────
+  // ─── Level 2: ST_Area, ST_Distance ─────────────────────────────────────
 
   describe("Level 2: Geodesic metrics") {
+
+    it("ST_Area unit box at equator") {
+      val row = sparkSession
+        .sql("SELECT ST_Area(ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)) AS a")
+        .first()
+      val area = row.getDouble(0)
+      // Spherical area of a 1°×1° box near the equator on a sphere of radius 6371008.0 m.
+      // Tolerance 1e7 m² (~0.08%) absorbs floating-point drift while staying tight enough to
+      // catch a model swap.
+      assertEquals(1.2364e10, area, 1e7)
+    }
+
+    it("ST_Area of a point returns 0") {
+      val row = sparkSession
+        .sql("SELECT ST_Area(ST_GeogFromWKT('POINT (1 2)', 4326)) AS a")
+        .first()
+      assertEquals(0.0, row.getDouble(0), 0.0)
+    }
 
     it("ST_Distance between two points") {
       val row = sparkSession

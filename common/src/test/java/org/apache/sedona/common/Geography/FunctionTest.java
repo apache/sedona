@@ -239,7 +239,57 @@ public class FunctionTest {
     assertNull(Functions.asText(null));
   }
 
-  // ─── Level 2: ST_Distance ────────────────────────────────────────────────
+  // ─── Level 2: ST_Area, ST_Distance ───────────────────────────────────────
+
+  @Test
+  public void area_unitBoxAtEquator() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    double area = Functions.area(g);
+    // S2 spherical area of a 1°x1° box near equator on a sphere of radius
+    // Haversine.AVG_EARTH_RADIUS = 6371008.0 m. Slightly larger than the WGS84-ellipsoid
+    // value (~1.231e10 m²) by the spheroid/sphere correction (~0.5%). Tolerance of 1e7 m²
+    // (~0.08%) is well above floating-point drift but tight enough to catch a model swap.
+    assertEquals(1.2364e10, area, 1e7);
+  }
+
+  @Test
+  public void area_rightTriangleAtOrigin() throws ParseException {
+    // Right triangle with vertices (0,0), (0,1), (1,0). The polygon is wound clockwise in
+    // lat/lon space, which would let a naïve sphere area function return the complementary
+    // region (almost the whole Earth, ~5.1e14 m²). Asserting the small-side value (~6.18e9 m²)
+    // proves the orientation-collapse branch is doing its job.
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 0 1, 1 0, 0 0))", 4326);
+    double area = Functions.area(g);
+    assertEquals(6.182489e9, area, 1e6);
+  }
+
+  @Test
+  public void area_multipolygon_sumsChildren() throws ParseException {
+    Geography g =
+        Constructors.geogFromWKT(
+            "MULTIPOLYGON (((0 0, 1 0, 1 1, 0 1, 0 0)), ((10 10, 11 10, 11 11, 10 11, 10 10)))",
+            4326);
+    double area = Functions.area(g);
+    // ~1.236e10 (1°² near equator) + ~1.216e10 (1°² near 10°N). Tolerance 5e7 m² ~ 0.2%.
+    assertEquals(2.452e10, area, 5e7);
+  }
+
+  @Test
+  public void area_point_returnsZero() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    assertEquals(0.0, Functions.area(g), 0.0);
+  }
+
+  @Test
+  public void area_linestring_returnsZero() throws ParseException {
+    Geography g = Constructors.geogFromWKT("LINESTRING (0 0, 1 1)", 4326);
+    assertEquals(0.0, Functions.area(g), 0.0);
+  }
+
+  @Test
+  public void area_nullHandling() {
+    assertEquals(0.0, Functions.area(null), 0.0);
+  }
 
   @Test
   public void distance_twoPoints() throws ParseException {

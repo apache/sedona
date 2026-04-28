@@ -41,6 +41,7 @@ These functions operate on geography type objects.
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
+| [ST_Area](Geography-Functions/ST_Area.md) | Double | Return the geodesic area of a geography in square meters (WGS84 spheroid). | v1.9.1 |
 | [ST_AsEWKT](Geography-Functions/ST_AsEWKT.md) | String | Return the Extended Well-Known Text representation of a geography. | v1.8.0 |
 | [ST_AsText](Geography-Functions/ST_AsText.md) | String | Return the Well-Known Text (WKT) representation of a geography. | v1.9.1 |
 | [ST_Envelope](Geography-Functions/ST_Envelope.md) | Geography | Return the bounding box (envelope) of a geography. Supports anti-meridian splitting. | v1.8.0 |

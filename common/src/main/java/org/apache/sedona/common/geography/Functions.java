@@ -106,6 +106,52 @@ public class Functions {
   // ─── Level 2: JTS + S2 geodesic metrics ──────────────────────────────────
 
   /**
+   * Spherical area in square meters of a geography, calculated on the sphere. The Earth is modeled
+   * as a sphere of radius {@link Haversine#AVG_EARTH_RADIUS}; the polygon's interior is integrated
+   * along great-circle edges and scaled by R squared. Multi-polygons sum the children's areas;
+   * geography collections recurse. Returns {@code 0.0} for point/line geographies and for {@code
+   * null}.
+   */
+  public static double area(Geography g) {
+    if (g == null) return 0.0;
+    Geography typed = (g instanceof WKBGeography) ? ((WKBGeography) g).getS2Geography() : g;
+    double steradians = sphericalArea(typed);
+    // S2 polygons can be wound either CCW (interior is the small side) or CW (interior is the
+    // complement on the sphere). Some WKT inputs land in the latter form after parsing, which
+    // makes S2 report the entire sphere minus the visible polygon. Always return the smaller
+    // of the two regions so the answer is bounded by half the surface of the sphere.
+    if (steradians > 2.0 * Math.PI) {
+      steradians = 4.0 * Math.PI - steradians;
+    }
+    return steradians * Haversine.AVG_EARTH_RADIUS * Haversine.AVG_EARTH_RADIUS;
+  }
+
+  /** Steradian area of {@code g} on the unit sphere; 0 for non-areal kinds. */
+  private static double sphericalArea(Geography g) {
+    if (g instanceof PolygonGeography) {
+      return ((PolygonGeography) g).polygon.getArea();
+    }
+    if (g instanceof MultiPolygonGeography) {
+      double sum = 0.0;
+      for (Geography feature : ((MultiPolygonGeography) g).getFeatures()) {
+        if (feature instanceof PolygonGeography) {
+          sum += ((PolygonGeography) feature).polygon.getArea();
+        }
+      }
+      return sum;
+    }
+    if (g instanceof GeographyCollection) {
+      double sum = 0.0;
+      for (Geography feature : ((GeographyCollection) g).getFeatures()) {
+        sum += sphericalArea(feature);
+      }
+      return sum;
+    }
+    // Points and polylines have zero area
+    return 0.0;
+  }
+
+  /**
    * Geometry-to-geometry geodesic distance in meters. Uses S2ClosestEdgeQuery for true minimum
    * distance between any two points on the geometries (not centroid-to-centroid). Consistent with
    * sedona-db's s2_distance implementation.
