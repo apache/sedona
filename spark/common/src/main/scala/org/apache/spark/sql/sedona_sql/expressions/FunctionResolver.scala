@@ -86,6 +86,12 @@ object FunctionResolver {
           // All arguments are NullType literals; every overload returns null, so the choice
           // between equally-good matches is semantically irrelevant. Prefer the first candidate.
           ambiguousMatches.head._1
+        } else if (expressions.headOption.exists(_.dataType == NullType)) {
+          // The first argument (the geometry/geography input) is a NullType literal. All
+          // ST_* overloads return null on null input, so the dispatch choice is again
+          // semantically irrelevant — prefer the first registered candidate. This keeps
+          // calls like `ST_Buffer(null, 0)` working after Geography overloads were added.
+          ambiguousMatches.head._1
         } else {
           val ambiguousTypesMsg = ambiguousMatches
             .map { case (function, _) =>
