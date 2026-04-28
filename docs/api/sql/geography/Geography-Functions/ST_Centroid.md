@@ -19,7 +19,14 @@
 
 # ST_Centroid
 
-Introduction: Returns the planar centroid of a geography object as a Geography point. Note that this computes the centroid in the projected (lon/lat) coordinate space, not on the sphere.
+Introduction: Returns the spherical centroid of a geography as a Geography point, computed on the sphere using S2:
+
+- **Polygon / MultiPolygon** — area-weighted centroid via `S2Polygon.getCentroid()`.
+- **LineString / MultiLineString** — length-weighted centroid via `S2Polyline.getCentroid()`.
+- **Point / MultiPoint** — mean of the unit vectors.
+- **GeographyCollection** — recursive weighted sum across the children.
+
+The result is the unit-length centroid on the sphere. Unlike a planar (lon/lat) centroid, it is correct for antimeridian-crossing and high-latitude geographies. As with JTS for non-convex shapes, the centroid may lie outside the input geometry. Returns `NULL` when the centroid is undefined (empty geometry, or antipodal points whose unit vectors cancel).
 
 Format:
 
@@ -35,8 +42,15 @@ SQL Example
 SELECT ST_AsEWKT(ST_Centroid(ST_GeogFromWKT('POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))')));
 ```
 
-Output:
+Output (small `O(d²/R²)` spherical correction vs the planar `(1 1)`):
 
 ```
 POINT (1 1)
+```
+
+For an antimeridian-crossing polygon, the spherical centroid stays on the antimeridian instead of jumping to the opposite side of the planet, which a planar centroid would do:
+
+```sql
+SELECT ST_AsEWKT(ST_Centroid(ST_GeogFromWKT('POLYGON ((170 -1, -170 -1, -170 1, 170 1, 170 -1))')));
+-- result: POINT near (180, 0) (or (-180, 0)), NOT (0, 0)
 ```
