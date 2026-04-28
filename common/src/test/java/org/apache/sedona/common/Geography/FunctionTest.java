@@ -29,7 +29,11 @@ import org.apache.sedona.common.S2Geography.PolygonGeography;
 import org.apache.sedona.common.geography.Constructors;
 import org.apache.sedona.common.geography.Functions;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 
 public class FunctionTest {
   private static final double EPS = 1e-9;
@@ -142,6 +146,97 @@ public class FunctionTest {
   public void nPoints_polygon() throws ParseException {
     Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
     assertEquals(5, Functions.nPoints(g));
+  }
+
+  @Test
+  public void numGeometries_point() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    assertEquals(1, Functions.numGeometries(g));
+  }
+
+  @Test
+  public void numGeometries_polygon() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    assertEquals(1, Functions.numGeometries(g));
+  }
+
+  @Test
+  public void numGeometries_multipoint() throws ParseException {
+    Geography g = Constructors.geogFromWKT("MULTIPOINT ((0 0), (1 1), (2 2))", 4326);
+    assertEquals(3, Functions.numGeometries(g));
+  }
+
+  @Test
+  public void numGeometries_multipolygon() throws ParseException {
+    Geography g =
+        Constructors.geogFromWKT(
+            "MULTIPOLYGON (((0 0, 1 0, 1 1, 0 1, 0 0)), ((2 2, 3 2, 3 3, 2 3, 2 2)))", 4326);
+    assertEquals(2, Functions.numGeometries(g));
+  }
+
+  @Test
+  public void numGeometries_nullHandling() {
+    assertEquals(0, Functions.numGeometries(null));
+  }
+
+  @Test
+  public void geometryType_point() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    assertEquals("ST_Point", Functions.geometryType(g));
+  }
+
+  @Test
+  public void geometryType_linestring() throws ParseException {
+    Geography g = Constructors.geogFromWKT("LINESTRING (0 0, 1 1, 2 2)", 4326);
+    assertEquals("ST_LineString", Functions.geometryType(g));
+  }
+
+  @Test
+  public void geometryType_polygon() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    assertEquals("ST_Polygon", Functions.geometryType(g));
+  }
+
+  @Test
+  public void geometryType_multipoint() throws ParseException {
+    Geography g = Constructors.geogFromWKT("MULTIPOINT ((0 0), (1 1))", 4326);
+    assertEquals("ST_MultiPoint", Functions.geometryType(g));
+  }
+
+  @Test
+  public void geometryType_nullHandling() {
+    assertNull(Functions.geometryType(null));
+  }
+
+  @Test
+  public void asText_point() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    String wkt = Functions.asText(g);
+    assertNotNull(wkt);
+    Point p = (Point) new WKTReader().read(wkt);
+    // S2 round-trip may introduce sub-nanometer floating-point drift; use a loose tolerance.
+    assertEquals(1.0, p.getX(), 1e-9);
+    assertEquals(2.0, p.getY(), 1e-9);
+  }
+
+  @Test
+  public void asText_polygon() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    String wkt = Functions.asText(g);
+    assertNotNull(wkt);
+    Polygon poly = (Polygon) new WKTReader().read(wkt);
+    Coordinate[] ring = poly.getExteriorRing().getCoordinates();
+    assertEquals(5, ring.length);
+    double[][] expected = {{0, 0}, {1, 0}, {1, 1}, {0, 1}, {0, 0}};
+    for (int i = 0; i < expected.length; i++) {
+      assertEquals("ring[" + i + "].x", expected[i][0], ring[i].x, 1e-9);
+      assertEquals("ring[" + i + "].y", expected[i][1], ring[i].y, 1e-9);
+    }
+  }
+
+  @Test
+  public void asText_nullHandling() {
+    assertNull(Functions.asText(null));
   }
 
   // ─── Level 2: ST_Length, ST_Distance ─────────────────────────────────────
