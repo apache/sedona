@@ -152,15 +152,19 @@ case class BroadcastIndexJoinExec(
     val refiner = newRefiner()
     val joinedRow = new JoinedRow
     streamIter.flatMap { case (geom, row) =>
-      joinedRow.withLeft(row)
-      index.value
-        .query(geom.getEnvelopeInternal)
-        .iterator
-        .asScala
-        .asInstanceOf[Iterator[Geometry]]
-        .filter(candidate => refiner.matches(candidate, geom))
-        .map(candidate => joinedRow.withRight(refiner.unpackRow(candidate)))
-        .filter(boundCondition)
+      if (geom == null) {
+        Iterator.empty
+      } else {
+        joinedRow.withLeft(row)
+        index.value
+          .query(geom.getEnvelopeInternal)
+          .iterator
+          .asScala
+          .asInstanceOf[Iterator[Geometry]]
+          .filter(candidate => refiner.matches(candidate, geom))
+          .map(candidate => joinedRow.withRight(refiner.unpackRow(candidate)))
+          .filter(boundCondition)
+      }
     }
   }
 
@@ -171,20 +175,20 @@ case class BroadcastIndexJoinExec(
     val joinedRow = new JoinedRow
     streamIter.flatMap { case (geom, row) =>
       val left = row
-      joinedRow.withLeft(left)
-      val anyMatches = index.value
-        .query(geom.getEnvelopeInternal)
-        .iterator
-        .asScala
-        .asInstanceOf[Iterator[Geometry]]
-        .filter(candidate => refiner.matches(candidate, geom))
-        .map(candidate => joinedRow.withRight(refiner.unpackRow(candidate)))
-        .exists(boundCondition)
-
-      if (anyMatches) {
-        Iterator.single(left)
-      } else {
+      if (geom == null) {
         Iterator.empty
+      } else {
+        joinedRow.withLeft(left)
+        val anyMatches = index.value
+          .query(geom.getEnvelopeInternal)
+          .iterator
+          .asScala
+          .asInstanceOf[Iterator[Geometry]]
+          .filter(candidate => refiner.matches(candidate, geom))
+          .map(candidate => joinedRow.withRight(refiner.unpackRow(candidate)))
+          .exists(boundCondition)
+
+        if (anyMatches) Iterator.single(left) else Iterator.empty
       }
     }
   }

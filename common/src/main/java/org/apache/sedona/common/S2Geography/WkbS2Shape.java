@@ -244,10 +244,10 @@ public class WkbS2Shape implements S2Shape {
   }
 
   /**
-   * Returns true when the ring's first and last vertex coordinates are byte-identical (i.e. the
-   * ring is closed in the standard WKB sense). Sedona's own WKBWriter produces open rings, so a
-   * cheap byte-level comparison lets us distinguish the two cases without running through the
-   * S2Point conversion.
+   * Returns true when the ring's first and last vertex compare equal as raw doubles, i.e. the ring
+   * is closed in the standard WKB sense. Sedona's own WKBWriter produces open rings, so this cheap
+   * numeric comparison on the in-buffer bytes lets us distinguish the two cases without running
+   * through the S2Point conversion.
    */
   private static boolean firstAndLastEqual(ByteBuffer buf, int byteOffset, int numCoords) {
     int lastOffset = byteOffset + (numCoords - 1) * 16;

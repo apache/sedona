@@ -71,12 +71,16 @@ trait TraitJoinQueryBase {
     val spatialRdd = new SpatialRDD[Geometry]
     spatialRdd.setRawSpatialRDD(
       rdd
-        .map { x =>
-          val geog =
-            GeographyWKBSerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
-          val shape = JoinedGeometry.geographyToEnvelopeGeometry(geog)
-          shape.setUserData(GeographyJoinShape(geog, x.copy))
-          shape
+        .flatMap { x =>
+          val geogBytes = shapeExpression.eval(x).asInstanceOf[Array[Byte]]
+          if (geogBytes == null) {
+            None
+          } else {
+            val geog = GeographyWKBSerializer.deserialize(geogBytes)
+            val shape = JoinedGeometry.geographyToEnvelopeGeometry(geog)
+            shape.setUserData(GeographyJoinShape(geog, x.copy))
+            Some(shape)
+          }
         }
         .toJavaRDD())
     spatialRdd

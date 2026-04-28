@@ -111,6 +111,30 @@ class BroadcastIndexJoinGeographySuite extends TestBaseScala {
       }
     }
 
+    it("supports LEFT OUTER with the polygon side broadcast") {
+      val joined = pointGeogDf
+        .join(broadcast(polygonGeogDf), expr("ST_Contains(poly_geog, pt_geog)"), "left_outer")
+      assert(planUsesBroadcastIndexJoin(joined))
+      // 6 stream rows; 3 match a polygon, 3 are emitted with NULL polygon columns.
+      assert(joined.count() === 6)
+      val nullPolygonCount =
+        joined.where("poly_id IS NULL").count()
+      assert(nullPolygonCount === 3)
+    }
+
+    it("supports RIGHT OUTER with the polygon side broadcast (build = left)") {
+      // For RIGHT OUTER the planner requires broadcastLeft, so we broadcast the polygon side
+      // and stream the points. Every right-side (point) row must appear; unmatched points
+      // come back with NULL polygon columns.
+      val joined = broadcast(polygonGeogDf)
+        .join(pointGeogDf, expr("ST_Contains(poly_geog, pt_geog)"), "right_outer")
+      assert(planUsesBroadcastIndexJoin(joined))
+      assert(joined.count() === 6)
+      val unmatchedPoints =
+        joined.where("poly_id IS NULL").selectExpr("pt_id").collect().map(_.getInt(0)).toSet
+      assert(unmatchedPoints === Set(3, 4, 5))
+    }
+
     it("does NOT plan BroadcastIndexJoinExec without a broadcast hint") {
       // autoBroadcastJoinThreshold = -1 in TestBaseScala, so neither side auto-broadcasts.
       // Geography ST_Contains has no partition/range-join path, so Spark falls back to a
