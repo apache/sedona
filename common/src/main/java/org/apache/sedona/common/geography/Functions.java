@@ -85,6 +85,86 @@ public class Functions {
     return toJTS(g).getNumPoints();
   }
 
+  /**
+   * Returns the spherical centroid of a geography as a {@link Geography} point. The centroid is
+   * computed on the sphere using S2 area- and length-weighting:
+   *
+   * <ul>
+   *   <li>Polygon / MultiPolygon: area-weighted centroid via {@link S2Polygon#getCentroid()}.
+   *   <li>LineString / MultiLineString: length-weighted centroid via {@link
+   *       S2Polyline#getCentroid()}.
+   *   <li>Point / MultiPoint: mean of the unit vectors.
+   *   <li>GeographyCollection: weighted sum of the children's S2 centroids.
+   * </ul>
+   *
+   * <p>Unlike a planar (lon/lat) centroid, this answer is correct for antimeridian-crossing and
+   * polar geographies. As with JTS for non-convex shapes, the centroid may lie outside the input
+   * geometry. Returns {@code null} if the input is {@code null} or if the centroid is undefined
+   * (e.g. an empty geometry, or antipodal points whose unit vectors cancel).
+   */
+  public static Geography centroid(Geography g) {
+    if (g == null) return null;
+    Geography typed = (g instanceof WKBGeography) ? ((WKBGeography) g).getS2Geography() : g;
+    S2Point weighted = sphericalCentroid(typed);
+    if (weighted == null) return null;
+    // S2 returns area- (or length-) weighted centroids; project back to the sphere.
+    double norm = weighted.norm();
+    if (!(norm > 0.0)) return null; // zero or NaN — centroid undefined
+    S2Point unit = S2Point.normalize(weighted);
+    SinglePointGeography point = new SinglePointGeography(unit);
+    point.setSRID(g.getSRID());
+    return WKBGeography.fromS2Geography(point);
+  }
+
+  /**
+   * Returns the S2-weighted centroid of {@code g} (area-weighted for polygons, length-weighted for
+   * polylines, sum of unit vectors for points). Result is {@code null} when no centroid
+   * contribution exists (empty input, unsupported kind).
+   */
+  private static S2Point sphericalCentroid(Geography g) {
+    if (g instanceof PointGeography) {
+      List<S2Point> pts = ((PointGeography) g).getPoints();
+      if (pts == null || pts.isEmpty()) return null;
+      S2Point sum = pts.get(0);
+      for (int i = 1; i < pts.size(); i++) {
+        sum = S2Point.add(sum, pts.get(i));
+      }
+      return sum;
+    }
+    if (g instanceof PolylineGeography) {
+      S2Point sum = null;
+      for (S2Polyline p : ((PolylineGeography) g).getPolylines()) {
+        sum = addOrInit(sum, p.getCentroid());
+      }
+      return sum;
+    }
+    if (g instanceof PolygonGeography) {
+      return ((PolygonGeography) g).polygon.getCentroid();
+    }
+    if (g instanceof MultiPolygonGeography) {
+      S2Point sum = null;
+      for (Geography feature : ((MultiPolygonGeography) g).getFeatures()) {
+        if (feature instanceof PolygonGeography) {
+          sum = addOrInit(sum, ((PolygonGeography) feature).polygon.getCentroid());
+        }
+      }
+      return sum;
+    }
+    if (g instanceof GeographyCollection) {
+      S2Point sum = null;
+      for (Geography feature : ((GeographyCollection) g).getFeatures()) {
+        sum = addOrInit(sum, sphericalCentroid(feature));
+      }
+      return sum;
+    }
+    return null;
+  }
+
+  private static S2Point addOrInit(S2Point sum, S2Point next) {
+    if (next == null) return sum;
+    return (sum == null) ? next : S2Point.add(sum, next);
+  }
+
   /** Return the number of sub-geometries in a geography (1 for singles). */
   public static int numGeometries(Geography g) {
     if (g == null) return 0;

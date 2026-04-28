@@ -148,6 +148,99 @@ public class FunctionTest {
     assertEquals(5, Functions.nPoints(g));
   }
 
+  // S2 area-weighted centroids on small polygons differ from planar by an O(d^2/R^2)
+  // spherical correction. 5e-3 deg (~500 m) is wide enough to absorb that drift on
+  // 1°-scale shapes near origin, while still catching any real bug (a planar/JTS centroid
+  // of an antimeridian polygon would be off by ~180°, not by hundreds of metres).
+  private static final double CENTROID_TOL_DEG = 5e-3;
+
+  @Test
+  public void centroid_squarePolygon() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    assertEquals(4326, c.getSRID());
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    assertEquals(1.0, p.getX(), CENTROID_TOL_DEG);
+    assertEquals(1.0, p.getY(), CENTROID_TOL_DEG);
+  }
+
+  @Test
+  public void centroid_linestring() throws ParseException {
+    Geography g = Constructors.geogFromWKT("LINESTRING (0 0, 2 0)", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    assertEquals(1.0, p.getX(), CENTROID_TOL_DEG);
+    assertEquals(0.0, p.getY(), CENTROID_TOL_DEG);
+  }
+
+  @Test
+  public void centroid_point() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (3 4)", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    // A single point's centroid is the point itself — exact.
+    assertEquals(3.0, p.getX(), 1e-9);
+    assertEquals(4.0, p.getY(), 1e-9);
+  }
+
+  @Test
+  public void centroid_multipoint_meanOfUnitVectors() throws ParseException {
+    Geography g = Constructors.geogFromWKT("MULTIPOINT ((-1 0), (1 0))", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    // Mean of unit vectors at (-1, 0) and (1, 0) lands on (0, 0).
+    assertEquals(0.0, p.getX(), CENTROID_TOL_DEG);
+    assertEquals(0.0, p.getY(), CENTROID_TOL_DEG);
+  }
+
+  @Test
+  public void centroid_multipolygon() throws ParseException {
+    // Two unit squares at (0..1, 0..1) and (10..11, 0..1). Equal area, so the area-weighted
+    // centroid should sit at the midpoint between the per-polygon centroids ≈ (5.5, 0.5).
+    Geography g =
+        Constructors.geogFromWKT(
+            "MULTIPOLYGON (((0 0, 1 0, 1 1, 0 1, 0 0)), ((10 0, 11 0, 11 1, 10 1, 10 0)))", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    assertEquals(5.5, p.getX(), CENTROID_TOL_DEG);
+    assertEquals(0.5, p.getY(), CENTROID_TOL_DEG);
+  }
+
+  @Test
+  public void centroid_antimeridianPolygon_isOnTheAntimeridian() throws ParseException {
+    // Thin band straddling 180°E. A planar JTS centroid would average the lons and land
+    // at lon ≈ 0 (the wrong side of the planet). The spherical centroid stays near ±180.
+    Geography g =
+        Constructors.geogFromWKT("POLYGON ((170 -1, -170 -1, -170 1, 170 1, 170 -1))", 4326);
+    Geography c = Functions.centroid(g);
+    assertNotNull(c);
+    org.locationtech.jts.geom.Point p =
+        (org.locationtech.jts.geom.Point) Constructors.geogToGeometry(c);
+    double lon = p.getX();
+    double lat = p.getY();
+    // |lon| close to 180 (either side of the wrap), lat close to 0.
+    double lonDistFromAntimeridian = Math.min(Math.abs(lon - 180.0), Math.abs(lon + 180.0));
+    assertTrue(
+        "expected centroid near the antimeridian; got (" + lon + ", " + lat + ")",
+        lonDistFromAntimeridian < 0.5);
+    assertEquals(0.0, lat, 0.5);
+  }
+
+  @Test
+  public void centroid_nullHandling() {
+    assertNull(Functions.centroid(null));
+  }
+
   @Test
   public void numGeometries_point() throws ParseException {
     Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);

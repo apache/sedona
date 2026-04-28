@@ -301,7 +301,9 @@ private[apache] case class ST_Area(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Centroid(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.getCentroid _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.getCentroid),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.centroid)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
