@@ -3229,6 +3229,10 @@
          <lastmod>2026-04-28</lastmod>
     </url>
     <url>
+         <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Functions/ST_Buffer/</loc>
+         <lastmod>2026-04-28</lastmod>
+    </url>
+    <url>
          <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Functions/ST_Contains/</loc>
          <lastmod>2026-04-28</lastmod>
     </url>
