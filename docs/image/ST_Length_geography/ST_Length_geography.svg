@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 320" width="540" height="320" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <radialGradient id="globeFill" cx="40%" cy="38%" r="65%">
+      <stop offset="0%" stop-color="#f4f8fc"/>
+      <stop offset="100%" stop-color="#cfd9e6"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Title -->
+  <text x="270" y="24" text-anchor="middle" font-size="15" font-weight="bold" fill="#333333">ST_Length on a Geography (sphere-native)</text>
+
+  <!-- ─── Globe panel (left) ───────────────────────────────────────── -->
+  <g transform="translate(20,40)">
+    <!-- Globe sphere -->
+    <circle cx="130" cy="130" r="120" fill="url(#globeFill)" stroke="#8a99a8" stroke-width="1.2"/>
+
+    <!-- Latitude lines -->
+    <ellipse cx="130" cy="130" rx="120" ry="22" fill="none" stroke="#aab6c2" stroke-width="0.7" stroke-dasharray="2,2"/>
+    <ellipse cx="130" cy="130" rx="118" ry="60" fill="none" stroke="#aab6c2" stroke-width="0.6" stroke-dasharray="2,2"/>
+    <ellipse cx="130" cy="130" rx="113" ry="95" fill="none" stroke="#aab6c2" stroke-width="0.5" stroke-dasharray="2,2"/>
+
+    <!-- Longitude meridians -->
+    <ellipse cx="130" cy="130" rx="22" ry="120" fill="none" stroke="#aab6c2" stroke-width="0.7" stroke-dasharray="2,2"/>
+    <ellipse cx="130" cy="130" rx="60" ry="118" fill="none" stroke="#aab6c2" stroke-width="0.6" stroke-dasharray="2,2"/>
+    <ellipse cx="130" cy="130" rx="95" ry="113" fill="none" stroke="#aab6c2" stroke-width="0.5" stroke-dasharray="2,2"/>
+
+    <!-- Polyline on the sphere as 3 great-circle arcs -->
+    <path d="M 60 175 Q 90 150 120 138" fill="none" stroke="#e02020" stroke-width="2.6"/>
+    <path d="M 120 138 Q 150 130 175 110" fill="none" stroke="#e02020" stroke-width="2.6"/>
+    <path d="M 175 110 Q 195 100 215 88" fill="none" stroke="#e02020" stroke-width="2.6"/>
+
+    <!-- Vertices -->
+    <circle cx="60"  cy="175" r="4" fill="#0b1f3a"/>
+    <circle cx="120" cy="138" r="3.5" fill="#0b1f3a"/>
+    <circle cx="175" cy="110" r="3.5" fill="#0b1f3a"/>
+    <circle cx="215" cy="88"  r="4" fill="#0b1f3a"/>
+
+    <!-- Edge labels (arc-angle θ_i) -->
+    <text x="80"  y="148" font-size="11" fill="#333333" font-style="italic">θ₁</text>
+    <text x="142" y="124" font-size="11" fill="#333333" font-style="italic">θ₂</text>
+    <text x="190" y="96"  font-size="11" fill="#333333" font-style="italic">θ₃</text>
+
+    <!-- Caption under globe -->
+    <text x="130" y="276" text-anchor="middle" font-size="11" fill="#555555">edges are great-circle arcs</text>
+  </g>
+
+  <!-- ─── Formula / steps panel (right) ───────────────────────────── -->
+  <g transform="translate(290,55)">
+    <rect x="0" y="0" width="230" height="220" rx="6" fill="#fbfbfc" stroke="#cfd6dd" stroke-width="1"/>
+
+    <text x="115" y="22" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">How length is measured</text>
+
+    <!-- Step 1 -->
+    <circle cx="20" cy="50" r="9" fill="#2a4db3"/>
+    <text x="20" y="54" text-anchor="middle" font-size="11" fill="#ffffff" font-weight="bold">1</text>
+    <text x="36" y="48" font-size="11" fill="#333333">For each edge, compute its</text>
+    <text x="36" y="62" font-size="11" fill="#333333">arc-angle <tspan font-style="italic">θᵢ</tspan> on the unit sphere.</text>
+
+    <!-- Step 2 -->
+    <circle cx="20" cy="98" r="9" fill="#2a4db3"/>
+    <text x="20" y="102" text-anchor="middle" font-size="11" fill="#ffffff" font-weight="bold">2</text>
+    <text x="36" y="96" font-size="11" fill="#333333">Sum the arc-angles across</text>
+    <text x="36" y="110" font-size="11" fill="#333333">all edges and sub-features.</text>
+
+    <!-- Step 3 -->
+    <circle cx="20" cy="146" r="9" fill="#2a4db3"/>
+    <text x="20" y="150" text-anchor="middle" font-size="11" fill="#ffffff" font-weight="bold">3</text>
+    <text x="36" y="144" font-size="11" fill="#333333">Multiply by Earth radius R</text>
+    <text x="36" y="158" font-size="11" fill="#333333">(6 371 008 m) to get meters.</text>
+
+    <!-- Formula -->
+    <line x1="14" y1="178" x2="216" y2="178" stroke="#cfd6dd" stroke-width="0.8"/>
+    <text x="115" y="200" text-anchor="middle" font-size="13" fill="#0b1f3a">
+      length = R · Σ <tspan font-style="italic">θᵢ</tspan>
+    </text>
+  </g>
+</svg>

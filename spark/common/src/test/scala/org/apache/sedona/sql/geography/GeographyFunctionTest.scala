@@ -98,8 +98,8 @@ class GeographyFunctionTest extends TestBaseScala {
         .sql("SELECT ST_Length(ST_GeogFromWKT('LINESTRING (0 0, 1 0)', 4326)) AS l")
         .first()
       val len = row.getDouble(0)
-      // WGS84 spheroid: 1° along the equator is ~111,319 meters
-      assertEquals(111319.0, len, 5.0)
+      // Sphere of radius 6371008 m: 1° along a great circle is ~111,195 m.
+      assertEquals(111195.10, len, 1.0)
     }
 
     it("ST_Length of a point returns 0") {

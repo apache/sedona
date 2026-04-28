@@ -45,5 +45,5 @@ These functions operate on geography type objects.
 | [ST_Envelope](Geography-Functions/ST_Envelope.md) | Geography | Return the bounding box (envelope) of a geography. Supports anti-meridian splitting. | v1.8.0 |
 | [ST_NPoints](Geography-Functions/ST_NPoints.md) | Integer | Return the number of points (vertices) in a geography. | v1.9.0 |
 | [ST_Distance](Geography-Functions/ST_Distance.md) | Double | Return the minimum geodesic distance between two geographies in meters. | v1.9.0 |
-| [ST_Length](Geography-Functions/ST_Length.md) | Double | Return the geodesic length of a geography in meters (WGS84 spheroid). | v1.9.1 |
+| [ST_Length](Geography-Functions/ST_Length.md) | Double | Return the spherical length of a geography in meters, summed along great-circle edges. | v1.9.1 |
 | [ST_Contains](Geography-Functions/ST_Contains.md) | Boolean | Test whether geography A fully contains geography B. | v1.9.0 |

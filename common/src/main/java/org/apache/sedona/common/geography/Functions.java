@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.sedona.common.S2Geography.*;
 import org.apache.sedona.common.sphere.Haversine;
-import org.apache.sedona.common.sphere.Spheroid;
 import org.locationtech.jts.geom.Geometry;
 
 public class Functions {
@@ -86,18 +85,43 @@ public class Functions {
     return toJTS(g).getNumPoints();
   }
 
-  // ─── Level 2: Geodesic metrics (mix of S2 and WGS84 spheroid backends) ──
+  // ─── Level 2: Geodesic metrics ───────────────────────────────────────────
 
-  /** Geodesic length in meters (WGS84 spheroid). Returns 0 for non-linear geographies. */
+  /**
+   * Spherical length in meters of a geography, calculated on the sphere. Edges are interpreted as
+   * great-circle arcs; the summed arc-angle is scaled by {@link Haversine#AVG_EARTH_RADIUS}.
+   * Multi-polylines sum the children's lengths; geography collections recurse. Returns {@code 0.0}
+   * for point/polygon geographies and for {@code null}.
+   */
   public static double length(Geography g) {
     if (g == null) return 0.0;
-    return Spheroid.length(toJTS(g));
+    Geography typed = (g instanceof WKBGeography) ? ((WKBGeography) g).getS2Geography() : g;
+    double radians = sphericalLength(typed);
+    return radians * Haversine.AVG_EARTH_RADIUS;
+  }
+
+  /** Arc-angle (radians) of {@code g} on the unit sphere; 0 for non-linear kinds. */
+  private static double sphericalLength(Geography g) {
+    if (g instanceof PolylineGeography) {
+      double sum = 0.0;
+      for (S2Polyline pl : ((PolylineGeography) g).getPolylines()) {
+        sum += pl.getArclengthAngle().radians();
+      }
+      return sum;
+    }
+    if (g instanceof GeographyCollection) {
+      double sum = 0.0;
+      for (Geography feature : ((GeographyCollection) g).getFeatures()) {
+        sum += sphericalLength(feature);
+      }
+      return sum;
+    }
+    return 0.0;
   }
 
   /**
    * Geometry-to-geometry geodesic distance in meters. Uses S2ClosestEdgeQuery for true minimum
-   * distance between any two points on the geometries (not centroid-to-centroid). Consistent with
-   * sedona-db's s2_distance implementation.
+   * distance between any two points on the geometries (not centroid-to-centroid).
    */
   public static Double distance(Geography g1, Geography g2) {
     if (g1 == null || g2 == null) return null;

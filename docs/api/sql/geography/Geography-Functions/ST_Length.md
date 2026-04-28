@@ -19,7 +19,13 @@
 
 # ST_Length
 
-Introduction: Returns the geodesic length of a geography object in meters, calculated on the WGS84 spheroid using GeographicLib. Linestring and multilinestring geographies have non-zero length, and geometrycollection geographies return the sum of the lengths of their linear components. Returns 0 for points and polygons.
+Introduction: Returns the spherical length of a geography in meters, calculated on the sphere. The Earth is modeled as a sphere of radius `R = 6 371 008 m` (the authalic Earth radius). Each edge between successive vertices is interpreted as a great-circle arc; the per-edge arc-angles are summed and scaled by `R`.
+
+Multi-linestrings sum the children's lengths; geography collections recurse and add up the lengths of their linear members. Returns `0.0` for non-linear geographies (points, polygons) and for `NULL`.
+
+![ST_Length on a Geography on the sphere](../../../../image/ST_Length_geography/ST_Length_geography.svg "ST_Length on a Geography (sphere-native)")
+
+If you specifically want the WGS84 ellipsoidal length (which differs from the spherical value by up to ~0.5 % depending on latitude), convert via `ST_GeogToGeometry` first and call the Geometry-typed `ST_Length(..., useSpheroid => true)` overload instead.
 
 Format:
 
@@ -32,13 +38,13 @@ Since: `v1.9.1`
 SQL Example
 
 ```sql
-SELECT ST_Length(ST_GeogFromWKT('LINESTRING (0 0, 1 1)'));
+SELECT ST_Length(ST_GeogFromWKT('LINESTRING (0 0, 1 0)'));
 ```
 
-Output:
+Output (in meters):
 
 ```
-156899.56829134026
+111195.10117748393
 ```
 
-The result is approximately 157 km — the geodesic length of a line from (0,0) to (1,1).
+The result is approximately 111.2 km — one degree of arc on a sphere of radius `R = 6 371 008 m`.
