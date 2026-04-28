@@ -150,8 +150,34 @@ public class FunctionTest {
   public void area_unitBoxAtEquator() throws ParseException {
     Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
     double area = Functions.area(g);
-    // WGS84 spheroid area of a 1°x1° box near equator is ~12,308,778,361 m² (~12,309 km²)
-    assertEquals(1.2308778361e10, area, 1e6);
+    // S2 spherical area of a 1°x1° box near equator on a sphere of radius
+    // Haversine.AVG_EARTH_RADIUS = 6371008.0 m. Slightly larger than the WGS84-ellipsoid
+    // value (~1.231e10 m²) by the spheroid/sphere correction (~0.5%). Tolerance of 1e7 m²
+    // (~0.08%) is well above floating-point drift but tight enough to catch a model swap.
+    assertEquals(1.2364e10, area, 1e7);
+  }
+
+  @Test
+  public void area_sedonaDbParity_triangle() throws ParseException {
+    // Same fixture as sedona-db's `c/sedona-s2geography/src/kernels.rs::area` test.
+    // Their reported result on the C++ s2geography path is 6_182_489_130.907195 m².
+    // Sedona Java uses Haversine.AVG_EARTH_RADIUS = 6371008.0 m and S2's identical
+    // spherical area formula, so the answer is within a fraction of a per cent of theirs
+    // (any difference is the Earth-radius constant choice; sedona-db uses 6371010 m).
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 0 1, 1 0, 0 0))", 4326);
+    double area = Functions.area(g);
+    assertEquals(6.182489e9, area, 1e6);
+  }
+
+  @Test
+  public void area_multipolygon_sumsChildren() throws ParseException {
+    Geography g =
+        Constructors.geogFromWKT(
+            "MULTIPOLYGON (((0 0, 1 0, 1 1, 0 1, 0 0)), ((10 10, 11 10, 11 11, 10 11, 10 10)))",
+            4326);
+    double area = Functions.area(g);
+    // ~1.236e10 (1°² near equator) + ~1.216e10 (1°² near 10°N). Tolerance 5e7 m² ~ 0.2%.
+    assertEquals(2.452e10, area, 5e7);
   }
 
   @Test

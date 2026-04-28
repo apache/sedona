@@ -19,7 +19,19 @@
 
 # ST_Area
 
-Introduction: Returns the geodesic area of a geography object in square meters, calculated on the WGS84 spheroid using GeographicLib. Returns 0 for non-polygon geographies (points, linestrings).
+Introduction: Returns the spherical area of a geography in square meters, calculated on the sphere. The Earth is modeled as a sphere of radius `R = 6 371 008 m` (the authalic Earth radius); the result is the area of the polygon's interior on that sphere. Returns `0.0` for non-areal geographies (points, linestrings) and for `NULL`.
+
+Multi-polygons sum the children's areas; geography collections recurse into their members.
+
+![ST_Area on a Geography on the sphere](../../../../image/ST_Area_geography/ST_Area_geography.svg "ST_Area on a Geography (sphere-native)")
+
+The result is the area of the polygon's user-intended interior. If the input ring happens to be wound in the orientation that would describe the rest of the planet instead, Sedona returns the smaller of the two regions, so the answer is always bounded by half the surface of the Earth (~2.55 × 10¹⁴ m²).
+
+If you specifically want the WGS84 ellipsoidal value (which is ~0.5 % lower for typical shapes), convert via `ST_GeogToGeometry` first and use the geometry overload:
+
+```sql
+SELECT ST_Area(ST_GeogToGeometry(geog), true) FROM …;
+```
 
 Format:
 
@@ -35,10 +47,10 @@ SQL Example
 SELECT ST_Area(ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))'));
 ```
 
-Output:
+Output (in m²):
 
 ```
-12308778361.469452
+1.2364028804392242E10
 ```
 
-The result is approximately 12,309 km² — the area of a 1-degree by 1-degree box near the equator.
+That is approximately 12,364 km² — the spherical area of a 1°×1° box near the equator.

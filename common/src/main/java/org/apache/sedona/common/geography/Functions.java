@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.sedona.common.S2Geography.*;
 import org.apache.sedona.common.sphere.Haversine;
-import org.apache.sedona.common.sphere.Spheroid;
 import org.locationtech.jts.geom.Geometry;
 
 public class Functions {
@@ -88,10 +87,54 @@ public class Functions {
 
   // ─── Level 2: JTS + S2 geodesic metrics ──────────────────────────────────
 
-  /** Geodesic area in square meters (WGS84 spheroid). Returns 0 for non-polygon geographies. */
+  /**
+   * Spherical area in square meters of a geography. Computed natively on the sphere using S2
+   * ({@link S2Polygon#getArea()} returns steradians; the result is multiplied by the squared
+   * authalic Earth radius {@link Haversine#AVG_EARTH_RADIUS}). Returns {@code 0.0} for point/line
+   * geographies and for {@code null}.
+   *
+   * <p>Consistent with sedona-db's {@code st_area}, BigQuery's {@code ST_AREA(GEOGRAPHY)}, and
+   * Snowflake's {@code ST_AREA(GEOGRAPHY)}, all of which use S2. This differs from PostGIS's {@code
+   * ST_Area(geography)} (and our own {@code ST_Area(geometry, useSpheroid=true)}) by roughly
+   * 0.3–0.5%, since those use the WGS84 spheroid via GeographicLib instead of a sphere.
+   */
   public static double area(Geography g) {
     if (g == null) return 0.0;
-    return Spheroid.area(toJTS(g));
+    Geography typed = (g instanceof WKBGeography) ? ((WKBGeography) g).getS2Geography() : g;
+    double steradians = sphericalArea(typed);
+    // S2 polygons can be wound either CCW (interior is the small side) or CW (interior is the
+    // complement on the sphere). Some WKT inputs land in the latter form after parsing, which
+    // makes S2 report the entire sphere minus the visible polygon. Match the "small side"
+    // convention used by sedona-db, BigQuery, and Snowflake by collapsing both cases.
+    if (steradians > 2.0 * Math.PI) {
+      steradians = 4.0 * Math.PI - steradians;
+    }
+    return steradians * Haversine.AVG_EARTH_RADIUS * Haversine.AVG_EARTH_RADIUS;
+  }
+
+  /** Steradian area of {@code g} on the unit sphere; 0 for non-areal kinds. */
+  private static double sphericalArea(Geography g) {
+    if (g instanceof PolygonGeography) {
+      return ((PolygonGeography) g).polygon.getArea();
+    }
+    if (g instanceof MultiPolygonGeography) {
+      double sum = 0.0;
+      for (Geography feature : ((MultiPolygonGeography) g).getFeatures()) {
+        if (feature instanceof PolygonGeography) {
+          sum += ((PolygonGeography) feature).polygon.getArea();
+        }
+      }
+      return sum;
+    }
+    if (g instanceof GeographyCollection) {
+      double sum = 0.0;
+      for (Geography feature : ((GeographyCollection) g).getFeatures()) {
+        sum += sphericalArea(feature);
+      }
+      return sum;
+    }
+    // Points and polylines have zero area
+    return 0.0;
   }
 
   /**
