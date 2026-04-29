@@ -312,6 +312,24 @@ public class Functions {
     return pred.S2_equals(toShapeIndex(g1), toShapeIndex(g2), s2Options());
   }
 
+  /**
+   * Spherical "distance within" test. Returns true iff the minimum geodesic distance between g1 and
+   * g2 (in meters) is less than or equal to {@code distanceMeters}.
+   */
+  public static boolean dWithin(Geography g1, Geography g2, double distanceMeters) {
+    if (g1 == null || g2 == null) return false;
+    Double d = distance(g1, g2);
+    return d != null && d <= distanceMeters;
+  }
+
+  /**
+   * Spherical "within" test. Returns true iff g1 is fully inside g2 on the sphere. OGC convention:
+   * {@code ST_Within(A, B) == ST_Contains(B, A)}.
+   */
+  public static boolean within(Geography g1, Geography g2) {
+    return contains(g2, g1);
+  }
+
   /** Return EWKT for geography object */
   public static String asEWKT(Geography geography) {
     return geography.toEWKT();
