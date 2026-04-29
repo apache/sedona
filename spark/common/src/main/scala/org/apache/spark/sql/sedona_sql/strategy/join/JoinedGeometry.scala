@@ -18,13 +18,41 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
+import org.apache.sedona.common.S2Geography.Geography
 import org.apache.sedona.common.sphere.Haversine
-import org.locationtech.jts.geom.{Envelope, Geometry}
+import org.apache.spark.sql.catalyst.expressions.UnsafeRow
+import org.locationtech.jts.geom.{Envelope, Geometry, GeometryFactory}
+
+/**
+ * Payload stored in `userData` on each Geography index entry. Carries both the deserialized
+ * Geography (for S2 predicate refinement) and the original row (for the join output).
+ */
+case class GeographyJoinShape(geog: Geography, row: UnsafeRow)
 
 /**
  * Utility functions for generating geometries for spatial join.
  */
 object JoinedGeometry {
+
+  private val DEFAULT_FACTORY = new GeometryFactory()
+
+  /**
+   * Convert a Geography to a JTS Geometry whose envelope covers the Geography's lat/lng bounding
+   * rectangle. When the rectangle wraps the antimeridian we expand to the full longitude range
+   * [-180, 180]; this is a coarse filter that keeps the planar index simple (apache/sedona-db PR
+   * #775 made the same trade-off; #782 tracks the eventual split-at-±180 optimisation).
+   */
+  def geographyToEnvelopeGeometry(geog: Geography): Geometry = {
+    val rect = geog.region().getRectBound
+    val latLo = rect.latLo().degrees()
+    val latHi = rect.latHi().degrees()
+    val (lngLo, lngHi) = if (rect.lng().isInverted) {
+      (-180.0, 180.0)
+    } else {
+      (rect.lngLo().degrees(), rect.lngHi().degrees())
+    }
+    DEFAULT_FACTORY.toGeometry(new Envelope(lngLo, lngHi, latLo, latHi))
+  }
 
   /**
    * Convert the given geometry to an envelope expanded by distance.

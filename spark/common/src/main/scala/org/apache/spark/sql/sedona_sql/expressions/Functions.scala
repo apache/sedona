@@ -192,7 +192,17 @@ private[apache] case class ST_Buffer(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction2(Functions.buffer),
       inferrableFunction3(Functions.buffer),
-      inferrableFunction4(Functions.buffer)) {
+      inferrableFunction4(Functions.buffer),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.buffer),
+      // Explicit type ascription disambiguates the two 3-arg Geography buffer overloads
+      // (`(Geography, double, String)` for the JTS-style parameters string, and
+      // `(Geography, double, boolean)` which throws a clear error if `useSpheroid` is passed).
+      inferrableFunction3(
+        org.apache.sedona.common.geography.Functions
+          .buffer(_: org.apache.sedona.common.S2Geography.Geography, _: Double, _: String)),
+      inferrableFunction3(
+        org.apache.sedona.common.geography.Functions
+          .buffer(_: org.apache.sedona.common.S2Geography.Geography, _: Double, _: Boolean))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -242,12 +252,17 @@ private[apache] case class ST_Expand(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the length measurement of a Geometry
+ * Return the length measurement of a Geometry or Geography. Supports both Geometry (JTS, planar
+ * length in the input's coordinate units) and Geography (S2, geodesic length in meters on the
+ * WGS84 spheroid) via InferredExpression dual dispatch.
  *
  * @param inputExpressions
+ *   Geometry or Geography
  */
 private[apache] case class ST_Length(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.length _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.length),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.length)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -268,12 +283,17 @@ private[apache] case class ST_Length2D(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the area measurement of a Geometry.
+ * Return the area measurement of a Geometry or Geography. Supports both Geometry (JTS, planar
+ * area in the input's coordinate units) and Geography (S2, geodesic area in square meters on the
+ * WGS84 spheroid) via InferredExpression dual dispatch.
  *
  * @param inputExpressions
+ *   Geometry or Geography
  */
 private[apache] case class ST_Area(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.area _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.area),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.area)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -286,7 +306,9 @@ private[apache] case class ST_Area(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Centroid(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.getCentroid _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.getCentroid),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.centroid)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -633,7 +655,9 @@ private[apache] case class ST_SetSRID(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_GeometryType(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.geometryType _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.geometryType),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.geometryType)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1053,16 +1077,19 @@ private[apache] object ST_IsRing {
 }
 
 /**
- * Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the
- * number of geometries, for single geometries will return 1
+ * Returns the number of sub-geometries. For a GEOMETRYCOLLECTION or MULTI* input, returns the
+ * number of component geometries; for single geometries returns 1. Supports both Geometry (JTS)
+ * and Geography (S2) inputs via InferredExpression dual dispatch.
  *
- * This method implements the SQL/MM specification. SQL-MM 3: 9.1.4
+ * For Geometry inputs this method implements the SQL/MM specification (SQL-MM 3: 9.1.4).
  *
  * @param inputExpressions
- *   Geometry
+ *   Geometry or Geography
  */
 private[apache] case class ST_NumGeometries(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.numGeometries _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.numGeometries),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.numGeometries)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
