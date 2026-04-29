@@ -238,12 +238,9 @@ private[apache] case class ST_RelateMatch(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Equals(inputExpressions: Seq[Expression])
-    extends ST_Predicate
-    with CodegenFallback {
-
-  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    Predicates.equals(leftGeometry, rightGeometry)
-  }
+    extends InferredExpression(
+      inferrableFunction2(Predicates.equals),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.equals)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

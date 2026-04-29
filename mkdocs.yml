@@ -56,6 +56,7 @@ nav:
               - GeoParquet: tutorial/files/geoparquet-sedona-spark.md
               - GeoJSON: tutorial/files/geojson-sedona-spark.md
               - Shapefiles: tutorial/files/shapefiles-sedona-spark.md
+              - GeoTIFF metadata: tutorial/files/geotiffmetadata-sedona-spark.md
               - STAC catalog: tutorial/files/stac-sedona-spark.md
           - Concepts:
               - Spatial Joins: tutorial/concepts/spatial-joins.md
@@ -199,8 +200,8 @@ extra:
     - icon: fontawesome/brands/discord
       link: 'https://discord.gg/9A3k5dEBsY'
   sedona:
-    current_version: 1.8.0
-    current_geotools: 1.8.0-33.1
+    current_version: 1.9.0
+    current_geotools: 1.9.0-33.5
   sedona_create_release:
     current_version: 1.9.0
     current_git_tag: sedona-1.9.0-rc1
