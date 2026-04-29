@@ -56,12 +56,36 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
 
   // Geography spatial joins are not supported in this PR — TraitJoinQueryBase.toSpatialRDD
   // deserializes join keys with GeometrySerializer, which would fail on Geography bytes.
-  // ST_Contains is the only spatial predicate currently wired for Geography (via InferredExpression
-  // dual dispatch); when either side is GeographyUDT we skip join planning and let Spark evaluate
-  // the predicate row-by-row. Other ST_Predicates reject Geography inputs at analysis time, so no
-  // guard is needed there.
+  // ST_Contains and ST_Within are wired for Geography via InferredExpression dual dispatch; when
+  // either side is GeographyUDT we skip join planning and let Spark evaluate the predicate
+  // row-by-row. Other ST_Predicates reject Geography inputs at analysis time, so no guard is
+  // needed there.
   private def isGeographyInput(shape: Expression): Boolean =
     shape.dataType.isInstanceOf[GeographyUDT]
+
+  /**
+   * Build a JoinQueryDetection for an InferredExpression predicate (ST_Contains, ST_Within, ...)
+   * unless either operand is GeographyUDT, in which case the join is skipped and the predicate
+   * falls back to row-by-row evaluation.
+   */
+  private def inferredJoinDetection(
+      left: LogicalPlan,
+      right: LogicalPlan,
+      leftShape: Expression,
+      rightShape: Expression,
+      spatialPredicate: SpatialPredicate,
+      extraCondition: Option[Expression]): Option[JoinQueryDetection] =
+    if (isGeographyInput(leftShape) || isGeographyInput(rightShape)) None
+    else
+      Some(
+        JoinQueryDetection(
+          left,
+          right,
+          leftShape,
+          rightShape,
+          spatialPredicate,
+          isGeography = false,
+          extraCondition))
 
   private def getJoinDetection(
       left: LogicalPlan,
@@ -199,30 +223,25 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
         case joinConditionMatcher(predicate, extraCondition) =>
           predicate match {
             // ST_Contains and ST_Within are InferredExpressions (not ST_Predicates) so they can't
-            // sit inside getJoinDetection; they also accept Geography inputs via dual dispatch and
-            // therefore need the Geography guard (join planning deserializes with GeometrySerializer).
-            case ST_Contains(Seq(leftShape, rightShape))
-                if !isGeographyInput(leftShape) && !isGeographyInput(rightShape) =>
-              Some(
-                JoinQueryDetection(
-                  left,
-                  right,
-                  leftShape,
-                  rightShape,
-                  SpatialPredicate.CONTAINS,
-                  false,
-                  extraCondition))
-            case ST_Within(Seq(leftShape, rightShape))
-                if !isGeographyInput(leftShape) && !isGeographyInput(rightShape) =>
-              Some(
-                JoinQueryDetection(
-                  left,
-                  right,
-                  leftShape,
-                  rightShape,
-                  SpatialPredicate.WITHIN,
-                  false,
-                  extraCondition))
+            // sit inside getJoinDetection; they also accept Geography inputs via dual dispatch.
+            // inferredJoinDetection applies the Geography guard so the partition/range planner
+            // doesn't try to deserialize Geography bytes via GeometrySerializer.
+            case ST_Contains(Seq(leftShape, rightShape)) =>
+              inferredJoinDetection(
+                left,
+                right,
+                leftShape,
+                rightShape,
+                SpatialPredicate.CONTAINS,
+                extraCondition)
+            case ST_Within(Seq(leftShape, rightShape)) =>
+              inferredJoinDetection(
+                left,
+                right,
+                leftShape,
+                rightShape,
+                SpatialPredicate.WITHIN,
+                extraCondition)
             case pred: ST_Predicate =>
               getJoinDetection(left, right, pred, extraCondition)
             case pred: RS_Predicate =>

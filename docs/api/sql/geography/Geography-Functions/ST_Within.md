@@ -19,7 +19,9 @@
 
 # ST_Within
 
-Introduction: Tests whether geography A is fully within geography B using S2 spherical boolean operations. Returns true if every point of A is inside or on the boundary of B. By OGC convention, `ST_Within(A, B)` is equivalent to `ST_Contains(B, A)`.
+Introduction: Tests whether geography `A` is fully within geography `B` using S2 spherical boolean operations. Returns true when every point of `A`'s interior lies in `B`'s interior. By OGC convention, `ST_Within(A, B)` is equivalent to `ST_Contains(B, A)`, and shares the same boundary semantics.
+
+Boundary semantics on the sphere are inherited from S2's boolean operations and depend on each ring's vertex orientation: along an edge that is "owned" by `B`'s boundary the test returns true, and along the opposite edge it returns false. Do not rely on a specific result for points that lie exactly on `B`'s boundary; for predictable behavior, use a strict interior point or expand `B` slightly with `ST_Buffer` before testing.
 
 ![ST_Within returning true](../../../../image/ST_Within_geography/ST_Within_geography_true.svg "ST_Within returning true")
 ![ST_Within returning false](../../../../image/ST_Within_geography/ST_Within_geography_false.svg "ST_Within returning false")
@@ -32,12 +34,12 @@ Return type: `Boolean`
 
 Since: `v1.9.1`
 
-SQL Example
+SQL Example — interior point:
 
 ```sql
 SELECT ST_Within(
-  ST_GeogFromWKT('POINT (0.5 0.5)'),
-  ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))')
+  ST_GeogFromWKT('POINT (0.5 0.5)', 4326),
+  ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)
 );
 ```
 

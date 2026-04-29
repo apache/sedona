@@ -251,6 +251,22 @@ class GeographyFunctionTest extends TestBaseScala {
       assertTrue(!row.getBoolean(0))
     }
 
+    it("ST_Within point on polygon boundary (S2-owned edge)") {
+      // S2 boolean ownership of an edge depends on vertex orientation; for the unit-square
+      // ring (0 0, 1 0, 1 1, 0 1) the left edge midpoint (0, 0.5) is reported as 'within'.
+      // The test locks in this current behavior so a future S2/library change won't silently
+      // flip it. Boundary semantics in general are documented as implementation-defined.
+      val row = sparkSession
+        .sql("""
+          SELECT ST_Within(
+            ST_GeogFromWKT('POINT (0 0.5)', 4326),
+            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)
+          ) AS r
+        """)
+        .first()
+      assertTrue(row.getBoolean(0))
+    }
+
     it("ST_Within null handling") {
       val r1 = sparkSession
         .sql("SELECT ST_Within(ST_GeogFromWKT('POINT (0 0)', 4326), null) AS r")
