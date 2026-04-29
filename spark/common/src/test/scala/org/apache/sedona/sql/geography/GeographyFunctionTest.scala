@@ -27,8 +27,8 @@ import org.locationtech.jts.geom.Point
 import org.locationtech.jts.io.WKTReader
 
 /**
- * Spark SQL integration tests for Geography ST functions. Tests one representative function per
- * architecture level: L1 (ST_NPoints), L2 (ST_Distance), L3 (ST_Contains).
+ * Spark SQL integration tests for Geography ST functions. Representative functions per
+ * architecture level: L1 (ST_NPoints), L2 (ST_Distance, ST_Length), L3 (ST_Contains).
  */
 class GeographyFunctionTest extends TestBaseScala {
 
@@ -143,9 +143,25 @@ class GeographyFunctionTest extends TestBaseScala {
     }
   }
 
-  // ─── Level 2: ST_Area, ST_Distance ─────────────────────────────────────
+  // ─── Level 2: ST_Length, ST_Area, ST_Distance ──────────────────────────
 
   describe("Level 2: Geodesic metrics") {
+
+    it("ST_Length along the equator") {
+      val row = sparkSession
+        .sql("SELECT ST_Length(ST_GeogFromWKT('LINESTRING (0 0, 1 0)', 4326)) AS l")
+        .first()
+      val len = row.getDouble(0)
+      // Sphere of radius 6371008 m: 1° along a great circle is ~111,195 m.
+      assertEquals(111195.10, len, 1.0)
+    }
+
+    it("ST_Length of a point returns 0") {
+      val row = sparkSession
+        .sql("SELECT ST_Length(ST_GeogFromWKT('POINT (1 2)', 4326)) AS l")
+        .first()
+      assertEquals(0.0, row.getDouble(0), 0.0)
+    }
 
     it("ST_Area unit box at equator") {
       val row = sparkSession

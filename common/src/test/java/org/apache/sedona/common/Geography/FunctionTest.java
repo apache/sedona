@@ -332,7 +332,48 @@ public class FunctionTest {
     assertNull(Functions.asText(null));
   }
 
-  // ─── Level 2: ST_Area, ST_Distance ───────────────────────────────────────
+  // ─── Level 2: ST_Length, ST_Area, ST_Distance ────────────────────────────
+
+  @Test
+  public void length_equatorDegree() throws ParseException {
+    Geography g = Constructors.geogFromWKT("LINESTRING (0 0, 1 0)", 4326);
+    double len = Functions.length(g);
+    // Sphere of radius 6371008 m: 1° along a great circle is ~111,195 m.
+    assertEquals(111195.10, len, 1.0);
+  }
+
+  @Test
+  public void length_meridianDegree() throws ParseException {
+    Geography g = Constructors.geogFromWKT("LINESTRING (0 0, 0 1)", 4326);
+    double len = Functions.length(g);
+    // Meridians are great circles on a sphere — same length as the equator degree.
+    assertEquals(111195.10, len, 1.0);
+  }
+
+  @Test
+  public void length_point_returnsZero() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    assertEquals(0.0, Functions.length(g), 0.0);
+  }
+
+  @Test
+  public void length_polygon_returnsZero() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    assertEquals(0.0, Functions.length(g), 0.0);
+  }
+
+  @Test
+  public void length_multilinestring_sumsChildren() throws ParseException {
+    Geography g = Constructors.geogFromWKT("MULTILINESTRING ((0 0, 1 0), (5 0, 6 0))", 4326);
+    double len = Functions.length(g);
+    // Two disjoint 1° equatorial arcs → 2 * (R * 1° in radians) ≈ 222,390 m.
+    assertEquals(2 * 111195.10, len, 2.0);
+  }
+
+  @Test
+  public void length_nullHandling() {
+    assertEquals(0.0, Functions.length(null), 0.0);
+  }
 
   @Test
   public void area_unitBoxAtEquator() throws ParseException {

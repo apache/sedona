@@ -252,12 +252,17 @@ private[apache] case class ST_Expand(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the length measurement of a Geometry
+ * Return the length measurement of a Geometry or Geography. Supports both Geometry (JTS, planar
+ * length in the input's coordinate units) and Geography (S2, geodesic length in meters on the
+ * WGS84 spheroid) via InferredExpression dual dispatch.
  *
  * @param inputExpressions
+ *   Geometry or Geography
  */
 private[apache] case class ST_Length(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.length _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.length),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.length)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
