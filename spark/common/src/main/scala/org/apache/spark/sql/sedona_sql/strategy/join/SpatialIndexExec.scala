@@ -39,7 +39,8 @@ case class SpatialIndexExec(
     indexType: IndexType,
     isRasterPredicate: Boolean,
     isGeography: Boolean,
-    distance: Option[Expression] = None)
+    distance: Option[Expression] = None,
+    geographyShape: Boolean = false)
     extends SedonaUnaryExecNode
     with TraitJoinQueryBase
     with Logging {
@@ -64,6 +65,8 @@ case class SpatialIndexExec(
       case None =>
         if (isRasterPredicate) {
           toWGS84EnvelopeRDD(resultRaw, boundShape)
+        } else if (geographyShape) {
+          toGeographySpatialRDD(resultRaw, boundShape)
         } else {
           toSpatialRDD(resultRaw, boundShape)
         }

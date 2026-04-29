@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
+import org.apache.sedona.common.S2Geography.GeographyWKBSerializer
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.utils.{GeometrySerializer, RasterSerializer}
@@ -52,6 +53,34 @@ trait TraitJoinQueryBase {
             GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
           shape.setUserData(x.copy)
           shape
+        }
+        .toJavaRDD())
+    spatialRdd
+  }
+
+  /**
+   * Builds a SpatialRDD from a column of GeographyUDT bytes. Each row becomes a JTS geometry
+   * whose envelope is the Geography's lat/lng bounding rectangle (full-longitude when the
+   * rectangle wraps the antimeridian). The Geography object is carried alongside the original row
+   * in `userData` via [[GeographyJoinShape]] so the join executor can perform S2-based predicate
+   * refinement and emit the row.
+   */
+  def toGeographySpatialRDD(
+      rdd: RDD[UnsafeRow],
+      shapeExpression: Expression): SpatialRDD[Geometry] = {
+    val spatialRdd = new SpatialRDD[Geometry]
+    spatialRdd.setRawSpatialRDD(
+      rdd
+        .flatMap { x =>
+          val geogBytes = shapeExpression.eval(x).asInstanceOf[Array[Byte]]
+          if (geogBytes == null) {
+            None
+          } else {
+            val geog = GeographyWKBSerializer.deserialize(geogBytes)
+            val shape = JoinedGeometry.geographyToEnvelopeGeometry(geog)
+            shape.setUserData(GeographyJoinShape(geog, x.copy))
+            Some(shape)
+          }
         }
         .toJavaRDD())
     spatialRdd
