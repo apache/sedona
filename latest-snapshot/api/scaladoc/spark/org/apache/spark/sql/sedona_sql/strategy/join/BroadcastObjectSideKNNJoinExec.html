@@ -199,6 +199,10 @@
                         <a href="DistanceJoinExec.html" title="Distance joins requires matching geometries to be in the same partition, despite not necessarily overlapping.">DistanceJoinExec</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
+                        <a class="class" href="GeographyJoinShape.html" title="Payload stored in userData on each Geography index entry."></a>
+                        <a href="GeographyJoinShape.html" title="Payload stored in userData on each Geography index entry.">GeographyJoinShape</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
                         <a class="class" href="JoinQueryDetection.html" title=""></a>
                         <a href="JoinQueryDetection.html" title="">JoinQueryDetection</a>
                       </li><li class="current-entities indented7">
@@ -2791,6 +2795,27 @@ joined rows from the left and right geometry pairs.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#toGeographySpatialRDD" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toGeographySpatialRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]"></a><a id="toGeographySpatialRDD(RDD[UnsafeRow],Expression):SpatialRDD[Geometry]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/BroadcastObjectSideKNNJoinExec.html#toGeographySpatialRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toGeographySpatialRDD</span><span class="params">(<span name="rdd">rdd: <span class="extype" name="org.apache.spark.rdd.RDD">RDD</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.UnsafeRow">UnsafeRow</span>]</span>, <span name="shapeExpression">shapeExpression: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>)</span><span class="result">: <a href="../../../../../sedona/core/spatialRDD/SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Builds a SpatialRDD from a column of GeographyUDT bytes.</p><div class="fullcomment"><div class="comment cmt"><p>Builds a SpatialRDD from a column of GeographyUDT bytes. Each row becomes a JTS geometry
+whose envelope is the Geography's lat/lng bounding rectangle (full-longitude when the
+rectangle wraps the antimeridian). The Geography object is carried alongside the original row
+in <code>userData</code> via <a href="GeographyJoinShape.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.GeographyJoinShape">GeographyJoinShape</a> so the join executor can perform S2-based predicate
+refinement and emit the row.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a></dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.trees.TreeNode#toJSON" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toJSON:String"></a>
       <span class="permalink">

@@ -199,6 +199,10 @@
                         <a href="DistanceJoinExec.html" title="Distance joins requires matching geometries to be in the same partition, despite not necessarily overlapping.">DistanceJoinExec</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
+                        <a class="class" href="GeographyJoinShape.html" title="Payload stored in userData on each Geography index entry."></a>
+                        <a href="GeographyJoinShape.html" title="Payload stored in userData on each Geography index entry.">GeographyJoinShape</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
                         <a class="class" href="JoinQueryDetection.html" title=""></a>
                         <a href="JoinQueryDetection.html" title="">JoinQueryDetection</a>
                       </li><li class="current-entities indented7">
@@ -461,6 +465,27 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.JoinedGeometry#geographyToEnvelopeGeometry" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="geographyToEnvelopeGeometry(geog:org.apache.sedona.common.S2Geography.Geography):org.locationtech.jts.geom.Geometry"></a><a id="geographyToEnvelopeGeometry(Geography):Geometry"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/JoinedGeometry$.html#geographyToEnvelopeGeometry(geog:org.apache.sedona.common.S2Geography.Geography):org.locationtech.jts.geom.Geometry" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geographyToEnvelopeGeometry</span><span class="params">(<span name="geog">geog: <span class="extype" name="org.apache.sedona.common.S2Geography.Geography">Geography</span></span>)</span><span class="result">: <span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Convert a Geography to a JTS Geometry whose envelope covers the Geography's lat/lng bounding
+rectangle.</p><div class="fullcomment"><div class="comment cmt"><p>Convert a Geography to a JTS Geometry whose envelope covers the Geography's lat/lng bounding
+rectangle. When the rectangle wraps the antimeridian we expand to the full longitude range
+[-180, 180]; this is a coarse filter that keeps the planar index simple (apache/sedona-db PR
+#775 made the same trade-off; #782 tracks the eventual split-at-±180 optimisation).
+</p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.JoinedGeometry#geometryToExpandedEnvelope" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="geometryToExpandedEnvelope(geom:org.locationtech.jts.geom.Geometry,distance:Double,isGeography:Boolean):org.locationtech.jts.geom.Geometry"></a><a id="geometryToExpandedEnvelope(Geometry,Double,Boolean):Geometry"></a>
       <span class="permalink">

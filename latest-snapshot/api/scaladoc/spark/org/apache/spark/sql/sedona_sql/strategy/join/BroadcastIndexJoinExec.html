@@ -199,6 +199,10 @@
                         <a href="DistanceJoinExec.html" title="Distance joins requires matching geometries to be in the same partition, despite not necessarily overlapping.">DistanceJoinExec</a>
                       </li><li class="current-entities indented7">
                         <span class="separator"></span>
+                        <a class="class" href="GeographyJoinShape.html" title="Payload stored in userData on each Geography index entry."></a>
+                        <a href="GeographyJoinShape.html" title="Payload stored in userData on each Geography index entry.">GeographyJoinShape</a>
+                      </li><li class="current-entities indented7">
+                        <span class="separator"></span>
                         <a class="class" href="JoinQueryDetection.html" title=""></a>
                         <a href="JoinQueryDetection.html" title="">JoinQueryDetection</a>
                       </li><li class="current-entities indented7">
@@ -276,7 +280,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">BroadcastIndexJoinExec</span><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="streamShape">streamShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="indexBuildSide">indexBuildSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="windowJoinSide">windowJoinSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="joinType">joinType: <span class="extype" name="org.apache.spark.sql.catalyst.plans.JoinType">JoinType</span></span>, <span name="spatialPredicate">spatialPredicate: <a href="../../../../../sedona/core/spatialOperator/SpatialPredicate.html" class="extype" name="org.apache.sedona.core.spatialOperator.SpatialPredicate">SpatialPredicate</a></span>, <span name="extraCondition">extraCondition: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>, <span name="distance">distance: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span> with <a href="../../execution/SedonaBinaryExecNode.html" class="extype" name="org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode">SedonaBinaryExecNode</a> with <a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">BroadcastIndexJoinExec</span><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="streamShape">streamShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="indexBuildSide">indexBuildSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="windowJoinSide">windowJoinSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="joinType">joinType: <span class="extype" name="org.apache.spark.sql.catalyst.plans.JoinType">JoinType</span></span>, <span name="spatialPredicate">spatialPredicate: <a href="../../../../../sedona/core/spatialOperator/SpatialPredicate.html" class="extype" name="org.apache.sedona.core.spatialOperator.SpatialPredicate">SpatialPredicate</a></span>, <span name="extraCondition">extraCondition: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>, <span name="distance">distance: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>, <span name="geographyShape">geographyShape: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span> with <a href="../../execution/SedonaBinaryExecNode.html" class="extype" name="org.apache.spark.sql.sedona_sql.execution.SedonaBinaryExecNode">SedonaBinaryExecNode</a> with <a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a> with <span class="extype" name="org.apache.spark.internal.Logging">Logging</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
@@ -332,9 +336,9 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="org.apache.spark.sql.sedona_sql.strategy.join.BroadcastIndexJoinExec#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(left:org.apache.spark.sql.execution.SparkPlan,right:org.apache.spark.sql.execution.SparkPlan,streamShape:org.apache.spark.sql.catalyst.expressions.Expression,indexBuildSide:org.apache.spark.sql.sedona_sql.strategy.join.JoinSide,windowJoinSide:org.apache.spark.sql.sedona_sql.strategy.join.JoinSide,joinType:org.apache.spark.sql.catalyst.plans.JoinType,spatialPredicate:org.apache.sedona.core.spatialOperator.SpatialPredicate,extraCondition:Option[org.apache.spark.sql.catalyst.expressions.Expression],distance:Option[org.apache.spark.sql.catalyst.expressions.Expression]):org.apache.spark.sql.sedona_sql.strategy.join.BroadcastIndexJoinExec"></a><a id="&lt;init&gt;:BroadcastIndexJoinExec"></a>
+      <a id="&lt;init&gt;(left:org.apache.spark.sql.execution.SparkPlan,right:org.apache.spark.sql.execution.SparkPlan,streamShape:org.apache.spark.sql.catalyst.expressions.Expression,indexBuildSide:org.apache.spark.sql.sedona_sql.strategy.join.JoinSide,windowJoinSide:org.apache.spark.sql.sedona_sql.strategy.join.JoinSide,joinType:org.apache.spark.sql.catalyst.plans.JoinType,spatialPredicate:org.apache.sedona.core.spatialOperator.SpatialPredicate,extraCondition:Option[org.apache.spark.sql.catalyst.expressions.Expression],distance:Option[org.apache.spark.sql.catalyst.expressions.Expression],geographyShape:Boolean):org.apache.spark.sql.sedona_sql.strategy.join.BroadcastIndexJoinExec"></a><a id="&lt;init&gt;:BroadcastIndexJoinExec"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/BroadcastIndexJoinExec.html#&lt;init&gt;(left:org.apache.spark.sql.execution.SparkPlan,right:org.apache.spark.sql.execution.SparkPlan,streamShape:org.apache.spark.sql.catalyst.expressions.Expression,indexBuildSide:org.apache.spark.sql.sedona_sql.strategy.join.JoinSide,windowJoinSide:org.apache.spark.sql.sedona_sql.strategy.join.JoinSide,joinType:org.apache.spark.sql.catalyst.plans.JoinType,spatialPredicate:org.apache.sedona.core.spatialOperator.SpatialPredicate,extraCondition:Option[org.apache.spark.sql.catalyst.expressions.Expression],distance:Option[org.apache.spark.sql.catalyst.expressions.Expression]):org.apache.spark.sql.sedona_sql.strategy.join.BroadcastIndexJoinExec" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/BroadcastIndexJoinExec.html#&lt;init&gt;(left:org.apache.spark.sql.execution.SparkPlan,right:org.apache.spark.sql.execution.SparkPlan,streamShape:org.apache.spark.sql.catalyst.expressions.Expression,indexBuildSide:org.apache.spark.sql.sedona_sql.strategy.join.JoinSide,windowJoinSide:org.apache.spark.sql.sedona_sql.strategy.join.JoinSide,joinType:org.apache.spark.sql.catalyst.plans.JoinType,spatialPredicate:org.apache.sedona.core.spatialOperator.SpatialPredicate,extraCondition:Option[org.apache.spark.sql.catalyst.expressions.Expression],distance:Option[org.apache.spark.sql.catalyst.expressions.Expression],geographyShape:Boolean):org.apache.spark.sql.sedona_sql.strategy.join.BroadcastIndexJoinExec" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -343,7 +347,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">BroadcastIndexJoinExec</span><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="streamShape">streamShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="indexBuildSide">indexBuildSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="windowJoinSide">windowJoinSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="joinType">joinType: <span class="extype" name="org.apache.spark.sql.catalyst.plans.JoinType">JoinType</span></span>, <span name="spatialPredicate">spatialPredicate: <a href="../../../../../sedona/core/spatialOperator/SpatialPredicate.html" class="extype" name="org.apache.sedona.core.spatialOperator.SpatialPredicate">SpatialPredicate</a></span>, <span name="extraCondition">extraCondition: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>, <span name="distance">distance: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>)</span>
+        <span class="name">BroadcastIndexJoinExec</span><span class="params">(<span name="left">left: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="right">right: <span class="extype" name="org.apache.spark.sql.execution.SparkPlan">SparkPlan</span></span>, <span name="streamShape">streamShape: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="indexBuildSide">indexBuildSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="windowJoinSide">windowJoinSide: <a href="JoinSide.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinSide">JoinSide</a></span>, <span name="joinType">joinType: <span class="extype" name="org.apache.spark.sql.catalyst.plans.JoinType">JoinType</span></span>, <span name="spatialPredicate">spatialPredicate: <a href="../../../../../sedona/core/spatialOperator/SpatialPredicate.html" class="extype" name="org.apache.sedona.core.spatialOperator.SpatialPredicate">SpatialPredicate</a></span>, <span name="extraCondition">extraCondition: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>, <span name="distance">distance: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>] = <span class="symbol">None</span></span>, <span name="geographyShape">geographyShape: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span>
       </span>
       
       
@@ -1211,6 +1215,22 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TreeNode</dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.BroadcastIndexJoinExec#geographyShape" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="geographyShape:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/BroadcastIndexJoinExec.html#geographyShape:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">geographyShape</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -2611,6 +2631,27 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#toGeographySpatialRDD" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toGeographySpatialRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]"></a><a id="toGeographySpatialRDD(RDD[UnsafeRow],Expression):SpatialRDD[Geometry]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/BroadcastIndexJoinExec.html#toGeographySpatialRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toGeographySpatialRDD</span><span class="params">(<span name="rdd">rdd: <span class="extype" name="org.apache.spark.rdd.RDD">RDD</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.UnsafeRow">UnsafeRow</span>]</span>, <span name="shapeExpression">shapeExpression: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>)</span><span class="result">: <a href="../../../../../sedona/core/spatialRDD/SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Builds a SpatialRDD from a column of GeographyUDT bytes.</p><div class="fullcomment"><div class="comment cmt"><p>Builds a SpatialRDD from a column of GeographyUDT bytes. Each row becomes a JTS geometry
+whose envelope is the Geography's lat/lng bounding rectangle (full-longitude when the
+rectangle wraps the antimeridian). The Geography object is carried alongside the original row
+in <code>userData</code> via <a href="GeographyJoinShape.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.GeographyJoinShape">GeographyJoinShape</a> so the join executor can perform S2-based predicate
+refinement and emit the row.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a></dd></dl></div>
     </li><li name="org.apache.spark.sql.catalyst.trees.TreeNode#toJSON" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toJSON:String"></a>
       <span class="permalink">
