@@ -230,6 +230,18 @@ class GeographyFunctionTest extends TestBaseScala {
       assertTrue(!row.getBoolean(0))
     }
 
+    it("ST_DWithin true when within threshold") {
+      val row = sparkSession
+        .sql("""
+          SELECT ST_DWithin(
+            ST_GeogFromWKT('POINT (0 0)', 4326),
+            ST_GeogFromWKT('POINT (0 1)', 4326),
+            200000.0) AS r
+        """)
+        .first()
+      assertTrue(row.getBoolean(0))
+    }
+
     it("ST_Equals same point") {
       val row = sparkSession
         .sql("""
@@ -240,6 +252,18 @@ class GeographyFunctionTest extends TestBaseScala {
         """)
         .first()
       assertTrue(row.getBoolean(0))
+    }
+
+    it("ST_DWithin false when outside threshold") {
+      val row = sparkSession
+        .sql("""
+          SELECT ST_DWithin(
+            ST_GeogFromWKT('POINT (0 0)', 4326),
+            ST_GeogFromWKT('POINT (0 1)', 4326),
+            100000.0) AS r
+        """)
+        .first()
+      assertTrue(!row.getBoolean(0))
     }
 
     it("ST_Equals different points") {
@@ -254,6 +278,67 @@ class GeographyFunctionTest extends TestBaseScala {
       assertTrue(!row.getBoolean(0))
     }
 
+    it("ST_DWithin null handling") {
+      // null as second arg
+      val r1 = sparkSession
+        .sql("SELECT ST_DWithin(ST_GeogFromWKT('POINT (0 0)', 4326), null, 1.0) AS r")
+        .first()
+      assertTrue(r1.isNullAt(0))
+      // null as first arg
+      val r2 = sparkSession
+        .sql("SELECT ST_DWithin(null, ST_GeogFromWKT('POINT (0 0)', 4326), 1.0) AS r")
+        .first()
+      assertTrue(r2.isNullAt(0))
+      // null distance
+      val r3 = sparkSession
+        .sql("""
+          SELECT ST_DWithin(
+            ST_GeogFromWKT('POINT (0 0)', 4326),
+            ST_GeogFromWKT('POINT (0 1)', 4326),
+            CAST(null AS DOUBLE)) AS r
+        """)
+        .first()
+      assertTrue(r3.isNullAt(0))
+    }
+
+    it("ST_DWithin accepts INT distance literal") {
+      // Catalyst should coerce INT -> DOUBLE for the 3-arg Geography overload.
+      val row = sparkSession
+        .sql("""
+          SELECT ST_DWithin(
+            ST_GeogFromWKT('POINT (0 0)', 4326),
+            ST_GeogFromWKT('POINT (0 1)', 4326),
+            200000) AS r
+        """)
+        .first()
+      assertTrue(row.getBoolean(0))
+    }
+
+    it("ST_DWithin accepts FLOAT distance literal") {
+      // CAST to FLOAT forces a narrower type than DOUBLE; Catalyst should widen it.
+      val row = sparkSession
+        .sql("""
+          SELECT ST_DWithin(
+            ST_GeogFromWKT('POINT (0 0)', 4326),
+            ST_GeogFromWKT('POINT (0 1)', 4326),
+            CAST(200000.5 AS FLOAT)) AS r
+        """)
+        .first()
+      assertTrue(row.getBoolean(0))
+    }
+
+    it("ST_Within point in polygon") {
+      val row = sparkSession
+        .sql("""
+          SELECT ST_Within(
+            ST_GeogFromWKT('POINT (0.5 0.5)', 4326),
+            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)
+          ) AS r
+        """)
+        .first()
+      assertTrue(row.getBoolean(0))
+    }
+
     it("ST_Equals same polygon") {
       val row = sparkSession
         .sql("""
@@ -266,6 +351,18 @@ class GeographyFunctionTest extends TestBaseScala {
       assertTrue(row.getBoolean(0))
     }
 
+    it("ST_Within point outside polygon") {
+      val row = sparkSession
+        .sql("""
+          SELECT ST_Within(
+            ST_GeogFromWKT('POINT (2 2)', 4326),
+            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)
+          ) AS r
+        """)
+        .first()
+      assertTrue(!row.getBoolean(0))
+    }
+
     it("ST_Equals different polygons") {
       val row = sparkSession
         .sql("""
@@ -276,6 +373,33 @@ class GeographyFunctionTest extends TestBaseScala {
         """)
         .first()
       assertTrue(!row.getBoolean(0))
+    }
+
+    it("ST_Within point on polygon boundary returns a Boolean (semantics implementation-defined)") {
+      // S2 boolean ownership of an edge depends on vertex orientation, so the result for points
+      // exactly on the boundary is intentionally not asserted. We only verify the call completes
+      // and returns a non-null Boolean — the docs steer users toward ST_Buffer for predictable
+      // boundary handling.
+      val row = sparkSession
+        .sql("""
+          SELECT ST_Within(
+            ST_GeogFromWKT('POINT (0 0.5)', 4326),
+            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326)
+          ) AS r
+        """)
+        .first()
+      assertTrue(!row.isNullAt(0))
+    }
+
+    it("ST_Within null handling") {
+      val r1 = sparkSession
+        .sql("SELECT ST_Within(ST_GeogFromWKT('POINT (0 0)', 4326), null) AS r")
+        .first()
+      assertTrue(r1.isNullAt(0))
+      val r2 = sparkSession
+        .sql("SELECT ST_Within(null, ST_GeogFromWKT('POINT (0 0)', 4326)) AS r")
+        .first()
+      assertTrue(r2.isNullAt(0))
     }
 
     it("ST_Intersects overlapping polygons") {
@@ -418,6 +542,26 @@ class GeographyFunctionTest extends TestBaseScala {
           st_constructors.ST_GeogFromWKT(col("poly"), lit(4326)).as("poly"),
           st_constructors.ST_GeogFromWKT(col("pt"), lit(4326)).as("pt"))
         .select(st_predicates.ST_Contains(col("poly"), col("pt")).as("result"))
+      assertTrue(df.first().getBoolean(0))
+    }
+
+    it("ST_DWithin via DataFrame API") {
+      val df = sparkSession
+        .sql("SELECT 'POINT (0 0)' AS a, 'POINT (0 1)' AS b")
+        .select(
+          st_constructors.ST_GeogFromWKT(col("a"), lit(4326)).as("a"),
+          st_constructors.ST_GeogFromWKT(col("b"), lit(4326)).as("b"))
+        .select(st_predicates.ST_DWithin(col("a"), col("b"), lit(200000.0)).as("r"))
+      assertTrue(df.first().getBoolean(0))
+    }
+
+    it("ST_Within via DataFrame API") {
+      val df = sparkSession
+        .sql("SELECT 'POINT (0.5 0.5)' AS pt, 'POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))' AS poly")
+        .select(
+          st_constructors.ST_GeogFromWKT(col("pt"), lit(4326)).as("pt"),
+          st_constructors.ST_GeogFromWKT(col("poly"), lit(4326)).as("poly"))
+        .select(st_predicates.ST_Within(col("pt"), col("poly")).as("r"))
       assertTrue(df.first().getBoolean(0))
     }
 

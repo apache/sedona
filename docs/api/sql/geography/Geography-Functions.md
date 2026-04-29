@@ -54,4 +54,6 @@ These functions operate on geography type objects.
 | [ST_Length](Geography-Functions/ST_Length.md) | Double | Return the spherical length of a geography in meters, summed along great-circle edges. | v1.9.1 |
 | [ST_Contains](Geography-Functions/ST_Contains.md) | Boolean | Test whether geography A fully contains geography B. | v1.9.0 |
 | [ST_Intersects](Geography-Functions/ST_Intersects.md) | Boolean | Test whether two geographies intersect. | v1.9.1 |
+| [ST_DWithin](Geography-Functions/ST_DWithin.md) | Boolean | Test whether two geographies are within a given geodesic distance (in meters) of each other. | v1.9.1 |
+| [ST_Within](Geography-Functions/ST_Within.md) | Boolean | Test whether geography A is fully within geography B. | v1.9.1 |
 | [ST_Equals](Geography-Functions/ST_Equals.md) | Boolean | Test whether two geographies are spatially equal. | v1.9.1 |

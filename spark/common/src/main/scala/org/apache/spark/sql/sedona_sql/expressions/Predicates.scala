@@ -106,17 +106,15 @@ private[apache] case class ST_Intersects(inputExpressions: Seq[Expression])
 }
 
 /**
- * Test if leftGeometry is full within rightGeometry
+ * Test if leftGeometry is fully within rightGeometry. Supports both Geometry (JTS) and Geography
+ * (S2) inputs via InferredExpression dual dispatch.
  *
  * @param inputExpressions
  */
 private[apache] case class ST_Within(inputExpressions: Seq[Expression])
-    extends ST_Predicate
-    with CodegenFallback {
-
-  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    Predicates.within(leftGeometry, rightGeometry)
-  }
+    extends InferredExpression(
+      inferrableFunction2(Predicates.within),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.within)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -286,7 +284,8 @@ private[apache] case class ST_OrderingEquals(inputExpressions: Seq[Expression])
 private[apache] case class ST_DWithin(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction3(Predicates.dWithin),
-      inferrableFunction4(Predicates.dWithin)) {
+      inferrableFunction4(Predicates.dWithin),
+      inferrableFunction3(org.apache.sedona.common.geography.Functions.dWithin)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
