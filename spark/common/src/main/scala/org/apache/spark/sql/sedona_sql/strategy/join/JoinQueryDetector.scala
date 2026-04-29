@@ -57,12 +57,14 @@ case class JoinQueryDetection(
  */
 class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
 
-  // ST_Contains is the only spatial predicate currently wired for Geography (via
-  // InferredExpression dual dispatch). For broadcast joins we route GeographyUDT inputs through
-  // a dedicated index/refine path (see SpatialIndexExec.geographyShape and
-  // BroadcastIndexJoinExec.geographyShape); for the partition/range path we still fall back to
-  // row-by-row evaluation. Other ST_Predicates reject Geography inputs at analysis time, so no
-  // guard is needed there.
+  // Geography spatial predicates wired via InferredExpression dual dispatch:
+  //   * ST_Contains — broadcast joins route GeographyUDT inputs through a dedicated index/refine
+  //     path (see SpatialIndexExec.geographyShape / BroadcastIndexJoinExec.geographyShape). The
+  //     partition/range path still falls back to row-by-row evaluation.
+  //   * ST_Equals — no broadcast index path yet (the Geography refiner is ST_Contains-specific),
+  //     so we gate Geography inputs at the matcher and let Spark evaluate the predicate
+  //     row-by-row.
+  // Other ST_Predicates reject Geography inputs at analysis time, so no guard is needed there.
   private def isGeographyInput(shape: Expression): Boolean =
     shape.dataType.isInstanceOf[GeographyUDT]
 
@@ -130,16 +132,6 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
             leftShape,
             rightShape,
             SpatialPredicate.TOUCHES,
-            false,
-            extraCondition))
-      case ST_Equals(Seq(leftShape, rightShape)) =>
-        Some(
-          JoinQueryDetection(
-            left,
-            right,
-            leftShape,
-            rightShape,
-            SpatialPredicate.EQUALS,
             false,
             extraCondition))
       case ST_Crosses(Seq(leftShape, rightShape)) =>
@@ -211,11 +203,14 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
       val queryDetection: Option[JoinQueryDetection] = condition.flatMap {
         case joinConditionMatcher(predicate, extraCondition) =>
           predicate match {
-            // ST_Contains is an InferredExpression (not ST_Predicate) so it can't sit inside
-            // getJoinDetection. When either operand is GeographyUDT we still detect the join
-            // here and set `geographyShape = true`; planBroadcastJoin will route the work to
-            // the Geography-aware index/refine path. Non-broadcast plans bail out in `apply`
-            // below and fall back to row-by-row evaluation.
+            // ST_Contains / ST_Equals are InferredExpression (not ST_Predicate) so they can't
+            // sit inside getJoinDetection; they're also the only predicates currently accepting
+            // Geography inputs.
+            //
+            // ST_Contains: when either operand is GeographyUDT we still detect the join here and
+            // set `geographyShape = true`; planBroadcastJoin will route the work to the
+            // Geography-aware index/refine path. Non-broadcast plans bail out in `apply` below
+            // and fall back to row-by-row evaluation.
             case ST_Contains(Seq(leftShape, rightShape)) =>
               val geographyShape =
                 isGeographyInput(leftShape) || isGeographyInput(rightShape)
@@ -229,6 +224,20 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   isGeography = false,
                   extraCondition,
                   geographyShape = geographyShape))
+            // ST_Equals on Geography has no broadcast index path yet (the Geography refiner is
+            // ST_Contains-specific), so gate Geography inputs and let them fall back to
+            // row-by-row evaluation.
+            case ST_Equals(Seq(leftShape, rightShape))
+                if !isGeographyInput(leftShape) && !isGeographyInput(rightShape) =>
+              Some(
+                JoinQueryDetection(
+                  left,
+                  right,
+                  leftShape,
+                  rightShape,
+                  SpatialPredicate.EQUALS,
+                  isGeography = false,
+                  extraCondition))
             case pred: ST_Predicate =>
               getJoinDetection(left, right, pred, extraCondition)
             case pred: RS_Predicate =>

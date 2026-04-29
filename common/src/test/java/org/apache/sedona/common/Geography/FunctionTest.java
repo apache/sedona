@@ -420,6 +420,35 @@ public class FunctionTest {
   }
 
   @Test
+  public void equals_samePoint() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    assertTrue(Functions.equals(g1, g2));
+  }
+
+  @Test
+  public void equals_differentPoints() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (3 4)", 4326);
+    assertFalse(Functions.equals(g1, g2));
+  }
+
+  @Test
+  public void equals_samePolygon() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    Geography g2 = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    assertTrue(Functions.equals(g1, g2));
+  }
+
+  @Test
+  public void equals_nullHandling() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 1)", 4326);
+    assertFalse(Functions.equals(g, null));
+    assertFalse(Functions.equals(null, g));
+    assertFalse(Functions.equals(null, null));
+  }
+
+  @Test
   public void contains_nullHandling() throws ParseException {
     Geography g1 = Constructors.geogFromWKT("POINT (1 1)", 4326);
     assertFalse(Functions.contains(g1, null));

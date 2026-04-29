@@ -52,3 +52,4 @@ These functions operate on geography type objects.
 | [ST_NumGeometries](Geography-Functions/ST_NumGeometries.md) | Integer | Return the number of sub-geometries in a geography (1 for single geometries). | v1.9.1 |
 | [ST_Distance](Geography-Functions/ST_Distance.md) | Double | Return the minimum geodesic distance between two geographies in meters. | v1.9.0 |
 | [ST_Contains](Geography-Functions/ST_Contains.md) | Boolean | Test whether geography A fully contains geography B. | v1.9.0 |
+| [ST_Equals](Geography-Functions/ST_Equals.md) | Boolean | Test whether two geographies are spatially equal. | v1.9.1 |
