@@ -45,34 +45,38 @@ class PreserveSRIDGeographySuite extends TestBaseScala with TableDrivenPropertyC
   }
 
   describe("Preserve SRID (Geography)") {
+    // Fixture SRID is 4326 because Geography ST_Buffer round-trips through
+    // FunctionsGeoTools.bufferSpheroid, which resolves the SRID via the EPSG authority
+    // — only real EPSG codes are valid there.
     val testCases = Table(
       "test case",
-      // Direct Geography→Geography
-      ("ST_Centroid(geog1)", 1000),
-      ("ST_Envelope(geog1)", 1000),
-      ("ST_Envelope(geog1, true)", 1000),
-      ("ST_Envelope(geog1, false)", 1000),
-      ("ST_Buffer(geog1, 0)", 1000),
-      ("ST_Buffer(geog1, 100)", 1000),
-      ("ST_Buffer(geog1, 100, 'quad_segs=8')", 1000),
-      // Cross-type boundaries
+      // Direct Geography→Geography. Note: 1-arg ST_Envelope is geometry-only; the
+      // splitAtAntiMeridian (2-arg) form is the Geography path.
+      ("ST_Centroid(geog1)", 4326),
+      ("ST_Envelope(geog1, true)", 4326),
+      ("ST_Envelope(geog1, false)", 4326),
+      ("ST_Buffer(geog1, 0)", 4326),
+      ("ST_Buffer(geog1, 100)", 4326),
+      ("ST_Buffer(geog1, 100, 'quad_segs=8')", 4326),
+      // Cross-type boundaries. The literal SRID here exercises that any int survives the
+      // Geometry↔Geography boundary (no CRS resolution is involved on this code path).
       ("ST_GeomToGeography(ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 1000))", 1000),
-      ("ST_GeogToGeometry(geog1)", 1000),
+      ("ST_GeogToGeometry(geog1)", 4326),
       // Predicates wrapped in identity passthrough
-      ("IF(ST_Intersects(geog1, geog2), geog1, geog1)", 1000),
-      ("IF(ST_Within(geog1, geog1), geog1, geog1)", 1000),
-      ("IF(ST_DWithin(geog1, geog2, 1000.0), geog1, geog1)", 1000),
-      ("IF(ST_Contains(geog1, geog1), geog1, geog1)", 1000),
-      ("IF(ST_Equals(geog1, geog1), geog1, geog1)", 1000),
+      ("IF(ST_Intersects(geog1, geog2), geog1, geog1)", 4326),
+      ("IF(ST_Within(geog1, geog1), geog1, geog1)", 4326),
+      ("IF(ST_DWithin(geog1, geog2, 1000.0), geog1, geog1)", 4326),
+      ("IF(ST_Contains(geog1, geog1), geog1, geog1)", 4326),
+      ("IF(ST_Equals(geog1, geog1), geog1, geog1)", 4326),
       // Scalar/string functions wrapped in identity passthrough
-      ("IF(ST_Length(geog3) >= 0, geog1, geog1)", 1000),
-      ("IF(ST_Area(geog1) >= 0, geog1, geog1)", 1000),
-      ("IF(ST_Distance(geog1, geog2) >= 0, geog1, geog1)", 1000),
-      ("IF(ST_NPoints(geog1) > 0, geog1, geog1)", 1000),
-      ("IF(ST_NumGeometries(geog1) > 0, geog1, geog1)", 1000),
-      ("IF(ST_GeometryType(geog1) IS NOT NULL, geog1, geog1)", 1000),
-      ("IF(ST_AsText(geog1) IS NOT NULL, geog1, geog1)", 1000),
-      ("IF(ST_AsEWKT(geog1) IS NOT NULL, geog1, geog1)", 1000))
+      ("IF(ST_Length(geog3) >= 0, geog1, geog1)", 4326),
+      ("IF(ST_Area(geog1) >= 0, geog1, geog1)", 4326),
+      ("IF(ST_Distance(geog1, geog2) >= 0, geog1, geog1)", 4326),
+      ("IF(ST_NPoints(geog1) > 0, geog1, geog1)", 4326),
+      ("IF(ST_NumGeometries(geog1) > 0, geog1, geog1)", 4326),
+      ("IF(ST_GeometryType(geog1) IS NOT NULL, geog1, geog1)", 4326),
+      ("IF(ST_AsText(geog1) IS NOT NULL, geog1, geog1)", 4326),
+      ("IF(ST_AsEWKT(geog1) IS NOT NULL, geog1, geog1)", 4326))
 
     forAll(testCases) { case (expression: String, srid: Int) =>
       it(s"$expression") {
@@ -97,11 +101,11 @@ class PreserveSRIDGeographySuite extends TestBaseScala with TableDrivenPropertyC
         StructField("geog2", GeographyUDT()),
         StructField("geog3", GeographyUDT())))
     val geog1 =
-      Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 1000)
+      Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326)
     val geog2 =
-      Constructors.geogFromWKT("MULTILINESTRING ((0 0, 0 1), (0 1, 1 1))", 1000)
+      Constructors.geogFromWKT("MULTILINESTRING ((0 0, 0 1), (0 1, 1 1))", 4326)
     val geog3 =
-      Constructors.geogFromWKT("LINESTRING (0 0, 0 1, 1 1, 1 0)", 1000)
+      Constructors.geogFromWKT("LINESTRING (0 0, 0 1, 1 1, 1 0)", 4326)
     val rows = Seq(Row(geog1, geog2, geog3))
     sparkSession.createDataFrame(rows.asJava, schema)
   }
