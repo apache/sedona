@@ -25,9 +25,11 @@ import org.locationtech.jts.geom.{Envelope, Geometry, GeometryFactory}
 
 /**
  * Payload stored in `userData` on each Geography index entry. Carries both the deserialized
- * Geography (for S2 predicate refinement) and the original row (for the join output).
+ * Geography (for S2 predicate refinement) and the original row (for the join output). For
+ * `ST_DWithin` joins, `radius` carries the per-row distance threshold from the row that produced
+ * this shape; for non-distance predicates it remains 0.0.
  */
-case class GeographyJoinShape(geog: Geography, row: UnsafeRow)
+case class GeographyJoinShape(geog: Geography, row: UnsafeRow, radius: Double = 0.0)
 
 /**
  * Utility functions for generating geometries for spatial join.
