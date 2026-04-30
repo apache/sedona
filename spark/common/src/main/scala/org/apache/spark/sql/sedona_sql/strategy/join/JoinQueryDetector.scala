@@ -309,11 +309,9 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   condition,
                   Some(distance),
                   geographyShape = geographyShape))
-            case ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid))
-                if isGeographyInput(leftShape) || isGeographyInput(rightShape) =>
-              throw new UnsupportedOperationException(
-                "ST_DWithin with the useSpheroid argument is not supported for Geography inputs; " +
-                  "use the 3-argument form ST_DWithin(geog1, geog2, distance) instead.")
+            // Note: the 4-arg ST_DWithin is geometry-only; on Geography input the Spark
+            // analyzer rejects the call before reaching this matcher, so no Geography
+            // guard is needed here.
             case ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid)) =>
               val useSpheroidUnwrapped = useSpheroid.eval().asInstanceOf[Boolean]
               Some(
@@ -888,9 +886,20 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
       .map { distanceExpr =>
         matchDistanceExpressionToJoinSide(distanceExpr, left, right) match {
           case Some(side) =>
-            if (broadcastSide.get == side) (Some(distanceExpr), None)
-            else if (distanceExpr.references.isEmpty) (Some(distanceExpr), None)
-            else (None, Some(distanceExpr))
+            if (geographyShape) {
+              // Geography distance joins read the per-row radius from the stream-side
+              // GeographyJoinShape inside GeographyDistanceRefiner, so the radius MUST
+              // also flow to the stream side. For literal radii we still keep the
+              // build-side expansion (mirror of the geometry literal optimisation).
+              if (broadcastSide.get == side) (Some(distanceExpr), Some(distanceExpr))
+              else if (distanceExpr.references.isEmpty)
+                (Some(distanceExpr), Some(distanceExpr))
+              else (None, Some(distanceExpr))
+            } else {
+              if (broadcastSide.get == side) (Some(distanceExpr), None)
+              else if (distanceExpr.references.isEmpty) (Some(distanceExpr), None)
+              else (None, Some(distanceExpr))
+            }
           case _ =>
             throw new IllegalArgumentException(
               "Distance expression must be bound to one side of the join")

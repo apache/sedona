@@ -338,7 +338,10 @@ class BroadcastIndexJoinGeographySuite extends TestBaseScala {
       assert(joined.where("id_b IS NULL").count() === 1)
     }
 
-    it("rejects ST_DWithin(geog, geog, dist, useSpheroid) at planning time") {
+    it("rejects ST_DWithin(geog, geog, dist, useSpheroid) at analysis time") {
+      // The 4-arg ST_DWithin is geometry-only; passing Geography arguments fails at
+      // analysis time with a DATATYPE_MISMATCH before the planner runs. There is no
+      // Geography overload of the 4-arg form because Geography is always spheroidal.
       val ex = intercept[Throwable] {
         pointsADf
           .join(broadcast(pointsBDf), expr("ST_DWithin(geog_a, geog_b, 1000.0, true)"))
@@ -351,8 +354,8 @@ class BroadcastIndexJoinGeographySuite extends TestBaseScala {
         .map(_.getMessage)
         .mkString(" | ")
       assert(
-        msg.contains("useSpheroid") && msg.contains("Geography"),
-        s"expected useSpheroid/Geography in error; got: $msg")
+        msg.contains("st_dwithin") && msg.contains("data type mismatch"),
+        s"expected analysis-time DATATYPE_MISMATCH on st_dwithin; got: $msg")
     }
   }
 }
