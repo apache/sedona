@@ -313,6 +313,33 @@ public class Functions {
   }
 
   /**
+   * Spherical intersection test using S2 boolean operations. Takes fast paths for point-to-point
+   * and point-to-complex inputs backed by WKBGeography, avoiding ShapeIndex construction on the
+   * point side.
+   */
+  public static boolean intersects(Geography g1, Geography g2) {
+    if (g1 == null || g2 == null) return false;
+    if (g1 instanceof WKBGeography && g2 instanceof WKBGeography) {
+      WKBGeography w1 = (WKBGeography) g1;
+      WKBGeography w2 = (WKBGeography) g2;
+      // Fast path: point-to-point intersects iff the points are equal
+      if (w1.isPoint() && w2.isPoint()) {
+        return w1.extractPoint().equalsPoint(w2.extractPoint());
+      }
+      // Fast path: point-to-complex uses PointTarget (avoids building ShapeIndex for point side)
+      if (w1.isPoint()) {
+        return Predicates.S2_intersectsPointWithIndex(w1.extractPoint(), toShapeIndex(w2));
+      }
+      if (w2.isPoint()) {
+        return Predicates.S2_intersectsPointWithIndex(w2.extractPoint(), toShapeIndex(w1));
+      }
+    }
+    // General path via ShapeIndex
+    Predicates pred = new Predicates();
+    return pred.S2_intersects(toShapeIndex(g1), toShapeIndex(g2), s2Options());
+  }
+
+  /**
    * Spherical "distance within" test. Returns true iff the minimum geodesic distance between g1 and
    * g2 (in meters) is less than or equal to {@code distanceMeters}.
    */

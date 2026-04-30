@@ -401,6 +401,30 @@ class GeographyFunctionTest extends TestBaseScala {
         .first()
       assertTrue(r2.isNullAt(0))
     }
+
+    it("ST_Intersects overlapping polygons") {
+      val row = sparkSession
+        .sql("""
+          SELECT ST_Intersects(
+            ST_GeogFromWKT('POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))', 4326),
+            ST_GeogFromWKT('POLYGON ((1 1, 3 1, 3 3, 1 3, 1 1))', 4326)
+          ) AS result
+        """)
+        .first()
+      assertTrue(row.getBoolean(0))
+    }
+
+    it("ST_Intersects disjoint polygons") {
+      val row = sparkSession
+        .sql("""
+          SELECT ST_Intersects(
+            ST_GeogFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326),
+            ST_GeogFromWKT('POLYGON ((10 10, 11 10, 11 11, 10 11, 10 10))', 4326)
+          ) AS result
+        """)
+        .first()
+      assertTrue(!row.getBoolean(0))
+    }
   }
 
   // ─── Level 4: ST_Buffer ────────────────────────────────────────────────

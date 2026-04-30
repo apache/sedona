@@ -96,12 +96,9 @@ private[apache] case class ST_Contains(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Intersects(inputExpressions: Seq[Expression])
-    extends ST_Predicate
-    with CodegenFallback {
-
-  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    Predicates.intersects(leftGeometry, rightGeometry)
-  }
+    extends InferredExpression(
+      inferrableFunction2(Predicates.intersects),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.intersects)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

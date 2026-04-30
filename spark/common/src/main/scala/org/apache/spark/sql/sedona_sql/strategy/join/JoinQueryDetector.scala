@@ -61,8 +61,8 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
   //   * ST_Contains — broadcast joins route GeographyUDT inputs through a dedicated index/refine
   //     path (see SpatialIndexExec.geographyShape / BroadcastIndexJoinExec.geographyShape). The
   //     partition/range path still falls back to row-by-row evaluation.
-  //   * ST_Within / ST_Equals — no broadcast index path yet (the Geography refiner is
-  //     ST_Contains-specific), so we gate Geography inputs at the matcher (via
+  //   * ST_Intersects / ST_Within / ST_Equals — no broadcast index path yet (the Geography
+  //     refiner is ST_Contains-specific), so we gate Geography inputs at the matcher (via
   //     `inferredJoinDetection`) and let Spark evaluate the predicate row-by-row.
   // Other ST_Predicates reject Geography inputs at analysis time, so no guard is needed there.
   private def isGeographyInput(shape: Expression): Boolean =
@@ -98,16 +98,6 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
       predicate: ST_Predicate,
       extraCondition: Option[Expression] = None): Option[JoinQueryDetection] = {
     predicate match {
-      case ST_Intersects(Seq(leftShape, rightShape)) =>
-        Some(
-          JoinQueryDetection(
-            left,
-            right,
-            leftShape,
-            rightShape,
-            SpatialPredicate.INTERSECTS,
-            false,
-            extraCondition))
       case ST_Covers(Seq(leftShape, rightShape)) =>
         Some(
           JoinQueryDetection(
@@ -217,9 +207,9 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
       val queryDetection: Option[JoinQueryDetection] = condition.flatMap {
         case joinConditionMatcher(predicate, extraCondition) =>
           predicate match {
-            // ST_Contains / ST_Equals / ST_Within are InferredExpression (not ST_Predicate) so
-            // they can't sit inside getJoinDetection; they're also the only predicates currently
-            // accepting Geography inputs.
+            // ST_Contains / ST_Intersects / ST_Within / ST_Equals are InferredExpression (not
+            // ST_Predicate) so they can't sit inside getJoinDetection; they're also the only
+            // predicates currently accepting Geography inputs.
             //
             // ST_Contains: when either operand is GeographyUDT we still detect the join here and
             // set `geographyShape = true`; planBroadcastJoin will route the work to the
@@ -238,9 +228,17 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   isGeography = false,
                   extraCondition,
                   geographyShape = geographyShape))
-            // ST_Within / ST_Equals on Geography have no broadcast index path yet (the Geography
-            // refiner is ST_Contains-specific), so gate Geography inputs and let them fall back
-            // to row-by-row evaluation.
+            // ST_Intersects / ST_Within / ST_Equals on Geography have no broadcast index path
+            // yet (the Geography refiner is ST_Contains-specific), so gate Geography inputs and
+            // let them fall back to row-by-row evaluation.
+            case ST_Intersects(Seq(leftShape, rightShape)) =>
+              inferredJoinDetection(
+                left,
+                right,
+                leftShape,
+                rightShape,
+                SpatialPredicate.INTERSECTS,
+                extraCondition)
             case ST_Within(Seq(leftShape, rightShape)) =>
               inferredJoinDetection(
                 left,

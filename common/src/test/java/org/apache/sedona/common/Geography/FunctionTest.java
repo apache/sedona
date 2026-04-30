@@ -490,6 +490,67 @@ public class FunctionTest {
   }
 
   @Test
+  public void intersects_overlappingPolygons() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))", 4326);
+    Geography g2 = Constructors.geogFromWKT("POLYGON ((1 1, 3 1, 3 3, 1 3, 1 1))", 4326);
+    assertTrue(Functions.intersects(g1, g2));
+  }
+
+  @Test
+  public void intersects_disjointPolygons() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    Geography g2 = Constructors.geogFromWKT("POLYGON ((10 10, 11 10, 11 11, 10 11, 10 10))", 4326);
+    assertFalse(Functions.intersects(g1, g2));
+  }
+
+  @Test
+  public void intersects_pointInPolygon() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (1 1)", 4326);
+    assertTrue(Functions.intersects(g1, g2));
+  }
+
+  @Test
+  public void intersects_pointToPoint_samePoint() throws ParseException {
+    // Exercises the point-to-point fast path (no ShapeIndex built on either side)
+    Geography g1 = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    assertTrue(Functions.intersects(g1, g2));
+  }
+
+  @Test
+  public void intersects_pointToPoint_differentPoints() throws ParseException {
+    Geography g1 = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    Geography g2 = Constructors.geogFromWKT("POINT (3 4)", 4326);
+    assertFalse(Functions.intersects(g1, g2));
+  }
+
+  @Test
+  public void intersects_pointOnLinestring() throws ParseException {
+    // Exercises the point-to-complex fast path
+    Geography line = Constructors.geogFromWKT("LINESTRING (0 0, 2 0)", 4326);
+    Geography pt = Constructors.geogFromWKT("POINT (1 0)", 4326);
+    assertTrue(Functions.intersects(line, pt));
+    assertTrue(Functions.intersects(pt, line));
+  }
+
+  @Test
+  public void intersects_pointOffLinestring() throws ParseException {
+    Geography line = Constructors.geogFromWKT("LINESTRING (0 0, 2 0)", 4326);
+    Geography pt = Constructors.geogFromWKT("POINT (5 5)", 4326);
+    assertFalse(Functions.intersects(line, pt));
+    assertFalse(Functions.intersects(pt, line));
+  }
+
+  @Test
+  public void intersects_nullHandling() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (1 1)", 4326);
+    assertFalse(Functions.intersects(g, null));
+    assertFalse(Functions.intersects(null, g));
+    assertFalse(Functions.intersects(null, null));
+  }
+
+  @Test
   public void contains_nullHandling() throws ParseException {
     Geography g1 = Constructors.geogFromWKT("POINT (1 1)", 4326);
     assertFalse(Functions.contains(g1, null));
