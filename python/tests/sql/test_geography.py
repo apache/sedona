@@ -26,8 +26,11 @@ from tests.test_base import TestBase
 
 def _parse_point_xy(wkt):
     """Extract (x, y) from a 'POINT (x y)' string."""
-    m = re.match(r"\s*POINT\s*\(\s*(-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)\s+(-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)\s*\)\s*$", wkt)
-    assert m is not None, f"unparseable POINT WKT: {wkt!r}"
+    m = re.match(
+        r"\s*POINT\s*\(\s*(-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)\s+(-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)\s*\)\s*$",
+        wkt,
+    )
+    assert m is not None, f"unparsable POINT WKT: {wkt!r}"
     return float(m.group(1)), float(m.group(2))
 
 
@@ -232,9 +235,9 @@ class TestGeographyFunctionsDataFrameAPI(TestBase):
         # `useSpheroid=None` so the wrapper falls through to the 2-arg form, which is
         # what Geography supports.
         df = self.spark.range(1).select(
-            stf.ST_Buffer(self._geog("POINT (0 0)"), lit(1000.0), useSpheroid=None).alias(
-                "b"
-            )
+            stf.ST_Buffer(
+                self._geog("POINT (0 0)"), lit(1000.0), useSpheroid=None
+            ).alias("b")
         )
         wkt = df.select(stf.ST_AsText(col("b"))).first()[0]
         assert wkt.startswith("POLYGON")
