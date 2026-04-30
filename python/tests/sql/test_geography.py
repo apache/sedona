@@ -15,11 +15,20 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from pyspark.sql.functions import col, lit
+import re
+
+from pyspark.sql.functions import col, expr, lit
 from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
 from sedona.spark.sql import st_predicates as stp
 from tests.test_base import TestBase
+
+
+def _parse_point_xy(wkt):
+    """Extract (x, y) from a 'POINT (x y)' string."""
+    m = re.match(r"\s*POINT\s*\(\s*(-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)\s+(-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)\s*\)\s*$", wkt)
+    assert m is not None, f"unparseable POINT WKT: {wkt!r}"
+    return float(m.group(1)), float(m.group(2))
 
 
 class TestGeographyConstructorsDataFrameAPI(TestBase):
@@ -37,7 +46,11 @@ class TestGeographyConstructorsDataFrameAPI(TestBase):
             stc.ST_GeogFromWKT(col("wkt")).alias("g")
         )
         wkt = df.select(stf.ST_AsText(col("g"))).first()[0]
-        assert wkt == "POINT (1 2)"
+        # S2 round-trip introduces sub-nanometer floating-point drift; allow a loose
+        # tolerance instead of comparing the WKT string verbatim.
+        x, y = _parse_point_xy(wkt)
+        assert abs(x - 1.0) < 1e-9
+        assert abs(y - 2.0) < 1e-9
 
     def test_st_geog_from_text(self):
         df = self.spark.sql("SELECT 'POINT (3 4)' AS wkt").select(
@@ -150,7 +163,11 @@ class TestGeographyConstructorsDataFrameAPI(TestBase):
             .select(stc.ST_GeogToGeometry(col("g")).alias("geom"))
         )
         wkt = df.select(stf.ST_AsText(col("geom"))).first()[0]
-        assert wkt == "POINT (7 8)"
+        # S2 round-trip introduces sub-nanometer floating-point drift on the geography
+        # → geometry conversion path; compare numerically with a loose tolerance.
+        x, y = _parse_point_xy(wkt)
+        assert abs(x - 7.0) < 1e-9
+        assert abs(y - 8.0) < 1e-9
 
     def test_st_geom_to_geography(self):
         df = (
@@ -209,17 +226,26 @@ class TestGeographyFunctionsDataFrameAPI(TestBase):
         assert wkt.startswith("POINT")
 
     def test_st_buffer(self):
+        # The Python `stf.ST_Buffer` wrapper defaults `useSpheroid=False` which dispatches
+        # to the 3-arg `(geom, buf, useSpheroid)` overload; Geography rejects any boolean
+        # `useSpheroid` argument because Geography is always spheroidal. Pass
+        # `useSpheroid=None` so the wrapper falls through to the 2-arg form, which is
+        # what Geography supports.
         df = self.spark.range(1).select(
-            stf.ST_Buffer(self._geog("POINT (0 0)"), lit(1000.0)).alias("b")
+            stf.ST_Buffer(self._geog("POINT (0 0)"), lit(1000.0), useSpheroid=None).alias(
+                "b"
+            )
         )
         wkt = df.select(stf.ST_AsText(col("b"))).first()[0]
         assert wkt.startswith("POLYGON")
 
     def test_st_envelope(self):
-        df = self.spark.range(1).select(
-            stf.ST_Envelope(self._geog("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))")).alias(
-                "e"
-            )
+        # Geography ST_Envelope is the 2-arg `splitAtAntiMeridian` form; the 1-arg form
+        # is geometry-only. Use a SQL expression to invoke the 2-arg overload.
+        df = (
+            self.spark.range(1)
+            .select(self._geog("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))").alias("g"))
+            .select(expr("ST_Envelope(g, true)").alias("e"))
         )
         wkt = df.select(stf.ST_AsText(col("e"))).first()[0]
         assert wkt.startswith("POLYGON")
