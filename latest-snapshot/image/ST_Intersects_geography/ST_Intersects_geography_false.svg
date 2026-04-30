@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <radialGradient id="globeGrad" cx="40%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#eaeaf6" />
+      <stop offset="100%" stop-color="#b5b5e0" />
+    </radialGradient>
+    <!-- Clip every overlay to the sphere so nothing floats off its surface -->
+    <clipPath id="sphereClipIntersectsFalse">
+      <circle cx="250" cy="170" r="105" />
+    </clipPath>
+  </defs>
+
+  <!-- Title (two cases) -->
+  <text x="250" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">ST_Intersects(A, B) is FALSE</text>
+  <text x="250" y="42" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">ST_Intersects(A, P) is FALSE</text>
+
+  <!-- Sphere / globe -->
+  <circle cx="250" cy="170" r="105" fill="url(#globeGrad)" stroke="#8e8ed0" stroke-width="1.8" />
+
+  <!-- Latitude/longitude suggestion for 3D depth -->
+  <ellipse cx="250" cy="170" rx="105" ry="27" fill="none" stroke="#8e8ed0" stroke-width="0.8" stroke-opacity="0.5" />
+  <ellipse cx="250" cy="170" rx="36" ry="105" fill="none" stroke="#8e8ed0" stroke-width="0.8" stroke-opacity="0.5" />
+  <ellipse cx="250" cy="170" rx="90" ry="105" fill="none" stroke="#8e8ed0" stroke-width="0.6" stroke-opacity="0.35" />
+
+  <!-- Overlays clipped to the sphere -->
+  <g clip-path="url(#sphereClipIntersectsFalse)">
+    <!-- Polygon A: tilted spherical cap on the left -->
+    <ellipse cx="195" cy="170" rx="42" ry="24" fill="#c5c5eb" fill-opacity="0.65" stroke="#6060c8" stroke-width="1.8" transform="rotate(-12 195 170)" />
+
+    <!-- Polygon B: tilted spherical cap on the right, fully separated from A -->
+    <ellipse cx="310" cy="180" rx="42" ry="24" fill="#e6c0c0" fill-opacity="0.7" stroke="#c94a4a" stroke-width="1.8" transform="rotate(-12 310 180)" />
+
+    <!-- Point P on the sphere but outside both A and B -->
+    <circle cx="265" cy="118" r="6" fill="#e74c3c" stroke="#ffffff" stroke-width="1.2" />
+  </g>
+
+  <!-- Labels (outside the clip so they're readable) -->
+  <text x="148" y="149" font-size="14" font-weight="bold" fill="#6060c8">A</text>
+  <text x="345" y="160" font-size="14" font-weight="bold" fill="#c94a4a">B</text>
+  <text x="273" y="113" font-size="13" font-weight="bold" fill="#c0392b">P</text>
+
+  <!-- Legend -->
+  <ellipse cx="80" cy="272" rx="8" ry="4" fill="#c5c5eb" fill-opacity="0.8" stroke="#6060c8" stroke-width="1" />
+  <text x="91" y="276" font-size="12" fill="#333333">Polygon A</text>
+
+  <ellipse cx="180" cy="272" rx="8" ry="4" fill="#e6c0c0" fill-opacity="0.85" stroke="#c94a4a" stroke-width="1" />
+  <text x="191" y="276" font-size="12" fill="#333333">Polygon B (Disjoint from A)</text>
+
+  <circle cx="368" cy="272" r="6" fill="#e74c3c" stroke="#ffffff" stroke-width="1" />
+  <text x="378" y="276" font-size="12" fill="#333333">Point P (Outside A)</text>
+</svg>
