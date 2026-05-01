@@ -353,8 +353,13 @@ class BroadcastIndexJoinGeographySuite extends TestBaseScala {
         .takeWhile(_ != null)
         .map(_.getMessage)
         .mkString(" | ")
+      // Normalize for cross-version stability: assert on either the stable Spark
+      // error class (`DATATYPE_MISMATCH`) or the human-readable text.
+      val normalizedMsg = msg.toLowerCase(java.util.Locale.ROOT)
       assert(
-        msg.contains("st_dwithin") && msg.contains("data type mismatch"),
+        normalizedMsg.contains("st_dwithin") &&
+          (normalizedMsg.contains("datatype_mismatch") ||
+            normalizedMsg.contains("data type mismatch")),
         s"expected analysis-time DATATYPE_MISMATCH on st_dwithin; got: $msg")
     }
   }

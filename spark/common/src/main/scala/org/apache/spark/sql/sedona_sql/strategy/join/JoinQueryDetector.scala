@@ -889,12 +889,25 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
             if (geographyShape) {
               // Geography distance joins read the per-row radius from the stream-side
               // GeographyJoinShape inside GeographyDistanceRefiner, so the radius MUST
-              // also flow to the stream side. For literal radii we still keep the
-              // build-side expansion (mirror of the geometry literal optimisation).
-              if (broadcastSide.get == side) (Some(distanceExpr), Some(distanceExpr))
-              else if (distanceExpr.references.isEmpty)
+              // be available on the streamed side. The stream-side expression is later
+              // re-bound against `streamed.output` in BroadcastIndexJoinExec, so we
+              // can only forward it to the stream side when it is either a literal
+              // (no references) or already bound to the streamed side.
+              if (distanceExpr.references.isEmpty) {
+                // Literal: keep build-side expansion AND populate stream-side radius.
                 (Some(distanceExpr), Some(distanceExpr))
-              else (None, Some(distanceExpr))
+              } else if (broadcastSide.get == side) {
+                // Non-literal expression bound to the broadcast/index side cannot be
+                // re-bound against streamed.output. Reject up front rather than
+                // planning a broadcast geography join that will fail at execution.
+                throw new UnsupportedOperationException(
+                  "Geography distance broadcast joins do not support non-literal " +
+                    "distance expressions bound to the broadcast/index side; bind " +
+                    "the distance expression to the streamed side or use a literal.")
+              } else {
+                // Bound to the streamed side: stream-only (no build-side expansion).
+                (None, Some(distanceExpr))
+              }
             } else {
               if (broadcastSide.get == side) (Some(distanceExpr), None)
               else if (distanceExpr.references.isEmpty) (Some(distanceExpr), None)
