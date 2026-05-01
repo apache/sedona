@@ -27,8 +27,8 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 
 /**
- * Planar 2D bounding box with min/max X and Y. Empty boxes are encoded as {@code xmin > xmax} (JTS
- * convention), which makes union/expand a no-op against the empty value.
+ * Planar 2D bounding box with min/max X and Y. Empty boxes are encoded as {@code xmin > xmax ||
+ * ymin > ymax} (JTS Envelope convention), which makes union/expand a no-op against the empty value.
  */
 public final class Box2D implements Serializable {
 
