@@ -26,17 +26,18 @@ import org.json4s.JsonAST.JValue
 import org.json4s.JsonDSL._
 
 /**
- * UDT for [[Box2D]]. Stored as a Spark struct of four non-nullable doubles
- * (`xmin`, `ymin`, `xmax`, `ymax`) so values round-trip natively to Parquet and
- * align with GeoParquet 1.1 bbox covering columns.
+ * UDT for [[Box2D]]. Stored as a Spark struct of four non-nullable doubles (`xmin`, `ymin`,
+ * `xmax`, `ymax`) so values round-trip natively to Parquet and align with GeoParquet 1.1 bbox
+ * covering columns.
  */
 class Box2DUDT extends UserDefinedType[Box2D] {
 
-  override def sqlType: DataType = StructType(Seq(
-    StructField("xmin", DoubleType, nullable = false),
-    StructField("ymin", DoubleType, nullable = false),
-    StructField("xmax", DoubleType, nullable = false),
-    StructField("ymax", DoubleType, nullable = false)))
+  override def sqlType: DataType = StructType(
+    Seq(
+      StructField("xmin", DoubleType, nullable = false),
+      StructField("ymin", DoubleType, nullable = false),
+      StructField("xmax", DoubleType, nullable = false),
+      StructField("ymax", DoubleType, nullable = false)))
 
   override def pyUDT: String = "sedona.spark.sql.types.Box2DType"
 
