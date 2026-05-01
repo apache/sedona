@@ -18,6 +18,11 @@
 # under the License.
 
 set -e
+# Without pipefail, a failing `python3 ... | tee ...` pipeline returns tee's
+# (zero) exit status, so a notebook crash or timeout would be silently
+# misreported as a pass. Enable pipefail so the per-notebook `if` block
+# below sees the real exit code.
+set -o pipefail
 
 # Set up environment variables if not already set
 export SPARK_HOME=${SPARK_HOME:-/opt/spark}
