@@ -32,7 +32,7 @@ repos:
         name: run check hooks apply
         description: check that all the hooks apply to the repository
   - repo: https://github.com/thlorenz/doctoc.git
-    rev: v2.3.0
+    rev: v2.4.1
     hooks:
       - id: doctoc
         name: add TOC for Markdown files
@@ -328,7 +328,7 @@ repos:
         description: audits Python environments, requirements files and dependency trees for known security vulnerabilities, and can automatically fix them
         args: ['.']
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v22.1.1
+    rev: v22.1.4
     hooks:
       - id: clang-format
         name: run clang-format
@@ -356,7 +356,7 @@ repos:
         name: run gitleaks
         description: check for secrets with gitleaks
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.23.1
+    rev: v1.24.1
     hooks:
       - id: zizmor
         name: run zizmor
@@ -518,7 +518,7 @@ repos:
         types: [yaml]
         files: \.ya?ml$
   - repo: https://github.com/oxipng/oxipng
-    rev: v10.1.0
+    rev: v10.1.1
     hooks:
       - id: oxipng
         name: run oxipng
@@ -541,7 +541,7 @@ repos:
         exclude: ^docs/image/.*$|^R/man/.*\.Rd$|^spark/common/src/test/resources/.*$
         alias: ec
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.11
+    rev: v1.7.12
     hooks:
       - id: actionlint
         name: run actionlint
