@@ -49,7 +49,7 @@ jobs:
           pip install pre-commit
       - name: set PY
         run: echo "PY=$(python -VV | sha256sum | cut -d' ' -f1)" >> "$GITHUB_ENV"
-      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.cache/pre-commit
           key: pre-commit|${{ inputs.job_id }}|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
