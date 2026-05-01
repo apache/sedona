@@ -27,8 +27,11 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Polygon;
 
 /**
- * Planar 2D bounding box with min/max X and Y. Empty boxes are encoded as {@code xmin > xmax ||
- * ymin > ymax} (JTS Envelope convention), which makes union/expand a no-op against the empty value.
+ * Planar 2D bounding box with min/max X and Y. Always a valid finite bbox; absence of a bbox (e.g.
+ * bbox of an empty geometry, extent over zero rows) is represented by SQL NULL at the column level
+ * rather than by an in-band sentinel. This matches PostGIS behavior and leaves {@code xmin > xmax}
+ * free for a future antimeridian-wraparound semantics on geography bboxes (cf. sedona-db's {@code
+ * WraparoundInterval}).
  */
 public final class Box2D implements Serializable {
 
@@ -46,25 +49,19 @@ public final class Box2D implements Serializable {
     this.ymax = ymax;
   }
 
-  public static Box2D empty() {
-    return new Box2D(
-        Double.POSITIVE_INFINITY,
-        Double.POSITIVE_INFINITY,
-        Double.NEGATIVE_INFINITY,
-        Double.NEGATIVE_INFINITY);
-  }
-
+  /** Returns the bbox of {@code geometry}, or {@code null} for null/empty geometry. */
   public static Box2D fromGeometry(Geometry geometry) {
     if (geometry == null || geometry.isEmpty()) {
-      return empty();
+      return null;
     }
     Envelope env = geometry.getEnvelopeInternal();
     return new Box2D(env.getMinX(), env.getMinY(), env.getMaxX(), env.getMaxY());
   }
 
+  /** Wraps a JTS {@link Envelope}. Returns {@code null} for null or {@code Envelope.isNull()}. */
   public static Box2D fromEnvelope(Envelope env) {
     if (env == null || env.isNull()) {
-      return empty();
+      return null;
     }
     return new Box2D(env.getMinX(), env.getMinY(), env.getMaxX(), env.getMaxY());
   }
@@ -85,16 +82,13 @@ public final class Box2D implements Serializable {
     return ymax;
   }
 
-  public boolean isEmpty() {
-    return xmin > xmax || ymin > ymax;
-  }
-
+  /**
+   * Returns the union of {@code this} and {@code other}. {@code other == null} is treated as a
+   * no-op, returning {@code this}, so callers can fold over a stream that may include nulls.
+   */
   public Box2D expandToInclude(Box2D other) {
-    if (other == null || other.isEmpty()) {
+    if (other == null) {
       return this;
-    }
-    if (this.isEmpty()) {
-      return other;
     }
     return new Box2D(
         Math.min(xmin, other.xmin),
@@ -104,17 +98,11 @@ public final class Box2D implements Serializable {
   }
 
   public Envelope toEnvelope() {
-    if (isEmpty()) {
-      return new Envelope();
-    }
     return new Envelope(xmin, xmax, ymin, ymax);
   }
 
-  /** Convert to a closed polygon. Empty boxes return an empty polygon. */
+  /** Convert to a closed polygon. */
   public Polygon toPolygon() {
-    if (isEmpty()) {
-      return GEOMETRY_FACTORY.createPolygon();
-    }
     Coordinate[] coords =
         new Coordinate[] {
           new Coordinate(xmin, ymin),
@@ -131,7 +119,6 @@ public final class Box2D implements Serializable {
     if (this == o) return true;
     if (!(o instanceof Box2D)) return false;
     Box2D other = (Box2D) o;
-    if (this.isEmpty() && other.isEmpty()) return true;
     return Double.compare(xmin, other.xmin) == 0
         && Double.compare(ymin, other.ymin) == 0
         && Double.compare(xmax, other.xmax) == 0
@@ -140,13 +127,11 @@ public final class Box2D implements Serializable {
 
   @Override
   public int hashCode() {
-    if (isEmpty()) return 0;
     return Objects.hash(xmin, ymin, xmax, ymax);
   }
 
   @Override
   public String toString() {
-    if (isEmpty()) return "BOX EMPTY";
     return "BOX(" + xmin + " " + ymin + ", " + xmax + " " + ymax + ")";
   }
 }

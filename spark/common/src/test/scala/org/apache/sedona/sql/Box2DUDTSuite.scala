@@ -53,14 +53,6 @@ class Box2DUDTSuite extends TestBaseScala with BeforeAndAfter {
       assert(udt.deserialize(udt.serialize(box)) == box)
     }
 
-    it("round-trips empty boxes through serde") {
-      val udt = new Box2DUDT()
-      val empty = Box2D.empty()
-      val recovered = udt.deserialize(udt.serialize(empty))
-      assert(recovered.isEmpty)
-      assert(recovered == empty)
-    }
-
     it("case object equals a fresh instance") {
       val instance = new Box2DUDT()
       assert(Box2DUDT == Box2DUDT)

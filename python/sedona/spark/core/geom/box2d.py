@@ -15,12 +15,12 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import math
-
 
 class Box2D:
-    """Planar 2D bounding box. Empty boxes are encoded as ``xmin > xmax`` or
-    ``ymin > ymax`` (JTS Envelope convention)."""
+    """Planar 2D bounding box. Always a valid finite bbox; absence of a bbox
+    is represented by ``None`` (SQL NULL) at the column level rather than by an
+    in-band sentinel. This matches PostGIS behavior and leaves ``xmin > xmax``
+    free for a future antimeridian-wraparound semantics on geography bboxes."""
 
     __slots__ = ("xmin", "ymin", "xmax", "ymax")
 
@@ -30,18 +30,9 @@ class Box2D:
         self.xmax = float(xmax)
         self.ymax = float(ymax)
 
-    @classmethod
-    def empty(cls) -> "Box2D":
-        return cls(math.inf, math.inf, -math.inf, -math.inf)
-
-    def is_empty(self) -> bool:
-        return self.xmin > self.xmax or self.ymin > self.ymax
-
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Box2D):
             return NotImplemented
-        if self.is_empty() and other.is_empty():
-            return True
         return (
             self.xmin == other.xmin
             and self.ymin == other.ymin
@@ -50,11 +41,7 @@ class Box2D:
         )
 
     def __hash__(self) -> int:
-        if self.is_empty():
-            return 0
         return hash((self.xmin, self.ymin, self.xmax, self.ymax))
 
     def __repr__(self) -> str:
-        if self.is_empty():
-            return "Box2D.empty()"
         return f"Box2D({self.xmin}, {self.ymin}, {self.xmax}, {self.ymax})"
