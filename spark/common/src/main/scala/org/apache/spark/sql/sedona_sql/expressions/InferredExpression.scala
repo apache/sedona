@@ -269,12 +269,14 @@ object InferredTypes {
       } else {
         null
       }
-    } else if (t =:= typeOf[Box2D]) { output =>
-      if (output != null) {
-        Box2DUDT().serialize(output.asInstanceOf[Box2D])
-      } else {
-        null
-      }
+    } else if (t =:= typeOf[Box2D]) {
+      val udt = Box2DUDT
+      output =>
+        if (output != null) {
+          udt.serialize(output.asInstanceOf[Box2D])
+        } else {
+          null
+        }
     } else if (InferredRasterExpression.isRasterType(t)) {
       InferredRasterExpression.rasterSerializer
     } else if (t =:= typeOf[String]) { output =>
