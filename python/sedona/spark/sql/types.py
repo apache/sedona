@@ -15,7 +15,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from pyspark.sql.types import BinaryType, UserDefinedType
+from pyspark.sql.types import (
+    BinaryType,
+    DoubleType,
+    StructField,
+    StructType,
+    UserDefinedType,
+)
 
 # Only support RasterType when rasterio is installed
 try:
@@ -34,6 +40,7 @@ else:
 
 from sedona.spark.utils import geometry_serde
 from sedona.spark.core.geom.geography import Geography
+from sedona.spark.core.geom.box2d import Box2D
 
 
 class GeometryType(UserDefinedType):
@@ -84,6 +91,37 @@ class GeographyType(UserDefinedType):
     @classmethod
     def scalaUDT(cls):
         return "org.apache.spark.sql.sedona_sql.UDT.GeographyUDT"
+
+
+class Box2DType(UserDefinedType):
+
+    @classmethod
+    def sqlType(cls):
+        return StructType(
+            [
+                StructField("xmin", DoubleType(), nullable=False),
+                StructField("ymin", DoubleType(), nullable=False),
+                StructField("xmax", DoubleType(), nullable=False),
+                StructField("ymax", DoubleType(), nullable=False),
+            ]
+        )
+
+    def serialize(self, obj):
+        return (obj.xmin, obj.ymin, obj.xmax, obj.ymax)
+
+    def deserialize(self, datum):
+        return Box2D(datum[0], datum[1], datum[2], datum[3])
+
+    @classmethod
+    def module(cls):
+        return "sedona.spark.sql.types"
+
+    def needConversion(self):
+        return True
+
+    @classmethod
+    def scalaUDT(cls):
+        return "org.apache.spark.sql.sedona_sql.UDT.Box2DUDT"
 
 
 class RasterType(UserDefinedType):
