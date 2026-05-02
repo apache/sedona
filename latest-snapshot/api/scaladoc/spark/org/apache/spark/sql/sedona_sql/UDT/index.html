@@ -166,6 +166,10 @@
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="org.apache.spark.sql.sedona_sql">sedona_sql</a></dd></dl></div>
     </li><li class="current-entities indented6">
+                        <a class="object" href="Box2DUDT$.html" title=""></a>
+                        <a class="class" href="Box2DUDT.html" title="UDT for Box2D."></a>
+                        <a href="Box2DUDT.html" title="UDT for Box2D.">Box2DUDT</a>
+                      </li><li class="current-entities indented6">
                         <a class="object" href="GeographyUDT$.html" title=""></a>
                         <a class="class" href="GeographyUDT.html" title=""></a>
                         <a href="GeographyUDT.html" title="">GeographyUDT</a>
@@ -384,7 +388,26 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="org.apache.spark.sql.sedona_sql.UDT.GeographyUDT" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="org.apache.spark.sql.sedona_sql.UDT.Box2DUDT" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Box2DUDTextendsUserDefinedType[org.apache.sedona.common.geometryObjects.Box2D]"></a><a id="Box2DUDT:Box2DUDT"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/UDT/Box2DUDT.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="UDT for Box2D." href="Box2DUDT.html"><span class="name">Box2DUDT</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.types.UserDefinedType">UserDefinedType</span>[<span class="extype" name="org.apache.sedona.common.geometryObjects.Box2D">Box2D</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">UDT for <span class="extype" name="Box2D">Box2D</span>.</p><div class="fullcomment"><div class="comment cmt"><p>UDT for <span class="extype" name="Box2D">Box2D</span>. Stored as a Spark struct of four non-nullable doubles (<code>xmin</code>, <code>ymin</code>,
+<code>xmax</code>, <code>ymax</code>) so values round-trip natively to Parquet and align with GeoParquet 1.1 bbox
+covering columns.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.UDT.GeographyUDT" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GeographyUDTextendsUserDefinedType[org.apache.sedona.common.S2Geography.Geography]"></a><a id="GeographyUDT:GeographyUDT"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/UDT/GeographyUDT.html" title="Permalink">
@@ -476,7 +499,23 @@ their schema, then transforms the schema to use BinaryType instead.
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="org.apache.spark.sql.sedona_sql.UDT.GeographyUDT" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="org.apache.spark.sql.sedona_sql.UDT.Box2DUDT" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Box2DUDT"></a><a id="Box2DUDT:Box2DUDT"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/UDT/Box2DUDT$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Box2DUDT$.html"><span class="name">Box2DUDT</span></a><span class="result"> extends <a href="Box2DUDT.html" class="extype" name="org.apache.spark.sql.sedona_sql.UDT.Box2DUDT">Box2DUDT</a> with <span class="extype" name="scala.Serializable">Serializable</span> with <span class="extype" name="scala.Product">Product</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.UDT.GeographyUDT" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="GeographyUDT"></a><a id="GeographyUDT:GeographyUDT"></a>
       <span class="permalink">
       <a href="../../../../../../org/apache/spark/sql/sedona_sql/UDT/GeographyUDT$.html" title="Permalink">

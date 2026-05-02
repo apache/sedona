@@ -4541,6 +4541,50 @@ This function creates an optimization barrier by evaluating boolean expressions 
 <section id="module-sedona.spark.sql.types">
 <span id="sedona-spark-sql-types-module"></span><h2>sedona.spark.sql.types module<a class="headerlink" href="#module-sedona.spark.sql.types" title="Permalink to this heading"></a></h2>
 <dl class="py class">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.Box2DType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">Box2DType</span></span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#Box2DType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.Box2DType" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">UserDefinedType</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.Box2DType.deserialize">
+<span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datum</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#Box2DType.deserialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.Box2DType.deserialize" title="Permalink to this definition"></a></dt>
+<dd><p>Converts a SQL datum into a user-type object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.Box2DType.module">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">module</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#Box2DType.module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.Box2DType.module" title="Permalink to this definition"></a></dt>
+<dd><p>The Python module of the UDT.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.Box2DType.needConversion">
+<span class="sig-name descname"><span class="pre">needConversion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#Box2DType.needConversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.Box2DType.needConversion" title="Permalink to this definition"></a></dt>
+<dd><p>Does this type needs conversion between Python object and internal SQL object.</p>
+<p>This is used to avoid the unnecessary conversion for ArrayType/MapType/StructType.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.Box2DType.scalaUDT">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scalaUDT</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#Box2DType.scalaUDT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.Box2DType.scalaUDT" title="Permalink to this definition"></a></dt>
+<dd><p>The class name of the paired Scala UDT (could be ‘’, if there
+is no corresponding one).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.Box2DType.serialize">
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#Box2DType.serialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.Box2DType.serialize" title="Permalink to this definition"></a></dt>
+<dd><p>Converts a user-type object into a SQL datum.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.sql.types.Box2DType.sqlType">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sqlType</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#Box2DType.sqlType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.Box2DType.sqlType" title="Permalink to this definition"></a></dt>
+<dd><p>Underlying SQL storage type for this UDT.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="sedona.spark.sql.types.GeographyType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.types.</span></span><span class="sig-name descname"><span class="pre">GeographyType</span></span><a class="reference internal" href="_modules/sedona/spark/sql/types.html#GeographyType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.types.GeographyType" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">UserDefinedType</span></code></p>

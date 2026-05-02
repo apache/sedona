@@ -224,7 +224,13 @@
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">BinaryType</span><span class="p">,</span> <span class="n">UserDefinedType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BinaryType</span><span class="p">,</span>
+    <span class="n">DoubleType</span><span class="p">,</span>
+    <span class="n">StructField</span><span class="p">,</span>
+    <span class="n">StructType</span><span class="p">,</span>
+    <span class="n">UserDefinedType</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="c1"># Only support RasterType when rasterio is installed</span>
 <span class="k">try</span><span class="p">:</span>
@@ -243,6 +249,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">geometry_serde</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.geom.geography</span><span class="w"> </span><span class="kn">import</span> <span class="n">Geography</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.geom.box2d</span><span class="w"> </span><span class="kn">import</span> <span class="n">Box2D</span>
 
 
 <div class="viewcode-block" id="GeometryType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeometryType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GeometryType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
@@ -293,6 +300,37 @@
 <div class="viewcode-block" id="GeographyType.scalaUDT"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.GeographyType.scalaUDT">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">scalaUDT</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;org.apache.spark.sql.sedona_sql.UDT.GeographyUDT&quot;</span></div></div>
+
+
+<div class="viewcode-block" id="Box2DType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.Box2DType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Box2DType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Box2DType.sqlType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.Box2DType.sqlType">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sqlType</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">StructType</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">StructField</span><span class="p">(</span><span class="s2">&quot;xmin&quot;</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                <span class="n">StructField</span><span class="p">(</span><span class="s2">&quot;ymin&quot;</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                <span class="n">StructField</span><span class="p">(</span><span class="s2">&quot;xmax&quot;</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                <span class="n">StructField</span><span class="p">(</span><span class="s2">&quot;ymax&quot;</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Box2DType.serialize"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.Box2DType.serialize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">xmin</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">ymin</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">xmax</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">ymax</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Box2DType.deserialize"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.Box2DType.deserialize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Box2D</span><span class="p">(</span><span class="n">datum</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">datum</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">datum</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">datum</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Box2DType.module"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.Box2DType.module">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">module</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;sedona.spark.sql.types&quot;</span></div>
+
+<div class="viewcode-block" id="Box2DType.needConversion"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.Box2DType.needConversion">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">needConversion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Box2DType.scalaUDT"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.Box2DType.scalaUDT">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scalaUDT</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;org.apache.spark.sql.sedona_sql.UDT.Box2DUDT&quot;</span></div></div>
 
 
 <div class="viewcode-block" id="RasterType"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">RasterType</span><span class="p">(</span><span class="n">UserDefinedType</span><span class="p">):</span>
