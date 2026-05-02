@@ -278,6 +278,7 @@ object Catalog extends AbstractCatalog with Logging {
   // Bounding-Box-Functions
   val boundingBoxExprs: Seq[FunctionDescription] = Seq(
     function[ST_BoundingDiagonal](),
+    function[ST_Box2D](),
     function[ST_Envelope](),
     function[ST_Expand](),
     function[ST_MMax](),
