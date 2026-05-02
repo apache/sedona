@@ -199,7 +199,7 @@ class functionTestScala
           SELECT
             ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')) AS bbox,
             ST_Box2D(ST_GeomFromText('POINT EMPTY')) AS bbox_empty,
-            ST_Box2D(CAST(NULL AS GEOMETRY)) AS bbox_null
+            ST_Box2D(ST_GeomFromText(NULL)) AS bbox_null
         """)
       val row = df.collect()(0)
       val bbox = row.getAs[Box2D]("bbox")
