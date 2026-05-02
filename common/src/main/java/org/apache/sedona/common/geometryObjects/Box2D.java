@@ -20,11 +20,8 @@ package org.apache.sedona.common.geometryObjects;
 
 import java.io.Serializable;
 import java.util.Objects;
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Polygon;
 
 /**
  * Planar 2D bounding box with min/max X and Y. Always a valid finite bbox; absence of a bbox (e.g.
@@ -34,8 +31,6 @@ import org.locationtech.jts.geom.Polygon;
  * WraparoundInterval}).
  */
 public final class Box2D implements Serializable {
-
-  private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
   private final double xmin;
   private final double ymin;
@@ -87,19 +82,6 @@ public final class Box2D implements Serializable {
         Math.min(ymin, other.ymin),
         Math.max(xmax, other.xmax),
         Math.max(ymax, other.ymax));
-  }
-
-  /** Convert to a closed polygon. */
-  public Polygon toPolygon() {
-    Coordinate[] coords =
-        new Coordinate[] {
-          new Coordinate(xmin, ymin),
-          new Coordinate(xmin, ymax),
-          new Coordinate(xmax, ymax),
-          new Coordinate(xmax, ymin),
-          new Coordinate(xmin, ymin)
-        };
-    return GEOMETRY_FACTORY.createPolygon(coords);
   }
 
   @Override
