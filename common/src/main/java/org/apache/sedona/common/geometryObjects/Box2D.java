@@ -58,14 +58,6 @@ public final class Box2D implements Serializable {
     return new Box2D(env.getMinX(), env.getMinY(), env.getMaxX(), env.getMaxY());
   }
 
-  /** Wraps a JTS {@link Envelope}. Returns {@code null} for null or {@code Envelope.isNull()}. */
-  public static Box2D fromEnvelope(Envelope env) {
-    if (env == null || env.isNull()) {
-      return null;
-    }
-    return new Box2D(env.getMinX(), env.getMinY(), env.getMaxX(), env.getMaxY());
-  }
-
   public double getXMin() {
     return xmin;
   }
@@ -95,10 +87,6 @@ public final class Box2D implements Serializable {
         Math.min(ymin, other.ymin),
         Math.max(xmax, other.xmax),
         Math.max(ymax, other.ymax));
-  }
-
-  public Envelope toEnvelope() {
-    return new Envelope(xmin, xmax, ymin, ymax);
   }
 
   /** Convert to a closed polygon. */
