@@ -699,6 +699,10 @@ public class Functions {
     return min == Double.MAX_VALUE ? null : min;
   }
 
+  public static Double xMin(Box2D box) {
+    return box == null ? null : box.getXMin();
+  }
+
   public static Double xMax(Geometry geometry) {
     Coordinate[] points = geometry.getCoordinates();
     double max = -Double.MAX_VALUE;
@@ -706,6 +710,10 @@ public class Functions {
       max = Math.max(points[i].getX(), max);
     }
     return max == -Double.MAX_VALUE ? null : max;
+  }
+
+  public static Double xMax(Box2D box) {
+    return box == null ? null : box.getXMax();
   }
 
   public static Double yMin(Geometry geometry) {
@@ -717,6 +725,10 @@ public class Functions {
     return min == Double.MAX_VALUE ? null : min;
   }
 
+  public static Double yMin(Box2D box) {
+    return box == null ? null : box.getYMin();
+  }
+
   public static Double yMax(Geometry geometry) {
     Coordinate[] points = geometry.getCoordinates();
     double max = -Double.MAX_VALUE;
@@ -724,6 +736,10 @@ public class Functions {
       max = Math.max(points[i].getY(), max);
     }
     return max == -Double.MAX_VALUE ? null : max;
+  }
+
+  public static Double yMax(Box2D box) {
+    return box == null ? null : box.getYMax();
   }
 
   public static Double zMax(Geometry geometry) {

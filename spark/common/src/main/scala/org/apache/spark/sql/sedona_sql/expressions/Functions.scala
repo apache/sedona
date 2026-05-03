@@ -19,6 +19,7 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.{Functions, FunctionsGeoTools, FunctionsProj4}
+import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.common.utils.{InscribedCircle, ValidDetail}
 import org.apache.sedona.core.utils.SedonaConf
@@ -69,7 +70,9 @@ private[apache] case class ST_Distance(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_YMax(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.yMax _) {
+    extends InferredExpression(
+      inferrableFunction1((g: Geometry) => Functions.yMax(g)),
+      inferrableFunction1((b: Box2D) => Functions.yMax(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -77,7 +80,9 @@ private[apache] case class ST_YMax(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_YMin(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.yMin _) {
+    extends InferredExpression(
+      inferrableFunction1((g: Geometry) => Functions.yMin(g)),
+      inferrableFunction1((b: Box2D) => Functions.yMin(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1489,7 +1494,9 @@ private[apache] case class ST_IsEmpty(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_XMax(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.xMax _) {
+    extends InferredExpression(
+      inferrableFunction1((g: Geometry) => Functions.xMax(g)),
+      inferrableFunction1((b: Box2D) => Functions.xMax(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1502,7 +1509,9 @@ private[apache] case class ST_XMax(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_XMin(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.xMin _) {
+    extends InferredExpression(
+      inferrableFunction1((g: Geometry) => Functions.xMin(g)),
+      inferrableFunction1((b: Box2D) => Functions.xMin(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

@@ -274,6 +274,28 @@ class functionTestScala
       assert(test.take(1)(0).get(0).asInstanceOf[Double] == -3.0)
     }
 
+    it("Passed ST_XMin / XMax / YMin / YMax for Box2D") {
+      val df = sparkSession.sql("""
+        WITH t AS (
+          SELECT ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')) AS bbox,
+                 ST_Box2D(ST_GeomFromText(NULL))                                  AS bbox_null
+        )
+        SELECT
+          ST_XMin(bbox),  ST_YMin(bbox),  ST_XMax(bbox),  ST_YMax(bbox),
+          ST_XMin(bbox_null), ST_YMin(bbox_null), ST_XMax(bbox_null), ST_YMax(bbox_null)
+        FROM t
+      """)
+      val row = df.collect()(0)
+      assert(row.getDouble(0) == 1.0)
+      assert(row.getDouble(1) == 2.0)
+      assert(row.getDouble(2) == 4.0)
+      assert(row.getDouble(3) == 5.0)
+      assert(row.isNullAt(4))
+      assert(row.isNullAt(5))
+      assert(row.isNullAt(6))
+      assert(row.isNullAt(7))
+    }
+
     it("Passed ST_ZMax") {
       val test = sparkSession.sql(
         "SELECT ST_ZMax(ST_GeomFromWKT('POLYGON((0 0 0,0 5 0,5 0 0,0 0 5),(1 1 0,3 1 0,1 3 0,1 1 0))'))")

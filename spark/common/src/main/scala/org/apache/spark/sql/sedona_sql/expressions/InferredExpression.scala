@@ -217,6 +217,8 @@ object InferredTypes {
       expr.toGeography(input)
     } else if (t =:= typeOf[Array[Geography]]) { expr => input =>
       expr.toGeographyArray(input)
+    } else if (t =:= typeOf[Box2D]) { expr => input =>
+      expr.toBox2D(input)
     } else if (InferredRasterExpression.isRasterType(t)) {
       InferredRasterExpression.rasterExtractor
     } else if (t =:= typeOf[Array[Double]]) { expr => input =>
