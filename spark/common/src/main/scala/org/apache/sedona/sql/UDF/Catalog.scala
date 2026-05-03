@@ -61,6 +61,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[ST_GeomFromGML](),
     function[ST_GeomFromKML](),
     function[ST_Point](),
+    function[ST_MakeBox2D](),
     function[ST_MakeEnvelope](),
     function[ST_MakePoint](null, null),
     function[ST_MakePointM](),

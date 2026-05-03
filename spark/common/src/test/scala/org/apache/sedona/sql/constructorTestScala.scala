@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.sedona.core.formatMapper.GeoJsonReader
 import org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader
 import org.apache.sedona.sql.utils.Adapter
@@ -136,6 +137,52 @@ class constructorTestScala extends TestBaseScala with Matchers {
       val polygonDF = sparkSession.sql(
         "select ST_PolygonFromEnvelope(double(1.234),double(2.234),double(3.345),double(3.345))")
       assert(polygonDF.count() == 1)
+    }
+
+    it("Passed ST_MakeBox2D") {
+      val df = sparkSession.sql("""
+        SELECT
+          ST_MakeBox2D(ST_Point(1.0, 2.0), ST_Point(4.0, 5.0))           AS bbox,
+          ST_MakeBox2D(ST_Point(10.0, 20.0), ST_GeomFromText(NULL))       AS bbox_null,
+          ST_MakeBox2D(ST_GeomFromText('POINT EMPTY'), ST_Point(1.0, 1.0)) AS bbox_empty
+      """)
+      val row = df.collect()(0)
+      val bbox = row.getAs[Box2D]("bbox")
+      assert(bbox.getXMin == 1.0)
+      assert(bbox.getYMin == 2.0)
+      assert(bbox.getXMax == 4.0)
+      assert(bbox.getYMax == 5.0)
+      assert(row.isNullAt(1))
+      assert(row.isNullAt(2))
+    }
+
+    it("ST_MakeBox2D preserves swapped corners") {
+      // No swapping or reordering; lower-left/upper-right are taken verbatim.
+      // This leaves xmin > xmax / ymin > ymax available for future antimeridian semantics.
+      val df = sparkSession.sql(
+        "SELECT ST_MakeBox2D(ST_Point(170.0, 10.0), ST_Point(-170.0, 20.0)) AS bbox")
+      val bbox = df.collect()(0).getAs[Box2D]("bbox")
+      assert(bbox.getXMin == 170.0)
+      assert(bbox.getXMax == -170.0)
+    }
+
+    it("ST_MakeBox2D ignores Z on 3D point input") {
+      val df = sparkSession.sql(
+        "SELECT ST_MakeBox2D(ST_PointZ(1.0, 2.0, 99.0), ST_PointZ(4.0, 5.0, 99.0)) AS bbox")
+      val bbox = df.collect()(0).getAs[Box2D]("bbox")
+      assert(bbox.getXMin == 1.0)
+      assert(bbox.getYMin == 2.0)
+      assert(bbox.getXMax == 4.0)
+      assert(bbox.getYMax == 5.0)
+    }
+
+    it("ST_MakeBox2D rejects non-point input") {
+      val ex = intercept[Exception] {
+        sparkSession
+          .sql("SELECT ST_MakeBox2D(ST_GeomFromText('LINESTRING(0 0, 1 1)'), ST_Point(2.0, 2.0))")
+          .collect()
+      }
+      assert(ex.getMessage.contains("ST_MakeBox2D requires two POINT geometries"))
     }
 
     it("Passed ST_PointFromText") {
