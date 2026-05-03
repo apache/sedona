@@ -294,6 +294,16 @@ case class BroadcastIndexJoinExec(
       case Some(distanceExpression) if geographyShape =>
         val boundDistance =
           BindReferences.bindReference(distanceExpression, streamed.output)
+        // When the broadcast side already expanded its envelope by `d` (the
+        // literal-radius case, where the planner forwards the same distance to
+        // both sides so the per-row radius is also available here for the
+        // refiner), keep the stream envelope unexpanded. The coarse filter then
+        // matches the geometry path: `expand(build, d) ∩ stream`, not the wider
+        // `expand(build, d) ∩ expand(stream, d)`. When only the stream side
+        // received the distance (per-row radius bound to the stream side), the
+        // build side is unexpanded and we still need to expand the stream
+        // envelope to ensure the index returns all candidates within `d`.
+        val streamSideExpands = broadcast.distance.isEmpty
         streamResultsRaw.map(row => {
           val serialized = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
           if (serialized == null) {
@@ -302,10 +312,13 @@ case class BroadcastIndexJoinExec(
             val geog = GeographyWKBSerializer.deserialize(serialized)
             val radius = boundDistance.eval(row).asInstanceOf[Double]
             val baseEnvelope = JoinedGeometry.geographyToEnvelopeGeometry(geog)
-            val expandedEnvelope =
+            val shape = if (streamSideExpands) {
               JoinedGeometry.geometryToExpandedEnvelope(baseEnvelope, radius, isGeography = true)
-            expandedEnvelope.setUserData(GeographyJoinShape(geog, row, radius))
-            (expandedEnvelope, row)
+            } else {
+              baseEnvelope
+            }
+            shape.setUserData(GeographyJoinShape(geog, row, radius))
+            (shape, row)
           }
         })
       case Some(distanceExpression) =>

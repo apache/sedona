@@ -91,9 +91,8 @@ object JoinedGeometry {
    *   in meter
    */
   private def expandEnvelopeForGeography(envelope: Envelope, distance: Double): Envelope = {
-    // Here we use the polar radius of the spheroid as the radius of the sphere, so that the expanded
-    // envelope will work for both spherical and spheroidal distances.
-    val sphereRadius = 6357000.0
-    Haversine.expandEnvelope(envelope, distance, sphereRadius)
+    // Use the polar radius of the spheroid as the radius of the sphere so that the expanded
+    // envelope upper-bounds both spherical and spheroidal distances.
+    Haversine.expandEnvelope(envelope, distance, Haversine.EARTH_POLAR_RADIUS)
   }
 }
