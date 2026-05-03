@@ -240,6 +240,19 @@ private[apache] case class ST_Envelope(inputExpressions: Seq[Expression])
   }
 }
 
+/**
+ * Return the planar bounding box (Box2D) of a Geometry. Returns NULL for null or empty input.
+ *
+ * @param inputExpressions
+ */
+private[apache] case class ST_Box2D(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.box2D _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 private[apache] case class ST_Expand(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction4(Functions.expand),

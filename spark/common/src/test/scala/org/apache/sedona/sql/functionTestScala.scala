@@ -21,6 +21,7 @@ package org.apache.sedona.sql
 import org.apache.commons.codec.binary.Hex
 import org.apache.commons.io.FileUtils
 import org.apache.sedona.common.FunctionsGeoTools
+import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.functions._
@@ -190,6 +191,24 @@ class functionTestScala
       val functionDf =
         sparkSession.sql("select ST_ShiftLongitude(polygondf.countyshape) from polygondf")
       assert(functionDf.count() > 0)
+    }
+
+    it("Passed ST_Box2D") {
+      val df = sparkSession
+        .sql("""
+          SELECT
+            ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')) AS bbox,
+            ST_Box2D(ST_GeomFromText('POINT EMPTY')) AS bbox_empty,
+            ST_Box2D(ST_GeomFromText(NULL)) AS bbox_null
+        """)
+      val row = df.collect()(0)
+      val bbox = row.getAs[Box2D]("bbox")
+      assert(bbox.getXMin == 1.0)
+      assert(bbox.getYMin == 2.0)
+      assert(bbox.getXMax == 4.0)
+      assert(bbox.getYMax == 5.0)
+      assert(row.isNullAt(1))
+      assert(row.isNullAt(2))
     }
 
     it("Passed ST_Envelope") {
