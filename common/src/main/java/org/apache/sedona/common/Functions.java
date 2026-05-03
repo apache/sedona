@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.approximate.StraightSkeleton;
+import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.jts2geojson.GeoJSONWriter;
 import org.apache.sedona.common.sphere.Spheroid;
@@ -599,6 +600,10 @@ public class Functions {
     return geometry.getEnvelope();
   }
 
+  public static Box2D box2D(Geometry geometry) {
+    return Box2D.fromGeometry(geometry);
+  }
+
   public static Double distance(Geometry left, Geometry right) {
     if (left.isEmpty() || right.isEmpty()) {
       return null;
@@ -694,6 +699,10 @@ public class Functions {
     return min == Double.MAX_VALUE ? null : min;
   }
 
+  public static Double xMin(Box2D box) {
+    return box == null ? null : box.getXMin();
+  }
+
   public static Double xMax(Geometry geometry) {
     Coordinate[] points = geometry.getCoordinates();
     double max = -Double.MAX_VALUE;
@@ -701,6 +710,10 @@ public class Functions {
       max = Math.max(points[i].getX(), max);
     }
     return max == -Double.MAX_VALUE ? null : max;
+  }
+
+  public static Double xMax(Box2D box) {
+    return box == null ? null : box.getXMax();
   }
 
   public static Double yMin(Geometry geometry) {
@@ -712,6 +725,10 @@ public class Functions {
     return min == Double.MAX_VALUE ? null : min;
   }
 
+  public static Double yMin(Box2D box) {
+    return box == null ? null : box.getYMin();
+  }
+
   public static Double yMax(Geometry geometry) {
     Coordinate[] points = geometry.getCoordinates();
     double max = -Double.MAX_VALUE;
@@ -719,6 +736,10 @@ public class Functions {
       max = Math.max(points[i].getY(), max);
     }
     return max == -Double.MAX_VALUE ? null : max;
+  }
+
+  public static Double yMax(Box2D box) {
+    return box == null ? null : box.getYMax();
   }
 
   public static Double zMax(Geometry geometry) {

@@ -21,8 +21,8 @@ ARG shared_workspace=/opt/workspace
 ARG spark_version=4.0.1
 ARG hadoop_s3_version=3.4.1
 ARG aws_sdk_version=2.38.2
-ARG sedona_version=1.8.0
-ARG geotools_wrapper_version=1.8.1-33.1
+ARG sedona_version=1.9.0
+ARG geotools_wrapper_version=1.9.0-33.5
 ARG spark_extension_version=2.14.2
 ARG zeppelin_version=0.12.0
 

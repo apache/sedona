@@ -24,12 +24,14 @@ on:
     paths:
       - '.github/workflows/docker-build.yml'
       - 'docker/**'
+      - 'docs/usecases/**'
   pull_request:
     branches:
       - '*'
     paths:
       - '.github/workflows/docker-build.yml'
       - 'docker/**'
+      - 'docs/usecases/**'
 env:
   MAVEN_OPTS: -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
 
@@ -50,9 +52,6 @@ jobs:
         include:
           - spark: 4.0.1
             sedona: 'latest'
-            geotools: '33.1'
-          - spark: 4.0.1
-            sedona: 1.8.0
             geotools: '33.1'
     runs-on: ${{ matrix.os }}
     defaults:

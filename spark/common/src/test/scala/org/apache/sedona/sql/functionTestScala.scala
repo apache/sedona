@@ -21,6 +21,7 @@ package org.apache.sedona.sql
 import org.apache.commons.codec.binary.Hex
 import org.apache.commons.io.FileUtils
 import org.apache.sedona.common.FunctionsGeoTools
+import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.sedona.sql.implicits._
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.functions._
@@ -192,6 +193,24 @@ class functionTestScala
       assert(functionDf.count() > 0)
     }
 
+    it("Passed ST_Box2D") {
+      val df = sparkSession
+        .sql("""
+          SELECT
+            ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')) AS bbox,
+            ST_Box2D(ST_GeomFromText('POINT EMPTY')) AS bbox_empty,
+            ST_Box2D(ST_GeomFromText(NULL)) AS bbox_null
+        """)
+      val row = df.collect()(0)
+      val bbox = row.getAs[Box2D]("bbox")
+      assert(bbox.getXMin == 1.0)
+      assert(bbox.getYMin == 2.0)
+      assert(bbox.getXMax == 4.0)
+      assert(bbox.getYMax == 5.0)
+      assert(row.isNullAt(1))
+      assert(row.isNullAt(2))
+    }
+
     it("Passed ST_Envelope") {
       var polygonWktDf = sparkSession.read
         .format("csv")
@@ -253,6 +272,28 @@ class functionTestScala
       var test = sparkSession.sql(
         "SELECT ST_YMin(ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))'))")
       assert(test.take(1)(0).get(0).asInstanceOf[Double] == -3.0)
+    }
+
+    it("Passed ST_XMin / XMax / YMin / YMax for Box2D") {
+      val df = sparkSession.sql("""
+        WITH t AS (
+          SELECT ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')) AS bbox,
+                 ST_Box2D(ST_GeomFromText(NULL))                                  AS bbox_null
+        )
+        SELECT
+          ST_XMin(bbox),  ST_YMin(bbox),  ST_XMax(bbox),  ST_YMax(bbox),
+          ST_XMin(bbox_null), ST_YMin(bbox_null), ST_XMax(bbox_null), ST_YMax(bbox_null)
+        FROM t
+      """)
+      val row = df.collect()(0)
+      assert(row.getDouble(0) == 1.0)
+      assert(row.getDouble(1) == 2.0)
+      assert(row.getDouble(2) == 4.0)
+      assert(row.getDouble(3) == 5.0)
+      assert(row.isNullAt(4))
+      assert(row.isNullAt(5))
+      assert(row.isNullAt(6))
+      assert(row.isNullAt(7))
     }
 
     it("Passed ST_ZMax") {
