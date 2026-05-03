@@ -401,6 +401,123 @@
     <span class="k">return</span> <span class="n">_call_constructor_function</span><span class="p">(</span><span class="s2">&quot;ST_GeogFromWKT&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="ST_GeogFromText"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_constructors.ST_GeogFromText">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_GeogFromText</span><span class="p">(</span>
+    <span class="n">wkt</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">srid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ColumnOrNameOrNumber</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a geography column from a Well-Known Text (WKT) string column.</span>
+<span class="sd">    This is an alias of ST_GeogFromWKT.</span>
+
+<span class="sd">    :param wkt: WKT string column to generate from.</span>
+<span class="sd">    :type wkt: ColumnOrName</span>
+<span class="sd">    :return: Geography column representing the WKT string.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">wkt</span><span class="p">)</span> <span class="k">if</span> <span class="n">srid</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">wkt</span><span class="p">,</span> <span class="n">srid</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_call_constructor_function</span><span class="p">(</span><span class="s2">&quot;ST_GeogFromText&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_GeogFromWKB"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_constructors.ST_GeogFromWKB">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_GeogFromWKB</span><span class="p">(</span>
+    <span class="n">wkb</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">srid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ColumnOrNameOrNumber</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a geography column from a Well-Known Binary (WKB) binary column.</span>
+
+<span class="sd">    :param wkb: WKB binary column to generate from.</span>
+<span class="sd">    :type wkb: ColumnOrName</span>
+<span class="sd">    :return: Geography column representing the WKB binary.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">wkb</span><span class="p">)</span> <span class="k">if</span> <span class="n">srid</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">wkb</span><span class="p">,</span> <span class="n">srid</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_call_constructor_function</span><span class="p">(</span><span class="s2">&quot;ST_GeogFromWKB&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_GeogFromEWKB"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_constructors.ST_GeogFromEWKB">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_GeogFromEWKB</span><span class="p">(</span><span class="n">wkb</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a geography column from an OGC Extended Well-Known Binary (EWKB) binary column.</span>
+
+<span class="sd">    :param wkb: EWKB binary column to generate from.</span>
+<span class="sd">    :type wkb: ColumnOrName</span>
+<span class="sd">    :return: Geography column representing the EWKB binary.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_constructor_function</span><span class="p">(</span><span class="s2">&quot;ST_GeogFromEWKB&quot;</span><span class="p">,</span> <span class="n">wkb</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_GeogFromEWKT"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_constructors.ST_GeogFromEWKT">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_GeogFromEWKT</span><span class="p">(</span><span class="n">ewkt</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a geography column from an OGC Extended Well-Known Text (EWKT) string column.</span>
+
+<span class="sd">    :param ewkt: EWKT string column to generate from.</span>
+<span class="sd">    :type ewkt: ColumnOrName</span>
+<span class="sd">    :return: Geography column representing the EWKT string.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_constructor_function</span><span class="p">(</span><span class="s2">&quot;ST_GeogFromEWKT&quot;</span><span class="p">,</span> <span class="n">ewkt</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_GeogFromGeoHash"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_constructors.ST_GeogFromGeoHash">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_GeogFromGeoHash</span><span class="p">(</span>
+    <span class="n">geohash</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">precision</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a geography column from a geohash column at a specified precision.</span>
+
+<span class="sd">    :param geohash: Geohash string column to generate from.</span>
+<span class="sd">    :type geohash: ColumnOrName</span>
+<span class="sd">    :param precision: Geohash precision to use, either an integer or an integer column.</span>
+<span class="sd">    :type precision: Union[ColumnOrName, int]</span>
+<span class="sd">    :return: Geography column representing the supplied geohash and precision level.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">geohash</span><span class="p">)</span> <span class="k">if</span> <span class="n">precision</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">geohash</span><span class="p">,</span> <span class="n">precision</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_call_constructor_function</span><span class="p">(</span><span class="s2">&quot;ST_GeogFromGeoHash&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_GeogCollFromText"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_constructors.ST_GeogCollFromText">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_GeogCollFromText</span><span class="p">(</span>
+    <span class="n">wkt</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">srid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ColumnOrNameOrNumber</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a GeometryCollection geography from a GeometryCollection WKT representation.</span>
+
+<span class="sd">    :param wkt: GeometryCollection WKT string column to generate from.</span>
+<span class="sd">    :type wkt: ColumnOrName</span>
+<span class="sd">    :param srid: SRID for the geography.</span>
+<span class="sd">    :type srid: ColumnOrNameOrNumber</span>
+<span class="sd">    :return: GeometryCollection geography generated from the wkt column.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">wkt</span><span class="p">)</span> <span class="k">if</span> <span class="n">srid</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">wkt</span><span class="p">,</span> <span class="n">srid</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_call_constructor_function</span><span class="p">(</span><span class="s2">&quot;ST_GeogCollFromText&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_GeogToGeometry"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_constructors.ST_GeogToGeometry">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_GeogToGeometry</span><span class="p">(</span><span class="n">geog</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a geography column into a geometry column.</span>
+
+<span class="sd">    :param geog: Geography column to convert.</span>
+<span class="sd">    :type geog: ColumnOrName</span>
+<span class="sd">    :return: Geometry column representing the geography.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_constructor_function</span><span class="p">(</span><span class="s2">&quot;ST_GeogToGeometry&quot;</span><span class="p">,</span> <span class="n">geog</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_GeomToGeography"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_constructors.ST_GeomToGeography">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_GeomToGeography</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a geometry column into a geography column.</span>
+
+<span class="sd">    :param geom: Geometry column to convert.</span>
+<span class="sd">    :type geom: ColumnOrName</span>
+<span class="sd">    :return: Geography column representing the geometry.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_constructor_function</span><span class="p">(</span><span class="s2">&quot;ST_GeomToGeography&quot;</span><span class="p">,</span> <span class="n">geom</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="ST_GeomFromEWKT"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_constructors.ST_GeomFromEWKT">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_GeomFromEWKT</span><span class="p">(</span><span class="n">ewkt</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a geometry column from a OGC Extended Well-Known Text (WKT) string column.</span>
