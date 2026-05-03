@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.sql
 
+import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.spark.sql.DataFrame
 import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon}
 
@@ -71,6 +72,48 @@ class aggregateFunctionTestScala extends TestBaseScala {
       assert(env.getMinY == 2.0)
       assert(env.getMaxX == 3.0)
       assert(env.getMaxY == 4.0)
+    }
+
+    it("Passed ST_Extent") {
+      val df = sparkSession.sql(
+        "SELECT ST_GeomFromWKT(wkt) AS geom FROM VALUES ('POINT (1 2)'), ('POINT (4 5)'), ('LINESTRING (-3 0, 0 0)') AS t(wkt)")
+      df.createOrReplaceTempView("t")
+      val bbox =
+        sparkSession.sql("SELECT ST_Extent(geom) AS bbox FROM t").take(1)(0).getAs[Box2D](0)
+      assert(bbox.getXMin == -3.0)
+      assert(bbox.getYMin == 0.0)
+      assert(bbox.getXMax == 4.0)
+      assert(bbox.getYMax == 5.0)
+    }
+
+    it("ST_Extent returns null over zero rows") {
+      val emptyDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT(wkt) AS geom FROM VALUES (NULL) AS t(wkt) WHERE wkt IS NOT NULL")
+      emptyDf.createOrReplaceTempView("empty_extent")
+      val result = sparkSession.sql("SELECT ST_Extent(geom) FROM empty_extent")
+      assert(result.take(1)(0).get(0) == null)
+    }
+
+    it("ST_Extent returns null when all inputs are null or empty") {
+      val nullDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT(wkt) AS geom FROM VALUES (CAST(NULL AS STRING)), ('POINT EMPTY'), ('POLYGON EMPTY') AS t(wkt)")
+      nullDf.createOrReplaceTempView("null_extent")
+      val result = sparkSession.sql("SELECT ST_Extent(geom) FROM null_extent")
+      assert(result.take(1)(0).get(0) == null)
+    }
+
+    it("ST_Extent ignores null and empty rows mixed with valid geometries") {
+      val mixedDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT(wkt) AS geom FROM VALUES (CAST(NULL AS STRING)), ('POINT EMPTY'), ('POINT (10 20)'), ('POINT (-5 -5)') AS t(wkt)")
+      mixedDf.createOrReplaceTempView("mixed_extent")
+      val bbox = sparkSession
+        .sql("SELECT ST_Extent(geom) FROM mixed_extent")
+        .take(1)(0)
+        .getAs[Box2D](0)
+      assert(bbox.getXMin == -5.0)
+      assert(bbox.getYMin == -5.0)
+      assert(bbox.getXMax == 10.0)
+      assert(bbox.getYMax == 20.0)
     }
 
     it("Passed ST_Union_aggr") {

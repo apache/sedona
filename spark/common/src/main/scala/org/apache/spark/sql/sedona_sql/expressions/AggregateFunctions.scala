@@ -19,6 +19,7 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.Functions
+import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.spark.sql.{Encoder, Encoders}
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.expressions.Aggregator
@@ -160,6 +161,51 @@ private[apache] class ST_Envelope_Aggr
   def bufferEncoder: Encoder[Option[EnvelopeBuffer]] = Encoders.product[Option[EnvelopeBuffer]]
 
   def outputEncoder: ExpressionEncoder[Geometry] = serde
+
+  def zero: Option[EnvelopeBuffer] = None
+}
+
+/**
+ * Return the planar bounding box (Box2D) of all geometries in the given column. Returns NULL when
+ * the input contains no rows or all rows are null/empty geometries. Mirrors PostGIS ST_Extent.
+ *
+ * ST_Envelope_Aggr is left untouched (returns a polygon Geometry) for backwards compatibility.
+ */
+private[apache] class ST_Extent extends Aggregator[Geometry, Option[EnvelopeBuffer], Box2D] {
+
+  val outputSerde: ExpressionEncoder[Box2D] = ExpressionEncoder[Box2D]()
+
+  def reduce(buffer: Option[EnvelopeBuffer], input: Geometry): Option[EnvelopeBuffer] = {
+    if (input == null || input.isEmpty) return buffer
+    val env = input.getEnvelopeInternal
+    val envBuffer = EnvelopeBuffer(env.getMinX, env.getMaxX, env.getMinY, env.getMaxY)
+    buffer match {
+      case Some(b) => Some(b.merge(envBuffer))
+      case None => Some(envBuffer)
+    }
+  }
+
+  def merge(
+      buffer1: Option[EnvelopeBuffer],
+      buffer2: Option[EnvelopeBuffer]): Option[EnvelopeBuffer] = {
+    (buffer1, buffer2) match {
+      case (Some(b1), Some(b2)) => Some(b1.merge(b2))
+      case (Some(_), None) => buffer1
+      case (None, Some(_)) => buffer2
+      case (None, None) => None
+    }
+  }
+
+  def finish(reduction: Option[EnvelopeBuffer]): Box2D = {
+    reduction match {
+      case Some(b) => new Box2D(b.minX, b.minY, b.maxX, b.maxY)
+      case None => null
+    }
+  }
+
+  def bufferEncoder: Encoder[Option[EnvelopeBuffer]] = Encoders.product[Option[EnvelopeBuffer]]
+
+  def outputEncoder: ExpressionEncoder[Box2D] = outputSerde
 
   def zero: Option[EnvelopeBuffer] = None
 }
