@@ -522,10 +522,15 @@ class BroadcastIndexJoinGeographySuite extends TestBaseScala {
       assert(nullPolyIds === Set(98))
     }
 
+    // Empty-input tests do NOT assert planUsesBroadcastIndexJoin: when one side of the
+    // join is statically empty, Spark's logical optimizer (PropagateEmptyRelation /
+    // ReplaceEmptyRelation) replaces the join with a LocalRelation/EmptyRelation
+    // before the spatial-join strategy runs, so there is no BroadcastIndexJoinExec
+    // to assert on. The intent of these tests is correctness, not plan shape.
+
     it("Empty broadcast side: inner join returns 0 rows") {
       val joined =
         pointGeogDf.join(broadcast(emptyPolygonGeogDf), expr("ST_Within(pt_geog, poly_geog)"))
-      assert(planUsesBroadcastIndexJoin(joined))
       assert(joined.count() === 0)
     }
 
@@ -534,7 +539,6 @@ class BroadcastIndexJoinGeographySuite extends TestBaseScala {
         broadcast(emptyPolygonGeogDf),
         expr("ST_Within(pt_geog, poly_geog)"),
         "left_outer")
-      assert(planUsesBroadcastIndexJoin(joined))
       assert(joined.count() === 6)
       assert(joined.where("poly_id IS NULL").count() === 6)
     }
@@ -542,7 +546,6 @@ class BroadcastIndexJoinGeographySuite extends TestBaseScala {
     it("Empty stream side: inner join returns 0 rows") {
       val joined =
         emptyPointGeogDf.join(broadcast(polygonGeogDf), expr("ST_Intersects(poly_geog, pt_geog)"))
-      assert(planUsesBroadcastIndexJoin(joined))
       assert(joined.count() === 0)
     }
   }
