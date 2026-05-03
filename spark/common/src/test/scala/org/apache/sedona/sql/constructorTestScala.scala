@@ -166,6 +166,16 @@ class constructorTestScala extends TestBaseScala with Matchers {
       assert(bbox.getXMax == -170.0)
     }
 
+    it("ST_MakeBox2D ignores Z on 3D point input") {
+      val df = sparkSession.sql(
+        "SELECT ST_MakeBox2D(ST_PointZ(1.0, 2.0, 99.0), ST_PointZ(4.0, 5.0, 99.0)) AS bbox")
+      val bbox = df.collect()(0).getAs[Box2D]("bbox")
+      assert(bbox.getXMin == 1.0)
+      assert(bbox.getYMin == 2.0)
+      assert(bbox.getXMax == 4.0)
+      assert(bbox.getYMax == 5.0)
+    }
+
     it("ST_MakeBox2D rejects non-point input") {
       val ex = intercept[Exception] {
         sparkSession
