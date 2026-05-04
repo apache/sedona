@@ -196,8 +196,7 @@ public class Spheroid {
     double distance = g.s12; // Distance in meters
 
     // Convert distance to angular width in degrees
-    Double angularWidth =
-        Math.toDegrees(distance / (Geodesic.WGS84.EquatorialRadius() * Math.PI / 180));
+    Double angularWidth = distance / (Geodesic.WGS84.EquatorialRadius() * Math.PI / 180);
 
     return angularWidth;
   }
@@ -213,8 +212,7 @@ public class Spheroid {
     double distance = g.s12; // Distance in meters
 
     // Convert distance to angular height in degrees
-    Double angularHeight =
-        Math.toDegrees(distance / (Geodesic.WGS84.EquatorialRadius() * Math.PI / 180));
+    Double angularHeight = distance / (Geodesic.WGS84.EquatorialRadius() * Math.PI / 180);
 
     return angularHeight;
   }
