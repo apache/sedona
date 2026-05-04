@@ -274,6 +274,17 @@ class functionTestScala
       assert(test.take(1)(0).get(0).asInstanceOf[Double] == -3.0)
     }
 
+    it("Passed ST_AsText for Box2D") {
+      val df = sparkSession.sql("""
+        SELECT
+          ST_AsText(ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))'))) AS wkt,
+          ST_AsText(ST_Box2D(ST_GeomFromText(NULL))) AS null_wkt
+      """)
+      val row = df.collect()(0)
+      assert(row.getString(0) == "BOX(1.0 2.0, 4.0 5.0)")
+      assert(row.isNullAt(1))
+    }
+
     it("Passed ST_XMin / XMax / YMin / YMax for Box2D") {
       val df = sparkSession.sql("""
         WITH t AS (

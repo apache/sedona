@@ -290,6 +290,29 @@ public class Constructors {
   }
 
   /**
+   * Convert a {@link Box2D} to a closed rectangular polygon. NULL on null input. Mirrors PostGIS
+   * {@code box2d::geometry}.
+   */
+  public static Geometry geomFromBox2D(Box2D box) {
+    if (box == null) {
+      return null;
+    }
+    double xmin = box.getXMin();
+    double ymin = box.getYMin();
+    double xmax = box.getXMax();
+    double ymax = box.getYMax();
+    Coordinate[] coords =
+        new Coordinate[] {
+          new Coordinate(xmin, ymin),
+          new Coordinate(xmin, ymax),
+          new Coordinate(xmax, ymax),
+          new Coordinate(xmax, ymin),
+          new Coordinate(xmin, ymin)
+        };
+    return GEOMETRY_FACTORY.createPolygon(coords);
+  }
+
+  /**
    * Build a {@link Box2D} from two corner points. The corners are taken verbatim — no swapping or
    * validation of ordering — so {@code xmin > xmax} or {@code ymin > ymax} are preserved as
    * supplied. NULL or empty point inputs return NULL.

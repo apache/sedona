@@ -552,6 +552,22 @@ private[apache] case class ST_MakeBox2D(inputExpressions: Seq[Expression])
   }
 }
 
+/**
+ * Convert a Box2D to a closed rectangular polygon Geometry. Equivalent to PostGIS {@code
+ * box2d::geometry}. Exposed as a function rather than a Catalyst implicit cast because UDT-to-UDT
+ * implicit casts require Catalyst-level work; ST_GeomFromBox2D lives alongside the other
+ * ST_GeomFrom* constructors.
+ *
+ * @param inputExpressions
+ */
+private[apache] case class ST_GeomFromBox2D(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.geomFromBox2D _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 private[apache] trait UserDataGenerator {
   def generateUserData(
       minInputLength: Integer,

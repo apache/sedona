@@ -868,6 +868,22 @@ public class Functions {
     return GeomUtils.getWKT(geometry);
   }
 
+  /** PostGIS-format text for a Box2D: {@code BOX(xmin ymin, xmax ymax)}. NULL on null input. */
+  public static String asWKT(Box2D box) {
+    if (box == null) {
+      return null;
+    }
+    return "BOX("
+        + box.getXMin()
+        + " "
+        + box.getYMin()
+        + ", "
+        + box.getXMax()
+        + " "
+        + box.getYMax()
+        + ")";
+  }
+
   public static byte[] asEWKB(Geometry geometry) {
     return GeomUtils.getEWKB(geometry);
   }
