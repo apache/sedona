@@ -57,6 +57,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[ST_GeomFromEWKT](),
     function[ST_GeomFromWKB](),
     function[ST_GeomFromEWKB](),
+    function[ST_GeomFromBox2D](),
     function[ST_GeomFromGeoJSON](),
     function[ST_GeomFromGML](),
     function[ST_GeomFromKML](),

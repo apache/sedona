@@ -290,6 +290,39 @@ public class Constructors {
   }
 
   /**
+   * Convert a {@link Box2D} to a Geometry. Mirrors PostGIS {@code box2d::geometry}: dispatches on
+   * dimensionality so the result matches what {@code ST_Envelope(geom)} would have produced for the
+   * source geometry. Degenerate boxes return:
+   *
+   * <ul>
+   *   <li>{@code POINT} when {@code xmin == xmax && ymin == ymax}
+   *   <li>{@code LINESTRING} when exactly one of the X / Y intervals collapses
+   *   <li>{@code POLYGON} otherwise
+   * </ul>
+   *
+   * Returns NULL on null input.
+   */
+  public static Geometry geomFromBox2D(Box2D box) {
+    if (box == null) {
+      return null;
+    }
+    double xmin = box.getXMin();
+    double ymin = box.getYMin();
+    double xmax = box.getXMax();
+    double ymax = box.getYMax();
+    boolean xCollapsed = xmin == xmax;
+    boolean yCollapsed = ymin == ymax;
+    if (xCollapsed && yCollapsed) {
+      return GEOMETRY_FACTORY.createPoint(new Coordinate(xmin, ymin));
+    }
+    if (xCollapsed || yCollapsed) {
+      return GEOMETRY_FACTORY.createLineString(
+          new Coordinate[] {new Coordinate(xmin, ymin), new Coordinate(xmax, ymax)});
+    }
+    return polygonFromEnvelope(xmin, ymin, xmax, ymax);
+  }
+
+  /**
    * Build a {@link Box2D} from two corner points. The corners are taken verbatim — no swapping or
    * validation of ordering — so {@code xmin > xmax} or {@code ymin > ymax} are preserved as
    * supplied. NULL or empty point inputs return NULL.

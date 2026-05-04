@@ -176,6 +176,21 @@ class constructorTestScala extends TestBaseScala with Matchers {
       assert(bbox.getYMax == 5.0)
     }
 
+    it("Passed ST_GeomFromBox2D") {
+      val df = sparkSession.sql("""
+        SELECT
+          ST_AsText(ST_GeomFromBox2D(ST_MakeBox2D(ST_Point(1.0, 2.0), ST_Point(4.0, 5.0)))) AS poly,
+          ST_AsText(ST_GeomFromBox2D(ST_MakeBox2D(ST_Point(3.0, 3.0), ST_Point(3.0, 3.0)))) AS point,
+          ST_AsText(ST_GeomFromBox2D(ST_MakeBox2D(ST_Point(1.0, 5.0), ST_Point(4.0, 5.0)))) AS line,
+          ST_GeomFromBox2D(ST_MakeBox2D(ST_GeomFromText(NULL), ST_Point(1.0, 1.0))) AS null_geom
+      """)
+      val row = df.collect()(0)
+      assert(row.getString(0) == "POLYGON ((1 2, 1 5, 4 5, 4 2, 1 2))")
+      assert(row.getString(1) == "POINT (3 3)")
+      assert(row.getString(2) == "LINESTRING (1 5, 4 5)")
+      assert(row.isNullAt(3))
+    }
+
     it("ST_MakeBox2D rejects non-point input") {
       val ex = intercept[Exception] {
         sparkSession
