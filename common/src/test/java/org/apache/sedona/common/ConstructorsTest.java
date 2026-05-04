@@ -244,13 +244,24 @@ public class ConstructorsTest {
 
   @Test
   public void geomFromBox2D() {
+    // 2-D box → POLYGON
     Geometry polygon = Constructors.geomFromBox2D(new Box2D(1.0, 2.0, 4.0, 5.0));
     assertTrue(polygon instanceof Polygon);
     assertEquals("POLYGON ((1 2, 1 5, 4 5, 4 2, 1 2))", Functions.asWKT(polygon));
 
-    // Degenerate box collapsed to a point/line is still a valid (closed-ring) polygon.
-    Geometry degenerate = Constructors.geomFromBox2D(new Box2D(3.0, 3.0, 3.0, 3.0));
-    assertTrue(degenerate instanceof Polygon);
+    // Collapsed in both axes → POINT (matches PostGIS box2d::geometry and ST_Envelope(point)).
+    Geometry point = Constructors.geomFromBox2D(new Box2D(3.0, 3.0, 3.0, 3.0));
+    assertTrue(point instanceof Point);
+    assertEquals("POINT (3 3)", Functions.asWKT(point));
+
+    // Collapsed in one axis → LINESTRING (matches ST_Envelope of an axis-aligned line).
+    Geometry horizontalLine = Constructors.geomFromBox2D(new Box2D(1.0, 5.0, 4.0, 5.0));
+    assertTrue(horizontalLine instanceof LineString);
+    assertEquals("LINESTRING (1 5, 4 5)", Functions.asWKT(horizontalLine));
+
+    Geometry verticalLine = Constructors.geomFromBox2D(new Box2D(2.0, 1.0, 2.0, 4.0));
+    assertTrue(verticalLine instanceof LineString);
+    assertEquals("LINESTRING (2 1, 2 4)", Functions.asWKT(verticalLine));
 
     assertNull(Constructors.geomFromBox2D(null));
   }

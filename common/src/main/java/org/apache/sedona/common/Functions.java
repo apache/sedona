@@ -869,10 +869,16 @@ public class Functions {
   }
 
   /**
-   * PostGIS-format text for a Box2D: {@code BOX(xmin ymin, xmax ymax)}. NULL on null input.
+   * PostGIS-format text for a Box2D: {@code BOX(x1 y1, x2 y2)}. NULL on null input.
    *
-   * <p>Note: not WKT (WKT has no BOX type), so this lives outside the {@code asWKT} family to keep
-   * that API a true geometry serializer.
+   * <p>Values are emitted exactly as stored on the Box2D — this method does not normalize the
+   * corners. Sedona's Box2D allows {@code xmin > xmax} (or {@code ymin > ymax}); that ordering is
+   * reserved for a future antimeridian-wraparound semantics on geography bboxes (cf. sedona-db's
+   * {@code WraparoundInterval}). The text faithfully reflects what {@code ST_XMin} / {@code
+   * ST_XMax} / etc. would return.
+   *
+   * <p>Not WKT (WKT has no {@code BOX} type), so this lives outside the {@code asWKT} family to
+   * keep that API a true geometry serializer.
    */
   public static String box2dAsText(Box2D box) {
     if (box == null) {
