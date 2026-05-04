@@ -538,5 +538,10 @@ object Catalog extends AbstractCatalog with Logging {
   // are only constructed when registerAll is called and Spark is set up. This lets the
   // categorization invariant test access `Catalog.expressions` without bootstrapping Spark.
   lazy val aggregateExpressions: Seq[Aggregator[Geometry, _, _]] =
-    Seq(new ST_Envelope_Aggr, new ST_Intersection_Aggr, new ST_Union_Aggr(), new ST_Collect_Agg())
+    Seq(
+      new ST_Envelope_Aggr,
+      new ST_Extent,
+      new ST_Intersection_Aggr,
+      new ST_Union_Aggr(),
+      new ST_Collect_Agg())
 }
