@@ -868,8 +868,13 @@ public class Functions {
     return GeomUtils.getWKT(geometry);
   }
 
-  /** PostGIS-format text for a Box2D: {@code BOX(xmin ymin, xmax ymax)}. NULL on null input. */
-  public static String asWKT(Box2D box) {
+  /**
+   * PostGIS-format text for a Box2D: {@code BOX(xmin ymin, xmax ymax)}. NULL on null input.
+   *
+   * <p>Note: not WKT (WKT has no BOX type), so this lives outside the {@code asWKT} family to keep
+   * that API a true geometry serializer.
+   */
+  public static String box2dAsText(Box2D box) {
     if (box == null) {
       return null;
     }

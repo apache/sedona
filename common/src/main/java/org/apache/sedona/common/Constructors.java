@@ -297,19 +297,7 @@ public class Constructors {
     if (box == null) {
       return null;
     }
-    double xmin = box.getXMin();
-    double ymin = box.getYMin();
-    double xmax = box.getXMax();
-    double ymax = box.getYMax();
-    Coordinate[] coords =
-        new Coordinate[] {
-          new Coordinate(xmin, ymin),
-          new Coordinate(xmin, ymax),
-          new Coordinate(xmax, ymax),
-          new Coordinate(xmax, ymin),
-          new Coordinate(xmin, ymin)
-        };
-    return GEOMETRY_FACTORY.createPolygon(coords);
+    return polygonFromEnvelope(box.getXMin(), box.getYMin(), box.getXMax(), box.getYMax());
   }
 
   /**

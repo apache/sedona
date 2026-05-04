@@ -26,6 +26,7 @@ import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.utils.*;
@@ -164,6 +165,15 @@ public class FunctionsTest extends TestBase {
     actual = geomFromEWKT(expectedResult);
     assertEquals(geometry, actual);
     assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void box2dAsText() {
+    assertEquals("BOX(1.0 2.0, 4.0 5.0)", Functions.box2dAsText(new Box2D(1.0, 2.0, 4.0, 5.0)));
+    assertEquals(
+        "BOX(-180.0 -90.0, 180.0 90.0)",
+        Functions.box2dAsText(new Box2D(-180.0, -90.0, 180.0, 90.0)));
+    assertNull(Functions.box2dAsText(null));
   }
 
   @Test

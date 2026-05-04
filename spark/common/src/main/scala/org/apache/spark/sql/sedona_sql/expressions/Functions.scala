@@ -615,7 +615,7 @@ private[apache] case class ST_AsText(inputExpressions: Seq[Expression])
       inferrableFunction1((g: Geometry) => Functions.asWKT(g)),
       inferrableFunction1((g: Geography) =>
         org.apache.sedona.common.geography.Functions.asText(g)),
-      inferrableFunction1((b: Box2D) => Functions.asWKT(b))) {
+      inferrableFunction1((b: Box2D) => Functions.box2dAsText(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

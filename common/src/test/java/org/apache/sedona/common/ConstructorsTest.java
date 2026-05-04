@@ -20,6 +20,7 @@ package org.apache.sedona.common;
 
 import static org.junit.Assert.*;
 
+import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
@@ -239,6 +240,19 @@ public class ConstructorsTest {
     assertTrue(geom instanceof Polygon);
     actual = Functions.asWKT(geom);
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void geomFromBox2D() {
+    Geometry polygon = Constructors.geomFromBox2D(new Box2D(1.0, 2.0, 4.0, 5.0));
+    assertTrue(polygon instanceof Polygon);
+    assertEquals("POLYGON ((1 2, 1 5, 4 5, 4 2, 1 2))", Functions.asWKT(polygon));
+
+    // Degenerate box collapsed to a point/line is still a valid (closed-ring) polygon.
+    Geometry degenerate = Constructors.geomFromBox2D(new Box2D(3.0, 3.0, 3.0, 3.0));
+    assertTrue(degenerate instanceof Polygon);
+
+    assertNull(Constructors.geomFromBox2D(null));
   }
 
   @Test
