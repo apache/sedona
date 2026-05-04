@@ -2597,6 +2597,28 @@ intersect
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#toExpandedGeographyEnvelopeRDD" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toExpandedGeographyEnvelopeRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression,boundRadius:org.apache.spark.sql.catalyst.expressions.Expression):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]"></a><a id="toExpandedGeographyEnvelopeRDD(RDD[UnsafeRow],Expression,Expression):SpatialRDD[Geometry]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/RangeJoinExec.html#toExpandedGeographyEnvelopeRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression,boundRadius:org.apache.spark.sql.catalyst.expressions.Expression):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toExpandedGeographyEnvelopeRDD</span><span class="params">(<span name="rdd">rdd: <span class="extype" name="org.apache.spark.rdd.RDD">RDD</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.UnsafeRow">UnsafeRow</span>]</span>, <span name="shapeExpression">shapeExpression: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="boundRadius">boundRadius: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>)</span><span class="result">: <a href="../../../../../sedona/core/spatialRDD/SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Geography variant of <a href="TraitJoinQueryBase.html#toExpandedEnvelopeRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression,boundRadius:org.apache.spark.sql.catalyst.expressions.Expression,isGeography:Boolean):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]" class="extmbr" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#toExpandedEnvelopeRDD">toExpandedEnvelopeRDD</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Geography variant of <a href="TraitJoinQueryBase.html#toExpandedEnvelopeRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression,boundRadius:org.apache.spark.sql.catalyst.expressions.Expression,isGeography:Boolean):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]" class="extmbr" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#toExpandedEnvelopeRDD">toExpandedEnvelopeRDD</a>. Each row becomes a JTS geometry whose
+envelope is the Geography's lat/lng bounding rectangle expanded by <code>boundRadius</code> meters using
+the Haversine-based polar-radius approximation in
+<a href="JoinedGeometry$.html#geometryToExpandedEnvelope(geom:org.locationtech.jts.geom.Geometry,distance:Double,isGeography:Boolean):org.locationtech.jts.geom.Geometry" class="extmbr" name="org.apache.spark.sql.sedona_sql.strategy.join.JoinedGeometry#geometryToExpandedEnvelope">JoinedGeometry.geometryToExpandedEnvelope</a> (with <code>isGeography=true</code>). The Geography object
+and per-row radius are carried alongside the original row in <code>userData</code> via
+<a href="GeographyJoinShape.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.GeographyJoinShape">GeographyJoinShape</a> so the join executor can perform S2-based ST_DWithin refinement.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#toGeographySpatialRDD" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toGeographySpatialRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]"></a><a id="toGeographySpatialRDD(RDD[UnsafeRow],Expression):SpatialRDD[Geometry]"></a>
       <span class="permalink">

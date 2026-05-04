@@ -280,13 +280,15 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">GeographyJoinShape</span><span class="params">(<span name="geog">geog: <span class="extype" name="org.apache.sedona.common.S2Geography.Geography">Geography</span></span>, <span name="row">row: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.UnsafeRow">UnsafeRow</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">GeographyJoinShape</span><span class="params">(<span name="geog">geog: <span class="extype" name="org.apache.sedona.common.S2Geography.Geography">Geography</span></span>, <span name="row">row: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.UnsafeRow">UnsafeRow</span></span>, <span name="radius">radius: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.0</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Payload stored in <code>userData</code> on each Geography index entry. Carries both the deserialized
-Geography (for S2 predicate refinement) and the original row (for the join output).
+Geography (for S2 predicate refinement) and the original row (for the join output). For
+<code>ST_DWithin</code> joins, <code>radius</code> carries the per-row distance threshold from the row that produced
+this shape; for non-distance predicates it remains 0.0.
 </p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -338,9 +340,9 @@ Geography (for S2 predicate refinement) and the original row (for the join outpu
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="org.apache.spark.sql.sedona_sql.strategy.join.GeographyJoinShape#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(geog:org.apache.sedona.common.S2Geography.Geography,row:org.apache.spark.sql.catalyst.expressions.UnsafeRow):org.apache.spark.sql.sedona_sql.strategy.join.GeographyJoinShape"></a><a id="&lt;init&gt;:GeographyJoinShape"></a>
+      <a id="&lt;init&gt;(geog:org.apache.sedona.common.S2Geography.Geography,row:org.apache.spark.sql.catalyst.expressions.UnsafeRow,radius:Double):org.apache.spark.sql.sedona_sql.strategy.join.GeographyJoinShape"></a><a id="&lt;init&gt;:GeographyJoinShape"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/GeographyJoinShape.html#&lt;init&gt;(geog:org.apache.sedona.common.S2Geography.Geography,row:org.apache.spark.sql.catalyst.expressions.UnsafeRow):org.apache.spark.sql.sedona_sql.strategy.join.GeographyJoinShape" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/GeographyJoinShape.html#&lt;init&gt;(geog:org.apache.sedona.common.S2Geography.Geography,row:org.apache.spark.sql.catalyst.expressions.UnsafeRow,radius:Double):org.apache.spark.sql.sedona_sql.strategy.join.GeographyJoinShape" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -349,7 +351,7 @@ Geography (for S2 predicate refinement) and the original row (for the join outpu
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">GeographyJoinShape</span><span class="params">(<span name="geog">geog: <span class="extype" name="org.apache.sedona.common.S2Geography.Geography">Geography</span></span>, <span name="row">row: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.UnsafeRow">UnsafeRow</span></span>)</span>
+        <span class="name">GeographyJoinShape</span><span class="params">(<span name="geog">geog: <span class="extype" name="org.apache.sedona.common.S2Geography.Geography">Geography</span></span>, <span name="row">row: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.UnsafeRow">UnsafeRow</span></span>, <span name="radius">radius: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.0</span></span>)</span>
       </span>
       
       
@@ -580,6 +582,22 @@ Geography (for S2 predicate refinement) and the original row (for the join outpu
                 <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.GeographyJoinShape#radius" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="radius:Double"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/GeographyJoinShape.html#radius:Double" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">radius</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      
+      
     </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.GeographyJoinShape#row" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="row:org.apache.spark.sql.catalyst.expressions.UnsafeRow"></a><a id="row:UnsafeRow"></a>
       <span class="permalink">

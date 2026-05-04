@@ -427,11 +427,13 @@ ST_Distance(a.geom, b.geom) &lt;= 1
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Payload stored in userData on each Geography index entry." href="GeographyJoinShape.html"><span class="name">GeographyJoinShape</span></a><span class="params">(<span name="geog">geog: <span class="extype" name="org.apache.sedona.common.S2Geography.Geography">Geography</span></span>, <span name="row">row: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.UnsafeRow">UnsafeRow</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="Payload stored in userData on each Geography index entry." href="GeographyJoinShape.html"><span class="name">GeographyJoinShape</span></a><span class="params">(<span name="geog">geog: <span class="extype" name="org.apache.sedona.common.S2Geography.Geography">Geography</span></span>, <span name="row">row: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.UnsafeRow">UnsafeRow</span></span>, <span name="radius">radius: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.0</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       <p class="shortcomment cmt">Payload stored in <code>userData</code> on each Geography index entry.</p><div class="fullcomment"><div class="comment cmt"><p>Payload stored in <code>userData</code> on each Geography index entry. Carries both the deserialized
-Geography (for S2 predicate refinement) and the original row (for the join output).
+Geography (for S2 predicate refinement) and the original row (for the join output). For
+<code>ST_DWithin</code> joins, <code>radius</code> carries the per-row distance threshold from the row that produced
+this shape; for non-distance predicates it remains 0.0.
 </p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.JoinQueryDetection" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="JoinQueryDetectionextendsProductwithSerializable"></a><a id="JoinQueryDetection:JoinQueryDetection"></a>
