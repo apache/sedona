@@ -3569,11 +3569,14 @@ public class FunctionsTest extends TestBase {
 
   @Test
   public void testBestSRIDNearSouthPole() throws ParseException {
-    int actualEPSG = Functions.bestSRID(geomFromWKT("LINESTRING (-179.9999994 -82.42408, -157.330902 -85.0511284)", 4326));
+    int actualEPSG =
+        Functions.bestSRID(
+            geomFromWKT("LINESTRING (-179.9999994 -82.42408, -157.330902 -85.0511284)", 4326));
 
     assertEquals(
-      "Expected South Pole Lambert Azimuthal Equal Area projection near the south pole", Spheroid.EPSG_SOUTH_LAMBERT, actualEPSG);
-
+        "Expected South Pole Lambert Azimuthal Equal Area projection near the south pole",
+        Spheroid.EPSG_SOUTH_LAMBERT,
+        actualEPSG);
   }
 
   @Test
