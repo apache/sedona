@@ -135,6 +135,38 @@ trait TraitJoinQueryBase {
     spatialRdd
   }
 
+  /**
+   * Geography variant of [[toExpandedEnvelopeRDD]]. Each row becomes a JTS geometry whose
+   * envelope is the Geography's lat/lng bounding rectangle expanded by `boundRadius` meters using
+   * the Haversine-based polar-radius approximation in
+   * [[JoinedGeometry.geometryToExpandedEnvelope]] (with `isGeography=true`). The Geography object
+   * and per-row radius are carried alongside the original row in `userData` via
+   * [[GeographyJoinShape]] so the join executor can perform S2-based ST_DWithin refinement.
+   */
+  def toExpandedGeographyEnvelopeRDD(
+      rdd: RDD[UnsafeRow],
+      shapeExpression: Expression,
+      boundRadius: Expression): SpatialRDD[Geometry] = {
+    val spatialRdd = new SpatialRDD[Geometry]
+    spatialRdd.setRawSpatialRDD(rdd
+      .flatMap { x =>
+        val geogBytes = shapeExpression.eval(x).asInstanceOf[Array[Byte]]
+        if (geogBytes == null) {
+          None
+        } else {
+          val geog = GeographyWKBSerializer.deserialize(geogBytes)
+          val distance = boundRadius.eval(x).asInstanceOf[Double]
+          val baseEnvelope = JoinedGeometry.geographyToEnvelopeGeometry(geog)
+          val expandedEnvelope =
+            JoinedGeometry.geometryToExpandedEnvelope(baseEnvelope, distance, isGeography = true)
+          expandedEnvelope.setUserData(GeographyJoinShape(geog, x.copy, distance))
+          Some(expandedEnvelope)
+        }
+      }
+      .toJavaRDD())
+    spatialRdd
+  }
+
   def doSpatialPartitioning(
       dominantShapes: SpatialRDD[Geometry],
       followerShapes: SpatialRDD[Geometry],

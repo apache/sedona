@@ -56,6 +56,11 @@ case class SpatialIndexExec(
     val boundShape = BindReferences.bindReference(shape, child.output)
     val resultRaw = child.execute().asInstanceOf[RDD[UnsafeRow]].coalesce(1)
     val spatialRDD = distance match {
+      case Some(distanceExpression) if geographyShape =>
+        toExpandedGeographyEnvelopeRDD(
+          resultRaw,
+          boundShape,
+          BindReferences.bindReference(distanceExpression, child.output))
       case Some(distanceExpression) =>
         toExpandedEnvelopeRDD(
           resultRaw,

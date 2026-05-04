@@ -142,9 +142,12 @@ case class BroadcastIndexJoinExec(
   // asymmetric and we cannot rely on a SpatialPredicateEvaluator.
   private lazy val refinerSwap: Boolean = indexBuildSide != windowJoinSide
 
-  private def newRefiner(): JoinRefiner =
-    if (geographyShape) new GeographyContainsRefiner(refinerSwap)
-    else new JtsRefiner(evaluator)
+  private def newRefiner(): JoinRefiner = {
+    if (geographyShape) {
+      if (distance.isDefined) new GeographyDistanceRefiner(refinerSwap)
+      else new GeographyRelationRefiner(spatialPredicate, refinerSwap)
+    } else new JtsRefiner(evaluator)
+  }
 
   private def innerJoin(
       streamIter: Iterator[(Geometry, UnsafeRow)],
@@ -288,6 +291,36 @@ case class BroadcastIndexJoinExec(
       streamResultsRaw: RDD[UnsafeRow],
       boundStreamShape: Expression) = {
     distance match {
+      case Some(distanceExpression) if geographyShape =>
+        val boundDistance =
+          BindReferences.bindReference(distanceExpression, streamed.output)
+        // When the broadcast side already expanded its envelope by `d` (the
+        // literal-radius case, where the planner forwards the same distance to
+        // both sides so the per-row radius is also available here for the
+        // refiner), keep the stream envelope unexpanded. The coarse filter then
+        // matches the geometry path: `expand(build, d) ∩ stream`, not the wider
+        // `expand(build, d) ∩ expand(stream, d)`. When only the stream side
+        // received the distance (per-row radius bound to the stream side), the
+        // build side is unexpanded and we still need to expand the stream
+        // envelope to ensure the index returns all candidates within `d`.
+        val streamSideExpands = broadcast.distance.isEmpty
+        streamResultsRaw.map(row => {
+          val serialized = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
+          if (serialized == null) {
+            (null, row)
+          } else {
+            val geog = GeographyWKBSerializer.deserialize(serialized)
+            val radius = boundDistance.eval(row).asInstanceOf[Double]
+            val baseEnvelope = JoinedGeometry.geographyToEnvelopeGeometry(geog)
+            val shape = if (streamSideExpands) {
+              JoinedGeometry.geometryToExpandedEnvelope(baseEnvelope, radius, isGeography = true)
+            } else {
+              baseEnvelope
+            }
+            shape.setUserData(GeographyJoinShape(geog, row, radius))
+            (shape, row)
+          }
+        })
       case Some(distanceExpression) =>
         streamResultsRaw.map(row => {
           val geom = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
@@ -348,8 +381,9 @@ case class BroadcastIndexJoinExec(
  * Per-iter helper that decides whether a candidate from the broadcast index actually satisfies
  * the spatial predicate, and unpacks the candidate's `userData` into the output row.
  *
- * Two implementations: `JtsRefiner` for the planar JTS path (existing behaviour, byte-equivalent
- * to the previous inline code), and `GeographyContainsRefiner` for the new Geography-on-S2 path.
+ * Three implementations: `JtsRefiner` for the planar JTS path, `GeographyRelationRefiner` for
+ * non-distance Geography predicates (CONTAINS, WITHIN, INTERSECTS, EQUALS), and
+ * `GeographyDistanceRefiner` for ST_DWithin on Geography.
  */
 private sealed trait JoinRefiner {
   def matches(candidate: Geometry, streamShape: Geometry): Boolean
@@ -368,20 +402,49 @@ private final class JtsRefiner(evaluator: SpatialPredicateEvaluator) extends Joi
 }
 
 /**
- * Refines candidates with `Functions.contains` (S2 spherical containment). Caching of the per-
- * Geography S2 ShapeIndex happens inside `WKBGeography.getShapeIndexGeography()`, so we do not
- * need a JTS-style PreparedGeometry cache here — the build side keeps the same Geography JVM
- * instances for the lifetime of the broadcast.
+ * Refines candidates with the appropriate `org.apache.sedona.common.geography.Functions`
+ * predicate (CONTAINS / WITHIN / INTERSECTS / EQUALS). Caching of the per-Geography S2 ShapeIndex
+ * happens inside `WKBGeography.getShapeIndexGeography()`, so we do not need a JTS-style
+ * PreparedGeometry cache here — the build side keeps the same Geography JVM instances for the
+ * lifetime of the broadcast. `swap` flips operand order when the build side does not correspond
+ * to the predicate's left-hand argument (handles the `RIGHT JOIN` / right-broadcast case for
+ * asymmetric predicates).
  */
-private final class GeographyContainsRefiner(swap: Boolean) extends JoinRefiner {
+private final class GeographyRelationRefiner(predicate: SpatialPredicate, swap: Boolean)
+    extends JoinRefiner {
   override def matches(candidate: Geometry, streamShape: Geometry): Boolean = {
     val buildShape = candidate.getUserData.asInstanceOf[GeographyJoinShape]
     val streamShapeData = streamShape.getUserData.asInstanceOf[GeographyJoinShape]
-    if (swap) {
-      GeographyFunctions.contains(streamShapeData.geog, buildShape.geog)
-    } else {
-      GeographyFunctions.contains(buildShape.geog, streamShapeData.geog)
+    val (a, b) =
+      if (swap) (streamShapeData.geog, buildShape.geog)
+      else (buildShape.geog, streamShapeData.geog)
+    predicate match {
+      case SpatialPredicate.CONTAINS => GeographyFunctions.contains(a, b)
+      case SpatialPredicate.WITHIN => GeographyFunctions.within(a, b)
+      case SpatialPredicate.INTERSECTS => GeographyFunctions.intersects(a, b)
+      case SpatialPredicate.EQUALS => GeographyFunctions.equals(a, b)
+      case other =>
+        throw new UnsupportedOperationException(
+          s"Geography broadcast spatial join does not support predicate $other")
     }
+  }
+
+  override def unpackRow(candidate: Geometry): UnsafeRow =
+    candidate.getUserData.asInstanceOf[GeographyJoinShape].row
+}
+
+/**
+ * Refines candidates for ST_DWithin on Geography. The per-row distance threshold is carried on
+ * the stream-side `GeographyJoinShape.radius`, populated when the stream shape is built.
+ */
+private final class GeographyDistanceRefiner(swap: Boolean) extends JoinRefiner {
+  override def matches(candidate: Geometry, streamShape: Geometry): Boolean = {
+    val buildShape = candidate.getUserData.asInstanceOf[GeographyJoinShape]
+    val streamShapeData = streamShape.getUserData.asInstanceOf[GeographyJoinShape]
+    val (a, b) =
+      if (swap) (streamShapeData.geog, buildShape.geog)
+      else (buildShape.geog, streamShapeData.geog)
+    GeographyFunctions.dWithin(a, b, streamShapeData.radius)
   }
 
   override def unpackRow(candidate: Geometry): UnsafeRow =
