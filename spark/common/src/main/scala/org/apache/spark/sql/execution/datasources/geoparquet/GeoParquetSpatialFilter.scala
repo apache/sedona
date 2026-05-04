@@ -68,7 +68,7 @@ object GeoParquetSpatialFilter {
       extends GeoParquetSpatialFilter {
     def evaluate(columns: Map[String, GeometryFieldMetaData]): Boolean = {
       columns.get(columnName).forall { column =>
-        val bbox = column.bbox
+        val bbox = column.bbox.getOrElse(return true)
         if (bbox.isEmpty) {
           return true
         }

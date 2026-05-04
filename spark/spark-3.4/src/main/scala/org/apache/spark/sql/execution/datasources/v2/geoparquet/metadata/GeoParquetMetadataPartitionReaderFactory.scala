@@ -83,7 +83,7 @@ object GeoParquetMetadataPartitionReaderFactory {
           val columnMetadataFields: Array[Any] = Array(
             UTF8String.fromString(columnMetadata.encoding),
             new GenericArrayData(columnMetadata.geometryTypes.map(UTF8String.fromString).toArray),
-            new GenericArrayData(columnMetadata.bbox.toArray),
+            columnMetadata.bbox.map(b => new GenericArrayData(b.toArray)).orNull,
             columnMetadata.crs
               .map(projjson => UTF8String.fromString(compact(render(projjson))))
               .getOrElse(UTF8String.fromString("")),

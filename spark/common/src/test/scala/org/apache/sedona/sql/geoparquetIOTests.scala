@@ -252,9 +252,12 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       validateGeoParquetMetadata(geoParquetSavePath) { geo =>
         implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
         val g0Types = (geo \ "columns" \ "g" \ "geometry_types").extract[Seq[String]]
-        val g0BBox = (geo \ "columns" \ "g" \ "bbox").extract[Seq[Double]]
         assert(g0Types.isEmpty)
-        assert(g0BBox == Seq(0.0, 0.0, 0.0, 0.0))
+        // Per the GeoParquet spec, bbox is optional and represents the extent of the geometries
+        // in the file; for a file with no geometries we omit it entirely rather than emit a
+        // bogus [0, 0, 0, 0] (which would falsely advertise data at Null Island and break
+        // bbox-based file pruning in downstream readers). See issue #2880.
+        assert((geo \ "columns" \ "g" \ "bbox") == org.json4s.JNothing)
       }
     }
 
