@@ -200,6 +200,17 @@ repos:
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
       - id: insert-license
+        name: add license for all RST files
+        description: automatically adds a licence header to all reStructuredText files that don't have a license header
+        files: \.rst$
+        args:
+          - --comment-style
+          - '||'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.rst
+          - --fuzzy-match-generates-todo
+        exclude: ^\.github/workflows/license-templates/LICENSE\.rst$
+      - id: insert-license
         name: add license for all Scala files
         description: automatically adds a licence header to all Scala files that don't have a license header
         files: \.scala$
