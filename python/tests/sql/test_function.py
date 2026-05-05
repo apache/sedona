@@ -185,6 +185,28 @@ class TestPredicateJoin(TestBase):
         actual = function_df.take(1)[0][0].wkt
         assert actual == "LINESTRING (179 10, -179 10)"
 
+    def test_st_box_2d(self):
+        df = self.spark.sql("""
+            SELECT
+              ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')) AS bbox,
+              ST_Box2D(ST_GeomFromText('POINT EMPTY')) AS bbox_empty,
+              ST_Box2D(ST_GeomFromText(NULL)) AS bbox_null
+            """)
+        row = df.first()
+        bbox = row[0]
+        assert bbox.xmin == 1.0
+        assert bbox.ymin == 2.0
+        assert bbox.xmax == 4.0
+        assert bbox.ymax == 5.0
+        assert row[1] is None
+        assert row[2] is None
+
+    def test_st_as_text_box_2d(self):
+        result = self.spark.sql("""
+            SELECT ST_AsText(ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')))
+            """).first()[0]
+        assert result == "BOX(1.0 2.0, 4.0 5.0)"
+
     def test_st_envelope(self):
         polygon_from_wkt = (
             self.spark.read.format("csv")
