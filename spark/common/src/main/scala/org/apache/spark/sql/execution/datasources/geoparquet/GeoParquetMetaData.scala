@@ -34,7 +34,9 @@ import org.json4s.{DefaultFormats, Extraction, JField, JNothing, JNull, JObject,
  * @param geometryTypes
  *   The geometry types of all geometries, or an empty array if they are not known.
  * @param bbox
- *   Bounding Box of the geometries in the file, formatted according to RFC 7946, section 5.
+ *   Bounding Box of the geometries in the file, formatted according to RFC 7946, section 5. None
+ *   if the file contains no geometries (per the GeoParquet 1.1 spec, bbox is optional and should
+ *   be omitted when there is no extent to describe).
  * @param crs
  *   The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is
  *   null, Some(value) if the crs is present and not null.
@@ -44,7 +46,7 @@ import org.json4s.{DefaultFormats, Extraction, JField, JNothing, JNull, JObject,
 case class GeometryFieldMetaData(
     encoding: String,
     geometryTypes: Seq[String],
-    bbox: Seq[Double],
+    bbox: Option[Seq[Double]],
     crs: Option[JValue] = None,
     covering: Option[Covering] = None)
 

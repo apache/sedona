@@ -245,13 +245,19 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       val columns = geometryColumnInfoMap.map { case (ordinal, columnInfo) =>
         val columnName = schema.fields(ordinal).name
         val geometryTypes = columnInfo.seenGeometryTypes.toSeq
+        // Omit bbox from column metadata when no geometries were observed (e.g. an empty
+        // Spark partition produces a zero-row file). Per the GeoParquet 1.1 spec, bbox is
+        // optional and represents the extent of the geometries in the file; emitting
+        // [0, 0, 0, 0] for an empty file falsely advertises data at Null Island and breaks
+        // bbox-based file pruning in downstream readers.
         val bbox = if (geometryTypes.nonEmpty) {
-          Seq(
-            columnInfo.bbox.minX,
-            columnInfo.bbox.minY,
-            columnInfo.bbox.maxX,
-            columnInfo.bbox.maxY)
-        } else Seq(0.0, 0.0, 0.0, 0.0)
+          Some(
+            Seq(
+              columnInfo.bbox.minX,
+              columnInfo.bbox.minY,
+              columnInfo.bbox.maxX,
+              columnInfo.bbox.maxY))
+        } else None
         val crs = geoParquetColumnCrsMap.getOrElse(
           columnName, {
             if (!userExplicitlySetDefaultCrs) {
