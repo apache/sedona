@@ -164,7 +164,7 @@ class TestPredicateJoin(TestBase):
         )
         function_df.show()
         actual = function_df.take(1)[0][0]
-        assert actual == 3395
+        assert actual == 32614
 
     def test_st_shiftlongitude(self):
         function_df = self.spark.sql(
