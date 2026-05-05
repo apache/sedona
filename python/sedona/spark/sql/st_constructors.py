@@ -551,6 +551,42 @@ def ST_MakePoint(
 
 
 @validate_argument_types
+def ST_MakeBox2D(
+    lower_left: ColumnOrName,
+    upper_right: ColumnOrName,
+) -> Column:
+    """Construct a Box2D from two corner points (lower-left, upper-right).
+
+    Coordinates are taken verbatim — no swapping or ordering validation. NULL or
+    empty point inputs return NULL. Non-point inputs raise an error.
+
+    :param lower_left: Lower-left corner Point.
+    :type lower_left: ColumnOrName
+    :param upper_right: Upper-right corner Point.
+    :type upper_right: ColumnOrName
+    :return: Box2D column.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_MakeBox2D", (lower_left, upper_right))
+
+
+@validate_argument_types
+def ST_GeomFromBox2D(box: ColumnOrName) -> Column:
+    """Convert a Box2D to a Geometry.
+
+    Dispatches on dimensionality (matching PostGIS box2d::geometry and
+    Sedona's ST_Envelope): POINT for 0-D boxes, LINESTRING for 1-D boxes,
+    POLYGON otherwise. NULL on null input.
+
+    :param box: Box2D column to convert.
+    :type box: ColumnOrName
+    :return: Geometry column.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_GeomFromBox2D", box)
+
+
+@validate_argument_types
 def ST_MakeEnvelope(
     min_x: ColumnOrNameOrNumber,
     min_y: ColumnOrNameOrNumber,

@@ -650,6 +650,20 @@ def ST_EndPoint(line_string: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_Box2D(geometry: ColumnOrName) -> Column:
+    """Get the planar bounding box (Box2D) of a geometry.
+
+    Returns NULL for null or empty input.
+
+    :param geometry: Geometry column to compute the bounding box of.
+    :type geometry: ColumnOrName
+    :return: Box2D bounding box of the geometry.
+    :rtype: Column
+    """
+    return _call_st_function("ST_Box2D", geometry)
+
+
+@validate_argument_types
 def ST_Envelope(geometry: ColumnOrName) -> Column:
     """Calculate the envelope boundary of a geometry column.
 

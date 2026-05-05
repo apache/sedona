@@ -22,6 +22,29 @@ from tests.test_base import TestBase
 
 class TestConstructors(TestBase):
 
+    def test_st_extent(self):
+        df = self.spark.sql("""
+            SELECT ST_GeomFromWKT(wkt) AS geom
+            FROM VALUES ('POINT (1 2)'), ('POINT (4 5)'), ('LINESTRING (-3 0, 0 0)') AS t(wkt)
+            """)
+        df.createOrReplaceTempView("extent_input")
+        bbox = self.spark.sql("SELECT ST_Extent(geom) FROM extent_input").first()[0]
+        assert bbox.xmin == -3.0
+        assert bbox.ymin == 0.0
+        assert bbox.xmax == 4.0
+        assert bbox.ymax == 5.0
+
+    def test_st_extent_returns_null_for_empty_input(self):
+        df = self.spark.sql("""
+            SELECT ST_GeomFromWKT(wkt) AS geom
+            FROM VALUES (CAST(NULL AS STRING)), ('POINT EMPTY') AS t(wkt)
+            """)
+        df.createOrReplaceTempView("empty_extent_input")
+        result = self.spark.sql(
+            "SELECT ST_Extent(geom) FROM empty_extent_input"
+        ).first()[0]
+        assert result is None
+
     def test_st_envelope_aggr(self):
         point_csv_df = (
             self.spark.read.format("csv")
