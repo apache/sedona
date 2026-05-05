@@ -383,7 +383,7 @@ test_configurations = [
     ),
     (stf.ST_AsText, ("point",), "point_geom", "", "POINT (0 1)"),
     (stf.ST_Azimuth, ("a", "b"), "two_points", "geom * 180.0 / pi()", 90.0),
-    (stf.ST_BestSRID, ("geom",), "triangle_geom", "", 3395),
+    (stf.ST_BestSRID, ("geom",), "triangle_geom", "", 32631),
     (
         stf.ST_Boundary,
         ("geom",),
