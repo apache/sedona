@@ -43,14 +43,14 @@ ENV PYTHONPATH=${SPARK_HOME}/python
 # Set up OS libraries and PySpark
 RUN apt-get update
 RUN apt-get install -y openjdk-17-jdk-headless curl python3-pip maven
-RUN pip3 install pipenv --break-system-packages
+RUN pip3 install --no-cache-dir pipenv --break-system-packages
 COPY ./docker/install-spark.sh ${SEDONA_HOME}/docker/
 RUN chmod +x ${SEDONA_HOME}/docker/install-spark.sh
 RUN ${SEDONA_HOME}/docker/install-spark.sh ${spark_version} ${hadoop_s3_version} ${aws_sdk_version}
 
 # Install Python dependencies
 COPY docker/requirements.txt /opt/requirements.txt
-RUN pip3 install -r /opt/requirements.txt --break-system-packages
+RUN pip3 install --no-cache-dir -r /opt/requirements.txt --break-system-packages
 
 
 # Copy local compiled jars and python code to the docker environment

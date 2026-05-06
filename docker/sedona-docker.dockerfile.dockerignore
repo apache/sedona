@@ -7,3 +7,16 @@
 !docs/usecases/**
 !python/**
 !spark-shaded/**
+
+# Re-exclude Python build artifacts and pyc caches so a tree that has
+# had `python -m build` run against it does not balloon the COPY layers.
+# Note: `**/target/` is intentionally NOT excluded here because the
+# build.sh `latest` mode runs `mvn clean install -DskipTests` and then
+# install-sedona.sh inside the image copies the freshly-built shaded
+# JAR from `${SEDONA_HOME}/spark-shaded/target/`. Stale Maven `target/`
+# directories from a prior local build are cleaned up by build.sh
+# (non-latest branch) instead — see docker/build.sh.
+python/build/
+python/dist/
+**/*.egg-info/
+**/__pycache__/
