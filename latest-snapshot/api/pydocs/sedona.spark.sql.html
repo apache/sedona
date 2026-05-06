@@ -379,6 +379,25 @@ or GeometryCollection based on the input geometry types.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.sql.st_aggregates.ST_Extent">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_aggregates.</span></span><span class="sig-name descname"><span class="pre">ST_Extent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_aggregates.html#ST_Extent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_aggregates.ST_Extent" title="Permalink to this definition"></a></dt>
+<dd><p>Aggregate Function: Get the bounding box (Box2D) of a geometry column.</p>
+<p>Returns NULL when the input contains no rows or all rows are null/empty
+geometries. Mirrors PostGIS ST_Extent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column to aggregate.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Box2D representing the union of bounding boxes of the geometry column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.sql.st_aggregates.ST_Intersection_Agg">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_aggregates.</span></span><span class="sig-name descname"><span class="pre">ST_Intersection_Agg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_aggregates.html#ST_Intersection_Agg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_aggregates.ST_Intersection_Agg" title="Permalink to this definition"></a></dt>
 <dd><p>Aggregate Function: Get the aggregate intersection of a geometry column.</p>
@@ -607,6 +626,26 @@ This is an alias of ST_GeogFromWKT.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>GeometryCollection geometry generated from the wkt column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.sql.st_constructors.ST_GeomFromBox2D">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_constructors.</span></span><span class="sig-name descname"><span class="pre">ST_GeomFromBox2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">box</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_constructors.html#ST_GeomFromBox2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_constructors.ST_GeomFromBox2D" title="Permalink to this definition"></a></dt>
+<dd><p>Convert a Box2D to a Geometry.</p>
+<p>Dispatches on dimensionality (matching PostGIS box2d::geometry and
+Sedona’s ST_Envelope): POINT for 0-D boxes, LINESTRING for 1-D boxes,
+POLYGON otherwise. NULL on null input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>box</strong> (<em>ColumnOrName</em>) – Box2D column to convert.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Geometry column.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Column</p>
@@ -932,6 +971,28 @@ in a string column.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>multiPolygon geometry generated from the wkt column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.sql.st_constructors.ST_MakeBox2D">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_constructors.</span></span><span class="sig-name descname"><span class="pre">ST_MakeBox2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower_left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_constructors.html#ST_MakeBox2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_constructors.ST_MakeBox2D" title="Permalink to this definition"></a></dt>
+<dd><p>Construct a Box2D from two corner points (lower-left, upper-right).</p>
+<p>Coordinates are taken verbatim — no swapping or ordering validation. NULL or
+empty point inputs return NULL. Non-point inputs raise an error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lower_left</strong> (<em>ColumnOrName</em>) – Lower-left corner Point.</p></li>
+<li><p><strong>upper_right</strong> (<em>ColumnOrName</em>) – Upper-right corner Point.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Box2D column.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Column</p>
@@ -1743,6 +1804,24 @@ geometry column.</p>
 start/end coordinates.
 :param geometry: Geometry to return bounding diagonal of.
 :return: LineString spanning min and max values of each dimension of the given geometry</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_Box2D">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_Box2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_Box2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_Box2D" title="Permalink to this definition"></a></dt>
+<dd><p>Get the planar bounding box (Box2D) of a geometry.</p>
+<p>Returns NULL for null or empty input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>geometry</strong> (<em>ColumnOrName</em>) – Geometry column to compute the bounding box of.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Box2D bounding box of the geometry.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

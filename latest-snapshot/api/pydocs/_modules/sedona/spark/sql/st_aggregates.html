@@ -250,6 +250,21 @@
     <span class="k">return</span> <span class="n">_call_aggregate_function</span><span class="p">(</span><span class="s2">&quot;ST_Envelope_Aggr&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="ST_Extent"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_aggregates.ST_Extent">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_Extent</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Aggregate Function: Get the bounding box (Box2D) of a geometry column.</span>
+
+<span class="sd">    Returns NULL when the input contains no rows or all rows are null/empty</span>
+<span class="sd">    geometries. Mirrors PostGIS ST_Extent.</span>
+
+<span class="sd">    :param geometry: Geometry column to aggregate.</span>
+<span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :return: Box2D representing the union of bounding boxes of the geometry column.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_aggregate_function</span><span class="p">(</span><span class="s2">&quot;ST_Extent&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="ST_Intersection_Aggr"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_aggregates.ST_Intersection_Aggr">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_Intersection_Aggr</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Aggregate Function: Get the aggregate intersection of a geometry column.</span>
