@@ -63,6 +63,16 @@ object st_aggregates {
     aggrFunc(col(geometry))
   }
 
+  def ST_Extent(geometry: Column): Column = {
+    val aggrFunc = udaf(new ST_Extent)
+    aggrFunc(geometry)
+  }
+
+  def ST_Extent(geometry: String): Column = {
+    val aggrFunc = udaf(new ST_Extent)
+    aggrFunc(col(geometry))
+  }
+
   // Aliases for *_Aggr functions with *_Agg suffix
   def ST_Envelope_Agg(geometry: Column): Column = ST_Envelope_Aggr(geometry)
 

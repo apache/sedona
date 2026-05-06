@@ -253,6 +253,14 @@ object st_constructors {
   def ST_MakeEnvelope(minX: Double, minY: Double, maxX: Double, maxY: Double, srid: Int): Column =
     wrapExpression[ST_MakeEnvelope](minX, minY, maxX, maxY, srid)
 
+  def ST_MakeBox2D(lowerLeft: Column, upperRight: Column): Column =
+    wrapExpression[ST_MakeBox2D](lowerLeft, upperRight)
+  def ST_MakeBox2D(lowerLeft: String, upperRight: String): Column =
+    wrapExpression[ST_MakeBox2D](lowerLeft, upperRight)
+
+  def ST_GeomFromBox2D(box: Column): Column = wrapExpression[ST_GeomFromBox2D](box)
+  def ST_GeomFromBox2D(box: String): Column = wrapExpression[ST_GeomFromBox2D](box)
+
   def ST_PolygonFromEnvelope(minX: Column, minY: Column, maxX: Column, maxY: Column): Column =
     wrapExpression[ST_PolygonFromEnvelope](minX, minY, maxX, maxY)
   def ST_PolygonFromEnvelope(minX: String, minY: String, maxX: String, maxY: String): Column =

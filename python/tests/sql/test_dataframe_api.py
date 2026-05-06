@@ -26,6 +26,7 @@ from pyspark.sql import functions as f
 from shapely.geometry.base import BaseGeometry
 from tests.test_base import TestBase
 
+from sedona.spark.core.geom.box2d import Box2D
 from sedona.spark.core.geom.geography import Geography
 from sedona.spark.sql import st_aggregates as sta
 from sedona.spark.sql import st_constructors as stc
@@ -167,6 +168,24 @@ test_configurations = [
         "constructor",
         "ST_AsText(geom)",
         "POINT M(0 1 2)",
+    ),
+    (
+        stc.ST_MakeBox2D,
+        ("a", "b"),
+        "two_points",
+        "",
+        Box2D(0.0, 0.0, 3.0, 4.0),
+    ),
+    (
+        stc.ST_GeomFromBox2D,
+        (
+            lambda: stc.ST_MakeBox2D(
+                f.expr("ST_Point(1.0, 2.0)"), f.expr("ST_Point(4.0, 5.0)")
+            ),
+        ),
+        "min_max_x_y",
+        "ST_AsText(geom)",
+        "POLYGON ((1 2, 1 5, 4 5, 4 2, 1 2))",
     ),
     (
         stc.ST_MakeEnvelope,
@@ -520,6 +539,13 @@ test_configurations = [
         ],
     ),
     (stf.ST_EndPoint, ("line",), "linestring_geom", "", "POINT (5 0)"),
+    (
+        stf.ST_Box2D,
+        ("line",),
+        "linestring_geom",
+        "",
+        Box2D(0.0, 0.0, 5.0, 0.0),
+    ),
     (
         stf.ST_Envelope,
         ("geom",),
@@ -1283,6 +1309,13 @@ test_configurations = [
         "exploded_points",
         "",
         "MULTIPOINT ((0 0), (1 1))",
+    ),
+    (
+        sta.ST_Extent,
+        ("geom",),
+        "exploded_points",
+        "",
+        Box2D(0.0, 0.0, 1.0, 1.0),
     ),
     # Test aliases for *_Aggr functions with *_Agg suffix
     (
