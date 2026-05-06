@@ -23,6 +23,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.annotation.InputGroup;
 import org.apache.flink.table.functions.ScalarFunction;
+import org.apache.sedona.common.geometryObjects.Box2D;
+import org.apache.sedona.flink.Box2DTypeSerializer;
 import org.apache.sedona.flink.GeometryArrayTypeSerializer;
 import org.apache.sedona.flink.GeometryTypeSerializer;
 import org.geotools.api.referencing.FactoryException;
@@ -502,6 +504,19 @@ public class Functions {
     }
   }
 
+  public static class ST_Box2D extends ScalarFunction {
+    @DataTypeHint(value = "RAW", rawSerializer = Box2DTypeSerializer.class, bridgedTo = Box2D.class)
+    public Box2D eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.box2D(geom);
+    }
+  }
+
   public static class ST_OrientedEnvelope extends ScalarFunction {
     @DataTypeHint(
         value = "RAW",
@@ -921,6 +936,16 @@ public class Functions {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.yMin(geom);
     }
+
+    @DataTypeHint("Double")
+    public Double eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D box) {
+      return org.apache.sedona.common.Functions.yMin(box);
+    }
   }
 
   public static class ST_YMax extends ScalarFunction {
@@ -933,6 +958,16 @@ public class Functions {
             Object o) {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.yMax(geom);
+    }
+
+    @DataTypeHint("Double")
+    public Double eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D box) {
+      return org.apache.sedona.common.Functions.yMax(box);
     }
   }
 
@@ -1287,6 +1322,16 @@ public class Functions {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.asWKT(geom);
     }
+
+    @DataTypeHint("String")
+    public String eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D box) {
+      return org.apache.sedona.common.Functions.box2dAsText(box);
+    }
   }
 
   public static class ST_AsEWKB extends ScalarFunction {
@@ -1499,6 +1544,16 @@ public class Functions {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.xMax(geom);
     }
+
+    @DataTypeHint("Double")
+    public Double eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D box) {
+      return org.apache.sedona.common.Functions.xMax(box);
+    }
   }
 
   public static class ST_XMin extends ScalarFunction {
@@ -1511,6 +1566,16 @@ public class Functions {
             Object o) {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.xMin(geom);
+    }
+
+    @DataTypeHint("Double")
+    public Double eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D box) {
+      return org.apache.sedona.common.Functions.xMin(box);
     }
   }
 

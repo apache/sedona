@@ -23,8 +23,10 @@ import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.enums.GeometryType;
+import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.sedona.common.utils.GeoHashDecoder;
+import org.apache.sedona.flink.Box2DTypeSerializer;
 import org.apache.sedona.flink.GeometryTypeSerializer;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
@@ -294,6 +296,39 @@ public class Constructors {
         @DataTypeHint("Double") Double maxX,
         @DataTypeHint("Double") Double maxY) {
       return org.apache.sedona.common.Constructors.makeEnvelope(minX, minY, maxX, maxY);
+    }
+  }
+
+  public static class ST_MakeBox2D extends ScalarFunction {
+    @DataTypeHint(value = "RAW", rawSerializer = Box2DTypeSerializer.class, bridgedTo = Box2D.class)
+    public Box2D eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object lowerLeft,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object upperRight) {
+      return org.apache.sedona.common.Constructors.makeBox2D(
+          (Geometry) lowerLeft, (Geometry) upperRight);
+    }
+  }
+
+  public static class ST_GeomFromBox2D extends ScalarFunction {
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryTypeSerializer.class,
+        bridgedTo = Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D box) {
+      return org.apache.sedona.common.Constructors.geomFromBox2D(box);
     }
   }
 

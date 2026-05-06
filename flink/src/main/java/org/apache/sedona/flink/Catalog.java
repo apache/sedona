@@ -25,6 +25,7 @@ public class Catalog {
   public static UserDefinedFunction[] getFuncs() {
     return new UserDefinedFunction[] {
       new Aggregators.ST_Envelope_Aggr(),
+      new Aggregators.ST_Extent(),
       new Aggregators.ST_Intersection_Aggr(),
       new Aggregators.ST_Union_Aggr(),
       // Aliases for *_Aggr functions with *_Agg suffix
@@ -40,6 +41,8 @@ public class Catalog {
       new Constructors.ST_PointFromWKB(),
       new Constructors.ST_LineFromWKB(),
       new Constructors.ST_LinestringFromWKB(),
+      new Constructors.ST_GeomFromBox2D(),
+      new Constructors.ST_MakeBox2D(),
       new Constructors.ST_MakeEnvelope(),
       new Constructors.ST_MakePoint(),
       new Constructors.ST_MakePointM(),
@@ -78,6 +81,7 @@ public class Catalog {
       new Functions.ST_ConvexHull(),
       new Functions.ST_CrossesDateLine(),
       new Functions.ST_Expand(),
+      new Functions.ST_Box2D(),
       new Functions.ST_Envelope(),
       new Functions.ST_OrientedEnvelope(),
       new Functions.ST_Difference(),

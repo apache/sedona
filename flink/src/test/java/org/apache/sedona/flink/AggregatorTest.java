@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNull;
 
 import org.apache.flink.table.api.*;
 import org.apache.flink.types.Row;
+import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.flink.expressions.Functions;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,6 +46,34 @@ public class AggregatorTest extends TestBase {
             "POLYGON ((0 0, 0 %s, %s %s, %s 0, 0 0))",
             testDataSize - 1, testDataSize - 1, testDataSize - 1, testDataSize - 1),
         last.getField(0).toString());
+  }
+
+  @Test
+  public void testExtent() {
+    tableEnv.executeSql(
+        "CREATE OR REPLACE TEMPORARY VIEW extent_view AS "
+            + "SELECT ST_GeomFromWKT(wkt) as geom FROM ("
+            + "VALUES ('POINT (1 2)'), ('POINT (4 5)'), ('LINESTRING (-3 0, 0 0)')"
+            + ") AS t(wkt)");
+    Table result = tableEnv.sqlQuery("SELECT ST_Extent(geom) FROM extent_view");
+    Row last = last(result);
+    Box2D bbox = (Box2D) last.getField(0);
+    assertEquals(-3.0, bbox.getXMin(), 0.0);
+    assertEquals(0.0, bbox.getYMin(), 0.0);
+    assertEquals(4.0, bbox.getXMax(), 0.0);
+    assertEquals(5.0, bbox.getYMax(), 0.0);
+  }
+
+  @Test
+  public void testExtent_EmptyAndNullGeometries() {
+    tableEnv.executeSql(
+        "CREATE OR REPLACE TEMPORARY VIEW null_extent_view AS "
+            + "SELECT ST_GeomFromWKT(wkt) as geom FROM ("
+            + "VALUES (CAST(NULL AS STRING)), ('POINT EMPTY'), ('POLYGON EMPTY')"
+            + ") AS t(wkt)");
+    Table result = tableEnv.sqlQuery("SELECT ST_Extent(geom) FROM null_extent_view");
+    Row last = last(result);
+    assertNull(last.getField(0));
   }
 
   @Test

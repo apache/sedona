@@ -34,6 +34,7 @@ import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.types.Row;
+import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.jts2geojson.GeoJSONReader;
 import org.apache.sedona.flink.expressions.Constructors;
 import org.apache.sedona.flink.expressions.Functions;
@@ -365,6 +366,37 @@ public class ConstructorTest extends TestBase {
             last(geomTable.select(call(Functions.ST_SRID.class.getSimpleName(), $("_c0"))))
                 .getField(0);
     assertEquals(4326, actual);
+  }
+
+  @Test
+  public void testMakeBox2D() {
+    Box2D bbox =
+        (Box2D)
+            last(tableEnv.sqlQuery("SELECT ST_MakeBox2D(ST_Point(1.0, 2.0), ST_Point(4.0, 5.0))"))
+                .getField(0);
+    assertEquals(1.0, bbox.getXMin(), 0.0);
+    assertEquals(2.0, bbox.getYMin(), 0.0);
+    assertEquals(4.0, bbox.getXMax(), 0.0);
+    assertEquals(5.0, bbox.getYMax(), 0.0);
+  }
+
+  @Test
+  public void testGeomFromBox2D() {
+    String wkt =
+        last(tableEnv.sqlQuery(
+                "SELECT ST_AsText(ST_GeomFromBox2D(ST_MakeBox2D("
+                    + "ST_Point(1.0, 2.0), ST_Point(4.0, 5.0))))"))
+            .getField(0)
+            .toString();
+    assertEquals("POLYGON ((1 2, 1 5, 4 5, 4 2, 1 2))", wkt);
+
+    String pointWkt =
+        last(tableEnv.sqlQuery(
+                "SELECT ST_AsText(ST_GeomFromBox2D(ST_MakeBox2D("
+                    + "ST_Point(3.0, 3.0), ST_Point(3.0, 3.0))))"))
+            .getField(0)
+            .toString();
+    assertEquals("POINT (3 3)", pointWkt);
   }
 
   @Test

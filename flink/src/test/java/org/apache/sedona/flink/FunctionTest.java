@@ -30,6 +30,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.types.Row;
+import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.flink.expressions.Functions;
 import org.apache.sedona.flink.expressions.FunctionsProj4;
 import org.datasyslab.proj4sedona.core.Proj;
@@ -436,6 +437,42 @@ public class FunctionTest extends TestBase {
     table = table.select(call(Functions.ST_EndPoint.class.getSimpleName(), $("geom")));
     Geometry result = (Geometry) first(table).getField(0);
     assertEquals("POINT (3 3)", result.toString());
+  }
+
+  @Test
+  public void testBox2D() {
+    Table t =
+        tableEnv.sqlQuery(
+            "SELECT ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')) AS bbox");
+    Box2D bbox = (Box2D) first(t).getField(0);
+    assertEquals(1.0, bbox.getXMin(), 0.0);
+    assertEquals(2.0, bbox.getYMin(), 0.0);
+    assertEquals(4.0, bbox.getXMax(), 0.0);
+    assertEquals(5.0, bbox.getYMax(), 0.0);
+
+    // null and empty inputs propagate to NULL.
+    Table tNull =
+        tableEnv.sqlQuery(
+            "SELECT ST_Box2D(ST_GeomFromText('POINT EMPTY')) AS empty_bbox,"
+                + " ST_Box2D(ST_GeomFromText(CAST(NULL AS STRING))) AS null_bbox");
+    Row row = first(tNull);
+    assertNull(row.getField(0));
+    assertNull(row.getField(1));
+  }
+
+  @Test
+  public void testBox2DAsTextAndAccessors() {
+    Table t =
+        tableEnv.sqlQuery(
+            "WITH bx AS ("
+                + " SELECT ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')) AS b)"
+                + " SELECT ST_AsText(b), ST_XMin(b), ST_YMin(b), ST_XMax(b), ST_YMax(b) FROM bx");
+    Row row = first(t);
+    assertEquals("BOX(1.0 2.0, 4.0 5.0)", row.getField(0));
+    assertEquals(1.0, row.getField(1));
+    assertEquals(2.0, row.getField(2));
+    assertEquals(4.0, row.getField(3));
+    assertEquals(5.0, row.getField(4));
   }
 
   @Test
