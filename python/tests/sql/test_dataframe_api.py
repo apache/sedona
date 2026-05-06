@@ -174,7 +174,8 @@ test_configurations = [
         ("a", "b"),
         "two_points",
         "",
-        Box2D(0.0, 0.0, 3.0, 4.0),
+        # two_points has a=(0,0,0), b=(3,0,4); ST_MakeBox2D drops Z, so y is 0 for both.
+        Box2D(0.0, 0.0, 3.0, 0.0),
     ),
     (
         stc.ST_GeomFromBox2D,
