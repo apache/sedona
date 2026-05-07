@@ -170,7 +170,7 @@
         <div class="container">
 
           <div class="logo-wrap">
-            <img src="image/home/hero/logo.svg" alt="" class="logo">
+            <img src="{{ "image/home/hero/logo.svg" | url }}" alt="" class="logo">
             <h1 class="page-title">Apache Sedona</h1>
           </div>
 
@@ -187,7 +187,7 @@
         </div>
 
         <div class="img-bg-wrap">
-          <img src="image/home/hero/mountains-desktop.svg" alt="" class="img-bg">
+          <img src="{{ "image/home/hero/mountains-desktop.svg" | url }}" alt="" class="img-bg">
         </div>
       </section>
 
@@ -324,7 +324,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="info-item">
               <div class="info-item__tag">
-                <img src="image/home/deploy/desktop.svg" alt="" class="">
+                <img src="{{ "image/home/deploy/desktop.svg" | url }}" alt="" class="">
                 <div class="caption">
                   {{ t.tag_local }}
                 </div>
@@ -346,7 +346,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="info-item">
               <div class="info-item__tag">
-                <img src="image/home/deploy/database.svg" alt="" class="">
+                <img src="{{ "image/home/deploy/database.svg" | url }}" alt="" class="">
                 <div class="caption">
                   {{ t.tag_batch }}
                 </div>
@@ -368,7 +368,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="info-item">
               <div class="info-item__tag">
-                <img src="image/home/deploy/signal.svg" alt="" class="">
+                <img src="{{ "image/home/deploy/signal.svg" | url }}" alt="" class="">
                 <div class="caption">
                   {{ t.tag_streaming }}
                 </div>
@@ -390,7 +390,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="info-item">
               <div class="info-item__tag">
-                <img src="image/home/deploy/snowflake.svg" alt="" class="">
+                <img src="{{ "image/home/deploy/snowflake.svg" | url }}" alt="" class="">
                 <div class="caption">
                     {{ t.tag_batch }}
                 </div>
@@ -414,7 +414,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="info-item info-item--wide">
               <div class="info-item__tag">
-                <img src="image/home/deploy/cloud.svg" alt="" class="">
+                <img src="{{ "image/home/deploy/cloud.svg" | url }}" alt="" class="">
                 <div class="caption">
                   {{ t.tag_cloud }}
                 </div>
@@ -480,63 +480,63 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
                 <div data-tab="Mobility" class="industries-tabs__body-item active">
                   <div class="industries-grid">
                     <div class="grid-item">
-                      <img src="image/home/industries/bmw.svg" alt="" class="">
+                      <img src="{{ "image/home/industries/bmw.svg" | url }}" alt="" class="">
                     </div>
                     <div class="grid-item">
-                      <img src="image/home/industries/gm.svg" alt="" class="">
+                      <img src="{{ "image/home/industries/gm.svg" | url }}" alt="" class="">
                     </div>
                     <div class="grid-item">
-                      <img src="image/home/industries/placer-ai.svg" alt="" class="">
+                      <img src="{{ "image/home/industries/placer-ai.svg" | url }}" alt="" class="">
                     </div>
                     <div class="grid-item">
-                      <img src="image/home/industries/arity.svg" alt="" class="">
+                      <img src="{{ "image/home/industries/arity.svg" | url }}" alt="" class="">
                     </div>
                   </div>
                 </div>
 
                 <div data-tab="Telecom" class="industries-tabs__body-item">
                   <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/comcast.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/at&t.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/telus.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/t-mobile.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/comcast.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/at&t.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/telus.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/t-mobile.svg" | url }}" alt="" class=""></div>
                   </div>
                 </div>
 
                 <div data-tab="Data and map production" class="industries-tabs__body-item">
                   <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/space-x.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/maxar.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/mapbox.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/tom-tom.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/space-x.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/maxar.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/mapbox.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/tom-tom.svg" | url }}" alt="" class=""></div>
                   </div>
                 </div>
 
                 <div data-tab="Logistics" class="industries-tabs__body-item">
                   <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/instacart.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/uber.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/UnitedAirlines.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/Boeing.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/instacart.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/uber.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/UnitedAirlines.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/Boeing.svg" | url }}" alt="" class=""></div>
                   </div>
                 </div>
 
                 <div data-tab="Energy" class="industries-tabs__body-item">
                   <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/shell.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/DukeEnergy.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/PG&E.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/Southern_Company.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/shell.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/DukeEnergy.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/PG&E.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/Southern_Company.svg" | url }}" alt="" class=""></div>
                   </div>
                 </div>
 
                 <div data-tab="Finance" class="industries-tabs__body-item">
                   <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/Allstate.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/CapitalOne.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/cigna.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/JPMorganChase.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/StateFarm.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/Allstate.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/CapitalOne.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/cigna.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/JPMorganChase.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/StateFarm.svg" | url }}" alt="" class=""></div>
                   </div>
                 </div>
 
@@ -568,7 +568,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="feature-item">
               <div class="feature-item__icon">
-                <img src="image/home/features/scalable.svg" alt="" class="">
+                <img src="{{ "image/home/features/scalable.svg" | url }}" alt="" class="">
               </div>
               <h3 class="feature-item__title">{{ t.feature_scalable_title }}</h3>
               <div class="feature-item__description editor">{{ t.feature_scalable_desc }}</div>
@@ -576,7 +576,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="feature-item">
               <div class="feature-item__icon">
-                <img src="image/home/features/waves.svg" alt="" class="">
+                <img src="{{ "image/home/features/waves.svg" | url }}" alt="" class="">
               </div>
               <h3 class="feature-item__title">{{ t.feature_complete_title }}</h3>
               <div class="feature-item__description editor">{{ t.feature_complete_desc }}</div>
@@ -584,7 +584,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="feature-item">
               <div class="feature-item__icon">
-                <img src="image/home/features/picture.svg" alt="" class="">
+                <img src="{{ "image/home/features/picture.svg" | url }}" alt="" class="">
               </div>
               <h3 class="feature-item__title">{{ t.feature_raster_title }}</h3>
               <div class="feature-item__description editor">{{ t.feature_raster_desc }}</div>
@@ -592,7 +592,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="feature-item">
               <div class="feature-item__icon">
-                <img src="image/home/features/cloud.svg" alt="" class="">
+                <img src="{{ "image/home/features/cloud.svg" | url }}" alt="" class="">
               </div>
               <h3 class="feature-item__title">{{ t.feature_portable_title }}</h3>
               <div class="feature-item__description editor">{{ t.feature_portable_desc }}</div>
@@ -600,7 +600,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="feature-item">
               <div class="feature-item__icon">
-                <img src="image/home/features/rocket.svg" alt="" class="">
+                <img src="{{ "image/home/features/rocket.svg" | url }}" alt="" class="">
               </div>
               <h3 class="feature-item__title">{{ t.feature_fast_title }}</h3>
               <div class="feature-item__description editor">{{ t.feature_fast_desc }}</div>
@@ -619,7 +619,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="feature-item">
               <div class="feature-item__icon">
-                <img src="image/home/features/code.svg" alt="" class="">
+                <img src="{{ "image/home/features/code.svg" | url }}" alt="" class="">
               </div>
               <h3 class="feature-item__title">{{ t.feature_familiar_title }}</h3>
               <div class="feature-item__description editor">{{ t.feature_familiar_desc }}</div>
@@ -681,7 +681,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
             <div class="community-card">
               <div class="community-card__author">
                 <div class="author-avatar">
-                  <img src="image/home/community/author.jpg" alt="" class="">
+                  <img src="{{ "image/home/community/author.jpg" | url }}" alt="" class="">
                 </div>
                 <div class="author-info">
                   <div class="author-name">Sean Rose</div>
@@ -695,7 +695,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
             <div class="community-card">
               <div class="community-card__author">
                 <div class="author-avatar">
-                  <img src="image/home/community/author.jpg" alt="" class="">
+                  <img src="{{ "image/home/community/author.jpg" | url }}" alt="" class="">
                 </div>
                 <div class="author-info">
                   <div class="author-name">Sean Rose</div>
@@ -709,7 +709,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
             <div class="community-card">
               <div class="community-card__author">
                 <div class="author-avatar">
-                  <img src="image/home/community/author.jpg" alt="" class="">
+                  <img src="{{ "image/home/community/author.jpg" | url }}" alt="" class="">
                 </div>
                 <div class="author-info">
                   <div class="author-name">Sean Rose</div>
@@ -723,7 +723,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
             <div class="community-card">
               <div class="community-card__author">
                 <div class="author-avatar">
-                  <img src="image/home/community/author.jpg" alt="" class="">
+                  <img src="{{ "image/home/community/author.jpg" | url }}" alt="" class="">
                 </div>
                 <div class="author-info">
                   <div class="author-name">Sean Rose</div>
@@ -737,7 +737,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
             <div class="community-card">
               <div class="community-card__author">
                 <div class="author-avatar">
-                  <img src="image/home/community/author.jpg" alt="" class="">
+                  <img src="{{ "image/home/community/author.jpg" | url }}" alt="" class="">
                 </div>
                 <div class="author-info">
                   <div class="author-name">Sean Rose</div>
@@ -772,7 +772,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
                 </a>
               </div>
             </div>
-            <img src="image/home/events/corner-mountains.svg" alt="" class="corner-img">
+            <img src="{{ "image/home/events/corner-mountains.svg" | url }}" alt="" class="corner-img">
             <div class="events-line">
               {%- set events_decor = {'en': ['Sedona ', 'Events'], 'zh': ['Sedona ', '活动']} -%}
               <div>{{ events_decor[lang][0] }}<strong>{{ events_decor[lang][1] }}</strong></div>

@@ -124,7 +124,7 @@ SedonaKepler.add_df(kepler_map, df=res, name="Tri-state water")
 
 地图效果非常出色！
 
-![New York City water](../image/nyc_base_water.png)
+![New York City water](image/nyc_base_water.png)
 
 通过这张地图，可以清晰地看到纽约市地区的所有河流、湖泊乃至游泳池。
 

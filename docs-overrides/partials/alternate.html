@@ -1,0 +1,15 @@
+{% if config.extra.alternate and config.extra.alternate | length > 1 %}
+<nav class="sd-lang-switch" aria-label="{{ lang.t('select.language') }}">
+  {% for alt in config.extra.alternate %}
+    {%- set is_active = (alt.lang == config.theme.language) -%}
+    <a
+      href="{{ alt.link | url }}"
+      hreflang="{{ alt.lang }}"
+      lang="{{ alt.lang }}"
+      target="_self"
+      class="sd-lang-switch__item{% if is_active %} sd-lang-switch__item--active{% endif %}"
+      {% if is_active %}aria-current="true"{% endif %}
+    >{{ alt.name }}</a>
+  {% endfor %}
+</nav>
+{% endif %}
