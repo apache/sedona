@@ -1,9 +1,17 @@
 {% extends "base.html" %}
 
+{# Locale shared across all blocks below. Detected once via mkdocs-static-i18n's
+   reconfigure_material flag, which sets config.theme.language per build. #}
+{%- set cur_lang = config.theme.language if config.theme.language in ['en', 'zh'] else 'en' -%}
+
 {% block outdated %}
-You're not viewing the latest stable version.
+{%- set outdated_msg = {
+    'en': ['You\'re not viewing the latest stable version.', 'Click here to go to the latest stable version.'],
+    'zh': ['您当前查看的不是最新稳定版本。', '点击此处跳转到最新稳定版本。']
+} -%}
+{{ outdated_msg[cur_lang][0] }}
 <a href="{{ '../' ~ base_url }}">
-  <strong>Click here to go to the latest stable version.</strong>
+  <strong>{{ outdated_msg[cur_lang][1] }}</strong>
 </a>
 {% endblock %}
 
@@ -20,14 +28,146 @@ You're not viewing the latest stable version.
 {% endblock %}
 
 {% block header %}
+  {%- set announcement = {
+      'en': 'Apache Sedona 1.9.0 is out now, featuring Spark 4.1 support, proj4sedona CRS transformation, Bing Tile functions, and more!',
+      'zh': 'Apache Sedona 1.9.0 已正式发布，新增 Spark 4.1 支持、proj4sedona 坐标系转换、Bing Tile 函数等众多特性！'
+  } -%}
   <div style="background: #CA463A; color: white; text-align: center; padding: 0.5rem;">
-    <a href="setup/release-notes/" title="Announcement">Apache Sedona 1.9.0 is out now, featuring Spark 4.1 support, proj4sedona CRS transformation, Bing Tile functions, and more!</a>
+    <a href="{{ 'setup/release-notes/' | url }}" title="Announcement">{{ announcement[cur_lang] }}</a>
   </div>
   {{ super() }} {# This renders the original header below your test bar #}
 {% endblock %}
 
 {% block container %}
-    {% if page.is_homepage %}
+    {% set is_home = page.is_homepage or (page.file and page.file.src_uri in ['index.md', 'index.zh.md']) %}
+    {% if is_home %}
+    {%- set i18n = {
+        'en': {
+            'hero_subtitle': 'Apache Sedona™ makes it easy to process spatial datasets of any scale.',
+            'hero_cta': 'Get Started',
+            'global_scale_title_1': 'QUERY and JOIN',
+            'global_scale_title_2': 'from local to global scale',
+            'typed_gps': 'GPS points',
+            'typed_buildings': 'buildings',
+            'typed_parcels': 'parcels',
+            'typed_trips': 'trips',
+            'typed_places': 'places',
+            'typed_businesses': 'businesses',
+            'typed_land': 'land',
+            'typed_vegetation': 'vegetation',
+            'typed_rasters': 'rasters',
+            'typed_vectors': 'vectors',
+            'typed_tabular': 'tabular tables',
+            'get_started_title': 'Get started in seconds',
+            'get_started_desc': 'Install SedonaDB, or run Sedona on distributed systems when you need additional scale.',
+            'install_sedonadb_cta': 'Install SedonaDB',
+            'deploy_title': 'Deploy Sedona where you need it',
+            'deploy_desc': 'Choose the right runtime for your infrastructure, from local setups to distributed and cloud-native systems.',
+            'tag_local': 'Local',
+            'tag_batch': 'Batch',
+            'tag_streaming': 'Streaming',
+            'tag_cloud': 'Cloud',
+            'sedonadb_desc': 'Standalone runtime for local processing and development.',
+            'sedonaspark_desc': 'Distributed batch processing on Apache Spark clusters.',
+            'sedonaflink_desc': 'Real-time spatial analytics using Apache Flink.',
+            'sedonasnow_desc': 'Native spatial support inside Snowflake environments.',
+            'sedona_cloud_title': 'Sedona in the Cloud',
+            'sedona_cloud_desc': 'Integrated spatial support in your preferred cloud environment',
+            'sedona_cloud_cta': 'Explore the ecosystem',
+            'industries_title': 'Want to share your Sedona use case?',
+            'industries_subtitle': 'Join our Discord or create a GitHub Discussion so we can collaborate.',
+            'industry_mobility': 'Mobility',
+            'industry_telecom': 'Telecom',
+            'industry_data': 'Data and map production',
+            'industry_logistics': 'Logistics',
+            'industry_energy': 'Energy',
+            'industry_finance': 'Finance',
+            'features_title': 'Apache Sedona at a glance',
+            'features_desc': 'Core features that define Sedona’s geospatial performance',
+            'feature_scalable_title': 'Scalable',
+            'feature_scalable_desc': 'Works with small or large datasets with Spark, Flink, or locally.',
+            'feature_complete_title': 'Feature Complete',
+            'feature_complete_desc': '300+ spatial functions, support for spatial file formats, and compatible with lakehouses and databases.',
+            'feature_raster_title': 'Raster and Vector Support',
+            'feature_raster_desc': 'Analyze both raster and vector datasets.',
+            'feature_portable_title': 'Portable',
+            'feature_portable_desc': 'Easy to run locally, in the cloud, or with any data platform.',
+            'feature_fast_title': 'Fast',
+            'feature_fast_desc': 'Optimized execution for single node or distributed cluster environments.',
+            'feature_fast_cta': 'See the benchmarks',
+            'feature_familiar_title': 'Familiar',
+            'feature_familiar_desc': 'Supports many programming languages and runnable in the environment where you feel most comfortable.',
+            'community_title': 'Join the community',
+            'community_desc': 'Discover what our community has to say about their Apache Sedona experience.',
+            'events_title': 'Monthly community meetings and programming conferences',
+            'events_cta': 'Find Events',
+            'events_decor_pre': 'Sedona ',
+            'events_decor_strong': 'Events'
+        },
+        'zh': {
+            'hero_subtitle': 'Apache Sedona™ 让处理任意规模的空间数据变得轻而易举。',
+            'hero_cta': '立即开始',
+            'global_scale_title_1': '查询与连接',
+            'global_scale_title_2': '从本地到全球规模',
+            'typed_gps': 'GPS 轨迹点',
+            'typed_buildings': '建筑',
+            'typed_parcels': '地块',
+            'typed_trips': '出行',
+            'typed_places': '场所',
+            'typed_businesses': '商户',
+            'typed_land': '土地',
+            'typed_vegetation': '植被',
+            'typed_rasters': '栅格',
+            'typed_vectors': '矢量',
+            'typed_tabular': '表格数据',
+            'get_started_title': '几秒钟即可上手',
+            'get_started_desc': '安装 SedonaDB，或在需要更大规模时将 Sedona 部署到分布式系统。',
+            'install_sedonadb_cta': '安装 SedonaDB',
+            'deploy_title': '在任何需要的地方部署 Sedona',
+            'deploy_desc': '从本地环境到分布式与云原生系统，选择最适合您基础设施的运行时。',
+            'tag_local': '本地',
+            'tag_batch': '批处理',
+            'tag_streaming': '流处理',
+            'tag_cloud': '云端',
+            'sedonadb_desc': '面向本地处理与开发的独立运行时。',
+            'sedonaspark_desc': '在 Apache Spark 集群上的分布式批处理。',
+            'sedonaflink_desc': '基于 Apache Flink 的实时空间分析。',
+            'sedonasnow_desc': '在 Snowflake 环境中提供原生空间支持。',
+            'sedona_cloud_title': '云端的 Sedona',
+            'sedona_cloud_desc': '在您所选的云环境中集成空间能力',
+            'sedona_cloud_cta': '探索生态系统',
+            'industries_title': '想分享您的 Sedona 应用案例？',
+            'industries_subtitle': '加入我们的 Discord，或在 GitHub Discussions 发起讨论，与我们协作。',
+            'industry_mobility': '出行',
+            'industry_telecom': '电信',
+            'industry_data': '数据与地图生产',
+            'industry_logistics': '物流',
+            'industry_energy': '能源',
+            'industry_finance': '金融',
+            'features_title': 'Apache Sedona 概览',
+            'features_desc': '定义 Sedona 地理空间性能的核心特性',
+            'feature_scalable_title': '可扩展',
+            'feature_scalable_desc': '可在 Spark、Flink 或本地处理小型或大型数据集。',
+            'feature_complete_title': '功能完备',
+            'feature_complete_desc': '300+ 空间函数，支持多种空间文件格式，并与数据湖仓和数据库兼容。',
+            'feature_raster_title': '同时支持栅格与矢量',
+            'feature_raster_desc': '可同时分析栅格与矢量数据集。',
+            'feature_portable_title': '可移植',
+            'feature_portable_desc': '易于在本地、云端或任何数据平台上运行。',
+            'feature_fast_title': '高性能',
+            'feature_fast_desc': '面向单节点或分布式集群环境的优化执行。',
+            'feature_fast_cta': '查看基准测试',
+            'feature_familiar_title': '熟悉易用',
+            'feature_familiar_desc': '支持多种编程语言，可在您最熟悉的环境中使用。',
+            'community_title': '加入社区',
+            'community_desc': '听听社区对 Apache Sedona 使用体验的分享。',
+            'events_title': '每月社区会议与技术大会',
+            'events_cta': '查看活动',
+            'events_decor_pre': 'Sedona ',
+            'events_decor_strong': '活动'
+        }
+    } -%}
+    {%- set t = i18n[cur_lang] -%}
     <div class="page-home">
 
       <!-- Section Hero -->
@@ -35,24 +175,24 @@ You're not viewing the latest stable version.
         <div class="container">
 
           <div class="logo-wrap">
-            <img src="image/home/hero/logo.svg" alt="" class="logo">
+            <img src="{{ "image/home/hero/logo.svg" | url }}" alt="" class="logo">
             <h1 class="page-title">Apache Sedona</h1>
           </div>
 
           <div class="section-description editor">
-            Apache Sedona™ makes it easy to process spatial datasets of any scale.
+            {{ t.hero_subtitle }}
           </div>
 
           <div class="btn-group">
             <a href="{{ page.next_page.url | url }}" title="{{ page.next_page.title | striptags }}" class="btn btn-black">
-              Get Started
+              {{ t.hero_cta }}
             </a>
           </div>
 
         </div>
 
         <div class="img-bg-wrap">
-          <img src="image/home/hero/mountains-desktop.svg" alt="" class="img-bg">
+          <img src="{{ "image/home/hero/mountains-desktop.svg" | url }}" alt="" class="img-bg">
         </div>
       </section>
 
@@ -63,24 +203,24 @@ You're not viewing the latest stable version.
 
             <div class="col-left">
               <div class="section-title">
-                <div>QUERY and JOIN</div>
+                <div>{{ t.global_scale_title_1 }}</div>
 
                 <p class="typed-wrap"><span class="typed"></span></p>
                 <div class="typed-strings">
-                  <p>GPS points</p>
-                  <p>buildings</p>
-                  <p>parcels</p>
-                  <p>trips</p>
-                  <p>places</p>
-                  <p>businesses</p>
-                  <p>land</p>
-                  <p>vegetation</p>
-                  <p>rasters</p>
-                  <p>vectors</p>
-                  <p>tabular tables</p>
+                  <p>{{ t.typed_gps }}</p>
+                  <p>{{ t.typed_buildings }}</p>
+                  <p>{{ t.typed_parcels }}</p>
+                  <p>{{ t.typed_trips }}</p>
+                  <p>{{ t.typed_places }}</p>
+                  <p>{{ t.typed_businesses }}</p>
+                  <p>{{ t.typed_land }}</p>
+                  <p>{{ t.typed_vegetation }}</p>
+                  <p>{{ t.typed_rasters }}</p>
+                  <p>{{ t.typed_vectors }}</p>
+                  <p>{{ t.typed_tabular }}</p>
                 </div>
 
-                <div>from local to global scale</div>
+                <div>{{ t.global_scale_title_2 }}</div>
               </div>
               <div class="section-description editor"></div>
             </div>
@@ -163,15 +303,15 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
             </div>
             <div class="col-right">
               <h2 class="section-title">
-                Get started in seconds
+                {{ t.get_started_title }}
               </h2>
               <div class="section-description editor">
-                Install SedonaDB, or run Sedona on distributed systems when you need additional scale.
+                {{ t.get_started_desc }}
               </div>
               <div class="bth-group">
                 <a href="/sedonadb" class="btn btn-red">
                      <span class="caption">
-                   Install SedonaDB
+                   {{ t.install_sedonadb_cta }}
                   </span>
                 </a>
               </div>
@@ -183,19 +323,19 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
       <!-- Section Deploy -->
       <section class="section-deploy">
         <div class="container">
-          <h2 class="section-title">Deploy Sedona where you need it</h2>
-          <div class="section-description editor">Choose the right runtime for your infrastructure, from local setups to distributed and cloud-native systems.</div>
+          <h2 class="section-title">{{ t.deploy_title }}</h2>
+          <div class="section-description editor">{{ t.deploy_desc }}</div>
           <div class="info-grid">
 
             <div class="info-item">
               <div class="info-item__tag">
-                <img src="image/home/deploy/desktop.svg" alt="" class="">
+                <img src="{{ "image/home/deploy/desktop.svg" | url }}" alt="" class="">
                 <div class="caption">
-                  Local
+                  {{ t.tag_local }}
                 </div>
               </div>
               <h3 class="info-item__title">SedonaDB</h3>
-              <div class="info-item__description editor">Standalone runtime for local processing and development.</div>
+              <div class="info-item__description editor">{{ t.sedonadb_desc }}</div>
               <div class="info-item__cta">
                 <a href="/sedonadb" class="btn-link">
                   <span class="caption">SedonaDB</span>
@@ -211,13 +351,13 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="info-item">
               <div class="info-item__tag">
-                <img src="image/home/deploy/database.svg" alt="" class="">
+                <img src="{{ "image/home/deploy/database.svg" | url }}" alt="" class="">
                 <div class="caption">
-                  Batch
+                  {{ t.tag_batch }}
                 </div>
               </div>
               <h3 class="info-item__title">SedonaSpark</h3>
-              <div class="info-item__description editor">Distributed batch processing on Apache Spark clusters.</div>
+              <div class="info-item__description editor">{{ t.sedonaspark_desc }}</div>
               <div class="info-item__cta">
                 <a href="sedonaspark" class="btn-link">
                   <span class="caption">SedonaSpark</span>
@@ -233,13 +373,13 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="info-item">
               <div class="info-item__tag">
-                <img src="image/home/deploy/signal.svg" alt="" class="">
+                <img src="{{ "image/home/deploy/signal.svg" | url }}" alt="" class="">
                 <div class="caption">
-                  Streaming
+                  {{ t.tag_streaming }}
                 </div>
               </div>
               <h3 class="info-item__title">SedonaFlink</h3>
-              <div class="info-item__description editor">Real-time spatial analytics using Apache Flink.</div>
+              <div class="info-item__description editor">{{ t.sedonaflink_desc }}</div>
               <div class="info-item__cta">
                 <a href="sedonaflink" class="btn-link">
                   <span class="caption">SedonaFlink</span>
@@ -255,14 +395,14 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="info-item">
               <div class="info-item__tag">
-                <img src="image/home/deploy/snowflake.svg" alt="" class="">
+                <img src="{{ "image/home/deploy/snowflake.svg" | url }}" alt="" class="">
                 <div class="caption">
-                    Batch
+                    {{ t.tag_batch }}
                 </div>
               </div>
               <h3 class="info-item__title">SedonaSnow</h3>
               <div class="info-item__description editor">
-                Native spatial support inside Snowflake environments.
+                {{ t.sedonasnow_desc }}
               </div>
               <div class="info-item__cta">
                 <a href="sedonasnow" class="btn-link">
@@ -279,16 +419,16 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="info-item info-item--wide">
               <div class="info-item__tag">
-                <img src="image/home/deploy/cloud.svg" alt="" class="">
+                <img src="{{ "image/home/deploy/cloud.svg" | url }}" alt="" class="">
                 <div class="caption">
-                  Cloud
+                  {{ t.tag_cloud }}
                 </div>
               </div>
-              <h3 class="info-item__title">Sedona in the Cloud</h3>
-              <div class="info-item__description editor">Integrated spatial support in your preferred cloud environment</div>
+              <h3 class="info-item__title">{{ t.sedona_cloud_title }}</h3>
+              <div class="info-item__description editor">{{ t.sedona_cloud_desc }}</div>
               <div class="info-item__cta">
                 <a href="setup/overview/" class="btn-link">
-                  <span class="caption">Explore the ecosystem</span>
+                  <span class="caption">{{ t.sedona_cloud_cta }}</span>
                   <span class="icon">
                         <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -309,10 +449,10 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
         <div class="container">
           <div class="content-box">
 
-            <h2 class="section-title">Want to share your Sedona use case?</h2>
+            <h2 class="section-title">{{ t.industries_title }}</h2>
 
             <div class="section__subtitle editor">
-              Join our Discord or create a GitHub Discussion so we can collaborate.
+              {{ t.industries_subtitle }}
             </div>
 
             <div class="industries-tabs">
@@ -320,22 +460,22 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
               <div class="industries-tabs__head-wrap">
                 <div class="industries-tabs__head">
                   <div class="industries-tabs__head-item active">
-                    Mobility
+                    {{ t.industry_mobility }}
                   </div>
                   <div class="industries-tabs__head-item ">
-                    Telecom
+                    {{ t.industry_telecom }}
                   </div>
                   <div class="industries-tabs__head-item">
-                    Data and map production
+                    {{ t.industry_data }}
                   </div>
                   <div class="industries-tabs__head-item">
-                    Logistics
+                    {{ t.industry_logistics }}
                   </div>
                   <div class="industries-tabs__head-item">
-                    Energy
+                    {{ t.industry_energy }}
                   </div>
                   <div class="industries-tabs__head-item">
-                    Finance
+                    {{ t.industry_finance }}
                   </div>
                 </div>
               </div>
@@ -345,63 +485,63 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
                 <div data-tab="Mobility" class="industries-tabs__body-item active">
                   <div class="industries-grid">
                     <div class="grid-item">
-                      <img src="image/home/industries/bmw.svg" alt="" class="">
+                      <img src="{{ "image/home/industries/bmw.svg" | url }}" alt="" class="">
                     </div>
                     <div class="grid-item">
-                      <img src="image/home/industries/gm.svg" alt="" class="">
+                      <img src="{{ "image/home/industries/gm.svg" | url }}" alt="" class="">
                     </div>
                     <div class="grid-item">
-                      <img src="image/home/industries/placer-ai.svg" alt="" class="">
+                      <img src="{{ "image/home/industries/placer-ai.svg" | url }}" alt="" class="">
                     </div>
                     <div class="grid-item">
-                      <img src="image/home/industries/arity.svg" alt="" class="">
+                      <img src="{{ "image/home/industries/arity.svg" | url }}" alt="" class="">
                     </div>
                   </div>
                 </div>
 
                 <div data-tab="Telecom" class="industries-tabs__body-item">
                   <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/comcast.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/at&t.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/telus.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/t-mobile.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/comcast.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/at&t.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/telus.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/t-mobile.svg" | url }}" alt="" class=""></div>
                   </div>
                 </div>
 
                 <div data-tab="Data and map production" class="industries-tabs__body-item">
                   <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/space-x.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/maxar.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/mapbox.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/tom-tom.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/space-x.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/maxar.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/mapbox.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/tom-tom.svg" | url }}" alt="" class=""></div>
                   </div>
                 </div>
 
                 <div data-tab="Logistics" class="industries-tabs__body-item">
                   <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/instacart.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/uber.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/UnitedAirlines.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/Boeing.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/instacart.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/uber.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/UnitedAirlines.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/Boeing.svg" | url }}" alt="" class=""></div>
                   </div>
                 </div>
 
                 <div data-tab="Energy" class="industries-tabs__body-item">
                   <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/shell.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/DukeEnergy.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/PG&E.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/Southern_Company.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/shell.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/DukeEnergy.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/PG&E.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/Southern_Company.svg" | url }}" alt="" class=""></div>
                   </div>
                 </div>
 
                 <div data-tab="Finance" class="industries-tabs__body-item">
                   <div class="industries-grid">
-                    <div class="grid-item"><img src="image/home/industries/Allstate.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/CapitalOne.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/cigna.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/JPMorganChase.svg" alt="" class=""></div>
-                    <div class="grid-item"><img src="image/home/industries/StateFarm.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/Allstate.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/CapitalOne.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/cigna.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/JPMorganChase.svg" | url }}" alt="" class=""></div>
+                    <div class="grid-item"><img src="{{ "image/home/industries/StateFarm.svg" | url }}" alt="" class=""></div>
                   </div>
                 </div>
 
@@ -427,51 +567,51 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
       <!-- Section Features -->
       <section class="section-features">
         <div class="container">
-          <h2 class="section-title">Apache Sedona at a glance</h2>
-          <div class="section-description editor">Core features that define Sedona’s geospatial performance</div>
+          <h2 class="section-title">{{ t.features_title }}</h2>
+          <div class="section-description editor">{{ t.features_desc }}</div>
           <div class="features-grid">
 
             <div class="feature-item">
               <div class="feature-item__icon">
-                <img src="image/home/features/scalable.svg" alt="" class="">
+                <img src="{{ "image/home/features/scalable.svg" | url }}" alt="" class="">
               </div>
-              <h3 class="feature-item__title">Scalable</h3>
-              <div class="feature-item__description editor">Works with small or large datasets with Spark, Flink, or locally.</div>
+              <h3 class="feature-item__title">{{ t.feature_scalable_title }}</h3>
+              <div class="feature-item__description editor">{{ t.feature_scalable_desc }}</div>
             </div>
 
             <div class="feature-item">
               <div class="feature-item__icon">
-                <img src="image/home/features/waves.svg" alt="" class="">
+                <img src="{{ "image/home/features/waves.svg" | url }}" alt="" class="">
               </div>
-              <h3 class="feature-item__title">Feature Complete</h3>
-              <div class="feature-item__description editor">300+ spatial functions, support for spatial file formats, and compatible with lakehouses and databases.</div>
+              <h3 class="feature-item__title">{{ t.feature_complete_title }}</h3>
+              <div class="feature-item__description editor">{{ t.feature_complete_desc }}</div>
             </div>
 
             <div class="feature-item">
               <div class="feature-item__icon">
-                <img src="image/home/features/picture.svg" alt="" class="">
+                <img src="{{ "image/home/features/picture.svg" | url }}" alt="" class="">
               </div>
-              <h3 class="feature-item__title">Raster and Vector Support</h3>
-              <div class="feature-item__description editor">Analyze both raster and vector datasets.</div>
+              <h3 class="feature-item__title">{{ t.feature_raster_title }}</h3>
+              <div class="feature-item__description editor">{{ t.feature_raster_desc }}</div>
             </div>
 
             <div class="feature-item">
               <div class="feature-item__icon">
-                <img src="image/home/features/cloud.svg" alt="" class="">
+                <img src="{{ "image/home/features/cloud.svg" | url }}" alt="" class="">
               </div>
-              <h3 class="feature-item__title">Portable</h3>
-              <div class="feature-item__description editor">Easy to run locally, in the cloud, or with any data platform.</div>
+              <h3 class="feature-item__title">{{ t.feature_portable_title }}</h3>
+              <div class="feature-item__description editor">{{ t.feature_portable_desc }}</div>
             </div>
 
             <div class="feature-item">
               <div class="feature-item__icon">
-                <img src="image/home/features/rocket.svg" alt="" class="">
+                <img src="{{ "image/home/features/rocket.svg" | url }}" alt="" class="">
               </div>
-              <h3 class="feature-item__title">Fast</h3>
-              <div class="feature-item__description editor">Optimized execution for single node or distribute cluster environments.</div>
+              <h3 class="feature-item__title">{{ t.feature_fast_title }}</h3>
+              <div class="feature-item__description editor">{{ t.feature_fast_desc }}</div>
               <div class="feature-item__cta">
                 <a href="https://github.com/apache/sedona-spatialbench" class="btn-link">
-                  <span class="caption">See the benchmarks</span>
+                  <span class="caption">{{ t.feature_fast_cta }}</span>
                   <span class="icon">
                         <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -484,10 +624,10 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
 
             <div class="feature-item">
               <div class="feature-item__icon">
-                <img src="image/home/features/code.svg" alt="" class="">
+                <img src="{{ "image/home/features/code.svg" | url }}" alt="" class="">
               </div>
-              <h3 class="feature-item__title">Familiar</h3>
-              <div class="feature-item__description editor">Supports many programming languages and runnable in the environment where you feel most comfortable.</div>
+              <h3 class="feature-item__title">{{ t.feature_familiar_title }}</h3>
+              <div class="feature-item__description editor">{{ t.feature_familiar_desc }}</div>
             </div>
 
 
@@ -510,8 +650,8 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
       <!-- Section Community -->
       <section class="section-community">
         <div class="container">
-          <h2 class="section-title">Join the community</h2>
-          <div class="section-description editor">Discover what our community has to say about their Apache Sedona experience.</div>
+          <h2 class="section-title">{{ t.community_title }}</h2>
+          <div class="section-description editor">{{ t.community_desc }}</div>
           <div class="btn-group">
             <a href="https://github.com/apache/sedona/discussions" class="btn btn-light-red">
                   <span class="caption">
@@ -546,7 +686,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
             <div class="community-card">
               <div class="community-card__author">
                 <div class="author-avatar">
-                  <img src="image/home/community/author.jpg" alt="" class="">
+                  <img src="{{ "image/home/community/author.jpg" | url }}" alt="" class="">
                 </div>
                 <div class="author-info">
                   <div class="author-name">Sean Rose</div>
@@ -560,7 +700,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
             <div class="community-card">
               <div class="community-card__author">
                 <div class="author-avatar">
-                  <img src="image/home/community/author.jpg" alt="" class="">
+                  <img src="{{ "image/home/community/author.jpg" | url }}" alt="" class="">
                 </div>
                 <div class="author-info">
                   <div class="author-name">Sean Rose</div>
@@ -574,7 +714,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
             <div class="community-card">
               <div class="community-card__author">
                 <div class="author-avatar">
-                  <img src="image/home/community/author.jpg" alt="" class="">
+                  <img src="{{ "image/home/community/author.jpg" | url }}" alt="" class="">
                 </div>
                 <div class="author-info">
                   <div class="author-name">Sean Rose</div>
@@ -588,7 +728,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
             <div class="community-card">
               <div class="community-card__author">
                 <div class="author-avatar">
-                  <img src="image/home/community/author.jpg" alt="" class="">
+                  <img src="{{ "image/home/community/author.jpg" | url }}" alt="" class="">
                 </div>
                 <div class="author-info">
                   <div class="author-name">Sean Rose</div>
@@ -602,7 +742,7 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
             <div class="community-card">
               <div class="community-card__author">
                 <div class="author-avatar">
-                  <img src="image/home/community/author.jpg" alt="" class="">
+                  <img src="{{ "image/home/community/author.jpg" | url }}" alt="" class="">
                 </div>
                 <div class="author-info">
                   <div class="author-name">Sean Rose</div>
@@ -627,21 +767,21 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
           <div class="content-box">
             <div class="content-box__inner">
               <h2 class="section-title">
-                Monthly community meetings and programming conferences
+                {{ t.events_title }}
               </h2>
               <div class="btn-group">
                 <a href="community/contact/" class="btn btn-red">
                      <span class="caption">
-                    Find Events
+                    {{ t.events_cta }}
                   </span>
                 </a>
               </div>
             </div>
-            <img src="image/home/events/corner-mountains.svg" alt="" class="corner-img">
+            <img src="{{ "image/home/events/corner-mountains.svg" | url }}" alt="" class="corner-img">
             <div class="events-line">
-              <div>Sedona <strong>Events</strong></div>
-              <div>Sedona <strong>Events</strong></div>
-              <div>Sedona <strong>Events</strong></div>
+              <div>{{ t.events_decor_pre }}<strong>{{ t.events_decor_strong }}</strong></div>
+              <div>{{ t.events_decor_pre }}<strong>{{ t.events_decor_strong }}</strong></div>
+              <div>{{ t.events_decor_pre }}<strong>{{ t.events_decor_strong }}</strong></div>
             </div>
           </div>
         </div>
