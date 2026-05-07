@@ -252,6 +252,123 @@ plugins:
       archive_date_format: MMMM yyyy
       # Maximum number of authors to display in the post excerpt
       post_excerpt_max_authors: 5
+  - i18n:
+      docs_structure: suffix
+      fallback_to_default: true
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: zh
+          name: 中文
+          build: true
+          site_name: Apache Sedona
+          site_description: Apache Sedona 是一个用于处理大规模空间数据的集群计算系统。Sedona 在 Apache Spark、Apache Flink 和 Snowflake 等现有集群计算系统的基础上，提供了一套开箱即用的分布式空间数据集和空间 SQL，可以高效地跨机器加载、处理和分析大规模空间数据。
+          nav_translations:
+            Home: 首页
+            Install: 安装
+            Overview: 概述
+            Modules: 模块
+            Language wrappers: 语言封装
+            Maven Central coordinate: Maven Central 坐标
+            Use Sedona in Docker: 在 Docker 中使用 Sedona
+            Install Sedona in your local Spark cluster: 在本地 Spark 集群中安装 Sedona
+            Install Sedona Scala/Java: 安装 Sedona Scala/Java
+            Install Sedona Python: 安装 Sedona Python
+            Install Sedona R: 安装 Sedona R
+            Install Sedona-Zeppelin: 安装 Sedona-Zeppelin
+            Set up Spark cluster manually: 手动搭建 Spark 集群
+            Cloud platforms: 云平台
+            Install on Wherobots: 在 Wherobots 上安装
+            Install on Databricks: 在 Databricks 上安装
+            Install on AWS EMR: 在 AWS EMR 上安装
+            Install on AWS Glue: 在 AWS Glue 上安装
+            Install on Microsoft Fabric: 在 Microsoft Fabric 上安装
+            Install on Azure Synapse Analytics: 在 Azure Synapse Analytics 上安装
+            Programming Guide: 编程指南
+            Programming Guides: 编程指南
+            Spatial DataFrame / SQL app: 空间 DataFrame / SQL 应用
+            Raster DataFrame / SQL app: 栅格 DataFrame / SQL 应用
+            Pure SQL environment: 纯 SQL 环境
+            GeoPandas API on Sedona: Sedona 上的 GeoPandas API
+            Spatial RDD app: 空间 RDD 应用
+            Sedona R: Sedona R
+            Work with GeoPandas and Shapely: 与 GeoPandas 和 Shapely 配合使用
+            Files: 文件
+            Concepts: 概念
+            Spatial Joins: 空间连接
+            Clustering Algorithms: 聚类算法
+            Distance: 距离
+            Map visualization SQL app: 地图可视化 SQL 应用
+            Use Apache Zeppelin: 使用 Apache Zeppelin
+            Gallery: 案例库
+            Performance tuning: 性能调优
+            Benchmark: 基准测试
+            Tune RDD application: 调优 RDD 应用
+            Storing large raster geometries in Parquet files: 在 Parquet 文件中存储大型栅格几何对象
+            API: API
+            SQL: SQL
+            Quick start: 快速开始
+            Vector data: 矢量数据
+            Geometry Functions: 几何函数
+            Geography Functions: 地理函数
+            DataFrame Style functions: DataFrame 风格函数
+            Query optimization: 查询优化
+            CRS Transformation: 坐标系转换
+            Nearest-Neighbour searching: 最近邻搜索
+            Reading Legacy Parquet Files: 读取旧版 Parquet 文件
+            Visualization: 可视化
+            Raster data: 栅格数据
+            Raster Functions: 栅格函数
+            Raster map algebra: 栅格地图代数
+            Raster affine transformation: 栅格仿射变换
+            Parameter: 参数
+            RDD (core): RDD（核心）
+            Scala/Java doc: Scala/Java 文档
+            Stats: 统计
+            DataFrame: DataFrame
+            Viz: 可视化
+            DataFrame/SQL: DataFrame/SQL
+            RDD: RDD
+            Sedona Python: Sedona Python
+            Release notes: 发布说明
+            Sedona with Apache Flink: 在 Apache Flink 上使用 Sedona
+            Spatial SQL app (Flink): 空间 SQL 应用（Flink）
+            Spatial SQL app (PyFlink): 空间 SQL 应用（PyFlink）
+            Examples: 示例
+            Scala/Java: Scala/Java
+            Python: Python
+            Overview (Flink): 概述（Flink）
+            Install Sedona SQL: 安装 Sedona SQL
+            Spatial SQL app (Snowflake): 空间 SQL 应用（Snowflake）
+            Overview (Snowflake): 概述（Snowflake）
+            Blog: 博客
+            Community: 社区
+            Download: 下载
+            Compile the code: 编译源码
+            Contributor Guide: 贡献者指南
+            Rules: 规则
+            Develop: 开发
+            Contribute to Geopandas API on Sedona: 为 Sedona 的 Geopandas API 贡献代码
+            Committer Guide: 提交者指南
+            Project Management Committee: 项目管理委员会
+            Become a release manager: 成为发布经理
+            Publish a snapshot version: 发布快照版本
+            Make a release: 发布版本
+            Vote a release: 投票发布
+            Publications: 论文
+            Apache Software Foundation: Apache 软件基金会
+            Foundation: 基金会
+            License: 许可证
+            Events: 活动
+            Sponsorship: 赞助
+            Thanks: 致谢
+            Security: 安全
+            Privacy: 隐私
+            Telemetry: 遥测
   - git-revision-date-localized:
       type: datetime
   - mike:
