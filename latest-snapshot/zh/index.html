@@ -97,10 +97,9 @@
         
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
-              
-You're not viewing the latest stable version.
+              您当前查看的不是最新稳定版本。
 <a href="../..">
-  <strong>Click here to go to the latest stable version.</strong>
+  <strong>点击此处跳转到最新稳定版本。</strong>
 </a>
 
             </div>
@@ -109,9 +108,8 @@ You're not viewing the latest stable version.
         
       </div>
     
-    
-  <div style="background: #CA463A; color: white; text-align: center; padding: 0.5rem;">
-    <a href="setup/release-notes/" title="Announcement">Apache Sedona 1.9.0 is out now, featuring Spark 4.1 support, proj4sedona CRS transformation, Bing Tile functions, and more!</a>
+    <div style="background: #CA463A; color: white; text-align: center; padding: 0.5rem;">
+    <a href="../setup/release-notes/" title="Announcement">Apache Sedona 1.9.0 已正式发布，新增 Spark 4.1 支持、proj4sedona 坐标系转换、Bing Tile 函数等众多特性！</a>
   </div>
   
       <!--
@@ -197,31 +195,27 @@ You're not viewing the latest stable version.
 
         <!-- Site language selector -->
         
-        <div class="md-header__option">
-  <div class="md-select">
-    
-    <button class="md-header__button md-icon" aria-label="选择当前语言">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
-    </button>
-    <div class="md-select__inner">
-      <ul class="md-select__list">
         
-          <li class="md-select__item">
-            <a href="/latest/" hreflang="en" class="md-select__link">
-              English
-            </a>
-          </li>
-        
-          <li class="md-select__item">
-            <a href="/latest/zh/" hreflang="zh" class="md-select__link">
-              中文
-            </a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
-</div>
+<nav class="sd-lang-switch" aria-label="选择当前语言">
+  <a
+      href="/latest/"
+      hreflang="en"
+      lang="en"
+      target="_self"
+      class="sd-lang-switch__item"
+      
+    >English</a>
+  <a
+      href="/latest/zh/"
+      hreflang="zh"
+      lang="zh"
+      target="_self"
+      class="sd-lang-switch__item sd-lang-switch__item--active"
+      aria-current="true"
+    >中文</a>
+  
+</nav>
+
         
       </div>
       <div class="right-part">
@@ -5523,85 +5517,680 @@ You're not viewing the latest stable version.
           
           
     
-    
-            <div class="md-content" data-md-component="content">
-              
-              <article class="md-content__inner md-typeset">
-                
-                  
+    <div class="page-home">
 
+      <!-- Section Hero -->
+      <section class="section-hero">
+        <div class="container">
 
-  
-    <a href="https://github.com/apache/sedona/edit/master/docs/index.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
-      
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
-    </a>
-  
-  
+          <div class="logo-wrap">
+            <img src="../image/home/hero/logo.svg" alt="" class="logo">
+            <h1 class="page-title">Apache Sedona</h1>
+          </div>
 
+          <div class="section-description editor">
+            Apache Sedona™ 让处理任意规模的空间数据变得轻而易举。
+          </div>
 
-  <h1>首页</h1>
+          <div class="btn-group">
+            <a href="sedonaspark/" title="首页" class="btn btn-black">
+              立即开始
+            </a>
+          </div>
 
-<!--
- Licensed to the Apache Software Foundation (ASF) under one
- or more contributor license agreements.  See the NOTICE file
- distributed with this work for additional information
- regarding copyright ownership.  The ASF licenses this file
- to you under the Apache License, Version 2.0 (the
- "License"); you may not use this file except in compliance
- with the License.  You may obtain a copy of the License at
+        </div>
 
-   http://www.apache.org/licenses/LICENSE-2.0
+        <div class="img-bg-wrap">
+          <img src="../image/home/hero/mountains-desktop.svg" alt="" class="img-bg">
+        </div>
+      </section>
 
- Unless required by applicable law or agreed to in writing,
- software distributed under the License is distributed on an
- "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- KIND, either express or implied.  See the License for the
- specific language governing permissions and limitations
- under the License.
- -->
+      <!-- Section Global Scale -->
+      <section class="section-global-scale">
+        <div class="container">
+          <div class="section-row">
 
-<h3 id="20250912sedona-180-geopandas-apipyflink-java-11-spark-40-udfmoran-i-mysql">2025/09/12：Sedona 1.8.0 发布。本次重要版本引入了 GeoPandas 兼容 API、PyFlink 支持、Java 11 升级、Spark 4.0 支持，以及向量化 UDF、Moran I 自相关、MySQL 几何类型支持和增强的空间过滤下推等众多新特性。<a class="headerlink" href="#20250912sedona-180-geopandas-apipyflink-java-11-spark-40-udfmoran-i-mysql" title="Permanent link">&para;</a></h3>
-<h3 id="20250607sedona-172-bug-java-8">2025/06/07：Sedona 1.7.2 发布。本次为纯 Bug 修复版本，也是 Java 8 上的最后一个发布版本。<a class="headerlink" href="#20250607sedona-172-bug-java-8" title="Permanent link">&para;</a></h3>
-<h3 id="20250315sedona-171-knn-geostats-sql-stac-catalog-osm-pbf-geoparquet">2025/03/15：Sedona 1.7.1 发布。包含 KNN 连接性能改进、GeoStats 的 SQL 接口、STAC catalog 读取器、OSM PBF 读取器，以及更优的 GeoParquet 文件分区。<a class="headerlink" href="#20250315sedona-171-knn-geostats-sql-stac-catalog-osm-pbf-geoparquet" title="Permanent link">&para;</a></h3>
-<h3 id="20241202sedona-170-knn-join-geostats-shapefile-geopackage-dataframe-st">2024/12/02：Sedona 1.7.0 发布。引入了名为 KNN Join 的新连接类型、名为 GeoStats 的新统计模块、用于 Shapefile 和 GeoPackage 的基于 DataFrame 的读取器，以及众多新的 ST 函数。<a class="headerlink" href="#20241202sedona-170-knn-join-geostats-shapefile-geopackage-dataframe-st" title="Permanent link">&para;</a></h3>
+            <div class="col-left">
+              <div class="section-title">
+                <div>查询与连接</div>
 
+                <p class="typed-wrap"><span class="typed"></span></p>
+                <div class="typed-strings">
+                  <p>GPS 轨迹点</p>
+                  <p>建筑</p>
+                  <p>地块</p>
+                  <p>出行</p>
+                  <p>场所</p>
+                  <p>商户</p>
+                  <p>土地</p>
+                  <p>植被</p>
+                  <p>栅格</p>
+                  <p>矢量</p>
+                  <p>表格数据</p>
+                </div>
 
-
-
-
-
-
-  
-    
-  
-  
-
-
-  <aside class="md-source-file">
-    
-      
-  <span class="md-source-file__fact">
-    <span class="md-icon" title="最后更新">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
-    </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月7日 04:14:05 UTC">2026年5月7日 04:14:05</span>
-  </span>
-
-    
-    
-    
-    
-  </aside>
-
-
-
-
-
-                
-              </article>
+                <div>从本地到全球规模</div>
+              </div>
+              <div class="section-description editor"></div>
             </div>
-          
+
+            <div class="col-right">
+              <div class="hljs-snippet" data-initial="python">
+                <div class="hljs-snippet__tabs" role="tablist" aria-label="Code tabs">
+                  <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="sql">SQL</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">SedonaSpark</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="bash">SedonaDB</button>
+                </div>
+                <div class="hljs-snippet__body">
+
+                  <button class="hljs-snippet__copy" aria-label="Copy code">
+                    <span class="btn-inner">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M13.125 11.8749C13.125 12.0406 13.0592 12.1996 12.9419 12.3168C12.8247 12.434 12.6658 12.4999 12.5 12.4999H7.5C7.33424 12.4999 7.17527 12.434 7.05806 12.3168C6.94085 12.1996 6.875 12.0406 6.875 11.8749C6.875 11.7091 6.94085 11.5502 7.05806 11.4329C7.17527 11.3157 7.33424 11.2499 7.5 11.2499H12.5C12.6658 11.2499 12.8247 11.3157 12.9419 11.4329C13.0592 11.5502 13.125 11.7091 13.125 11.8749ZM12.5 8.74989H7.5C7.33424 8.74989 7.17527 8.81573 7.05806 8.93295C6.94085 9.05016 6.875 9.20913 6.875 9.37489C6.875 9.54065 6.94085 9.69962 7.05806 9.81683C7.17527 9.93404 7.33424 9.99989 7.5 9.99989H12.5C12.6658 9.99989 12.8247 9.93404 12.9419 9.81683C13.0592 9.69962 13.125 9.54065 13.125 9.37489C13.125 9.20913 13.0592 9.05016 12.9419 8.93295C12.8247 8.81573 12.6658 8.74989 12.5 8.74989ZM16.875 3.74989V16.8749C16.875 17.2064 16.7433 17.5243 16.5089 17.7588C16.2745 17.9932 15.9565 18.1249 15.625 18.1249H4.375C4.04348 18.1249 3.72554 17.9932 3.49112 17.7588C3.2567 17.5243 3.125 17.2064 3.125 16.8749V3.74989C3.125 3.41837 3.2567 3.10042 3.49112 2.866C3.72554 2.63158 4.04348 2.49989 4.375 2.49989H7.20781C7.55899 2.1067 7.98924 1.79212 8.47041 1.57673C8.95158 1.36134 9.47282 1.25 10 1.25C10.5272 1.25 11.0484 1.36134 11.5296 1.57673C12.0108 1.79212 12.441 2.1067 12.7922 2.49989H15.625C15.9565 2.49989 16.2745 2.63158 16.5089 2.866C16.7433 3.10042 16.875 3.41837 16.875 3.74989ZM7.5 4.99989H12.5C12.5 4.33685 12.2366 3.70096 11.7678 3.23212C11.2989 2.76328 10.663 2.49989 10 2.49989C9.33696 2.49989 8.70107 2.76328 8.23223 3.23212C7.76339 3.70096 7.5 4.33685 7.5 4.99989ZM15.625 3.74989H13.5352C13.6773 4.15131 13.75 4.57403 13.75 4.99989V5.62489C13.75 5.79065 13.6842 5.94962 13.5669 6.06683C13.4497 6.18404 13.2908 6.24989 13.125 6.24989H6.875C6.70924 6.24989 6.55027 6.18404 6.43306 6.06683C6.31585 5.94962 6.25 5.79065 6.25 5.62489V4.99989C6.25001 4.57403 6.32267 4.15131 6.46484 3.74989H4.375V16.8749H15.625V3.74989Z"
+                        fill="white" />
+                    </svg>
+                      <span class="active-state">✅</span>
+                    </span>
+                  </button>
+
+                  <pre class="hljs-snippet__panel" data-lang="sql"><code class="language-sql"><pre><code class="language-sql">SELECT superhero.name
+FROM city, superhero
+WHERE ST_Contains(city.geom, superhero.geom)
+AND city.name = 'Gotham'</code></pre>
+    </code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">sedona.sql("""
+SELECT superhero.name
+FROM city, superhero
+WHERE ST_Contains(city.geom, superhero.geom)
+AND city.name = 'Gotham'
+""")</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="bash" hidden><code class="language-bash">sd.sql("""
+SELECT superhero.name
+FROM city, superhero
+WHERE ST_Contains(city.geom, superhero.geom)
+AND city.name = 'Gotham'
+""")</code></pre>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Get Started in  -->
+      <section class="section-get-started-in-seconds">
+        <div class="container">
+          <div class="section-row">
+            <div class="col-left">
+              <div class="hljs-snippet" data-initial="pyspark">
+                <div class="hljs-snippet__tabs" role="tablist" aria-label="Code tabs">
+                  <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="pyspark">SedonaSpark</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">SedonaDB</button>
+                  <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="bash">SedonaSpark in Docker</button>
+                </div>
+                <div class="hljs-snippet__body">
+
+                  <button class="hljs-snippet__copy" aria-label="Copy code">
+                    <span class="btn-inner">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M13.125 11.8749C13.125 12.0406 13.0592 12.1996 12.9419 12.3168C12.8247 12.434 12.6658 12.4999 12.5 12.4999H7.5C7.33424 12.4999 7.17527 12.434 7.05806 12.3168C6.94085 12.1996 6.875 12.0406 6.875 11.8749C6.875 11.7091 6.94085 11.5502 7.05806 11.4329C7.17527 11.3157 7.33424 11.2499 7.5 11.2499H12.5C12.6658 11.2499 12.8247 11.3157 12.9419 11.4329C13.0592 11.5502 13.125 11.7091 13.125 11.8749ZM12.5 8.74989H7.5C7.33424 8.74989 7.17527 8.81573 7.05806 8.93295C6.94085 9.05016 6.875 9.20913 6.875 9.37489C6.875 9.54065 6.94085 9.69962 7.05806 9.81683C7.17527 9.93404 7.33424 9.99989 7.5 9.99989H12.5C12.6658 9.99989 12.8247 9.93404 12.9419 9.81683C13.0592 9.69962 13.125 9.54065 13.125 9.37489C13.125 9.20913 13.0592 9.05016 12.9419 8.93295C12.8247 8.81573 12.6658 8.74989 12.5 8.74989ZM16.875 3.74989V16.8749C16.875 17.2064 16.7433 17.5243 16.5089 17.7588C16.2745 17.9932 15.9565 18.1249 15.625 18.1249H4.375C4.04348 18.1249 3.72554 17.9932 3.49112 17.7588C3.2567 17.5243 3.125 17.2064 3.125 16.8749V3.74989C3.125 3.41837 3.2567 3.10042 3.49112 2.866C3.72554 2.63158 4.04348 2.49989 4.375 2.49989H7.20781C7.55899 2.1067 7.98924 1.79212 8.47041 1.57673C8.95158 1.36134 9.47282 1.25 10 1.25C10.5272 1.25 11.0484 1.36134 11.5296 1.57673C12.0108 1.79212 12.441 2.1067 12.7922 2.49989H15.625C15.9565 2.49989 16.2745 2.63158 16.5089 2.866C16.7433 3.10042 16.875 3.41837 16.875 3.74989ZM7.5 4.99989H12.5C12.5 4.33685 12.2366 3.70096 11.7678 3.23212C11.2989 2.76328 10.663 2.49989 10 2.49989C9.33696 2.49989 8.70107 2.76328 8.23223 3.23212C7.76339 3.70096 7.5 4.33685 7.5 4.99989ZM15.625 3.74989H13.5352C13.6773 4.15131 13.75 4.57403 13.75 4.99989V5.62489C13.75 5.79065 13.6842 5.94962 13.5669 6.06683C13.4497 6.18404 13.2908 6.24989 13.125 6.24989H6.875C6.70924 6.24989 6.55027 6.18404 6.43306 6.06683C6.31585 5.94962 6.25 5.79065 6.25 5.62489V4.99989C6.25001 4.57403 6.32267 4.15131 6.46484 3.74989H4.375V16.8749H15.625V3.74989Z"
+                        fill="white" />
+                    </svg>
+                      <span class="active-state">✅</span>
+                    </span>
+                  </button>
+                  <pre class="hljs-snippet__panel" data-lang="pyspark" hidden><code class="language-python">pip install apache-sedona</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">pip install "apache-sedona[db]"</code></pre>
+                  <pre class="hljs-snippet__panel" data-lang="bash" hidden><code class="language-bash">docker pull apache/sedona:latest
+docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
+                  </code></pre>
+                </div>
+              </div>
+            </div>
+            <div class="col-right">
+              <h2 class="section-title">
+                几秒钟即可上手
+              </h2>
+              <div class="section-description editor">
+                安装 SedonaDB，或在需要更大规模时将 Sedona 部署到分布式系统。
+              </div>
+              <div class="bth-group">
+                <a href="/sedonadb" class="btn btn-red">
+                     <span class="caption">
+                   安装 SedonaDB
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Deploy -->
+      <section class="section-deploy">
+        <div class="container">
+          <h2 class="section-title">在任何需要的地方部署 Sedona</h2>
+          <div class="section-description editor">从本地环境到分布式与云原生系统，选择最适合您基础设施的运行时。</div>
+          <div class="info-grid">
+
+            <div class="info-item">
+              <div class="info-item__tag">
+                <img src="../image/home/deploy/desktop.svg" alt="" class="">
+                <div class="caption">
+                  本地
+                </div>
+              </div>
+              <h3 class="info-item__title">SedonaDB</h3>
+              <div class="info-item__description editor">面向本地处理与开发的独立运行时。</div>
+              <div class="info-item__cta">
+                <a href="/sedonadb" class="btn-link">
+                  <span class="caption">SedonaDB</span>
+                  <span class="icon">
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+                      </span>
+                </a>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-item__tag">
+                <img src="../image/home/deploy/database.svg" alt="" class="">
+                <div class="caption">
+                  批处理
+                </div>
+              </div>
+              <h3 class="info-item__title">SedonaSpark</h3>
+              <div class="info-item__description editor">在 Apache Spark 集群上的分布式批处理。</div>
+              <div class="info-item__cta">
+                <a href="sedonaspark" class="btn-link">
+                  <span class="caption">SedonaSpark</span>
+                  <span class="icon">
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+                      </span>
+                </a>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-item__tag">
+                <img src="../image/home/deploy/signal.svg" alt="" class="">
+                <div class="caption">
+                  流处理
+                </div>
+              </div>
+              <h3 class="info-item__title">SedonaFlink</h3>
+              <div class="info-item__description editor">基于 Apache Flink 的实时空间分析。</div>
+              <div class="info-item__cta">
+                <a href="sedonaflink" class="btn-link">
+                  <span class="caption">SedonaFlink</span>
+                  <span class="icon">
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+                      </span>
+                </a>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-item__tag">
+                <img src="../image/home/deploy/snowflake.svg" alt="" class="">
+                <div class="caption">
+                    批处理
+                </div>
+              </div>
+              <h3 class="info-item__title">SedonaSnow</h3>
+              <div class="info-item__description editor">
+                在 Snowflake 环境中提供原生空间支持。
+              </div>
+              <div class="info-item__cta">
+                <a href="sedonasnow" class="btn-link">
+                  <span class="caption">SedonaSnow</span>
+                  <span class="icon">
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+                      </span>
+                </a>
+              </div>
+            </div>
+
+            <div class="info-item info-item--wide">
+              <div class="info-item__tag">
+                <img src="../image/home/deploy/cloud.svg" alt="" class="">
+                <div class="caption">
+                  云端
+                </div>
+              </div>
+              <h3 class="info-item__title">云端的 Sedona</h3>
+              <div class="info-item__description editor">在您所选的云环境中集成空间能力</div>
+              <div class="info-item__cta">
+                <a href="setup/overview/" class="btn-link">
+                  <span class="caption">探索生态系统</span>
+                  <span class="icon">
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+                      </span>
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
+      <!-- Section Industries Tabs -->
+      <section class="section-industries-tabs">
+        <div class="container">
+          <div class="content-box">
+
+            <h2 class="section-title">想分享您的 Sedona 应用案例？</h2>
+
+            <div class="section__subtitle editor">
+              加入我们的 Discord，或在 GitHub Discussions 发起讨论，与我们协作。
+            </div>
+
+            <div class="industries-tabs">
+
+              <div class="industries-tabs__head-wrap">
+                <div class="industries-tabs__head">
+                  <div class="industries-tabs__head-item active">
+                    出行
+                  </div>
+                  <div class="industries-tabs__head-item ">
+                    电信
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    数据与地图生产
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    物流
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    能源
+                  </div>
+                  <div class="industries-tabs__head-item">
+                    金融
+                  </div>
+                </div>
+              </div>
+
+              <div class="industries-tabs__body">
+
+                <div data-tab="Mobility" class="industries-tabs__body-item active">
+                  <div class="industries-grid">
+                    <div class="grid-item">
+                      <img src="../image/home/industries/bmw.svg" alt="" class="">
+                    </div>
+                    <div class="grid-item">
+                      <img src="../image/home/industries/gm.svg" alt="" class="">
+                    </div>
+                    <div class="grid-item">
+                      <img src="../image/home/industries/placer-ai.svg" alt="" class="">
+                    </div>
+                    <div class="grid-item">
+                      <img src="../image/home/industries/arity.svg" alt="" class="">
+                    </div>
+                  </div>
+                </div>
+
+                <div data-tab="Telecom" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="../image/home/industries/comcast.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/at&t.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/telus.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/t-mobile.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div data-tab="Data and map production" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="../image/home/industries/space-x.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/maxar.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/mapbox.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/tom-tom.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div data-tab="Logistics" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="../image/home/industries/instacart.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/uber.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/UnitedAirlines.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/Boeing.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div data-tab="Energy" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="../image/home/industries/shell.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/DukeEnergy.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/PG&E.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/Southern_Company.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+                <div data-tab="Finance" class="industries-tabs__body-item">
+                  <div class="industries-grid">
+                    <div class="grid-item"><img src="../image/home/industries/Allstate.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/CapitalOne.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/cigna.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/JPMorganChase.svg" alt="" class=""></div>
+                    <div class="grid-item"><img src="../image/home/industries/StateFarm.svg" alt="" class=""></div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!--<div class="btn-group">
+              <a href="#" class="btn btn-red">Showcase your use case</a>
+              <a href="#" class="btn btn-light-red">
+                <span class="caption">See All Cases</span>
+                <span class="icon">
+                  <svg width="15" height="12" viewBox="0 0 15 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1.25 6H13.75M13.75 6L9.0625 1M13.75 6L9.0625 11" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
+
+                </span>
+              </a>
+            </div>-->
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Features -->
+      <section class="section-features">
+        <div class="container">
+          <h2 class="section-title">Apache Sedona 概览</h2>
+          <div class="section-description editor">定义 Sedona 地理空间性能的核心特性</div>
+          <div class="features-grid">
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="../image/home/features/scalable.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">可扩展</h3>
+              <div class="feature-item__description editor">可在 Spark、Flink 或本地处理小型或大型数据集。</div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="../image/home/features/waves.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">功能完备</h3>
+              <div class="feature-item__description editor">300+ 空间函数，支持多种空间文件格式，并与数据湖仓和数据库兼容。</div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="../image/home/features/picture.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">同时支持栅格与矢量</h3>
+              <div class="feature-item__description editor">可同时分析栅格与矢量数据集。</div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="../image/home/features/cloud.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">可移植</h3>
+              <div class="feature-item__description editor">易于在本地、云端或任何数据平台上运行。</div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="../image/home/features/rocket.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">高性能</h3>
+              <div class="feature-item__description editor">面向单节点或分布式集群环境的优化执行。</div>
+              <div class="feature-item__cta">
+                <a href="https://github.com/apache/sedona-spatialbench" class="btn-link">
+                  <span class="caption">查看基准测试</span>
+                  <span class="icon">
+                        <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.95831 9.5H15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M9.5 3.95825L15.0417 9.49992L9.5 15.0416" stroke="#CA463A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+                      </span>
+                </a>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-item__icon">
+                <img src="../image/home/features/code.svg" alt="" class="">
+              </div>
+              <h3 class="feature-item__title">熟悉易用</h3>
+              <div class="feature-item__description editor">支持多种编程语言，可在您最熟悉的环境中使用。</div>
+            </div>
+
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Section GIF -->
+      <!--
+      <section  hidden="hidden" class="section-img-wrap">
+        <div class="container">
+          <div class="img-wrap">
+            <img src="" alt="" class="">
+          </div>
+        </div>
+      </section>
+      -->
+
+
+      <!-- Section Community -->
+      <section class="section-community">
+        <div class="container">
+          <h2 class="section-title">加入社区</h2>
+          <div class="section-description editor">听听社区对 Apache Sedona 使用体验的分享。</div>
+          <div class="btn-group">
+            <a href="https://github.com/apache/sedona/discussions" class="btn btn-light-red">
+                  <span class="caption">
+                    GitHub Discussions
+                  </span>
+              <span class="icon icon-lg">
+    <svg width="17" height="18" viewBox="0 0 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M8.5 16.5C12.6421 16.5 16 13.1421 16 9C16 4.85786 12.6421 1.5 8.5 1.5C4.35786 1.5 1 4.85786 1 9C1 10.1998 1.28171 11.3337 1.7826 12.3394C2.16071 13.0985 1.63606 14.1228 1.43613 14.87C1.24222 15.5947 1.90526 16.2578 2.63001 16.0639C3.37722 15.8639 4.4015 15.3393 5.16065 15.7174C6.16627 16.2183 7.30024 16.5 8.5 16.5Z"
+      stroke="#CA463A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+
+                  </span>
+            </a>
+            <a href="https://discord.gg/9A3k5dEBsY" class="btn btn-light-red">
+              <span class="caption">Discord</span>
+              <span class="icon  icon-lg">
+                     <svg width="17" height="18" viewBox="0 0 17 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M8.5 16.5C12.6421 16.5 16 13.1421 16 9C16 4.85786 12.6421 1.5 8.5 1.5C4.35786 1.5 1 4.85786 1 9C1 10.1998 1.28171 11.3337 1.7826 12.3394C2.16071 13.0985 1.63606 14.1228 1.43613 14.87C1.24222 15.5947 1.90526 16.2578 2.63001 16.0639C3.37722 15.8639 4.4015 15.3393 5.16065 15.7174C6.16627 16.2183 7.30024 16.5 8.5 16.5Z"
+      stroke="#CA463A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+
+
+                    </span>
+            </a>
+          </div>
+
+          <!--
+          <div hidden="hidden" class="community-cards">
+
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="../image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="../image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="../image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="../image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+            <div class="community-card">
+              <div class="community-card__author">
+                <div class="author-avatar">
+                  <img src="../image/home/community/author.jpg" alt="" class="">
+                </div>
+                <div class="author-info">
+                  <div class="author-name">Sean Rose</div>
+                  <div class="author-tag">@seanrose</div>
+                </div>
+              </div>
+              <div class="community-card__text editor">
+                Really, really liking @apachesedona so far. It's just the right amount of simple/fast for.
+              </div>
+            </div>
+
+
+          </div>
+           -->
+
+        </div>
+      </section>
+
+      <!-- Section Events -->
+      <section class="section-events">
+        <div class="container">
+          <div class="content-box">
+            <div class="content-box__inner">
+              <h2 class="section-title">
+                每月社区会议与技术大会
+              </h2>
+              <div class="btn-group">
+                <a href="community/contact/" class="btn btn-red">
+                     <span class="caption">
+                    查看活动
+                  </span>
+                </a>
+              </div>
+            </div>
+            <img src="../image/home/events/corner-mountains.svg" alt="" class="corner-img">
+            <div class="events-line">
+              <div>Sedona <strong>活动</strong></div>
+              <div>Sedona <strong>活动</strong></div>
+              <div>Sedona <strong>活动</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Get Started -->
+      <!-- <section class="section-get-started">
+        <div class="container">
+
+          <h2 class="section-title">
+            Start using SedonaDB in minutes
+          </h2>
+
+          <div class="section-description editor">
+            Install SedonaDB, or run Sedona on distributed systems when you need additional scale.
+          </div>
+
+          <div class="hljs-snippet" data-initial="powershell">
+            <div class="hljs-snippet__tabs" role="tablist" aria-label="Code tabs">
+              <button class="hljs-snippet__tab is-active" role="tab" aria-selected="true" data-lang="powershell">Command line</button>
+              <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="python">PySpark</button>
+              <button class="hljs-snippet__tab" role="tab" aria-selected="false" data-lang="java">Java</button>
+            </div>
+            <div class="hljs-snippet__body">
+
+              <button class="hljs-snippet__copy" aria-label="Copy code">
+                    <span class="btn-inner">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M13.125 11.8749C13.125 12.0406 13.0592 12.1996 12.9419 12.3168C12.8247 12.434 12.6658 12.4999 12.5 12.4999H7.5C7.33424 12.4999 7.17527 12.434 7.05806 12.3168C6.94085 12.1996 6.875 12.0406 6.875 11.8749C6.875 11.7091 6.94085 11.5502 7.05806 11.4329C7.17527 11.3157 7.33424 11.2499 7.5 11.2499H12.5C12.6658 11.2499 12.8247 11.3157 12.9419 11.4329C13.0592 11.5502 13.125 11.7091 13.125 11.8749ZM12.5 8.74989H7.5C7.33424 8.74989 7.17527 8.81573 7.05806 8.93295C6.94085 9.05016 6.875 9.20913 6.875 9.37489C6.875 9.54065 6.94085 9.69962 7.05806 9.81683C7.17527 9.93404 7.33424 9.99989 7.5 9.99989H12.5C12.6658 9.99989 12.8247 9.93404 12.9419 9.81683C13.0592 9.69962 13.125 9.54065 13.125 9.37489C13.125 9.20913 13.0592 9.05016 12.9419 8.93295C12.8247 8.81573 12.6658 8.74989 12.5 8.74989ZM16.875 3.74989V16.8749C16.875 17.2064 16.7433 17.5243 16.5089 17.7588C16.2745 17.9932 15.9565 18.1249 15.625 18.1249H4.375C4.04348 18.1249 3.72554 17.9932 3.49112 17.7588C3.2567 17.5243 3.125 17.2064 3.125 16.8749V3.74989C3.125 3.41837 3.2567 3.10042 3.49112 2.866C3.72554 2.63158 4.04348 2.49989 4.375 2.49989H7.20781C7.55899 2.1067 7.98924 1.79212 8.47041 1.57673C8.95158 1.36134 9.47282 1.25 10 1.25C10.5272 1.25 11.0484 1.36134 11.5296 1.57673C12.0108 1.79212 12.441 2.1067 12.7922 2.49989H15.625C15.9565 2.49989 16.2745 2.63158 16.5089 2.866C16.7433 3.10042 16.875 3.41837 16.875 3.74989ZM7.5 4.99989H12.5C12.5 4.33685 12.2366 3.70096 11.7678 3.23212C11.2989 2.76328 10.663 2.49989 10 2.49989C9.33696 2.49989 8.70107 2.76328 8.23223 3.23212C7.76339 3.70096 7.5 4.33685 7.5 4.99989ZM15.625 3.74989H13.5352C13.6773 4.15131 13.75 4.57403 13.75 4.99989V5.62489C13.75 5.79065 13.6842 5.94962 13.5669 6.06683C13.4497 6.18404 13.2908 6.24989 13.125 6.24989H6.875C6.70924 6.24989 6.55027 6.18404 6.43306 6.06683C6.31585 5.94962 6.25 5.79065 6.25 5.62489V4.99989C6.25001 4.57403 6.32267 4.15131 6.46484 3.74989H4.375V16.8749H15.625V3.74989Z"
+                        fill="white" />
+                    </svg>
+                      <span class="active-state">✅</span>
+                    </span>
+              </button>
+
+              <pre class="hljs-snippet__panel" data-lang="powershell"><code class="language-powershell">curl https://install.sedona.apache.org | sh    </code></pre>
+              <pre class="hljs-snippet__panel" data-lang="python" hidden><code class="language-python">print(&quot;Hello from PySpark!&quot;)
+    # from pyspark.sql import SparkSession
+    # spark = SparkSession.builder.getOrCreate()</code></pre>
+              <pre class="hljs-snippet__panel" data-lang="java" hidden><code class="language-java">public class Main {
+      public static void main(String[] args) {
+        System.out.println(&quot;Hello Java&quot;);
+      }
+    }</code></pre>
+            </div>
+          </div>
+
+          <div class="bth-group">
+            <a href="#" class="btn btn-red">
+                     <span class="caption">
+                   Install SedonaDB
+                  </span>
+            </a>
+          </div>
+
+        </div>
+      </section> -->
+
+    </div>
     
 
           
