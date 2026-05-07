@@ -20,6 +20,10 @@
       
       
         
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../zh/blog/" hreflang="zh">
+        
       
       
       <link rel="icon" href="../favicon.ico">
@@ -189,6 +193,32 @@ You're not viewing the latest stable version.
         
 
         <!-- Site language selector -->
+        
+        <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../zh/blog/" hreflang="zh" class="md-select__link">
+              中文
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
         
       </div>
       <div class="right-part">
@@ -4482,10 +4512,6 @@ You're not viewing the latest stable version.
     
   
   
-    
-      
-    
-  
   
     <li class="md-nav__item md-nav__item--active">
       
@@ -5366,10 +5392,29 @@ You're not viewing the latest stable version.
             
           
           
-  <div class="md-content" data-md-component="content">
-    <div class="md-content__inner">
-      <header class="md-typeset">
-        <!--
+    
+    
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+
+
+
+  
+    <a href="https://github.com/apache/sedona/edit/master/docs/blog/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+  <h1>Blog</h1>
+
+<!--
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -5389,682 +5434,46 @@ You're not viewing the latest stable version.
 -->
 
 <p>The official source for Apache Sedona news, technical insights, release updates, and best practices in large-scale spatial data management.</p>
-      </header>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../assets/authors/dewey.jpeg" alt="Dewey Dunnington">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/kristin.jpeg" alt="Kristin Cowalcijk">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/feng.jpeg" alt="Feng Zhang">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/peter.jpeg" alt="Peter Nguyen">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/jia.jpeg" alt="Jia Yu">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-03-01 00:00:00+00:00">Sunday, March 1, 2026</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              10 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="sedonadb-030-release"><a class="toclink" href="2026/03/01/sedonadb-030-release/">SedonaDB 0.3.0 Release</a></h2>
-<!--
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
--->
-
-<p>The Apache Sedona community is excited to announce the release of
-<a href="https://sedona.apache.org/sedonadb">SedonaDB</a> version 0.3.0!</p>
-<p>SedonaDB is the first open-source, single-node analytical database
-engine that treats spatial data as a first-class citizen. It is
-developed as a subproject of Apache Sedona. This release consists of
-<a href="https://github.com/apache/sedona-db/milestone/2?closed=1">187 resolved
-issues</a>
-including 36 new functions from 18 contributors.</p>
-<p>Apache Sedona powers large-scale geospatial processing on distributed
-engines like Spark (SedonaSpark), Flink (SedonaFlink), and Snowflake
-(SedonaSnow). SedonaDB extends the Sedona ecosystem with a single-node
-engine optimized for small-to-medium data analytics, delivering the
-simplicity and speed that distributed systems often cannot.</p>
-
-    
-      <nav class="md-post__action">
-        <a href="2026/03/01/sedonadb-030-release/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../assets/authors/jia.jpeg" alt="Jia Yu">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-01-11 00:00:00+00:00">Sunday, January 11, 2026</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              5 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="apache-sedona-2025-year-in-review"><a class="toclink" href="2026/01/11/apache-sedona-2025-year-in-review/">Apache Sedona 2025 Year in Review</a></h2>
-<!--
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
--->
-
-<p>2025 was a milestone year for <strong>Apache Sedona</strong>. We made major progress in distributed spatial analytics on Spark, Flink, and Snowflake, launched a new single-node engine called SedonaDB, and pushed forward benchmarking and open geospatial data standards.</p>
-<p>This post summarizes the most important highlights from the Apache Sedona ecosystem in 2025.</p>
-
-    
-      <nav class="md-post__action">
-        <a href="2026/01/11/apache-sedona-2025-year-in-review/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../assets/authors/jia.jpeg" alt="Jia Yu">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/james.jpeg" alt="James Willis">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/pranav.jpeg" alt="Pranav Toggi">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-01-08 00:00:00+00:00">Thursday, January 8, 2026</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              6 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="spatial-query-benchmarking-on-databricks-with-spatialbench"><a class="toclink" href="2026/01/08/spatial-query-benchmarking-databricks/">Spatial Query Benchmarking on Databricks with SpatialBench</a></h2>
-<!--
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
--->
-
-<p><a href="https://www.databricks.com/blog/databricks-spatial-joins-now-17x-faster-out-box">Recently Databricks announced</a> that Serverless SQL users "will see up to 17x faster performance compared to classic clusters with Apache Sedona installed." Unfortunately, Databricks didn’t speak to the cost of the results. It is also an apples-to-oranges comparison because the serverless compute shape and quantity that Databricks deployed to generate the 17x performance difference was not shared. Their result was also limited to specific query configurations.</p>
-<p>We saw an opportunity to address these issues using <a href="https://sedona.apache.org/spatialbench/">SpatialBench</a>, a new benchmarking framework for spatial queries. Because we are comparing different infrastructure types, our benchmark normalizes on price-performance rather than performance alone, while providing what we believe is a more comprehensive benchmarking result.</p>
-<p>We found that only one of the simpler SpatialBench queries (#2) tested on Databricks SQL Serverless had price-performance aligned with the Databricks claim. However, we found that Sedona excelled in most other queries, delivering up to 6x better price-performance, while offering more query coverage.</p>
-
-    
-      <nav class="md-post__action">
-        <a href="2026/01/08/spatial-query-benchmarking-databricks/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../assets/authors/pranav.jpeg" alt="Pranav Toggi">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/james.jpeg" alt="James Willis">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/jia.jpeg" alt="Jia Yu">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/powers.jpeg" alt="Matthew Powers">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2025-12-11 00:00:00+00:00">Thursday, December 11, 2025</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              6 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="introducing-spatialbench-performance-benchmarks-for-spatial-database-queries"><a class="toclink" href="2025/12/11/introducing-spatialbench-performance-benchmarks-for-spatial-database-queries/">Introducing SpatialBench: performance benchmarks for spatial database queries</a></h2>
-<!--
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
--->
-
-<p>SpatialBench is a benchmarking framework for spatial joins, distance queries, and point-in-polygon analyses.</p>
-<p>Traditional benchmarking frameworks don’t include spatial workflows.  It’s important to benchmark spatial workflows separately because an engine that’s fast for tabular data analyses isn’t necessarily performant for spatial queries.</p>
-<p>For example, here are the <a href="https://sedona.apache.org/spatialbench/single-node-benchmarks/">SpatialBench results</a> for Scale Factor 1 (SF-1) and SF-10 for SedonaDB, DuckDB, and GeoPandas on a single ec2 instance:</p>
-
-    
-      <nav class="md-post__action">
-        <a href="2025/12/11/introducing-spatialbench-performance-benchmarks-for-spatial-database-queries/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../assets/authors/dewey.jpeg" alt="Dewey Dunnington">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/kristin.jpeg" alt="Kristin Cowalcijk">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/feng.jpeg" alt="Feng Zhang">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/peter.jpeg" alt="Peter Nguyen">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/jess.jpeg" alt="Jess Pavlin">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2025-12-01 00:00:00+00:00">Monday, December 1, 2025</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              6 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="sedonadb-020-release"><a class="toclink" href="2025/12/01/sedonadb-020-release/">SedonaDB 0.2.0 Release</a></h2>
-<!--
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
--->
-
-<p>The Apache Sedona community is excited to announce the release of <a href="https://sedona.apache.org/sedonadb">SedonaDB</a> version 0.2.0!</p>
-<p>SedonaDB is the first open-source, single-node analytical database engine that treats spatial data as a first-class citizen. It is developed as a subproject of Apache Sedona. This release consists of <a href="https://github.com/apache/sedona-db/milestone/1?closed=1">136 resolved issues</a> including 40 new functions from 17 contributors.</p>
-<p>Apache Sedona powers large-scale geospatial processing on distributed engines like Spark (SedonaSpark), Flink (SedonaFlink), and Snowflake (SedonaSnow). SedonaDB extends the Sedona ecosystem with a single-node engine optimized for small-to-medium data analytics, delivering the simplicity and speed that distributed systems often cannot.</p>
-
-    
-      <nav class="md-post__action">
-        <a href="2025/12/01/sedonadb-020-release/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../assets/authors/powers.jpeg" alt="Matthew Powers">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2025-10-21 00:00:00+00:00">Tuesday, October 21, 2025</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              11 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="managing-spatial-tables-in-data-lakehouses-with-iceberg"><a class="toclink" href="2025/10/21/managing-spatial-tables-in-data-lakehouses-with-iceberg/">Managing spatial tables in Data Lakehouses with Iceberg</a></h2>
-<!--
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
--->
-
-<p>This post explains the benefits of the Lakehouse Architecture for spatial tables and how Lakehouses differ from data warehouses and data lakes.</p>
-
-    
-      <nav class="md-post__action">
-        <a href="2025/10/21/managing-spatial-tables-in-data-lakehouses-with-iceberg/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../assets/authors/dewey.jpeg" alt="Dewey Dunnington">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/kristin.jpeg" alt="Kristin Cowalcijk">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/feng.jpeg" alt="Feng Zhang">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/peter.jpeg" alt="Peter Nguyen">
-          </span>
-        
-          <span class="md-author">
-            <img src="../assets/authors/jess.jpeg" alt="Jess Pavlin">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2025-09-24 00:00:00+00:00">Wednesday, September 24, 2025</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              9 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen"><a class="toclink" href="2025/09/24/introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen/">Introducing SedonaDB: A single-node analytical database engine with geospatial as a first-class citizen</a></h2>
-<!--
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
--->
-
-<p>The Apache Sedona community is excited to announce the initial release of <a href="https://sedona.apache.org/sedonadb">SedonaDB</a>! 🎉</p>
-<p>SedonaDB is the first open-source, single-node analytical database engine that treats spatial data as a first-class citizen. It is developed as a subproject of Apache Sedona.</p>
-<p>Apache Sedona powers large-scale geospatial processing on distributed engines like Spark (SedonaSpark), Flink (SedonaFlink), and Snowflake (SedonaSnow). SedonaDB extends the Sedona ecosystem with a single-node engine optimized for small-to-medium data analytics, delivering the simplicity and speed that distributed systems often cannot.</p>
-
-    
-      <nav class="md-post__action">
-        <a href="2025/09/24/introducing-sedonadb-a-single-node-analytical-database-engine-with-geospatial-as-a-first-class-citizen/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../assets/authors/forrest.jpeg" alt="Matthew Forrest">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2025-09-05 00:00:00+00:00">Friday, September 5, 2025</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              10 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="should-you-use-h3-for-geospatial-analytics-a-deep-dive-with-apache-spark-and-sedona"><a class="toclink" href="2025/09/05/should-you-use-h3-for-geospatial-analytics-a-deep-dive-with-apache-spark-and-sedona/">Should You Use H3 for Geospatial Analytics? A Deep Dive with Apache Spark and Sedona</a></h2>
-<!--
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership. The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License. You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the License for the
-# specific language governing permissions and limitations
-# under the License.
--->
-
-<p>TL;DR The <a href="https://www.uber.com/blog/h3/">H3 spatial index</a> provides a number of spatial functions and a consistent grid system for efficient data aggregation and visualization. H3 is an approximation that makes some computations run faster, but less accurately.  Sedona supports H3 spatial index, but it's often preferable to use precise computations, especially when accuracy is important.</p>
-
-    
-      <nav class="md-post__action">
-        <a href="2025/09/05/should-you-use-h3-for-geospatial-analytics-a-deep-dive-with-apache-spark-and-sedona/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../assets/authors/kelly.jpeg" alt="Kelly-Ann Dolor">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2025-07-09 00:00:00+00:00">Wednesday, July 9, 2025</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              1 min read
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="welcome-to-the-apache-sedona-blog"><a class="toclink" href="2025/07/09/welcome-to-the-apache-sedona-blog/">Welcome to the Apache Sedona Blog!</a></h2>
-<!--
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
--->
-
-<p>Welcome to the brand-new blog for Apache Sedona!</p>
-<p>For several years, Apache Sedona has been the go-to open-source engine for processing massive geospatial
-datasets, extending Apache Spark to handle complex spatial operations with unparalleled speed and efficiency.
-Sedona's capabilities also extend beyond Spark, bringing spatial analytics to the Snowflake data warehouse
-with <a href="https://app.snowflake.com/marketplace/listing/GZTYZF0RTY3/wherobots-sedonasnow">SedonaSnow</a> and the
-real-time streaming engine Apache Flink with a <a href="https://sedona.apache.org/latest/tutorial/flink/sql/">Spatial SQL integration</a>.</p>
-
-    
-      <nav class="md-post__action">
-        <a href="2025/07/09/welcome-to-the-apache-sedona-blog/">
-          Continue reading
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
-      
-        
-          
 
 
 
-<nav class="md-pagination">
+
+
+
+
   
-</nav>
-        
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
       
-    </div>
-  </div>
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 16, 2025 17:55:28 UTC">July 16, 2025 17:55:28</span>
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+  
+
+
+
+                
+              </article>
+            </div>
+          
+    
 
           
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
