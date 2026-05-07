@@ -51,6 +51,7 @@ docs = [
   "mkdocs-git-revision-date-localized-plugin",
   "mkdocs-jupyter",
   "mkdocs-macros-plugin",
+  "mkdocs-static-i18n",
   "pymdown-extensions",
   "mike",
   "blacken-docs",
