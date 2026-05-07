@@ -20,6 +20,7 @@ package org.apache.spark.sql.execution.datasources.geoparquet
 
 import scala.util.control.NonFatal
 
+import org.apache.spark.sql.sedona_sql.UDT.Box2DUDT
 import org.apache.spark.sql.types.{DoubleType, FloatType, StructType}
 import org.datasyslab.proj4sedona.core.Proj
 import org.datasyslab.proj4sedona.parser.CRSSerializer
@@ -236,6 +237,14 @@ object GeoParquetMetaData {
     schema(coveringColumnIndex).dataType match {
       case coveringColumnType: StructType =>
         coveringColumnTypeToCovering(coveringColumnName, coveringColumnType)
+      case _: Box2DUDT =>
+        // Box2DUDT exposes a struct<xmin, ymin, xmax, ymax: double> sqlType, which is the exact
+        // shape required by GeoParquet 1.1 bbox covering columns. Treat the underlying struct as
+        // the covering struct so users can write a Box2D column and have it referenced as a
+        // covering column in GeoParquet metadata without any manual struct construction.
+        coveringColumnTypeToCovering(
+          coveringColumnName,
+          new Box2DUDT().sqlType.asInstanceOf[StructType])
       case _ =>
         throw new IllegalArgumentException(
           s"Covering column $coveringColumnName is not a struct type")
