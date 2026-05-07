@@ -1,14 +1,17 @@
 {% extends "base.html" %}
 
+{# Locale shared across all blocks below. Detected once via mkdocs-static-i18n's
+   reconfigure_material flag, which sets config.theme.language per build. #}
+{%- set cur_lang = config.theme.language if config.theme.language in ['en', 'zh'] else 'en' -%}
+
 {% block outdated %}
-{%- set lang = config.theme.language if config.theme.language in ['en', 'zh'] else 'en' -%}
 {%- set outdated_msg = {
     'en': ['You\'re not viewing the latest stable version.', 'Click here to go to the latest stable version.'],
     'zh': ['您当前查看的不是最新稳定版本。', '点击此处跳转到最新稳定版本。']
 } -%}
-{{ outdated_msg[lang][0] }}
+{{ outdated_msg[cur_lang][0] }}
 <a href="{{ '../' ~ base_url }}">
-  <strong>{{ outdated_msg[lang][1] }}</strong>
+  <strong>{{ outdated_msg[cur_lang][1] }}</strong>
 </a>
 {% endblock %}
 
@@ -25,13 +28,12 @@
 {% endblock %}
 
 {% block header %}
-  {%- set lang = config.theme.language if config.theme.language in ['en', 'zh'] else 'en' -%}
   {%- set announcement = {
       'en': 'Apache Sedona 1.9.0 is out now, featuring Spark 4.1 support, proj4sedona CRS transformation, Bing Tile functions, and more!',
       'zh': 'Apache Sedona 1.9.0 已正式发布，新增 Spark 4.1 支持、proj4sedona 坐标系转换、Bing Tile 函数等众多特性！'
   } -%}
   <div style="background: #CA463A; color: white; text-align: center; padding: 0.5rem;">
-    <a href="setup/release-notes/" title="Announcement">{{ announcement[lang] }}</a>
+    <a href="{{ 'setup/release-notes/' | url }}" title="Announcement">{{ announcement[cur_lang] }}</a>
   </div>
   {{ super() }} {# This renders the original header below your test bar #}
 {% endblock %}
@@ -39,7 +41,6 @@
 {% block container %}
     {% set is_home = page.is_homepage or (page.file and page.file.src_uri in ['index.md', 'index.zh.md']) %}
     {% if is_home %}
-    {%- set lang = config.theme.language if config.theme.language in ['en', 'zh'] else 'en' -%}
     {%- set i18n = {
         'en': {
             'hero_subtitle': 'Apache Sedona™ makes it easy to process spatial datasets of any scale.',
@@ -92,14 +93,16 @@
             'feature_portable_title': 'Portable',
             'feature_portable_desc': 'Easy to run locally, in the cloud, or with any data platform.',
             'feature_fast_title': 'Fast',
-            'feature_fast_desc': 'Optimized execution for single node or distribute cluster environments.',
+            'feature_fast_desc': 'Optimized execution for single node or distributed cluster environments.',
             'feature_fast_cta': 'See the benchmarks',
             'feature_familiar_title': 'Familiar',
             'feature_familiar_desc': 'Supports many programming languages and runnable in the environment where you feel most comfortable.',
             'community_title': 'Join the community',
             'community_desc': 'Discover what our community has to say about their Apache Sedona experience.',
             'events_title': 'Monthly community meetings and programming conferences',
-            'events_cta': 'Find Events'
+            'events_cta': 'Find Events',
+            'events_decor_pre': 'Sedona ',
+            'events_decor_strong': 'Events'
         },
         'zh': {
             'hero_subtitle': 'Apache Sedona™ 让处理任意规模的空间数据变得轻而易举。',
@@ -159,10 +162,12 @@
             'community_title': '加入社区',
             'community_desc': '听听社区对 Apache Sedona 使用体验的分享。',
             'events_title': '每月社区会议与技术大会',
-            'events_cta': '查看活动'
+            'events_cta': '查看活动',
+            'events_decor_pre': 'Sedona ',
+            'events_decor_strong': '活动'
         }
     } -%}
-    {%- set t = i18n[lang] -%}
+    {%- set t = i18n[cur_lang] -%}
     <div class="page-home">
 
       <!-- Section Hero -->
@@ -774,10 +779,9 @@ docker run -d -p 8888:8888 -p 8085:8085 apache/sedona:latest
             </div>
             <img src="{{ "image/home/events/corner-mountains.svg" | url }}" alt="" class="corner-img">
             <div class="events-line">
-              {%- set events_decor = {'en': ['Sedona ', 'Events'], 'zh': ['Sedona ', '活动']} -%}
-              <div>{{ events_decor[lang][0] }}<strong>{{ events_decor[lang][1] }}</strong></div>
-              <div>{{ events_decor[lang][0] }}<strong>{{ events_decor[lang][1] }}</strong></div>
-              <div>{{ events_decor[lang][0] }}<strong>{{ events_decor[lang][1] }}</strong></div>
+              <div>{{ t.events_decor_pre }}<strong>{{ t.events_decor_strong }}</strong></div>
+              <div>{{ t.events_decor_pre }}<strong>{{ t.events_decor_strong }}</strong></div>
+              <div>{{ t.events_decor_pre }}<strong>{{ t.events_decor_strong }}</strong></div>
             </div>
           </div>
         </div>
