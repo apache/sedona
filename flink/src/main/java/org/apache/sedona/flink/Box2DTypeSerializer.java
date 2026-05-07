@@ -50,7 +50,11 @@ public class Box2DTypeSerializer extends TypeSerializer<Box2D> {
 
   @Override
   public Box2D createInstance() {
-    return new Box2D(0.0, 0.0, 0.0, 0.0);
+    // Box2D has no in-band "empty" sentinel — absence is represented by SQL NULL.
+    // Returning null here is the honest default; (0, 0, 0, 0) would alias to a real point at
+    // the equator/prime-meridian and could silently corrupt any caller that treats the
+    // createInstance() result as a usable bbox.
+    return null;
   }
 
   @Override
