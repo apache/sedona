@@ -84,13 +84,13 @@
         {% if not config.theme.palette is mapping %}
         {% include "partials/javascripts/palette.html" %}
         {% endif %}
+      </div>
+      <div class="right-part">
 
         <!-- Site language selector -->
         {% if config.extra.alternate %}
         {% include "partials/alternate.html" %}
         {% endif %}
-      </div>
-      <div class="right-part">
 
         <!-- Button to open search modal -->
         {% if "material/search" in config.plugins %}
