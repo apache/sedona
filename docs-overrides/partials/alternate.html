@@ -4,11 +4,20 @@
     <span class="sd-lang-switch__glyph" aria-hidden="true"><span class="sd-lang-switch__glyph-cn">文</span><span class="sd-lang-switch__glyph-en">A</span></span>
   </summary>
   <ul class="sd-lang-switch__menu">
+    {#-
+      mkdocs-static-i18n stores `alt.link` as a server-absolute path like
+      `/zh/sedonaspark/`. Passing that directly to `| url` keeps the leading
+      slash, so the link bypasses any deployment prefix added by mike (e.g.
+      `/latest-snapshot/`) and lands at the wrong version. Strip the leading
+      slash so `| url` resolves against the docs root and stays inside the
+      current mike version.
+    -#}
     {% for alt in config.extra.alternate %}
       {%- set is_active = (alt.lang == config.theme.language) -%}
+      {%- set alt_link = alt.link[1:] if alt.link.startswith('/') else alt.link -%}
       <li>
         <a
-          href="{{ alt.link | url }}"
+          href="{{ alt_link | url }}"
           hreflang="{{ alt.lang }}"
           lang="{{ alt.lang }}"
           target="_self"
