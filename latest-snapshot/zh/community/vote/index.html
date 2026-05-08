@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#vote-a-sedona-release" class="md-skip">
+        <a href="#sedona" class="md-skip">
           跳转至
         </a>
       
@@ -5077,10 +5077,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#install-necessary-software" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install necessary software
+        安装必要软件
       
     </span>
   </a>
@@ -5088,10 +5088,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#run-the-verify-script" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run the verify script
+        运行校验脚本
       
     </span>
   </a>
@@ -5099,10 +5099,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#check-files-manually" class="md-nav__link">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Check files manually
+        手动检查文件
       
     </span>
   </a>
@@ -5476,10 +5476,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#install-necessary-software" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install necessary software
+        安装必要软件
       
     </span>
   </a>
@@ -5487,10 +5487,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#run-the-verify-script" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run the verify script
+        运行校验脚本
       
     </span>
   </a>
@@ -5498,10 +5498,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#check-files-manually" class="md-nav__link">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Check files manually
+        手动检查文件
       
     </span>
   </a>
@@ -5528,7 +5528,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/community/vote.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/community/vote.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5555,43 +5555,43 @@
  under the License.
  -->
 
-<h1 id="vote-a-sedona-release">Vote a Sedona release<a class="headerlink" href="#vote-a-sedona-release" title="Permanent link">&para;</a></h1>
-<p>This page is for Sedona community to vote a Sedona release. The script below is tested on macOS.</p>
-<p>In order to vote a Sedona release, you must provide your checklist including the following minimum requirement:</p>
+<h1 id="sedona">投票发布 Sedona 版本<a class="headerlink" href="#sedona" title="Permanent link">&para;</a></h1>
+<p>本页面面向 Sedona 社区，用于对 Sedona 发布版本进行投票。下面的脚本已在 macOS 上测试通过。</p>
+<p>要对 Sedona 发布版本投票，您需要在投票邮件中提供至少包含以下条目的检查清单：</p>
 <ul>
-<li>Download links are valid</li>
-<li>Checksums and PGP signatures are valid</li>
-<li>DISCLAIMER and NOTICE are included</li>
-<li>Source code artifacts have correct names matching the current release</li>
-<li>The project can compile from the source code</li>
+<li>下载链接有效</li>
+<li>校验和与 PGP 签名有效</li>
+<li>已包含 DISCLAIMER 与 NOTICE</li>
+<li>源码 artifact 名称与当前发布版本一致</li>
+<li>项目能从源码成功编译</li>
 </ul>
-<p>To make your life easier, we have provided an <a href="https://github.com/jiayuasu/sedona-tools">online Jupyter notebook</a> using MyBinder. Please click this button to open the notebook and verify the release: <a href="https://mybinder.org/v2/gh/jiayuasu/sedona-tools/HEAD?labpath=binder%2Fverify-release.ipynb"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a>. Then you can vote <code>+1</code> in the vote email.</p>
-<p>If you prefer to run the steps on your local machine, please read the steps below. If you can successfully finish the steps, you will pass the items mentioned above. Then you can vote <code>+1</code> in the vote email and provide your checklist.</p>
-<h2 id="install-necessary-software">Install necessary software<a class="headerlink" href="#install-necessary-software" title="Permanent link">&para;</a></h2>
+<p>为方便您完成校验，我们提供了一份基于 MyBinder 的 <a href="https://github.com/jiayuasu/sedona-tools">在线 Jupyter Notebook</a>。点击下方按钮即可打开 notebook 进行校验：<a href="https://mybinder.org/v2/gh/jiayuasu/sedona-tools/HEAD?labpath=binder%2Fverify-release.ipynb"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a>。校验通过后，即可在投票邮件中投 <code>+1</code>。</p>
+<p>如果您更愿意在本机执行这些步骤，请阅读下方的步骤说明。如果能成功完成所有步骤，则上述检查清单都会得到满足，您即可在投票邮件中投 <code>+1</code> 并附上检查清单。</p>
+<h2 id="_1">安装必要软件<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <ol>
-<li>GPG: On Mac <code>brew install gnupg gnupg2</code>. You can check in a terminal <code>gpg --version</code>.</li>
-<li>JDK 1.8 or 1.11. Your Mac might have many different Java versions installed. You can try to use it but not sure if it can pass. You can check in a terminal <code>java --version</code>.</li>
-<li>Apache Maven 3.3.1+. On Mac <code>brew install maven</code>. You can check it in a terminal <code>mvn -version</code>.</li>
-<li>Python3 installed on your machine. MacOS comes with Python3 by default. You can check in a terminal <code>python3 --version</code>.</li>
+<li>GPG：在 Mac 上 <code>brew install gnupg gnupg2</code>。可在终端中通过 <code>gpg --version</code> 检查。</li>
+<li>JDK 1.8 或 1.11。Mac 上可能安装了多种 Java 版本，可以尝试当前版本，但不保证一定能通过。可在终端通过 <code>java --version</code> 检查。</li>
+<li>Apache Maven 3.3.1+。在 Mac 上 <code>brew install maven</code>。可在终端通过 <code>mvn -version</code> 检查。</li>
+<li>Python3：macOS 默认带有 Python3。可在终端通过 <code>python3 --version</code> 检查。</li>
 </ol>
-<p>You can skip this step if you installed these software before.</p>
-<h2 id="run-the-verify-script">Run the verify script<a class="headerlink" href="#run-the-verify-script" title="Permanent link">&para;</a></h2>
-<p>Please replace SEDONA_CURRENT_RC and SEDONA_CURRENT_VERSION with the correct versions. Then paste the content in a script called <code>verify.sh</code> and re-direct the output to a file. To run a script, do the following:</p>
+<p>如果您之前已安装过这些软件，可跳过本步骤。</p>
+<h2 id="_2">运行校验脚本<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>请将 SEDONA_CURRENT_RC 与 SEDONA_CURRENT_VERSION 替换为正确的版本号，然后把内容粘贴到名为 <code>verify.sh</code> 的脚本中，并将输出重定向到文件。运行方式：</p>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 
-<span class="c1">## Change the permission of the script to executable</span>
+<span class="c1">## 修改脚本权限为可执行</span>
 chmod<span class="w"> </span><span class="m">777</span><span class="w"> </span>verify.sh
 
-<span class="c1">## Run and redirect the output to a file</span>
+<span class="c1">## 运行并把输出重定向到文件</span>
 ./verify.sh<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>verify.out
 </code></pre></div>
-<p>The content of the <code>verify.sh</code> script is as follows. <mark>If you copy the following content, a line break is automatically added to a long line of code. Please remove it in your local script.</mark></p>
+<p><code>verify.sh</code> 内容如下。<mark>如果直接复制下方内容，长行可能会被自动加上换行，请在本地脚本中将其去掉。</mark></p>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 
 <span class="nv">SEDONA_CURRENT_RC</span><span class="o">=</span><span class="m">1</span>.9.0-rc1
 <span class="nv">SEDONA_CURRENT_VERSION</span><span class="o">=</span><span class="m">1</span>.9.0
 
-<span class="c1">## Download a Sedona release</span>
+<span class="c1">## 下载 Sedona 发布</span>
 wget<span class="w"> </span>-q<span class="w"> </span>https://downloads.apache.org/sedona/KEYS
 wget<span class="w"> </span>-q<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-src.tar.gz
 wget<span class="w"> </span>-q<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-src.tar.gz.asc
@@ -5600,7 +5600,7 @@ wget<span class="w"> </span>-q<span class="w"> </span>https://dist.apache.org/re
 wget<span class="w"> </span>-q<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-bin.tar.gz.asc
 wget<span class="w"> </span>-q<span class="w"> </span>https://dist.apache.org/repos/dist/dev/sedona/<span class="nv">$SEDONA_CURRENT_RC</span>/apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-bin.tar.gz.sha512
 
-<span class="c1">## Verify the signature and checksum</span>
+<span class="c1">## 校验签名与校验和</span>
 gpg<span class="w"> </span>--import<span class="w"> </span>KEYS
 gpg<span class="w"> </span>--verify<span class="w"> </span>apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-src.tar.gz.asc
 gpg<span class="w"> </span>--verify<span class="w"> </span>apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-bin.tar.gz.asc
@@ -5609,14 +5609,14 @@ cat<span class="w"> </span>apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSIO
 shasum<span class="w"> </span>-a<span class="w"> </span><span class="m">512</span><span class="w"> </span>apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-bin.tar.gz
 cat<span class="w"> </span>apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-bin.tar.gz.sha512
 
-<span class="c1">## Uncompress the source code folder</span>
+<span class="c1">## 解压源码包</span>
 tar<span class="w"> </span>-xvf<span class="w"> </span>apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-src.tar.gz
 
-<span class="c1">## Compile the project from source</span>
+<span class="c1">## 从源码编译项目</span>
 <span class="o">(</span><span class="nb">cd</span><span class="w"> </span>apache-sedona-<span class="nv">$SEDONA_CURRENT_VERSION</span>-src<span class="p">;</span>mvn<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests<span class="o">)</span>
 </code></pre></div>
 <ul>
-<li>If successful, in the output file, you should be able to see something similar to the following text. It should include <code>Good signature from</code> and the final 4 lines should be two pairs of checksum matching each other.</li>
+<li>如果运行成功，输出文件中应能看到与下面类似的信息，并包含 <code>Good signature from</code>，最后 4 行应是两对相互匹配的校验和：</li>
 </ul>
 <div class="highlight"><pre><span></span><code>gpg: key 3A79A47AC26FF4CD: &quot;Jia Yu &lt;jiayu@apache.org&gt;&quot; not changed
 gpg: key 6C883CA80E7FD299: &quot;PawelKocinski &lt;imbruced@apache.org&gt;&quot; not changed
@@ -5644,15 +5644,15 @@ d3bdfd4d870838ebe63f21cb93634d2421ec1ac1b8184636206a5dc0d89a78a88257798b1f17371a
 64cea38dd3ca171ee4e2a7365dbce999773862f2a11599bd0f27e9551d740659a519a9b976b3e7b0826088010967093e6acc9462f7073e9737c24b007a2df846  apache-sedona-1.2.0-incubating-bin.tar.gz
 </code></pre></div>
 <ul>
-<li>At the end of the output, you should also see the <code>BUILD SUCCESS</code> if you can compile the source code. If this step fails, you can contact Sedona PMC and see if this is just because of your environment.</li>
+<li>如果源码编译成功，您还会在输出末尾看到 <code>BUILD SUCCESS</code>。如果该步骤失败，可联系 Sedona PMC 询问是否仅是您本地环境的问题。</li>
 </ul>
-<h2 id="check-files-manually">Check files manually<a class="headerlink" href="#check-files-manually" title="Permanent link">&para;</a></h2>
+<h2 id="_3">手动检查文件<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>Check if the downloaded files have the correct version.</p>
+<p>检查下载的文件版本号是否正确。</p>
 </li>
 <li>
-<p>In the unzipped source code folder, and check if DISCLAIMER and NOTICE files and included and up to date.</p>
+<p>解压源码目录后，检查 DISCLAIMER 与 NOTICE 文件是否存在且为最新。</p>
 </li>
 </ol>
 
@@ -5675,7 +5675,7 @@ d3bdfd4d870838ebe63f21cb93634d2421ec1ac1b8184636206a5dc0d89a78a88257798b1f17371a
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47 UTC">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 21:29:11 UTC">2026年5月8日 21:29:11</span>
   </span>
 
     

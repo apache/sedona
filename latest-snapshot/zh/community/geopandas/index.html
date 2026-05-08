@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#geopandas-on-sedona" class="md-skip">
+        <a href="#sedona-geopandas" class="md-skip">
           跳转至
         </a>
       
@@ -4879,10 +4879,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#suggested-short-readings" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Suggested Short Readings:
+        推荐阅读
       
     </span>
   </a>
@@ -4890,10 +4890,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#other-references" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Other References
+        其他参考
       
     </span>
   </a>
@@ -5465,10 +5465,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#suggested-short-readings" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Suggested Short Readings:
+        推荐阅读
       
     </span>
   </a>
@@ -5476,10 +5476,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#other-references" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Other References
+        其他参考
       
     </span>
   </a>
@@ -5506,7 +5506,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/community/geopandas.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/community/geopandas.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5533,30 +5533,30 @@
  under the License.
  -->
 
-<h1 id="geopandas-on-sedona">Geopandas on Sedona<a class="headerlink" href="#geopandas-on-sedona" title="Permanent link">&para;</a></h1>
-<p>This guide outlines a few important considerations when contributing changes to the GeoPandas component of Apache Sedona as a developer. Again, <strong>this guide is targeted towards contributors</strong>; the official documentation is more tailored towards users.</p>
-<p><strong>General Approach</strong>: This component is built on top of the PySpark Pandas API. The <code>GeoDataFrame</code> and <code>GeoSeries</code> classes both inherit from pyspark pandas' <code>ps.DataFrame</code> and <code>ps.Series</code> classes, respectively. When possible, it is generally preferred to leverage pyspark pandas' implementation of a function and extending it from there (i.e. find a way to leverage <code>super()</code> rather than copying over parts of logic). The code structure resembles the structure of the <a href="https://github.com/geopandas/geopandas">Geopandas repo</a>.</p>
-<p><strong>Lazy Evaluation</strong>: Spark uses lazy evaluation. Spark's distributed and lazy nature occasionally comes in the way of implementing functionality in the same way the original GeoPandas library does so. For example, GeoPandas has many checks for invalid crs in many places (e.g <code>GeoSeries.__init__()</code>, <code>set_crs()</code>). Sedona's implementation for getting the <code>crs</code> currently is expensive compared to GeoPandas because it requires us to run an eager <code>ST_SRID()</code> query. If we eagerly query for the crs in every initialization of <code>GeoSeries</code>, all of our function calls (e.g <code>.area()</code>, etc) would also become eager and would incur a noticeable slowdown, resulting in a poor user experience.</p>
-<p><strong>Maintaining Order</strong>: Because Spark uses distributed data, maintaining the order of data across operations takes extra time and effort. Maintaining order for some operations is not very meaningful. In those cases, it's reasonable to skip the post-sorting to avoid an unnecessary performance hit. Documentation should document this behavior. For example, <code>sjoin</code> currently does not maintain the traditional pandas dataframe order after performing the join. This follows the same convention as traditional PySpark Pandas. The user can always post-sort using a separate function such as <code>sort_index()</code>, but we should avoid sorting unnecessarily by default.</p>
-<p><strong>Conventions</strong>: The conventional shorthand for the Sedona Geopandas package is <code>sgpd</code>. Notice it's the same as the geopandas shorthand (<code>gpd</code>), except prefixed with an 's'. The conventional short hands for adjacent packages are shown below also.</p>
+<h1 id="sedona-geopandas">在 Sedona 上的 Geopandas<a class="headerlink" href="#sedona-geopandas" title="Permanent link">&para;</a></h1>
+<p>本指南列出了在 Apache Sedona 的 GeoPandas 组件上以开发者身份贡献变更时需要注意的若干重要事项。请再次注意：<strong>本指南面向贡献者</strong>；面向用户的官方文档另有侧重。</p>
+<p><strong>总体思路</strong>：本组件构建在 PySpark Pandas API 之上。<code>GeoDataFrame</code> 与 <code>GeoSeries</code> 类分别继承自 pyspark pandas 的 <code>ps.DataFrame</code> 与 <code>ps.Series</code>。在可能的情况下，应尽量复用 pyspark pandas 已有的实现并在其基础上扩展（即尽量通过 <code>super()</code> 调用，而不是把现有逻辑复制过来）。代码组织结构与 <a href="https://github.com/geopandas/geopandas">Geopandas 仓库</a> 类似。</p>
+<p><strong>惰性求值</strong>：Spark 使用惰性求值。Spark 的分布式与惰性特性有时会让我们无法完全照搬原版 GeoPandas 的实现方式。例如 GeoPandas 在多处对非法 CRS 做了校验（如 <code>GeoSeries.__init__()</code>、<code>set_crs()</code> 等）。Sedona 当前获取 <code>crs</code> 的实现相比 GeoPandas 较为昂贵，因为它需要跑一次立即求值的 <code>ST_SRID()</code> 查询。如果在每次 <code>GeoSeries</code> 初始化时都立即查询 CRS，那么所有函数调用（如 <code>.area()</code> 等）也会变成立即求值，性能会明显下降，用户体验变差。</p>
+<p><strong>保留顺序</strong>：由于 Spark 使用分布式数据，在多次操作之间保留顺序需要付出额外的时间和精力。某些操作维持顺序意义不大，此时跳过额外的 sort 是合理的，否则会带来不必要的性能开销。文档中应说明这种行为。例如 <code>sjoin</code> 在执行连接后并不会保持传统 pandas DataFrame 的顺序，这与传统 PySpark Pandas 保持一致。用户随时可以通过 <code>sort_index()</code> 等额外函数后排序，但默认实现应避免不必要的排序。</p>
+<p><strong>约定</strong>：Sedona Geopandas 包的常用别名是 <code>sgpd</code>，与 geopandas 的别名 <code>gpd</code> 类似，仅多了一个 <code>s</code> 前缀。相邻包的常用别名见下：</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ps</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sgpd</span>
 </code></pre></div>
-<p><strong>Conversion Methods</strong>: Sedona's Implementation of Geopandas provides useful methods to convert to and from other dataframes using the following methods. These apply to both <code>GeoDataFrame</code> and <code>GeoSeries</code>:</p>
+<p><strong>转换方法</strong>：Sedona 的 Geopandas 实现提供了在多种 DataFrame 之间互转的便捷方法。下列方法对 <code>GeoDataFrame</code> 与 <code>GeoSeries</code> 都可用：</p>
 <ul>
-<li><code>to_geopandas()</code>: Sedona Geo(DataFrame/Series) to Geopandas</li>
-<li><code>to_geoframe()</code>: Sedona GeoSeries to Sedona GeoDataFrame</li>
-<li><code>to_spark_pandas()</code>: Sedona Geo(DataFrame/Series) to Pandas on PySpark</li>
-<li><code>to_spark()</code> (inherited): Sedona GeoDataFrame to Spark DataFrame</li>
-<li><code>to_frame()</code> (inherited): Sedona GeoSeries to PySpark Pandas DataFrame</li>
+<li><code>to_geopandas()</code>：Sedona Geo(DataFrame/Series) 转为 Geopandas</li>
+<li><code>to_geoframe()</code>：Sedona GeoSeries 转为 Sedona GeoDataFrame</li>
+<li><code>to_spark_pandas()</code>：Sedona Geo(DataFrame/Series) 转为 Pandas on PySpark</li>
+<li><code>to_spark()</code>（继承）：Sedona GeoDataFrame 转为 Spark DataFrame</li>
+<li><code>to_frame()</code>（继承）：Sedona GeoSeries 转为 PySpark Pandas DataFrame</li>
 </ul>
-<p><strong>GeoSeries functions</strong>: Most geometry manipulation operations in Geopandas are considered GeoSeries functions. However, we can call them from a <code>GeoDataFrame</code> object as well to execute on its active geometry column. We implement the functions in the <code>GeoSeries</code> class. However in <code>base.py</code>, we add a <code>_delegate_to_geometry_column()</code> call to allow the <code>GeoDataFrame</code> to also execute the function on its active geometry column. We also specify the docstring for the function here instead of <code>GeoSeries</code>, so that both <code>GeoDataFrame</code> and <code>GeoSeries</code> will inherit the shared docstring (avoiding duplicated docstrings).</p>
-<p><strong>Explain Query Plans</strong>: Because these dataframe abstractions are built on Spark, we can retrieve the query plan for an operation for a Dataframe by using the <code>.spark.explain()</code> method.</p>
-<p>Example:</p>
+<p><strong>GeoSeries 函数</strong>：Geopandas 中的几何操作大多是 GeoSeries 函数，但也可以从 <code>GeoDataFrame</code> 对象上调用，作用在其活动几何列（active geometry column）上。我们在 <code>GeoSeries</code> 类中实现这些函数；同时在 <code>base.py</code> 中加上 <code>_delegate_to_geometry_column()</code> 调用，让 <code>GeoDataFrame</code> 也可以在自己的活动几何列上执行该函数。我们把函数的 docstring 写在 <code>base.py</code> 而不是 <code>GeoSeries</code>，这样 <code>GeoDataFrame</code> 与 <code>GeoSeries</code> 都能继承同一份 docstring（避免重复）。</p>
+<p><strong>查看查询计划</strong>：由于这些 DataFrame 抽象建立在 Spark 之上，可以通过 <code>.spark.explain()</code> 方法获取一次操作的查询计划。</p>
+<p>示例：</p>
 <div class="highlight"><pre><span></span><code><span class="n">geoseries</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">([</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])])</span>
-<span class="c1"># Currently PySpark pandas Series does not have the spark.explain() method, so a workaround is to convert it to a dataframe first</span>
+<span class="c1"># PySpark pandas Series 目前没有 spark.explain() 方法，可先转为 DataFrame 再调用</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">geoseries</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">explain</span><span class="p">(</span><span class="n">extended</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>== Parsed Logical Plan ==
@@ -5575,15 +5575,15 @@ Project [__index_level_0__#19L, 0#27 AS None#31]
 Project [__index_level_0__#19L,  **org.apache.spark.sql.sedona_sql.expressions.ST_Area**   AS None#31]
 +- *(1) Scan ExistingRDD[__index_level_0__#19L,0#20]
 </code></pre></div>
-<h2 id="suggested-short-readings">Suggested Short Readings:<a class="headerlink" href="#suggested-short-readings" title="Permanent link">&para;</a></h2>
+<h2 id="_1">推荐阅读<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://spark.apache.org/docs/latest/api/python/tutorial/pandas_on_spark/best_practices.html">PySpark Pandas Best Practices</a> - This mentions other useful notes to consider such as why <code>__iter__()</code> is not supported</li>
-<li><a href="https://geopandas.org/en/stable/docs/user_guide/data_structures.html">Geopandas User Guide</a> - Specifically it's useful to understand the GeoDataFrame's "active geometry column"</li>
+<li><a href="https://spark.apache.org/docs/latest/api/python/tutorial/pandas_on_spark/best_practices.html">PySpark Pandas Best Practices</a> —— 其中提到了一些值得注意的细节，比如为什么不支持 <code>__iter__()</code>。</li>
+<li><a href="https://geopandas.org/en/stable/docs/user_guide/data_structures.html">Geopandas 用户指南</a> —— 特别有助于理解 GeoDataFrame 中 “活动几何列（active geometry column）” 的概念。</li>
 </ul>
-<h2 id="other-references">Other References<a class="headerlink" href="#other-references" title="Permanent link">&para;</a></h2>
+<h2 id="_2">其他参考<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.pandas/index.html">Public API Pages for Pandas API on Spark</a></li>
-<li><a href="https://geopandas.org/en/stable/docs/reference.html">Geopandas API Page</a></li>
+<li><a href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.pandas/index.html">Pandas API on Spark 公开 API 页面</a></li>
+<li><a href="https://geopandas.org/en/stable/docs/reference.html">Geopandas API 页面</a></li>
 </ul>
 
 
@@ -5605,7 +5605,7 @@ Project [__index_level_0__#19L,  **org.apache.spark.sql.sedona_sql.expressions.S
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 6, 2025 18:43:12 UTC">August 6, 2025 18:43:12</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 21:29:11 UTC">2026年5月8日 21:29:11</span>
   </span>
 
     

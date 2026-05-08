@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#publish-a-snapshot-version" class="md-skip">
+        <a href="#snapshot" class="md-skip">
           跳转至
         </a>
       
@@ -5021,10 +5021,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#0-prepare-an-empty-script-file" class="md-nav__link">
+  <a href="#0" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0. Prepare an empty script file
+        0. 准备一个空脚本文件
       
     </span>
   </a>
@@ -5032,10 +5032,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-upload-snapshot-versions" class="md-nav__link">
+  <a href="#1-snapshot" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Upload snapshot versions
+        1. 上传 snapshot 版本
       
     </span>
   </a>
@@ -5465,10 +5465,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#0-prepare-an-empty-script-file" class="md-nav__link">
+  <a href="#0" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0. Prepare an empty script file
+        0. 准备一个空脚本文件
       
     </span>
   </a>
@@ -5476,10 +5476,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-upload-snapshot-versions" class="md-nav__link">
+  <a href="#1-snapshot" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Upload snapshot versions
+        1. 上传 snapshot 版本
       
     </span>
   </a>
@@ -5506,7 +5506,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/community/snapshot.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/community/snapshot.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5533,29 +5533,29 @@
  under the License.
  -->
 
-<h1 id="publish-a-snapshot-version">Publish a SNAPSHOT version<a class="headerlink" href="#publish-a-snapshot-version" title="Permanent link">&para;</a></h1>
-<p>This step is to publish Maven SNAPSHOTs to <a href="https://repository.apache.org">https://repository.apache.org</a></p>
-<p>This is a good practice for a release manager to try out his/her credential setup.</p>
-<p>The detailed requirement is on <a href="https://infra.apache.org/publishing-maven-artifacts.html">ASF Infra website</a></p>
+<h1 id="snapshot">发布 SNAPSHOT 版本<a class="headerlink" href="#snapshot" title="Permanent link">&para;</a></h1>
+<p>本步骤用于将 Maven SNAPSHOT 发布到 <a href="https://repository.apache.org">https://repository.apache.org</a></p>
+<p>对于发布经理（release manager）来说，这是检验自己凭据配置的良好实践。</p>
+<p>详细要求见 <a href="https://infra.apache.org/publishing-maven-artifacts.html">ASF Infra 网站</a>。</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>All scripts on this page should be run in your local Sedona Git repo under master branch via a single script file.</p>
+<p>本页所有脚本都应在本地 Sedona Git 仓库的 master 分支下，通过单一脚本文件运行。</p>
 </div>
-<h2 id="0-prepare-an-empty-script-file">0. Prepare an empty script file<a class="headerlink" href="#0-prepare-an-empty-script-file" title="Permanent link">&para;</a></h2>
+<h2 id="0">0. 准备一个空脚本文件<a class="headerlink" href="#0" title="Permanent link">&para;</a></h2>
 <ol>
-<li>In your local Sedona Git repo under master branch, run</li>
+<li>在本地 Sedona Git 仓库 master 分支下运行：</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;#!/bin/bash&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>create-release.sh
 chmod<span class="w"> </span><span class="m">777</span><span class="w"> </span>create-release.sh
 </code></pre></div>
 <ol>
-<li>Use your favourite GUI text editor to open <code>create-release.sh</code>.</li>
-<li>Then keep copying the scripts on this web page to replace all content in this text file.</li>
-<li>Do NOT directly copy/paste the scripts to your terminal because a bug in <code>clipboard.js</code> will create link breaks in such case.</li>
-<li>Each time when you copy content to this script file, run <code>./create-release.sh</code> to execute it.</li>
+<li>用您喜欢的 GUI 文本编辑器打开 <code>create-release.sh</code>。</li>
+<li>然后不断把本页上的脚本复制粘贴到该文件中，覆盖原内容。</li>
+<li>不要直接将脚本复制粘贴到终端，因为 <code>clipboard.js</code> 的一个 bug 会在这种情形下产生换行符问题。</li>
+<li>每次更新该脚本后，运行 <code>./create-release.sh</code> 执行它。</li>
 </ol>
-<h2 id="1-upload-snapshot-versions">1. Upload snapshot versions<a class="headerlink" href="#1-upload-snapshot-versions" title="Permanent link">&para;</a></h2>
-<p>In your Sedona GitHub repo, run this script:</p>
+<h2 id="1-snapshot">1. 上传 snapshot 版本<a class="headerlink" href="#1-snapshot" title="Permanent link">&para;</a></h2>
+<p>在您的 Sedona GitHub 仓库中运行：</p>
 <div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
 
 git<span class="w"> </span>checkout<span class="w"> </span>master
@@ -5564,20 +5564,20 @@ git<span class="w"> </span>pull
 rm<span class="w"> </span>-f<span class="w"> </span>release.*
 rm<span class="w"> </span>-f<span class="w"> </span>pom.xml.*
 
-<span class="c1"># Validate the POMs and your credential setup</span>
+<span class="c1"># 校验 POM 与凭据配置</span>
 mvn<span class="w"> </span>-q<span class="w"> </span>-B<span class="w"> </span>clean<span class="w"> </span>release:prepare<span class="w"> </span>-Dtag<span class="o">=</span>sedona-1.9.0-rc1<span class="w"> </span>-DreleaseVersion<span class="o">=</span><span class="m">1</span>.9.0<span class="w"> </span>-DdevelopmentVersion<span class="o">=</span><span class="m">1</span>.9.1-SNAPSHOT<span class="w"> </span>-Dresume<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-DdryRun<span class="o">=</span><span class="nb">true</span><span class="w"> </span>-Penable-all-submodules<span class="w"> </span>-Darguments<span class="o">=</span><span class="s2">&quot;-DskipTests&quot;</span>
 mvn<span class="w"> </span>-q<span class="w"> </span>-B<span class="w"> </span>release:clean<span class="w"> </span>-Penable-all-submodules
 
-<span class="c1"># Spark 3.3 and Scala 2.12</span>
+<span class="c1"># Spark 3.3 与 Scala 2.12</span>
 mvn<span class="w"> </span>-q<span class="w"> </span>deploy<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.3<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12
 
-<span class="c1"># Spark 3.3 and Scala 2.13</span>
+<span class="c1"># Spark 3.3 与 Scala 2.13</span>
 mvn<span class="w"> </span>-q<span class="w"> </span>deploy<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.3<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
 
-<span class="c1"># Spark 3.4 and Scala 2.12</span>
+<span class="c1"># Spark 3.4 与 Scala 2.12</span>
 mvn<span class="w"> </span>-q<span class="w"> </span>deploy<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.12
 
-<span class="c1"># Spark 3.4 and Scala 2.13</span>
+<span class="c1"># Spark 3.4 与 Scala 2.13</span>
 mvn<span class="w"> </span>-q<span class="w"> </span>deploy<span class="w"> </span>-DskipTests<span class="w"> </span>-Dspark<span class="o">=</span><span class="m">3</span>.4<span class="w"> </span>-Dscala<span class="o">=</span><span class="m">2</span>.13
 </code></pre></div>
 
@@ -5600,7 +5600,7 @@ mvn<span class="w"> </span>-q<span class="w"> </span>deploy<span class="w"> </sp
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47 UTC">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 21:29:11 UTC">2026年5月8日 21:29:11</span>
   </span>
 
     
