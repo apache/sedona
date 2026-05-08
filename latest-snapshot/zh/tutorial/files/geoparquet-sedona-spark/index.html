@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#apache-sedona-geoparquet-with-spark" class="md-skip">
+        <a href="#spark-apache-sedona-geoparquet" class="md-skip">
           跳转至
         </a>
       
@@ -1723,10 +1723,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#write-sedona-dataframe-to-geoparquet-with-spark" class="md-nav__link">
+  <a href="#spark-sedona-dataframe-geoparquet" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Write Sedona DataFrame to GeoParquet with Spark
+        使用 Spark 把 Sedona DataFrame 写为 GeoParquet
       
     </span>
   </a>
@@ -1734,10 +1734,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#read-geoparquet-files-into-sedona-dataframe-with-spark" class="md-nav__link">
+  <a href="#spark-geoparquet-sedona-dataframe" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Read GeoParquet files into Sedona DataFrame with Spark
+        使用 Spark 将 GeoParquet 读入 Sedona DataFrame
       
     </span>
   </a>
@@ -1745,10 +1745,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#inspect-geoparquet-metadata" class="md-nav__link">
+  <a href="#geoparquet" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Inspect GeoParquet metadata
+        检查 GeoParquet 元数据
       
     </span>
   </a>
@@ -1756,22 +1756,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#write-geoparquet-with-crs-metadata" class="md-nav__link">
+  <a href="#crs-geoparquet" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Write GeoParquet with CRS Metadata
+        写出带 CRS 元数据的 GeoParquet
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Write GeoParquet with CRS Metadata">
+    <nav class="md-nav" aria-label="写出带 CRS 元数据的 GeoParquet">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#automatic-crs-from-srid" class="md-nav__link">
+  <a href="#srid-crs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Automatic CRS from SRID
+        通过 SRID 自动推断 CRS
       
     </span>
   </a>
@@ -1784,10 +1784,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#save-geoparquet-with-covering-metadata" class="md-nav__link">
+  <a href="#covering-geoparquet" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Save GeoParquet with Covering Metadata
+        写出带 covering 元数据的 GeoParquet
       
     </span>
   </a>
@@ -1795,10 +1795,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sort-then-save-geoparquet" class="md-nav__link">
+  <a href="#geoparquet_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Sort then Save GeoParquet
+        排序后再写出 GeoParquet
       
     </span>
   </a>
@@ -1806,10 +1806,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-sedona-uses-geoparquet-bounding-box-bbox-metadata-with-spark" class="md-nav__link">
+  <a href="#sedona-spark-geoparquet-bbox" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How Sedona uses GeoParquet bounding box (bbox) metadata with Spark
+        Sedona 如何在 Spark 上利用 GeoParquet 边界框（bbox）元数据
       
     </span>
   </a>
@@ -1817,10 +1817,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#advantages-of-geoparquet-files" class="md-nav__link">
+  <a href="#geoparquet_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Advantages of GeoParquet files
+        GeoParquet 的优势
       
     </span>
   </a>
@@ -1828,10 +1828,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#limitations-of-geoparquet-files" class="md-nav__link">
+  <a href="#geoparquet_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Limitations of GeoParquet files
+        GeoParquet 的局限
       
     </span>
   </a>
@@ -1839,10 +1839,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#conclusion" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Conclusion
+        结论
       
     </span>
   </a>
@@ -5573,10 +5573,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#write-sedona-dataframe-to-geoparquet-with-spark" class="md-nav__link">
+  <a href="#spark-sedona-dataframe-geoparquet" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Write Sedona DataFrame to GeoParquet with Spark
+        使用 Spark 把 Sedona DataFrame 写为 GeoParquet
       
     </span>
   </a>
@@ -5584,10 +5584,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#read-geoparquet-files-into-sedona-dataframe-with-spark" class="md-nav__link">
+  <a href="#spark-geoparquet-sedona-dataframe" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Read GeoParquet files into Sedona DataFrame with Spark
+        使用 Spark 将 GeoParquet 读入 Sedona DataFrame
       
     </span>
   </a>
@@ -5595,10 +5595,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#inspect-geoparquet-metadata" class="md-nav__link">
+  <a href="#geoparquet" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Inspect GeoParquet metadata
+        检查 GeoParquet 元数据
       
     </span>
   </a>
@@ -5606,22 +5606,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#write-geoparquet-with-crs-metadata" class="md-nav__link">
+  <a href="#crs-geoparquet" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Write GeoParquet with CRS Metadata
+        写出带 CRS 元数据的 GeoParquet
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Write GeoParquet with CRS Metadata">
+    <nav class="md-nav" aria-label="写出带 CRS 元数据的 GeoParquet">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#automatic-crs-from-srid" class="md-nav__link">
+  <a href="#srid-crs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Automatic CRS from SRID
+        通过 SRID 自动推断 CRS
       
     </span>
   </a>
@@ -5634,10 +5634,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#save-geoparquet-with-covering-metadata" class="md-nav__link">
+  <a href="#covering-geoparquet" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Save GeoParquet with Covering Metadata
+        写出带 covering 元数据的 GeoParquet
       
     </span>
   </a>
@@ -5645,10 +5645,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sort-then-save-geoparquet" class="md-nav__link">
+  <a href="#geoparquet_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Sort then Save GeoParquet
+        排序后再写出 GeoParquet
       
     </span>
   </a>
@@ -5656,10 +5656,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-sedona-uses-geoparquet-bounding-box-bbox-metadata-with-spark" class="md-nav__link">
+  <a href="#sedona-spark-geoparquet-bbox" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How Sedona uses GeoParquet bounding box (bbox) metadata with Spark
+        Sedona 如何在 Spark 上利用 GeoParquet 边界框（bbox）元数据
       
     </span>
   </a>
@@ -5667,10 +5667,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#advantages-of-geoparquet-files" class="md-nav__link">
+  <a href="#geoparquet_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Advantages of GeoParquet files
+        GeoParquet 的优势
       
     </span>
   </a>
@@ -5678,10 +5678,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#limitations-of-geoparquet-files" class="md-nav__link">
+  <a href="#geoparquet_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Limitations of GeoParquet files
+        GeoParquet 的局限
       
     </span>
   </a>
@@ -5689,10 +5689,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#conclusion" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Conclusion
+        结论
       
     </span>
   </a>
@@ -5719,7 +5719,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/tutorial/files/geoparquet-sedona-spark.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/tutorial/files/geoparquet-sedona-spark.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5746,20 +5746,20 @@
  under the License.
  -->
 
-<h1 id="apache-sedona-geoparquet-with-spark">Apache Sedona GeoParquet with Spark<a class="headerlink" href="#apache-sedona-geoparquet-with-spark" title="Permanent link">&para;</a></h1>
-<p>This page explains how to build spatial data lakes with Apache Sedona and GeoParquet.</p>
-<p>GeoParquet offers many advantages for spatial data sets:</p>
+<h1 id="spark-apache-sedona-geoparquet">在 Spark 上使用 Apache Sedona 处理 GeoParquet<a class="headerlink" href="#spark-apache-sedona-geoparquet" title="Permanent link">&para;</a></h1>
+<p>本页介绍如何使用 Apache Sedona 与 GeoParquet 构建空间数据湖。</p>
+<p>GeoParquet 在空间数据集场景下具有诸多优势：</p>
 <ul>
-<li>Built-in support for geometry columns</li>
-<li>GeoParquet's columnar nature allows for column pruning, which speeds up queries that use only a subset of columns.</li>
-<li>Embedded statistics enable readers to skip reading entire chunks of a file in some queries.</li>
-<li>Storing bounding-box metadata (“bbox”) for each row group allows for row-group filtering.</li>
-<li>Columnar file formats are easy to compress.</li>
-<li>You don’t need to infer or manually specify the schema as you would have to with GeoJSON or CSV because GeoParquet includes it in the footer.</li>
+<li>内置对几何列的支持</li>
+<li>GeoParquet 是列式存储，支持列裁剪，仅使用部分列的查询会更快</li>
+<li>内嵌统计信息让某些查询能够直接跳过整块文件内容</li>
+<li>为每个 row group 存储边界框（“bbox”）元数据，可进行 row-group 级过滤</li>
+<li>列式格式利于压缩</li>
+<li>与 GeoJSON 或 CSV 不同，GeoParquet 在文件尾部携带 schema，无需推断或手动指定</li>
 </ul>
-<p>Let's see how to write a Sedona DataFrame to GeoParquet files.</p>
-<h2 id="write-sedona-dataframe-to-geoparquet-with-spark">Write Sedona DataFrame to GeoParquet with Spark<a class="headerlink" href="#write-sedona-dataframe-to-geoparquet-with-spark" title="Permanent link">&para;</a></h2>
-<p>Start by creating a Sedona DataFrame:</p>
+<p>下面看如何把 Sedona DataFrame 写成 GeoParquet 文件。</p>
+<h2 id="spark-sedona-dataframe-geoparquet">使用 Spark 把 Sedona DataFrame 写为 GeoParquet<a class="headerlink" href="#spark-sedona-dataframe-geoparquet" title="Permanent link">&para;</a></h2>
+<p>先创建一个 Sedona DataFrame：</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
     <span class="p">[</span>
         <span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(2.0 5.0,6.0 1.0)&quot;</span><span class="p">),</span>
@@ -5770,10 +5770,10 @@
 <span class="p">)</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)))</span>
 </code></pre></div>
-<p>Now write the DataFrame to GeoParquet files:</p>
+<p>将 DataFrame 写成 GeoParquet 文件：</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geoparquet&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;/tmp/somewhere&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>Here are the files created in storage:</p>
+<p>写出的文件如下：</p>
 <div class="highlight"><pre><span></span><code>somewhere/
   _SUCCESS
   part-00000-1c13be9e-6d4c-401e-89d8-739000ad3aba-c000.snappy.parquet
@@ -5781,13 +5781,13 @@
   part-00007-1c13be9e-6d4c-401e-89d8-739000ad3aba-c000.snappy.parquet
   part-00011-1c13be9e-6d4c-401e-89d8-739000ad3aba-c000.snappy.parquet
 </code></pre></div>
-<p>Sedona writes many Parquet files in parallel because that's much faster than writing a single file.</p>
-<h2 id="read-geoparquet-files-into-sedona-dataframe-with-spark">Read GeoParquet files into Sedona DataFrame with Spark<a class="headerlink" href="#read-geoparquet-files-into-sedona-dataframe-with-spark" title="Permanent link">&para;</a></h2>
-<p>Let's read the GeoParquet files into a Sedona DataFrame:</p>
+<p>Sedona 会并行写出多个 Parquet 文件，比写单一文件快得多。</p>
+<h2 id="spark-geoparquet-sedona-dataframe">使用 Spark 将 GeoParquet 读入 Sedona DataFrame<a class="headerlink" href="#spark-geoparquet-sedona-dataframe" title="Permanent link">&para;</a></h2>
+<p>将 GeoParquet 文件读入 Sedona DataFrame：</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geoparquet&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/tmp/somewhere&quot;</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
-<p>Here are the results:</p>
+<p>结果如下：</p>
 <div class="highlight"><pre><span></span><code>+---+---------------------+
 |id |geometry             |
 +---+---------------------+
@@ -5796,16 +5796,15 @@
 |c  |LINESTRING (1 3, 3 1)|
 +---+---------------------+
 </code></pre></div>
-<p>Here's how Sedona executes this query under the hood:</p>
+<p>Sedona 在底层执行该查询的过程大致如下：</p>
 <ol>
-<li>It fetches the schema from the footer of a GeoParquet file, so no schema inference is needed.</li>
-<li>It collects the bbox metadata for each file and sees if any data can be skipped.</li>
-<li>It runs the query, skipping any columns that are not required.</li>
+<li>从 GeoParquet 文件尾部读取 schema，因此无需 schema 推断。</li>
+<li>收集每个文件的 bbox 元数据，判断哪些数据可以被跳过。</li>
+<li>执行查询时跳过未使用的列。</li>
 </ol>
-<p>Sedona queries on GeoParquet files can often be executed faster and more reliably than other file formats, like CSV.  CSV files don't store the schema in the file footer, don't support column pruning, and don't have row-group metadata for data skipping.</p>
-<h2 id="inspect-geoparquet-metadata">Inspect GeoParquet metadata<a class="headerlink" href="#inspect-geoparquet-metadata" title="Permanent link">&para;</a></h2>
-<p>Since v<code>1.5.1</code>, Sedona provides a Spark SQL data source <code>"geoparquet.metadata"</code> for inspecting GeoParquet metadata. The resulting dataframe contains
-the "geo" metadata for each input file.</p>
+<p>得益于此，Sedona 在 GeoParquet 上的查询通常比在 CSV 等格式上更快、更稳定。CSV 既不在文件尾部存 schema，也不支持列裁剪，更没有用于数据跳过的 row-group 元数据。</p>
+<h2 id="geoparquet">检查 GeoParquet 元数据<a class="headerlink" href="#geoparquet" title="Permanent link">&para;</a></h2>
+<p>自 v<code>1.5.1</code> 起，Sedona 提供了一个 Spark SQL 数据源 <code>"geoparquet.metadata"</code>，可用于检查 GeoParquet 元数据。返回的 DataFrame 中包含每个输入文件的 “geo” 元数据。</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Scala</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block"></div>
@@ -5830,7 +5829,7 @@ the "geo" metadata for each input file.</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geoparquet.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 </code></pre></div>
-<p>The output will be as follows:</p>
+<p>输出如下：</p>
 <div class="highlight"><pre><span></span><code>root
  |-- path: string (nullable = true)
  |-- version: string (nullable = true)
@@ -5845,17 +5844,17 @@ the "geo" metadata for each input file.</p>
  |    |    |    |-- element: double (containsNull = true)
  |    |    |-- crs: string (nullable = true)
 </code></pre></div>
-<p>The GeoParquet footer stores the following data for each column:</p>
+<p>GeoParquet 文件尾部为每一列存储以下数据：</p>
 <ul>
-<li>geometry_type: type of geometric object like point or polygon</li>
-<li>bbox: bounding box of objects in file</li>
-<li>crs: Coordinate Reference System</li>
-<li>covering: a struct column of xmin, ymin, xmax, ymax that provides the row group statistics for GeoParquet 1.1 files</li>
+<li>geometry_type：几何对象的类型，如点、多边形等</li>
+<li>bbox：文件中对象的边界框</li>
+<li>crs：坐标参考系</li>
+<li>covering：包含 xmin、ymin、xmax、ymax 的结构体列，用于 GeoParquet 1.1 文件的 row group 统计信息</li>
 </ul>
-<p>The rest of the Parquet metadata is stored in the Parquet footer, right where it is stored for other Parquet files too.</p>
-<p>If the input Parquet file does not have GeoParquet metadata, the values of <code>version</code>, <code>primary_column</code> and <code>columns</code> fields of the resulting dataframe will be <code>null</code>.</p>
-<p><code>geoparquet.metadata</code> only supports reading GeoParquet specific metadata. Users can use <a href="https://github.com/G-Research/spark-extension/blob/13109b8e43dfba9272c85896ba5e30cfe280426f/PARQUET.md">G-Research/spark-extension</a> to read comprehensive metadata of generic Parquet files.</p>
-<p>Let’s check out the content of the metadata and the schema:</p>
+<p>其他 Parquet 元数据存储在 Parquet 文件尾部，与普通 Parquet 文件保持一致。</p>
+<p>如果输入的 Parquet 文件没有 GeoParquet 元数据，返回 DataFrame 中的 <code>version</code>、<code>primary_column</code> 与 <code>columns</code> 字段会为 <code>null</code>。</p>
+<p><code>geoparquet.metadata</code> 仅支持读取 GeoParquet 特有的元数据。如果需要读取通用 Parquet 文件的全部元数据，可以使用 <a href="https://github.com/G-Research/spark-extension/blob/13109b8e43dfba9272c85896ba5e30cfe280426f/PARQUET.md">G-Research/spark-extension</a>。</p>
+<p>我们来查看一下元数据的内容与 schema：</p>
 <div class="highlight"><pre><span></span><code>df.show(truncate=False)
 
 +-----------------------------+-------------------------------------------------------------------+
@@ -5867,86 +5866,84 @@ the "geo" metadata for each input file.</p>
 |file:/part-00000-1c13.parquet|{geometry -&gt; {WKB, [], [0.0, 0.0, 0.0, 0.0], null, NULL}}          |
 +-----------------------------+-------------------------------------------------------------------+
 </code></pre></div>
-<p>The <code>columns</code> column contains bounding box information on each file in the GeoParquet data lake.  These bbox values are useful for skipping files or row-groups.  More will come on bbox metadata in the following section.</p>
-<h2 id="write-geoparquet-with-crs-metadata">Write GeoParquet with CRS Metadata<a class="headerlink" href="#write-geoparquet-with-crs-metadata" title="Permanent link">&para;</a></h2>
-<p>Since v<code>1.5.1</code>, Sedona supports writing GeoParquet files with custom GeoParquet spec version and crs.
-The default GeoParquet spec version is <code>1.1.0</code> (since <code>v1.9.0</code>) and the default crs is <code>null</code>. You can specify the GeoParquet spec version and crs as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">projjson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{...}&quot;</span><span class="w"> </span><span class="c1">// PROJJSON string for all geometry columns</span>
+<p><code>columns</code> 列保存了 GeoParquet 数据湖中各文件的边界框信息，可用于跳过整个文件或 row group。下文还会进一步介绍如何利用 bbox 元数据。</p>
+<h2 id="crs-geoparquet">写出带 CRS 元数据的 GeoParquet<a class="headerlink" href="#crs-geoparquet" title="Permanent link">&para;</a></h2>
+<p>自 v<code>1.5.1</code> 起，Sedona 支持以自定义的 GeoParquet 规范版本与 CRS 写出 GeoParquet 文件。默认的 GeoParquet 规范版本为 <code>1.1.0</code>（自 <code>v1.9.0</code> 起），默认 CRS 为 <code>null</code>。可按以下方式指定：</p>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">projjson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{...}&quot;</span><span class="w"> </span><span class="c1">// 所有几何列共享的 PROJJSON 字符串</span>
 <span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.version&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.crs&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">projjson</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="n">geoparquetoutputlocation</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/GeoParquet_File_Name.parquet&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>If you have multiple geometry columns written to the GeoParquet file, you can specify the CRS for each column.
-For example, <code>g0</code> and <code>g1</code> are two geometry columns in the DataFrame <code>df</code>, and you want to specify the CRS for each column as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">projjson_g0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{...}&quot;</span><span class="w"> </span><span class="c1">// PROJJSON string for g0</span>
-<span class="kd">val</span><span class="w"> </span><span class="n">projjson_g1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{...}&quot;</span><span class="w"> </span><span class="c1">// PROJJSON string for g1</span>
+<p>如果 GeoParquet 文件中存在多个几何列，可以为每个列分别指定 CRS。例如 <code>df</code> 中有两列几何列 <code>g0</code> 与 <code>g1</code>，希望分别指定它们的 CRS：</p>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">projjson_g0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{...}&quot;</span><span class="w"> </span><span class="c1">// g0 的 PROJJSON 字符串</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">projjson_g1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{...}&quot;</span><span class="w"> </span><span class="c1">// g1 的 PROJJSON 字符串</span>
 <span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.version&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.crs.g0&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">projjson_g0</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.crs.g1&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">projjson_g1</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="n">geoparquetoutputlocation</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/GeoParquet_File_Name.parquet&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>The value of <code>geoparquet.crs</code> and <code>geoparquet.crs.&lt;column_name&gt;</code> can be one of the following:</p>
+<p><code>geoparquet.crs</code> 与 <code>geoparquet.crs.&lt;column_name&gt;</code> 可取以下值：</p>
 <ul>
-<li><code>"null"</code>: Explicitly setting <code>crs</code> field to <code>null</code>. This is the default behavior when geometry SRID is 0.</li>
-<li><code>""</code> (empty string): Omit the <code>crs</code> field. This implies that the CRS is <a href="https://www.opengis.net/def/crs/OGC/1.3/CRS84">OGC:CRS84</a> for CRS-aware implementations.</li>
-<li><code>"{...}"</code> (PROJJSON string): The <code>crs</code> field will be set as the PROJJSON object representing the Coordinate Reference System (CRS) of the geometry. You can find the PROJJSON string of a specific CRS from here: <a href="https://epsg.io/">https://epsg.io/</a> (click the JSON option at the bottom of the page). You can also customize your PROJJSON string as needed.</li>
+<li><code>"null"</code>：显式将 <code>crs</code> 字段置为 <code>null</code>，这是几何 SRID 为 0 时的默认行为。</li>
+<li><code>""</code>（空字符串）：省略 <code>crs</code> 字段。对于支持 CRS 的实现而言，意味着使用 <a href="https://www.opengis.net/def/crs/OGC/1.3/CRS84">OGC:CRS84</a>。</li>
+<li><code>"{...}"</code>（PROJJSON 字符串）：<code>crs</code> 字段会被设为表示该几何坐标参考系的 PROJJSON 对象。可在 <a href="https://epsg.io/">https://epsg.io/</a> （页面底部点击 JSON 选项）查找特定 CRS 的 PROJJSON，也可以根据需要自定义 PROJJSON。</li>
 </ul>
-<h3 id="automatic-crs-from-srid">Automatic CRS from SRID<a class="headerlink" href="#automatic-crs-from-srid" title="Permanent link">&para;</a></h3>
-<p>When no <code>geoparquet.crs</code> option is explicitly provided, Sedona will automatically derive the CRS PROJJSON from the SRID of the geometry column. For example, if all geometries in a column have SRID 32632 (set via <a href="../../../api/sql/Spatial-Reference-System/ST_SetSRID/"><code>ST_SetSRID</code></a>), the writer will automatically produce the PROJJSON for EPSG:32632 in the GeoParquet metadata. For SRID 4326, the CRS field is omitted since this is the GeoParquet default (OGC:CRS84).</p>
+<h3 id="srid-crs">通过 SRID 自动推断 CRS<a class="headerlink" href="#srid-crs" title="Permanent link">&para;</a></h3>
+<p>未显式提供 <code>geoparquet.crs</code> 选项时，Sedona 会根据几何列的 SRID 自动推导出 CRS PROJJSON。例如，如果某列所有几何对象的 SRID 都是 32632（通过 <a href="../../../api/sql/Spatial-Reference-System/ST_SetSRID/"><code>ST_SetSRID</code></a> 设置），写入器会自动在 GeoParquet 元数据中生成 EPSG:32632 对应的 PROJJSON。当 SRID 为 4326 时，由于这就是 GeoParquet 的默认 CRS（OGC:CRS84），<code>crs</code> 字段会被省略。</p>
 <ul>
-<li>If the SRID is 0 (the default for geometries without an explicit SRID), the <code>crs</code> field will be set to <code>null</code>.</li>
-<li>If geometries in a column have mixed SRIDs, the <code>crs</code> field defaults to <code>null</code>.</li>
-<li>If an explicit <code>geoparquet.crs</code> or <code>geoparquet.crs.&lt;column_name&gt;</code> option is provided, it always takes precedence over the SRID-derived CRS.</li>
+<li>若 SRID 为 0（未显式设置 SRID 的几何对象的默认值），<code>crs</code> 字段会被设为 <code>null</code>。</li>
+<li>若同一列中的几何对象 SRID 不一致，<code>crs</code> 字段默认置为 <code>null</code>。</li>
+<li>若显式提供了 <code>geoparquet.crs</code> 或 <code>geoparquet.crs.&lt;column_name&gt;</code> 选项，则始终优先于 SRID 推导出的 CRS。</li>
 </ul>
-<p>Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use <a href="../../../api/sql/Geometry-Editors/ST_FlipCoordinates/"><code>ST_FlipCoordinates</code></a> to swap the axis order of your geometries.</p>
-<h2 id="save-geoparquet-with-covering-metadata">Save GeoParquet with Covering Metadata<a class="headerlink" href="#save-geoparquet-with-covering-metadata" title="Permanent link">&para;</a></h2>
-<p>Since <code>v1.6.1</code>, Sedona supports writing the <a href="https://github.com/opengeospatial/geoparquet/blob/v1.1.0/format-specs/geoparquet.md#covering"><code>covering</code> field</a> to geometry column metadata. The <code>covering</code> field specifies a bounding box column to help accelerate spatial data retrieval. The bounding box column should be a top-level struct column containing <code>xmin</code>, <code>ymin</code>, <code>xmax</code>, <code>ymax</code> columns. If the DataFrame you are writing contains such columns, you can specify <code>.option("geoparquet.covering.&lt;geometryColumnName&gt;", "&lt;coveringColumnName&gt;")</code> option to write <code>covering</code> metadata to GeoParquet files:</p>
+<p>Sedona 的 GeoParquet 读写器**不会**校验坐标轴顺序（lon/lat 还是 lat/lon），假定使用者在读写时自行处理。可以使用 <a href="../../../api/sql/Geometry-Editors/ST_FlipCoordinates/"><code>ST_FlipCoordinates</code></a> 来交换几何对象的坐标轴顺序。</p>
+<h2 id="covering-geoparquet">写出带 covering 元数据的 GeoParquet<a class="headerlink" href="#covering-geoparquet" title="Permanent link">&para;</a></h2>
+<p>自 <code>v1.6.1</code> 起，Sedona 支持向几何列元数据写入 <a href="https://github.com/opengeospatial/geoparquet/blob/v1.1.0/format-specs/geoparquet.md#covering"><code>covering</code> 字段</a>。该字段指定一列边界框列以加速空间数据检索。该边界框列必须是顶层结构体列，包含 <code>xmin</code>、<code>ymin</code>、<code>xmax</code>、<code>ymax</code> 四个子列。如果待写入的 DataFrame 已经包含这样的列，可通过 <code>.option("geoparquet.covering.&lt;geometryColumnName&gt;", "&lt;coveringColumnName&gt;")</code> 选项把 <code>covering</code> 元数据写入 GeoParquet：</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering.geometry&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bbox&quot;</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>If the DataFrame has only one geometry column, you can simply specify the <code>geoparquet.covering</code> option and omit the geometry column name:</p>
+<p>如果 DataFrame 仅有一列几何列，可以省略列名直接使用 <code>geoparquet.covering</code>：</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bbox&quot;</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>If you don't set a <code>geoparquet.covering</code> option, Sedona will automatically populate covering metadata for GeoParquet <code>1.1.0</code>.</p>
-<p>For each geometry column, Sedona uses <code>&lt;geometryColumnName&gt;_bbox</code> as the covering column:</p>
+<p>如果未设置 <code>geoparquet.covering</code> 选项，Sedona 在写出 GeoParquet <code>1.1.0</code> 时会自动为您填充 covering 元数据。</p>
+<p>对每个几何列，Sedona 会使用 <code>&lt;geometryColumnName&gt;_bbox</code> 作为 covering 列：</p>
 <ul>
-<li>If <code>&lt;geometryColumnName&gt;_bbox</code> already exists and is a valid covering struct (<code>xmin</code>, <code>ymin</code>, <code>xmax</code>, <code>ymax</code>), Sedona reuses it.</li>
-<li>If <code>&lt;geometryColumnName&gt;_bbox</code> does not exist, Sedona generates it automatically while writing.</li>
+<li>如果 <code>&lt;geometryColumnName&gt;_bbox</code> 已存在且是合法的 covering 结构体（<code>xmin</code>、<code>ymin</code>、<code>xmax</code>、<code>ymax</code>），Sedona 会复用它。</li>
+<li>如果 <code>&lt;geometryColumnName&gt;_bbox</code> 不存在，Sedona 会在写出时自动生成。</li>
 </ul>
-<p>Explicit <code>geoparquet.covering</code> or <code>geoparquet.covering.&lt;geometryColumnName&gt;</code> options take precedence over the default behavior.</p>
-<p>You can control this default behavior with <code>geoparquet.covering.mode</code>:</p>
+<p>显式的 <code>geoparquet.covering</code> 或 <code>geoparquet.covering.&lt;geometryColumnName&gt;</code> 选项始终优先于上述默认行为。</p>
+<p>可以通过 <code>geoparquet.covering.mode</code> 控制该默认行为：</p>
 <ul>
-<li><code>auto</code> (default): enable automatic covering metadata/column generation for GeoParquet <code>1.1.0</code>.</li>
-<li><code>legacy</code>: disable automatic covering generation.</li>
+<li><code>auto</code>（默认）：在写 GeoParquet <code>1.1.0</code> 时启用 covering 元数据/列的自动生成。</li>
+<li><code>legacy</code>：禁用自动 covering 生成。</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
 <span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering.mode&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;legacy&quot;</span><span class="p">)</span>
 <span class="w">  </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>If the DataFrame does not have a covering column, you can construct one using Sedona's SQL functions:</p>
+<p>如果 DataFrame 中没有 covering 列，可以使用 Sedona 的 SQL 函数构造一个：</p>
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df_bbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;bbox&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;struct(ST_XMin(geometry) AS xmin, ST_YMin(geometry) AS ymin, ST_XMax(geometry) AS xmax, ST_YMax(geometry) AS ymax)&quot;</span><span class="p">))</span>
 <span class="n">df_bbox</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering.geometry&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bbox&quot;</span><span class="p">).</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="sort-then-save-geoparquet">Sort then Save GeoParquet<a class="headerlink" href="#sort-then-save-geoparquet" title="Permanent link">&para;</a></h2>
-<p>To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see <a href="../../../api/sql/Geometry-Output/ST_GeoHash/">ST_GeoHash</a>) and then save as a GeoParquet file. An example is as follows:</p>
+<h2 id="geoparquet_1">排序后再写出 GeoParquet<a class="headerlink" href="#geoparquet_1" title="Permanent link">&para;</a></h2>
+<p>为了最大程度地发挥 Sedona GeoParquet filter pushdown 的性能，建议先按几何对象的 geohash 值（参见 <a href="../../../api/sql/Geometry-Output/ST_GeoHash/">ST_GeoHash</a>）排序，再写出 GeoParquet。示例如下：</p>
 <div class="highlight"><pre><span></span><code>SELECT col1, col2, geom, ST_GeoHash(geom, 5) as geohash
 FROM spatialDf
 ORDER BY geohash
 </code></pre></div>
-<p>Let's look closer at how Sedona uses the GeoParquet bbox metadata to optimize queries.</p>
-<h2 id="how-sedona-uses-geoparquet-bounding-box-bbox-metadata-with-spark">How Sedona uses GeoParquet bounding box (bbox) metadata with Spark<a class="headerlink" href="#how-sedona-uses-geoparquet-bounding-box-bbox-metadata-with-spark" title="Permanent link">&para;</a></h2>
-<p>The bounding box metadata specifies the area covered by geometric shapes in a given file.  Suppose you query points in a region not covered by the bounding box for a given file.  The engine can skip that entire file when executing the query because it’s known that it does not cover any relevant data.</p>
-<p>Skipping entire files of data can massively improve performance.  The more data that’s skipped, the faster the query will run.</p>
-<p>Let’s look at an example of a dataset with points and three bounding boxes.</p>
+<p>接下来更深入地看看 Sedona 是如何利用 GeoParquet 的 bbox 元数据来优化查询的。</p>
+<h2 id="sedona-spark-geoparquet-bbox">Sedona 如何在 Spark 上利用 GeoParquet 边界框（bbox）元数据<a class="headerlink" href="#sedona-spark-geoparquet-bbox" title="Permanent link">&para;</a></h2>
+<p>bbox 元数据描述了某个文件中所包含几何对象覆盖的范围。如果查询的区域不与某个文件的边界框相交，引擎在执行查询时即可整体跳过该文件——因为它不可能包含相关数据。</p>
+<p>跳过整个文件可以极大提升性能，跳过的数据越多，查询就越快。</p>
+<p>下面来看一个由若干点和三个边界框组成的数据集示例：</p>
 <p><img alt="GeoParquet bbox" src="../../../../image/tutorial/files/geoparquet_bbox1.png" /></p>
-<p>Now, let’s apply a spatial filter to read points within a particular area:</p>
-<p><img alt="GeoParquet bbox filter" src="../../../../image/tutorial/files/geoparquet_bbox2.png" /></p>
-<p>Here is the query:</p>
+<p>应用一个空间过滤器，只读取某个区域内的点：</p>
+<p><img alt="GeoParquet bbox 过滤" src="../../../../image/tutorial/files/geoparquet_bbox2.png" /></p>
+<p>查询代码：</p>
 <div class="highlight"><pre><span></span><code><span class="n">my_shape</span> <span class="o">=</span> <span class="s2">&quot;POLYGON((4.0 3.5, 4.0 6.0, 8.0 6.0, 8.0 4.5, 4.0 3.5))&quot;</span>
 
 <span class="n">res</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
@@ -5956,7 +5953,7 @@ ORDER BY geohash
 <span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
 <span class="n">res</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
-<p>Here are the results:</p>
+<p>结果如下：</p>
 <div class="highlight"><pre><span></span><code>+---+-----------+
 |id |geometry   |
 +---+-----------+
@@ -5965,7 +5962,7 @@ ORDER BY geohash
 |g  |POINT (6 5)|
 +---+-----------+
 </code></pre></div>
-<p>We don’t need the data in bounding boxes 1 or 3 to run this query.  We just need points in bounding box 2.  File skipping lets us read one file instead of three for this query.  Here are the bounding boxes for the files in the GeoParquet data lake:</p>
+<p>执行该查询其实并不需要边界框 1 或 3 中的数据，只需要边界框 2 中的点。文件跳过让我们对这个查询只需读取一个文件而非三个。该数据湖中各文件的 bbox 如下：</p>
 <div class="highlight"><pre><span></span><code>+--------------------------------------------------------------+
 |columns                                                       |
 +--------------------------------------------------------------+
@@ -5974,30 +5971,30 @@ ORDER BY geohash
 |{geometry -&gt; {WKB, [Point], [5.0, 4.0, 6.0, 5.0], null, NULL}}|
 +--------------------------------------------------------------+
 </code></pre></div>
-<p>Skipping entire files can result in massive performance gains.</p>
-<h2 id="advantages-of-geoparquet-files">Advantages of GeoParquet files<a class="headerlink" href="#advantages-of-geoparquet-files" title="Permanent link">&para;</a></h2>
-<p>As previously mentioned, GeoParquet files have many advantages over row-oriented files like CSV or GeoJSON:</p>
+<p>跳过整个文件能带来显著的性能收益。</p>
+<h2 id="geoparquet_2">GeoParquet 的优势<a class="headerlink" href="#geoparquet_2" title="Permanent link">&para;</a></h2>
+<p>如前所述，GeoParquet 相比 CSV、GeoJSON 等行式格式有诸多优势：</p>
 <ul>
-<li>Column pruning</li>
-<li>Row group filtering</li>
-<li>Schema in the footer</li>
-<li>Good compressibility because of the columnar data layout</li>
+<li>列裁剪</li>
+<li>row-group 过滤</li>
+<li>schema 写在文件尾部</li>
+<li>列式数据布局，压缩效果良好</li>
 </ul>
-<p>These are huge advantages but don’t offer the complete feature set that spatial data practitioners need.</p>
-<h2 id="limitations-of-geoparquet-files">Limitations of GeoParquet files<a class="headerlink" href="#limitations-of-geoparquet-files" title="Permanent link">&para;</a></h2>
-<p>Parquet data lakes and GeoParquet data lakes face many of the same limitations as other data lakes:</p>
+<p>但这些优势仍不足以满足空间数据从业者所需的全部能力。</p>
+<h2 id="geoparquet_3">GeoParquet 的局限<a class="headerlink" href="#geoparquet_3" title="Permanent link">&para;</a></h2>
+<p>Parquet 与 GeoParquet 数据湖与其他数据湖一样，存在以下局限：</p>
 <ul>
-<li>They don’t support reliable transactions</li>
-<li>Some Data Manipulation Language (“DML”) operations (e.g., update, delete) are not supported</li>
-<li>No concurrency protection</li>
-<li>Poor performance compared to databases for certain operations</li>
+<li>不支持可靠事务</li>
+<li>不支持部分数据操作语言（DML），如 update、delete</li>
+<li>没有并发保护</li>
+<li>与数据库相比，某些操作性能较差</li>
 </ul>
-<p>To overcome these limitations, the data community has migrated to open table formats like Iceberg, Delta Lake, and Hudi.</p>
-<p>Iceberg recently rolled out support for geometry and geography columns.  This allows data practitioners to get the best features of open table formats and the benefits of Parquet files, where the data is stored.  Iceberg overcomes the limitations of GeoParquet data lakes and allows for reliable transactions and easy access to common operations like updates and deletes.</p>
-<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
-<p>GeoParquet is a significant innovation for the spatial data community.  It provides geo engineers with embedded schemas, performance optimizations, and native support for geometry columns.</p>
-<p>Spatial data engineers can also migrate to Iceberg now that it supports all these positive features of GeoParquet, and even more.  Iceberg provides many useful open table features and is almost always a better option than vanilla GeoParquet (except for single file datasets that will never change or for compatibility with other engines).</p>
-<p>Switching from legacy file formats like Shapefile, GeoPackage, CSV, GeoJSON to high-performance file formats like GeoParquet/Iceberg should immediately speed up your computational workflows.</p>
+<p>为了克服这些局限，数据社区已逐步迁移到 Iceberg、Delta Lake、Hudi 等开放式表格式。</p>
+<p>Iceberg 最近开始支持 geometry 与 geography 列，让数据从业者既能享受开放式表格式的特性，又能复用底层的 Parquet 文件。Iceberg 解决了 GeoParquet 数据湖的局限，支持可靠事务以及 update、delete 等常见操作。</p>
+<h2 id="_1">结论<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>GeoParquet 是空间数据社区的一项重要进展。它为地理工程师提供了内嵌 schema、性能优化与对几何列的原生支持。</p>
+<p>由于 Iceberg 现已具备 GeoParquet 的全部优秀特性甚至更多，空间数据工程师也可以平滑迁移到 Iceberg。Iceberg 提供了大量实用的开放式表格式特性，几乎在所有场景下都优于纯 GeoParquet（例外情况：永不变更的单文件数据集，或与其他引擎的兼容性需求）。</p>
+<p>将工作流从 Shapefile、GeoPackage、CSV、GeoJSON 等传统格式迁移到 GeoParquet/Iceberg 等高性能格式，能立刻提升计算效率。</p>
 
 
 
@@ -6018,7 +6015,7 @@ ORDER BY geohash
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 27, 2026 06:37:29 UTC">February 27, 2026 06:37:29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 06:54:59 UTC">2026年5月8日 06:54:59</span>
   </span>
 
     
