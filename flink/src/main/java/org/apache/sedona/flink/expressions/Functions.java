@@ -581,6 +581,29 @@ public class Functions {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.expand(geom, deltaX, deltaY, deltaZ);
     }
+
+    @DataTypeHint(value = "RAW", rawSerializer = Box2DTypeSerializer.class, bridgedTo = Box2D.class)
+    public Box2D eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D box,
+        @DataTypeHint(value = "Double") Double uniformDelta) {
+      return org.apache.sedona.common.Functions.expand(box, uniformDelta);
+    }
+
+    @DataTypeHint(value = "RAW", rawSerializer = Box2DTypeSerializer.class, bridgedTo = Box2D.class)
+    public Box2D eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D box,
+        @DataTypeHint(value = "Double") Double deltaX,
+        @DataTypeHint(value = "Double") Double deltaY) {
+      return org.apache.sedona.common.Functions.expand(box, deltaX, deltaY);
+    }
   }
 
   public static class ST_Dimension extends ScalarFunction {

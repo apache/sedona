@@ -177,6 +177,30 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void expandBox2D() {
+    Box2D box = new Box2D(1.0, 2.0, 4.0, 5.0);
+
+    Box2D uniform = Functions.expand(box, 1.0);
+    assertEquals(0.0, uniform.getXMin(), 0.0);
+    assertEquals(1.0, uniform.getYMin(), 0.0);
+    assertEquals(5.0, uniform.getXMax(), 0.0);
+    assertEquals(6.0, uniform.getYMax(), 0.0);
+
+    Box2D perAxis = Functions.expand(box, 2.0, 0.5);
+    assertEquals(-1.0, perAxis.getXMin(), 0.0);
+    assertEquals(1.5, perAxis.getYMin(), 0.0);
+    assertEquals(6.0, perAxis.getXMax(), 0.0);
+    assertEquals(5.5, perAxis.getYMax(), 0.0);
+
+    // Negative deltas may produce a degenerate bbox (xmin > xmax); we return as-is.
+    Box2D shrunkPastZero = Functions.expand(new Box2D(0.0, 0.0, 1.0, 1.0), -2.0);
+    assertTrue(shrunkPastZero.getXMin() > shrunkPastZero.getXMax());
+
+    assertNull(Functions.expand((Box2D) null, 1.0));
+    assertNull(Functions.expand((Box2D) null, 1.0, 1.0));
+  }
+
+  @Test
   public void asWKB() throws Exception {
     Geometry geometry = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 2.0));
     byte[] actualResult = Functions.asWKB(geometry);

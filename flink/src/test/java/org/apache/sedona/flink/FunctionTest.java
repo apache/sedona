@@ -536,6 +536,34 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testExpandBox2D() {
+    Table t =
+        tableEnv.sqlQuery(
+            "SELECT ST_Expand(ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')), 1.0) AS uniform,"
+                + " ST_Expand(ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')), 2.0, 0.5) AS per_axis");
+    Row row = first(t);
+    Box2D uniform = (Box2D) row.getField(0);
+    assertEquals(0.0, uniform.getXMin(), 0.0);
+    assertEquals(1.0, uniform.getYMin(), 0.0);
+    assertEquals(5.0, uniform.getXMax(), 0.0);
+    assertEquals(6.0, uniform.getYMax(), 0.0);
+    Box2D perAxis = (Box2D) row.getField(1);
+    assertEquals(-1.0, perAxis.getXMin(), 0.0);
+    assertEquals(1.5, perAxis.getYMin(), 0.0);
+    assertEquals(6.0, perAxis.getXMax(), 0.0);
+    assertEquals(5.5, perAxis.getYMax(), 0.0);
+
+    // NULL Box2D input propagates to NULL for both signatures.
+    Table tNull =
+        tableEnv.sqlQuery(
+            "SELECT ST_Expand(ST_Box2D(ST_GeomFromText(CAST(NULL AS STRING))), 1.0) AS u,"
+                + " ST_Expand(ST_Box2D(ST_GeomFromText(CAST(NULL AS STRING))), 1.0, 1.0) AS p");
+    Row nullRow = first(tNull);
+    assertNull(nullRow.getField(0));
+    assertNull(nullRow.getField(1));
+  }
+
+  @Test
   public void testFlipCoordinates() {
     Table pointTable = createPointTable_real(testDataSize);
     Table flippedTable =
