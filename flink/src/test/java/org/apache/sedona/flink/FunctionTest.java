@@ -552,6 +552,15 @@ public class FunctionTest extends TestBase {
     assertEquals(1.5, perAxis.getYMin(), 0.0);
     assertEquals(6.0, perAxis.getXMax(), 0.0);
     assertEquals(5.5, perAxis.getYMax(), 0.0);
+
+    // NULL Box2D input propagates to NULL for both signatures.
+    Table tNull =
+        tableEnv.sqlQuery(
+            "SELECT ST_Expand(ST_Box2D(ST_GeomFromText(CAST(NULL AS STRING))), 1.0) AS u,"
+                + " ST_Expand(ST_Box2D(ST_GeomFromText(CAST(NULL AS STRING))), 1.0, 1.0) AS p");
+    Row nullRow = first(tNull);
+    assertNull(nullRow.getField(0));
+    assertNull(nullRow.getField(1));
   }
 
   @Test

@@ -247,7 +247,9 @@ class TestPredicateJoin(TestBase):
         df = self.spark.sql("""
             SELECT
               ST_Expand(ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')), 1.0) AS uniform,
-              ST_Expand(ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')), 2.0, 0.5) AS per_axis
+              ST_Expand(ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')), 2.0, 0.5) AS per_axis,
+              ST_Expand(ST_Box2D(ST_GeomFromText(NULL)), 1.0)             AS null_uniform,
+              ST_Expand(ST_Box2D(ST_GeomFromText(NULL)), 1.0, 1.0)        AS null_per_axis
             """)
         row = df.first()
         uniform = row[0]
@@ -260,6 +262,9 @@ class TestPredicateJoin(TestBase):
         assert per_axis.ymin == 1.5
         assert per_axis.xmax == 6.0
         assert per_axis.ymax == 5.5
+        # NULL Box2D input deserializes to None for both signatures.
+        assert row[2] is None
+        assert row[3] is None
 
     def test_st_centroid(self):
         polygon_wkt_df = (
