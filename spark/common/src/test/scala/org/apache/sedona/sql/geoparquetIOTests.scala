@@ -1021,6 +1021,53 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
 
+    it("GeoParquet supports writing covering metadata from a Box2D column") {
+      // User-provided Box2D column referenced via the geoparquet.covering option.
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+        .withColumn("test_cov", expr("ST_Box2D(geometry)"))
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_with_box2d_covering.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.covering.geometry", "test_cov")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val coveringJsValue = geo \ "columns" \ "geometry" \ "covering"
+        val covering = coveringJsValue.extract[Covering]
+        assert(covering.bbox.xmin == Seq("test_cov", "xmin"))
+        assert(covering.bbox.ymin == Seq("test_cov", "ymin"))
+        assert(covering.bbox.xmax == Seq("test_cov", "xmax"))
+        assert(covering.bbox.ymax == Seq("test_cov", "ymax"))
+      }
+    }
+
+    it("GeoParquet auto populates covering metadata for a Box2D <geom>_bbox column") {
+      // Auto-detect path: when a column named <geom>_bbox is a Box2D, reuse it as the
+      // covering column instead of synthesizing a separate float64 struct.
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+        .withColumn("geometry_bbox", expr("ST_Box2D(geometry)"))
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_box2d_auto_covering.parquet"
+      df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val coveringJsValue = geo \ "columns" \ "geometry" \ "covering"
+        val covering = coveringJsValue.extract[Covering]
+        assert(covering.bbox.xmin == Seq("geometry_bbox", "xmin"))
+        assert(covering.bbox.ymin == Seq("geometry_bbox", "ymin"))
+        assert(covering.bbox.xmax == Seq("geometry_bbox", "xmax"))
+        assert(covering.bbox.ymax == Seq("geometry_bbox", "ymax"))
+      }
+    }
+
     it("GeoParquet auto populates covering metadata for single geometry column") {
       val df = sparkSession
         .range(0, 100)
