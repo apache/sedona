@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#gather-maven-links" class="md-skip">
+        <a href="#maven" class="md-skip">
           跳转至
         </a>
       
@@ -1267,10 +1267,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#gather-maven-links" class="md-nav__link">
+  <a href="#maven" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Gather Maven Links
+        收集 Maven 链接
       
     </span>
   </a>
@@ -1278,22 +1278,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#configure-glue-job" class="md-nav__link">
+  <a href="#glue" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configure Glue Job
+        配置 Glue 作业
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Configure Glue Job">
+    <nav class="md-nav" aria-label="配置 Glue 作业">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#notebook-job" class="md-nav__link">
+  <a href="#notebook" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Notebook Job
+        Notebook 作业
       
     </span>
   </a>
@@ -1301,10 +1301,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#etl-job" class="md-nav__link">
+  <a href="#etl" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ETL Job
+        ETL 作业
       
     </span>
   </a>
@@ -5490,10 +5490,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#gather-maven-links" class="md-nav__link">
+  <a href="#maven" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Gather Maven Links
+        收集 Maven 链接
       
     </span>
   </a>
@@ -5501,22 +5501,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#configure-glue-job" class="md-nav__link">
+  <a href="#glue" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configure Glue Job
+        配置 Glue 作业
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Configure Glue Job">
+    <nav class="md-nav" aria-label="配置 Glue 作业">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#notebook-job" class="md-nav__link">
+  <a href="#notebook" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Notebook Job
+        Notebook 作业
       
     </span>
   </a>
@@ -5524,10 +5524,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#etl-job" class="md-nav__link">
+  <a href="#etl" class="md-nav__link">
     <span class="md-ellipsis">
       
-        ETL Job
+        ETL 作业
       
     </span>
   </a>
@@ -5559,7 +5559,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/setup/glue.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/setup/glue.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5588,39 +5588,33 @@
  under the License.
  -->
 
-<p>This tutorial will cover how to configure both a glue notebook and a glue ETL job. The tutorial is written assuming you
-have a working knowledge of AWS Glue jobs.</p>
-<p>In the tutorial, we use
-Sedona 1.9.0 and <a href="https://docs.aws.amazon.com/glue/latest/dg/release-notes.html">Glue 5.0</a> which runs on Spark 3.5.4, Java 17, Scala 2.12,
-and Python 3.11. We recommend Sedona 1.8.0 and above for Glue 5.0.</p>
+<p>本教程介绍如何配置 Glue notebook 与 Glue ETL 作业。本文假设您已具备 AWS Glue 作业的基础使用经验。</p>
+<p>教程中使用 Sedona 1.9.0 与 <a href="https://docs.aws.amazon.com/glue/latest/dg/release-notes.html">Glue 5.0</a>，运行环境为 Spark 3.5.4、Java 17、Scala 2.12 和 Python 3.11。Glue 5.0 推荐使用 Sedona 1.8.0 及以上版本。</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p><strong>Important:</strong> Since Sedona 1.8.0, Java 8 support is dropped and Spark 3.3 support is dropped. Sedona 1.8.0+ requires Glue 5.0+ which supports Java 17 and Spark 3.5+. If you must stay on Glue 4.0 (Spark 3.3, Java 8), use Sedona 1.7.1 or lower along with the <code>sedona-spark-shaded-3.3_2.12</code> artifact instead of the <code>sedona-spark-shaded-3.5_2.12</code> artifact shown below.</p>
+<p><strong>重要：</strong> 自 Sedona 1.8.0 起不再支持 Java 8 与 Spark 3.3。Sedona 1.8.0+ 需要 Glue 5.0+（支持 Java 17 与 Spark 3.5+）。如果您必须停留在 Glue 4.0（Spark 3.3、Java 8），请使用 Sedona 1.7.1 或更低版本，并将下方的 <code>sedona-spark-shaded-3.5_2.12</code> artifact 替换为 <code>sedona-spark-shaded-3.3_2.12</code>。</p>
 </div>
-<h2 id="gather-maven-links">Gather Maven Links<a class="headerlink" href="#gather-maven-links" title="Permanent link">&para;</a></h2>
-<p>You will need to point your glue job to the Sedona and Geotools jars. We recommend using the jars available from maven. The links below are those intended for Glue 5.0.</p>
-<p>Sedona Jar: <a href="https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.9.0/sedona-spark-shaded-3.5_2.12-1.9.0.jar">Maven Central</a></p>
-<p>Geotools Jar: <a href="https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.9.0-33.5/geotools-wrapper-1.9.0-33.5.jar">Maven Central</a></p>
+<h2 id="maven">收集 Maven 链接<a class="headerlink" href="#maven" title="Permanent link">&para;</a></h2>
+<p>您需要让 Glue 作业指向 Sedona 与 Geotools 的 jar。推荐直接使用 Maven 上发布的 jar。下面给出的链接是为 Glue 5.0 准备的。</p>
+<p>Sedona Jar：<a href="https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.9.0/sedona-spark-shaded-3.5_2.12-1.9.0.jar">Maven Central</a></p>
+<p>Geotools Jar：<a href="https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.9.0-33.5/geotools-wrapper-1.9.0-33.5.jar">Maven Central</a></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Ensure you pick a version for Scala 2.12 and Spark 3.5. The Scala
-2.13 jars are not compatible with Glue 5.0.</p>
+<p>请务必选择 Scala 2.12 与 Spark 3.5 的版本。Scala 2.13 的 jar 与 Glue 5.0 不兼容。</p>
 </div>
-<h2 id="configure-glue-job">Configure Glue Job<a class="headerlink" href="#configure-glue-job" title="Permanent link">&para;</a></h2>
-<p>Once you have your jar links, you can configure your Glue job to use them, as well as the apache-sedona Python
-package. How you do this varies slightly between the notebook and the script job types.</p>
+<h2 id="glue">配置 Glue 作业<a class="headerlink" href="#glue" title="Permanent link">&para;</a></h2>
+<p>获得 jar 链接后，您可以将它们与 apache-sedona Python 包一起配置到 Glue 作业中。notebook 类型与 script 类型的作业配置方式略有不同。</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Always ensure that the Sedona version of the jars and the Python package match.</p>
+<p>请务必保持 jar 与 Python 包的 Sedona 版本一致。</p>
 </div>
-<h3 id="notebook-job">Notebook Job<a class="headerlink" href="#notebook-job" title="Permanent link">&para;</a></h3>
-<p>Add the following cell magics before starting your sparkContext or glueContext. The first points to the jars,
-and the second installs the Sedona Python package directly from pip.</p>
+<h3 id="notebook">Notebook 作业<a class="headerlink" href="#notebook" title="Permanent link">&para;</a></h3>
+<p>在创建 sparkContext 或 glueContext 之前，添加以下 cell magic。第一行指向 jar，第二行直接通过 pip 安装 Sedona Python 包。</p>
 <div class="highlight"><pre><span></span><code># Sedona Config
 %extra_jars https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.9.0/sedona-spark-shaded-3.5_2.12-1.9.0.jar, https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.9.0-33.5/geotools-wrapper-1.9.0-33.5.jar
 %additional_python_modules apache-sedona==1.9.0
 </code></pre></div>
-<p>If you are using the example notebook from glue, the first cell should now look like this:</p>
+<p>如果您使用 Glue 提供的示例 notebook，则第一个 cell 现在大致应是：</p>
 <div class="highlight"><pre><span></span><code>%idle_timeout 2880
 %glue_version 5.0
 %worker_type G.1X
@@ -5643,18 +5637,16 @@ glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
 </code></pre></div>
-<p>You can confirm your installation by running the following cell:</p>
+<p>可以通过运行以下 cell 验证安装：</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
 <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT ST_POINT(1., 2.) as geom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
-<h3 id="etl-job">ETL Job<a class="headerlink" href="#etl-job" title="Permanent link">&para;</a></h3>
-<p>Glue also calls these Scripts. From your job's page, navigate to the "Job details" tab. At the bottom of the page expand
-the "Advanced properties" section. In the "Dependent JARs path" field, add the paths to the jars, separated by a comma.</p>
-<p>To add the Sedona Python package, navigate to the "Job Parameters" section and add a new parameter with the key
-<code>--additional-python-modules</code> and the value <code>apache-sedona==1.9.0</code>.</p>
-<p>To confirm the installation add the follow code to the script:</p>
+<h3 id="etl">ETL 作业<a class="headerlink" href="#etl" title="Permanent link">&para;</a></h3>
+<p>Glue 也将这种作业称为 Script 作业。在作业页面上切换到 “Job details” 选项卡，展开页面底部的 “Advanced properties” 部分。在 “Dependent JARs path” 字段中填入两个 jar 的链接，并以英文逗号分隔。</p>
+<p>要添加 Sedona Python 包，进入 “Job Parameters” 部分新增一个参数，键为 <code>--additional-python-modules</code>，值为 <code>apache-sedona==1.9.0</code>。</p>
+<p>为验证安装，可在脚本中加入以下代码：</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
@@ -5662,7 +5654,7 @@ the "Advanced properties" section. In the "Dependent JARs path" field, add the p
 
 <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT ST_POINT(1., 2.) as geom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
-<p>Once added to the script, save and run the job. If the job runs successfully, the installation was successful.</p>
+<p>将其加入脚本后保存并运行作业。如果作业运行成功，则说明安装成功。</p>
 
 
 
@@ -5683,7 +5675,7 @@ the "Advanced properties" section. In the "Dependent JARs path" field, add the p
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 7, 2026 00:22:02 UTC">May 7, 2026 00:22:02</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 06:17:05 UTC">2026年5月8日 06:17:05</span>
   </span>
 
     

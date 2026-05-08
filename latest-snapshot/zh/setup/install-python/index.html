@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#install-sedona" class="md-skip">
+        <a href="#sedona" class="md-skip">
           跳转至
         </a>
       
@@ -1013,10 +1013,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#install-sedona" class="md-nav__link">
+  <a href="#sedona" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install sedona
+        安装 sedona
       
     </span>
   </a>
@@ -1024,10 +1024,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#prepare-sedona-spark-jar" class="md-nav__link">
+  <a href="#sedona-spark-jar" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Prepare sedona-spark jar
+        准备 sedona-spark jar
       
     </span>
   </a>
@@ -1035,10 +1035,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#setup-environment-variables" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Setup environment variables
+        设置环境变量
       
     </span>
   </a>
@@ -5473,10 +5473,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#install-sedona" class="md-nav__link">
+  <a href="#sedona" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install sedona
+        安装 sedona
       
     </span>
   </a>
@@ -5484,10 +5484,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#prepare-sedona-spark-jar" class="md-nav__link">
+  <a href="#sedona-spark-jar" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Prepare sedona-spark jar
+        准备 sedona-spark jar
       
     </span>
   </a>
@@ -5495,10 +5495,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#setup-environment-variables" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Setup environment variables
+        设置环境变量
       
     </span>
   </a>
@@ -5525,7 +5525,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/setup/install-python.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/setup/install-python.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5554,40 +5554,40 @@
  under the License.
  -->
 
-<p>Apache Sedona extends pyspark functions which depends on libraries:</p>
+<p>Apache Sedona 扩展了 PySpark 函数，依赖以下库：</p>
 <ul>
 <li>pyspark</li>
 <li>shapely</li>
 <li>attrs</li>
 </ul>
-<p>You need to install necessary packages if your system does not have them installed. Sedona now uses <a href="https://docs.astral.sh/uv/">uv</a> for Python dependency management. See the dependency definitions in our <a href="https://github.com/apache/sedona/blob/master/python/pyproject.toml">pyproject.toml</a>.</p>
-<h3 id="install-sedona">Install sedona<a class="headerlink" href="#install-sedona" title="Permanent link">&para;</a></h3>
+<p>如果您的系统尚未安装这些包，请先安装。Sedona 现使用 <a href="https://docs.astral.sh/uv/">uv</a> 管理 Python 依赖，详细依赖定义见 <a href="https://github.com/apache/sedona/blob/master/python/pyproject.toml">pyproject.toml</a>。</p>
+<h3 id="sedona">安装 sedona<a class="headerlink" href="#sedona" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Installing from PyPI repositories. You can find the latest Sedona Python on <a href="https://pypi.org/project/apache-sedona/">PyPI</a>. <a href="../release-notes/#known-issue">There is a known issue in Sedona v1.0.1 and earlier versions</a>.</li>
+<li>从 PyPI 仓库安装。最新版的 Sedona Python 可在 <a href="https://pypi.org/project/apache-sedona/">PyPI</a> 找到。<a href="../release-notes/#known-issue">Sedona v1.0.1 及更早版本存在已知问题</a>。</li>
 </ul>
 <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>apache-sedona
 </code></pre></div>
 <ul>
-<li>Since Sedona v1.1.0, pyspark is an optional dependency of Sedona Python because spark comes pre-installed on many spark platforms. To install pyspark along with Sedona Python in one go, use the <code>spark</code> extra:</li>
+<li>自 Sedona v1.1.0 起，pyspark 已成为 Sedona Python 的可选依赖，因为许多 Spark 平台都已预装 Spark。如需在安装 Sedona Python 时一并安装 pyspark，请使用 <code>spark</code> 附加项：</li>
 </ul>
 <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>apache-sedona<span class="o">[</span>spark<span class="o">]</span>
 </code></pre></div>
 <ul>
-<li>Installing from Sedona Python source</li>
+<li>从 Sedona Python 源码安装</li>
 </ul>
-<p>Clone Sedona GitHub source code and run the following command</p>
+<p>克隆 Sedona GitHub 源码后运行以下命令：</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>python
 python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.
 </code></pre></div>
-<h3 id="prepare-sedona-spark-jar">Prepare sedona-spark jar<a class="headerlink" href="#prepare-sedona-spark-jar" title="Permanent link">&para;</a></h3>
-<p>Sedona Python needs one additional jar file called <code>sedona-spark-shaded</code> or <code>sedona-spark</code> to work properly. Please make sure you use the correct version for Spark and Scala.</p>
-<p>Please use Spark major.minor version number in artifact names.</p>
-<p>You can get it using one of the following methods:</p>
+<h3 id="sedona-spark-jar">准备 sedona-spark jar<a class="headerlink" href="#sedona-spark-jar" title="Permanent link">&para;</a></h3>
+<p>Sedona Python 需要额外配套一个名为 <code>sedona-spark-shaded</code> 或 <code>sedona-spark</code> 的 jar 文件。请确保所选版本与您的 Spark 和 Scala 版本匹配。</p>
+<p>请在 artifact 名称中使用 Spark 的 major.minor 版本号。</p>
+<p>可通过以下方式之一获取该 jar：</p>
 <ol>
-<li>If you run Sedona in Databricks, AWS EMR, or other cloud platform's notebook, use the <code>shaded jar</code>: Download <a href="https://repo.maven.apache.org/maven2/org/apache/sedona/">sedona-spark-shaded jar</a> and <a href="https://repo.maven.apache.org/maven2/org/datasyslab/geotools-wrapper/">geotools-wrapper jar</a> from Maven Central, and put them in SPARK_HOME/jars/ folder.</li>
-<li>If you run Sedona in an IDE or a local Jupyter notebook, use the <code>unshaded jar</code>. Call the <a href="../maven-coordinates/">Maven Central coordinate</a> in your python program. For example,
-<mark>Sedona &gt;= 1.4.1</mark></li>
+<li>如果您在 Databricks、AWS EMR 或其他云平台的 notebook 中运行 Sedona，请使用 <code>shaded jar</code>：从 Maven Central 下载 <a href="https://repo.maven.apache.org/maven2/org/apache/sedona/">sedona-spark-shaded jar</a> 与 <a href="https://repo.maven.apache.org/maven2/org/datasyslab/geotools-wrapper/">geotools-wrapper jar</a>，并将其放入 <code>SPARK_HOME/jars/</code> 目录。</li>
+<li>如果您在 IDE 或本地 Jupyter Notebook 中运行 Sedona，请使用 <code>unshaded jar</code>，并在 Python 程序中通过 <a href="../maven-coordinates/">Maven Central 坐标</a> 引用，例如：</li>
 </ol>
+<p><mark>Sedona &gt;= 1.4.1</mark></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
@@ -5606,7 +5606,7 @@ python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </s
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </code></pre></div>
 <p><mark>Sedona &lt; 1.4.1</mark></p>
-<p>SedonaRegistrator is deprecated in Sedona 1.4.1 and later versions. Please use the above method instead.</p>
+<p><code>SedonaRegistrator</code> 自 Sedona 1.4.1 起已被弃用，请改用上面的方式。</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaRegistrator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaKryoRegistrator</span><span class="p">,</span> <span class="n">KryoSerializer</span>
@@ -5624,19 +5624,19 @@ python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </s
 <span class="p">)</span>
 <span class="n">SedonaRegistrator</span><span class="o">.</span><span class="n">registerAll</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
 </code></pre></div>
-<h3 id="setup-environment-variables">Setup environment variables<a class="headerlink" href="#setup-environment-variables" title="Permanent link">&para;</a></h3>
-<p>If you manually copy the sedona-spark-shaded jar to <code>SPARK_HOME/jars/</code> folder, you need to setup two environment variables</p>
+<h3 id="_1">设置环境变量<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p>如果您手动将 sedona-spark-shaded jar 复制到 <code>SPARK_HOME/jars/</code> 目录，则需要设置两个环境变量：</p>
 <ul>
-<li>SPARK_HOME. For example, run the command in your terminal</li>
+<li>SPARK_HOME。例如，在终端运行：</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">SPARK_HOME</span><span class="o">=</span>~/Downloads/spark-3.0.1-bin-hadoop2.7
 </code></pre></div>
 <ul>
-<li>PYTHONPATH. For example, run the command in your terminal</li>
+<li>PYTHONPATH。例如，在终端运行：</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span><span class="nv">$SPARK_HOME</span>/python
 </code></pre></div>
-<p>You can then play with <a href="../../tutorial/jupyter-notebook/">Sedona Python Jupyter notebook</a>.</p>
+<p>之后即可体验 <a href="../../tutorial/jupyter-notebook/">Sedona Python Jupyter Notebook</a>。</p>
 
 
 
@@ -5657,7 +5657,7 @@ python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </s
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="October 29, 2025 06:19:23 UTC">October 29, 2025 06:19:23</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 06:17:05 UTC">2026年5月8日 06:17:05</span>
   </span>
 
     

@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#maven-coordinates" class="md-skip">
+        <a href="#maven" class="md-skip">
           跳转至
         </a>
       
@@ -881,10 +881,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#use-sedona-shaded-fat-jars" class="md-nav__link">
+  <a href="#sedona-shadedfatjar" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Use Sedona shaded (fat) jars
+        使用 Sedona shaded（fat）jar
       
     </span>
   </a>
@@ -892,15 +892,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-sedona-unshaded-jars" class="md-nav__link">
+  <a href="#sedona-unshaded-jar" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Use Sedona unshaded jars
+        使用 Sedona unshaded jar
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Use Sedona unshaded jars">
+    <nav class="md-nav" aria-label="使用 Sedona unshaded jar">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -920,15 +920,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#snapshot-versions" class="md-nav__link">
+  <a href="#snapshot" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SNAPSHOT versions
+        SNAPSHOT 版本
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="SNAPSHOT versions">
+    <nav class="md-nav" aria-label="SNAPSHOT 版本">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5522,10 +5522,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#use-sedona-shaded-fat-jars" class="md-nav__link">
+  <a href="#sedona-shadedfatjar" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Use Sedona shaded (fat) jars
+        使用 Sedona shaded（fat）jar
       
     </span>
   </a>
@@ -5533,15 +5533,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-sedona-unshaded-jars" class="md-nav__link">
+  <a href="#sedona-unshaded-jar" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Use Sedona unshaded jars
+        使用 Sedona unshaded jar
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Use Sedona unshaded jars">
+    <nav class="md-nav" aria-label="使用 Sedona unshaded jar">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5561,15 +5561,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#snapshot-versions" class="md-nav__link">
+  <a href="#snapshot" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SNAPSHOT versions
+        SNAPSHOT 版本
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="SNAPSHOT versions">
+    <nav class="md-nav" aria-label="SNAPSHOT 版本">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5619,7 +5619,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/setup/maven-coordinates.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/setup/maven-coordinates.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5646,23 +5646,23 @@
  under the License.
  -->
 
-<h1 id="maven-coordinates">Maven Coordinates<a class="headerlink" href="#maven-coordinates" title="Permanent link">&para;</a></h1>
-<h2 id="use-sedona-shaded-fat-jars">Use Sedona shaded (fat) jars<a class="headerlink" href="#use-sedona-shaded-fat-jars" title="Permanent link">&para;</a></h2>
+<h1 id="maven">Maven 坐标<a class="headerlink" href="#maven" title="Permanent link">&para;</a></h1>
+<h2 id="sedona-shadedfatjar">使用 Sedona shaded（fat）jar<a class="headerlink" href="#sedona-shadedfatjar" title="Permanent link">&para;</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>For Scala/Java/Python users, this is the most common way to use Sedona in your environment. Do not use separate Sedona jars unless you are sure that you do not need shaded jars.</p>
+<p>对于 Scala/Java/Python 用户，这是在您的环境中使用 Sedona 最常见的方式。除非确认确实不需要 shaded jar，否则不要使用单独的 Sedona jar。</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>For R users, this is the only way to use Sedona in your environment.</p>
+<p>对于 R 用户，这是在您的环境中使用 Sedona 的唯一方式。</p>
 </div>
-<p>Apache Sedona provides different packages for each supported version of Spark.</p>
-<p>Please use the artifact with Spark major.minor version in the artifact name. For example, for Spark 3.4, the artifacts to use should be <code>sedona-spark-shaded-3.4_2.12</code>.</p>
-<p>If you are using the Scala 2.13 builds of Spark, please use the corresponding packages for Scala 2.13, which are suffixed by <code>_2.13</code>.</p>
-<p>The optional GeoTools library is required if you want to use raster operators. Vector CRS transformation (ST_Transform) now uses the built-in proj4sedona library by default and does not require GeoTools. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license so we cannot package it in Sedona official release.</p>
+<p>Apache Sedona 针对每个受支持的 Spark 版本提供了不同的包。</p>
+<p>请使用 artifact 名称中包含 Spark major.minor 版本号的 artifact。例如，对于 Spark 3.4，应使用 <code>sedona-spark-shaded-3.4_2.12</code>。</p>
+<p>如果使用基于 Scala 2.13 编译的 Spark，则应使用对应的 Scala 2.13 版本，其后缀为 <code>_2.13</code>。</p>
+<p>可选的 GeoTools 库仅在使用栅格算子时才需要。矢量 CRS 转换（ST_Transform）现在默认使用内置的 proj4sedona，无需 GeoTools。该 wrapper 库是 GeoTools 官方 jar 的再分发，目的仅是把 GeoTools jar 从 OSGEO 仓库带入 Maven Central。该库基于 GNU Lesser General Public License (LGPL) 协议，因此无法打包进 Sedona 官方发行版中。</p>
 <div class="admonition abstract">
-<p class="admonition-title">Sedona with Apache Spark and Scala 2.12</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Spark 3.4 and Scala 2.12</label><label for="__tabbed_1_2">Spark 3.5 and Scala 2.12</label><label for="__tabbed_1_3">Spark 4.0 and Scala 2.12</label></div>
+<p class="admonition-title">Sedona 与 Apache Spark + Scala 2.12</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Spark 3.4 与 Scala 2.12</label><label for="__tabbed_1_2">Spark 3.5 与 Scala 2.12</label><label for="__tabbed_1_3">Spark 4.0 与 Scala 2.12</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
@@ -5670,7 +5670,7 @@
 <span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-shaded-3.4_2.12<span class="nt">&lt;/artifactId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.0<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
-<span class="cm">&lt;!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
+<span class="cm">&lt;!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
 <span class="nt">&lt;dependency&gt;</span>
 <span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
@@ -5684,7 +5684,7 @@
 <span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-shaded-3.5_2.12<span class="nt">&lt;/artifactId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.0<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
-<span class="cm">&lt;!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
+<span class="cm">&lt;!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
 <span class="nt">&lt;dependency&gt;</span>
 <span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
@@ -5698,7 +5698,7 @@
 <span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-shaded-4.0_2.12<span class="nt">&lt;/artifactId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.0<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
-<span class="cm">&lt;!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
+<span class="cm">&lt;!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
 <span class="nt">&lt;dependency&gt;</span>
 <span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
@@ -5710,8 +5710,8 @@
 </div>
 </div>
 <div class="admonition abstract">
-<p class="admonition-title">Sedona with Apache Spark and Scala 2.13</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Spark 3.4 and Scala 2.13</label><label for="__tabbed_2_2">Spark 3.5 and Scala 2.13</label><label for="__tabbed_2_3">Spark 4.0 and Scala 2.13</label><label for="__tabbed_2_4">Spark 4.1 and Scala 2.13</label></div>
+<p class="admonition-title">Sedona 与 Apache Spark + Scala 2.13</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Spark 3.4 与 Scala 2.13</label><label for="__tabbed_2_2">Spark 3.5 与 Scala 2.13</label><label for="__tabbed_2_3">Spark 4.0 与 Scala 2.13</label><label for="__tabbed_2_4">Spark 4.1 与 Scala 2.13</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
@@ -5719,7 +5719,7 @@
 <span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-shaded-3.4_2.13<span class="nt">&lt;/artifactId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.0<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
-<span class="cm">&lt;!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
+<span class="cm">&lt;!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
 <span class="nt">&lt;dependency&gt;</span>
 <span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
@@ -5733,7 +5733,7 @@
 <span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-shaded-3.5_2.13<span class="nt">&lt;/artifactId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.0<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
-<span class="cm">&lt;!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
+<span class="cm">&lt;!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
 <span class="nt">&lt;dependency&gt;</span>
 <span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
@@ -5747,7 +5747,7 @@
 <span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-shaded-4.0_2.13<span class="nt">&lt;/artifactId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.0<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
-<span class="cm">&lt;!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
+<span class="cm">&lt;!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
 <span class="nt">&lt;dependency&gt;</span>
 <span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
@@ -5761,7 +5761,7 @@
 <span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-spark-shaded-4.1_2.13<span class="nt">&lt;/artifactId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.0<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
-<span class="cm">&lt;!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
+<span class="cm">&lt;!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
 <span class="nt">&lt;dependency&gt;</span>
 <span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
@@ -5773,8 +5773,8 @@
 </div>
 </div>
 <div class="admonition abstract">
-<p class="admonition-title">Sedona with Apache Flink</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:1"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Flink 1.12+ and Scala 2.12</label></div>
+<p class="admonition-title">Sedona 与 Apache Flink</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:1"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Flink 1.12+ 与 Scala 2.12</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
@@ -5782,7 +5782,7 @@
 <span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-flink-shaded_2.12<span class="nt">&lt;/artifactId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.0<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
-<span class="cm">&lt;!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
+<span class="cm">&lt;!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
 <span class="nt">&lt;dependency&gt;</span>
 <span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
@@ -5794,8 +5794,8 @@
 </div>
 </div>
 <div class="admonition abstract">
-<p class="admonition-title">Sedona with Snowflake</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:1"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Snowflake 7.0+ (Year 2023 and later)</label></div>
+<p class="admonition-title">Sedona 与 Snowflake</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:1"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Snowflake 7.0+（2023 年及以后）</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
@@ -5803,7 +5803,7 @@
 <span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>sedona-snowflake<span class="nt">&lt;/artifactId&gt;</span>
 <span class="w">  </span><span class="nt">&lt;version&gt;</span>1.9.0<span class="nt">&lt;/version&gt;</span>
 <span class="nt">&lt;/dependency&gt;</span>
-<span class="cm">&lt;!-- Optional: https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
+<span class="cm">&lt;!-- 可选：https://mvnrepository.com/artifact/org.datasyslab/geotools-wrapper --&gt;</span>
 <span class="nt">&lt;dependency&gt;</span>
 <span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.datasyslab<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>geotools-wrapper<span class="nt">&lt;/artifactId&gt;</span>
@@ -5814,18 +5814,18 @@
 </div>
 </div>
 </div>
-<h2 id="use-sedona-unshaded-jars">Use Sedona unshaded jars<a class="headerlink" href="#use-sedona-unshaded-jars" title="Permanent link">&para;</a></h2>
+<h2 id="sedona-unshaded-jar">使用 Sedona unshaded jar<a class="headerlink" href="#sedona-unshaded-jar" title="Permanent link">&para;</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>For Scala, Java, Python users, please use the following jars only if you satisfy these conditions: (1) you know how to exclude transient dependencies in a complex application. (2) your environment has internet access (3) you are using some sort of Maven package resolver, or pom.xml, or build.sbt. It usually directly takes an input like this <code>GroupID:ArtifactID:Version</code>. If you don't understand what we are talking about, the following jars are not for you.</p>
+<p>Scala、Java、Python 用户仅在同时满足以下条件时才考虑使用下面的 jar：(1) 您知道如何在复杂应用中排除传递依赖；(2) 您的环境可以访问公网；(3) 您正在使用某种 Maven 包解析器，或 pom.xml/build.sbt，它通常以 <code>GroupID:ArtifactID:Version</code> 的形式接收输入。如果您不清楚以上含义，那么下面的 jar 不适合您。</p>
 </div>
-<p>Apache Sedona provides different packages for each supported version of Spark.</p>
-<p>Please use the artifacts with Spark major.minor version in the artifact name. For example, for Spark 3.4, the artifacts to use should be <code>sedona-spark-3.4_2.12</code>.</p>
-<p>If you are using the Scala 2.13 builds of Spark, please use the corresponding packages for Scala 2.13, which are suffixed by <code>_2.13</code>.</p>
-<p>The optional GeoTools library is required if you want to use raster operators. Vector CRS transformation (ST_Transform) now uses the built-in proj4sedona library by default and does not require GeoTools. This wrapper library is a re-distribution of GeoTools official jars. The only purpose of this library is to bring GeoTools jars from OSGEO repository to Maven Central. This library is under GNU Lesser General Public License (LGPL) license, so we cannot package it in Sedona official release.</p>
+<p>Apache Sedona 针对每个受支持的 Spark 版本提供了不同的包。</p>
+<p>请使用 artifact 名称中包含 Spark major.minor 版本号的 artifact。例如，对于 Spark 3.4，应使用 <code>sedona-spark-3.4_2.12</code>。</p>
+<p>如果使用基于 Scala 2.13 编译的 Spark，则应使用对应的 Scala 2.13 版本（后缀为 <code>_2.13</code>）。</p>
+<p>可选的 GeoTools 库仅在使用栅格算子时才需要。矢量 CRS 转换（ST_Transform）现在默认使用内置的 proj4sedona，无需 GeoTools。该 wrapper 库是 GeoTools 官方 jar 的再分发，目的仅是把 GeoTools jar 从 OSGEO 仓库带入 Maven Central。该库基于 GNU Lesser General Public License (LGPL) 协议，因此无法打包进 Sedona 官方发行版中。</p>
 <div class="admonition abstract">
-<p class="admonition-title">Sedona with Apache Spark and Scala 2.12</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Spark 3.4 and Scala 2.12</label><label for="__tabbed_5_2">Spark 3.5 and Scala 2.12</label><label for="__tabbed_5_3">Spark 4.0 and Scala 2.12</label></div>
+<p class="admonition-title">Sedona 与 Apache Spark + Scala 2.12</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Spark 3.4 与 Scala 2.12</label><label for="__tabbed_5_2">Spark 3.5 与 Scala 2.12</label><label for="__tabbed_5_3">Spark 4.0 与 Scala 2.12</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
@@ -5870,8 +5870,8 @@
 </div>
 </div>
 <div class="admonition abstract">
-<p class="admonition-title">Sedona with Apache Spark and Scala 2.13</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:4"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><input id="__tabbed_6_4" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Spark 3.4 and Scala 2.13</label><label for="__tabbed_6_2">Spark 3.5 and Scala 2.13</label><label for="__tabbed_6_3">Spark 4.0 and Scala 2.13</label><label for="__tabbed_6_4">Spark 4.1 and Scala 2.13</label></div>
+<p class="admonition-title">Sedona 与 Apache Spark + Scala 2.13</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:4"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><input id="__tabbed_6_4" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Spark 3.4 与 Scala 2.13</label><label for="__tabbed_6_2">Spark 3.5 与 Scala 2.13</label><label for="__tabbed_6_3">Spark 4.0 与 Scala 2.13</label><label for="__tabbed_6_4">Spark 4.1 与 Scala 2.13</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
@@ -5929,8 +5929,8 @@
 </div>
 </div>
 <div class="admonition abstract">
-<p class="admonition-title">Sedona with Apache Flink</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:1"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Flink 1.12+ and Scala 2.12</label></div>
+<p class="admonition-title">Sedona 与 Apache Flink</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:1"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Flink 1.12+ 与 Scala 2.12</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
@@ -5948,16 +5948,16 @@
 </div>
 </div>
 </div>
-<p>Sedona Snowflake does not have an unshaded version.</p>
+<p>Sedona Snowflake 没有 unshaded 版本。</p>
 <h3 id="netcdf-java-542">netCDF-Java 5.4.2<a class="headerlink" href="#netcdf-java-542" title="Permanent link">&para;</a></h3>
-<p>This is required only if you want to read HDF/NetCDF files using <code>RS_FromNetCDF</code>. Note that this JAR is not in Maven Central so you will need to add this repository to your pom.xml or build.sbt, or specify the URL in Spark Config <code>spark.jars.repositories</code> or spark-submit <code>--repositories</code> option.</p>
-<p>Under BSD 3-clause (compatible with Apache 2.0 license)</p>
+<p>仅当您希望使用 <code>RS_FromNetCDF</code> 读取 HDF/NetCDF 文件时才需要此依赖。注意该 JAR 并未发布到 Maven Central，需要在 pom.xml 或 build.sbt 中加入对应仓库，或在 Spark 配置 <code>spark.jars.repositories</code> / <code>spark-submit --repositories</code> 中指定其 URL。</p>
+<p>许可协议：BSD 3-clause（与 Apache 2.0 兼容）。</p>
 <div class="admonition abstract">
-<p class="admonition-title">Add HDF/NetCDF dependency</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Sedona 1.3.1+</label><label for="__tabbed_8_2">Before Sedona 1.3.1</label></div>
+<p class="admonition-title">添加 HDF/NetCDF 依赖</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Sedona 1.3.1+</label><label for="__tabbed_8_2">Sedona 1.3.1 之前</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Add unidata repo to your pom.xml</p>
+<p>在 pom.xml 中加入 unidata 仓库：</p>
 <div class="highlight"><pre><span></span><code>&lt;repositories&gt;
     &lt;repository&gt;
         &lt;id&gt;unidata-all&lt;/id&gt;
@@ -5966,7 +5966,7 @@
     &lt;/repository&gt;
 &lt;/repositories&gt;
 </code></pre></div>
-<p>Then add cdm-core to your POM dependency.</p>
+<p>然后将 cdm-core 添加到 POM 依赖中：</p>
 <div class="highlight"><pre><span></span><code><span class="nt">&lt;dependency&gt;</span>
 <span class="w">    </span><span class="nt">&lt;groupId&gt;</span>edu.ucar<span class="nt">&lt;/groupId&gt;</span>
 <span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>cdm-core<span class="nt">&lt;/artifactId&gt;</span>
@@ -5986,9 +5986,9 @@
 </div>
 </div>
 </div>
-<h2 id="snapshot-versions">SNAPSHOT versions<a class="headerlink" href="#snapshot-versions" title="Permanent link">&para;</a></h2>
-<p>Sometimes Sedona has a SNAPSHOT version for the upcoming release. It follows the same naming conversion but has "SNAPSHOT" as suffix in the version. For example, <code>1.9.1-SNAPSHOT</code></p>
-<p>In order to download SNAPSHOTs, you need to add the following repositories in your pom.xml or build.sbt</p>
+<h2 id="snapshot">SNAPSHOT 版本<a class="headerlink" href="#snapshot" title="Permanent link">&para;</a></h2>
+<p>有时 Sedona 会为即将发布的版本提供 SNAPSHOT 版本。其命名规则与正式版相同，仅在版本号中以 “SNAPSHOT” 作为后缀，例如 <code>1.9.1-SNAPSHOT</code>。</p>
+<p>要下载 SNAPSHOT，需要在 pom.xml 或 build.sbt 中添加以下仓库：</p>
 <h3 id="buildsbt">build.sbt<a class="headerlink" href="#buildsbt" title="Permanent link">&para;</a></h3>
 <p>resolvers +=
   "Apache Software Foundation Snapshots" at "<a href="https://repository.apache.org/content/groups/snapshots">https://repository.apache.org/content/groups/snapshots</a>"</p>
@@ -6022,7 +6022,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 14, 2026 09:15:08 UTC">February 14, 2026 09:15:08</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 06:17:05 UTC">2026年5月8日 06:17:05</span>
   </span>
 
     

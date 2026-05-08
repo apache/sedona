@@ -997,10 +997,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#download-sedona-jar-automatically" class="md-nav__link">
+  <a href="#sedona-jar" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Download Sedona jar automatically
+        自动下载 Sedona jar
       
     </span>
   </a>
@@ -1008,10 +1008,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#download-sedona-jar-manually" class="md-nav__link">
+  <a href="#sedona-jar_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Download Sedona jar manually
+        手动下载 Sedona jar
       
     </span>
   </a>
@@ -1035,10 +1035,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#self-contained-spark-projects" class="md-nav__link">
+  <a href="#spark" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Self-contained Spark projects
+        独立的 Spark 项目
       
     </span>
   </a>
@@ -5513,10 +5513,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#download-sedona-jar-automatically" class="md-nav__link">
+  <a href="#sedona-jar" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Download Sedona jar automatically
+        自动下载 Sedona jar
       
     </span>
   </a>
@@ -5524,10 +5524,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#download-sedona-jar-manually" class="md-nav__link">
+  <a href="#sedona-jar_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Download Sedona jar manually
+        手动下载 Sedona jar
       
     </span>
   </a>
@@ -5551,10 +5551,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#self-contained-spark-projects" class="md-nav__link">
+  <a href="#spark" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Self-contained Spark projects
+        独立的 Spark 项目
       
     </span>
   </a>
@@ -5581,7 +5581,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/setup/install-scala.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/setup/install-scala.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5610,79 +5610,79 @@
  under the License.
  -->
 
-<p>Before starting the Sedona journey, you need to make sure your Apache Spark cluster is ready.</p>
-<p>There are two ways to use a Scala or Java library with Apache Spark. You can use either one to run Sedona.</p>
+<p>在开始 Sedona 之旅之前，请确保您的 Apache Spark 集群已就绪。</p>
+<p>在 Apache Spark 中使用 Scala/Java 库有两种方式，您可以任选其一来运行 Sedona：</p>
 <ul>
-<li>Spark interactive Scala or SQL shell: easy to start, good for new learners to try simple functions</li>
-<li>Self-contained Scala / Java project: a steep learning curve of package management, but good for large projects</li>
+<li>Spark 交互式 Scala 或 SQL shell：上手简单，适合新手尝试简单的函数调用。</li>
+<li>独立的 Scala / Java 项目：包管理学习成本较高，但适合大型项目。</li>
 </ul>
 <h2 id="spark-scala-shell">Spark Scala shell<a class="headerlink" href="#spark-scala-shell" title="Permanent link">&para;</a></h2>
-<h3 id="download-sedona-jar-automatically">Download Sedona jar automatically<a class="headerlink" href="#download-sedona-jar-automatically" title="Permanent link">&para;</a></h3>
+<h3 id="sedona-jar">自动下载 Sedona jar<a class="headerlink" href="#sedona-jar" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
-<p>Have your Spark cluster ready.</p>
+<p>准备好 Spark 集群。</p>
 </li>
 <li>
-<p>Run Spark shell with <code>--packages</code> option. This command will automatically download Sedona jars from Maven Central.</p>
+<p>使用 <code>--packages</code> 选项启动 Spark shell。该命令会自动从 Maven Central 下载 Sedona jar。</p>
 </li>
 </ol>
 <div class="highlight"><pre><span></span><code>./bin/spark-shell --packages MavenCoordinates
 </code></pre></div>
-<p>Please refer to <a href="../maven-coordinates/">Sedona Maven Central coordinates</a> to select the corresponding Sedona packages for your Spark version.</p>
-<div class="codehilite"><pre><span></span><code><span class="o">*</span><span class="w"> </span><span class="n">Local</span><span class="w"> </span><span class="n">mode</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="n">Sedona</span><span class="w"> </span><span class="n">without</span><span class="w"> </span><span class="n">setting</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">cluster</span>
+<p>请参考 <a href="../maven-coordinates/">Sedona Maven Central 坐标</a>，根据您的 Spark 版本选择对应的 Sedona 包。</p>
+<div class="codehilite"><pre><span></span><code><span class="o">*</span><span class="w"> </span><span class="err">本地模式：无需搭建集群即可测试</span><span class="w"> </span><span class="n">Sedona</span>
 <span class="err">```</span>
 <span class="o">./</span><span class="n">bin</span><span class="o">/</span><span class="n">spark</span><span class="o">-</span><span class="n">shell</span><span class="w"> </span><span class="o">--</span><span class="n">packages</span><span class="w"> </span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">sedona</span><span class="p">:</span><span class="n">sedona</span><span class="o">-</span><span class="n">spark</span><span class="o">-</span><span class="n">shaded</span><span class="o">-</span><span class="mf">3.3</span><span class="n">_2</span><span class="o">.</span><span class="mi">12</span><span class="p">:</span><span class="mf">1.9</span><span class="o">.</span><span class="mi">0</span><span class="p">,</span><span class="n">org</span><span class="o">.</span><span class="n">datasyslab</span><span class="p">:</span><span class="n">geotools</span><span class="o">-</span><span class="n">wrapper</span><span class="p">:</span><span class="mf">1.9</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mf">33.5</span>
 <span class="err">```</span>
 
-<span class="o">*</span><span class="w"> </span><span class="n">Cluster</span><span class="w"> </span><span class="n">mode</span><span class="p">:</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">need</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">specify</span><span class="w"> </span><span class="n">Spark</span><span class="w"> </span><span class="n">Master</span><span class="w"> </span><span class="n">IP</span>
+<span class="o">*</span><span class="w"> </span><span class="err">集群模式：需要指定</span><span class="w"> </span><span class="n">Spark</span><span class="w"> </span><span class="n">Master</span><span class="w"> </span><span class="n">IP</span>
 <span class="err">```</span>
 <span class="o">./</span><span class="n">bin</span><span class="o">/</span><span class="n">spark</span><span class="o">-</span><span class="n">shell</span><span class="w"> </span><span class="o">--</span><span class="k">master</span><span class="w"> </span><span class="n">spark</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">7077</span><span class="w"> </span><span class="o">--</span><span class="n">packages</span><span class="w"> </span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">sedona</span><span class="p">:</span><span class="n">sedona</span><span class="o">-</span><span class="n">spark</span><span class="o">-</span><span class="n">shaded</span><span class="o">-</span><span class="mf">3.3</span><span class="n">_2</span><span class="o">.</span><span class="mi">12</span><span class="p">:</span><span class="mf">1.9</span><span class="o">.</span><span class="mi">0</span><span class="p">,</span><span class="n">org</span><span class="o">.</span><span class="n">datasyslab</span><span class="p">:</span><span class="n">geotools</span><span class="o">-</span><span class="n">wrapper</span><span class="p">:</span><span class="mf">1.9</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mf">33.5</span>
 <span class="err">```</span>
 </code></pre></div>
 
-<h3 id="download-sedona-jar-manually">Download Sedona jar manually<a class="headerlink" href="#download-sedona-jar-manually" title="Permanent link">&para;</a></h3>
+<h3 id="sedona-jar_1">手动下载 Sedona jar<a class="headerlink" href="#sedona-jar_1" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
-<p>Have your Spark cluster ready.</p>
+<p>准备好 Spark 集群。</p>
 </li>
 <li>
-<p>Download Sedona jars:</p>
+<p>下载 Sedona jar：</p>
 <ul>
-<li>Download the pre-compiled jars from <a href="../../download/">Sedona Releases</a></li>
-<li>Download / Git clone Sedona source code and compile the code by yourself (see <a href="../compile/">Compile Sedona</a>)</li>
+<li>从 <a href="../../download/">Sedona Releases</a> 下载预编译 jar</li>
+<li>下载 / git clone Sedona 源码并自行编译（参见 <a href="../compile/">编译 Sedona</a>）</li>
 </ul>
 </li>
-<li>Run Spark shell with <code>--jars</code> option.</li>
+<li>使用 <code>--jars</code> 选项启动 Spark shell。</li>
 </ol>
 <div class="highlight"><pre><span></span><code>./bin/spark-shell --jars /Path/To/SedonaJars.jar
 </code></pre></div>
-<p>Please use jars with Spark major.minor versions in the filename, such as <code>sedona-spark-shaded-3.3_2.12-1.9.0</code>.</p>
-<div class="codehilite"><pre><span></span><code><span class="o">*</span><span class="w"> </span><span class="n">Local</span><span class="w"> </span><span class="n">mode</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="n">Sedona</span><span class="w"> </span><span class="n">without</span><span class="w"> </span><span class="n">setting</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">cluster</span>
+<p>请使用文件名中包含 Spark major.minor 版本号的 jar，例如 <code>sedona-spark-shaded-3.3_2.12-1.9.0</code>。</p>
+<div class="codehilite"><pre><span></span><code><span class="o">*</span><span class="w"> </span><span class="err">本地模式：无需搭建集群即可测试</span><span class="w"> </span><span class="n">Sedona</span>
 <span class="err">```</span>
 <span class="o">./</span><span class="n">bin</span><span class="o">/</span><span class="n">spark</span><span class="o">-</span><span class="n">shell</span><span class="w"> </span><span class="o">--</span><span class="n">jars</span><span class="w"> </span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">sedona</span><span class="o">-</span><span class="n">spark</span><span class="o">-</span><span class="n">shaded</span><span class="o">-</span><span class="mf">3.3</span><span class="n">_2</span><span class="o">.</span><span class="mi">12</span><span class="o">-</span><span class="mf">1.9</span><span class="o">.</span><span class="mf">0.j</span><span class="n">ar</span><span class="p">,</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">geotools</span><span class="o">-</span><span class="n">wrapper</span><span class="o">-</span><span class="mf">1.9</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mf">33.5</span><span class="o">.</span><span class="n">jar</span>
 <span class="err">```</span>
 
-<span class="o">*</span><span class="w"> </span><span class="n">Cluster</span><span class="w"> </span><span class="n">mode</span><span class="p">:</span><span class="w"> </span><span class="n">you</span><span class="w"> </span><span class="n">need</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">specify</span><span class="w"> </span><span class="n">Spark</span><span class="w"> </span><span class="n">Master</span><span class="w"> </span><span class="n">IP</span>
+<span class="o">*</span><span class="w"> </span><span class="err">集群模式：需要指定</span><span class="w"> </span><span class="n">Spark</span><span class="w"> </span><span class="n">Master</span><span class="w"> </span><span class="n">IP</span>
 <span class="err">```</span>
 <span class="o">./</span><span class="n">bin</span><span class="o">/</span><span class="n">spark</span><span class="o">-</span><span class="n">shell</span><span class="w"> </span><span class="o">--</span><span class="k">master</span><span class="w"> </span><span class="n">spark</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">7077</span><span class="w"> </span><span class="o">--</span><span class="n">jars</span><span class="w"> </span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">sedona</span><span class="o">-</span><span class="n">spark</span><span class="o">-</span><span class="n">shaded</span><span class="o">-</span><span class="mf">3.3</span><span class="n">_2</span><span class="o">.</span><span class="mi">12</span><span class="o">-</span><span class="mf">1.9</span><span class="o">.</span><span class="mf">0.j</span><span class="n">ar</span><span class="p">,</span><span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">geotools</span><span class="o">-</span><span class="n">wrapper</span><span class="o">-</span><span class="mf">1.9</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mf">33.5</span><span class="o">.</span><span class="n">jar</span>
 <span class="err">```</span>
 </code></pre></div>
 
 <h2 id="spark-sql-shell">Spark SQL shell<a class="headerlink" href="#spark-sql-shell" title="Permanent link">&para;</a></h2>
-<p>Please see <a href="../../tutorial/sql-pure-sql/">Use Sedona in a pure SQL environment</a></p>
-<h2 id="self-contained-spark-projects">Self-contained Spark projects<a class="headerlink" href="#self-contained-spark-projects" title="Permanent link">&para;</a></h2>
-<p>A self-contained project allows you to create multiple Scala / Java files and write complex logics in one place. To use Sedona in your self-contained Spark project, you just need to add Sedona as a dependency in your pom.xml or build.sbt.</p>
+<p>请参阅 <a href="../../tutorial/sql-pure-sql/">在纯 SQL 环境中使用 Sedona</a>。</p>
+<h2 id="spark">独立的 Spark 项目<a class="headerlink" href="#spark" title="Permanent link">&para;</a></h2>
+<p>独立项目可以让您创建多个 Scala / Java 文件，并将复杂的逻辑集中实现。要在独立的 Spark 项目中使用 Sedona，只需在 <code>pom.xml</code> 或 <code>build.sbt</code> 中将 Sedona 添加为依赖。</p>
 <ol>
-<li>To add Sedona as dependencies, please read <a href="../maven-coordinates/">Sedona Maven Central coordinates</a></li>
-<li>Use Sedona Template project to start: <a href="../../tutorial/demo/">Sedona Template Project</a></li>
-<li>Compile your project using SBT. Make sure you obtain the fat jar which packages all dependencies.</li>
-<li>Submit your compiled fat jar to Spark cluster. Make sure you are in the root folder of Spark distribution. Then run the following command:</li>
+<li>关于如何添加 Sedona 依赖，请参阅 <a href="../maven-coordinates/">Sedona Maven Central 坐标</a></li>
+<li>使用 Sedona 模板项目快速上手：<a href="../../tutorial/demo/">Sedona 模板项目</a></li>
+<li>使用 SBT 编译您的项目，并确保得到打包了所有依赖的 fat jar。</li>
+<li>将编译生成的 fat jar 提交到 Spark 集群。请确保位于 Spark 发行版的根目录，然后运行以下命令：</li>
 </ol>
 <div class="highlight"><pre><span></span><code>./bin/spark-submit --master spark://YOUR-IP:7077 /Path/To/YourJar.jar
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The detailed explanation of spark-submit is available on <a href="https://spark.apache.org/docs/latest/submitting-applications.html">Spark website</a>.</p>
+<p>关于 spark-submit 的详细说明请参见 <a href="https://spark.apache.org/docs/latest/submitting-applications.html">Spark 官方文档</a>。</p>
 </div>
 
 
@@ -5704,7 +5704,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="June 21, 2025 18:31:10 UTC">June 21, 2025 18:31:10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 06:17:05 UTC">2026年5月8日 06:17:05</span>
   </span>
 
     

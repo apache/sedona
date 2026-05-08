@@ -5409,7 +5409,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/setup/flink/install-scala.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/setup/flink/install-scala.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5438,14 +5438,14 @@
  under the License.
  -->
 
-<p>Before starting the Sedona journey, you need to make sure your Apache Flink cluster is ready.</p>
-<p>Then you can create a self-contained Scala / Java project. A self-contained project allows you to create multiple Scala / Java files and write complex logics in one place.</p>
-<p>To use Sedona in your self-contained Flink project, you just need to add Sedona as a dependency in your pom.xml or build.sbt.</p>
+<p>在开始 Sedona 之旅之前，请确保您的 Apache Flink 集群已就绪。</p>
+<p>随后即可创建一个独立的 Scala / Java 项目。独立项目可以让您创建多个 Scala / Java 文件，并将复杂的逻辑集中实现。</p>
+<p>要在独立的 Flink 项目中使用 Sedona，只需在 <code>pom.xml</code> 或 <code>build.sbt</code> 中将 Sedona 添加为依赖。</p>
 <ol>
-<li>To add Sedona as dependencies, please read <a href="../../maven-coordinates/">Sedona Maven Central coordinates</a></li>
-<li>Read <a href="../../../tutorial/flink/sql/">Sedona Flink guide</a> and use Sedona Template project to start: <a href="../../../tutorial/demo/">Sedona Template Project</a></li>
-<li>Compile your project using Maven. Make sure you obtain the fat jar which packages all dependencies.</li>
-<li>Submit your compiled fat jar to Flink cluster. Make sure you are in the root folder of Flink distribution. Then run the following command:</li>
+<li>关于如何添加 Sedona 依赖，请参阅 <a href="../../maven-coordinates/">Sedona Maven Central 坐标</a></li>
+<li>阅读 <a href="../../../tutorial/flink/sql/">Sedona Flink 指南</a>，并使用 Sedona 模板项目快速上手：<a href="../../../tutorial/demo/">Sedona 模板项目</a></li>
+<li>使用 Maven 编译您的项目，并确保得到打包了所有依赖的 fat jar。</li>
+<li>将编译生成的 fat jar 提交到 Flink 集群。请确保位于 Flink 发行版的根目录，然后运行以下命令：</li>
 </ol>
 <div class="highlight"><pre><span></span><code>./bin/flink run /Path/To/YourJar.jar
 </code></pre></div>
@@ -5469,7 +5469,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47 UTC">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 06:17:05 UTC">2026年5月8日 06:17:05</span>
   </span>
 
     
