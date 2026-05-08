@@ -260,7 +260,7 @@ plugins:
       languages:
         - locale: en
           default: true
-          name: EN
+          name: English
           build: true
         - locale: zh
           name: 中文
