@@ -20,10 +20,48 @@ package org.apache.sedona.flink.expressions;
 
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
+import org.apache.sedona.common.geometryObjects.Box2D;
+import org.apache.sedona.flink.Box2DTypeSerializer;
 import org.apache.sedona.flink.GeometryTypeSerializer;
 import org.locationtech.jts.geom.Geometry;
 
 public class Predicates {
+
+  public static class ST_BoxIntersects extends ScalarFunction {
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D a,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D b) {
+      if (a == null || b == null) return null;
+      return org.apache.sedona.common.Predicates.boxIntersects(a, b);
+    }
+  }
+
+  public static class ST_BoxContains extends ScalarFunction {
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D a,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D b) {
+      if (a == null || b == null) return null;
+      return org.apache.sedona.common.Predicates.boxContains(a, b);
+    }
+  }
 
   public static class ST_Intersects extends ScalarFunction {
     /** Constructor for relation checking without duplicate removal */

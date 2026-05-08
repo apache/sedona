@@ -25,6 +25,41 @@ class predicateTestScala extends TestBaseScala {
 
   describe("Sedona-SQL Predicate Test") {
 
+    it("Passed ST_BoxIntersects and ST_BoxContains") {
+      val df = sparkSession.sql("""
+        WITH t AS (
+          SELECT
+            ST_Box2D(ST_GeomFromText('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))'))   AS a,
+            ST_Box2D(ST_GeomFromText('POLYGON((1 1, 1 2, 2 2, 2 1, 1 1))'))   AS inside,
+            ST_Box2D(ST_GeomFromText('POLYGON((3 3, 3 7, 7 7, 7 3, 3 3))'))   AS overlap,
+            ST_Box2D(ST_GeomFromText('POLYGON((5 0, 5 5, 10 5, 10 0, 5 0))')) AS edge,
+            ST_Box2D(ST_GeomFromText('POLYGON((6 6, 6 7, 7 7, 7 6, 6 6))'))   AS disjoint,
+            ST_Box2D(ST_GeomFromText(NULL))                                    AS box_null
+        )
+        SELECT
+          ST_BoxIntersects(a, inside),
+          ST_BoxIntersects(a, overlap),
+          ST_BoxIntersects(a, edge),
+          ST_BoxIntersects(a, disjoint),
+          ST_BoxIntersects(a, box_null),
+          ST_BoxContains(a, inside),
+          ST_BoxContains(a, overlap),
+          ST_BoxContains(a, a),
+          ST_BoxContains(a, box_null)
+        FROM t
+        """)
+      val row = df.collect()(0)
+      assert(row.getBoolean(0)) // intersects: inside
+      assert(row.getBoolean(1)) // intersects: overlap
+      assert(row.getBoolean(2)) // intersects: edge-touch
+      assert(!row.getBoolean(3)) // intersects: disjoint
+      assert(row.isNullAt(4)) // intersects: NULL propagates
+      assert(row.getBoolean(5)) // contains: inside
+      assert(!row.getBoolean(6)) // contains: overlap (extends past)
+      assert(row.getBoolean(7)) // contains: equal
+      assert(row.isNullAt(8)) // contains: NULL propagates
+    }
+
     it("Passed ST_Contains") {
       var pointCsvDF = sparkSession.read
         .format("csv")

@@ -90,6 +90,38 @@ private[apache] case class ST_Contains(inputExpressions: Seq[Expression])
 }
 
 /**
+ * Closed-interval bbox intersection over two Box2D arguments. Returns true if the boxes overlap
+ * on both the X and Y axes (matches PostGIS `&&` on box2d). Edge- and corner-touching boxes count
+ * as intersecting. Throws on inverted bounds (xmin>xmax / ymin>ymax) since planar predicates have
+ * no defined meaning for inverted intervals; that ordering is reserved for future
+ * antimeridian-wraparound semantics.
+ *
+ * @param inputExpressions
+ */
+private[apache] case class ST_BoxIntersects(inputExpressions: Seq[Expression])
+    extends InferredExpression(Predicates.boxIntersects _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Closed-interval bbox containment over two Box2D arguments. Returns true if argument `a` fully
+ * contains argument `b` on both axes (matches PostGIS `~` on box2d). Equal boxes contain each
+ * other. Throws on inverted bounds for the same reason as ST_BoxIntersects.
+ *
+ * @param inputExpressions
+ */
+private[apache] case class ST_BoxContains(inputExpressions: Seq[Expression])
+    extends InferredExpression(Predicates.boxContains _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
  * Test if leftGeometry full intersects rightGeometry. Supports both Geometry (JTS) and Geography
  * (S2) inputs via InferredExpression dual dispatch.
  *

@@ -31,6 +31,38 @@ _call_predicate_function = partial(call_sedona_function, "st_predicates")
 
 
 @validate_argument_types
+def ST_BoxContains(a: ColumnOrName, b: ColumnOrName) -> Column:
+    """Check whether Box2D a fully contains Box2D b (closed intervals).
+
+    Mirrors PostGIS ``~`` on box2d. NULL on null input.
+
+    :param a: Outer Box2D column.
+    :type a: ColumnOrName
+    :param b: Inner Box2D column.
+    :type b: ColumnOrName
+    :return: True if a contains b, false otherwise.
+    :rtype: Column
+    """
+    return _call_predicate_function("ST_BoxContains", (a, b))
+
+
+@validate_argument_types
+def ST_BoxIntersects(a: ColumnOrName, b: ColumnOrName) -> Column:
+    """Check whether Box2D a and Box2D b share any point (closed intervals).
+
+    Mirrors PostGIS ``&&`` on box2d. NULL on null input.
+
+    :param a: First Box2D column.
+    :type a: ColumnOrName
+    :param b: Second Box2D column.
+    :type b: ColumnOrName
+    :return: True if a and b overlap, false otherwise.
+    :rtype: Column
+    """
+    return _call_predicate_function("ST_BoxIntersects", (a, b))
+
+
+@validate_argument_types
 def ST_Contains(a: ColumnOrName, b: ColumnOrName) -> Column:
     """Check whether geometry a contains geometry b.
 
