@@ -93,6 +93,7 @@
   }
 }
 
-// Close the dropdown when clicking outside — relies on the click-away
-// hint via `tabindex` on the body and `:focus-within`. Native <details>
-// stays open until summary is clicked again, which is acceptable.
+// The native <details> element stays open until the user clicks the
+// summary again. We accept that behavior here; clicking elsewhere on
+// the page does not auto-close the menu. Keeping it pure HTML/CSS
+// means the dropdown works without any JS dependency.

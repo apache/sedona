@@ -3,16 +3,15 @@
   <summary class="sd-lang-switch__trigger" aria-label="{{ lang.t('select.language') }}" title="{{ lang.t('select.language') }}">
     <span class="sd-lang-switch__glyph" aria-hidden="true"><span class="sd-lang-switch__glyph-cn">文</span><span class="sd-lang-switch__glyph-en">A</span></span>
   </summary>
-  <ul class="sd-lang-switch__menu" role="menu">
+  <ul class="sd-lang-switch__menu">
     {% for alt in config.extra.alternate %}
       {%- set is_active = (alt.lang == config.theme.language) -%}
-      <li role="none">
+      <li>
         <a
           href="{{ alt.link | url }}"
           hreflang="{{ alt.lang }}"
           lang="{{ alt.lang }}"
           target="_self"
-          role="menuitem"
           class="sd-lang-switch__link{% if is_active %} sd-lang-switch__link--active{% endif %}"
           {% if is_active %}aria-current="true"{% endif %}
         >{{ alt.name }}</a>
