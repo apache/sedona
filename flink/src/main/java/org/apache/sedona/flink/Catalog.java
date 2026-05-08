@@ -247,6 +247,8 @@ public class Catalog {
 
   public static UserDefinedFunction[] getPredicates() {
     return new UserDefinedFunction[] {
+      new Predicates.ST_BoxContains(),
+      new Predicates.ST_BoxIntersects(),
       new Predicates.ST_Intersects(),
       new Predicates.ST_Contains(),
       new Predicates.ST_Crosses(),

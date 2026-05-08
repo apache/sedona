@@ -22,6 +22,7 @@ import static org.apache.sedona.common.Constructors.geomFromEWKT;
 import static org.apache.sedona.common.Functions.crossesDateLine;
 import static org.junit.Assert.*;
 
+import org.apache.sedona.common.geometryObjects.Box2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -31,6 +32,38 @@ import org.locationtech.jts.io.ParseException;
 public class PredicatesTest extends TestBase {
 
   private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
+
+  @Test
+  public void testBoxIntersects() {
+    Box2D a = new Box2D(0.0, 0.0, 5.0, 5.0);
+
+    // Full overlap
+    assertTrue(Predicates.boxIntersects(a, new Box2D(1.0, 1.0, 2.0, 2.0)));
+    // Partial overlap
+    assertTrue(Predicates.boxIntersects(a, new Box2D(3.0, 3.0, 7.0, 7.0)));
+    // Edge-touching (closed intervals)
+    assertTrue(Predicates.boxIntersects(a, new Box2D(5.0, 0.0, 10.0, 5.0)));
+    // Corner-touching (closed intervals)
+    assertTrue(Predicates.boxIntersects(a, new Box2D(5.0, 5.0, 10.0, 10.0)));
+    // Disjoint on X
+    assertFalse(Predicates.boxIntersects(a, new Box2D(6.0, 0.0, 10.0, 5.0)));
+    // Disjoint on Y
+    assertFalse(Predicates.boxIntersects(a, new Box2D(0.0, 6.0, 5.0, 10.0)));
+  }
+
+  @Test
+  public void testBoxContains() {
+    Box2D outer = new Box2D(0.0, 0.0, 10.0, 10.0);
+
+    assertTrue(Predicates.boxContains(outer, new Box2D(2.0, 2.0, 5.0, 5.0)));
+    // Boundaries are inclusive
+    assertTrue(Predicates.boxContains(outer, new Box2D(0.0, 0.0, 10.0, 10.0)));
+    assertTrue(Predicates.boxContains(outer, new Box2D(0.0, 0.0, 1.0, 1.0)));
+    // Outside on X
+    assertFalse(Predicates.boxContains(outer, new Box2D(-1.0, 0.0, 5.0, 5.0)));
+    // Crosses boundary on X
+    assertFalse(Predicates.boxContains(outer, new Box2D(5.0, 0.0, 11.0, 5.0)));
+  }
 
   @Test
   public void testDWithinSuccess() {

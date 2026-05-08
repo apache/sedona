@@ -19,6 +19,7 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.Predicates
+import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
@@ -95,6 +96,22 @@ private[apache] case class ST_Contains(inputExpressions: Seq[Expression])
  *
  * @param inputExpressions
  */
+private[apache] case class ST_BoxIntersects(inputExpressions: Seq[Expression])
+    extends InferredExpression(Predicates.boxIntersects _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BoxContains(inputExpressions: Seq[Expression])
+    extends InferredExpression(Predicates.boxContains _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 private[apache] case class ST_Intersects(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction2(Predicates.intersects),

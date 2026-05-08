@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.common;
 
+import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.operation.relate.RelateOp;
@@ -25,6 +26,30 @@ import org.locationtech.jts.operation.relate.RelateOp;
 public class Predicates {
   public static boolean contains(Geometry leftGeometry, Geometry rightGeometry) {
     return leftGeometry.contains(rightGeometry);
+  }
+
+  /**
+   * Closed-interval bbox intersection: true if {@code a} and {@code b} share any point on either
+   * axis (matches PostGIS {@code &&} on box2d). Either argument being null returns null at the SQL
+   * layer; this Java entry point throws {@link NullPointerException} on null input.
+   */
+  public static boolean boxIntersects(Box2D a, Box2D b) {
+    return !(a.getXMax() < b.getXMin()
+        || a.getXMin() > b.getXMax()
+        || a.getYMax() < b.getYMin()
+        || a.getYMin() > b.getYMax());
+  }
+
+  /**
+   * True if {@code a} fully contains {@code b} (closed intervals; matches PostGIS {@code ~} on
+   * box2d). Either argument being null returns null at the SQL layer; this Java entry point throws
+   * {@link NullPointerException} on null input.
+   */
+  public static boolean boxContains(Box2D a, Box2D b) {
+    return a.getXMin() <= b.getXMin()
+        && a.getYMin() <= b.getYMin()
+        && a.getXMax() >= b.getXMax()
+        && a.getYMax() >= b.getYMax();
   }
 
   public static boolean intersects(Geometry leftGeometry, Geometry rightGeometry) {
