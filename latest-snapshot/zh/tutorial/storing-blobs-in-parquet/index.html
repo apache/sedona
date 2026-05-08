@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#storing-large-raster-geometries-in-parquet-files" class="md-skip">
+        <a href="#parquet" class="md-skip">
           跳转至
         </a>
       
@@ -2261,10 +2261,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#background" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Background
+        背景
       
     </span>
   </a>
@@ -2272,10 +2272,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reading-poorly-structured-parquet-files" class="md-nav__link">
+  <a href="#parquet_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reading poorly structured Parquet files
+        读取结构不佳的 Parquet 文件
       
     </span>
   </a>
@@ -2283,10 +2283,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#writing-better-structured-parquet-files-for-blobs" class="md-nav__link">
+  <a href="#parquet_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Writing better structured Parquet files for blobs
+        为大块二进制数据写出结构更佳的 Parquet 文件
       
     </span>
   </a>
@@ -5479,10 +5479,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#background" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Background
+        背景
       
     </span>
   </a>
@@ -5490,10 +5490,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reading-poorly-structured-parquet-files" class="md-nav__link">
+  <a href="#parquet_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reading poorly structured Parquet files
+        读取结构不佳的 Parquet 文件
       
     </span>
   </a>
@@ -5501,10 +5501,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#writing-better-structured-parquet-files-for-blobs" class="md-nav__link">
+  <a href="#parquet_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Writing better structured Parquet files for blobs
+        为大块二进制数据写出结构更佳的 Parquet 文件
       
     </span>
   </a>
@@ -5531,7 +5531,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/tutorial/storing-blobs-in-parquet.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/tutorial/storing-blobs-in-parquet.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5558,46 +5558,43 @@
  under the License.
  -->
 
-<h1 id="storing-large-raster-geometries-in-parquet-files">Storing large raster geometries in Parquet files<a class="headerlink" href="#storing-large-raster-geometries-in-parquet-files" title="Permanent link">&para;</a></h1>
+<h1 id="parquet">在 Parquet 文件中存储大型栅格几何对象<a class="headerlink" href="#parquet" title="Permanent link">&para;</a></h1>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Always convert the raster geometries to a well known format with the RS_AsXXX functions before saving them.
-It is possible to save the raw bytes of the raster geometries, but they will be stored in an internal Sedona format that is not guaranteed to be stable across versions.</p>
+<p>在保存栅格几何对象之前，务必先用 <code>RS_AsXXX</code> 函数将其转换为公认的标准格式。
+虽然可以保存栅格几何对象的原始字节，但这是 Sedona 的内部格式，不保证跨版本稳定。</p>
 </div>
-<p>The default settings in Spark are not well suited for storing large binaries like raster geometries.
-It is very much worth the time to tune and benchmark your settings.
-Writing large binaries with the default settings will result in poorly structured Parquet files that are very expensive to read.
-Some basic tuning can increase the read performance by several magnitudes.</p>
-<h2 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h2>
-<p>Parquet files are divided into one or several row groups.
-Each column in a row group is stored in a column chunk.
-Each column chunk is further divided into pages.
-A page is conceptually an indivisible unit in terms of compression and encoding.
-The default size for a page is 1 MB.
-Data is buffered until the page is full and then written to disk.
-The frequency of checks of the page size limit will be between <code>parquet.page.size.row.check.min</code> and <code>parquet.page.size.row.check.max</code> (default between 100 and 10000 rows).</p>
-<p>If you write 5 MB image files to Parquet with the default setting the first page size check will happen after 100 rows.
-You will end up with pages of 500 MB instead of 1 MB.
-Reading such a file will require a lot of memory and will be slow.</p>
-<h2 id="reading-poorly-structured-parquet-files">Reading poorly structured Parquet files<a class="headerlink" href="#reading-poorly-structured-parquet-files" title="Permanent link">&para;</a></h2>
-<p>Especially snappy compressed files are sensitive to oversized pages.
-More performant options are no compression or zstd compression.
-You can set <code>spark.buffer.size</code> to a value larger than the default of 64k to improve read performance.
-Increasing <code>spark.buffer.size</code> might add an io penalty for other columns in the Parquet file.</p>
-<h2 id="writing-better-structured-parquet-files-for-blobs">Writing better structured Parquet files for blobs<a class="headerlink" href="#writing-better-structured-parquet-files-for-blobs" title="Permanent link">&para;</a></h2>
-<p>Ideally you want to write Parquet files with a sane page size to get better and more consistent read performance across different clients.
-Since version 1.12.0 of parquet-hadoop, bundled with Spark 3.2, you can add Hadoop properties for controlling page size checks.
-Better values for writing blobs are:</p>
+<p>Spark 的默认设置并不适合存储栅格几何对象这类大型二进制数据。
+为此投入时间调优和基准测试是非常值得的。
+使用默认设置写入大型二进制数据会得到结构很差、读取代价非常高的 Parquet 文件。
+做一些基本调优可以让读取性能提升数个数量级。</p>
+<h2 id="_1">背景<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>Parquet 文件被划分为一个或多个 row group。
+每个 row group 中的每一列存储为一个 column chunk，
+每个 column chunk 又进一步划分为 page。
+page 在压缩与编码层面是不可分割的最小单位，默认大小为 1 MB。
+数据先在内存中缓冲，写满 page 后再落盘写入。
+对 page 大小的检查频率介于 <code>parquet.page.size.row.check.min</code> 与 <code>parquet.page.size.row.check.max</code> 之间（默认在 100 到 10000 行之间）。</p>
+<p>如果您按默认设置将 5 MB 的图像文件写入 Parquet，第一次 page 大小检查会在 100 行后才发生。
+这样得到的 page 会是 500 MB 而非 1 MB。
+读取这种文件会消耗大量内存，速度也会很慢。</p>
+<h2 id="parquet_1">读取结构不佳的 Parquet 文件<a class="headerlink" href="#parquet_1" title="Permanent link">&para;</a></h2>
+<p>snappy 压缩对超大 page 尤为敏感。
+更合适的选择是不压缩或使用 zstd 压缩。
+您可以将 <code>spark.buffer.size</code> 设置为大于默认 64k 的值以提升读取性能。
+不过调大 <code>spark.buffer.size</code> 可能会让 Parquet 文件中的其他列承担额外的 I/O 开销。</p>
+<h2 id="parquet_2">为大块二进制数据写出结构更佳的 Parquet 文件<a class="headerlink" href="#parquet_2" title="Permanent link">&para;</a></h2>
+<p>理想情况下，您希望以合理的 page 大小写出 Parquet 文件，从而在不同客户端读取时都能获得更好且更一致的性能。
+自 parquet-hadoop 1.12.0 起（Spark 3.2 内置该版本），可以通过 Hadoop 属性来控制 page 大小检查。
+更适合写大块数据的设置如下：</p>
 <div class="highlight"><pre><span></span><code>spark.sql.parquet.compression.codec=zstd
 spark.hadoop.parquet.page.size.row.check.min=2
 spark.hadoop.parquet.page.size.row.check.max=10
 </code></pre></div>
-<p>Zstd performs better than snappy in general.
-Even more so for large pages.
-The first page size check will happen after 2 rows.
-If the page is not full after 2 rows the next check will happen after another 2-10 rows, depending on the size of the two rows already written.</p>
-<p>Spark will set Hadoop properties from Spark properties prefixed with "spark.hadoop.".
-For a full list of Parquet Hadoop properties see: <a href="https://github.com/apache/parquet-mr/blob/master/parquet-hadoop/README.md">https://github.com/apache/parquet-mr/blob/master/parquet-hadoop/README.md</a></p>
+<p>整体上 zstd 比 snappy 表现更好，对于大型 page 更是如此。
+第一次 page 大小检查会在 2 行后进行；如果 2 行后 page 仍未写满，下一次检查会在再写 2 到 10 行后发生（具体取决于已写入两行的字节数）。</p>
+<p>Spark 会把以 “spark.hadoop.” 为前缀的 Spark 属性映射成 Hadoop 属性。
+完整的 Parquet Hadoop 属性列表请参考：<a href="https://github.com/apache/parquet-mr/blob/master/parquet-hadoop/README.md">https://github.com/apache/parquet-mr/blob/master/parquet-hadoop/README.md</a></p>
 
 
 
@@ -5618,7 +5615,7 @@ For a full list of Parquet Hadoop properties see: <a href="https://github.com/ap
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47 UTC">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 06:38:43 UTC">2026年5月8日 06:38:43</span>
   </span>
 
     

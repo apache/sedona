@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#apache-sedona-clustering-algorithms-with-apache-spark" class="md-skip">
+        <a href="#apache-spark-apache-sedona" class="md-skip">
           跳转至
         </a>
       
@@ -1949,10 +1949,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#clustering-with-dbscan-and-spark" class="md-nav__link">
+  <a href="#spark-dbscan" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Clustering with DBSCAN and Spark
+        在 Spark 上使用 DBSCAN 进行聚类
       
     </span>
   </a>
@@ -5457,10 +5457,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#clustering-with-dbscan-and-spark" class="md-nav__link">
+  <a href="#spark-dbscan" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Clustering with DBSCAN and Spark
+        在 Spark 上使用 DBSCAN 进行聚类
       
     </span>
   </a>
@@ -5487,7 +5487,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/tutorial/concepts/clustering-algorithms.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/tutorial/concepts/clustering-algorithms.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5514,27 +5514,27 @@
  under the License.
  -->
 
-<h1 id="apache-sedona-clustering-algorithms-with-apache-spark">Apache Sedona Clustering Algorithms with Apache Spark<a class="headerlink" href="#apache-sedona-clustering-algorithms-with-apache-spark" title="Permanent link">&para;</a></h1>
-<p>Clustering algorithms group similar data points into “clusters.”  Apache Sedona can run clustering algorithms on large geometric datasets.</p>
-<p>Note that the term cluster is overloaded here:</p>
+<h1 id="apache-spark-apache-sedona">在 Apache Spark 上使用 Apache Sedona 进行聚类<a class="headerlink" href="#apache-spark-apache-sedona" title="Permanent link">&para;</a></h1>
+<p>聚类算法将相似的数据点划分到 “簇（cluster）” 中。Apache Sedona 可以在大规模几何数据集上运行聚类算法。</p>
+<p>注意 “cluster” 一词在此处有两种含义：</p>
 <ul>
-<li>A computation cluster is a network of computers that work together to execute the algorithm</li>
-<li>A clustering algorithm divides data points into different “clusters”</li>
+<li>计算集群（computation cluster）是一组协同执行算法的计算机网络</li>
+<li>聚类算法把数据点划分到不同的 “簇（cluster）” 中</li>
 </ul>
-<p>This page uses “cluster” to refer to the output of a clustering algorithm.</p>
-<h2 id="clustering-with-dbscan-and-spark">Clustering with DBSCAN and Spark<a class="headerlink" href="#clustering-with-dbscan-and-spark" title="Permanent link">&para;</a></h2>
-<p>This page explains how to use Apache Sedona to perform density-based spatial clustering of applications with noise (“DBSCAN”).</p>
-<p>This algorithm groups geometric objects in high-density areas as clusters and marks points in low-density areas as outliers.</p>
-<p>Let’s look at a scatter plot of points to visualize a data set that can be clustered.</p>
-<p><img alt="scatter plot of points" src="../../../../image/tutorial/concepts/dbscan-scatterplot-points.png" /></p>
-<p>Here’s how the DBSCAN algorithm clusters the points:</p>
-<p><img alt="scatter point with cluster groupings" src="../../../../image/tutorial/concepts/dbscan-clustering.png" /></p>
+<p>本页中的 “簇” 指聚类算法的输出结果。</p>
+<h2 id="spark-dbscan">在 Spark 上使用 DBSCAN 进行聚类<a class="headerlink" href="#spark-dbscan" title="Permanent link">&para;</a></h2>
+<p>本页介绍如何使用 Apache Sedona 执行基于密度的带噪声空间聚类（DBSCAN，density-based spatial clustering of applications with noise）。</p>
+<p>DBSCAN 将密度较高区域中的几何对象聚为簇，同时把密度较低区域中的点标记为噪声/离群点。</p>
+<p>下面通过散点图来观察一份可被聚类的数据：</p>
+<p><img alt="点的散点图" src="../../../../image/tutorial/concepts/dbscan-scatterplot-points.png" /></p>
+<p>DBSCAN 的聚类结果如下：</p>
+<p><img alt="带簇分组的散点图" src="../../../../image/tutorial/concepts/dbscan-clustering.png" /></p>
 <ul>
-<li>5 points are in cluster 0</li>
-<li>4 points are in cluster 1</li>
-<li>4 points are outliers</li>
+<li>簇 0 包含 5 个点</li>
+<li>簇 1 包含 4 个点</li>
+<li>4 个点为离群点</li>
 </ul>
-<p>Let’s create a Spark DataFrame with this data and then run the clustering with Sedona.  Here’s how to construct the DataFrame:</p>
+<p>下面使用这份数据创建 Spark DataFrame，并使用 Sedona 运行聚类。构造 DataFrame 的代码如下：</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
         <span class="p">[</span>
@@ -5556,7 +5556,7 @@
     <span class="p">)</span>
 <span class="p">)</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;point&quot;</span><span class="p">,</span> <span class="n">ST_Point</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)))</span>
 </code></pre></div>
-<p>Here are the contents of the DataFrame:</p>
+<p>DataFrame 内容如下：</p>
 <div class="highlight"><pre><span></span><code>+---+----+---+----------------+
 | id|   x|  y|           point|
 +---+----+---+----------------+
@@ -5575,12 +5575,12 @@
 | 13| 4.0|3.0|     POINT (4 3)|
 +---+----+---+----------------+
 </code></pre></div>
-<p>Here’s how to run the DBSCAN algorithm:</p>
+<p>运行 DBSCAN 算法的方法如下：</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">dbscan</span>
 
 <span class="n">dbscan</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
-<p>Here are the results of the computation:</p>
+<p>计算结果如下：</p>
 <div class="highlight"><pre><span></span><code>+---+----+---+----------------+------+-------+
 | id|   x|  y|           point|isCore|cluster|
 +---+----+---+----------------+------+-------+
@@ -5599,12 +5599,12 @@
 | 13| 4.0|3.0|     POINT (4 3)| false|     -1|
 +---+----+---+----------------+------+-------+
 </code></pre></div>
-<p>You can see the <code>cluster</code> column that indicates the grouping of the geometric object.</p>
-<p>To run this operation, you must set the Spark checkpoint directory. The checkpoint directory is a temporary cache in durable storage where the query's intermediate results are written.</p>
-<p>Here is how you can set the checkpoint directory:</p>
+<p>可以看到 <code>cluster</code> 列表示每个几何对象所属的簇。</p>
+<p>要执行该操作，必须先设置 Spark 的检查点目录。检查点目录是查询中间结果写入的持久化临时缓存位置。</p>
+<p>可按如下方式设置检查点目录：</p>
 <div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">setCheckpointDir</span><span class="p">(</span><span class="n">myPath</span><span class="p">)</span>
 </code></pre></div>
-<p><code>myPath</code> needs to be accessible to all executors. A local path is a good option on a local machine. When available, the HDFS is likely the best choice. Some runtime environments may allow or require block storage paths (e.g., Amazon S3, Google Cloud Storage). Depending on your environment, some runtime environments may already set the Spark checkpoint directory, so this step may not be necessary.</p>
+<p><code>myPath</code> 必须能被所有 executor 访问。本机运行时使用本地路径即可；如有 HDFS，通常是更好的选择。某些运行时环境可能允许或要求使用块存储路径（如 Amazon S3、Google Cloud Storage）。部分环境可能已经预先设置了 Spark 检查点目录，这一步即可省略。</p>
 
 
 
@@ -5625,7 +5625,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="June 11, 2025 09:52:40 UTC">June 11, 2025 09:52:40</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 06:38:43 UTC">2026年5月8日 06:38:43</span>
   </span>
 
     

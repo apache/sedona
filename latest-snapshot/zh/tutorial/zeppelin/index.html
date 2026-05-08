@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#small-scale-without-sedonaviz" class="md-skip">
+        <a href="#sedonaviz" class="md-skip">
           跳转至
         </a>
       
@@ -2087,10 +2087,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#small-scale-without-sedonaviz" class="md-nav__link">
+  <a href="#sedonaviz" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Small-scale without SedonaViz
+        小规模数据：不使用 SedonaViz
       
     </span>
   </a>
@@ -2098,10 +2098,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#large-scale-with-sedonaviz" class="md-nav__link">
+  <a href="#sedonaviz_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Large-scale with SedonaViz
+        大规模数据：使用 SedonaViz
       
     </span>
   </a>
@@ -2109,10 +2109,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#zeppelin-spark-notebook-demo" class="md-nav__link">
+  <a href="#zeppelin-spark-notebook" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Zeppelin Spark notebook demo
+        Zeppelin Spark notebook 演示
       
     </span>
   </a>
@@ -5473,10 +5473,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#small-scale-without-sedonaviz" class="md-nav__link">
+  <a href="#sedonaviz" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Small-scale without SedonaViz
+        小规模数据：不使用 SedonaViz
       
     </span>
   </a>
@@ -5484,10 +5484,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#large-scale-with-sedonaviz" class="md-nav__link">
+  <a href="#sedonaviz_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Large-scale with SedonaViz
+        大规模数据：使用 SedonaViz
       
     </span>
   </a>
@@ -5495,10 +5495,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#zeppelin-spark-notebook-demo" class="md-nav__link">
+  <a href="#zeppelin-spark-notebook" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Zeppelin Spark notebook demo
+        Zeppelin Spark notebook 演示
       
     </span>
   </a>
@@ -5525,7 +5525,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/tutorial/zeppelin.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/tutorial/zeppelin.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5554,14 +5554,14 @@
  under the License.
  -->
 
-<p>Sedona provides a Helium visualization plugin tailored for <a href="https://zeppelin.apache.org/">Apache Zeppelin</a>. This finally bridges the gap between Sedona and Zeppelin. Please read <a href="../../setup/zeppelin/">Install Sedona-Zeppelin</a> to learn how to install this plugin in Zeppelin.</p>
-<p>Sedona-Zeppelin equips two approaches to visualize spatial data in Zeppelin. The first approach uses Zeppelin to plot all spatial objects on the map. The second one leverages SedonaViz to generate map images and overlay them on maps.</p>
-<h2 id="small-scale-without-sedonaviz">Small-scale without SedonaViz<a class="headerlink" href="#small-scale-without-sedonaviz" title="Permanent link">&para;</a></h2>
+<p>Sedona 提供了一个为 <a href="https://zeppelin.apache.org/">Apache Zeppelin</a> 量身定制的 Helium 可视化插件，最终弥合了 Sedona 与 Zeppelin 之间的鸿沟。安装方法请参阅 <a href="../../setup/zeppelin/">安装 Sedona-Zeppelin</a>。</p>
+<p>Sedona-Zeppelin 提供了两种在 Zeppelin 中可视化空间数据的方式。第一种方式使用 Zeppelin 在地图上绘制所有空间对象；第二种方式利用 SedonaViz 生成地图图像并叠加到地图上。</p>
+<h2 id="sedonaviz">小规模数据：不使用 SedonaViz<a class="headerlink" href="#sedonaviz" title="Permanent link">&para;</a></h2>
 <div class="admonition danger">
 <p class="admonition-title">Danger</p>
-<p>Zeppelin is just a front-end visualization framework. This approach is not scalable and will fail at large-scale geospatial data. Please scroll down to read SedonaViz solution.</p>
+<p>Zeppelin 只是一个前端可视化框架，本方式不具备扩展性，对于大规模地理空间数据会失败。请向下阅读 SedonaViz 方案。</p>
 </div>
-<p>You can use Apache Zeppelin to plot a small number of spatial objects, such as 1000 points. Assume you already have a Spatial DataFrame, you need to convert the geometry column to WKT string column use the following command in your Zeppelin Spark notebook Scala paragraph:</p>
+<p>可以使用 Apache Zeppelin 绘制少量空间对象，例如 1000 个点。假设您已经有一个空间 DataFrame，需要在 Zeppelin 的 Spark notebook 中通过 Scala paragraph 将几何列转换为 WKT 字符串列：</p>
 <div class="highlight"><pre><span></span><code><span class="n">spark</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span>
 <span class="w">  </span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">    |CREATE OR REPLACE TEMP VIEW wktpoint AS</span>
@@ -5569,17 +5569,17 @@
 <span class="s">    |FROM pointtable</span>
 <span class="s">  &quot;&quot;&quot;</span><span class="p">.</span><span class="n">stripMargin</span><span class="p">)</span>
 </code></pre></div>
-<p>Then create an SQL paragraph to fetch the data</p>
+<p>然后再创建一个 SQL paragraph 拉取数据：</p>
 <div class="highlight"><pre><span></span><code><span class="o">%</span><span class="k">sql</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">wktpoint</span>
 </code></pre></div>
-<p>Select the geometry column to visualize:</p>
-<p><img alt="Create an SQL paragraph to fetch the data and then select the geometry column" src="../../../image/sql-zeppelin.gif" /></p>
-<h2 id="large-scale-with-sedonaviz">Large-scale with SedonaViz<a class="headerlink" href="#large-scale-with-sedonaviz" title="Permanent link">&para;</a></h2>
-<p>SedonaViz is a distributed visualization system that allows you to visualize big spatial data at scale. Please read <a href="../viz/">How to use SedonaViz</a>.</p>
-<p>You can use Sedona-Zeppelin to ask Zeppelin to overlay SedonaViz images on a map background. This way, you can easily visualize 1 billion spatial objects or more (depends on your cluster size).</p>
-<p>First, encode images of SedonaViz DataFrame in Zeppelin Spark notebook Scala paragraph,</p>
+<p>选择要可视化的几何列：</p>
+<p><img alt="创建 SQL paragraph 并选择几何列" src="../../../image/sql-zeppelin.gif" /></p>
+<h2 id="sedonaviz_1">大规模数据：使用 SedonaViz<a class="headerlink" href="#sedonaviz_1" title="Permanent link">&para;</a></h2>
+<p>SedonaViz 是一个分布式可视化系统，能够大规模地可视化空间数据。请阅读 <a href="../viz/">如何使用 SedonaViz</a>。</p>
+<p>可以借助 Sedona-Zeppelin 让 Zeppelin 把 SedonaViz 的图像叠加到地图上，从而轻松可视化 10 亿乃至更多的空间对象（取决于集群规模）。</p>
+<p>首先，在 Zeppelin Spark notebook 的 Scala paragraph 中对 SedonaViz DataFrame 中的图像进行编码：</p>
 <div class="highlight"><pre><span></span><code>spark.sql(
   &quot;&quot;&quot;
     |CREATE OR REPLACE TEMP VIEW images AS
@@ -5587,16 +5587,16 @@
     |FROM images
   &quot;&quot;&quot;.stripMargin)
 </code></pre></div>
-<p>Then create an SQL paragraph to fetch the data</p>
+<p>然后创建 SQL paragraph 拉取数据：</p>
 <div class="highlight"><pre><span></span><code><span class="o">%</span><span class="k">sql</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;I am the map center!&#39;</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">images</span>
 </code></pre></div>
-<p>Select the image and its geospatial boundary:</p>
-<p><img alt="Selecting the image and its boundary" src="../../../image/viz-zeppelin.gif" /></p>
-<h2 id="zeppelin-spark-notebook-demo">Zeppelin Spark notebook demo<a class="headerlink" href="#zeppelin-spark-notebook-demo" title="Permanent link">&para;</a></h2>
-<p>We provide a full Zeppelin Spark notebook which demonstrates all functions. Please download <a href="../../../image/geospark-zeppelin-demo.json">Sedona-Zeppelin notebook template</a> and <a href="../../../image/arealm.csv">test data - arealm.csv</a>.</p>
-<p>You need to use Zeppelin to import this notebook JSON file and modify the input data path in the notebook.</p>
+<p>选择图像与对应的地理边界：</p>
+<p><img alt="选择图像与边界" src="../../../image/viz-zeppelin.gif" /></p>
+<h2 id="zeppelin-spark-notebook">Zeppelin Spark notebook 演示<a class="headerlink" href="#zeppelin-spark-notebook" title="Permanent link">&para;</a></h2>
+<p>我们提供了一个完整的 Zeppelin Spark notebook，演示了所有功能。请下载 <a href="../../../image/geospark-zeppelin-demo.json">Sedona-Zeppelin notebook 模板</a> 与 <a href="../../../image/arealm.csv">测试数据 - arealm.csv</a>。</p>
+<p>需要在 Zeppelin 中导入该 notebook JSON 文件，并修改 notebook 中的输入数据路径。</p>
 
 
 
@@ -5617,7 +5617,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47 UTC">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 06:38:43 UTC">2026年5月8日 06:38:43</span>
   </span>
 
     

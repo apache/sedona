@@ -5411,7 +5411,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/tutorial/flink/pyflink-sql.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/tutorial/flink/pyflink-sql.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5440,8 +5440,8 @@
  under the License.
  -->
 
-<p>To set up the PyFlink with Apache Sedona, please follow the guide. <a href="../../../setup/flink/install-python/">PyFlink</a>
-When you finish it, you can run the following code to test if everything works.</p>
+<p>要在 Apache Sedona 中配置 PyFlink，请先按 <a href="../../../setup/flink/install-python/">PyFlink</a> 指南完成安装。
+完成后，可以运行下面的代码以验证环境是否正常工作。</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.flink</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyflink.datastream</span><span class="w"> </span><span class="kn">import</span> <span class="n">StreamExecutionEnvironment</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyflink.table</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnvironmentSettings</span><span class="p">,</span> <span class="n">StreamTableEnvironment</span>
@@ -5452,9 +5452,8 @@ When you finish it, you can run the following code to test if everything works.<
 
 <span class="n">table_env</span><span class="o">.</span><span class="n">sql_query</span><span class="p">(</span><span class="s2">&quot;SELECT ST_Point(1.0, 2.0)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
 </code></pre></div>
-<p>PyFlink does not expose the possibility of transforming Scala's own user-defined types (UDT) to Python UDT.
-So, when you want to collect the result in Python, you need to use functions
-like <code>ST_AsText</code> or <code>ST_ASBinary</code> to convert the result to a string or binary.</p>
+<p>PyFlink 不支持把 Scala 自定义类型（UDT）转换为 Python UDT。
+因此，如果想在 Python 中收集结果，需要使用 <code>ST_AsText</code> 或 <code>ST_ASBinary</code> 等函数把结果转换为字符串或二进制。</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.wkb</span><span class="w"> </span><span class="kn">import</span> <span class="n">loads</span>
 
 <span class="n">table_env</span><span class="o">.</span><span class="n">sql_query</span><span class="p">(</span><span class="s2">&quot;SELECT ST_ASBinary(ST_Point(1.0, 2.0))&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
@@ -5463,7 +5462,7 @@ like <code>ST_AsText</code> or <code>ST_ASBinary</code> to convert the result to
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>[&lt;POINT (1 2)&gt;]
 </code></pre></div>
-<p>Similar with User Defined Scalar functions</p>
+<p>用户自定义标量函数（UDF）也是类似的处理方式：</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyflink.table.udf</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScalarFunction</span><span class="p">,</span> <span class="n">udf</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.wkb</span><span class="w"> </span><span class="kn">import</span> <span class="n">loads</span>
 
@@ -5482,7 +5481,7 @@ like <code>ST_AsText</code> or <code>ST_ASBinary</code> to convert the result to
     <span class="s2">&quot;SELECT ST_BufferPython(ST_ASBinary(ST_Point(1.0, 2.0))) AS buffer&quot;</span>
 <span class="p">)</span>
 </code></pre></div>
-<p>For more SQL examples please follow the FlinkSQL section <a href="../sql/">FlinkSQL</a>.</p>
+<p>更多 SQL 示例请参阅 FlinkSQL 章节：<a href="../sql/">FlinkSQL</a>。</p>
 
 
 
@@ -5503,7 +5502,7 @@ like <code>ST_AsText</code> or <code>ST_ASBinary</code> to convert the result to
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 31, 2025 18:13:18 UTC">July 31, 2025 18:13:18</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 06:38:43 UTC">2026年5月8日 06:38:43</span>
   </span>
 
     
