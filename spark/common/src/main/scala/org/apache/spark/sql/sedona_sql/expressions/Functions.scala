@@ -260,9 +260,12 @@ private[apache] case class ST_Box2D(inputExpressions: Seq[Expression])
 
 private[apache] case class ST_Expand(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction4(Functions.expand),
-      inferrableFunction3(Functions.expand),
-      inferrableFunction2(Functions.expand)) {
+      inferrableFunction4((g: Geometry, dx: Double, dy: Double, dz: Double) =>
+        Functions.expand(g, dx, dy, dz)),
+      inferrableFunction3((g: Geometry, dx: Double, dy: Double) => Functions.expand(g, dx, dy)),
+      inferrableFunction2((g: Geometry, delta: Double) => Functions.expand(g, delta)),
+      inferrableFunction3((b: Box2D, dx: Double, dy: Double) => Functions.expand(b, dx, dy)),
+      inferrableFunction2((b: Box2D, delta: Double) => Functions.expand(b, delta))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

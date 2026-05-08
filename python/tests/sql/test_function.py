@@ -243,6 +243,24 @@ class TestPredicateJoin(TestBase):
         expected = "POLYGON Z((44 45 4, 44 85 4, 86 85 0, 86 45 0, 44 45 4))"
         assert expected == actual
 
+    def test_st_expand_box_2d(self):
+        df = self.spark.sql("""
+            SELECT
+              ST_Expand(ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')), 1.0) AS uniform,
+              ST_Expand(ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')), 2.0, 0.5) AS per_axis
+            """)
+        row = df.first()
+        uniform = row[0]
+        assert uniform.xmin == 0.0
+        assert uniform.ymin == 1.0
+        assert uniform.xmax == 5.0
+        assert uniform.ymax == 6.0
+        per_axis = row[1]
+        assert per_axis.xmin == -1.0
+        assert per_axis.ymin == 1.5
+        assert per_axis.xmax == 6.0
+        assert per_axis.ymax == 5.5
+
     def test_st_centroid(self):
         polygon_wkt_df = (
             self.spark.read.format("csv")

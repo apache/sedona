@@ -235,6 +235,28 @@ public class Functions {
     return expand(geometry, deltaX, deltaY, 0);
   }
 
+  /** Expand a {@link Box2D} uniformly on both axes. NULL on null input. */
+  public static Box2D expand(Box2D box, double uniformDelta) {
+    return expand(box, uniformDelta, uniformDelta);
+  }
+
+  /**
+   * Expand a {@link Box2D} by the given per-axis deltas. Negative deltas shrink the bbox; if a
+   * negative delta produces {@code xmin > xmax} or {@code ymin > ymax}, the resulting Box2D is
+   * returned as-is (callers can detect the degenerate result via the accessor functions). NULL on
+   * null input.
+   */
+  public static Box2D expand(Box2D box, double deltaX, double deltaY) {
+    if (box == null) {
+      return null;
+    }
+    return new Box2D(
+        box.getXMin() - deltaX,
+        box.getYMin() - deltaY,
+        box.getXMax() + deltaX,
+        box.getYMax() + deltaY);
+  }
+
   public static Geometry expand(Geometry geometry, double deltaX, double deltaY, double deltaZ) {
     if (geometry == null || geometry.isEmpty()) {
       return geometry;
