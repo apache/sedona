@@ -29,11 +29,20 @@ public class Predicates {
   }
 
   /**
-   * Closed-interval bbox intersection: true if {@code a} and {@code b} share any point on either
-   * axis (matches PostGIS {@code &&} on box2d). Either argument being null returns null at the SQL
-   * layer; this Java entry point throws {@link NullPointerException} on null input.
+   * Closed-interval bbox intersection: true if {@code a} and {@code b} overlap on <em>both</em> the
+   * X and Y axes (matches PostGIS {@code &&} on box2d). Edge- and corner-touching boxes count as
+   * intersecting.
+   *
+   * <p>Both arguments must have ordered bounds ({@code xmin <= xmax} and {@code ymin <= ymax}).
+   * Sedona's Box2D type allows inverted bounds ({@code xmin > xmax}) — that ordering is reserved
+   * for a future antimeridian-wraparound semantics on geography bboxes (cf. sedona-db's {@code
+   * WraparoundInterval}). Until those semantics ship, planar predicates throw on inverted input
+   * rather than silently returning misleading results. SQL callers see NULL in/out null
+   * propagation; this Java entry point throws on null.
    */
   public static boolean boxIntersects(Box2D a, Box2D b) {
+    requireOrderedPlanarBox(a, "a");
+    requireOrderedPlanarBox(b, "b");
     return !(a.getXMax() < b.getXMin()
         || a.getXMin() > b.getXMax()
         || a.getYMax() < b.getYMin()
@@ -41,15 +50,31 @@ public class Predicates {
   }
 
   /**
-   * True if {@code a} fully contains {@code b} (closed intervals; matches PostGIS {@code ~} on
-   * box2d). Either argument being null returns null at the SQL layer; this Java entry point throws
-   * {@link NullPointerException} on null input.
+   * True if {@code a} fully contains {@code b} on <em>both</em> the X and Y axes (closed intervals;
+   * matches PostGIS {@code ~} on box2d). Equal boxes contain each other.
+   *
+   * <p>Same ordered-bound contract as {@link #boxIntersects(Box2D, Box2D)} — inverted bounds throw
+   * because planar containment with inverted intervals has no defined meaning until antimeridian
+   * wraparound semantics ship.
    */
   public static boolean boxContains(Box2D a, Box2D b) {
+    requireOrderedPlanarBox(a, "a");
+    requireOrderedPlanarBox(b, "b");
     return a.getXMin() <= b.getXMin()
         && a.getYMin() <= b.getYMin()
         && a.getXMax() >= b.getXMax()
         && a.getYMax() >= b.getYMax();
+  }
+
+  private static void requireOrderedPlanarBox(Box2D box, String argName) {
+    if (box.getXMin() > box.getXMax() || box.getYMin() > box.getYMax()) {
+      throw new IllegalArgumentException(
+          "Box2D argument '"
+              + argName
+              + "' has inverted bounds (xmin > xmax or ymin > ymax). Planar Box2D predicates "
+              + "require ordered intervals; inverted bounds are reserved for future antimeridian "
+              + "wraparound semantics.");
+    }
   }
 
   public static boolean intersects(Geometry leftGeometry, Geometry rightGeometry) {

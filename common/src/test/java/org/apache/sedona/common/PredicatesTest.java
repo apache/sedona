@@ -66,6 +66,23 @@ public class PredicatesTest extends TestBase {
   }
 
   @Test
+  public void testBoxPredicatesRejectInvertedBounds() {
+    // Box2D allows xmin > xmax (reserved for future antimeridian wraparound); planar predicates
+    // refuse to evaluate them rather than silently returning misleading results.
+    Box2D normal = new Box2D(0.0, 0.0, 5.0, 5.0);
+    Box2D wrapX = new Box2D(170.0, 10.0, -170.0, 20.0); // longitude crosses antimeridian
+    Box2D wrapY = new Box2D(0.0, 5.0, 5.0, 0.0); // ymin > ymax
+
+    IllegalArgumentException ex1 =
+        assertThrows(IllegalArgumentException.class, () -> Predicates.boxIntersects(wrapX, normal));
+    assertTrue(ex1.getMessage().contains("inverted bounds"));
+
+    IllegalArgumentException ex2 =
+        assertThrows(IllegalArgumentException.class, () -> Predicates.boxContains(normal, wrapY));
+    assertTrue(ex2.getMessage().contains("inverted bounds"));
+  }
+
+  @Test
   public void testDWithinSuccess() {
     Geometry point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
     Geometry point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(2, 2));
