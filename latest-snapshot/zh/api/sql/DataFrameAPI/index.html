@@ -5412,7 +5412,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/api/sql/DataFrameAPI.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/api/sql/DataFrameAPI.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5441,34 +5441,34 @@
  under the License.
  -->
 
-<p>Sedona SQL functions can be used in a DataFrame style API similar to Spark functions.</p>
-<p>The following objects contain the exposed functions: <code>org.apache.spark.sql.sedona_sql.expressions.st_functions</code>, <code>org.apache.spark.sql.sedona_sql.expressions.st_constructors</code>, <code>org.apache.spark.sql.sedona_sql.expressions.st_predicates</code>, and <code>org.apache.spark.sql.sedona_sql.expressions.st_aggregates</code>.</p>
-<p>Every function can take all <code>Column</code> arguments. Additionally, overloaded forms can commonly take a mix of <code>String</code> and other Scala types (such as <code>Double</code>) as arguments.</p>
-<p>In general the following rules apply (although check the documentation of specific functions for any exceptions):</p>
+<p>Sedona SQL 函数可以通过类似于 Spark 函数的 DataFrame 风格 API 使用。</p>
+<p>下列对象包含了对外暴露的函数：<code>org.apache.spark.sql.sedona_sql.expressions.st_functions</code>、<code>org.apache.spark.sql.sedona_sql.expressions.st_constructors</code>、<code>org.apache.spark.sql.sedona_sql.expressions.st_predicates</code> 以及 <code>org.apache.spark.sql.sedona_sql.expressions.st_aggregates</code>。</p>
+<p>每个函数都可以接收全为 <code>Column</code> 类型的参数。此外，重载形式通常还可以接收 <code>String</code> 和其他 Scala 类型（例如 <code>Double</code>）的混合参数。</p>
+<p>一般而言适用以下规则（不过具体函数请参考各自的文档以了解可能的例外）：</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Scala</label><label for="__tabbed_1_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <ol>
-<li>Every function returns a <code>Column</code> so that it can be used interchangeably with Spark functions as well as <code>DataFrame</code> methods such as <code>DataFrame.select</code> or <code>DataFrame.join</code>.</li>
-<li>Every function has a form that takes all <code>Column</code> arguments.
-These are the most versatile of the forms.</li>
-<li>Most functions have a form that takes a mix of <code>String</code> arguments with other Scala types.</li>
+<li>每个函数都返回一个 <code>Column</code>，因此可以与 Spark 函数以及 <code>DataFrame</code> 的方法（如 <code>DataFrame.select</code> 或 <code>DataFrame.join</code>）互换使用。</li>
+<li>每个函数都有一种全部以 <code>Column</code> 作为参数的形式。
+这种形式是最通用的。</li>
+<li>大多数函数都有一种以 <code>String</code> 参数与其他 Scala 类型混合使用的形式。</li>
 </ol>
 </div>
 <div class="tabbed-block">
 <ol>
-<li><code>Column</code> type arguments are passed straight through and are always accepted.</li>
-<li><code>str</code> type arguments are always assumed to be names of columns and are wrapped in a <code>Column</code> to support that.
-If an actual string literal needs to be passed then it will need to be wrapped in a <code>Column</code> using <code>pyspark.sql.functions.lit</code>.</li>
-<li>Any other types of arguments are checked on a per function basis. Generally, arguments that could reasonably support a python native type are accepted and passed through.   4. Shapely <code>Geometry</code> objects are not currently accepted in any of the functions.</li>
+<li><code>Column</code> 类型的参数会被原样透传，并始终被接受。</li>
+<li><code>str</code> 类型的参数总是被视为列名，并会自动包装到 <code>Column</code> 中。
+如果需要传递一个实际的字符串字面量，则需要使用 <code>pyspark.sql.functions.lit</code> 把它包装成 <code>Column</code>。</li>
+<li>其他类型的参数会按函数逐一检查。一般来说，能够合理对应 python 原生类型的参数会被接受并透传。   4. 目前所有函数都不接受 Shapely 的 <code>Geometry</code> 对象。</li>
 </ol>
 </div>
 </div>
 </div>
-<p>The exact mixture of argument types allowed is function specific.
-However, in these instances, all <code>String</code> arguments are assumed to be the names of columns and will be wrapped in a <code>Column</code> automatically.
-Non-<code>String</code> arguments are assumed to be literals that are passed to the sedona function. If you need to pass a <code>String</code> literal then you should use the all <code>Column</code> form of the sedona function and wrap the <code>String</code> literal in a <code>Column</code> with the <code>lit</code> Spark function.</p>
-<p>A short example of using this API (uses the <code>array_min</code> and <code>array_max</code> Spark functions):</p>
+<p>允许的参数类型组合视具体函数而定。
+不过在这些情况下，所有 <code>String</code> 参数都会被视为列名，并自动包装成 <code>Column</code>。
+非 <code>String</code> 参数会被视为字面量并直接传给对应的 sedona 函数。如果你需要传递 <code>String</code> 类型的字面量，应使用 sedona 函数的全 <code>Column</code> 形式，并通过 Spark 的 <code>lit</code> 函数将该 <code>String</code> 字面量包装成 <code>Column</code>。</p>
+<p>下面是使用该 API 的一个简短示例（用到了 Spark 的 <code>array_min</code> 和 <code>array_max</code> 函数）：</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Scala</label><label for="__tabbed_2_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -5493,20 +5493,20 @@ Non-<code>String</code> arguments are assumed to be literals that are passed to 
 </div>
 </div>
 </div>
-<p>The above code will generate the following dataframe:</p>
+<p>上面的代码将生成如下 dataframe：</p>
 <div class="highlight"><pre><span></span><code>+-----------+
 |point      |
 +-----------+
 |POINT (0 2)|
 +-----------+
 </code></pre></div>
-<p>Some functions will take native python values and infer them as literals.
-For example:</p>
+<p>某些函数会接受 python 的原生值并将其推断为字面量。
+例如：</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">ST_Point</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;point&quot;</span><span class="p">))</span>
 </code></pre></div>
-<p>This will generate a dataframe with a constant point in a column:</p>
+<p>这会生成一个包含常量点的列：</p>
 <div class="highlight"><pre><span></span><code>+-----------+
 |point      |
 +-----------+
@@ -5533,7 +5533,7 @@ For example:</p>
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47 UTC">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月11日 04:13:31 UTC">2026年5月11日 04:13:31</span>
   </span>
 
     

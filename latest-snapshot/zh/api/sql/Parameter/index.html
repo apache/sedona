@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#usage" class="md-skip">
+        <a href="#_1" class="md-skip">
           跳转至
         </a>
       
@@ -2966,10 +2966,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Usage
+        使用方式
       
     </span>
   </a>
@@ -2977,10 +2977,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#general-parameters" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        General Parameters
+        通用参数
       
     </span>
   </a>
@@ -2988,10 +2988,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#join-parameters" class="md-nav__link">
+  <a href="#join" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Join Parameters
+        连接（Join）相关参数
       
     </span>
   </a>
@@ -2999,10 +2999,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#crs-transformation-parameters" class="md-nav__link">
+  <a href="#crs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        CRS Transformation Parameters
+        CRS 转换参数
       
     </span>
   </a>
@@ -5483,10 +5483,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Usage
+        使用方式
       
     </span>
   </a>
@@ -5494,10 +5494,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#general-parameters" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        General Parameters
+        通用参数
       
     </span>
   </a>
@@ -5505,10 +5505,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#join-parameters" class="md-nav__link">
+  <a href="#join" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Join Parameters
+        连接（Join）相关参数
       
     </span>
   </a>
@@ -5516,10 +5516,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#crs-transformation-parameters" class="md-nav__link">
+  <a href="#crs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        CRS Transformation Parameters
+        CRS 转换参数
       
     </span>
   </a>
@@ -5546,7 +5546,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/api/sql/Parameter.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/api/sql/Parameter.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5575,10 +5575,10 @@
  under the License.
  -->
 
-<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
-<p>SedonaSQL supports many parameters. To change their values,</p>
+<h2 id="_1">使用方式<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>SedonaSQL 支持多种参数。修改它们的取值有以下几种方式：</p>
 <ol>
-<li>Set it through SparkConf:</li>
+<li>通过 SparkConf 设置：</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">().</span>
 <span class="w">      </span><span class="n">config</span><span class="p">(</span><span class="s">&quot;spark.serializer&quot;</span><span class="p">,</span><span class="s">&quot;org.apache.spark.serializer.KryoSerializer&quot;</span><span class="p">).</span>
@@ -5587,145 +5587,145 @@
 <span class="w">      </span><span class="n">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">).</span><span class="n">appName</span><span class="p">(</span><span class="s">&quot;mySedonaSQLdemo&quot;</span><span class="p">).</span><span class="n">getOrCreate</span><span class="p">()</span>
 </code></pre></div>
 <ol>
-<li>Check your current SedonaSQL configuration:</li>
+<li>查看当前的 SedonaSQL 配置：</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">sedonaConf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="nc">SedonaConf</span><span class="p">(</span><span class="n">sparkSession</span><span class="p">.</span><span class="n">conf</span><span class="p">)</span>
 <span class="n">println</span><span class="p">(</span><span class="n">sedonaConf</span><span class="p">)</span>
 </code></pre></div>
 <ol>
-<li>Sedona parameters can be changed at runtime:</li>
+<li>Sedona 参数可以在运行时动态修改：</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;sedona.global.index&quot;</span><span class="p">,</span><span class="s">&quot;false&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>In addition, you can also add <code>spark</code> prefix to the parameter name, for example:</p>
+<p>此外，你也可以在参数名前添加 <code>spark</code> 前缀，例如：</p>
 <div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;spark.sedona.global.index&quot;</span><span class="p">,</span><span class="s">&quot;false&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>However, any parameter set through <code>spark</code> prefix will be honored by Spark, which means you can set these parameters before hand via <code>spark-defaults.conf</code> or Spark on Kubernetes configuration.</p>
-<p>If you set the same parameter through both <code>sedona</code> and <code>spark.sedona</code> prefixes, the parameter set through <code>sedona</code> prefix will override the parameter set through <code>spark.sedona</code> prefix.</p>
-<h2 id="general-parameters">General Parameters<a class="headerlink" href="#general-parameters" title="Permanent link">&para;</a></h2>
+<p>不过，所有通过 <code>spark</code> 前缀设置的参数都会被 Spark 所识别，这意味着你可以提前通过 <code>spark-defaults.conf</code> 或 Spark on Kubernetes 的配置来设定这些参数。</p>
+<p>如果同一个参数同时通过 <code>sedona</code> 和 <code>spark.sedona</code> 两种前缀进行设置，则 <code>sedona</code> 前缀设置的值会覆盖 <code>spark.sedona</code> 前缀设置的值。</p>
+<h2 id="_2">通用参数<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th style="text-align: left;">Parameter</th>
-<th style="text-align: left;">Description</th>
-<th style="text-align: left;">Default</th>
-<th style="text-align: left;">Possible Values</th>
+<th style="text-align: left;">参数</th>
+<th style="text-align: left;">说明</th>
+<th style="text-align: left;">默认值</th>
+<th style="text-align: left;">可选值</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: left;"><code>sedona.global.index</code></td>
-<td style="text-align: left;">Use spatial index (currently, only supports in SQL range join and SQL distance join)</td>
+<td style="text-align: left;">是否启用空间索引（目前仅支持 SQL 范围连接与 SQL 距离连接）</td>
 <td style="text-align: left;"><code>true</code></td>
 <td style="text-align: left;"><code>true</code>, <code>false</code></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>sedona.global.indextype</code></td>
-<td style="text-align: left;">Spatial index type, only valid when <code>sedona.global.index</code> is true</td>
+<td style="text-align: left;">空间索引类型，仅在 <code>sedona.global.index</code> 为 true 时生效</td>
 <td style="text-align: left;"><code>rtree</code></td>
 <td style="text-align: left;"><code>rtree</code>, <code>quadtree</code></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>spark.sedona.enableParserExtension</code></td>
-<td style="text-align: left;">Enable the parser extension to parse GEOMETRY data type in SQL DDL statements</td>
+<td style="text-align: left;">启用解析器扩展，用于在 SQL DDL 语句中解析 GEOMETRY 数据类型</td>
 <td style="text-align: left;"><code>true</code></td>
 <td style="text-align: left;"><code>true</code>, <code>false</code></td>
 </tr>
 </tbody>
 </table>
-<h2 id="join-parameters">Join Parameters<a class="headerlink" href="#join-parameters" title="Permanent link">&para;</a></h2>
+<h2 id="join">连接（Join）相关参数<a class="headerlink" href="#join" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th style="text-align: left;">Parameter</th>
-<th style="text-align: left;">Description</th>
-<th style="text-align: left;">Default</th>
-<th style="text-align: left;">Possible Values</th>
+<th style="text-align: left;">参数</th>
+<th style="text-align: left;">说明</th>
+<th style="text-align: left;">默认值</th>
+<th style="text-align: left;">可选值</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: left;"><code>sedona.join.autoBroadcastJoinThreshold</code></td>
-<td style="text-align: left;">Maximum size in bytes for a table that will be broadcast to all worker nodes when performing a join. Set to -1 to disable automatic broadcasting.</td>
-<td style="text-align: left;">Same as <code>spark.sql.autoBroadcastJoinThreshold</code></td>
-<td style="text-align: left;">Any integer with a byte suffix, e.g. <code>10MB</code> or <code>512KB</code></td>
+<td style="text-align: left;">执行连接时，将被广播到所有工作节点的表的最大字节大小。设为 -1 可禁用自动广播。</td>
+<td style="text-align: left;">与 <code>spark.sql.autoBroadcastJoinThreshold</code> 相同</td>
+<td style="text-align: left;">带有字节后缀的整数，例如 <code>10MB</code> 或 <code>512KB</code></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>sedona.join.gridtype</code></td>
-<td style="text-align: left;">Spatial partitioning grid type for join query</td>
+<td style="text-align: left;">连接查询使用的空间分区网格类型</td>
 <td style="text-align: left;"><code>kdbtree</code></td>
 <td style="text-align: left;"><code>quadtree</code>, <code>kdbtree</code></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>spark.sedona.join.knn.includeTieBreakers</code></td>
-<td style="text-align: left;">KNN join will include all ties in the result, possibly returning more than k results</td>
+<td style="text-align: left;">KNN 连接结果是否包含所有并列项，可能返回多于 k 个结果</td>
 <td style="text-align: left;"><code>false</code></td>
 <td style="text-align: left;"><code>true</code>, <code>false</code></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>sedona.join.indexbuildside</code></td>
-<td style="text-align: left;"><strong>(Advanced)</strong> The side which Sedona builds spatial indices on</td>
+<td style="text-align: left;"><strong>（高级）</strong> Sedona 在哪一侧构建空间索引</td>
 <td style="text-align: left;"><code>left</code></td>
 <td style="text-align: left;"><code>left</code>, <code>right</code></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>sedona.join.numpartition</code></td>
-<td style="text-align: left;"><strong>(Advanced)</strong> Number of partitions for both sides in a join query</td>
-<td style="text-align: left;"><code>-1</code> (use existing partitions)</td>
-<td style="text-align: left;">Any integer</td>
+<td style="text-align: left;"><strong>（高级）</strong> 连接查询双方的分区数</td>
+<td style="text-align: left;"><code>-1</code>（使用现有分区数）</td>
+<td style="text-align: left;">任意整数</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>sedona.join.spatitionside</code></td>
-<td style="text-align: left;"><strong>(Advanced)</strong> The dominant side in spatial partitioning stage</td>
+<td style="text-align: left;"><strong>（高级）</strong> 空间分区阶段的主导侧</td>
 <td style="text-align: left;"><code>left</code></td>
 <td style="text-align: left;"><code>left</code>, <code>right</code></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>sedona.join.optimizationmode</code></td>
-<td style="text-align: left;"><strong>(Advanced)</strong> When Sedona should optimize spatial join SQL queries</td>
+<td style="text-align: left;"><strong>（高级）</strong> Sedona 何时优化空间连接 SQL 查询</td>
 <td style="text-align: left;"><code>nonequi</code></td>
-<td style="text-align: left;"><code>all</code> (always optimize, even equi-joins), <code>none</code> (disable optimization), <code>nonequi</code> (optimize non-equi-joins only)</td>
+<td style="text-align: left;"><code>all</code>（始终优化，包括等值连接），<code>none</code>（禁用优化），<code>nonequi</code>（仅优化非等值连接）</td>
 </tr>
 </tbody>
 </table>
-<h2 id="crs-transformation-parameters">CRS Transformation Parameters<a class="headerlink" href="#crs-transformation-parameters" title="Permanent link">&para;</a></h2>
+<h2 id="crs">CRS 转换参数<a class="headerlink" href="#crs" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th style="text-align: left;">Parameter</th>
-<th style="text-align: left;">Description</th>
-<th style="text-align: left;">Default</th>
-<th style="text-align: left;">Possible Values</th>
-<th style="text-align: left;">Since</th>
+<th style="text-align: left;">参数</th>
+<th style="text-align: left;">说明</th>
+<th style="text-align: left;">默认值</th>
+<th style="text-align: left;">可选值</th>
+<th style="text-align: left;">起始版本</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align: left;"><code>spark.sedona.crs.geotools</code></td>
-<td style="text-align: left;">Controls which library is used for CRS transformations in ST_Transform</td>
+<td style="text-align: left;">控制 ST_Transform 中 CRS 转换所使用的库</td>
 <td style="text-align: left;"><code>raster</code></td>
-<td style="text-align: left;"><code>none</code> (proj4sedona for all), <code>raster</code> (proj4sedona for vector, GeoTools for raster), <code>all</code> (GeoTools for all — legacy)</td>
+<td style="text-align: left;"><code>none</code>（全部使用 proj4sedona），<code>raster</code>（矢量使用 proj4sedona，栅格使用 GeoTools），<code>all</code>（全部使用 GeoTools —— 旧版行为）</td>
 <td style="text-align: left;">v1.9.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>spark.sedona.crs.url.base</code></td>
-<td style="text-align: left;">Base URL of a CRS definition server for resolving authority codes (e.g., EPSG) via HTTP. When set, ST_Transform will consult this URL provider before the built-in definitions.</td>
-<td style="text-align: left;"><em>(empty — disabled)</em></td>
-<td style="text-align: left;">e.g. <code>https://crs.example.com</code></td>
+<td style="text-align: left;">CRS 定义服务器的基础 URL，用于通过 HTTP 解析权威机构代码（如 EPSG）。设置后，ST_Transform 会先查询该 URL 提供者，再回退到内置定义。</td>
+<td style="text-align: left;"><em>（空 —— 禁用）</em></td>
+<td style="text-align: left;">例如 <code>https://crs.example.com</code></td>
 <td style="text-align: left;">v1.9.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>spark.sedona.crs.url.pathTemplate</code></td>
-<td style="text-align: left;">URL path template appended to <code>spark.sedona.crs.url.base</code>. Placeholders <code>{authority}</code> and <code>{code}</code> are replaced at runtime.</td>
+<td style="text-align: left;">附加在 <code>spark.sedona.crs.url.base</code> 之后的 URL 路径模板。占位符 <code>{authority}</code> 和 <code>{code}</code> 会在运行时被替换。</td>
 <td style="text-align: left;"><code>/{authority}/{code}.json</code></td>
-<td style="text-align: left;">e.g. <code>/epsg/{code}.json</code></td>
+<td style="text-align: left;">例如 <code>/epsg/{code}.json</code></td>
 <td style="text-align: left;">v1.9.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>spark.sedona.crs.url.format</code></td>
-<td style="text-align: left;">The CRS definition format returned by the URL provider</td>
+<td style="text-align: left;">URL 提供者返回的 CRS 定义格式</td>
 <td style="text-align: left;"><code>projjson</code></td>
-<td style="text-align: left;"><code>projjson</code>, <code>proj</code>, <code>wkt1</code> (OGC WKT1), <code>wkt2</code> (ISO 19162 WKT2)</td>
+<td style="text-align: left;"><code>projjson</code>、<code>proj</code>、<code>wkt1</code>（OGC WKT1）、<code>wkt2</code>（ISO 19162 WKT2）</td>
 <td style="text-align: left;">v1.9.0</td>
 </tr>
 </tbody>
@@ -5750,7 +5750,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 27, 2026 06:37:29 UTC">February 27, 2026 06:37:29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月11日 04:13:31 UTC">2026年5月11日 04:13:31</span>
   </span>
 
     

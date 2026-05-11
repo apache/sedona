@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#introduction" class="md-skip">
+        <a href="#_1" class="md-skip">
           跳转至
         </a>
       
@@ -2404,10 +2404,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#function-list" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Function list
+        函数列表
       
     </span>
   </a>
@@ -2415,10 +2415,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#raster-function-list" class="md-nav__link">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Raster function list
+        栅格函数列表
       
     </span>
   </a>
@@ -2426,10 +2426,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#raster-quick-start" class="md-nav__link">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Raster quick start
+        栅格快速入门
       
     </span>
   </a>
@@ -2437,10 +2437,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick start
+        快速入门
       
     </span>
   </a>
@@ -5489,10 +5489,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#function-list" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Function list
+        函数列表
       
     </span>
   </a>
@@ -5500,10 +5500,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#raster-function-list" class="md-nav__link">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Raster function list
+        栅格函数列表
       
     </span>
   </a>
@@ -5511,10 +5511,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#raster-quick-start" class="md-nav__link">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Raster quick start
+        栅格快速入门
       
     </span>
   </a>
@@ -5522,10 +5522,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick start
+        快速入门
       
     </span>
   </a>
@@ -5552,7 +5552,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/api/sql/Overview.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/api/sql/Overview.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5579,71 +5579,71 @@
  under the License.
  -->
 
-<h1 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h1>
-<h2 id="function-list">Function list<a class="headerlink" href="#function-list" title="Permanent link">&para;</a></h2>
-<p>SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:</p>
+<h1 id="_1">简介<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<h2 id="_2">函数列表<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>SedonaSQL 支持 SQL/MM Part3 空间 SQL 标准，包含以下四种 SQL 算子。所有这些算子都可以通过下面的方式直接调用：</p>
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">myDataFrame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;YOUR_SQL&quot;</span><span class="p">)</span>
 </code></pre></div>
-<p>Alternatively, <code>expr</code> and <code>selectExpr</code> can be used:</p>
+<p>此外，也可以使用 <code>expr</code> 和 <code>selectExpr</code> 调用：</p>
 <div class="highlight"><pre><span></span><code><span class="n">myDataFrame</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;geometry&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_*&quot;</span><span class="p">)).</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">&quot;ST_*&quot;</span><span class="p">)</span>
 </code></pre></div>
 <ul>
-<li>Constructor: Construct a Geometry given an input string or coordinates<ul>
-<li>Example: ST_GeomFromWKT (string). Create a Geometry from a WKT String.</li>
-<li>Documentation: <a href="../Geometry-Functions/">Here</a></li>
+<li>构造函数（Constructor）：根据输入的字符串或坐标构造一个 Geometry<ul>
+<li>示例：ST_GeomFromWKT (string)。根据 WKT 字符串创建一个 Geometry。</li>
+<li>文档：<a href="../Geometry-Functions/">点击查看</a></li>
 </ul>
 </li>
-<li>Function: Execute a function on the given column or columns<ul>
-<li>Example: ST_Distance (A, B). Given two Geometry A and B, return the Euclidean distance of A and B.</li>
-<li>Documentation: Functions are organized by category. See <a href="../Geometry-Functions/">Geometry Accessors</a>, <a href="../Geometry-Functions/">Geometry Editors</a>, <a href="../Geometry-Functions/#measurement-functions">Measurement Functions</a>, <a href="../Geometry-Functions/">Geometry Processing</a>, <a href="../Geometry-Functions/#overlay-functions">Overlay Functions</a>, and other categories in the sidebar.</li>
+<li>函数（Function）：在指定的一列或多列上执行某个函数<ul>
+<li>示例：ST_Distance (A, B)。给定两个 Geometry A 和 B，返回 A 与 B 的欧氏距离。</li>
+<li>文档：函数按类别组织。参见 <a href="../Geometry-Functions/">Geometry Accessors</a>、<a href="../Geometry-Functions/">Geometry Editors</a>、<a href="../Geometry-Functions/#measurement-functions">Measurement Functions</a>、<a href="../Geometry-Functions/">Geometry Processing</a>、<a href="../Geometry-Functions/#overlay-functions">Overlay Functions</a>，以及侧边栏中的其他分类。</li>
 </ul>
 </li>
-<li>Aggregate function: Return the aggregated value on the given column<ul>
-<li>Example: ST_Envelope_Aggr (Geometry column). Given a Geometry column, calculate the entire envelope boundary of this column.</li>
-<li>Documentation: <a href="../Geometry-Functions/#aggregate-functions">Here</a></li>
+<li>聚合函数（Aggregate function）：对给定列返回聚合后的值<ul>
+<li>示例：ST_Envelope_Aggr (Geometry column)。给定一个 Geometry 列，计算该列所有几何对象的总外接包络。</li>
+<li>文档：<a href="../Geometry-Functions/#aggregate-functions">点击查看</a></li>
 </ul>
 </li>
-<li>Predicate: Execute a logic judgement on the given columns and return true or false<ul>
-<li>Example: ST_Contains (A, B). Check if A fully contains B. Return "True" if yes, else return "False".</li>
-<li>Documentation: <a href="../Geometry-Functions/#predicates">Here</a></li>
+<li>谓词（Predicate）：在给定的列上执行逻辑判断，返回 true 或 false<ul>
+<li>示例：ST_Contains (A, B)。检查 A 是否完全包含 B。如果是则返回 "True"，否则返回 "False"。</li>
+<li>文档：<a href="../Geometry-Functions/#predicates">点击查看</a></li>
 </ul>
 </li>
 </ul>
-<p>Sedona also provides an Adapter to convert SpatialRDD &lt;-&gt; DataFrame. Please read <a href="../../scaladoc/spark/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a></p>
-<p>SedonaSQL supports SparkSQL query optimizer, documentation is <a href="../Optimizer/">Here</a></p>
-<h2 id="raster-function-list">Raster function list<a class="headerlink" href="#raster-function-list" title="Permanent link">&para;</a></h2>
-<p>SedonaSQL also supports raster data processing. Raster functions use the <code>RS_</code> prefix. All raster operators can be called in the same way as vector operators:</p>
+<p>Sedona 还提供了一个 Adapter 用于在 SpatialRDD 与 DataFrame 之间相互转换。详见 <a href="../../scaladoc/spark/org/apache/sedona/sql/utils/index.html">Adapter Scaladoc</a></p>
+<p>SedonaSQL 支持 SparkSQL 查询优化器，相关文档见<a href="../Optimizer/">此处</a></p>
+<h2 id="_3">栅格函数列表<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>SedonaSQL 同样支持栅格数据处理。栅格函数以 <code>RS_</code> 为前缀。所有栅格算子的调用方式与矢量算子相同：</p>
 <div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">myDataFrame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;YOUR_SQL&quot;</span><span class="p">)</span>
 </code></pre></div>
 <ul>
-<li>Constructor: Construct a Raster given an input file or parameters<ul>
-<li>Example: RS_FromGeoTiff (binary). Create a Raster from a GeoTiff binary.</li>
-<li>Documentation: <a href="../Raster-Functions/#raster-constructors">Here</a></li>
+<li>构造函数（Constructor）：根据输入的文件或参数构造一个 Raster<ul>
+<li>示例：RS_FromGeoTiff (binary)。从一个 GeoTiff 二进制数据创建一个 Raster。</li>
+<li>文档：<a href="../Raster-Functions/#raster-constructors">点击查看</a></li>
 </ul>
 </li>
-<li>Function: Execute a function on the given Raster column or columns<ul>
-<li>Example: RS_Value (raster, point). Given a Raster and a Point geometry, return the pixel value at that location.</li>
-<li>Documentation: Functions are organized by category. See <a href="../Raster-Functions/#raster-accessors">Raster Accessors</a>, <a href="../Raster-Functions/#raster-operators">Raster Operators</a>, <a href="../Raster-Functions/#raster-band-accessors">Raster Band Accessors</a>, <a href="../Raster-Functions/#raster-output">Raster Output</a>, and other categories in the sidebar.</li>
+<li>函数（Function）：在指定的一列或多列 Raster 上执行某个函数<ul>
+<li>示例：RS_Value (raster, point)。给定一个 Raster 和一个 Point 几何对象，返回该位置上的像元值。</li>
+<li>文档：函数按类别组织。参见 <a href="../Raster-Functions/#raster-accessors">Raster Accessors</a>、<a href="../Raster-Functions/#raster-operators">Raster Operators</a>、<a href="../Raster-Functions/#raster-band-accessors">Raster Band Accessors</a>、<a href="../Raster-Functions/#raster-output">Raster Output</a>，以及侧边栏中的其他分类。</li>
 </ul>
 </li>
-<li>Aggregate function: Return the aggregated value on the given Raster column<ul>
-<li>Example: RS_Union_Aggr (Raster column). Given a Raster column, combine all rasters into a single multiband raster.</li>
-<li>Documentation: <a href="../Raster-Functions/#raster-aggregate-functions">Here</a></li>
+<li>聚合函数（Aggregate function）：对给定的 Raster 列返回聚合后的值<ul>
+<li>示例：RS_Union_Aggr (Raster column)。给定一个 Raster 列，将所有 Raster 合并为单个多波段栅格。</li>
+<li>文档：<a href="../Raster-Functions/#raster-aggregate-functions">点击查看</a></li>
 </ul>
 </li>
-<li>Predicate: Execute a logic judgement on the given columns and return true or false<ul>
-<li>Example: RS_Intersects (raster, geometry). Check if a raster intersects a geometry. Return "True" if yes, else return "False".</li>
-<li>Documentation: <a href="../Raster-Functions/#raster-predicates">Here</a></li>
+<li>谓词（Predicate）：在给定的列上执行逻辑判断，返回 true 或 false<ul>
+<li>示例：RS_Intersects (raster, geometry)。判断一个栅格是否与一个几何对象相交。如果是则返回 "True"，否则返回 "False"。</li>
+<li>文档：<a href="../Raster-Functions/#raster-predicates">点击查看</a></li>
 </ul>
 </li>
 </ul>
-<h2 id="raster-quick-start">Raster quick start<a class="headerlink" href="#raster-quick-start" title="Permanent link">&para;</a></h2>
-<p>The detailed explanation is here <a href="../../../tutorial/raster/">Write a Raster DataFrame/SQL application</a>.</p>
-<h2 id="quick-start">Quick start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
-<p>The detailed explanation is here <a href="../../../tutorial/sql/">Write a SQL/DataFrame application</a>.</p>
+<h2 id="_4">栅格快速入门<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<p>详细说明请参见<a href="../../../tutorial/raster/">编写栅格 DataFrame/SQL 应用</a>。</p>
+<h2 id="_5">快速入门<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<p>详细说明请参见<a href="../../../tutorial/sql/">编写 SQL/DataFrame 应用</a>。</p>
 <ol>
-<li>Add Sedona-core and Sedona-SQL into your project pom.xml or build.sbt</li>
-<li>Create your Sedona config if you want to customize your SparkSession.</li>
+<li>在你的项目 pom.xml 或 build.sbt 中加入 Sedona-core 和 Sedona-SQL</li>
+<li>如果需要定制 SparkSession，创建你自己的 Sedona 配置。</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">sedona</span><span class="p">.</span><span class="nn">spark</span><span class="p">.</span><span class="nc">SedonaContext</span>
 <span class="kd">val</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SedonaContext</span><span class="p">.</span><span class="n">builder</span><span class="p">().</span>
@@ -5651,7 +5651,7 @@
 <span class="w">    </span><span class="p">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 </code></pre></div>
 <ol>
-<li>Add the following line after your Sedona context declaration:</li>
+<li>在 Sedona context 声明之后加上以下代码：</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">sedona</span><span class="p">.</span><span class="nn">spark</span><span class="p">.</span><span class="nc">SedonaContext</span>
 <span class="kd">val</span><span class="w"> </span><span class="n">sedona</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SedonaContext</span><span class="p">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
@@ -5676,7 +5676,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="March 30, 2026 06:14:22 UTC">March 30, 2026 06:14:22</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月11日 04:13:31 UTC">2026年5月11日 04:13:31</span>
   </span>
 
     

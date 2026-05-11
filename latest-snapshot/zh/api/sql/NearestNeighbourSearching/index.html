@@ -2632,10 +2632,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#filter-pushdown-considerations" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Filter Pushdown Considerations:
+        谓词下推注意事项：
       
     </span>
   </a>
@@ -2643,10 +2643,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#optimization-barrier" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Optimization Barrier
+        优化屏障
       
     </span>
   </a>
@@ -2654,10 +2654,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#example" class="md-nav__link">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example
+        示例
       
     </span>
   </a>
@@ -2665,10 +2665,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#handling-sql-defined-tables-in-st_knn-joins" class="md-nav__link">
+  <a href="#st_knn-sql" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Handling SQL-Defined Tables in ST_KNN Joins:
+        在 ST_KNN 连接中处理 SQL 定义的表：
       
     </span>
   </a>
@@ -2676,10 +2676,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#sql-example" class="md-nav__link">
+  <a href="#sql" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SQL Example
+        SQL 示例
       
     </span>
   </a>
@@ -5525,10 +5525,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#filter-pushdown-considerations" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Filter Pushdown Considerations:
+        谓词下推注意事项：
       
     </span>
   </a>
@@ -5536,10 +5536,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#optimization-barrier" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Optimization Barrier
+        优化屏障
       
     </span>
   </a>
@@ -5547,10 +5547,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#example" class="md-nav__link">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example
+        示例
       
     </span>
   </a>
@@ -5558,10 +5558,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#handling-sql-defined-tables-in-st_knn-joins" class="md-nav__link">
+  <a href="#st_knn-sql" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Handling SQL-Defined Tables in ST_KNN Joins:
+        在 ST_KNN 连接中处理 SQL 定义的表：
       
     </span>
   </a>
@@ -5569,10 +5569,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#sql-example" class="md-nav__link">
+  <a href="#sql" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SQL Example
+        SQL 示例
       
     </span>
   </a>
@@ -5604,7 +5604,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/api/sql/NearestNeighbourSearching.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/api/sql/NearestNeighbourSearching.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5633,30 +5633,30 @@
  under the License.
  -->
 
-<p>Sedona supports nearest-neighbour searching on geospatial data by providing a geospatial k-Nearest Neighbors (kNN) join method. This method involves identifying the k-nearest neighbors for a given spatial point or region based on geographic proximity, typically using spatial coordinates and a suitable distance metric like Euclidean or great-circle distance.</p>
+<p>Sedona 通过提供地理空间 k 近邻（kNN）连接方法来支持对地理空间数据进行最近邻搜索。该方法基于地理临近性识别给定空间点或区域的 k 个最近邻，通常使用空间坐标以及合适的距离度量（如欧氏距离或大圆距离）。</p>
 <h2 id="st_knn">ST_KNN<a class="headerlink" href="#st_knn" title="Permanent link">&para;</a></h2>
-<p>Introduction: join operation to find the k-nearest neighbors of a point or region in a spatial dataset.</p>
-<p>Format: <code>ST_KNN(R: Table, S: Table, k: Integer, use_spheroid: Boolean)</code></p>
-<p>Where R is the queries side table and S is the object side table, K is the number of neighbors. use_spheroid is a boolean value that determines whether to use the spheroid distance or not.</p>
-<p>Queries side table contains geometries that are used to find the k-nearest neighbors in the object side table.</p>
-<p>When either queries or objects data contain non-point data (geometries), we take the centroid of each geometry.</p>
-<p>In case there are ties in the distance, the result will include all the tied geometries only when the following sedona config is set to true:</p>
-<p><strong>Note for Inner Join:</strong></p>
+<p>简介：用于在空间数据集中查找一个点或区域的 k 个最近邻的连接操作。</p>
+<p>格式：<code>ST_KNN(R: Table, S: Table, k: Integer, use_spheroid: Boolean)</code></p>
+<p>其中 R 是查询侧表，S 是对象侧表，K 是邻居数量。use_spheroid 是一个布尔值，决定是否使用椭球距离。</p>
+<p>查询侧表包含用于在对象侧表中查找 k 近邻的几何对象。</p>
+<p>当查询数据或对象数据中存在非点几何（其他几何类型）时，会取每个几何对象的质心。</p>
+<p>当距离上出现并列时，只有在下面的 sedona 配置被设置为 true 时，结果才会包含所有并列的几何对象：</p>
+<p><strong>关于内连接的说明：</strong></p>
 <ul>
-<li>The <code>ST_KNN</code> join only supports left inner join.</li>
-<li>It returns only pairs where there is at least one matching neighbor within the k nearest neighbors.</li>
-<li>If a query point has no valid neighbor (e.g., because k is too large), it is excluded from the result.</li>
+<li><code>ST_KNN</code> 连接仅支持 left inner join。</li>
+<li>它只返回那些至少存在一个在 k 近邻范围内的匹配邻居的对。</li>
+<li>如果某个查询点没有有效邻居（例如 k 设得太大），它会被从结果中排除。</li>
 </ul>
 <div class="highlight"><pre><span></span><code>spark.sedona.join.knn.includeTieBreakers=true
 </code></pre></div>
-<h3 id="filter-pushdown-considerations">Filter Pushdown Considerations:<a class="headerlink" href="#filter-pushdown-considerations" title="Permanent link">&para;</a></h3>
-<p>When using ST_KNN with filters applied to the resulting DataFrame, some of these filters may be pushed down to the object side of the kNN join. This means the filters will be applied to the object side reader before the kNN join is executed. If you want the filters to be applied after the kNN join, ensure that you first materialize the kNN join results and then apply the filters.</p>
-<p>For example, you can use the following approach:</p>
-<p>Scala Example:</p>
+<h3 id="_1">谓词下推注意事项：<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p>在 ST_KNN 之后对结果 DataFrame 施加的过滤条件，部分可能会被下推到 kNN 连接的对象侧。这意味着这些过滤会在 kNN 连接执行之前应用到对象侧的读取阶段。如果你希望过滤在 kNN 连接之后再生效，请先将 kNN 连接的结果物化，然后再应用过滤条件。</p>
+<p>例如，可以使用以下方式：</p>
+<p>Scala 示例：</p>
 <div class="highlight"><pre><span></span><code>val knnResult = knnJoinDF.cache()
 val filteredResult = knnResult.filter(condition)
 </code></pre></div>
-<p>SQL Example:</p>
+<p>SQL 示例：</p>
 <div class="highlight"><pre><span></span><code>CREATE OR REPLACE TEMP VIEW knnResult AS
 SELECT * FROM (
   -- Your KNN join SQL here
@@ -5664,18 +5664,18 @@ SELECT * FROM (
 CACHE TABLE knnResult;
 SELECT * FROM knnResult WHERE condition;
 </code></pre></div>
-<h3 id="optimization-barrier">Optimization Barrier<a class="headerlink" href="#optimization-barrier" title="Permanent link">&para;</a></h3>
-<p>Use the <code>barrier</code> function to prevent filter pushdown and control predicate evaluation order in complex spatial joins. This function creates an optimization barrier by evaluating boolean expressions at runtime.</p>
-<p>The <code>barrier</code> function takes a boolean expression as a string, followed by pairs of variable names and their values that will be substituted into the expression:</p>
+<h3 id="_2">优化屏障<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p>使用 <code>barrier</code> 函数可以阻止谓词下推，并在复杂的空间连接中控制谓词的求值顺序。该函数通过在运行时对布尔表达式求值来创建一个优化屏障。</p>
+<p><code>barrier</code> 函数接收一个作为字符串的布尔表达式，之后是若干对变量名及其取值，这些取值会在该表达式中被替换：</p>
 <div class="highlight"><pre><span></span><code><span class="n">barrier</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span><span class="w"> </span><span class="n">var_name1</span><span class="p">,</span><span class="w"> </span><span class="n">var_value1</span><span class="p">,</span><span class="w"> </span><span class="n">var_name2</span><span class="p">,</span><span class="w"> </span><span class="n">var_value2</span><span class="p">,</span><span class="w"> </span><span class="p">...)</span>
 </code></pre></div>
-<p>The placement of filters relative to KNN joins changes the semantic meaning of the query:</p>
+<p>过滤条件相对于 KNN 连接的放置位置会改变查询的语义：</p>
 <ul>
-<li><strong>Filter before KNN</strong>: First filters the data, then finds K nearest neighbors from the filtered subset. This answers "What are the K nearest high-rated restaurants?"</li>
-<li><strong>Filter after KNN</strong>: First finds K nearest neighbors from all data, then filters those results. This answers "Of the K nearest restaurants, which ones are high-rated?"</li>
+<li><strong>在 KNN 之前过滤</strong>：先对数据进行过滤，再在过滤后的子集上查找 K 个最近邻。回答的是“评分高的餐厅中，最近的 K 家是哪几家？”</li>
+<li><strong>在 KNN 之后过滤</strong>：先在全部数据中查找 K 个最近邻，再对结果进行过滤。回答的是“最近的 K 家餐厅中，哪几家是高评分的？”</li>
 </ul>
-<h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h3>
-<p>Find the 3 nearest high-rated restaurants to luxury hotels, ensuring the KNN join completes before filtering.</p>
+<h3 id="_3">示例<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p>查找距离每家豪华酒店最近的 3 家高评分餐厅，并确保 KNN 连接先完成，再进行过滤。</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span>
 <span class="w">    </span><span class="n">h</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">hotel</span><span class="p">,</span>
 <span class="w">    </span><span class="n">r</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">restaurant</span><span class="p">,</span>
@@ -5687,35 +5687,35 @@ SELECT * FROM knnResult WHERE condition;
 <span class="w">              </span><span class="s1">&#39;rating&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="n">rating</span><span class="p">,</span>
 <span class="w">              </span><span class="s1">&#39;stars&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">h</span><span class="p">.</span><span class="n">stars</span><span class="p">)</span>
 </code></pre></div>
-<p>With the barrier function, this query first finds the 3 nearest restaurants to each hotel (regardless of rating), then filters to keep only those pairs where the restaurant has rating &gt; 4.0 and the hotel has stars &gt;= 4. Without the barrier, an optimizer might push the filters down, changing the query to first filter for high-rated restaurants and luxury hotels, then find the 3 nearest among those filtered sets.</p>
-<h3 id="handling-sql-defined-tables-in-st_knn-joins">Handling SQL-Defined Tables in ST_KNN Joins:<a class="headerlink" href="#handling-sql-defined-tables-in-st_knn-joins" title="Permanent link">&para;</a></h3>
-<p>When creating DataFrames from hard-coded SQL select statements in Sedona, and later using them in <code>ST_KNN</code> joins, Sedona may attempt to optimize the query in a way that bypasses the intended kNN join logic. Specifically, if you create DataFrames with hard-coded SQL, such as:</p>
+<p>借助 barrier 函数，这条查询会先为每家酒店找到 3 家最近的餐厅（不考虑评分），随后再过滤，仅保留餐厅评分大于 4.0 且酒店星级不低于 4 的配对。如果不使用 barrier，优化器可能会将过滤下推，将查询改写为先过滤出高评分餐厅与豪华酒店，再在这些过滤后的子集中找最近的 3 个。</p>
+<h3 id="st_knn-sql">在 ST_KNN 连接中处理 SQL 定义的表：<a class="headerlink" href="#st_knn-sql" title="Permanent link">&para;</a></h3>
+<p>在 Sedona 中，如果使用硬编码的 SQL select 语句创建 DataFrame，并随后在 <code>ST_KNN</code> 连接中使用它们，Sedona 可能会以绕过 kNN 连接逻辑的方式来优化查询。具体地说，如果你像下面这样用硬编码 SQL 创建 DataFrame：</p>
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;SELECT ST_Point(0.0, 0.0) as geom1&quot;</span><span class="p">)</span>
 <span class="kd">val</span><span class="w"> </span><span class="n">df2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;SELECT ST_Point(0.0, 0.0) as geom2&quot;</span><span class="p">)</span>
 
 <span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df1</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">df2</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_KNN(geom1, geom2, 1)&quot;</span><span class="p">))</span>
 </code></pre></div>
-<p>Sedona may optimize the join to a form like this:</p>
+<p>Sedona 可能会把这次连接优化为类似下面的形式：</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_KNN</span><span class="p">(</span><span class="n">ST_Point</span><span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">ST_Point</span><span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
-<p>As a result, the ST_KNN function is handled as a User-Defined Function (UDF) instead of a proper join operation, preventing Sedona from initiating the kNN join execution path. Unlike typical UDFs, the ST_KNN function operates on multiple rows across DataFrames, not just individual rows. When this occurs, the query fails with an UnsupportedOperationException, indicating that the KNN predicate is not supported.</p>
-<p>Workaround:</p>
-<p>To prevent Spark's optimization from bypassing the kNN join logic, the DataFrames created with hard-coded SQL select statements must be materialized before performing the join. By caching the DataFrames, you can instruct Spark to avoid this undesired optimization:</p>
+<p>结果是，ST_KNN 函数被当作用户自定义函数（UDF）处理，而非一个连接操作，从而阻止 Sedona 走 kNN 连接的执行路径。与典型的 UDF 不同，ST_KNN 函数会跨 DataFrame 作用在多行上，而不是仅作用在单行上。当出现这种情况时，查询会以 UnsupportedOperationException 失败，提示不支持该 KNN 谓词。</p>
+<p>解决方法：</p>
+<p>为防止 Spark 的优化绕过 kNN 连接逻辑，必须先将由硬编码 SQL select 创建的 DataFrame 物化，再执行连接。可以通过缓存 DataFrame 告诉 Spark 不要进行这种不希望的优化：</p>
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;SELECT ST_Point(0.0, 0.0) as geom1&quot;</span><span class="p">).</span><span class="n">cache</span><span class="p">()</span>
 <span class="kd">val</span><span class="w"> </span><span class="n">df2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;SELECT ST_Point(0.0, 0.0) as geom2&quot;</span><span class="p">).</span><span class="n">cache</span><span class="p">()</span>
 
 <span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df1</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">df2</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_KNN(geom1, geom2, 1)&quot;</span><span class="p">))</span>
 </code></pre></div>
-<p>Materializing the DataFrames with .cache() ensures that the correct kNN join path is followed in the Spark logical plan and prevents the optimization that would treat ST_KNN as a simple UDF.</p>
-<h3 id="sql-example">SQL Example<a class="headerlink" href="#sql-example" title="Permanent link">&para;</a></h3>
-<p>Suppose we have two tables <code>QUERIES</code> and <code>OBJECTS</code> with the following data:</p>
-<p>QUERIES table:</p>
+<p>通过 <code>.cache()</code> 物化 DataFrame 后，Spark 逻辑计划中会走正确的 kNN 连接路径，避免将 ST_KNN 当成普通 UDF 处理的优化。</p>
+<h3 id="sql">SQL 示例<a class="headerlink" href="#sql" title="Permanent link">&para;</a></h3>
+<p>假设我们有两张表 <code>QUERIES</code> 与 <code>OBJECTS</code>，数据如下：</p>
+<p>QUERIES 表：</p>
 <div class="highlight"><pre><span></span><code>ID  GEOMETRY            NAME
 1   POINT(1 1)          station1
 2   POINT(10 10)        station2
 3   POINT(-0.5 -0.5)    station3
 </code></pre></div>
-<p>OBJECTS table:</p>
+<p>OBJECTS 表：</p>
 <div class="highlight"><pre><span></span><code>ID  GEOMETRY            NAME
 1   POINT(11 5)         bank1
 2   POINT(12 1)         bank2
@@ -5744,7 +5744,7 @@ SELECT * FROM knnResult WHERE condition;
 <span class="w">    </span><span class="n">OBJECTS</span><span class="p">.</span><span class="n">GEOMETRY</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">OBJECTS_GEOM</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">QUERIES</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">OBJECTS</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">ST_KNN</span><span class="p">(</span><span class="n">QUERIES</span><span class="p">.</span><span class="n">GEOMETRY</span><span class="p">,</span><span class="w"> </span><span class="n">OBJECTS</span><span class="p">.</span><span class="n">GEOMETRY</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="k">FALSE</span><span class="p">)</span>
 </code></pre></div>
-<p>Output:</p>
+<p>输出：</p>
 <div class="highlight"><pre><span></span><code>+--------+-----------------+-------------+
 |QUERY_ID|QUERIES_GEOM     |OBJECTS_GEOM |
 +--------+-----------------+-------------+
@@ -5782,7 +5782,7 @@ SELECT * FROM knnResult WHERE condition;
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 19, 2025 06:42:06 UTC">September 19, 2025 06:42:06</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月11日 04:13:31 UTC">2026年5月11日 04:13:31</span>
   </span>
 
     

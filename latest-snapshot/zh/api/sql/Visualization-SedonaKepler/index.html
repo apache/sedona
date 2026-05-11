@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#creating-a-map-object-using-sedonakeplercreate_map" class="md-skip">
+        <a href="#sedonakeplercreate_map" class="md-skip">
           跳转至
         </a>
       
@@ -2784,10 +2784,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#creating-a-map-object-using-sedonakeplercreate_map" class="md-nav__link">
+  <a href="#sedonakeplercreate_map" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Creating a map object using SedonaKepler.create_map
+        使用 SedonaKepler.create_map 创建地图对象
       
     </span>
   </a>
@@ -2795,10 +2795,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#adding-sedonadataframe-to-a-map-object-using-sedonakepleradd_df" class="md-nav__link">
+  <a href="#sedonakepleradd_df-sedonadataframe" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Adding SedonaDataFrame to a map object using SedonaKepler.add_df
+        使用 SedonaKepler.add_df 向地图对象添加 SedonaDataFrame
       
     </span>
   </a>
@@ -2806,10 +2806,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#setting-a-config-via-the-map" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Setting a config via the map
+        通过地图设置配置
       
     </span>
   </a>
@@ -2817,10 +2817,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#saving-and-setting-config" class="md-nav__link">
+  <a href="#config" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Saving and setting config
+        保存与设置 config
       
     </span>
   </a>
@@ -5487,10 +5487,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#creating-a-map-object-using-sedonakeplercreate_map" class="md-nav__link">
+  <a href="#sedonakeplercreate_map" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Creating a map object using SedonaKepler.create_map
+        使用 SedonaKepler.create_map 创建地图对象
       
     </span>
   </a>
@@ -5498,10 +5498,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#adding-sedonadataframe-to-a-map-object-using-sedonakepleradd_df" class="md-nav__link">
+  <a href="#sedonakepleradd_df-sedonadataframe" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Adding SedonaDataFrame to a map object using SedonaKepler.add_df
+        使用 SedonaKepler.add_df 向地图对象添加 SedonaDataFrame
       
     </span>
   </a>
@@ -5509,10 +5509,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#setting-a-config-via-the-map" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Setting a config via the map
+        通过地图设置配置
       
     </span>
   </a>
@@ -5520,10 +5520,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#saving-and-setting-config" class="md-nav__link">
+  <a href="#config" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Saving and setting config
+        保存与设置 config
       
     </span>
   </a>
@@ -5550,7 +5550,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/api/sql/Visualization-SedonaKepler.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/api/sql/Visualization-SedonaKepler.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5579,29 +5579,29 @@
  under the License.
  -->
 
-<p>SedonaKepler offers a number of APIs which aid in quick and interactive visualization of a geospatial data in a Jupyter notebook/lab environment.</p>
-<p>Inorder to start using SedonaKepler, simply import Sedona using:</p>
+<p>SedonaKepler 提供了一组 API，便于在 Jupyter notebook/lab 环境中对地理空间数据进行快速、交互式的可视化。</p>
+<p>要开始使用 SedonaKepler，只需通过下面的方式导入 Sedona：</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 </code></pre></div>
-<p>Alternatively it can also be imported using:</p>
+<p>也可以使用以下方式导入：</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaKepler</span>
 </code></pre></div>
-<p>Following are details on all the APIs exposed via SedonaKepler:</p>
-<h3 id="creating-a-map-object-using-sedonakeplercreate_map"><strong>Creating a map object using SedonaKepler.create_map</strong><a class="headerlink" href="#creating-a-map-object-using-sedonakeplercreate_map" title="Permanent link">&para;</a></h3>
-<p>SedonaKepler exposes a create_map API with the following signature:</p>
+<p>下面是 SedonaKepler 暴露的所有 API 的详细说明：</p>
+<h3 id="sedonakeplercreate_map"><strong>使用 SedonaKepler.create_map 创建地图对象</strong><a class="headerlink" href="#sedonakeplercreate_map" title="Permanent link">&para;</a></h3>
+<p>SedonaKepler 暴露的 create_map API 的签名如下：</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_map</span><span class="p">(</span>
     <span class="n">df</span><span class="p">:</span> <span class="n">SedonaDataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;unnamed&quot;</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">map</span><span class="p">:</span> <span class="o">...</span>
 </code></pre></div>
-<p>The parameter 'name' is used to associate the passed SedonaDataFrame in the map object and any config applied to the map is linked to this name. It is recommended you pass a unique identifier to the dataframe here.</p>
-<p>If no SedonaDataFrame object is passed, an empty map (with config applied if passed) is returned. A SedonaDataFrame can be added later using the method <code>add_df</code></p>
-<p>A map config can be passed optionally to apply pre-apply customizations to the map.</p>
+<p>参数 'name' 用于在地图对象中关联传入的 SedonaDataFrame，应用到该地图上的任何配置都会与该名称绑定。建议为 dataframe 传入唯一的标识符。</p>
+<p>如果没有传入 SedonaDataFrame 对象，会返回一个空地图（如果传入了 config 则会应用该 config）。之后可以通过 <code>add_df</code> 方法添加 SedonaDataFrame。</p>
+<p>也可以可选地传入一个 map config，对地图进行预设的定制。</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The map config references every customization with the name assigned to the SedonaDataFrame being displayed, if there is a mismatch in the name, the config will not be applied to the map object.</p>
+<p>map config 是按显示的 SedonaDataFrame 的名称来引用每一项定制配置的，如果名称不匹配，则该 config 不会被应用到地图对象上。</p>
 </div>
 <div class="admonition abstract">
-<p class="admonition-title">Example usage (Referenced from Sedona Jupyter examples)</p>
+<p class="admonition-title">示例用法（参考自 Sedona Jupyter 示例）</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -5612,18 +5612,18 @@
 </div>
 </div>
 </div>
-<h3 id="adding-sedonadataframe-to-a-map-object-using-sedonakepleradd_df"><strong>Adding SedonaDataFrame to a map object using SedonaKepler.add_df</strong><a class="headerlink" href="#adding-sedonadataframe-to-a-map-object-using-sedonakepleradd_df" title="Permanent link">&para;</a></h3>
-<p>SedonaKepler exposes an add_df API with the following signature:</p>
+<h3 id="sedonakepleradd_df-sedonadataframe"><strong>使用 SedonaKepler.add_df 向地图对象添加 SedonaDataFrame</strong><a class="headerlink" href="#sedonakepleradd_df-sedonadataframe" title="Permanent link">&para;</a></h3>
+<p>SedonaKepler 暴露的 add_df API 的签名如下：</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_df</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">SedonaDataFrame</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;unnamed&quot;</span><span class="p">):</span> <span class="o">...</span>
 </code></pre></div>
-<p>This API can be used to add a SedonaDataFrame to an already created map object. The map object passed is directly mutated and nothing is returned.</p>
-<p>The parameters name has the same conditions as 'create_map'</p>
+<p>该 API 可用于向已经创建的地图对象添加一个 SedonaDataFrame。传入的 map 对象会被直接修改，不返回任何值。</p>
+<p>参数 name 的约束条件与 'create_map' 相同。</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>This method can be used to add multiple dataframes to a map object to be able to visualize them together.</p>
+<p>可以通过该方法向一个地图对象添加多个 dataframe，从而在同一张地图上一起可视化。</p>
 </div>
 <div class="admonition abstract">
-<p class="admonition-title">Example usage (Referenced from Sedona Jupyter examples)</p>
+<p class="admonition-title">示例用法（参考自 Sedona Jupyter 示例）</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block"></div>
@@ -5634,14 +5634,14 @@
 <span class="nb">map</span>
 </code></pre></div>
 </div>
-<h3 id="setting-a-config-via-the-map"><strong>Setting a config via the map</strong><a class="headerlink" href="#setting-a-config-via-the-map" title="Permanent link">&para;</a></h3>
-<p>A map rendered by accessing the map object created by SedonaKepler includes a config panel which can be used to customize the map</p>
-<h3 id="saving-and-setting-config"><strong>Saving and setting config</strong><a class="headerlink" href="#saving-and-setting-config" title="Permanent link">&para;</a></h3>
-<p>A map object's current config can be accessed by accessing its 'config' attribute like <code>map.config</code>. This config can be saved for future use or use across notebooks if the exact same map is to be rendered every time.</p>
+<h3 id="_1"><strong>通过地图设置配置</strong><a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p>由 SedonaKepler 创建的地图对象在被访问渲染时，会附带一个 config 面板，可用于自定义地图</p>
+<h3 id="config"><strong>保存与设置 config</strong><a class="headerlink" href="#config" title="Permanent link">&para;</a></h3>
+<p>可以通过访问地图对象的 'config' 属性（如 <code>map.config</code>）来获取其当前 config。如果每次都需要渲染完全相同的地图，可以将该 config 保存下来以备后续使用，或在不同 notebook 之间复用。</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The map config references each applied customization with the name given to the dataframe and hence will work only on maps with the same name of dataframe supplied.
-For more details refer to keplerGl documentation <a href="https://docs.kepler.gl/docs/keplergl-jupyter#6.-match-config-with-data">here</a></p>
+<p>map config 是按 dataframe 的名称来引用每一项已应用的定制配置的，因此它只在使用相同 dataframe 名称的地图上生效。
+更多细节请参见 keplerGl 文档：<a href="https://docs.kepler.gl/docs/keplergl-jupyter#6.-match-config-with-data">这里</a></p>
 </div>
 
 
@@ -5663,7 +5663,7 @@ For more details refer to keplerGl documentation <a href="https://docs.kepler.gl
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 31, 2025 18:13:18 UTC">July 31, 2025 18:13:18</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月11日 04:13:31 UTC">2026年5月11日 04:13:31</span>
   </span>
 
     

@@ -86,7 +86,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#quick-start" class="md-skip">
+        <a href="#_1" class="md-skip">
           跳转至
         </a>
       
@@ -3224,10 +3224,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick start
+        快速入门
       
     </span>
   </a>
@@ -3235,15 +3235,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#regular-functions" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Regular functions
+        常规函数
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Regular functions">
+    <nav class="md-nav" aria-label="常规函数">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3296,15 +3296,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#aggregate-functions" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Aggregate functions
+        聚合函数
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Aggregate functions">
+    <nav class="md-nav" aria-label="聚合函数">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5539,10 +5539,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#quick-start" class="md-nav__link">
+  <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Quick start
+        快速入门
       
     </span>
   </a>
@@ -5550,15 +5550,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#regular-functions" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Regular functions
+        常规函数
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Regular functions">
+    <nav class="md-nav" aria-label="常规函数">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5611,15 +5611,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#aggregate-functions" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Aggregate functions
+        聚合函数
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Aggregate functions">
+    <nav class="md-nav" aria-label="聚合函数">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -5658,7 +5658,7 @@
 
 
   
-    <a href="https://github.com/apache/sedona/edit/master/docs/api/viz/sql.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/apache/sedona/edit/master/docs/api/viz/sql.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -5687,11 +5687,11 @@
  under the License.
  -->
 
-<h2 id="quick-start">Quick start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
-<p>The detailed explanation is here: <a href="../../../tutorial/viz/">Visualize Spatial DataFrame/RDD</a>.</p>
+<h2 id="_1">快速入门<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>详细说明请参见：<a href="../../../tutorial/viz/">可视化空间 DataFrame/RDD</a>。</p>
 <ol>
-<li>Add Sedona-core, Sedona-SQL, Sedona-Viz into your project pom.xml or build.sbt</li>
-<li>Declare your Spark Session</li>
+<li>在你的项目 pom.xml 或 build.sbt 中加入 Sedona-core、Sedona-SQL、Sedona-Viz</li>
+<li>声明你的 Spark Session</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">().</span>
 <span class="n">config</span><span class="p">(</span><span class="s">&quot;spark.serializer&quot;</span><span class="p">,</span><span class="s">&quot;org.apache.spark.serializer.KryoSerializer&quot;</span><span class="p">).</span>
@@ -5699,78 +5699,78 @@
 <span class="n">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">).</span><span class="n">appName</span><span class="p">(</span><span class="s">&quot;mySedonaVizDemo&quot;</span><span class="p">).</span><span class="n">getOrCreate</span><span class="p">()</span>
 </code></pre></div>
 <ol>
-<li>Add the following lines after your SparkSession declaration:</li>
+<li>在 SparkSession 声明之后加上以下代码：</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="nc">SedonaSQLRegistrator</span><span class="p">.</span><span class="n">registerAll</span><span class="p">(</span><span class="n">sparkSession</span><span class="p">)</span>
 <span class="nc">SedonaVizRegistrator</span><span class="p">.</span><span class="n">registerAll</span><span class="p">(</span><span class="n">sparkSession</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="regular-functions">Regular functions<a class="headerlink" href="#regular-functions" title="Permanent link">&para;</a></h2>
+<h2 id="_2">常规函数<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <h3 id="st_colorize">ST_Colorize<a class="headerlink" href="#st_colorize" title="Permanent link">&para;</a></h3>
-<p>Introduction: Given the weight of a pixel, return the corresponding color. The weight can be the spatial aggregation of spatial objects or spatial observations such as temperature and humidity.</p>
+<p>简介：根据像素的权重返回对应的颜色。权重可以是空间对象的空间聚合值，也可以是诸如温度、湿度等空间观测值。</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The color is encoded to an Integer type value in DataFrame. When you print it, it will show some nonsense values. You can just treat them as colors in GeoSparkViz.</p>
+<p>该颜色在 DataFrame 中被编码为 Integer 类型的数值。当你打印它时，看到的会是一些看似无意义的数字。可以直接把它们当作 GeoSparkViz 中的颜色处理。</p>
 </div>
-<p>Format:</p>
+<p>格式：</p>
 <div class="highlight"><pre><span></span><code>ST_Colorize (weight: Double, maxWeight: Double, mandatory color: String (Optional))
 </code></pre></div>
-<p>Since: <code>v1.0.0</code></p>
-<h4 id="produce-various-colors-heat-map">Produce various colors - heat map<a class="headerlink" href="#produce-various-colors-heat-map" title="Permanent link">&para;</a></h4>
-<p>This function will normalize the weight according to the max weight among all pixels. Different pixel obtains different color.</p>
-<p>SQL Example</p>
+<p>起始版本：<code>v1.0.0</code></p>
+<h4 id="_3">生成不同颜色 —— 热力图<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
+<p>该函数会根据所有像素中的最大权重对当前权重做归一化，从而让不同像素得到不同的颜色。</p>
+<p>SQL 示例</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">pixels</span><span class="p">.</span><span class="n">px</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Colorize</span><span class="p">(</span><span class="n">pixels</span><span class="p">.</span><span class="n">weight</span><span class="p">,</span><span class="w"> </span><span class="mi">999</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">color</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pixels</span>
 </code></pre></div>
-<h4 id="produce-uniform-colors-scatter-plot">Produce uniform colors - scatter plot<a class="headerlink" href="#produce-uniform-colors-scatter-plot" title="Permanent link">&para;</a></h4>
-<p>If a mandatory color name is put as the third input argument, this function will directly output this color, without considering the weights. In this case, every pixel will possess the same color.</p>
-<p>SQL Example</p>
+<h4 id="_4">生成统一颜色 —— 散点图<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h4>
+<p>如果将一个强制颜色名作为第三个输入参数传入，该函数会直接输出该颜色，而忽略权重。这种情况下，所有像素都使用同一个颜色。</p>
+<p>SQL 示例</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">pixels</span><span class="p">.</span><span class="n">px</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Colorize</span><span class="p">(</span><span class="n">pixels</span><span class="p">.</span><span class="n">weight</span><span class="p">,</span><span class="w"> </span><span class="mi">999</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;red&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">color</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pixels</span>
 </code></pre></div>
-<p>Here are some example color names can be entered:</p>
+<p>下面是一些可输入的颜色名示例：</p>
 <div class="highlight"><pre><span></span><code>&quot;firebrick&quot;
 &quot;#aa38e0&quot;
 &quot;0x40A8CC&quot;
 &quot;rgba(112,36,228,0.9)&quot;
 </code></pre></div>
-<p>Please refer to <a href="https://static.javadoc.io/org.beryx/awt-color-factory/1.0.0/org/beryx/awt/color/ColorFactory.html">AWT Colors</a> for a list of pre-defined colors.</p>
+<p>预定义颜色的完整列表请参见 <a href="https://static.javadoc.io/org.beryx/awt-color-factory/1.0.0/org/beryx/awt/color/ColorFactory.html">AWT Colors</a>。</p>
 <h3 id="st_encodeimage">ST_EncodeImage<a class="headerlink" href="#st_encodeimage" title="Permanent link">&para;</a></h3>
-<p>Introduction: Return the base64 string representation of a Java PNG BufferedImage. This is specific for the server-client environment. For example, transfer the base64 string from GeoSparkViz to Apache Zeppelin.</p>
-<p>Format: <code>ST_EncodeImage (A: Image)</code></p>
-<p>Since: <code>v1.0.0</code></p>
-<p>SQL Example</p>
+<p>简介：返回一个 Java PNG BufferedImage 的 base64 字符串表示。该函数主要用于服务端—客户端环境，例如将 base64 字符串从 GeoSparkViz 传输到 Apache Zeppelin。</p>
+<p>格式：<code>ST_EncodeImage (A: Image)</code></p>
+<p>起始版本：<code>v1.0.0</code></p>
+<p>SQL 示例</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_EncodeImage</span><span class="p">(</span><span class="n">images</span><span class="p">.</span><span class="n">img</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">images</span>
 </code></pre></div>
 <h3 id="st_pixelize">ST_Pixelize<a class="headerlink" href="#st_pixelize" title="Permanent link">&para;</a></h3>
-<p>Introduction: Convert a geometry to an array of pixels given a resolution</p>
-<p>You should use it together with <code>Lateral View</code> and <code>Explode</code></p>
-<p>Format:</p>
+<p>简介：在给定的分辨率下，将一个几何对象转换成像素数组</p>
+<p>你应当与 <code>Lateral View</code> 和 <code>Explode</code> 一起使用该函数。</p>
+<p>格式：</p>
 <div class="highlight"><pre><span></span><code>ST_Pixelize (A: Geometry, ResolutionX: Integer, ResolutionY: Integer, Boundary: Geometry)
 </code></pre></div>
-<p>Since: <code>v1.0.0</code></p>
-<p>SQL Example</p>
+<p>起始版本：<code>v1.0.0</code></p>
+<p>SQL 示例</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Pixelize</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span><span class="w"> </span><span class="mi">256</span><span class="p">,</span><span class="w"> </span><span class="mi">256</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">ST_Envelope_Aggr</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">pointtable</span><span class="p">))</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span>
 </code></pre></div>
 <h3 id="st_tilename">ST_TileName<a class="headerlink" href="#st_tilename" title="Permanent link">&para;</a></h3>
-<p>Introduction: Return the map tile name for a given zoom level. Please refer to <a href="http://wiki.openstreetmap.org/wiki/Zoom_levels">OpenStreetMap ZoomLevel</a> and <a href="https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames">OpenStreetMap tile name</a>.</p>
+<p>简介：返回给定缩放级别下的地图瓦片名称。请参阅 <a href="http://wiki.openstreetmap.org/wiki/Zoom_levels">OpenStreetMap ZoomLevel</a> 和 <a href="https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames">OpenStreetMap tile name</a>。</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Tile name is formatted as a "Z-X-Y" string. Z is zoom level. X is tile coordinate on X axis. Y is tile coordinate on Y axis.</p>
+<p>瓦片名称的格式为 "Z-X-Y" 字符串。Z 为缩放级别，X 为 X 轴上的瓦片坐标，Y 为 Y 轴上的瓦片坐标。</p>
 </div>
-<p>Format: <code>ST_TileName (A: Pixel, ZoomLevel: Integer)</code></p>
-<p>Since: <code>v1.0.0</code></p>
-<p>SQL Example</p>
+<p>格式：<code>ST_TileName (A: Pixel, ZoomLevel: Integer)</code></p>
+<p>起始版本：<code>v1.0.0</code></p>
+<p>SQL 示例</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_TileName</span><span class="p">(</span><span class="n">pixels</span><span class="p">.</span><span class="n">px</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pixels</span>
 </code></pre></div>
-<h2 id="aggregate-functions">Aggregate functions<a class="headerlink" href="#aggregate-functions" title="Permanent link">&para;</a></h2>
+<h2 id="_5">聚合函数<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <h3 id="st_render">ST_Render<a class="headerlink" href="#st_render" title="Permanent link">&para;</a></h3>
-<p>Introduction: Given a group of pixels and their colors, return a single Java PNG BufferedImage. The 3<sup>rd</sup> parameter is optional and it is the zoom level. You should use zoom level when you want to render tiles, instead of a single image.</p>
-<p>Format: <code>ST_Render (A: Pixel, B: Color, C: Integer - optional zoom level)</code></p>
-<p>Since: <code>v1.0.0</code></p>
-<p>SQL Example</p>
+<p>简介：给定一组像素及其颜色，返回一个 Java PNG BufferedImage。第 3 个参数为可选的缩放级别。当你需要渲染瓦片而不是单张图像时，应当使用该缩放级别参数。</p>
+<p>格式：<code>ST_Render (A: Pixel, B: Color, C: Integer - optional zoom level)</code></p>
+<p>起始版本：<code>v1.0.0</code></p>
+<p>SQL 示例</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">tilename</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Render</span><span class="p">(</span><span class="n">pixels</span><span class="p">.</span><span class="n">px</span><span class="p">,</span><span class="w"> </span><span class="n">pixels</span><span class="p">.</span><span class="n">color</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">tileimg</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pixels</span>
 <span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">tilename</span>
@@ -5795,7 +5795,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="December 4, 2024 07:01:47 UTC">December 4, 2024 07:01:47</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月11日 04:13:31 UTC">2026年5月11日 04:13:31</span>
   </span>
 
     
