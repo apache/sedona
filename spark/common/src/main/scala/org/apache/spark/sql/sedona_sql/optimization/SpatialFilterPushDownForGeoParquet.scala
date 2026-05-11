@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.optimization
 
+import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.sedona.common.sphere.Haversine
 import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.sedona.sql.utils.GeometrySerializer
@@ -42,10 +43,12 @@ import org.apache.spark.sql.execution.datasources.PushableColumnBase
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetFileFormatBase
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.AndFilter
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DLeafFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.OrFilter
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.sedona_sql.expressions.{ST_AsEWKT, ST_Buffer, ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Distance, ST_DistanceSphere, ST_DistanceSpheroid, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Touches, ST_Within}
+import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, GeometryUDT}
+import org.apache.spark.sql.sedona_sql.expressions.{ST_AsEWKT, ST_BoxContains, ST_BoxIntersects, ST_Buffer, ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Distance, ST_DistanceSphere, ST_DistanceSpheroid, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Touches, ST_Within}
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
 import org.apache.spark.sql.types.DoubleType
 import org.locationtech.jts.geom.Geometry
@@ -143,6 +146,16 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
             unquote(name),
             SpatialPredicate.INTERSECTS,
             GeometryUDT.deserialize(value))
+
+      // Box2D predicates push down to an INTERSECTS check on the geometry column whose covering
+      // metadata references this Box2D column. Both BoxIntersects and BoxContains use INTERSECTS
+      // semantics at the file level: per-row containment implies per-row intersection, which is
+      // only possible if the geometry column's file-level bbox intersects the query box.
+      case ST_BoxIntersects(_) | ST_BoxContains(_) =>
+        for {
+          (name, value) <- resolveNameAndLiteral(predicate.children, pushableColumn)
+          queryBox <- extractBox2DLiteral(value)
+        } yield Box2DLeafFilter(unquote(name), queryBox)
 
       case LessThan(ST_Distance(distArgs), Literal(d, DoubleType)) =>
         for ((name, value) <- resolveNameAndLiteral(distArgs, pushableColumn))
@@ -254,6 +267,16 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
 
   private def unquote(name: String): String = {
     parseColumnPath(name).mkString(".")
+  }
+
+  /**
+   * Extract a [[Box2D]] from a Catalyst literal value. Box2DUDT serializes to an InternalRow of
+   * four doubles; if the value is something else, the predicate is not pushable.
+   */
+  private def extractBox2DLiteral(value: Any): Option[Box2D] = value match {
+    case row: InternalRow if row.numFields == 4 =>
+      Some(new Box2D(row.getDouble(0), row.getDouble(1), row.getDouble(2), row.getDouble(3)))
+    case _ => None
   }
 
   private def resolveNameAndLiteral(

@@ -30,6 +30,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.FileSourceScanExec
 import org.apache.spark.sql.execution.SimpleMode
 import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileFormat, GeoParquetMetaData, GeoParquetSpatialFilter}
+import org.apache.spark.sql.functions.expr
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.GeometryFactory
@@ -317,6 +318,73 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
         assert(getPushedDownSpatialFilter(dfFiltered).isEmpty)
       }
     }
+
+    it("Push down ST_BoxIntersects against a Box2D covering column") {
+      val (box2dDf, box2dDir, box2dMetaMap) = setupBox2DCoveringFixture()
+      try {
+        // Q1 region only (region 1, center +10/+10)
+        val q1Filter =
+          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(5.0, 5.0), ST_Point(15.0, 15.0)))"
+        verifyBox2DFilter(box2dDf, box2dMetaMap, q1Filter, Seq(1))
+
+        // Window covering Q2 and Q4 (negative X) — should preserve regions 0 and 2
+        val leftHalfFilter =
+          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(-20.0, -20.0), ST_Point(-1.0, 20.0)))"
+        verifyBox2DFilter(box2dDf, box2dMetaMap, leftHalfFilter, Seq(0, 2))
+
+        // Disjoint window prunes everything
+        val disjointFilter =
+          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(100.0, 100.0), ST_Point(200.0, 200.0)))"
+        verifyBox2DFilter(box2dDf, box2dMetaMap, disjointFilter, Seq.empty)
+      } finally {
+        FileUtils.deleteDirectory(new File(box2dDir).getParentFile)
+      }
+    }
+
+    it("Push down ST_BoxContains against a Box2D covering column") {
+      val (box2dDf, box2dDir, box2dMetaMap) = setupBox2DCoveringFixture()
+      try {
+        // ST_BoxContains(box_col, lit_box) pushes down as INTERSECTS at the file level. A tiny
+        // query box inside Q1 prunes everything except region 1.
+        val containsFilter =
+          "ST_BoxContains(geom_bbox, ST_MakeBox2D(ST_Point(9.0, 9.0), ST_Point(10.0, 10.0)))"
+        verifyBox2DFilter(box2dDf, box2dMetaMap, containsFilter, Seq(1))
+      } finally {
+        FileUtils.deleteDirectory(new File(box2dDir).getParentFile)
+      }
+    }
+  }
+
+  private def setupBox2DCoveringFixture()
+      : (DataFrame, String, Map[Int, Seq[GeoParquetMetaData]]) = {
+    val box2dParent =
+      Files.createTempDirectory("sedona_geoparquet_box2d_").toFile.getAbsolutePath
+    val box2dDir = box2dParent + "/data"
+    val withBox = df.withColumn("geom_bbox", expr("ST_Box2D(geom)"))
+    withBox.coalesce(1).write.partitionBy("region").format("geoparquet").save(box2dDir)
+    val box2dDf = sparkSession.read.format("geoparquet").load(box2dDir)
+    val box2dMetaMap = readGeoParquetMetaDataMap(box2dDir)
+    (box2dDf, box2dDir, box2dMetaMap)
+  }
+
+  private def verifyBox2DFilter(
+      box2dDf: DataFrame,
+      box2dMetaMap: Map[Int, Seq[GeoParquetMetaData]],
+      condition: String,
+      expectedPreservedRegions: Seq[Int]): Unit = {
+    val dfFiltered = box2dDf.where(condition)
+    val pushed = getPushedDownSpatialFilter(dfFiltered)
+    assert(pushed.isDefined, s"Expected filter push-down for: $condition")
+    val preserved = box2dMetaMap
+      .filter { case (_, metaDataList) =>
+        metaDataList.exists(metadata => pushed.get.evaluate(metadata.columns))
+      }
+      .keys
+      .toSeq
+      .sorted
+    assert(
+      expectedPreservedRegions.sorted == preserved,
+      s"Expected $expectedPreservedRegions, got $preserved for: $condition")
   }
 
   /**

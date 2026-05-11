@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.execution.datasources.geoparquet
 
+import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.locationtech.jts.geom.Envelope
 import org.locationtech.jts.geom.Geometry
@@ -87,5 +88,58 @@ object GeoParquetSpatialFilter {
       }
     }
     override def simpleString: String = s"$columnName ${predicateType.name} $queryWindow"
+  }
+
+  /**
+   * Pushdown filter for predicates that operate on a Box2D-typed column (e.g.
+   * `ST_BoxIntersects(box_col, lit_box)` or `ST_BoxContains(box_col, lit_box)`).
+   *
+   * Per-file evaluation: walks the file's GeoParquet column metadata to find the geometry column
+   * whose covering metadata points at `box2dColumnName`, then prunes using that geometry column's
+   * recorded bbox.
+   *
+   * Both intersects and contains map to a file-level INTERSECTS check: per-row containment
+   * implies per-row intersection, which implies the file's union envelope must intersect the
+   * query box for any row to match. If no geometry column references this Box2D column as its
+   * covering, the file is kept (cannot prune safely).
+   *
+   * @param box2dColumnName
+   *   the Box2D column referenced by the predicate
+   * @param queryBox
+   *   the literal Box2D from the predicate's RHS
+   */
+  case class Box2DLeafFilter(box2dColumnName: String, queryBox: Box2D)
+      extends GeoParquetSpatialFilter {
+
+    override def evaluate(columns: Map[String, GeometryFieldMetaData]): Boolean = {
+      // Find the geometry column whose covering metadata points at this Box2D column.
+      val matchingGeomEntry = columns.find { case (_, field) =>
+        field.covering.exists(_.bbox.xmin.headOption.contains(box2dColumnName))
+      }
+
+      matchingGeomEntry match {
+        case Some((_, field)) =>
+          // Use the geometry column's recorded bbox to prune. The union of per-row Box2D values
+          // is a superset of the geometry column's bbox (covering boxes are at least as wide as
+          // their geometries), so if the geom-column bbox does not intersect the query box, no
+          // row's Box2D can intersect either. May leave some files unpruned when Box2D values
+          // are conservatively wider than geometries, but never produces false negatives.
+          val bbox = field.bbox.getOrElse(return true)
+          if (bbox.isEmpty) return true
+          val fileXMin = bbox(0)
+          val fileYMin = bbox(1)
+          val fileXMax = bbox(2)
+          val fileYMax = bbox(3)
+          !(fileXMax < queryBox.getXMin || fileXMin > queryBox.getXMax
+            || fileYMax < queryBox.getYMin || fileYMin > queryBox.getYMax)
+        case None =>
+          // No geometry column references this Box2D column as covering — cannot prune safely.
+          true
+      }
+    }
+
+    override def simpleString: String =
+      s"$box2dColumnName INTERSECTS BOX(${queryBox.getXMin} ${queryBox.getYMin}, " +
+        s"${queryBox.getXMax} ${queryBox.getYMax})"
   }
 }
