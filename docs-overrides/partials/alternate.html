@@ -5,16 +5,27 @@
   </summary>
   <ul class="sd-lang-switch__menu">
     {#-
-      mkdocs-static-i18n stores `alt.link` as a server-absolute path like
-      `/zh/sedonaspark/`. Passing that directly to `| url` keeps the leading
-      slash, so the link bypasses any deployment prefix added by mike (e.g.
-      `/latest-snapshot/`) and lands at the wrong version. Strip the leading
-      slash so `| url` resolves against the docs root and stays inside the
-      current mike version.
+      mkdocs-static-i18n derives `alt.link` from `urlsplit(site_url).path`, so
+      when mike rewrites site_url to include its canonical_version (e.g.
+      `https://sedona.apache.org/latest`) the alt links get that prefix baked
+      in — yielding paths like `/latest/zh/sedonaspark/`. Feeding that through
+      `| url` from a different mike alias (`/latest-snapshot/`) produces
+      broken targets like `/latest-snapshot/latest/zh/`. Strip the mike
+      canonical prefix, then any remaining leading slash, so `| url`
+      resolves against the docs root of the version actually being served.
     -#}
+    {%- set mike_prefix = '' -%}
+    {%- if 'mike' in config.plugins and config.plugins.mike.config.canonical_version -%}
+      {%- set mike_prefix = '/' ~ config.plugins.mike.config.canonical_version ~ '/' -%}
+    {%- endif -%}
     {% for alt in config.extra.alternate %}
       {%- set is_active = (alt.lang == config.theme.language) -%}
-      {%- set alt_link = alt.link[1:] if alt.link.startswith('/') else alt.link -%}
+      {%- set alt_link = alt.link -%}
+      {%- if mike_prefix and alt_link.startswith(mike_prefix) -%}
+        {%- set alt_link = alt_link[mike_prefix|length:] -%}
+      {%- elif alt_link.startswith('/') -%}
+        {%- set alt_link = alt_link[1:] -%}
+      {%- endif -%}
       <li>
         <a
           href="{{ alt_link | url }}"
