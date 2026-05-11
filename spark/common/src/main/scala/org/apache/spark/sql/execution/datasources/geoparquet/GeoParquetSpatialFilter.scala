@@ -99,9 +99,21 @@ object GeoParquetSpatialFilter {
    * recorded bbox.
    *
    * Both intersects and contains map to a file-level INTERSECTS check: per-row containment
-   * implies per-row intersection, which implies the file's union envelope must intersect the
-   * query box for any row to match. If no geometry column references this Box2D column as its
-   * covering, the file is kept (cannot prune safely).
+   * implies per-row intersection, so the file's recorded geom bbox must intersect the query box
+   * for any row to match.
+   *
+   * '''Soundness caveat.''' The GeoParquet 1.1 spec allows covering bboxes to be conservatively
+   * wider than per-row geometry envelopes (e.g. sedona-db's Float32 writer rounds outward via
+   * `next_after`). When that happens, the union of per-row Box2D values is a strict superset of
+   * the file's geom bbox, and pruning using the geom bbox can produce false negatives. Pushdown
+   * is sound when the Box2D column is exactly the per-row geometry envelope — which is the case
+   * for Sedona's own writer (`ST_Box2D(geom)` produces exact envelopes). A proper Parquet column
+   * statistics-based pruning that operates on the Box2D column's own xmin/ymin/xmax/ymax bounds
+   * is tracked as a follow-up; until then this filter is opt-out via
+   * `spark.sedona.geoparquet.box2dFilterPushDown`.
+   *
+   * Ambiguity: if multiple geometry columns reference the same Box2D column as their covering
+   * (unusual), the file is kept rather than picking an arbitrary one.
    *
    * @param box2dColumnName
    *   the Box2D column referenced by the predicate
@@ -112,18 +124,16 @@ object GeoParquetSpatialFilter {
       extends GeoParquetSpatialFilter {
 
     override def evaluate(columns: Map[String, GeometryFieldMetaData]): Boolean = {
-      // Find the geometry column whose covering metadata points at this Box2D column.
-      val matchingGeomEntry = columns.find { case (_, field) =>
-        field.covering.exists(_.bbox.xmin.headOption.contains(box2dColumnName))
-      }
+      // Find all geometry columns whose covering metadata points at this Box2D column. Require
+      // exactly one match — multiple matches are ambiguous and we fall back to keep-file.
+      val matchingGeomFields = columns.collect {
+        case (_, field)
+            if field.covering.exists(_.bbox.xmin.headOption.contains(box2dColumnName)) =>
+          field
+      }.toSeq
 
-      matchingGeomEntry match {
-        case Some((_, field)) =>
-          // Use the geometry column's recorded bbox to prune. The union of per-row Box2D values
-          // is a superset of the geometry column's bbox (covering boxes are at least as wide as
-          // their geometries), so if the geom-column bbox does not intersect the query box, no
-          // row's Box2D can intersect either. May leave some files unpruned when Box2D values
-          // are conservatively wider than geometries, but never produces false negatives.
+      matchingGeomFields match {
+        case Seq(field) =>
           val bbox = field.bbox.getOrElse(return true)
           if (bbox.isEmpty) return true
           val fileXMin = bbox(0)
@@ -132,8 +142,9 @@ object GeoParquetSpatialFilter {
           val fileYMax = bbox(3)
           !(fileXMax < queryBox.getXMin || fileXMin > queryBox.getXMax
             || fileYMax < queryBox.getYMin || fileYMin > queryBox.getYMax)
-        case None =>
-          // No geometry column references this Box2D column as covering — cannot prune safely.
+        case _ =>
+          // Zero matches: no covering registered for this column. Multiple matches: ambiguous.
+          // Either way, cannot prune safely.
           true
       }
     }

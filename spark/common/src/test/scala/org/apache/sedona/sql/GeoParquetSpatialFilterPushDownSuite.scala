@@ -385,6 +385,20 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
     assert(
       expectedPreservedRegions.sorted == preserved,
       s"Expected $expectedPreservedRegions, got $preserved for: $condition")
+
+    // Verify the pushed-down result matches the result computed without push-down (i.e. that
+    // pruning did not drop any rows we should have kept).
+    val expectedResult = withConf(Map("spark.sedona.geoparquet.box2dFilterPushDown" -> "false")) {
+      box2dDf
+        .where(condition)
+        .orderBy("region", "id")
+        .select("region", "id")
+        .collect()
+        .toSeq
+    }
+    val actualResult =
+      dfFiltered.orderBy("region", "id").select("region", "id").collect().toSeq
+    assert(expectedResult == actualResult, s"Result mismatch under push-down for: $condition")
   }
 
   /**

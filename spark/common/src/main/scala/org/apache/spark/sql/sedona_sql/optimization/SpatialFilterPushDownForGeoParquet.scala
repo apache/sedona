@@ -47,7 +47,7 @@ import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFi
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.OrFilter
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, GeometryUDT}
+import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.{ST_AsEWKT, ST_BoxContains, ST_BoxIntersects, ST_Buffer, ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Distance, ST_DistanceSphere, ST_DistanceSpheroid, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Touches, ST_Within}
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
 import org.apache.spark.sql.types.DoubleType
@@ -55,6 +55,11 @@ import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.Point
 
 class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rule[LogicalPlan] {
+
+  private def enableBox2DFilterPushDown: Boolean =
+    sparkSession.conf
+      .get("spark.sedona.geoparquet.box2dFilterPushDown", "true")
+      .toBoolean
 
   override def apply(plan: LogicalPlan): LogicalPlan = {
     val enableSpatialFilterPushDown =
@@ -151,7 +156,11 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
       // metadata references this Box2D column. Both BoxIntersects and BoxContains use INTERSECTS
       // semantics at the file level: per-row containment implies per-row intersection, which is
       // only possible if the geometry column's file-level bbox intersects the query box.
-      case ST_BoxIntersects(_) | ST_BoxContains(_) =>
+      // Soundness assumes the Box2D column is exactly the per-row geometry envelope (true for
+      // ST_Box2D(geom)-derived columns including the auto-generated <geom>_bbox path). When the
+      // covering column is conservatively wider than the geometry, pushdown can drop matching
+      // files; the box2dFilterPushDown conf lets users opt out in that case.
+      case ST_BoxIntersects(_) | ST_BoxContains(_) if enableBox2DFilterPushDown =>
         for {
           (name, value) <- resolveNameAndLiteral(predicate.children, pushableColumn)
           queryBox <- extractBox2DLiteral(value)
