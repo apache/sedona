@@ -106,3 +106,12 @@ test('WSS Equal', (t) => {
   runTest(t, suite)
   t.end()
 })
+
+test('URI Equals tolerates malformed fragments', (t) => {
+  t.equal(
+    fastURI.equal('http://example.com/#%E0%A4A', 'http://example.com/#%E0%A4A'),
+    true,
+    'malformed fragment does not throw during equality checks'
+  )
+  t.end()
+})

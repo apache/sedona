@@ -150,6 +150,11 @@ test('URI parse', (t) => {
   t.equal(components.query, undefined, 'query')
   t.equal(components.fragment, '%0D', 'fragment')
 
+  // malformed percent-encoded fragment must not throw
+  components = fastURI.parse('http://example.com/#%E0%A4A')
+  t.equal(components.error, 'URI malformed', 'malformed fragment errors')
+  t.equal(components.fragment, '%E0%A4A', 'malformed fragment is preserved')
+
   // all
   components = fastURI.parse('uri://user:pass@example.com:123/one/two.three?q1=a1&q2=a2#body')
   t.equal(components.error, undefined, 'all errors')

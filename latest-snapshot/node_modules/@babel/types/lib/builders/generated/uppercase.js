@@ -9,9 +9,7 @@ exports.YieldExpression = exports.WithStatement = exports.WhileStatement = expor
 var b = require("./lowercase.js");
 var _deprecationWarning = require("../../utils/deprecationWarning.js");
 function alias(lowercase) {
-  {
-    return b[lowercase];
-  }
+  return b[lowercase];
 }
 const ArrayExpression = exports.ArrayExpression = alias("arrayExpression"),
   AssignmentExpression = exports.AssignmentExpression = alias("assignmentExpression"),

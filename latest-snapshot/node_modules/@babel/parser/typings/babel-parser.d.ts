@@ -3,6 +3,26 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports, @typescript-eslint/no-redundant-type-constituents */
 import { File, Expression } from '@babel/types';
 
+declare class Position {
+    line: number;
+    column: number;
+    index: number;
+    constructor(line: number, col: number, index: number);
+}
+
+type SyntaxPlugin = "flow" | "typescript" | "jsx" | "pipelineOperator" | "placeholders";
+type ParseErrorCode = "BABEL_PARSER_SYNTAX_ERROR" | "BABEL_PARSER_SOURCETYPE_MODULE_REQUIRED";
+interface ParseErrorSpecification<ErrorDetails> {
+    code: ParseErrorCode;
+    reasonCode: string;
+    syntaxPlugin?: SyntaxPlugin;
+    missingPlugin?: string | string[];
+    loc: Position;
+    details: ErrorDetails;
+    pos: number;
+}
+type ParseError$1<ErrorDetails> = SyntaxError & ParseErrorSpecification<ErrorDetails>;
+
 type BABEL_8_BREAKING = false;
 type IF_BABEL_7<V> = false extends BABEL_8_BREAKING ? V : never;
 
@@ -19,7 +39,7 @@ type Plugin$1 =
   | "deferredImportEvaluation"
   | "decoratorAutoAccessors"
   | "destructuringPrivate"
-  | "deprecatedImportAssert"
+  | IF_BABEL_7<"deprecatedImportAssert">
   | "doExpressions"
   | IF_BABEL_7<"dynamicImport">
   | IF_BABEL_7<"explicitResourceManagement">
@@ -120,6 +140,10 @@ interface Options {
      * Set this to true to accept such code.
      */
     allowNewTargetOutsideFunction?: boolean;
+    /**
+     * By default, super calls are not allowed outside of a method.
+     * Set this to true to accept such code.
+     */
     allowSuperOutsideMethod?: boolean;
     /**
      * By default, exported identifiers must refer to a declared variable.
@@ -218,12 +242,11 @@ interface Options {
 }
 
 type ParserOptions = Partial<Options>;
-interface ParseError {
-    code: string;
-    reasonCode: string;
-}
+type ParseError = ParseError$1<object>;
 type ParseResult<Result extends File | Expression = File> = Result & {
+    comments: File["comments"];
     errors: null | ParseError[];
+    tokens?: File["tokens"];
 };
 /**
  * Parse the provided code as an entire ECMAScript program.

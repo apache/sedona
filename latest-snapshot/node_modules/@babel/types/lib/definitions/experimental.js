@@ -73,17 +73,15 @@ var _utils = require("./utils.js");
   visitor: ["elements"],
   aliases: ["Expression"]
 });
-{
-  (0, _utils.default)("DecimalLiteral", {
-    builder: ["value"],
-    fields: {
-      value: {
-        validate: (0, _utils.assertValueType)("string")
-      }
-    },
-    aliases: ["Expression", "Pureish", "Literal", "Immutable"]
-  });
-}
+(0, _utils.default)("DecimalLiteral", {
+  builder: ["value"],
+  fields: {
+    value: {
+      validate: (0, _utils.assertValueType)("string")
+    }
+  },
+  aliases: ["Expression", "Pureish", "Literal", "Immutable"]
+});
 (0, _utils.default)("ModuleExpression", {
   visitor: ["body"],
   fields: {
