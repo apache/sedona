@@ -56,9 +56,19 @@ import org.locationtech.jts.geom.Point
 
 class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rule[LogicalPlan] {
 
+  /**
+   * Box2D filter pushdown is opt-in (default `false`) because pruning via the geometry column's
+   * recorded bbox is only sound when per-row Box2D values equal per-row geometry envelopes.
+   * Sedona's own writer satisfies this (`ST_Box2D(geom)` produces exact envelopes), but the
+   * GeoParquet 1.1 spec permits conservatively wider coverings (e.g., sedona-db's Float32 writer
+   * rounds outward via `next_after`), which can produce false negatives. Users who know their
+   * files were written with exact coverings can enable this via
+   * `spark.sedona.geoparquet.box2dFilterPushDown=true`. The proper Parquet
+   * column-statistics-based pruning that removes this caveat is tracked in #2949.
+   */
   private def enableBox2DFilterPushDown: Boolean =
     sparkSession.conf
-      .get("spark.sedona.geoparquet.box2dFilterPushDown", "true")
+      .get("spark.sedona.geoparquet.box2dFilterPushDown", "false")
       .toBoolean
 
   override def apply(plan: LogicalPlan): LogicalPlan = {
@@ -156,10 +166,10 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
       // metadata references this Box2D column. Both BoxIntersects and BoxContains use INTERSECTS
       // semantics at the file level: per-row containment implies per-row intersection, which is
       // only possible if the geometry column's file-level bbox intersects the query box.
-      // Soundness assumes the Box2D column is exactly the per-row geometry envelope (true for
+      // Soundness requires the Box2D column to be exactly the per-row geometry envelope (true for
       // ST_Box2D(geom)-derived columns including the auto-generated <geom>_bbox path). When the
-      // covering column is conservatively wider than the geometry, pushdown can drop matching
-      // files; the box2dFilterPushDown conf lets users opt out in that case.
+      // covering column is conservatively wider than the geometry (spec-permitted), pushdown can
+      // drop matching files — see #2949. The box2dFilterPushDown conf is opt-in by default.
       case ST_BoxIntersects(_) | ST_BoxContains(_) if enableBox2DFilterPushDown =>
         for {
           (name, value) <- resolveNameAndLiteral(predicate.children, pushableColumn)
