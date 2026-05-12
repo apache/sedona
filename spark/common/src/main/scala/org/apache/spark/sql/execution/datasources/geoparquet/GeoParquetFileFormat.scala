@@ -273,6 +273,15 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
         None
       }
 
+      // Spatial filters that translate to Parquet row-group predicates (e.g. Box2D bounds
+      // comparisons on a Box2D-typed column) are AND'd into the pushed-down filter so Parquet
+      // can skip row groups whose column statistics disprove them.
+      val combinedPushed = spatialFilter.flatMap(_.toParquetFilter) match {
+        case Some(spatialPredicate) =>
+          Some(pushed.fold(spatialPredicate)(p => FilterApi.and(p, spatialPredicate)))
+        case None => pushed
+      }
+
       // Prune file scans using pushed down spatial filters and per-column bboxes in geoparquet metadata
       val shouldScanFile =
         GeoParquetMetaData.parseKeyValueMetaData(footerFileMetaData.getKeyValueMetaData).forall {
@@ -304,8 +313,10 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
 
         // Try to push down filters when filter push-down is enabled.
         // Notice: This push-down is RowGroups level, not individual records.
-        if (pushed.isDefined) {
-          ParquetInputFormat.setFilterPredicate(hadoopAttemptContext.getConfiguration, pushed.get)
+        if (combinedPushed.isDefined) {
+          ParquetInputFormat.setFilterPredicate(
+            hadoopAttemptContext.getConfiguration,
+            combinedPushed.get)
         }
         if (enableVectorizedReader) {
           logWarning(
@@ -319,8 +330,8 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
           datetimeRebaseSpec,
           int96RebaseSpec,
           options)
-        val reader = if (pushed.isDefined && enableRecordFilter) {
-          val parquetFilter = FilterCompat.get(pushed.get, null)
+        val reader = if (combinedPushed.isDefined && enableRecordFilter) {
+          val parquetFilter = FilterCompat.get(combinedPushed.get, null)
           new ParquetRecordReader[InternalRow](readSupport, parquetFilter)
         } else {
           new ParquetRecordReader[InternalRow](readSupport)

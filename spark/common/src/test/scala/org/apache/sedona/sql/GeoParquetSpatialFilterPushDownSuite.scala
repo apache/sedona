@@ -319,113 +319,86 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
       }
     }
 
-    it("Push down ST_BoxIntersects against a Box2D covering column") {
-      val (box2dDf, box2dDir, box2dMetaMap) = setupBox2DCoveringFixture()
+    it("Push down ST_BoxIntersects against a Box2D column") {
+      val (box2dDf, box2dDir) = setupBox2DCoveringFixture()
       try {
-        withConf(Map("spark.sedona.geoparquet.box2dFilterPushDown" -> "true")) {
-          // Q1 region only (region 1, center +10/+10)
-          val q1Filter =
-            "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(5.0, 5.0), ST_Point(15.0, 15.0)))"
-          verifyBox2DFilter(box2dDf, box2dMetaMap, q1Filter, Seq(1))
+        // Q1 region only (region 1, center +10/+10)
+        val q1Filter =
+          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(5.0, 5.0), ST_Point(15.0, 15.0)))"
+        verifyBox2DFilter(box2dDf, q1Filter)
 
-          // Window covering Q2 and Q4 (negative X) — should preserve regions 0 and 2
-          val leftHalfFilter =
-            "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(-20.0, -20.0), ST_Point(-1.0, 20.0)))"
-          verifyBox2DFilter(box2dDf, box2dMetaMap, leftHalfFilter, Seq(0, 2))
+        // Window covering Q2 and Q4 (negative X)
+        val leftHalfFilter =
+          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(-20.0, -20.0), ST_Point(-1.0, 20.0)))"
+        verifyBox2DFilter(box2dDf, leftHalfFilter)
 
-          // Disjoint window prunes everything
-          val disjointFilter =
-            "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(100.0, 100.0), ST_Point(200.0, 200.0)))"
-          verifyBox2DFilter(box2dDf, box2dMetaMap, disjointFilter, Seq.empty)
+        // Disjoint window prunes everything
+        val disjointFilter =
+          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(100.0, 100.0), ST_Point(200.0, 200.0)))"
+        verifyBox2DFilter(box2dDf, disjointFilter)
 
-          // Reverse argument order: ST_BoxIntersects(lit, col) is symmetric and should produce
-          // the same pruning as ST_BoxIntersects(col, lit).
-          val reversedFilter =
-            "ST_BoxIntersects(ST_MakeBox2D(ST_Point(5.0, 5.0), ST_Point(15.0, 15.0)), geom_bbox)"
-          verifyBox2DFilter(box2dDf, box2dMetaMap, reversedFilter, Seq(1))
-        }
+        // Reverse argument order: ST_BoxIntersects(lit, col) is symmetric.
+        val reversedFilter =
+          "ST_BoxIntersects(ST_MakeBox2D(ST_Point(5.0, 5.0), ST_Point(15.0, 15.0)), geom_bbox)"
+        verifyBox2DFilter(box2dDf, reversedFilter)
       } finally {
         FileUtils.deleteDirectory(new File(box2dDir).getParentFile)
       }
     }
 
-    it("Push down ST_BoxContains against a Box2D covering column") {
-      val (box2dDf, box2dDir, box2dMetaMap) = setupBox2DCoveringFixture()
+    it("Push down ST_BoxContains against a Box2D column") {
+      val (box2dDf, box2dDir) = setupBox2DCoveringFixture()
       try {
-        withConf(Map("spark.sedona.geoparquet.box2dFilterPushDown" -> "true")) {
-          // ST_BoxContains(box_col, lit_box) pushes down as INTERSECTS at the file level. A tiny
-          // query box inside Q1 prunes everything except region 1.
-          val containsFilter =
-            "ST_BoxContains(geom_bbox, ST_MakeBox2D(ST_Point(9.0, 9.0), ST_Point(10.0, 10.0)))"
-          verifyBox2DFilter(box2dDf, box2dMetaMap, containsFilter, Seq(1))
+        // ST_BoxContains(box_col, lit_box) — the column box must contain the literal box. A tiny
+        // query inside Q1 is contained only by rows from region 1.
+        val containsFilter =
+          "ST_BoxContains(geom_bbox, ST_MakeBox2D(ST_Point(9.0, 9.0), ST_Point(10.0, 10.0)))"
+        verifyBox2DFilter(box2dDf, containsFilter)
 
-          // Reverse argument order: ST_BoxContains(lit_box, col) — at the file level both
-          // orderings devolve to INTERSECTS pruning.
-          val reversedFilter =
-            "ST_BoxContains(ST_MakeBox2D(ST_Point(9.0, 9.0), ST_Point(10.0, 10.0)), geom_bbox)"
-          verifyBox2DFilter(box2dDf, box2dMetaMap, reversedFilter, Seq(1))
-        }
-      } finally {
-        FileUtils.deleteDirectory(new File(box2dDir).getParentFile)
-      }
-    }
-
-    it("Box2D filter pushdown disabled by default") {
-      val (box2dDf, box2dDir, _) = setupBox2DCoveringFixture()
-      try {
-        val dfFiltered = box2dDf.where(
-          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(5.0, 5.0), ST_Point(15.0, 15.0)))")
-        assert(
-          getPushedDownSpatialFilter(dfFiltered).isEmpty,
-          "Box2D filter pushdown should be off by default until #2949 lands proper Parquet " +
-            "column-statistics-based pruning")
+        // Reverse argument order: ST_BoxContains(lit_box, col) — the literal box must contain the
+        // column box. The 10x10 window in Q1 contains the 2x2 polygons centered at (5,5), (5,15),
+        // (15,5), (15,15) only partially; only rows whose envelopes lie entirely inside the window
+        // survive.
+        val reversedFilter =
+          "ST_BoxContains(ST_MakeBox2D(ST_Point(4.0, 4.0), ST_Point(16.0, 16.0)), geom_bbox)"
+        verifyBox2DFilter(box2dDf, reversedFilter)
       } finally {
         FileUtils.deleteDirectory(new File(box2dDir).getParentFile)
       }
     }
   }
 
-  private def setupBox2DCoveringFixture()
-      : (DataFrame, String, Map[Int, Seq[GeoParquetMetaData]]) = {
+  private def setupBox2DCoveringFixture(): (DataFrame, String) = {
     val box2dParent =
       Files.createTempDirectory("sedona_geoparquet_box2d_").toFile.getAbsolutePath
     val box2dDir = box2dParent + "/data"
     val withBox = df.withColumn("geom_bbox", expr("ST_Box2D(geom)"))
     withBox.coalesce(1).write.partitionBy("region").format("geoparquet").save(box2dDir)
     val box2dDf = sparkSession.read.format("geoparquet").load(box2dDir)
-    val box2dMetaMap = readGeoParquetMetaDataMap(box2dDir)
-    (box2dDf, box2dDir, box2dMetaMap)
+    (box2dDf, box2dDir)
   }
 
-  private def verifyBox2DFilter(
-      box2dDf: DataFrame,
-      box2dMetaMap: Map[Int, Seq[GeoParquetMetaData]],
-      condition: String,
-      expectedPreservedRegions: Seq[Int]): Unit = {
+  private def verifyBox2DFilter(box2dDf: DataFrame, condition: String): Unit = {
     val dfFiltered = box2dDf.where(condition)
-    val pushed = getPushedDownSpatialFilter(dfFiltered)
-    assert(pushed.isDefined, s"Expected filter push-down for: $condition")
-    val preserved = box2dMetaMap
-      .filter { case (_, metaDataList) =>
-        metaDataList.exists(metadata => pushed.get.evaluate(metadata.columns))
-      }
-      .keys
-      .toSeq
-      .sorted
-    assert(
-      expectedPreservedRegions.sorted == preserved,
-      s"Expected $expectedPreservedRegions, got $preserved for: $condition")
 
-    // Verify the pushed-down result matches the result computed without push-down (i.e. that
-    // pruning did not drop any rows we should have kept).
-    val expectedResult = withConf(Map("spark.sedona.geoparquet.box2dFilterPushDown" -> "false")) {
-      box2dDf
-        .where(condition)
-        .orderBy("region", "id")
-        .select("region", "id")
-        .collect()
-        .toSeq
-    }
+    // Pushdown is attached and translates to a Parquet row-group filter.
+    val pushed = getPushedDownSpatialFilter(dfFiltered)
+    assert(pushed.isDefined, s"Expected spatial filter push-down for: $condition")
+    assert(
+      pushed.get.toParquetFilter.isDefined,
+      s"Expected a Parquet FilterPredicate for: $condition")
+
+    // Correctness: pushdown must not drop any matching rows. Compare against a run with the
+    // spatial filter rule disabled (so no Parquet predicate is injected from Sedona).
+    val expectedResult =
+      withConf(Map("spark.sedona.geoparquet.spatialFilterPushDown" -> "false")) {
+        box2dDf
+          .where(condition)
+          .orderBy("region", "id")
+          .select("region", "id")
+          .collect()
+          .toSeq
+      }
     val actualResult =
       dfFiltered.orderBy("region", "id").select("region", "id").collect().toSeq
     assert(expectedResult == actualResult, s"Result mismatch under push-down for: $condition")

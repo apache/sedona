@@ -44,6 +44,7 @@ import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetFileForma
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.AndFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DLeafFilter
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DPredicateKind
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.OrFilter
 import org.apache.spark.sql.catalyst.InternalRow
@@ -55,21 +56,6 @@ import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.Point
 
 class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rule[LogicalPlan] {
-
-  /**
-   * Box2D filter pushdown is opt-in (default `false`) because pruning via the geometry column's
-   * recorded bbox is only sound when per-row Box2D values equal per-row geometry envelopes.
-   * Sedona's own writer satisfies this (`ST_Box2D(geom)` produces exact envelopes), but the
-   * GeoParquet 1.1 spec permits conservatively wider coverings (e.g., sedona-db's Float32 writer
-   * rounds outward via `next_after`), which can produce false negatives. Users who know their
-   * files were written with exact coverings can enable this via
-   * `spark.sedona.geoparquet.box2dFilterPushDown=true`. The proper Parquet
-   * column-statistics-based pruning that removes this caveat is tracked in #2949.
-   */
-  private def enableBox2DFilterPushDown: Boolean =
-    sparkSession.conf
-      .get("spark.sedona.geoparquet.box2dFilterPushDown", "false")
-      .toBoolean
 
   override def apply(plan: LogicalPlan): LogicalPlan = {
     val enableSpatialFilterPushDown =
@@ -162,19 +148,23 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
             SpatialPredicate.INTERSECTS,
             GeometryUDT.deserialize(value))
 
-      // Box2D predicates push down to an INTERSECTS check on the geometry column whose covering
-      // metadata references this Box2D column. Both BoxIntersects and BoxContains use INTERSECTS
-      // semantics at the file level: per-row containment implies per-row intersection, which is
-      // only possible if the geometry column's file-level bbox intersects the query box.
-      // Soundness requires the Box2D column to be exactly the per-row geometry envelope (true for
-      // ST_Box2D(geom)-derived columns including the auto-generated <geom>_bbox path). When the
-      // covering column is conservatively wider than the geometry (spec-permitted), pushdown can
-      // drop matching files — see #2949. The box2dFilterPushDown conf is opt-in by default.
-      case ST_BoxIntersects(_) | ST_BoxContains(_) if enableBox2DFilterPushDown =>
+      // Box2D predicates push down as Parquet row-group filters on the Box2D column's underlying
+      // (xmin, ymin, xmax, ymax) double leaves. Pruning is done by Parquet's stats-based skipping
+      // against the column's recorded min/max, which is sound regardless of how the writer chose
+      // the per-row Box2D values.
+      case ST_BoxIntersects(_) =>
+        // Intersects is symmetric — both argument orders produce the same predicate.
         for {
           (name, value) <- resolveNameAndLiteral(predicate.children, pushableColumn)
           queryBox <- extractBox2DLiteral(value)
-        } yield Box2DLeafFilter(unquote(name), queryBox)
+        } yield Box2DLeafFilter(unquote(name), Box2DPredicateKind.Intersects, queryBox)
+
+      case ST_BoxContains(Seq(pushableColumn(name), Literal(v, _))) =>
+        extractBox2DLiteral(v).map(qb =>
+          Box2DLeafFilter(unquote(name), Box2DPredicateKind.ColumnContainsLiteral, qb))
+      case ST_BoxContains(Seq(Literal(v, _), pushableColumn(name))) =>
+        extractBox2DLiteral(v).map(qb =>
+          Box2DLeafFilter(unquote(name), Box2DPredicateKind.LiteralContainsColumn, qb))
 
       case LessThan(ST_Distance(distArgs), Literal(d, DoubleType)) =>
         for ((name, value) <- resolveNameAndLiteral(distArgs, pushableColumn))
