@@ -275,11 +275,17 @@ class GeoParquetFileFormat(val spatialFilter: Option[GeoParquetSpatialFilter])
 
       // Spatial filters that translate to Parquet row-group predicates (e.g. Box2D bounds
       // comparisons on a Box2D-typed column) are AND'd into the pushed-down filter so Parquet
-      // can skip row groups whose column statistics disprove them.
-      val combinedPushed = spatialFilter.flatMap(_.toParquetFilter) match {
-        case Some(spatialPredicate) =>
-          Some(pushed.fold(spatialPredicate)(p => FilterApi.and(p, spatialPredicate)))
-        case None => pushed
+      // can skip row groups whose column statistics disprove them. Gated on the same Spark
+      // SQL flag as ordinary Parquet pushdown so disabling `spark.sql.parquet.filterPushdown`
+      // also disables Sedona-injected row-group predicates.
+      val combinedPushed = if (enableParquetFilterPushDown) {
+        spatialFilter.flatMap(_.toParquetFilter) match {
+          case Some(spatialPredicate) =>
+            Some(pushed.fold(spatialPredicate)(p => FilterApi.and(p, spatialPredicate)))
+          case None => pushed
+        }
+      } else {
+        pushed
       }
 
       // Prune file scans using pushed down spatial filters and per-column bboxes in geoparquet metadata

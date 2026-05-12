@@ -346,6 +346,30 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
       }
     }
 
+    it("ST_BoxIntersects with inverted-bound literal falls back to runtime throw") {
+      val (box2dDf, box2dDir) = setupBox2DCoveringFixture()
+      try {
+        // xmin > xmax: must not push down — otherwise Parquet's row-group filter could prune all
+        // matches and hide the expected IllegalArgumentException from the predicate's runtime
+        // evaluation.
+        val invertedFilter =
+          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(20.0, -20.0), ST_Point(-20.0, 20.0)))"
+        val dfFiltered = box2dDf.where(invertedFilter)
+        assert(
+          getPushedDownSpatialFilter(dfFiltered).isEmpty,
+          "Inverted-bound Box2D literal must not be pushed down")
+        val ex = intercept[Exception](dfFiltered.collect())
+        assert(
+          Iterator
+            .iterate(ex: Throwable)(_.getCause)
+            .takeWhile(_ != null)
+            .exists(_.isInstanceOf[IllegalArgumentException]),
+          s"Expected IllegalArgumentException in cause chain, got: $ex")
+      } finally {
+        FileUtils.deleteDirectory(new File(box2dDir).getParentFile)
+      }
+    }
+
     it("Push down ST_BoxContains against a Box2D column") {
       val (box2dDf, box2dDir) = setupBox2DCoveringFixture()
       try {

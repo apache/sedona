@@ -280,11 +280,19 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
 
   /**
    * Extract a [[Box2D]] from a Catalyst literal value. Box2DUDT serializes to an InternalRow of
-   * four doubles; if the value is something else, the predicate is not pushable.
+   * four doubles; if the value is something else, the predicate is not pushable. Inverted bounds
+   * (xmin>xmax or ymin>ymax) are rejected here so the predicate falls back to runtime evaluation
+   * and surfaces the expected IllegalArgumentException — pushing them through Parquet would
+   * silently prune all matching rows before the throw fires.
    */
   private def extractBox2DLiteral(value: Any): Option[Box2D] = value match {
     case row: InternalRow if row.numFields == 4 =>
-      Some(new Box2D(row.getDouble(0), row.getDouble(1), row.getDouble(2), row.getDouble(3)))
+      val xmin = row.getDouble(0)
+      val ymin = row.getDouble(1)
+      val xmax = row.getDouble(2)
+      val ymax = row.getDouble(3)
+      if (xmin > xmax || ymin > ymax) None
+      else Some(new Box2D(xmin, ymin, xmax, ymax))
     case _ => None
   }
 
