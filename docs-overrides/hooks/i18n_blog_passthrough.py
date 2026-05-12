@@ -31,7 +31,7 @@
 from mkdocs import plugins
 from mkdocs.structure.files import File, Files
 
-BLOG_FILES: list = []
+BLOG_FILES: list[File] = []
 
 
 @plugins.event_priority(-95)
@@ -47,7 +47,6 @@ def _on_files_disconnect_blog_files(files: Files, config, *_, **__):
             blog_prefixes.append(instance.config.blog_dir)
 
     blog_prefix_tuple = tuple(p.rstrip("/") + "/" for p in blog_prefixes)
-    config.extra.i18n_blog_prefixes = blog_prefix_tuple
 
     for file in files:
         if file.src_uri.startswith(blog_prefix_tuple):
