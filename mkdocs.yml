@@ -373,6 +373,8 @@ plugins:
       type: datetime
   - mike:
       canonical_version: 'latest'
+hooks:
+  - docs-overrides/hooks/i18n_blog_passthrough.py
 extra_css:
   - assets/stylesheets/extra.min.css
 extra_javascript:
