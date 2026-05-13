@@ -18,6 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.optimization
 
+import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.sedona.common.sphere.Haversine
 import org.apache.sedona.core.spatialOperator.SpatialPredicate
 import org.apache.sedona.sql.utils.GeometrySerializer
@@ -42,10 +43,13 @@ import org.apache.spark.sql.execution.datasources.PushableColumnBase
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetFileFormatBase
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.AndFilter
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DLeafFilter
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DPredicateKind
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.OrFilter
+import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.sedona_sql.expressions.{ST_AsEWKT, ST_Buffer, ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Distance, ST_DistanceSphere, ST_DistanceSpheroid, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Touches, ST_Within}
+import org.apache.spark.sql.sedona_sql.expressions.{ST_AsEWKT, ST_BoxContains, ST_BoxIntersects, ST_Buffer, ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Distance, ST_DistanceSphere, ST_DistanceSpheroid, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Touches, ST_Within}
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
 import org.apache.spark.sql.types.DoubleType
 import org.locationtech.jts.geom.Geometry
@@ -143,6 +147,24 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
             unquote(name),
             SpatialPredicate.INTERSECTS,
             GeometryUDT.deserialize(value))
+
+      // Box2D predicates push down as Parquet row-group filters on the Box2D column's underlying
+      // (xmin, ymin, xmax, ymax) double leaves. Pruning is done by Parquet's stats-based skipping
+      // against the column's recorded min/max, which is sound regardless of how the writer chose
+      // the per-row Box2D values.
+      case ST_BoxIntersects(_) =>
+        // Intersects is symmetric — both argument orders produce the same predicate.
+        for {
+          (name, value) <- resolveNameAndLiteral(predicate.children, pushableColumn)
+          queryBox <- extractBox2DLiteral(value)
+        } yield Box2DLeafFilter(unquote(name), Box2DPredicateKind.Intersects, queryBox)
+
+      case ST_BoxContains(Seq(pushableColumn(name), Literal(v, _))) =>
+        extractBox2DLiteral(v).map(qb =>
+          Box2DLeafFilter(unquote(name), Box2DPredicateKind.ColumnContainsLiteral, qb))
+      case ST_BoxContains(Seq(Literal(v, _), pushableColumn(name))) =>
+        extractBox2DLiteral(v).map(qb =>
+          Box2DLeafFilter(unquote(name), Box2DPredicateKind.LiteralContainsColumn, qb))
 
       case LessThan(ST_Distance(distArgs), Literal(d, DoubleType)) =>
         for ((name, value) <- resolveNameAndLiteral(distArgs, pushableColumn))
@@ -254,6 +276,24 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
 
   private def unquote(name: String): String = {
     parseColumnPath(name).mkString(".")
+  }
+
+  /**
+   * Extract a [[Box2D]] from a Catalyst literal value. Box2DUDT serializes to an InternalRow of
+   * four doubles; if the value is something else, the predicate is not pushable. Inverted bounds
+   * (xmin>xmax or ymin>ymax) are rejected here so the predicate falls back to runtime evaluation
+   * and surfaces the expected IllegalArgumentException — pushing them through Parquet would
+   * silently prune all matching rows before the throw fires.
+   */
+  private def extractBox2DLiteral(value: Any): Option[Box2D] = value match {
+    case row: InternalRow if row.numFields == 4 =>
+      val xmin = row.getDouble(0)
+      val ymin = row.getDouble(1)
+      val xmax = row.getDouble(2)
+      val ymax = row.getDouble(3)
+      if (xmin > xmax || ymin > ymax) None
+      else Some(new Box2D(xmin, ymin, xmax, ymax))
+    case _ => None
   }
 
   private def resolveNameAndLiteral(
