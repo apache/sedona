@@ -27,12 +27,22 @@ class Box2DCastSuite extends TestBaseScala {
   /**
    * SQL `CAST(... AS box2d)` / `CAST(... AS geometry)` parsing requires Sedona's
    * `SedonaSqlAstBuilder` to be active. The test base randomizes
-   * `spark.sedona.enableParserExtension` across CI runs, so SQL-level CAST tests are gated on
-   * that flag. DataFrame `.cast(...)` tests run unconditionally because the resolution rule is
-   * always injected.
+   * `spark.sedona.enableParserExtension` across CI runs, and `SparkContext` is JVM-singleton so
+   * the active value can differ from this suite's session-level config. Probe directly by parsing
+   * a tiny CAST: this matches the behavior the SQL tests actually depend on, and caches the
+   * answer for the rest of the suite. DataFrame `.cast(...)` tests run unconditionally because
+   * the resolution rule is always injected.
    */
-  private def parserExtensionEnabled: Boolean =
-    sparkSession.conf.get("spark.sedona.enableParserExtension", "true").toBoolean
+  private lazy val sqlCastSupported: Boolean = {
+    try {
+      sparkSession
+        .sql("SELECT CAST(ST_GeomFromText('POINT (0 0)') AS box2d) AS b")
+        .collect()
+      true
+    } catch {
+      case _: org.apache.spark.sql.catalyst.parser.ParseException => false
+    }
+  }
 
   describe("Geometry ↔ Box2D Catalyst cast") {
 
@@ -85,7 +95,7 @@ class Box2DCastSuite extends TestBaseScala {
 
     it("SQL CAST(geom AS box2d) returns the planar bbox") {
       assume(
-        parserExtensionEnabled,
+        sqlCastSupported,
         "Sedona SQL parser extension is required for `CAST(... AS box2d)` syntax")
       val box = sparkSession
         .sql("SELECT CAST(ST_GeomFromText('LINESTRING (0 0, 10 20)') AS box2d) AS b")
@@ -97,7 +107,7 @@ class Box2DCastSuite extends TestBaseScala {
 
     it("SQL CAST(box AS geometry) returns the rectangular polygon") {
       assume(
-        parserExtensionEnabled,
+        sqlCastSupported,
         "Sedona SQL parser extension is required for `CAST(... AS geometry)` syntax")
       val wkt = sparkSession
         .sql("SELECT ST_AsText(CAST(ST_MakeBox2D(ST_Point(0.0, 0.0), ST_Point(2.0, 4.0)) AS geometry)) AS w")
@@ -109,7 +119,7 @@ class Box2DCastSuite extends TestBaseScala {
 
     it("SQL round-trip Geometry → Box2D → Geometry yields the envelope polygon") {
       assume(
-        parserExtensionEnabled,
+        sqlCastSupported,
         "Sedona SQL parser extension is required for `CAST(... AS ...)` between UDTs")
       val wkt = sparkSession
         .sql("SELECT ST_AsText(CAST(CAST(ST_GeomFromText('LINESTRING (0 0, 5 10)') AS box2d) AS geometry)) AS w")
@@ -121,7 +131,7 @@ class Box2DCastSuite extends TestBaseScala {
 
     it("SQL CAST(NULL geometry AS box2d) returns null") {
       assume(
-        parserExtensionEnabled,
+        sqlCastSupported,
         "Sedona SQL parser extension is required for `CAST(... AS box2d)` syntax")
       val box = sparkSession
         .sql("SELECT CAST(ST_GeomFromText(NULL) AS box2d) AS b")
