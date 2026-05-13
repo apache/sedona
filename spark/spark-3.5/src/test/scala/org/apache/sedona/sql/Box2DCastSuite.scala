@@ -27,8 +27,7 @@ class Box2DCastSuite extends TestBaseScala {
 
     it("SQL CAST(geom AS box2d) returns the planar bbox") {
       val row = sparkSession
-        .sql(
-          "SELECT CAST(ST_GeomFromText('LINESTRING (0 0, 10 20)') AS box2d) AS b")
+        .sql("SELECT CAST(ST_GeomFromText('LINESTRING (0 0, 10 20)') AS box2d) AS b")
         .collect()
         .head
       val box = row.getAs[Box2D]("b")
@@ -37,8 +36,7 @@ class Box2DCastSuite extends TestBaseScala {
 
     it("SQL CAST(box AS geometry) returns the rectangular polygon") {
       val wkt = sparkSession
-        .sql(
-          "SELECT ST_AsText(CAST(ST_MakeBox2D(ST_Point(0.0, 0.0), ST_Point(2.0, 4.0)) AS geometry)) AS w")
+        .sql("SELECT ST_AsText(CAST(ST_MakeBox2D(ST_Point(0.0, 0.0), ST_Point(2.0, 4.0)) AS geometry)) AS w")
         .collect()
         .head
         .getString(0)
@@ -58,8 +56,8 @@ class Box2DCastSuite extends TestBaseScala {
 
     it("DataFrame API .cast(GeometryUDT) rewrites to ST_GeomFromBox2D") {
       import sparkSession.implicits._
-      val df = sparkSession.sql(
-        "SELECT ST_MakeBox2D(ST_Point(0.0, 0.0), ST_Point(1.0, 1.0)) AS b")
+      val df =
+        sparkSession.sql("SELECT ST_MakeBox2D(ST_Point(0.0, 0.0), ST_Point(1.0, 1.0)) AS b")
       val out = df
         .select(col("b").cast(GeometryUDT()).alias("g"))
         .selectExpr("ST_AsText(g) AS wkt")
@@ -69,8 +67,7 @@ class Box2DCastSuite extends TestBaseScala {
 
     it("Round-trip Geometry → Box2D → Geometry yields the envelope polygon") {
       val wkt = sparkSession
-        .sql(
-          "SELECT ST_AsText(CAST(CAST(ST_GeomFromText('LINESTRING (0 0, 5 10)') AS box2d) AS geometry)) AS w")
+        .sql("SELECT ST_AsText(CAST(CAST(ST_GeomFromText('LINESTRING (0 0, 5 10)') AS box2d) AS geometry)) AS w")
         .collect()
         .head
         .getString(0)
