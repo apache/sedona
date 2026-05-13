@@ -203,6 +203,14 @@
                         <a href="GeoParquetSpatialFilter$$AndFilter.html" title="">AndFilter</a>
                       </li><li class="current-entities indented8">
                         <span class="separator"></span>
+                        <a class="class" href="GeoParquetSpatialFilter$$Box2DLeafFilter.html" title="Pushdown filter for predicates that operate on a Box2D-typed column (e.g."></a>
+                        <a href="GeoParquetSpatialFilter$$Box2DLeafFilter.html" title="Pushdown filter for predicates that operate on a Box2D-typed column (e.g.">Box2DLeafFilter</a>
+                      </li><li class="current-entities indented8">
+                        <a class="object" href="GeoParquetSpatialFilter$$Box2DPredicateKind$.html" title=""></a>
+                        <a class="trait" href="GeoParquetSpatialFilter$$Box2DPredicateKind.html" title="Semantic kind of a Box2D leaf predicate."></a>
+                        <a href="GeoParquetSpatialFilter$$Box2DPredicateKind.html" title="Semantic kind of a Box2D leaf predicate.">Box2DPredicateKind</a>
+                      </li><li class="current-entities indented8">
+                        <span class="separator"></span>
                         <a class="class" href="" title="Spatial predicate pushed down to GeoParquet data source."></a>
                         <a href="" title="Spatial predicate pushed down to GeoParquet data source.">LeafFilter</a>
                       </li><li class="current-entities indented8">
@@ -458,7 +466,10 @@ metadata to prune unrelated files.
         <span class="name">evaluate</span><span class="params">(<span name="columns">columns: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="GeometryFieldMetaData.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeometryFieldMetaData">GeometryFieldMetaData</a>]</span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter">LeafFilter</a> → <a href="GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a></dd></dl></div>
+      <p class="shortcomment cmt">File-level evaluation against GeoParquet column metadata.</p><div class="fullcomment"><div class="comment cmt"><p>File-level evaluation against GeoParquet column metadata. Used for cheap whole-file pruning
+before reading row-group statistics. Filters that cannot soundly prune at the file metadata
+level should return <code>true</code> here and emit their pruning predicate via <a href="#toParquetFilter:Option[org.apache.parquet.filter2.predicate.FilterPredicate]" class="extmbr" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter#toParquetFilter">toParquetFilter</a>.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter">LeafFilter</a> → <a href="GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -618,6 +629,26 @@ metadata to prune unrelated files.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter#toParquetFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toParquetFilter:Option[org.apache.parquet.filter2.predicate.FilterPredicate]"></a><a id="toParquetFilter:Option[FilterPredicate]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetSpatialFilter$$LeafFilter.html#toParquetFilter:Option[org.apache.parquet.filter2.predicate.FilterPredicate]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toParquetFilter</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.parquet.filter2.predicate.FilterPredicate">FilterPredicate</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Translate this spatial filter into a Parquet <span class="extype" name="FilterPredicate">FilterPredicate</span> that the Parquet reader can
+evaluate against row-group statistics.</p><div class="fullcomment"><div class="comment cmt"><p>Translate this spatial filter into a Parquet <span class="extype" name="FilterPredicate">FilterPredicate</span> that the Parquet reader can
+evaluate against row-group statistics. Returns <code>None</code> if the filter cannot be expressed as a
+Parquet predicate (e.g. arbitrary JTS predicates on a geometry column).
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">

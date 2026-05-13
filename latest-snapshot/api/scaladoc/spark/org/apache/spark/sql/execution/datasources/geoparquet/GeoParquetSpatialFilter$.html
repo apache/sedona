@@ -347,6 +347,49 @@
       </span>
       
       
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DLeafFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Box2DLeafFilterextendsGeoParquetSpatialFilterwithProductwithSerializable"></a><a id="Box2DLeafFilter:Box2DLeafFilter"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetSpatialFilter$$Box2DLeafFilter.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Pushdown filter for predicates that operate on a Box2D-typed column (e.g." href="GeoParquetSpatialFilter$$Box2DLeafFilter.html"><span class="name">Box2DLeafFilter</span></a><span class="params">(<span name="box2dColumnName">box2dColumnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="predicateKind">predicateKind: <a href="GeoParquetSpatialFilter$$Box2DPredicateKind.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DPredicateKind">Box2DPredicateKind</a></span>, <span name="queryBox">queryBox: <span class="extype" name="org.apache.sedona.common.geometryObjects.Box2D">Box2D</span></span>)</span><span class="result"> extends <a href="GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Pushdown filter for predicates that operate on a Box2D-typed column (e.g.</p><div class="fullcomment"><div class="comment cmt"><p>Pushdown filter for predicates that operate on a Box2D-typed column (e.g.
+<code>ST_BoxIntersects(box_col, lit_box)</code> or <code>ST_BoxContains(box_col, lit_box)</code>).</p><p>Pruning is performed by translating the predicate into per-leaf inequalities on the Box2D
+column's four <code>Double</code> fields (<code>xmin</code>, <code>ymin</code>, <code>xmax</code>, <code>ymax</code>) and pushing the result down as
+a Parquet <span class="extype" name="FilterPredicate">FilterPredicate</span>. Parquet's row-group statistics machinery then skips row groups
+whose per-column min/max bounds disprove the predicate.</p><p>File-metadata evaluation returns <code>true</code> (i.e. don't prune at the GeoParquet metadata layer)
+because that path relied on the geometry column's bbox and is unsound when the GeoParquet 1.1
+spec permits coverings to be conservatively wider than per-row envelopes. The Parquet-stats
+path uses the Box2D column's actual recorded min/max, so it is sound for any writer.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DPredicateKind" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="Box2DPredicateKindextendsAnyRef"></a><a id="Box2DPredicateKind:Box2DPredicateKind"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetSpatialFilter$$Box2DPredicateKind.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Semantic kind of a Box2D leaf predicate." href="GeoParquetSpatialFilter$$Box2DPredicateKind.html"><span class="name">Box2DPredicateKind</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Semantic kind of a Box2D leaf predicate.</p><div class="fullcomment"><div class="comment cmt"><p>Semantic kind of a Box2D leaf predicate. Determines which inequality system is emitted as a
+Parquet filter against the four (xmin, ymin, xmax, ymax) leaf columns of a Box2D-typed
+column.
+</p></div></div>
     </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LeafFilterextendsGeoParquetSpatialFilterwithProductwithSerializable"></a><a id="LeafFilter:LeafFilter"></a>
       <span class="permalink">
@@ -730,6 +773,22 @@ metadata to prune unrelated files.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.Box2DPredicateKind" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Box2DPredicateKind"></a><a id="Box2DPredicateKind:Box2DPredicateKind"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/execution/datasources/geoparquet/GeoParquetSpatialFilter$$Box2DPredicateKind$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="GeoParquetSpatialFilter$$Box2DPredicateKind$.html"><span class="name">Box2DPredicateKind</span></a>
+      </span>
+      
+      
     </li>
               </ol>
             </div>
