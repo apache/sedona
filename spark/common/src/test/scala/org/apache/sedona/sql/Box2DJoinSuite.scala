@@ -112,6 +112,46 @@ class Box2DJoinSuite extends TestBaseScala {
       assert(df.count() == 4)
     }
 
+    it("Null Box2D rows are safe and produce no matches") {
+      // A null shape on either side must not crash the executor and must not contribute matches
+      // (mirrors the existing GeometrySerializer.deserialize(null) → empty-collection fallback).
+      import sparkSession.implicits._
+      val withNullLeft = leftBoxes
+        .selectExpr("id", "box AS box")
+        .union(Seq((99, null.asInstanceOf[org.apache.sedona.common.geometryObjects.Box2D]))
+          .toDF("id", "box"))
+      val df = withNullLeft
+        .alias("L")
+        .join(broadcast(rightBoxes.alias("R")), expr("ST_BoxIntersects(L.box, R.box)"))
+      assert(df.count() == 4) // unchanged from the non-null fixture
+      // Range join path (no broadcast) also tolerates nulls.
+      val rangeDf = withNullLeft
+        .alias("L")
+        .join(rightBoxes.alias("R"), expr("ST_BoxIntersects(L.box, R.box)"))
+      assert(rangeDf.count() == 4)
+    }
+
+    it("Inverted Box2D bounds in a join throw IllegalArgumentException") {
+      import sparkSession.implicits._
+      // Construct an inverted Box2D directly via the Java constructor (the SQL ST_MakeBox2D
+      // doesn't validate, so this is how a stored column with inverted bounds would look).
+      val invertedLeft =
+        Seq((1, new org.apache.sedona.common.geometryObjects.Box2D(10.0, 0.0, 0.0, 10.0)))
+          .toDF("id", "box")
+      val ex = intercept[org.apache.spark.SparkException] {
+        invertedLeft
+          .alias("L")
+          .join(broadcast(rightBoxes.alias("R")), expr("ST_BoxIntersects(L.box, R.box)"))
+          .collect()
+      }
+      val cause = Iterator
+        .iterate(ex: Throwable)(_.getCause)
+        .takeWhile(_ != null)
+        .find(_.isInstanceOf[IllegalArgumentException])
+      assert(cause.isDefined, s"Expected IllegalArgumentException in cause chain, got: $ex")
+      assert(cause.get.getMessage.contains("inverted bounds"))
+    }
+
     it("Result is equivalent to ST_Intersects on the Box2D-as-polygon envelopes") {
       val viaBox = leftBoxes
         .alias("L")
