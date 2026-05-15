@@ -23,13 +23,16 @@ import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.JavaSerializer;
+import com.sun.media.imageioimpl.common.BogusColorSpace;
 import com.sun.media.jai.rmi.ColorModelState;
 import com.sun.media.jai.util.ImageUtil;
 import it.geosolutions.jaiext.range.NoDataContainer;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Transparency;
 import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
@@ -39,6 +42,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -384,6 +388,11 @@ public final class DeepCopiedRenderedImage
     // The deserialized rendered image contains only one tile (imageRaster). We need to update
     // the sample model and tile properties to reflect this.
     this.sampleModel = this.imageRaster.getSampleModel();
+
+    // Reconcile colorModel with the actual sampleModel. Python UDFs may change the band count
+    // or data type, producing a sampleModel that is incompatible with the serialized colorModel.
+    this.colorModel = reconcileColorModel(this.colorModel, this.sampleModel);
+
     this.tileWidth = this.width;
     this.tileHeight = this.height;
     this.numXTiles = 1;
@@ -419,6 +428,40 @@ public final class DeepCopiedRenderedImage
       }
     }
     return propertyTable;
+  }
+
+  /**
+   * Reconcile a deserialized ColorModel with the actual SampleModel. When a Python UDF changes the
+   * band count or data type, the serialized colorModel blob may describe the original raster's
+   * structure (e.g., 4 bands) while the SampleModel reflects the new structure (e.g., 1 band). This
+   * mismatch causes {@link javax.media.jai.PlanarImage#setImageLayout} to throw {@link
+   * IllegalArgumentException} when wrapping this image in a {@link
+   * javax.media.jai.RenderedImageAdapter}.
+   *
+   * <p>This method applies the same self-healing pattern used by {@link MapAlgebra#fetchColorModel}
+   * and {@link RasterUtils#clone}: check compatibility first, then try {@link
+   * PlanarImage#createColorModel}, then fall back to {@link BogusColorSpace}.
+   *
+   * @param colorModel the deserialized ColorModel (may be incompatible)
+   * @param sampleModel the actual SampleModel from the deserialized raster data
+   * @return a compatible ColorModel — either the original if compatible, or a newly constructed one
+   */
+  private static ColorModel reconcileColorModel(ColorModel colorModel, SampleModel sampleModel) {
+    if (colorModel.isCompatibleSampleModel(sampleModel)) {
+      return colorModel;
+    }
+    // Try PlanarImage's heuristic first (handles common cases like grayscale, RGB)
+    ColorModel cm = PlanarImage.createColorModel(sampleModel);
+    if (cm != null) {
+      return cm;
+    }
+    // Fall back to BogusColorSpace — always works for any band count / data type
+    int numBands = sampleModel.getNumBands();
+    int dataType = sampleModel.getDataType();
+    final int[] nBits = new int[numBands];
+    Arrays.fill(nBits, DataBuffer.getDataTypeSize(dataType));
+    return new ComponentColorModel(
+        new BogusColorSpace(numBands), nBits, false, true, Transparency.OPAQUE, dataType);
   }
 
   public static void registerKryo(Kryo kryo) {
@@ -486,6 +529,11 @@ public final class DeepCopiedRenderedImage
     // The deserialized rendered image contains only one tile (imageRaster). We need to update
     // the sample model and tile properties to reflect this.
     this.sampleModel = this.imageRaster.getSampleModel();
+
+    // Reconcile colorModel with the actual sampleModel. Python UDFs may change the band count
+    // or data type, producing a sampleModel that is incompatible with the serialized colorModel.
+    this.colorModel = reconcileColorModel(this.colorModel, this.sampleModel);
+
     this.tileWidth = this.width;
     this.tileHeight = this.height;
     this.numXTiles = 1;

@@ -131,7 +131,12 @@ class RasterType(UserDefinedType):
         return BinaryType()
 
     def serialize(self, obj):
-        raise NotImplementedError("RasterType.serialize is not implemented yet")
+        if raster_serde is None:
+            raise NotImplementedError(
+                "rasterio is not installed. Please install it to support "
+                "RasterType serialization"
+            )
+        return raster_serde.serialize(obj)
 
     def deserialize(self, datum):
         if raster_serde is not None:
