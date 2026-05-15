@@ -554,9 +554,8 @@ private[apache] case class ST_MakeBox2D(inputExpressions: Seq[Expression])
 
 /**
  * Convert a Box2D to a closed rectangular polygon Geometry. Equivalent to PostGIS {@code
- * box2d::geometry}. Exposed as a function rather than a Catalyst implicit cast because UDT-to-UDT
- * implicit casts require Catalyst-level work; ST_GeomFromBox2D lives alongside the other
- * ST_GeomFrom* constructors.
+ * box2d::geometry}. `CAST(box AS geometry)` is also accepted (resolved to this expression by the
+ * Box2D cast resolution rule).
  *
  * @param inputExpressions
  */
