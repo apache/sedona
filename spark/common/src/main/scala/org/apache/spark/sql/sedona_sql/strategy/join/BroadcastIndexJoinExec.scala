@@ -323,11 +323,10 @@ case class BroadcastIndexJoinExec(
         })
       case Some(distanceExpression) =>
         streamResultsRaw.map(row => {
-          val geom = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
-          if (geom == null) {
+          val geometry = TraitJoinQueryBase.shapeToGeometry(boundStreamShape, row)
+          if (geometry == null) {
             (null, row)
           } else {
-            val geometry = GeometrySerializer.deserialize(geom)
             val radius = BindReferences
               .bindReference(distanceExpression, streamed.output)
               .eval(row)
@@ -351,23 +350,21 @@ case class BroadcastIndexJoinExec(
         })
       case _ =>
         streamResultsRaw.map(row => {
-          val serializedObject = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
-          if (serializedObject == null) {
-            (null, row)
-          } else {
-            val shape = if (isRasterPredicate) {
-              if (boundStreamShape.dataType.isInstanceOf[RasterUDT]) {
-                val raster = RasterSerializer.deserialize(serializedObject)
-                JoinedGeometryRaster.rasterToWGS84Envelope(raster)
-              } else {
-                val geom = GeometrySerializer.deserialize(serializedObject)
-                JoinedGeometryRaster.geometryToWGS84Envelope(geom)
-              }
+          val shape = if (isRasterPredicate) {
+            // Raster path keeps the legacy bytes-only handling — Box2D doesn't apply here.
+            val serializedObject = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
+            if (serializedObject == null) null
+            else if (boundStreamShape.dataType.isInstanceOf[RasterUDT]) {
+              val raster = RasterSerializer.deserialize(serializedObject)
+              JoinedGeometryRaster.rasterToWGS84Envelope(raster)
             } else {
-              GeometrySerializer.deserialize(serializedObject)
+              val geom = GeometrySerializer.deserialize(serializedObject)
+              JoinedGeometryRaster.geometryToWGS84Envelope(geom)
             }
-            (shape, row)
+          } else {
+            TraitJoinQueryBase.shapeToGeometry(boundStreamShape, row)
           }
+          (shape, row)
         })
     }
   }

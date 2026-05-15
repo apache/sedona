@@ -291,6 +291,31 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                 rightShape,
                 SpatialPredicate.EQUALS,
                 extraCondition)
+            // Box2D predicates. Both shape expressions resolve to Box2DUDT; the executors
+            // materialise each Box2D as a rectangular Polygon so the existing partitioner /
+            // R-tree / refine machinery applies unchanged. ST_BoxContains is closed-interval
+            // containment, so it maps to SpatialPredicate.COVERS (JTS `contains` would reject
+            // edge-touching cases).
+            case ST_BoxIntersects(Seq(leftShape, rightShape)) =>
+              Some(
+                JoinQueryDetection(
+                  left,
+                  right,
+                  leftShape,
+                  rightShape,
+                  SpatialPredicate.INTERSECTS,
+                  isGeography = false,
+                  extraCondition))
+            case ST_BoxContains(Seq(leftShape, rightShape)) =>
+              Some(
+                JoinQueryDetection(
+                  left,
+                  right,
+                  leftShape,
+                  rightShape,
+                  SpatialPredicate.COVERS,
+                  isGeography = false,
+                  extraCondition))
             case pred: ST_Predicate =>
               getJoinDetection(left, right, pred, extraCondition)
             case pred: RS_Predicate =>

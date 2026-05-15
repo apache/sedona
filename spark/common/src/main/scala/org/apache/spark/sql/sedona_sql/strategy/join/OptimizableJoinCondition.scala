@@ -63,7 +63,7 @@ case class OptimizableJoinCondition(left: LogicalPlan, right: LogicalPlan) {
     expression match {
       case _: ST_Intersects | _: ST_Contains | _: ST_Covers | _: ST_Within | _: ST_CoveredBy |
           _: ST_Overlaps | _: ST_Touches | _: ST_Equals | _: ST_Crosses | _: ST_KNN |
-          _: RS_Predicate =>
+          _: ST_BoxIntersects | _: ST_BoxContains | _: RS_Predicate =>
         val leftShape = expression.children.head
         val rightShape = expression.children(1)
         ExpressionUtils.matchExpressionsToPlans(leftShape, rightShape, left, right).isDefined

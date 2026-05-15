@@ -18,14 +18,16 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
+import org.apache.sedona.common.Constructors
 import org.apache.sedona.common.S2Geography.GeographyWKBSerializer
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.utils.{GeometrySerializer, RasterSerializer}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeRow}
 import org.apache.spark.sql.execution.SparkPlan
-import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
+import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, RasterUDT}
 import org.locationtech.jts.geom.Geometry
 
 trait TraitJoinQueryBase {
@@ -49,8 +51,7 @@ trait TraitJoinQueryBase {
     spatialRdd.setRawSpatialRDD(
       rdd
         .map { x =>
-          val shape =
-            GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
+          val shape = TraitJoinQueryBase.shapeToGeometry(shapeExpression, x)
           shape.setUserData(x.copy)
           shape
         }
@@ -123,8 +124,7 @@ trait TraitJoinQueryBase {
     spatialRdd.setRawSpatialRDD(
       rdd
         .map { x =>
-          val shape =
-            GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
+          val shape = TraitJoinQueryBase.shapeToGeometry(shapeExpression, x)
           val distance = boundRadius.eval(x).asInstanceOf[Double]
           val expandedEnvelope =
             JoinedGeometry.geometryToExpandedEnvelope(shape, distance, isGeography)
@@ -176,5 +176,38 @@ trait TraitJoinQueryBase {
       dominantShapes.spatialPartitioning(sedonaConf.getJoinGridType, numPartitions)
       followerShapes.spatialPartitioning(dominantShapes.getPartitioner)
     }
+  }
+}
+
+object TraitJoinQueryBase {
+
+  /**
+   * Materialise a shape column value as a JTS [[Geometry]]. Box2D-typed columns are turned into
+   * the closed rectangular polygon implied by their `(xmin, ymin, xmax, ymax)` bounds; all other
+   * shape columns are deserialised from the Sedona geometry binary form.
+   *
+   * Producing a JTS rectangle here lets the rest of the join machinery — partitioner, R-tree
+   * `IndexBuilder`, refine evaluator — stay shape-agnostic. JTS already short-circuits
+   * rectangle-rectangle predicates (`Polygon.isRectangle` triggers `RectangleIntersects` /
+   * `RectangleContains`), so a `ST_BoxIntersects` join naturally pays only the four-double
+   * envelope comparison at refine time.
+   */
+  def shapeToGeometry(shapeExpression: Expression, row: InternalRow): Geometry = {
+    val evaluated = shapeExpression.eval(row)
+    if (evaluated == null) {
+      null
+    } else
+      shapeExpression.dataType match {
+        case _: Box2DUDT =>
+          val box = evaluated.asInstanceOf[InternalRow]
+          Constructors
+            .polygonFromEnvelope(
+              box.getDouble(0),
+              box.getDouble(1),
+              box.getDouble(2),
+              box.getDouble(3))
+        case _ =>
+          GeometrySerializer.deserialize(evaluated.asInstanceOf[Array[Byte]])
+      }
   }
 }
