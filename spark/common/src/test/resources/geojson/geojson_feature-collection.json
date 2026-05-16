@@ -14,7 +14,11 @@
       },
       "properties": {
         "prop0": "value1",
-        "prop1": 0.0
+        "prop1": {
+          "prop1_0": "0",
+          "prop1_1": "1",
+          "prop1_2": "2"
+        }
       }
     },
     { "type": "Feature",
@@ -27,7 +31,13 @@
       },
       "properties": {
         "prop0": "value2",
-        "prop1": {"this": "that"}
+        "prop1": {
+          "prop1_0": "0",
+          "prop1_1": "1",
+          "prop1_2": {
+            "this": "that"
+          }
+        }
       }
     },
     {
@@ -41,7 +51,11 @@
       },
       "properties": {
         "prop0": "value3",
-        "prop1": {"this": "that"}
+        "prop1": {
+          "prop1_0": "0",
+          "prop1_1": "1",
+          "prop1_2": "2"
+        }
       }
     },
     {
@@ -55,7 +69,11 @@
       },
       "properties": {
         "prop0": "value4",
-        "prop1": {"this": "that"}
+        "prop1": {
+          "prop1_0": "0",
+          "prop1_1": "1",
+          "prop1_2": "2"
+        }
       }
     },
     {
@@ -69,7 +87,11 @@
       },
       "properties": {
         "prop0": "value5",
-        "prop1": {"this": "that"}
+        "prop1": {
+          "prop1_0": "0",
+          "prop1_1": "1",
+          "prop1_2": "2"
+        }
       }
     }
   ]

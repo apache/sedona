@@ -22,6 +22,8 @@ import org.apache.commons.io.FileUtils
 import org.apache.spark.sql.{Row, SaveMode}
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.functions.{col, explode, expr}
+import org.apache.spark.sql.sedona_sql.io.geojson.GeoJSONUtils.updateGeometrySchema
+import org.apache.spark.sql.types.{ArrayType, DoubleType, StringType, StructField, StructType}
 import org.locationtech.jts.geom.{Geometry, MultiLineString, Point, Polygon}
 import org.scalatest.BeforeAndAfterAll
 
@@ -454,5 +456,63 @@ class geojsonIOTests extends TestBaseScala with BeforeAndAfterAll {
       assert(rowsR.getAs[String]("stac_version") == rowsW.getAs[String]("stac_version"))
       assert(rowsR.getAs[Polygon]("geometry") == rowsW.getAs[Polygon]("geometry"))
     }
+  }
+
+  it("updateGeometrySchema should update first geometry struct only") {
+    val inputSchema = StructType(
+      Seq(
+        StructField("type", StringType),
+        StructField(
+          "features",
+          ArrayType(StructType(Seq(
+            StructField("type", StringType),
+            StructField(
+              "geometry",
+              StructType(Seq(
+                StructField("type", StringType),
+                StructField("coordinates", ArrayType(ArrayType(DoubleType)))))),
+            StructField(
+              "properties",
+              StructType(Seq(
+                StructField("prop0", StringType),
+                StructField(
+                  "prop1",
+                  StructType(Seq(
+                    StructField("prop1_0", StringType),
+                    StructField(
+                      "geometry",
+                      StructType(Seq(
+                        StructField("type", StringType),
+                        StructField(
+                          "coordinates",
+                          ArrayType(ArrayType(DoubleType))))))))))))))))))
+
+    val updatedSchema = updateGeometrySchema(inputSchema, StringType)
+
+    val expectedSchema = StructType(
+      Seq(
+        StructField("type", StringType),
+        StructField(
+          "features",
+          ArrayType(StructType(Seq(
+            StructField("type", StringType),
+            StructField("geometry", StringType), // GeoJSON string
+            StructField(
+              "properties",
+              StructType(Seq(
+                StructField("prop0", StringType),
+                StructField(
+                  "prop1",
+                  StructType(Seq(
+                    StructField("prop1_0", StringType),
+                    StructField(
+                      "geometry",
+                      StructType(Seq(
+                        StructField("type", StringType),
+                        StructField(
+                          "coordinates",
+                          ArrayType(ArrayType(DoubleType))))))))))))))))))
+
+    assert(updatedSchema == expectedSchema)
   }
 }
