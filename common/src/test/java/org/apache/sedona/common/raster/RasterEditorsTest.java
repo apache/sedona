@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 
 import java.awt.image.DataBuffer;
@@ -3575,6 +3576,39 @@ public class RasterEditorsTest extends RasterTestBase {
     assertEquals(
         Double.NaN, RasterUtils.getNoDataValue(modifiedRaster6.getSampleDimension(0)), 0.01d);
     assertEquals(0.0, RasterUtils.getNoDataValue(modifiedRaster6.getSampleDimension(1)), 0.01d);
+  }
+
+  /**
+   * Test that when interpolating a single band in a multi-band raster, the other bands are
+   * preserved unchanged.
+   */
+  @Test
+  public void testInterpolatePreservesOtherBands() throws FactoryException {
+    double[] band1Values =
+        new double[] {1, Double.NaN, 3, Double.NaN, 5, Double.NaN, 7, Double.NaN, 9};
+    double[] band2Values = new double[] {1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, 3, 3, 0, 0, 1);
+    // Use -9999 as noDataValue so 0 is preserved as a valid value
+    raster = MapAlgebra.addBandFromArray(raster, band1Values, 1, -9999.0);
+    raster = MapAlgebra.addBandFromArray(raster, band2Values, 2, -9999.0);
+
+    // Interpolate only band 1 (specify band=1), leaving band 2 unchanged
+    GridCoverage2D result = RasterEditors.interpolate(raster, 2.0, "Fixed", 3.0, 1.0, 1);
+
+    // Verify band 1 was interpolated (NaN values should be filled)
+    double[] resultBand1 = MapAlgebra.bandAsArray(result, 1);
+    for (int i = 0; i < resultBand1.length; i++) {
+      // Band 1 should not have any NaN values after interpolation
+      assertFalse("Band 1 should not have NaN at index " + i, Double.isNaN(resultBand1[i]));
+    }
+
+    // Verify band 2 is EXACTLY the same as original
+    double[] resultBand2 = MapAlgebra.bandAsArray(result, 2);
+    assertEquals(
+        "Band 2 should be preserved unchanged",
+        Arrays.toString(band2Values),
+        Arrays.toString(resultBand2));
   }
 
   @Test
