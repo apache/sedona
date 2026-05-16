@@ -32,7 +32,7 @@ If no `toRasterIndex` is provided, the new band is appended to the end of `toRas
 Format:
 
 ```
-RS_AddBand(toRaster: Raster, fromRaster: Raster, fromBand: Integer = 1, toRasterIndex: Integer = at_end)
+RS_AddBand(toRaster: Raster, fromRaster: Raster)
 ```
 
 ```
@@ -40,7 +40,7 @@ RS_AddBand(toRaster: Raster, fromRaster: Raster, fromBand: Integer = 1)
 ```
 
 ```
-RS_AddBand(toRaster: Raster, fromRaster: Raster)
+RS_AddBand(toRaster: Raster, fromRaster: Raster, fromBand: Integer = 1, toRasterIndex: Integer = at_end)
 ```
 
 Return type: `Raster`

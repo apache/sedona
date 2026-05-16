@@ -32,15 +32,7 @@ Introduction: `RS_AsRaster` converts a vector geometry into a raster dataset by 
 Format:
 
 ```
-RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boolean, value: Double, noDataValue: Double, useGeometryExtent: Boolean)
-```
-
-```
-RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boolean, value: Double, noDataValue: Double)
-```
-
-```
-RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boolean, value: Double)
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String)
 ```
 
 ```
@@ -48,7 +40,15 @@ RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boole
 ```
 
 ```
-RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String)
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boolean, value: Double)
+```
+
+```
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boolean, value: Double, noDataValue: Double)
+```
+
+```
+RS_AsRaster(geom: Geometry, raster: Raster, pixelType: String, allTouched: Boolean, value: Double, noDataValue: Double, useGeometryExtent: Boolean)
 ```
 
 Return type: `Raster`

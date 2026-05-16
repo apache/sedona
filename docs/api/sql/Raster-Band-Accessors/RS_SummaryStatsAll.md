@@ -30,11 +30,11 @@ Introduction: Returns summary stats struct consisting of count, sum, mean, stdde
 
 Formats:
 
-`RS_SummaryStatsAll(raster: Raster, band: Integer = 1, excludeNoDataValue: Boolean = true)`
+`RS_SummaryStatsAll(raster: Raster)`
 
 `RS_SummaryStatsAll(raster: Raster, band: Integer = 1)`
 
-`RS_SummaryStatsAll(raster: Raster)`
+`RS_SummaryStatsAll(raster: Raster, band: Integer = 1, excludeNoDataValue: Boolean = true)`
 
 Return type: `Struct<count: Long, sum: Double, mean: Double, stddev: Double, min: Double, max: Double>`
 

@@ -30,11 +30,11 @@ Introduction: Returns the number of pixels in a given band. If band is not speci
 
 Format:
 
-`RS_Count(raster: Raster, band: Integer = 1, excludeNoDataValue: Boolean = true)`
+`RS_Count(raster: Raster)`
 
 `RS_Count(raster: Raster, band: Integer = 1)`
 
-`RS_Count(raster: Raster)`
+`RS_Count(raster: Raster, band: Integer = 1, excludeNoDataValue: Boolean = true)`
 
 Return type: `Long`
 

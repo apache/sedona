@@ -30,11 +30,11 @@ to this function.
 Format without ROI `geom`:
 
 ```
-RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, width: Integer, height: Integer, newValues: ARRAY[Double], keepNoData: Boolean = false)
+RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, width: Integer, height: Integer, newValues: ARRAY[Double])
 ```
 
 ```
-RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, width: Integer, height: Integer, newValues: ARRAY[Double])
+RS_SetValues(raster: Raster, bandIndex: Integer, colX: Integer, rowY: Integer, width: Integer, height: Integer, newValues: ARRAY[Double], keepNoData: Boolean = false)
 ```
 
 Return type: `Raster`
@@ -60,7 +60,7 @@ The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
 Format with ROI `geom`:
 
 ```
-RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Double, allTouched: Boolean = false, keepNoData: Boolean = false)
+RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Double)
 ```
 
 ```
@@ -68,7 +68,7 @@ RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Doubl
 ```
 
 ```
-RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Double)
+RS_SetValues(raster: Raster, bandIndex: Integer, geom: Geometry, newValue: Double, allTouched: Boolean = false, keepNoData: Boolean = false)
 ```
 
 SQL Example
