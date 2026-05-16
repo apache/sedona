@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import static org.apache.sedona.common.raster.RasterBandEditors.rasterUnion;
+import static org.apache.sedona.common.utils.RasterUtils.flipVerticallyPixelSpace;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -180,6 +181,9 @@ public class RasterBandEditorsTest extends RasterTestBase {
       throws FactoryException, IOException, ParseException, TransformException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+
+    GridCoverage2D raster_bottom_up = flipVerticallyPixelSpace(raster);
+
     String polygon =
         "POLYGON ((-8682522.873537656 4572703.890837922, -8673439.664183248 4572993.532747675, -8673155.57366801 4563873.2099182755, -8701890.325907696 4562931.7093397, -8682522.873537656 4572703.890837922))";
     Geometry geom = Constructors.geomFromWKT(polygon, 3857);
@@ -199,6 +203,27 @@ public class RasterBandEditorsTest extends RasterTestBase {
     Double[] actualValues = PixelFunctions.values(clippedRaster, points, 1).toArray(new Double[0]);
     Double[] expectedValues = new Double[] {null, null, 0.0, 0.0, null};
     assertTrue(Arrays.equals(expectedValues, actualValues));
+
+    // Test for bottom-up raster
+    clippedRaster = RasterBandEditors.clip(raster_bottom_up, 1, geom, false, 200, false);
+    clippedMetadata = Arrays.stream(RasterAccessors.metadata(clippedRaster), 0, 9).toArray();
+    originalMetadata = Arrays.stream(RasterAccessors.metadata(raster_bottom_up), 0, 9).toArray();
+    assertArrayEquals(originalMetadata, clippedMetadata, 0.01d);
+
+    // Making sure orientation is preserved
+    assertEquals(
+        RasterAccessors.metadata(raster_bottom_up)[5],
+        RasterAccessors.metadata(clippedRaster)[5],
+        0.0);
+
+    points = new ArrayList<>();
+    points.add(Constructors.geomFromWKT("POINT(223802 4.21769e+06)", 26918));
+    points.add(Constructors.geomFromWKT("POINT(224759 4.20453e+06)", 26918));
+    points.add(Constructors.geomFromWKT("POINT(237201 4.20429e+06)", 26918));
+    points.add(Constructors.geomFromWKT("POINT(237919 4.20357e+06)", 26918));
+    points.add(Constructors.geomFromWKT("POINT(254668 4.21769e+06)", 26918));
+    actualValues = PixelFunctions.values(clippedRaster, points, 1).toArray(new Double[0]);
+    assertTrue(Arrays.equals(expectedValues, actualValues));
   }
 
   @Test
@@ -206,9 +231,13 @@ public class RasterBandEditorsTest extends RasterTestBase {
     // Test for AOI geometries smaller than a pixel
     GridCoverage2D raster =
         RasterConstructors.makeEmptyRaster(1, "F", 4, 4, 401805.039562261, 2095852.150947876, 30);
+
     raster = RasterEditors.setSrid(raster, 5070);
-    double[] bandValues = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-    raster = MapAlgebra.addBandFromArray(raster, bandValues, 1);
+    double[] bandValues_top_down = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    raster = MapAlgebra.addBandFromArray(raster, bandValues_top_down, 1);
+
+    GridCoverage2D raster_bottom_up = flipVerticallyPixelSpace(raster);
+
     String polygon =
         "POLYGON ((401866.1071465613 2095803.8989834636, 401850.9983055725 2095803.1375789386, 401850.039562261 2095822.150947876, 401865.14840359957 2095822.9124532426, 401880.2572475523 2095823.6738547424, 401881.2159852499 2095804.6604855175, 401866.1071465613 2095803.8989834636))";
     Geometry geom = Constructors.geomFromWKT(polygon, 5070);
@@ -222,6 +251,22 @@ public class RasterBandEditorsTest extends RasterTestBase {
     assertEquals(expectedBandNoDataValue, bandNoDataValue, FP_TOLERANCE);
     assertTrue(Arrays.equals(expectedValues, actualValues));
 
+    // Test for bottom-up raster
+    clippedRaster = RasterBandEditors.clip(raster_bottom_up, 1, geom, false, 0, true);
+    bandNoDataValue = RasterBandAccessors.getBandNoDataValue(clippedRaster);
+    actualValues = MapAlgebra.bandAsArray(clippedRaster, 1);
+
+    // Making sure orientation is preserved
+    assertEquals(
+        RasterAccessors.metadata(raster_bottom_up)[5],
+        RasterAccessors.metadata(clippedRaster)[5],
+        0.0);
+
+    expectedValues = new double[] {0.0, 7.0, 0.0, 0.0};
+    assertEquals(expectedBandNoDataValue, bandNoDataValue, FP_TOLERANCE);
+    assertTrue(Arrays.equals(expectedValues, actualValues));
+
+    // Test for geometry in different CRS
     Geometry geomTransformed = FunctionsGeoTools.transform(geom, "EPSG:5070", "EPSG:4326");
 
     clippedRaster = RasterBandEditors.clip(raster, 1, geomTransformed, false, 0, true);
@@ -230,6 +275,21 @@ public class RasterBandEditorsTest extends RasterTestBase {
     actualValues = MapAlgebra.bandAsArray(clippedRaster, 1);
     expectedValues = new double[] {0.0, 0.0, 0.0, 7.0};
 
+    assertEquals(expectedBandNoDataValue, bandNoDataValue, FP_TOLERANCE);
+    assertTrue(Arrays.equals(expectedValues, actualValues));
+
+    // Test for bottom-up raster
+    clippedRaster = RasterBandEditors.clip(raster_bottom_up, 1, geom, false, 0, true);
+    bandNoDataValue = RasterBandAccessors.getBandNoDataValue(clippedRaster);
+    actualValues = MapAlgebra.bandAsArray(clippedRaster, 1);
+
+    // Making sure orientation is preserved
+    assertEquals(
+        RasterAccessors.metadata(raster_bottom_up)[5],
+        RasterAccessors.metadata(clippedRaster)[5],
+        0.0);
+
+    expectedValues = new double[] {0.0, 7.0, 0.0, 0.0};
     assertEquals(expectedBandNoDataValue, bandNoDataValue, FP_TOLERANCE);
     assertTrue(Arrays.equals(expectedValues, actualValues));
   }
@@ -279,6 +339,24 @@ public class RasterBandEditorsTest extends RasterTestBase {
 
     assertEquals(expectedBandNoDataValue, bandNoDataValue, FP_TOLERANCE);
     assertArrayEquals(expectedValues, actualValues, 0.0);
+
+    // Test for bottom-up raster
+    GridCoverage2D raster_bottom_up = flipVerticallyPixelSpace(raster);
+    clippedRaster = RasterBandEditors.clip(raster_bottom_up, 1, geom, true, 0, true);
+
+    bandNoDataValue = RasterBandAccessors.getBandNoDataValue(clippedRaster);
+    expectedBandNoDataValue = 0.0;
+    actualValues = MapAlgebra.bandAsArray(clippedRaster, 1);
+    expectedValues =
+        new double[] {
+          91.0, 92.0, 93.0, 94.0, 0.0, 96.0, 97.0, 98.0, 99.0, 100.0, 81.0, 82.0, 83.0, 84.0, 0.0,
+          86.0, 87.0, 88.0, 89.0, 90.0, 71.0, 72.0, 73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0,
+          61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 0.0, 0.0, 51.0, 52.0, 53.0, 54.0, 55.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 42.0, 43.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        };
+
+    assertEquals(expectedBandNoDataValue, bandNoDataValue, FP_TOLERANCE);
+    assertArrayEquals(expectedValues, actualValues, 0.0);
   }
 
   @Test
@@ -287,6 +365,8 @@ public class RasterBandEditorsTest extends RasterTestBase {
           ClassNotFoundException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+    GridCoverage2D raster_bottom_up = flipVerticallyPixelSpace(raster);
+
     String polygon =
         "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))";
     Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
@@ -350,6 +430,53 @@ public class RasterBandEditorsTest extends RasterTestBase {
     actualValues = PixelFunctions.values(croppedRaster, points, 1).toArray(new Double[0]);
     expectedValues = new Double[] {85.0, 85.0, 127.0, 212.0, null};
     assertArrayEquals(expectedValues, actualValues);
+
+    // Test for bottom-up raster
+    // Testing red band without crop
+    clippedRaster = RasterBandEditors.clip(raster_bottom_up, 1, geom, false, 200, false);
+
+    clippedMetadata = RasterAccessors.metadata(clippedRaster);
+    originalMetadata = RasterAccessors.metadata(raster_bottom_up);
+    assertArrayEquals(
+        Arrays.stream(originalMetadata, 0, 9).toArray(),
+        Arrays.stream(clippedMetadata, 0, 9).toArray(),
+        0.01d);
+    assertEquals(1, clippedMetadata[9], FP_TOLERANCE);
+    actual = String.valueOf(clippedRaster.getSampleDimensions()[0]);
+    expected =
+        "RenderedSampleDimension(\"RED_BAND\":[200.0 ... 200.0])\n  ‣ Category(\"No data\":[200...200])\n";
+    assertEquals(expected, actual);
+
+    points = new ArrayList<>();
+    points.add(Constructors.geomFromWKT("POINT(223802 4.21769e+06)", 26918));
+    points.add(Constructors.geomFromWKT("POINT(224759 4.20453e+06)", 26918));
+    points.add(Constructors.geomFromWKT("POINT(237201 4.20429e+06)", 26918));
+    points.add(Constructors.geomFromWKT("POINT(237919 4.20357e+06)", 26918));
+    points.add(Constructors.geomFromWKT("POINT(254668 4.21769e+06)", 26918));
+
+    actualValues = PixelFunctions.values(clippedRaster, points, 1).toArray(new Double[0]);
+    expectedValues = new Double[] {null, null, 0.0, 0.0, null};
+    assertTrue(Arrays.equals(expectedValues, actualValues));
+
+    // Testing green band with crop
+    croppedRaster = RasterBandEditors.clip(raster_bottom_up, 2, geom, false, 200, true);
+    assertEquals(0, croppedRaster.getRenderedImage().getMinX());
+    assertEquals(0, croppedRaster.getRenderedImage().getMinY());
+    croppedRaster2 = Serde.deserialize(Serde.serialize(croppedRaster));
+    assertSameCoverage(croppedRaster, croppedRaster2);
+
+    points = new ArrayList<>();
+    points.add(Constructors.geomFromWKT("POINT(236842 4.20465e+06)", 26918));
+    points.add(Constructors.geomFromWKT("POINT(236961 4.20453e+06)", 26918));
+    points.add(Constructors.geomFromWKT("POINT(237201 4.20429e+06)", 26918));
+    points.add(Constructors.geomFromWKT("POINT(237919 4.20357e+06)", 26918));
+    points.add(Constructors.geomFromWKT("POINT(223802 4.20465e+06)", 26918));
+
+    actual = String.valueOf(croppedRaster.getSampleDimensions()[0]);
+    expected =
+        "RenderedSampleDimension(\"GREEN_BAND\":[200.0 ... 200.0])\n"
+            + "  ‣ Category(\"No data\":[200...200])\n";
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -357,6 +484,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
       throws FactoryException, IOException, ParseException, TransformException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+    GridCoverage2D raster_bottom_up = flipVerticallyPixelSpace(raster);
 
     // Construct a polygon that does not intersect with the raster
     Geometry nonIntersectingGeom =
@@ -376,6 +504,17 @@ public class RasterBandEditorsTest extends RasterTestBase {
         RasterBandEditors.clip(raster, 1, nonIntersectingGeom, false, 200, false);
     assertNull(result);
     raster.dispose(true);
+
+    // Test for bottom-up raster
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            RasterBandEditors.clip(
+                raster_bottom_up, 1, nonIntersectingGeom, false, 200, false, false));
+
+    result = RasterBandEditors.clip(raster_bottom_up, 1, nonIntersectingGeom, false, 200, false);
+    assertNull(result);
+    raster_bottom_up.dispose(true);
   }
 
   @Test

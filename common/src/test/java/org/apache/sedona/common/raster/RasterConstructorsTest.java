@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.common.raster;
 
+import static org.apache.sedona.common.utils.RasterUtils.flipVerticallyPixelSpace;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -81,6 +82,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     // Polygon
     GridCoverage2D raster =
         RasterConstructors.makeEmptyRaster(2, 255, 255, 1, -1, 2, -2, 0, 0, 4326);
+    GridCoverage2D raster_bottom_up = flipVerticallyPixelSpace(raster);
 
     Geometry geom =
         Constructors.geomFromWKT("POLYGON((15 -15, 18 -20, 15 -24, 24 -25, 15 -15))", 0);
@@ -108,6 +110,22 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     assertArrayEquals(expected, actual, 0.1d);
 
+    // Test bottom-up raster case
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d");
+    expected =
+        new double[] {
+          1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        };
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // Making sure orientation is preserved
+    assertEquals(
+        RasterAccessors.metadata(raster_bottom_up)[5],
+        RasterAccessors.metadata(rasterized)[5],
+        0.0);
+
     // MultiPolygon
     geom =
         Constructors.geomFromWKT(
@@ -134,6 +152,23 @@ public class RasterConstructorsTest extends RasterTestBase {
         };
     assertArrayEquals(expected, actual, 0.1d);
 
+    // Test bottom-up raster case
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d");
+
+    // Making sure orientation is preserved
+    assertEquals(
+        RasterAccessors.metadata(raster_bottom_up)[5],
+        RasterAccessors.metadata(rasterized)[5],
+        0.0);
+
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+          0.0, 0.0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
     // MultiLineString
     geom =
         Constructors.geomFromWKT("MULTILINESTRING ((5 -5, 10 -10), (10 -10, 15 -15, 20 -20))", 0);
@@ -151,6 +186,28 @@ public class RasterConstructorsTest extends RasterTestBase {
         };
     assertArrayEquals(expected, actual, 0.1d);
 
+    // Test bottom-up raster case
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 3093151, 3d);
+
+    // Making sure orientation is preserved
+    assertEquals(
+        RasterAccessors.metadata(raster_bottom_up)[5],
+        RasterAccessors.metadata(rasterized)[5],
+        0.0);
+
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0
+        };
+
+    assertArrayEquals(expected, actual, 0.1d);
+
     rasterized = RasterConstructors.asRaster(geom, raster, "d");
 
     actual = MapAlgebra.bandAsArray(rasterized, 1);
@@ -163,6 +220,27 @@ public class RasterConstructorsTest extends RasterTestBase {
           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0
         };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // Test bottom-up raster case
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d");
+
+    // Making sure orientation is preserved
+    assertEquals(
+        RasterAccessors.metadata(raster_bottom_up)[5],
+        RasterAccessors.metadata(rasterized)[5],
+        0.0);
+
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        };
+
     assertArrayEquals(expected, actual, 0.1d);
 
     // LinearRing
@@ -181,6 +259,28 @@ public class RasterConstructorsTest extends RasterTestBase {
         };
     assertArrayEquals(expected, actual, 0.1d);
 
+    // Test bottom-up raster case
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 3093151, 3d);
+
+    // Making sure orientation is preserved
+    assertEquals(
+        RasterAccessors.metadata(raster_bottom_up)[5],
+        RasterAccessors.metadata(rasterized)[5],
+        0.0);
+
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0.0, 0.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0,
+          3093151.0, 3093151.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0,
+          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0
+        };
+
+    assertArrayEquals(expected, actual, 0.1d);
+
     rasterized = RasterConstructors.asRaster(geom, raster, "d");
     actual = MapAlgebra.bandAsArray(rasterized, 1);
 
@@ -192,6 +292,25 @@ public class RasterConstructorsTest extends RasterTestBase {
           1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0
         };
 
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // Test bottom-up raster case
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d");
+
+    // Making sure orientation is preserved
+    assertEquals(
+        RasterAccessors.metadata(raster_bottom_up)[5],
+        RasterAccessors.metadata(rasterized)[5],
+        0.0);
+
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        };
     assertArrayEquals(expected, actual, 0.1d);
 
     // MultiPoints
@@ -208,6 +327,19 @@ public class RasterConstructorsTest extends RasterTestBase {
         };
     assertArrayEquals(expected, actual, 0.1d);
 
+    // Test bottom-up raster case
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 3093151, 3d);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0,
+          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        };
+
+    assertArrayEquals(expected, actual, 0.1d);
+
     rasterized = RasterConstructors.asRaster(geom, raster, "d");
     actual = MapAlgebra.bandAsArray(rasterized, 1);
 
@@ -220,6 +352,17 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     assertArrayEquals(expected, actual, 0.1d);
 
+    // Test bottom-up raster case
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d");
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+          1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
     // Point
     geom = Constructors.geomFromWKT("POINT (5 -5)", 0);
     rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 3d);
@@ -229,9 +372,19 @@ public class RasterConstructorsTest extends RasterTestBase {
     expected = new double[] {3093151.0, 3093151.0, 3093151.0, 3093151.0};
     assertArrayEquals(expected, actual, 0.1d);
 
+    // Test bottom-up raster case
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 3093151, 3d);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    assertArrayEquals(expected, actual, 0.1d);
+
     rasterized = RasterConstructors.asRaster(geom, raster, "d");
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected = new double[] {1.0, 1.0, 1.0, 1.0};
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // Test bottom-up raster case
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d");
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
     assertArrayEquals(expected, actual, 0.1d);
   }
 
@@ -240,10 +393,18 @@ public class RasterConstructorsTest extends RasterTestBase {
     // Horizontal LineString
     GridCoverage2D raster =
         RasterConstructors.makeEmptyRaster(2, 255, 255, 1, -1, 2, -2, 0, 0, 4326);
+    GridCoverage2D raster_bottom_up =
+        RasterConstructors.makeEmptyRaster(2, 255, 255, 1, -511, 2, 2, 0, 0, 4326);
+
     Geometry geom = Constructors.geomFromEWKT("LINESTRING(1 -1, 2 -1, 10 -1)");
     GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 0d);
     double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
     double[] expected = new double[] {3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0};
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // Test bottom-up raster case
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 3093151, 0d);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
     assertArrayEquals(expected, actual, 0.1d);
 
     // Vertical LineString
@@ -251,6 +412,11 @@ public class RasterConstructorsTest extends RasterTestBase {
     rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 0d);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected = new double[] {3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0};
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // Test bottom-up raster case
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 3093151, 0d);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
     assertArrayEquals(expected, actual, 0.1d);
   }
 
@@ -320,6 +486,9 @@ public class RasterConstructorsTest extends RasterTestBase {
   public void testAsRasterWithRasterExtent2() throws FactoryException, ParseException {
     GridCoverage2D raster =
         RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0.5, 0.1, -0.1, 0, 0, 4326);
+    GridCoverage2D raster_bottom_up =
+        RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0.0, 0.1, 0.1, 0, 0, 4326);
+
     Geometry geom =
         Constructors.geomFromWKT("POLYGON((0.1 0.1, 0.1 0.4, 0.4 0.4, 0.4 0.1, 0.1 0.1))", 0);
     GridCoverage2D rasterized =
@@ -331,6 +500,18 @@ public class RasterConstructorsTest extends RasterTestBase {
     assertEquals(5, RasterAccessors.getWidth(rasterized));
     assertEquals(5, RasterAccessors.getHeight(rasterized));
     double sum = Arrays.stream(MapAlgebra.bandAsArray(rasterized, 1)).sum();
+    assertEquals(900, sum, 1e-6); // Covers 3x3 grid
+
+    // Test bottom-up raster case
+    rasterized =
+        RasterConstructors.asRasterWithRasterExtent(geom, raster_bottom_up, "d", false, 100d, 0d);
+    assertEquals(0, rasterized.getEnvelope2D().getMinX(), 1e-6);
+    assertEquals(0, rasterized.getEnvelope2D().getMinY(), 1e-6);
+    assertEquals(0.5, rasterized.getEnvelope2D().getWidth(), 1e-6);
+    assertEquals(0.5, rasterized.getEnvelope2D().getHeight(), 1e-6);
+    assertEquals(5, RasterAccessors.getWidth(rasterized));
+    assertEquals(5, RasterAccessors.getHeight(rasterized));
+    sum = Arrays.stream(MapAlgebra.bandAsArray(rasterized, 1)).sum();
     assertEquals(900, sum, 1e-6); // Covers 3x3 grid
   }
 
