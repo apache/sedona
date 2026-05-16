@@ -18,7 +18,7 @@
  */
 package org.apache.spark.sql.sedona_sql.io.stac
 
-import org.apache.spark.sql.types.{StringType, StructField, StructType}
+import org.apache.spark.sql.types.{DoubleType, StringType, StructField, StructType}
 
 /**
  * Defines a STAC extension with its schema and property mappings
@@ -49,9 +49,14 @@ object StacExtension {
       StacExtension(
         name = "grid",
         // Schema for the grid extension, add all required fields here
-        schema = StructType(Seq(StructField("grid:code", StringType, nullable = true))))
+        schema = StructType(Seq(StructField("grid:code", StringType, nullable = true)))),
 
       // Add other extensions here...
-    )
+      StacExtension(
+        name = "eo",
+        schema = StructType(Seq(StructField("eo:cloud_cover", DoubleType, nullable = true)))),
+      StacExtension(
+        name = "eo",
+        schema = StructType(Seq(StructField("eo:snow_cover", DoubleType, nullable = true)))))
   }
 }
