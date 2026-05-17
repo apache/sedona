@@ -75,6 +75,7 @@ nav:
               - Quick start: api/sql/Overview.md
               - Vector data:
                   - Geometry Functions: api/sql/Geometry-Functions.md
+                  - Box2D Functions: api/sql/box2d/Box2D-Functions.md
                   - Geography Functions: api/sql/geography/Geography-Functions.md
                   - DataFrame Style functions: api/sql/DataFrameAPI.md
                   - Query optimization: api/sql/Optimizer.md
