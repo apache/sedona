@@ -840,7 +840,9 @@ public class RasterEditors {
                       maxRadiusOrMinPoints);
               interpolatedValue =
                   (Double.isNaN(interpolatedValue)) ? noDataValue : interpolatedValue;
-              if (interpolatedValue != noDataValue) {
+              // Only decrement if interpolation actually succeeded (returned a valid value)
+              if (!Double.isNaN(interpolatedValue)
+                  && (Double.isNaN(noDataValue) || interpolatedValue != noDataValue)) {
                 countNoDataValues--;
               }
               raster.setSample(x, y, bandIndex, interpolatedValue);
@@ -861,9 +863,9 @@ public class RasterEditors {
             0,
             raster.getWidth(),
             raster.getHeight(),
-            band,
+            bandIndex,
             rasterData.getSamples(
-                0, 0, raster.getWidth(), raster.getHeight(), band, (double[]) null));
+                0, 0, raster.getWidth(), raster.getHeight(), bandIndex, (double[]) null));
       }
     }
 
