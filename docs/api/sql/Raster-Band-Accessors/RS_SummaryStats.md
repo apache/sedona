@@ -36,11 +36,11 @@ Introduction: Returns summary statistic for a particular band based on the `stat
 
 Formats:
 
-`RS_SummaryStats(raster: Raster, statType: String, band: Integer = 1, excludeNoDataValue: Boolean = true)`
+`RS_SummaryStats(raster: Raster, statType: String)`
 
 `RS_SummaryStats(raster: Raster, statType: String, band: Integer = 1)`
 
-`RS_SummaryStats(raster: Raster, statType: String)`
+`RS_SummaryStats(raster: Raster, statType: String, band: Integer = 1, excludeNoDataValue: Boolean = true)`
 
 Return type: `Double`
 

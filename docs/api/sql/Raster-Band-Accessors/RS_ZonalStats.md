@@ -53,15 +53,7 @@ The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
 Format:
 
 ```
-RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, allTouched: Boolean, excludeNoData: Boolean, lenient: Boolean)
-```
-
-```
-RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, allTouched: Boolean, excludeNoData: Boolean)
-```
-
-```
-RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, allTouched: Boolean)
+RS_ZonalStats(raster: Raster, zone: Geometry, statType: String)
 ```
 
 ```
@@ -69,7 +61,15 @@ RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String)
 ```
 
 ```
-RS_ZonalStats(raster: Raster, zone: Geometry, statType: String)
+RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, allTouched: Boolean)
+```
+
+```
+RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, allTouched: Boolean, excludeNoData: Boolean)
+```
+
+```
+RS_ZonalStats(raster: Raster, zone: Geometry, band: Integer, statType: String, allTouched: Boolean, excludeNoData: Boolean, lenient: Boolean)
 ```
 
 Return type: `Double`
