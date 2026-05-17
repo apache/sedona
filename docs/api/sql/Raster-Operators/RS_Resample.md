@@ -49,7 +49,7 @@ For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the [Af
 Format:
 
 ```sql
-RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, gridX: Double, gridY: Double, useScale: Boolean, algorithm: String)
+RS_Resample(raster: Raster, referenceRaster: Raster, useScale: Boolean, algorithm: String)
 ```
 
 ```sql
@@ -57,7 +57,7 @@ RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, useScal
 ```
 
 ```sql
-RS_Resample(raster: Raster, referenceRaster: Raster, useScale: Boolean, algorithm: String)
+RS_Resample(raster: Raster, widthOrScale: Double, heightOrScale: Double, gridX: Double, gridY: Double, useScale: Boolean, algorithm: String)
 ```
 
 Return type: `Raster`

@@ -33,11 +33,11 @@ Since `v1.5.1`, this function supports the ability to replace the current no-dat
 Format:
 
 ```
-RS_SetBandNoDataValue(raster: Raster, bandIndex: Integer, noDataValue: Double, replace: Boolean)
+RS_SetBandNoDataValue(raster: Raster, bandIndex: Integer = 1, noDataValue: Double)
 ```
 
 ```
-RS_SetBandNoDataValue(raster: Raster, bandIndex: Integer = 1, noDataValue: Double)
+RS_SetBandNoDataValue(raster: Raster, bandIndex: Integer, noDataValue: Double, replace: Boolean)
 ```
 
 Return type: `Raster`

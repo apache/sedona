@@ -37,15 +37,7 @@ The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
 Format:
 
 ```
-RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean, noDataValue: Double, crop: Boolean, lenient: Boolean)
-```
-
-```
-RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean, noDataValue: Double, crop: Boolean)
-```
-
-```
-RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean, noDataValue: Double)
+RS_Clip(raster: Raster, band: Integer, geom: Geometry)
 ```
 
 ```
@@ -53,7 +45,15 @@ RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean)
 ```
 
 ```
-RS_Clip(raster: Raster, band: Integer, geom: Geometry)
+RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean, noDataValue: Double)
+```
+
+```
+RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean, noDataValue: Double, crop: Boolean)
+```
+
+```
+RS_Clip(raster: Raster, band: Integer, geom: Geometry, allTouched: Boolean, noDataValue: Double, crop: Boolean, lenient: Boolean)
 ```
 
 Return type: `Raster`
