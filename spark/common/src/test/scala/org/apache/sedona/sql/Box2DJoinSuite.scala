@@ -138,12 +138,17 @@ class Box2DJoinSuite extends TestBaseScala {
       val invertedLeft =
         Seq((1, new org.apache.sedona.common.geometryObjects.Box2D(10.0, 0.0, 0.0, 10.0)))
           .toDF("id", "box")
-      val ex = intercept[org.apache.spark.SparkException] {
-        invertedLeft
-          .alias("L")
-          .join(broadcast(rightBoxes.alias("R")), expr("ST_BoxIntersects(L.box, R.box)"))
-          .collect()
-      }
+      val df = invertedLeft
+        .alias("L")
+        .join(broadcast(rightBoxes.alias("R")), expr("ST_BoxIntersects(L.box, R.box)"))
+      // Confirm the join is actually planned as BroadcastIndexJoinExec so the throw originates
+      // from the join-side `shapeToGeometry` validation, not from a row-by-row fallback that
+      // also happens to throw via `Predicates.boxIntersects`.
+      assert(
+        df.queryExecution.sparkPlan.collect { case b: BroadcastIndexJoinExec => b }.size == 1,
+        "Expected BroadcastIndexJoinExec — without it the test could pass via row-by-row " +
+          "predicate evaluation, hiding a regression in join optimization")
+      val ex = intercept[org.apache.spark.SparkException](df.collect())
       val cause = Iterator
         .iterate(ex: Throwable)(_.getCause)
         .takeWhile(_ != null)
