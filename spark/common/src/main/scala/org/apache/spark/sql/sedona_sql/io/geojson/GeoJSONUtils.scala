@@ -30,20 +30,28 @@ import org.apache.spark.unsafe.types.UTF8String
 object GeoJSONUtils {
 
   def updateGeometrySchema(schema: StructType, datatype: DataType): StructType = {
-    StructType(schema.fields.map {
-      case StructField("geometry", _, nullable, metadata) =>
-        StructField("geometry", datatype, nullable, metadata)
-      case StructField(name, dataType: StructType, nullable, metadata) =>
-        StructField(name, updateGeometrySchema(dataType, datatype), nullable, metadata)
-      case StructField(
-            name,
-            ArrayType(elementType: StructType, containsNull),
-            nullable,
-            metadata) =>
-        val updatedElementType = updateGeometrySchema(elementType, datatype)
-        StructField(name, ArrayType(updatedElementType, containsNull), nullable, metadata)
-      case other => other
-    })
+    // If this struct already has a geometry field, only update that field and stop.
+    val hasGeometry = hasGeometryField(schema)
+    if (hasGeometry) {
+      StructType(schema.fields.map {
+        case StructField("geometry", _, nullable, metadata) =>
+          StructField("geometry", datatype, nullable, metadata)
+        case other =>
+          other
+      })
+    } else {
+      // Otherwise keep searching deeper for the first geometry field
+      StructType(schema.fields.map {
+        case StructField(name, st: StructType, nullable, metadata) =>
+          StructField(name, updateGeometrySchema(st, datatype), nullable, metadata)
+
+        case StructField(name, ArrayType(elem: StructType, containsNull), nullable, metadata) =>
+          val updatedElem = updateGeometrySchema(elem, datatype)
+          StructField(name, ArrayType(updatedElem, containsNull), nullable, metadata)
+
+        case other => other
+      })
+    }
   }
 
   def geoJsonToGeometry(geoJson: String): Array[Byte] = {
@@ -103,20 +111,53 @@ object GeoJSONUtils {
     InternalRow.fromSeq(newValues)
   }
 
+  private def hasGeometryField(st: StructType): Boolean =
+    st.fields.exists(_.name == "geometry")
+
   def convertGeoJsonToGeometry(row: InternalRow, schema: StructType): InternalRow = {
     val newValues = new Array[Any](schema.fields.length)
 
+    // This struct is the geometry level if it has a geometry field at this level
+    val geometryLevel = hasGeometryField(schema)
+
     schema.fields.zipWithIndex.foreach {
-      case (StructField("geometry", StringType, _, _), index) =>
-        val geometryGeoJson = row.getString(index)
-        newValues(index) = geoJsonToGeometry(geometryGeoJson)
+
+      // Convert geometry ONLY at the first geometry level
+      case (StructField("geometry", StringType, _, _), index) if geometryLevel =>
+        newValues(index) =
+          if (row.isNullAt(index)) null
+          else geoJsonToGeometry(row.getString(index))
+
+      // If we've reached the geometry level, do NOT recurse further
+      case (sf @ StructField(_, _: StructType, _, _), index) if geometryLevel =>
+        newValues(index) =
+          if (row.isNullAt(index)) null
+          else row.get(index, sf.dataType)
+
+      case (sf @ StructField(_, _: ArrayType, _, _), index) if geometryLevel =>
+        newValues(index) =
+          if (row.isNullAt(index)) null
+          else row.get(index, sf.dataType)
+
+      // Otherwise, recurse until the first geometry level is reached
       case (StructField(_, structType: StructType, _, _), index) =>
-        val nestedRow = row.getStruct(index, structType.fields.length)
-        newValues(index) = convertGeoJsonToGeometry(nestedRow, structType)
+        newValues(index) =
+          if (row.isNullAt(index)) null
+          else {
+            val nestedRow = row.getStruct(index, structType.fields.length)
+            convertGeoJsonToGeometry(nestedRow, structType)
+          }
+
       case (StructField(_, arrayType: ArrayType, _, _), index) =>
-        newValues(index) = handleArray(row, index, arrayType.elementType, true)
+        newValues(index) =
+          if (row.isNullAt(index)) null
+          else handleArray(row, index, arrayType.elementType, toGeometry = true)
+
+      // Primitives
       case (_, index) =>
-        newValues(index) = row.get(index, schema.fields(index).dataType)
+        newValues(index) =
+          if (row.isNullAt(index)) null
+          else row.get(index, schema.fields(index).dataType)
     }
 
     InternalRow.fromSeq(newValues)
