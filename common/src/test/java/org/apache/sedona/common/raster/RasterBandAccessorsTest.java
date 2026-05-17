@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.common.raster;
 
+import static org.apache.sedona.common.utils.RasterUtils.flipVerticallyPixelSpace;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -127,6 +128,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
   public void testZonalStats() throws FactoryException, ParseException, IOException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+    GridCoverage2D raster_bottom_up = flipVerticallyPixelSpace(raster);
     String polygon =
         "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))";
     Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
@@ -180,6 +182,15 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         () ->
             RasterBandAccessors.getZonalStats(
                 raster, nonIntersectingGeom, 1, "sum", false, false, false));
+
+    // Test bottom-up raster case
+    geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
+    actual = RasterBandAccessors.getZonalStats(raster_bottom_up, geom, 1, "sum", false, false);
+    assertEquals(1.0795427E7, actual, 0d);
+
+    actual = RasterBandAccessors.getZonalStats(raster_bottom_up, geom, 2, "mean", false, false);
+    expected = 220.7711988936036;
+    assertEquals(expected, actual, FP_TOLERANCE);
   }
 
   @Test
@@ -206,6 +217,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
   public void testZonalStatsWithNoData() throws IOException, FactoryException, ParseException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+    GridCoverage2D raster_bottom_up = flipVerticallyPixelSpace(raster);
     String polygon =
         "POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))";
     // Testing implicit CRS transformation
@@ -237,6 +249,15 @@ public class RasterBandAccessorsTest extends RasterTestBase {
 
     actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sd", false, true);
     expected = 74.81287592054916;
+    assertEquals(expected, actual, FP_TOLERANCE);
+
+    // Test bottom-up raster case
+    actual = RasterBandAccessors.getZonalStats(raster_bottom_up, geom, 1, "sum", false, true);
+    expected = 3229013.0;
+    assertEquals(expected, actual, 0d);
+
+    actual = RasterBandAccessors.getZonalStats(raster_bottom_up, geom, 1, "mean", false, true);
+    expected = 226.61330619692416;
     assertEquals(expected, actual, FP_TOLERANCE);
   }
 

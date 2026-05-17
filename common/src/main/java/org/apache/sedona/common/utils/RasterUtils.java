@@ -984,4 +984,170 @@ public class RasterUtils {
             false);
     return modifiedRaster;
   }
+
+  /**
+   * This function calculates the upper-left Y world coordinate of the raster. It accounts for both
+   * bottom-up and top-down raster conventions.
+   *
+   * <p>For bottom-up rasters (metadata[5] > 0), the upper-left Y world coordinate is directly taken
+   * from metadata[1]. - For top-down rasters (metadata[5] < 0), the upper-left Y coordinate is
+   * adjusted by adding the product of the raster height and the scale factor (metadata[5]).
+   *
+   * @param metadata The metadata array containing raster properties.
+   * @return The upper-left Y world coordinate of the raster.
+   */
+  public static double getRasterUpperLeftY(double[] metadata) {
+    if (metadata[5] < 0) {
+      return metadata[1];
+    } else {
+      int rasterHeight = (int) metadata[3];
+      return metadata[1] + (rasterHeight * metadata[5]);
+    }
+  }
+
+  /**
+   * This function calculates the Y scale factor of the raster. It ensures that the scale factor is
+   * always negative, regardless of the raster convention.
+   *
+   * <p>For bottom-up rasters (metadata[5] > 0), the scale factor is returned as-is. - For top-down
+   * rasters (metadata[5] < 0), the scale factor is negated to maintain consistency.
+   *
+   * @param metadata The metadata array containing raster properties.
+   * @return The Y scale factor of the raster.
+   */
+  public static double getRasterScaleY(double[] metadata) {
+    if (metadata[5] < 0) {
+      return metadata[5];
+    } else {
+      return -metadata[5];
+    }
+  }
+
+  /**
+   * GRID SPACE: Grid space refers to the raster's index space (col, row). Pixel values remain at
+   * the same array indices, but the grid-to-CRS affine transform is rewritten.
+   *
+   * <p>EFFECT: - The raster is reinterpreted spatially (top-down ↔ bottom-up). - Pixel values are
+   * NOT moved in memory. - Pixel world coordinates DO change. - The world envelope (bounding box)
+   * is preserved.
+   *
+   * <p>Use this when you want to change how the raster is oriented in CRS space without touching
+   * the pixel data.
+   */
+  public static GridCoverage2D flipVerticallyGridSpace(GridCoverage2D raster) {
+
+    GridGeometry2D gridGeometry = raster.getGridGeometry();
+
+    MathTransform mt = gridGeometry.getGridToCRS2D();
+    if (!(mt instanceof AffineTransform2D)) {
+      throw new UnsupportedOperationException(
+          "flipVertically only supports AffineTransform2D grid-to-CRS transforms");
+    }
+
+    AffineTransform2D affine = (AffineTransform2D) mt;
+
+    RenderedImage image = raster.getRenderedImage();
+    int height = image.getHeight();
+
+    /*
+     * Affine transform definition (GeoTools / GDAL compatible):
+     *
+     *   worldX = scaleX * col + shearX * row + translateX
+     *   worldY = shearY * col + scaleY * row + translateY
+     */
+    double scaleX = affine.getScaleX();
+    double shearX = affine.getShearX();
+    double shearY = affine.getShearY();
+    double scaleY = affine.getScaleY();
+    double translateX = affine.getTranslateX();
+    double translateY = affine.getTranslateY();
+
+    /*
+     * Apply grid-space vertical flip:
+     *
+     *   row = (H - 1) - row'
+     */
+    double newShearX = -shearX;
+    double newScaleY = -scaleY;
+
+    double newTranslateX = translateX + shearX * (height - 1);
+    double newTranslateY = translateY + scaleY * (height - 1);
+
+    AffineTransform2D flippedAffine =
+        new AffineTransform2D(scaleX, shearY, newShearX, newScaleY, newTranslateX, newTranslateY);
+
+    GridGeometry2D newGridGeometry =
+        new GridGeometry2D(
+            gridGeometry.getGridRange(),
+            flippedAffine,
+            gridGeometry.getCoordinateReferenceSystem());
+
+    return RasterUtils.clone(
+        raster.getRenderedImage(),
+        newGridGeometry,
+        raster.getSampleDimensions(),
+        raster,
+        null,
+        true);
+  }
+
+  /**
+   * PIXEL SPACE: Pixel space refers to pixel values anchored at their world coordinates. Pixel
+   * values are physically rearranged so that each value remains at the same CRS location.
+   *
+   * <p>EFFECT: - Raster rows are reversed in memory. - The affine transform is updated accordingly.
+   * - Pixel world coordinates are preserved. - The world envelope (bounding box) is preserved.
+   *
+   * <p>Use this when pixel values must remain fixed at their geographic locations.
+   */
+  public static GridCoverage2D flipVerticallyPixelSpace(GridCoverage2D raster) {
+    GridGeometry2D gridGeometry = raster.getGridGeometry();
+
+    MathTransform mt = gridGeometry.getGridToCRS2D();
+    if (!(mt instanceof AffineTransform2D)) {
+      throw new UnsupportedOperationException(
+          "flipVertically only supports AffineTransform2D grid-to-CRS transforms");
+    }
+
+    AffineTransform2D affine = (AffineTransform2D) mt;
+
+    RenderedImage image = raster.getRenderedImage();
+    int height = image.getHeight();
+
+    // Flip the affine transformation
+    double scaleX = affine.getScaleX();
+    double shearX = affine.getShearX();
+    double shearY = affine.getShearY();
+    double scaleY = affine.getScaleY();
+    double translateX = affine.getTranslateX();
+    double translateY = affine.getTranslateY();
+
+    double newShearX = -shearX;
+    double newScaleY = -scaleY;
+    double newTranslateX = translateX + shearX * (height - 1);
+    double newTranslateY = translateY + scaleY * (height - 1);
+
+    AffineTransform2D flippedAffine =
+        new AffineTransform2D(scaleX, shearY, newShearX, newScaleY, newTranslateX, newTranslateY);
+
+    // Create a new WritableRaster to preserve pixel values
+    Raster originalRaster = RasterUtils.getRaster(image);
+    WritableRaster flippedRaster = originalRaster.createCompatibleWritableRaster();
+
+    // Copy pixel values to the flipped raster
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < image.getWidth(); x++) {
+        flippedRaster.setPixel(x, height - y - 1, originalRaster.getPixel(x, y, (double[]) null));
+      }
+    }
+
+    GridGeometry2D newGridGeometry =
+        new GridGeometry2D(
+            gridGeometry.getGridRange(),
+            flippedAffine,
+            gridGeometry.getCoordinateReferenceSystem());
+
+    return RasterUtils.clone(
+        flippedRaster, newGridGeometry, raster.getSampleDimensions(), raster, null, true);
+  }
 }
