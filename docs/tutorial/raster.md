@@ -39,6 +39,7 @@ Raster support is available in all Sedona language bindings (Scala, Java, Python
 
 	1. Follow [Quick start](../setup/install-python.md) to install Sedona Python.
 	2. This tutorial mirrors the structure of the [Sedona SQL Jupyter Notebook example](jupyter-notebook.md).
+	3. The walkthrough synthesizes its input scene with NumPy and rasterio: `pip install numpy rasterio`. Real workflows that read existing GeoTIFFs don't need rasterio.
 
 ## Create a SedonaContext
 
@@ -50,7 +51,7 @@ If you already have a SparkSession (Wherobots, AWS EMR, Databricks), skip ahead 
 	import org.apache.sedona.spark.SedonaContext
 
 	val config = SedonaContext.builder()
-	  .master("local[*]")
+	  .master("local[*]") // Delete this line when running on a cluster
 	  .appName("rasterTutorial")
 	  .getOrCreate()
 	val sedona = SedonaContext.create(config)
@@ -62,7 +63,7 @@ If you already have a SparkSession (Wherobots, AWS EMR, Databricks), skip ahead 
 	import org.apache.sedona.spark.SedonaContext;
 
 	SparkSession config = SedonaContext.builder()
-	  .master("local[*]")
+	  .master("local[*]") // Delete this line when running on a cluster
 	  .appName("rasterTutorial")
 	  .getOrCreate();
 	SparkSession sedona = SedonaContext.create(config);
@@ -156,7 +157,8 @@ The `raster` data source loads GeoTIFFs and automatically splits each file into 
 === "Scala"
 
 	```scala
-	val rasterDf = sedona.read.format("raster").load(s"$WORK/scene.tif")
+	// Replace the path with wherever scene.tif lives, e.g. an object-store URL.
+	val rasterDf = sedona.read.format("raster").load("/tmp/sedona-raster-tutorial/scene.tif")
 	rasterDf.createOrReplaceTempView("rasterDf")
 	rasterDf.show()
 	```
@@ -164,7 +166,8 @@ The `raster` data source loads GeoTIFFs and automatically splits each file into 
 === "Java"
 
 	```java
-	Dataset<Row> rasterDf = sedona.read().format("raster").load(WORK + "/scene.tif");
+	// Replace the path with wherever scene.tif lives, e.g. an object-store URL.
+	Dataset<Row> rasterDf = sedona.read().format("raster").load("/tmp/sedona-raster-tutorial/scene.tif");
 	rasterDf.createOrReplaceTempView("rasterDf");
 	rasterDf.show();
 	```
@@ -367,7 +370,7 @@ Writing is a two-step pattern: convert the `Raster` column to a binary format wi
 	import org.apache.spark.sql.functions.expr
 
 	ndviDf.withColumn("raster_binary", expr("RS_AsGeoTiff(rast)"))
-	  .write.format("raster").mode("overwrite").save(s"$WORK/ndvi_out")
+	  .write.format("raster").mode("overwrite").save("/tmp/sedona-raster-tutorial/ndvi_out")
 	```
 
 === "Python"
