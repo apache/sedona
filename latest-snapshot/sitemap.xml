@@ -3298,6 +3298,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Aggregate-Functions/ST_Envelope_Agg/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/api/sql/Aggregate-Functions/ST_Extent/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/Aggregate-Functions/ST_Extent/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Aggregate-Functions/ST_Extent/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/api/sql/Aggregate-Functions/ST_Intersection_Agg/</loc>
         <lastmod>2026-05-18</lastmod>
         <changefreq>daily</changefreq>
@@ -5571,6 +5578,90 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/Spatial-Statistics/ST_WeightedDistanceBandColumn/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Spatial-Statistics/ST_WeightedDistanceBandColumn/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/sql/box2d/Box2D-Functions/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/box2d/Box2D-Functions/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/box2d/Box2D-Functions/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/sql/box2d/Box2D-Accessors/ST_XMax/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/box2d/Box2D-Accessors/ST_XMax/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/box2d/Box2D-Accessors/ST_XMax/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/sql/box2d/Box2D-Accessors/ST_XMin/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/box2d/Box2D-Accessors/ST_XMin/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/box2d/Box2D-Accessors/ST_XMin/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/sql/box2d/Box2D-Accessors/ST_YMax/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/box2d/Box2D-Accessors/ST_YMax/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/box2d/Box2D-Accessors/ST_YMax/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/sql/box2d/Box2D-Accessors/ST_YMin/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/box2d/Box2D-Accessors/ST_YMin/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/box2d/Box2D-Accessors/ST_YMin/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/sql/box2d/Box2D-Constructors/ST_Box2D/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/box2d/Box2D-Constructors/ST_Box2D/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/box2d/Box2D-Constructors/ST_Box2D/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/sql/box2d/Box2D-Constructors/ST_GeomFromBox2D/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/box2d/Box2D-Constructors/ST_GeomFromBox2D/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/box2d/Box2D-Constructors/ST_GeomFromBox2D/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/sql/box2d/Box2D-Constructors/ST_MakeBox2D/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/box2d/Box2D-Constructors/ST_MakeBox2D/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/box2d/Box2D-Constructors/ST_MakeBox2D/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/sql/box2d/Box2D-Functions/ST_AsText/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/box2d/Box2D-Functions/ST_AsText/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/box2d/Box2D-Functions/ST_AsText/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/sql/box2d/Box2D-Functions/ST_Expand/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/box2d/Box2D-Functions/ST_Expand/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/box2d/Box2D-Functions/ST_Expand/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/sql/box2d/Box2D-Predicates/ST_BoxContains/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/box2d/Box2D-Predicates/ST_BoxContains/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/box2d/Box2D-Predicates/ST_BoxContains/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/sql/box2d/Box2D-Predicates/ST_BoxIntersects/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/box2d/Box2D-Predicates/ST_BoxIntersects/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/box2d/Box2D-Predicates/ST_BoxIntersects/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Functions/</loc>
@@ -9591,6 +9682,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Aggregate-Functions/ST_Envelope_Agg/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/Aggregate-Functions/ST_Extent/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/Aggregate-Functions/ST_Extent/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Aggregate-Functions/ST_Extent/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/zh/api/sql/Aggregate-Functions/ST_Intersection_Agg/</loc>
         <lastmod>2026-05-18</lastmod>
         <changefreq>daily</changefreq>
@@ -11864,6 +11962,90 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/Spatial-Statistics/ST_WeightedDistanceBandColumn/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Spatial-Statistics/ST_WeightedDistanceBandColumn/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Functions/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Functions/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/box2d/Box2D-Functions/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Accessors/ST_XMax/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Accessors/ST_XMax/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/box2d/Box2D-Accessors/ST_XMax/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Accessors/ST_XMin/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Accessors/ST_XMin/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/box2d/Box2D-Accessors/ST_XMin/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Accessors/ST_YMax/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Accessors/ST_YMax/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/box2d/Box2D-Accessors/ST_YMax/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Accessors/ST_YMin/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Accessors/ST_YMin/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/box2d/Box2D-Accessors/ST_YMin/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Constructors/ST_Box2D/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Constructors/ST_Box2D/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/box2d/Box2D-Constructors/ST_Box2D/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Constructors/ST_GeomFromBox2D/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Constructors/ST_GeomFromBox2D/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/box2d/Box2D-Constructors/ST_GeomFromBox2D/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Constructors/ST_MakeBox2D/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Constructors/ST_MakeBox2D/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/box2d/Box2D-Constructors/ST_MakeBox2D/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Functions/ST_AsText/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Functions/ST_AsText/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/box2d/Box2D-Functions/ST_AsText/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Functions/ST_Expand/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Functions/ST_Expand/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/box2d/Box2D-Functions/ST_Expand/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Predicates/ST_BoxContains/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Predicates/ST_BoxContains/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/box2d/Box2D-Predicates/ST_BoxContains/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Predicates/ST_BoxIntersects/</loc>
+        <lastmod>2026-05-18</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/box2d/Box2D-Predicates/ST_BoxIntersects/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/box2d/Box2D-Predicates/ST_BoxIntersects/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/api/sql/geography/Geography-Functions/</loc>
