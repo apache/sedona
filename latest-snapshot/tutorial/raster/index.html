@@ -1793,6 +1793,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Python UDFs over rasters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#raster-to-scalar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Raster to scalar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#raster-to-raster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Raster to raster
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -6183,6 +6211,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Python UDFs over rasters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#raster-to-scalar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Raster to scalar
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#raster-to-raster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Raster to raster
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -6933,6 +6989,8 @@ Replace <code>3.3</code> with the major.minor version of your Spark install (for
 <span class="n">band1</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="python-udfs-over-rasters">Python UDFs over rasters<a class="headerlink" href="#python-udfs-over-rasters" title="Permanent link">&para;</a></h2>
+<p>Python UDFs receive raster data, process it with NumPy / SciPy / scikit-learn / etc., and return either a scalar value or a new raster.</p>
+<h3 id="raster-to-scalar">Raster to scalar<a class="headerlink" href="#raster-to-scalar" title="Permanent link">&para;</a></h3>
 <p>UDFs can take <code>SedonaRaster</code> inputs and return any Spark data type. Mean of a raster:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoubleType</span>
 
@@ -6950,24 +7008,28 @@ Replace <code>3.3</code> with the major.minor version of your Spark install (for
 |GridCoverage2D[&quot;g...|1542.8092886117788|
 +--------------------+------------------+
 </code></pre></div>
-<p>Returning a raster from a UDF directly isn't supported yet — Sedona can't serialize Python raster objects. The workaround is to return the band data as an array and rebuild the raster with <a href="../../api/sql/Raster-Constructors/RS_MakeRaster/"><code>RS_MakeRaster</code></a>:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayType</span><span class="p">,</span> <span class="n">DoubleType</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<h3 id="raster-to-raster">Raster to raster<a class="headerlink" href="#raster-to-raster" title="Permanent link">&para;</a></h3>
+<p>UDFs can also return raster objects. Use <code>SedonaRaster.with_bands()</code> to replace pixel data while preserving all spatial metadata (CRS, affine transform, NODATA, etc.). Band count and dtype can change freely.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">RasterType</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">mask_udf</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
     <span class="n">band1</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
-    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">band1</span> <span class="o">&lt;</span> <span class="mi">1400</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">mask</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">band1</span> <span class="o">&lt;</span> <span class="mi">1400</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>  <span class="c1"># 1 band, preserves CRS/affine/nodata</span>
 
 
-<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mask_udf&quot;</span><span class="p">,</span> <span class="n">mask_udf</span><span class="p">,</span> <span class="n">ArrayType</span><span class="p">(</span><span class="n">DoubleType</span><span class="p">()))</span>
-<span class="p">(</span>
-    <span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mask&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;mask_udf(rast)&quot;</span><span class="p">))</span>
-    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mask_rast&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;RS_MakeRaster(rast, &#39;I&#39;, mask)&quot;</span><span class="p">))</span>
-    <span class="o">.</span><span class="n">show</span><span class="p">()</span>
-<span class="p">)</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mask_udf&quot;</span><span class="p">,</span> <span class="n">mask_udf</span><span class="p">,</span> <span class="n">RasterType</span><span class="p">())</span>
+<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mask_rast&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;mask_udf(rast)&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
+<div class="highlight"><pre><span></span><code>+--------------------+--------------------+
+|                rast|           mask_rast|
++--------------------+--------------------+
+|GridCoverage2D[&quot;g...|GridCoverage2D[&quot;g...|
++--------------------+--------------------+
+</code></pre></div>
+<p><code>with_bands()</code> accepts a NumPy array in CHW order (bands × height × width), or HW order (height × width) for single-band output. The returned <code>SedonaRaster</code> carries all the original metadata and is serialized back to the JVM automatically when the UDF returns.</p>
 <h2 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h2>
 <p>For large raster datasets, see <a href="../storing-blobs-in-parquet/">storing raster geometries in Parquet format</a> for recommendations on partitioning and persistence.</p>
 
@@ -6990,7 +7052,7 @@ Replace <code>3.3</code> with the major.minor version of your Spark install (for
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 17, 2026 07:00:45 UTC">May 17, 2026 07:00:45</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 18, 2026 18:14:37 UTC">May 18, 2026 18:14:37</span>
   </span>
 
     

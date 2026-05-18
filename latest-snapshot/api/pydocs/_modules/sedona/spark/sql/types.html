@@ -340,7 +340,12 @@
         <span class="k">return</span> <span class="n">BinaryType</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="RasterType.serialize"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.serialize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;RasterType.serialize is not implemented yet&quot;</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">raster_serde</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;rasterio is not installed. Please install it to support &quot;</span>
+                <span class="s2">&quot;RasterType serialization&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">raster_serde</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="RasterType.deserialize"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.types.RasterType.deserialize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">raster_serde</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

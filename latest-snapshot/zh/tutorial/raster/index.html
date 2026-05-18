@@ -1793,10 +1793,38 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="在栅格上编写 Python UDF">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        栅格 → 标量
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        栅格 → 栅格
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#_14" class="md-nav__link">
     <span class="md-ellipsis">
       
         性能优化
@@ -6183,10 +6211,38 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="在栅格上编写 Python UDF">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        栅格 → 标量
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        栅格 → 栅格
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#_12" class="md-nav__link">
+  <a href="#_14" class="md-nav__link">
     <span class="md-ellipsis">
       
         性能优化
@@ -6933,6 +6989,8 @@
 <span class="n">band1</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="python-udf">在栅格上编写 Python UDF<a class="headerlink" href="#python-udf" title="Permanent link">&para;</a></h2>
+<p>Python UDF 接收栅格数据，使用 NumPy / SciPy / scikit-learn 等处理，并返回标量或新栅格。</p>
+<h3 id="_12">栅格 → 标量<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
 <p>UDF 可接收 <code>SedonaRaster</code> 输入并返回任意 Spark 数据类型。下面的 UDF 计算栅格均值：</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoubleType</span>
 
@@ -6950,25 +7008,29 @@
 |GridCoverage2D[&quot;g...|1542.8092886117788|
 +--------------------+------------------+
 </code></pre></div>
-<p>让 UDF 直接返回栅格目前还不支持 —— Sedona 暂未实现 Python 栅格对象的序列化。变通方案是返回波段数据数组，再用 <a href="../../api/sql/Raster-Constructors/RS_MakeRaster/"><code>RS_MakeRaster</code></a> 重建栅格：</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayType</span><span class="p">,</span> <span class="n">DoubleType</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<h3 id="_13">栅格 → 栅格<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<p>UDF 也可以返回栅格对象。使用 <code>SedonaRaster.with_bands()</code> 替换像素数据，同时保留所有空间元数据（CRS、仿射变换、NODATA 等）。波段数与 dtype 可自由变化。</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">RasterType</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">mask_udf</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
     <span class="n">band1</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
-    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">band1</span> <span class="o">&lt;</span> <span class="mi">1400</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">mask</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">band1</span> <span class="o">&lt;</span> <span class="mi">1400</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>  <span class="c1"># 1 个波段，保留 CRS / 仿射变换 / NODATA</span>
 
 
-<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mask_udf&quot;</span><span class="p">,</span> <span class="n">mask_udf</span><span class="p">,</span> <span class="n">ArrayType</span><span class="p">(</span><span class="n">DoubleType</span><span class="p">()))</span>
-<span class="p">(</span>
-    <span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mask&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;mask_udf(rast)&quot;</span><span class="p">))</span>
-    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mask_rast&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;RS_MakeRaster(rast, &#39;I&#39;, mask)&quot;</span><span class="p">))</span>
-    <span class="o">.</span><span class="n">show</span><span class="p">()</span>
-<span class="p">)</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mask_udf&quot;</span><span class="p">,</span> <span class="n">mask_udf</span><span class="p">,</span> <span class="n">RasterType</span><span class="p">())</span>
+<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mask_rast&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;mask_udf(rast)&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
-<h2 id="_12">性能优化<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>+--------------------+--------------------+
+|                rast|           mask_rast|
++--------------------+--------------------+
+|GridCoverage2D[&quot;g...|GridCoverage2D[&quot;g...|
++--------------------+--------------------+
+</code></pre></div>
+<p><code>with_bands()</code> 接受 NumPy 数组：CHW 顺序（波段 × 高 × 宽），或单波段输出时的 HW 顺序（高 × 宽）。返回的 <code>SedonaRaster</code> 携带全部原始元数据，UDF 返回时会自动序列化回 JVM 端。</p>
+<h2 id="_14">性能优化<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h2>
 <p>处理大体量栅格时，可参考 <a href="../storing-blobs-in-parquet/">将栅格几何以 Parquet 形式存储</a> 的分区与持久化建议。</p>
 
 
@@ -6990,7 +7052,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月17日 07:00:45 UTC">2026年5月17日 07:00:45</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月18日 18:14:37 UTC">2026年5月18日 18:14:37</span>
   </span>
 
     
