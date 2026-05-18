@@ -315,6 +315,7 @@ plugins:
             Quick start: 快速开始
             Vector data: 矢量数据
             Geometry Functions: 几何函数
+            Box2D Functions: Box2D 函数
             Geography Functions: 地理函数
             DataFrame Style functions: DataFrame 风格函数
             Query optimization: 查询优化

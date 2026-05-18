@@ -274,6 +274,7 @@ These functions perform aggregate operations on groups of geometries.
 | :--- | :--- | :--- | :--- |
 | [ST_Collect_Agg](Aggregate-Functions/ST_Collect_Agg.md) | Geometry | Collects all geometries in a geometry column into a single multi-geometry (MultiPoint, MultiLineString, MultiPolygon, or GeometryCollection). Unlike `ST_Union_Agg`, this function does not dissolve ... | v1.8.1 |
 | [ST_Envelope_Agg](Aggregate-Functions/ST_Envelope_Agg.md) | Geometry | Return the entire envelope boundary of all geometries in A. Empty geometries and null values are skipped. If all inputs are empty or null, the result is null. This behavior is consistent with PostG... | v1.0.0 |
+| [ST_Extent](Aggregate-Functions/ST_Extent.md) | Box2D | Return the planar bounding box of all geometries in A as a typed Box2D. Empty geometries and NULL values are skipped. Mirrors PostGIS `ST_Extent`. | v1.9.1 |
 | [ST_Intersection_Agg](Aggregate-Functions/ST_Intersection_Agg.md) | Geometry | Return the polygon intersection of all polygons in A | v1.0.0 |
 | [ST_Union_Agg](Aggregate-Functions/ST_Union_Agg.md) | Geometry | Return the polygon union of all polygons in A | v1.0.0 |
 

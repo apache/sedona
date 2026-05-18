@@ -28,7 +28,7 @@ The `Box2D` type in Sedona represents a planar axis-aligned bounding box — a r
 - `Box2D` values use closed-interval semantics: edge-touching boxes are considered intersecting and (per [ST_BoxContains](Box2D-Predicates/ST_BoxContains.md)) contained.
 - Absence is represented by SQL `NULL` rather than an in-band sentinel.
 - Bounds are required to be ordered (`xmin <= xmax`, `ymin <= ymax`). Inverted-bound values are reserved for a future antimeridian-wraparound semantics on geography bboxes; predicates and join planning throw `IllegalArgumentException` on inverted input today.
-- Unlike [ST_Envelope](../Bounding-Box-Functions/ST_Envelope.md), which returns a `Geometry` polygon, [ST_Box2D](Box2D-Constructors/ST_Box2D.md) returns a typed `Box2D` value. Prefer the typed form when downstream code only needs the four bounds, and prefer the polygon when downstream code expects a `Geometry`.
+- Unlike [ST_Envelope](../Bounding-Box-Functions/ST_Envelope.md), which returns the envelope as a `Geometry` (typically a polygon, but JTS may return a `Point` or `LineString` for degenerate inputs), [ST_Box2D](Box2D-Constructors/ST_Box2D.md) always returns a typed `Box2D` value. Prefer the typed form when downstream code only needs the four bounds, and prefer the geometry form when downstream code expects a `Geometry`.
 
 ## Box2D Constructors
 
@@ -62,6 +62,12 @@ The same `ST_XMin` / `ST_YMin` / `ST_XMax` / `ST_YMax` functions also accept `Ge
 | :--- | :--- | :--- | :--- |
 | [ST_Expand](Box2D-Functions/ST_Expand.md) | Box2D | Expand a Box2D by a per-axis or uniform delta. | v1.9.1 |
 | [ST_AsText](Box2D-Functions/ST_AsText.md) | String | Return the `BOX(xmin ymin, xmax ymax)` text representation of a Box2D. | v1.9.1 |
+
+## Box2D Aggregates
+
+| Function | Return type | Description | Since |
+| :--- | :--- | :--- | :--- |
+| [ST_Extent](../Aggregate-Functions/ST_Extent.md) | Box2D | Return the planar bounding box of all geometries in a column as a Box2D. Empty and NULL inputs are skipped. Mirrors PostGIS `ST_Extent`. | v1.9.1 |
 
 ## Type conversion
 
