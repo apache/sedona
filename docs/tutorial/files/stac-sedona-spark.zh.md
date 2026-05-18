@@ -78,6 +78,8 @@ root
  |-- constellation: string (nullable = true)
  |-- mission: string (nullable = true)
  |-- grid:code: string (nullable = true)
+ |-- eo:cloud_cover: double (nullable = true)
+ |-- eo:snow_cover: double (nullable = true)
  |-- gsd: double (nullable = true)
  |-- collection: string (nullable = true)
  |-- links: array (nullable = true)
@@ -152,6 +154,16 @@ SELECT id, datetime as dt, geometry, bbox FROM STAC_TABLE
 ```
 
 该例中，数据源会把空间过滤下推到底层数据源。
+
+### 带 EO 扩展过滤的 SQL Select
+
+```sql
+  SELECT id, datetime, geometry, `eo:cloud_cover`
+  FROM STAC_TABLE
+  WHERE `eo:cloud_cover` < 20.0
+```
+
+该例按 [EO 扩展](https://github.com/stac-extensions/eo) 中的云覆盖百分比进行过滤。当 STAC item properties 中包含 `eo:cloud_cover` 和 `eo:snow_cover` 字段时，会被自动提取。
 
 ### Sedona 的 STAC 读取器配置
 
