@@ -692,6 +692,10 @@ band1 = ds.read(1)
 
 ## 在栅格上编写 Python UDF
 
+Python UDF 接收栅格数据，使用 NumPy / SciPy / scikit-learn 等处理，并返回标量或新栅格。
+
+### 栅格 → 标量
+
 UDF 可接收 `SedonaRaster` 输入并返回任意 Spark 数据类型。下面的 UDF 计算栅格均值：
 
 ```python
@@ -714,26 +718,34 @@ df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
 +--------------------+------------------+
 ```
 
-让 UDF 直接返回栅格目前还不支持 —— Sedona 暂未实现 Python 栅格对象的序列化。变通方案是返回波段数据数组，再用 [`RS_MakeRaster`](../api/sql/Raster-Constructors/RS_MakeRaster.md) 重建栅格：
+### 栅格 → 栅格
+
+UDF 也可以返回栅格对象。使用 `SedonaRaster.with_bands()` 替换像素数据，同时保留所有空间元数据（CRS、仿射变换、NODATA 等）。波段数与 dtype 可自由变化。
 
 ```python
-from pyspark.sql.types import ArrayType, DoubleType
 import numpy as np
+from sedona.spark.sql.types import RasterType
 
 
 def mask_udf(raster):
     band1 = raster.as_numpy()[0, :, :]
-    mask = (band1 < 1400).astype(np.float64)
-    return mask.flatten().tolist()
+    mask = (band1 < 1400).astype(np.float32)
+    return raster.with_bands(mask)  # 1 个波段，保留 CRS / 仿射变换 / NODATA
 
 
-sedona.udf.register("mask_udf", mask_udf, ArrayType(DoubleType()))
-(
-    df_raster.withColumn("mask", expr("mask_udf(rast)"))
-    .withColumn("mask_rast", expr("RS_MakeRaster(rast, 'I', mask)"))
-    .show()
-)
+sedona.udf.register("mask_udf", mask_udf, RasterType())
+df_raster.withColumn("mask_rast", expr("mask_udf(rast)")).show()
 ```
+
+```
++--------------------+--------------------+
+|                rast|           mask_rast|
++--------------------+--------------------+
+|GridCoverage2D["g...|GridCoverage2D["g...|
++--------------------+--------------------+
+```
+
+`with_bands()` 接受 NumPy 数组：CHW 顺序（波段 × 高 × 宽），或单波段输出时的 HW 顺序（高 × 宽）。返回的 `SedonaRaster` 携带全部原始元数据，UDF 返回时会自动序列化回 JVM 端。
 
 ## 性能优化
 

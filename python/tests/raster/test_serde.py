@@ -16,6 +16,7 @@
 # under the License.
 
 import numpy as np
+import pyspark
 import pytest
 import rasterio
 from pyspark.sql.functions import expr
@@ -155,3 +156,69 @@ class TestRasterSerde(TestBase):
                         expected = expected % 16
                     assert arr[b, y, x] == expected
                     assert band[y, x] == expected
+
+    @pytest.mark.skipif(
+        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
+    )
+    def test_serialize_round_trip_via_udf(self):
+        """Deserialize → serialize round-trip through a raster-returning UDF.
+        Verifies that the Python-serialized bytes can be deserialized back
+        to produce correct pixel values.
+        """
+        from sedona.spark.raster import raster_serde
+
+        spark = self.spark
+
+        df = spark.sql(
+            "SELECT RS_MakeRasterForTesting(3, 'I', 'BandedSampleModel', "
+            "10, 8, 100, 100, 10, -10, 0, 0, 3857) as raster"
+        )
+        # Collect the deserialized raster from Spark
+        original = df.first()["raster"]
+
+        # Serialize on Python side and deserialize back
+        serialized = raster_serde.serialize(original)
+        round_tripped = raster_serde.deserialize(serialized)
+
+        # Verify pixel values for all 3 bands
+        arr = round_tripped.as_numpy()
+        assert arr.shape == (3, 8, 10)
+        for b in range(3):
+            for y in range(8):
+                for x in range(10):
+                    expected = b + y * 10 + x
+                    assert arr[b, y, x] == expected
+
+        round_tripped.close()
+        original.close()
+
+    @pytest.mark.skipif(
+        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
+    )
+    def test_serialize_preserves_metadata(self):
+        """Verify CRS, affine, and dimensions survive serialize round-trip."""
+        from sedona.spark.raster import raster_serde
+
+        spark = self.spark
+
+        df = spark.sql(
+            "SELECT RS_MakeRasterForTesting(1, 'I', 'BandedSampleModel', "
+            "4, 3, 100, 100, 10, -10, 0, 0, 3857) as raster"
+        )
+        original = df.first()["raster"]
+
+        # Serialize and deserialize in Python
+        serialized = raster_serde.serialize(original)
+        round_tripped = raster_serde.deserialize(serialized)
+
+        # Verify spatial metadata survived the round-trip
+        assert round_tripped.width == 4
+        assert round_tripped.height == 3
+        assert round_tripped.affine_trans.scale_x == 10.0
+        assert round_tripped.affine_trans.scale_y == -10.0
+        assert round_tripped.affine_trans.ip_x == 100.0
+        assert round_tripped.affine_trans.ip_y == 100.0
+        assert "3857" in round_tripped.crs_wkt or "Mercator" in round_tripped.crs_wkt
+
+        round_tripped.close()
+        original.close()

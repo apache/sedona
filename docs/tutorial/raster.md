@@ -676,6 +676,10 @@ band1 = ds.read(1)
 
 ## Python UDFs over rasters
 
+Python UDFs receive raster data, process it with NumPy / SciPy / scikit-learn / etc., and return either a scalar value or a new raster.
+
+### Raster to scalar
+
 UDFs can take `SedonaRaster` inputs and return any Spark data type. Mean of a raster:
 
 ```python
@@ -698,26 +702,34 @@ df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
 +--------------------+------------------+
 ```
 
-Returning a raster from a UDF directly isn't supported yet — Sedona can't serialize Python raster objects. The workaround is to return the band data as an array and rebuild the raster with [`RS_MakeRaster`](../api/sql/Raster-Constructors/RS_MakeRaster.md):
+### Raster to raster
+
+UDFs can also return raster objects. Use `SedonaRaster.with_bands()` to replace pixel data while preserving all spatial metadata (CRS, affine transform, NODATA, etc.). Band count and dtype can change freely.
 
 ```python
-from pyspark.sql.types import ArrayType, DoubleType
 import numpy as np
+from sedona.spark.sql.types import RasterType
 
 
 def mask_udf(raster):
     band1 = raster.as_numpy()[0, :, :]
-    mask = (band1 < 1400).astype(np.float64)
-    return mask.flatten().tolist()
+    mask = (band1 < 1400).astype(np.float32)
+    return raster.with_bands(mask)  # 1 band, preserves CRS/affine/nodata
 
 
-sedona.udf.register("mask_udf", mask_udf, ArrayType(DoubleType()))
-(
-    df_raster.withColumn("mask", expr("mask_udf(rast)"))
-    .withColumn("mask_rast", expr("RS_MakeRaster(rast, 'I', mask)"))
-    .show()
-)
+sedona.udf.register("mask_udf", mask_udf, RasterType())
+df_raster.withColumn("mask_rast", expr("mask_udf(rast)")).show()
 ```
+
+```
++--------------------+--------------------+
+|                rast|           mask_rast|
++--------------------+--------------------+
+|GridCoverage2D["g...|GridCoverage2D["g...|
++--------------------+--------------------+
+```
+
+`with_bands()` accepts a NumPy array in CHW order (bands × height × width), or HW order (height × width) for single-band output. The returned `SedonaRaster` carries all the original metadata and is serialized back to the JVM automatically when the UDF returns.
 
 ## Performance
 

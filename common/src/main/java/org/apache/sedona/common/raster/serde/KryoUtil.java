@@ -318,4 +318,13 @@ public class KryoUtil {
     }
     return params;
   }
+
+  /**
+   * Skip past a UTF-8 string written by {@link #writeUTF8String}. Reads the 4-byte length prefix,
+   * then skips that many bytes.
+   */
+  public static void skipUTF8String(Input input) {
+    int length = input.readInt();
+    input.skip(length);
+  }
 }
