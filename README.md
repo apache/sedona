@@ -23,7 +23,6 @@
 [![Docker image build](https://github.com/apache/sedona/actions/workflows/docker-build.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docker-build.yml)
 [![Docs build](https://github.com/apache/sedona/actions/workflows/docs.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docs.yml)
 [![Example project build](https://github.com/apache/sedona/actions/workflows/example.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/example.yml)
-[![First Interaction Workflow Status](https://github.com/apache/sedona/actions/workflows/first-interaction.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/first-interaction.yml)
 [![Manual Hooks Workflow Status](https://github.com/apache/sedona/actions/workflows/pre-commit-manual.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/pre-commit-manual.yml)
 [![Pre-commit Workflow Status](https://github.com/apache/sedona/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/pre-commit.yml)
 [![Python build](https://github.com/apache/sedona/actions/workflows/python.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/python.yml)

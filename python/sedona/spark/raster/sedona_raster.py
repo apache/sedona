@@ -258,9 +258,7 @@ class SedonaRaster(ABC):
 
         Only supported on InDbSedonaRaster.
         """
-        raise TypeError(
-            f"with_bands() is not supported on {type(self).__name__}."
-        )
+        raise TypeError(f"with_bands() is not supported on {type(self).__name__}.")
 
     def __enter__(self):
         return self
