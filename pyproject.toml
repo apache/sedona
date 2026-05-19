@@ -62,5 +62,5 @@ docs = [
   "sphinx-autobuild",
 ]
 dev = [
-    "prek>=0.2.19"
+    "prek>=0.4.0"
 ]

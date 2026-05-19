@@ -158,45 +158,117 @@ uv run mike deploy --update-aliases latest-snapshot -b website -p
 uv run mike serve
 ```
 
-## pre-commit
+## Code Quality Checks with `prek`, `uv`, and `make`
 
-We run [pre-commit](https://pre-commit.com/) with GitHub Actions so installation on
-your local machine is currently optional.
+This guide explains how Apache Sedona manages code quality checks, formatting, and linting locally. To ensure a fast and consistent developer experience, we combine `uv` (a lightning-fast Python package and environment manager) with `prek` (our internal pre-commit wrapper framework) and expose everything via a simple `Makefile`.
 
-The pre-commit [configuration file](https://github.com/apache/sedona/blob/master/.pre-commit-config.yaml)
-is in the repository root. Before you can run the hooks, you need to have pre-commit installed.
+---
 
-The hooks run when running `git commit` and also from the command line with `pre-commit`. Some of the hooks will auto
-fix the code after the hooks fail whilst most will print error messages from the linters. If a hook fails the overall
-commit will fail, and you will need to fix the issues or problems and `git add` and git commit again. On git commit
-the hooks will run mostly only against modified files so if you want to test all hooks against all files and when you
-are adding a new hook you should always run:
+### Prerequisites
 
-`pre-commit run --all-files`
+Before running any checks, ensure you have `uv` installed on your machine. If you don't have it yet, you can install it via:
 
-Sometimes you might need to skip a hook to commit because the hook is stopping you from committing or your computer
-might not have all the installation requirements for all the hooks. The `SKIP` variable is comma separated for two or
-more hooks:
+`curl -LsSf https://astral.sh/uv/install.sh | sh`
 
-`SKIP=codespell git commit -m "foo"`
+You do not need to manually install Python virtual environments, `pre-commit`, or `prek`. The `Makefile` handles environment isolation and dependency resolution automatically using `uv`.
 
-The same applies when running pre-commit:
+---
 
-`SKIP=codespell pre-commit run --all-files`
+### The Core Workflow: `uv` + `prek`
 
-Occasionally you can have more serious problems when using `pre-commit` with `git commit`. You can use `--no-verify` to
-commit and stop `pre-commit` from checking the hooks. For example:
+Our codebase uses `prek` to orchestrate linting and formatting workflows (such as Black, markdownlint, or oxipng).
 
-`git commit --no-verify -m "foo"`
+Instead of forcing you to activate a virtual environment manually, the `Makefile` uses `uv sync` to build a perfectly isolated environment behind the scenes. When you run any `make check-*` command, it guarantees that `prek` is executed using the exact dependency versions locked in the project.
 
-If you just want to run one hook for example just run the `markdownlint` hook:
+---
 
-`pre-commit run markdownlint --all-files`
+### Available Make Commands
 
-We have a [Makefile](https://github.com/apache/sedona/blob/master/Makefile) in the repository root which has three pre-commit convenience commands.
+For maximum convenience, you should interact with `prek` entirely through the following `make` shortcuts.
 
-For example, you can run the following to setup pre-commit to run before each commit
+#### 1. Run Checks on Staged Changes (Recommended before committing)
 
-```
-make checkinstall
-```
+This runs `prek` only against the files you have explicitly staged using `git add`. It is incredibly fast.
+
+`make check-stage`
+
+#### 2. Run Checks on the Full Codebase
+
+This forces `prek` to evaluate every single file in the repository, regardless of git status. Use this before opening a Pull Request.
+
+`make check`
+
+#### 3. Run Checks on Your Entire Branch History
+
+This automatically identifies all files changed since you branched off of the `main` branch and runs linting rules against them.
+
+`make check-from-ref`
+
+#### 4. Run Checks on Your Last Commit
+
+If you just committed code and want to double-check that everything passes post-commit:
+
+`make check-last`
+
+#### 5. Keeping Linter Hooks Up to Date
+
+To upgrade `prek` hooks to their latest respective upstream versions and update your local locked dependencies:
+
+`make update-deps`
+
+---
+
+### Advanced Usage & Examples
+
+#### Skipping Specific Hooks Locally
+
+Sometimes a specific linter rule or hook blocks your workflow, or you want to isolate your testing to a single hook. You can bypass specific hooks by passing the `SKIP` environment variable directly to `prek`.
+
+* Example: Run all checks except the linter named codespell
+`SKIP=codespell make check-stage`
+* Example: Skip multiple hooks simultaneously (comma-separated)
+`SKIP=codespell,gitleaks make check`
+
+#### Bypassing Automated Git Hooks (`--no-verify`)
+
+If you have configured `prek` to run automatically as a native Git `pre-commit` hook on your system, it will block `git commit` if any files fail the quality gates.
+
+If you need to commit a work-in-progress (WIP) branch quickly without fixing style errors, you can bypass the `prek` gate entirely using Git's built-in `--no-verify` (or `-n`) flag.
+
+* Example: Force a commit despite failing linter checks
+`git add .`
+`git commit -m "WIP: basic structure for new feature" --no-verify`
+
+Warning: Continuous Integration (CI) runners will still execute all `prek` gates on your Pull Request. Bypassing hooks with `--no-verify` should only be used for temporary local savepoints.
+
+---
+
+### Housekeeping & Resetting Cache (`make clean`)
+
+If your Python environment behaves unexpectedly, or if the linters fail to pick up recent changes due to aggressive local caching, you should reset your workspace back to a pristine state.
+
+Run the following command:
+
+`make clean`
+
+#### What happens under the hood?
+
+This command triggers a multi-directory sweep to remove compiled local artifacts and temporary caches:
+
+* `__pycache__`: Clears out compiled Python bytecode files (`.pyc`).
+* `.mypy_cache`: Empties the type-checking state cache to ensure a fresh, accurate type analysis next run.
+* `.pytest_cache`: Cleans up previous test failure tracking states.
+
+Following a `make clean`, running any subsequent `make check` command will completely rebuild the `uv` virtual environment mapping and rerun all `prek` checks completely fresh.
+
+---
+
+### Architecture Pipeline
+
+When you execute a command like `make check`, the automation engine follows these exact steps:
+
+1. `check-install`: Verifies `uv` is installed on your local path.
+2. `install`: Triggers `uv sync --all-groups`, which automatically creates/syncs a `.venv` folder containing `prek` and all development dependencies.
+3. `Execution`: Runs the target `prek` command within that guaranteed environment context.
+
+`[ Your CLI ] ---> [ make check ] ---> [ uv syncs environment ] ---> [ prek executes hooks ]`

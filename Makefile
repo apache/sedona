@@ -15,8 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-.PHONY: check check-from-ref check-install check-last check-stage clean docsbuild docsinstall install run-docs \
-		sync-no-dev update update-deps
+.PHONY: check check-from-ref check-install check-last check-stage clean docsbuild docsinstall install run-docs sync-no-dev update update-deps
 
 check: install ## run all pre-commit checks
 	prek run --all-files

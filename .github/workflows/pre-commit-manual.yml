@@ -15,7 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-name: pre-commit-manual
+# https://github.com/j178/prek
+name: Manual hooks
 
 on:
   push:
@@ -33,9 +34,16 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
-  run:
-    name: Run manual hooks
-    uses: ./.github/workflows/pre-commit-reusable.yml
-    with:
-      job_id: 'manual'
-      extra_args: '--hook-stage manual'
+  pre-commit:
+    name: Run pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout ${{ github.ref }} ( ${{ github.sha }} )'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: j178/prek-action@6ad80277337ad479fe43bd70701c3f7f8aa74db3 # v2.0.3
+        with:
+          install-only: true
+      - name: Run manual pre-commit hooks
+        run: prek run --color=always --all-files --hook-stage manual
