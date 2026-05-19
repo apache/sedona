@@ -315,9 +315,14 @@ private[apache] case class ST_OrderingEquals(inputExpressions: Seq[Expression])
 
 private[apache] case class ST_DWithin(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction3(Predicates.dWithin),
+      inferrableFunction3((l: Geometry, r: Geometry, d: Double) => Predicates.dWithin(l, r, d)),
       inferrableFunction4(Predicates.dWithin),
-      inferrableFunction3(org.apache.sedona.common.geography.Functions.dWithin)) {
+      inferrableFunction3(org.apache.sedona.common.geography.Functions.dWithin),
+      inferrableFunction3(
+        (
+            a: org.apache.sedona.common.geometryObjects.Box2D,
+            b: org.apache.sedona.common.geometryObjects.Box2D,
+            distance: Double) => Predicates.dWithin(a, b, distance))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

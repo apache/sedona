@@ -66,6 +66,37 @@ public class PredicatesTest extends TestBase {
   }
 
   @Test
+  public void testDWithinBox2D() {
+    Box2D a = new Box2D(0.0, 0.0, 10.0, 10.0);
+
+    // Overlapping → distance 0, matches any non-negative radius.
+    assertTrue(Predicates.dWithin(a, new Box2D(5.0, 5.0, 15.0, 15.0), 0.0));
+    // Edge-touching → distance 0 (closed-interval).
+    assertTrue(Predicates.dWithin(a, new Box2D(10.0, 0.0, 20.0, 10.0), 0.0));
+    // Corner-touching diagonally → distance 0.
+    assertTrue(Predicates.dWithin(a, new Box2D(10.0, 10.0, 20.0, 20.0), 0.0));
+    // Separated by 1 on X only → distance 1.0.
+    Box2D rightOf = new Box2D(11.0, 0.0, 20.0, 10.0);
+    assertTrue(Predicates.dWithin(a, rightOf, 1.0));
+    assertFalse(Predicates.dWithin(a, rightOf, 0.999));
+    // Separated by (3, 4) → distance 5 (Pythagorean).
+    Box2D diagonal = new Box2D(13.0, 14.0, 20.0, 20.0);
+    assertTrue(Predicates.dWithin(a, diagonal, 5.0));
+    assertFalse(Predicates.dWithin(a, diagonal, 4.999));
+    // Negative radius never matches, even for overlapping boxes.
+    assertFalse(Predicates.dWithin(a, a, -1.0));
+  }
+
+  @Test
+  public void testDWithinBox2DRejectInvertedBounds() {
+    Box2D normal = new Box2D(0.0, 0.0, 5.0, 5.0);
+    Box2D wrapX = new Box2D(170.0, 10.0, -170.0, 20.0);
+    IllegalArgumentException ex =
+        assertThrows(IllegalArgumentException.class, () -> Predicates.dWithin(wrapX, normal, 1.0));
+    assertTrue(ex.getMessage().contains("inverted bounds"));
+  }
+
+  @Test
   public void testBoxPredicatesRejectInvertedBounds() {
     // Box2D allows xmin > xmax (reserved for future antimeridian wraparound); planar predicates
     // refuse to evaluate them rather than silently returning misleading results.

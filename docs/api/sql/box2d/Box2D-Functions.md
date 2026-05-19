@@ -55,6 +55,7 @@ The same `ST_XMin` / `ST_YMin` / `ST_XMax` / `ST_YMax` functions also accept `Ge
 | :--- | :--- | :--- | :--- |
 | [ST_BoxIntersects](Box2D-Predicates/ST_BoxIntersects.md) | Boolean | Closed-interval bbox intersection over two Box2D arguments. Matches PostGIS `&&` on `box2d`. | v1.9.1 |
 | [ST_BoxContains](Box2D-Predicates/ST_BoxContains.md) | Boolean | Closed-interval bbox containment over two Box2D arguments. Matches PostGIS `~` on `box2d`. | v1.9.1 |
+| [ST_DWithin](Box2D-Predicates/ST_DWithin.md) | Boolean | Closed-interval planar distance test between two Box2D rectangles. | v1.9.1 |
 
 ## Box2D Functions
 

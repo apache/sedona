@@ -134,6 +134,25 @@ public class Predicates {
     }
   }
 
+  /**
+   * Closed-interval planar distance test between two Box2D rectangles. Returns true if the minimum
+   * Euclidean distance between the rectangles is less than or equal to {@code distance}.
+   *
+   * <p>Overlapping or edge/corner-touching boxes have distance 0 and therefore match for any {@code
+   * distance >= 0}. Inverted bounds throw for the same reason {@link #boxIntersects(Box2D, Box2D)}
+   * does — planar predicates have no defined meaning on inverted intervals.
+   */
+  public static boolean dWithin(Box2D a, Box2D b, double distance) {
+    requireOrderedPlanarBox(a, "a");
+    requireOrderedPlanarBox(b, "b");
+    double dx = Math.max(0.0, Math.max(a.getXMin() - b.getXMax(), b.getXMin() - a.getXMax()));
+    double dy = Math.max(0.0, Math.max(a.getYMin() - b.getYMax(), b.getYMin() - a.getYMax()));
+    // Compare squared distance to avoid a sqrt; bail out fast if either delta already exceeds
+    // the supplied radius.
+    if (dx > distance || dy > distance) return false;
+    return dx * dx + dy * dy <= distance * distance;
+  }
+
   public static String relate(Geometry leftGeometry, Geometry rightGeometry) {
     return RelateOp.relate(leftGeometry, rightGeometry).toString();
   }

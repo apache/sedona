@@ -20,7 +20,7 @@ package org.apache.sedona.sql
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{broadcast, expr}
-import org.apache.spark.sql.sedona_sql.strategy.join.{BroadcastIndexJoinExec, RangeJoinExec}
+import org.apache.spark.sql.sedona_sql.strategy.join.{BroadcastIndexJoinExec, DistanceJoinExec, RangeJoinExec}
 
 class Box2DJoinSuite extends TestBaseScala {
 
@@ -181,6 +181,73 @@ class Box2DJoinSuite extends TestBaseScala {
         .toSeq
 
       assert(viaBox == asPolygons)
+    }
+  }
+
+  describe("Box2D distance join") {
+
+    /**
+     * Boxes wired so the L↔R distances are exactly predictable:
+     *   - L1=(0,0,10,10), R1=(11,0,12,1) → distance 1.0 (separated by 1 on X)
+     *   - L1=(0,0,10,10), R2=(5,15,8,18) → distance 5.0 (separated by 5 on Y)
+     *   - L2=(0,0,1,1), R1=(11,0,12,1) → distance 10.0
+     *   - L2=(0,0,1,1), R2=(5,15,8,18) → sqrt(16 + 196) ≈ 14.56
+     */
+    def distLeft: DataFrame = {
+      import sparkSession.implicits._
+      Seq(TestBox(1, 0.0, 0.0, 10.0, 10.0), TestBox(2, 0.0, 0.0, 1.0, 1.0))
+        .toDF("id", "xmin", "ymin", "xmax", "ymax")
+        .selectExpr("id", "ST_MakeBox2D(ST_Point(xmin, ymin), ST_Point(xmax, ymax)) AS box")
+    }
+
+    def distRight: DataFrame = {
+      import sparkSession.implicits._
+      Seq(TestBox(11, 11.0, 0.0, 12.0, 1.0), TestBox(12, 5.0, 15.0, 8.0, 18.0))
+        .toDF("id", "xmin", "ymin", "xmax", "ymax")
+        .selectExpr("id", "ST_MakeBox2D(ST_Point(xmin, ymin), ST_Point(xmax, ymax)) AS box")
+    }
+
+    it("ST_DWithin on Box2D inputs: broadcast index join, radius 1.0") {
+      val df = distLeft
+        .alias("L")
+        .join(broadcast(distRight.alias("R")), expr("ST_DWithin(L.box, R.box, 1.0)"))
+      assert(
+        df.queryExecution.sparkPlan.collect { case b: BroadcastIndexJoinExec => b }.size == 1,
+        "Expected BroadcastIndexJoinExec in the plan")
+      // Only (L1, R1) is within 1.0.
+      assert(df.count() == 1)
+    }
+
+    it("ST_DWithin on Box2D inputs: broadcast index join, radius 6.0") {
+      val df = distLeft
+        .alias("L")
+        .join(broadcast(distRight.alias("R")), expr("ST_DWithin(L.box, R.box, 6.0)"))
+      // (L1, R1) distance=1 ✓, (L1, R2) distance=5 ✓; (L2, R1) distance=10 ✗, (L2, R2) ≈14.56 ✗.
+      assert(df.count() == 2)
+    }
+
+    it("ST_DWithin on Box2D inputs: distance join (non-broadcast) produces the same count") {
+      val df = distLeft
+        .alias("L")
+        .join(distRight.alias("R"), expr("ST_DWithin(L.box, R.box, 6.0)"))
+      assert(
+        df.queryExecution.sparkPlan.collect { case d: DistanceJoinExec => d }.size == 1,
+        "Expected DistanceJoinExec in the plan")
+      assert(df.count() == 2)
+    }
+
+    it("ST_DWithin on Box2D inputs: zero radius matches only edge/corner-touching pairs") {
+      import sparkSession.implicits._
+      val touching = Seq(TestBox(1, 0.0, 0.0, 10.0, 10.0))
+        .toDF("id", "xmin", "ymin", "xmax", "ymax")
+        .selectExpr("id", "ST_MakeBox2D(ST_Point(xmin, ymin), ST_Point(xmax, ymax)) AS box")
+      val adjacent = Seq(TestBox(11, 10.0, 0.0, 20.0, 10.0)) // shares edge x=10
+        .toDF("id", "xmin", "ymin", "xmax", "ymax")
+        .selectExpr("id", "ST_MakeBox2D(ST_Point(xmin, ymin), ST_Point(xmax, ymax)) AS box")
+      val df = touching
+        .alias("L")
+        .join(broadcast(adjacent.alias("R")), expr("ST_DWithin(L.box, R.box, 0.0)"))
+      assert(df.count() == 1)
     }
   }
 
