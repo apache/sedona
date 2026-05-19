@@ -317,10 +317,15 @@ public class WKBWriter {
     List<S2Loop> loops = s2poly.getLoops();
     writeInt(loops.size(), os);
     for (S2Loop loop : loops) {
+      // S2Loop stores N distinct vertices (loop is implicitly closed from
+      // vertex(n-1) back to vertex(0)). OGC WKB requires N+1 vertices with
+      // last == first. Emit the closing duplicate so downstream OGC-strict
+      // readers (e.g., geoarrow-c's WKB reader used by sedona-db's
+      // s2geography kernels) don't treat the ring as unclosed/degenerate.
       int n = loop.numVertices();
-      writeInt(n, os);
-      for (int i = 0; i < n; i++) {
-        S2LatLng ll = new S2LatLng(loop.vertex(i));
+      writeInt(n + 1, os);
+      for (int i = 0; i <= n; i++) {
+        S2LatLng ll = new S2LatLng(loop.vertex(i % n));
         double lon = ll.lngDegrees();
         double lat = ll.latDegrees();
 
@@ -358,12 +363,14 @@ public class WKBWriter {
       List<S2Loop> loops = s2poly.polygon.getLoops();
       writeInt(loops.size(), os);
 
-      // 4c) For each ring, write vertex count + coords
+      // 4c) For each ring, write vertex count + coords.
+      // Emit N+1 vertices with last == first for OGC WKB compliance;
+      // see the explanatory comment in writePolygon().
       for (S2Loop loop : loops) {
         int n = loop.numVertices();
-        writeInt(n, os);
-        for (int i = 0; i < n; i++) {
-          S2LatLng ll = new S2LatLng(loop.vertex(i));
+        writeInt(n + 1, os);
+        for (int i = 0; i <= n; i++) {
+          S2LatLng ll = new S2LatLng(loop.vertex(i % n));
           double lon = ll.lngDegrees();
           double lat = ll.latDegrees();
 
