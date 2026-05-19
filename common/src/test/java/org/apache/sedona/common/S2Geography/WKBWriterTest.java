@@ -217,10 +217,10 @@ public class WKBWriterTest {
   }
 
   /**
-   * Guards the {@code n == 0} path in {@link WKBWriter#writePolygon}: an empty/degenerate
-   * {@link S2Loop} (zero vertices) must serialize as a 0-point ring instead of attempting to
-   * fabricate a closing vertex (which would throw {@code ArithmeticException} on a
-   * naive {@code i % n} indexer).
+   * Guards the {@code n == 0} path in {@link WKBWriter#writePolygon}: an empty/degenerate {@link
+   * S2Loop} (zero vertices) must serialize as a 0-point ring instead of attempting to fabricate a
+   * closing vertex (which would throw {@code ArithmeticException} on a naive {@code i % n}
+   * indexer).
    */
   @Test
   public void PolygonEmptyLoopTest() throws IOException {
