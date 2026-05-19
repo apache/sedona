@@ -322,19 +322,29 @@ public class WKBWriter {
       // last == first. Emit the closing duplicate so downstream OGC-strict
       // readers (e.g., geoarrow-c's WKB reader used by sedona-db's
       // s2geography kernels) don't treat the ring as unclosed/degenerate.
+      // For a degenerate empty loop (n == 0) we keep the prior behavior of
+      // writing a 0-point ring rather than fabricating a closing vertex.
       int n = loop.numVertices();
-      writeInt(n + 1, os);
-      for (int i = 0; i <= n; i++) {
-        S2LatLng ll = new S2LatLng(loop.vertex(i % n));
-        double lon = ll.lngDegrees();
-        double lat = ll.latDegrees();
-
-        ByteOrderValues.putDouble(lon, buf, byteOrder);
-        os.write(buf, 8);
-        ByteOrderValues.putDouble(lat, buf, byteOrder);
-        os.write(buf, 8);
+      if (n == 0) {
+        writeInt(0, os);
+      } else {
+        writeInt(n + 1, os);
+        for (int i = 0; i < n; i++) {
+          writeS2PointLonLat(loop.vertex(i), os);
+        }
+        // Closing duplicate (== vertex(0))
+        writeS2PointLonLat(loop.vertex(0), os);
       }
     }
+  }
+
+  /** Write a single S2Point as (lon, lat) doubles in WKB ordering. */
+  private void writeS2PointLonLat(S2Point point, OutStream os) throws IOException {
+    S2LatLng ll = new S2LatLng(point);
+    ByteOrderValues.putDouble(ll.lngDegrees(), buf, byteOrder);
+    os.write(buf, 8);
+    ByteOrderValues.putDouble(ll.latDegrees(), buf, byteOrder);
+    os.write(buf, 8);
   }
 
   private void writeMultiPolygon(int geometryType, MultiPolygonGeography multiPoly, OutStream os)
@@ -364,21 +374,20 @@ public class WKBWriter {
       writeInt(loops.size(), os);
 
       // 4c) For each ring, write vertex count + coords.
-      // Emit N+1 vertices with last == first for OGC WKB compliance;
-      // see the explanatory comment in writePolygon().
+      // Emit N+1 vertices with last == first for OGC WKB compliance; see the
+      // explanatory comment in writePolygon(). Degenerate empty rings
+      // (n == 0) keep the prior behavior of writing a 0-point ring.
       for (S2Loop loop : loops) {
         int n = loop.numVertices();
-        writeInt(n + 1, os);
-        for (int i = 0; i <= n; i++) {
-          S2LatLng ll = new S2LatLng(loop.vertex(i % n));
-          double lon = ll.lngDegrees();
-          double lat = ll.latDegrees();
-
-          // X (lon) then Y (lat)—matches Point/LineString ordering
-          ByteOrderValues.putDouble(lon, buf, byteOrder);
-          os.write(buf, 8);
-          ByteOrderValues.putDouble(lat, buf, byteOrder);
-          os.write(buf, 8);
+        if (n == 0) {
+          writeInt(0, os);
+        } else {
+          writeInt(n + 1, os);
+          for (int i = 0; i < n; i++) {
+            writeS2PointLonLat(loop.vertex(i), os);
+          }
+          // Closing duplicate (== vertex(0))
+          writeS2PointLonLat(loop.vertex(0), os);
         }
       }
     }

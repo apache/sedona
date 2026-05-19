@@ -22,7 +22,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.geometry.S2LatLng;
+import com.google.common.geometry.S2Loop;
 import com.google.common.geometry.S2Point;
+import com.google.common.geometry.S2Polygon;
 import com.google.common.geometry.S2Polyline;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -212,6 +214,29 @@ public class WKBWriterTest {
     // Sanity round-trip.
     Geography decoded = new WKBReader().read(wkb);
     assertEquals(0, TestHelper.compareTo(geo, decoded));
+  }
+
+  /**
+   * Guards the {@code n == 0} path in {@link WKBWriter#writePolygon}: an empty/degenerate
+   * {@link S2Loop} (zero vertices) must serialize as a 0-point ring instead of attempting to
+   * fabricate a closing vertex (which would throw {@code ArithmeticException} on a
+   * naive {@code i % n} indexer).
+   */
+  @Test
+  public void PolygonEmptyLoopTest() throws IOException {
+    S2Polygon emptyPoly = new S2Polygon(new S2Loop(new ArrayList<S2Point>()));
+    Geography geo = new PolygonGeography(emptyPoly);
+
+    byte[] wkb = new WKBWriter(2, ByteOrderValues.LITTLE_ENDIAN).write(geo);
+    ByteBuffer bb = ByteBuffer.wrap(wkb).order(ByteOrder.LITTLE_ENDIAN);
+
+    // 1 byte order + 4 type + 4 num_rings + 4 num_points = 13 bytes total,
+    // num_points must be 0 (no fabricated closing vertex on an empty loop).
+    assertEquals(13, wkb.length);
+    assertEquals(0x01, bb.get(0));
+    assertEquals(3 /* POLYGON */, bb.getInt(1));
+    assertEquals("expected 1 ring (the empty one)", 1, bb.getInt(5));
+    assertEquals("empty ring must serialize as 0 points", 0, bb.getInt(9));
   }
 
   @Test
