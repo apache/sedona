@@ -38,6 +38,9 @@ public class UDTFDDLGenerator {
     ST_Union_Aggr.class,
     ST_Collect.class,
     ST_Dump.class,
+    ST_Envelope_Agg.class,
+    ST_Intersection_Agg.class,
+    ST_Union_Agg.class,
     // ST_SubDivideExplodeV2 is not supported in Snowflake.
     // The error message is "java.lang.RuntimeException:
     // net.snowflake.client.jdbc.SnowflakeSQLException: Data type GEOMETRY is not supported in

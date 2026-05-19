@@ -18,6 +18,11 @@
 # under the License.
 
 set -e
+# Without pipefail, a failing `python3 ... | tee ...` pipeline returns tee's
+# (zero) exit status, so a notebook crash or timeout would be silently
+# misreported as a pass. Enable pipefail so the per-notebook `if` block
+# below sees the real exit code.
+set -o pipefail
 
 # Set up environment variables if not already set
 export SPARK_HOME=${SPARK_HOME:-/opt/spark}
@@ -60,10 +65,25 @@ NOTEBOOK_COUNT=$(echo "$NOTEBOOK_FILES" | wc -l)
 echo "Found $NOTEBOOK_COUNT notebook file(s) to test (root level only, excluding subdirectories)"
 echo ""
 
+SKIPPED_TESTS=0
+
 # Convert and test each notebook
 for NOTEBOOK in $NOTEBOOK_FILES; do
     NOTEBOOK_NAME=$(basename "$NOTEBOOK" .ipynb)
     PYTHON_FILE="${NOTEBOOK%.ipynb}.py"
+
+    # A notebook can declare a network dependency by including the marker
+    #   requires-network: true
+    # anywhere in its source (typically in the first markdown cell). When
+    # SEDONA_NOTEBOOK_OFFLINE=1 is set, such notebooks are skipped so the
+    # harness still passes in sandboxed CI environments without outbound
+    # network access.
+    if [ "${SEDONA_NOTEBOOK_OFFLINE:-0}" = "1" ] && grep -q "requires-network: true" "$NOTEBOOK"; then
+        echo "Skipping (offline mode): $NOTEBOOK_NAME"
+        echo ""
+        SKIPPED_TESTS=$((SKIPPED_TESTS + 1))
+        continue
+    fi
 
     echo "Testing: $NOTEBOOK_NAME"
     echo "  Converting notebook to Python..."
@@ -179,13 +199,15 @@ PYTHON_CLEANUP
         continue
     fi
 
-    # Run the full Python script with timeout (600 seconds = 10 minutes)
-    echo "  Running Python script (600 second timeout)..."
+    # Run the full Python script with timeout (900 seconds = 15 minutes).
+    # Bumped from 600s to absorb network variance in notebooks that hit STAC
+    # or remote object stores. Local-data notebooks finish well under 60s.
+    echo "  Running Python script (900 second timeout)..."
     cd "$EXAMPLES_DIR/.."
 
     # Use timeout with progress reporting
     START_TIME=$(date +%s)
-    if timeout 600 python3 "$PYTHON_FILE" | tee /tmp/notebook_output_$$.log; then
+    if timeout 900 python3 "$PYTHON_FILE" | tee /tmp/notebook_output_$$.log; then
         END_TIME=$(date +%s)
         ELAPSED=$((END_TIME - START_TIME))
         echo "  ✓ Test passed (completed in ${ELAPSED}s)"
@@ -195,7 +217,7 @@ PYTHON_CLEANUP
         END_TIME=$(date +%s)
         ELAPSED=$((END_TIME - START_TIME))
         if [ $EXIT_CODE -eq 124 ]; then
-            echo "  ✗ Test timed out (exceeded 600 seconds, ran for ${ELAPSED}s)"
+            echo "  ✗ Test timed out (exceeded 900 seconds, ran for ${ELAPSED}s)"
             echo "  Last 20 lines of output:"
             tail -20 /tmp/notebook_output_$$.log 2>/dev/null || echo "  (no output captured)"
         else
@@ -213,9 +235,10 @@ done
 echo "========================================="
 echo "Test Summary"
 echo "========================================="
-echo "Passed: $PASSED_TESTS"
-echo "Failed: $FAILED_TESTS"
-echo "Total:  $((PASSED_TESTS + FAILED_TESTS))"
+echo "Passed:  $PASSED_TESTS"
+echo "Failed:  $FAILED_TESTS"
+echo "Skipped: $SKIPPED_TESTS"
+echo "Total:   $((PASSED_TESTS + FAILED_TESTS + SKIPPED_TESTS))"
 echo "========================================="
 
 if [ $FAILED_TESTS -gt 0 ]; then

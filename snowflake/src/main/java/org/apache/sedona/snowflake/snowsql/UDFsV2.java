@@ -20,7 +20,7 @@ package org.apache.sedona.snowflake.snowsql;
 
 import java.io.IOException;
 import org.apache.sedona.common.Functions;
-import org.apache.sedona.common.FunctionsGeoTools;
+import org.apache.sedona.common.FunctionsProj4;
 import org.apache.sedona.common.Predicates;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
@@ -228,7 +228,7 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"left", "right"},
       argTypes = {"Geometry", "Geometry"})
-  public static double ST_Azimuth(String left, String right) {
+  public static Double ST_Azimuth(String left, String right) {
     return Functions.azimuth(GeometrySerde.deserGeoJson(left), GeometrySerde.deserGeoJson(right));
   }
 
@@ -520,6 +520,15 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geometry"},
+      argTypes = {"Geometry"},
+      returnTypes = "Geometry")
+  public static String ST_OrientedEnvelope(String geometry) {
+    return GeometrySerde.serGeoJson(
+        Functions.orientedEnvelope(GeometrySerde.deserGeoJson(geometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geometry", "uniformDelta"},
       argTypes = {"Geometry", "double"},
       returnTypes = "Geometry")
@@ -610,6 +619,20 @@ public class UDFsV2 {
       argTypes = {"Geometry", "int"})
   public static String ST_GeoHash(String geometry, int precision) {
     return Functions.geohash(GeometrySerde.deserGeoJson(geometry), precision);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geohash"},
+      argTypes = {"String"})
+  public static String[] ST_GeoHashNeighbors(String geohash) {
+    return Functions.geohashNeighbors(geohash);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geohash", "direction"},
+      argTypes = {"String", "String"})
+  public static String ST_GeoHashNeighbor(String geohash, String direction) {
+    return Functions.geohashNeighbor(geohash, direction);
   }
 
   @UDFAnnotations.ParamMeta(
@@ -789,7 +812,7 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geom", "point"},
       argTypes = {"Geometry", "Geometry"})
-  public static double ST_LineLocatePoint(String geom, String point) {
+  public static Double ST_LineLocatePoint(String geom, String point) {
     return Functions.lineLocatePoint(
         GeometrySerde.deserGeoJson(geom), GeometrySerde.deserGeoJson(point));
   }
@@ -936,6 +959,24 @@ public class UDFsV2 {
       returnTypes = "Geometry")
   public static String ST_Normalize(String geometry) {
     return GeometrySerde.serGeoJson(Functions.normalize(GeometrySerde.deserGeoJson(geometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "distance"},
+      argTypes = {"Geometry", "double"},
+      returnTypes = "Geometry")
+  public static String ST_OffsetCurve(String geometry, double distance) {
+    return GeometrySerde.serGeoJson(
+        Functions.offsetCurve(GeometrySerde.deserGeoJson(geometry), distance));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "distance", "quadrantSegments"},
+      argTypes = {"Geometry", "double", "int"},
+      returnTypes = "Geometry")
+  public static String ST_OffsetCurve(String geometry, double distance, int quadrantSegments) {
+    return GeometrySerde.serGeoJson(
+        Functions.offsetCurve(GeometrySerde.deserGeoJson(geometry), distance, quadrantSegments));
   }
 
   @UDFAnnotations.ParamMeta(
@@ -1340,7 +1381,7 @@ public class UDFsV2 {
       returnTypes = "Geometry")
   public static String ST_Transform(String geometry, String sourceCRS, String targetCRS) {
     return GeometrySerde.serGeoJson(
-        GeoToolsWrapper.transform(GeometrySerde.deserGeoJson(geometry), sourceCRS, targetCRS));
+        FunctionsProj4.transform(GeometrySerde.deserGeoJson(geometry), sourceCRS, targetCRS));
   }
 
   @UDFAnnotations.ParamMeta(
@@ -1350,7 +1391,7 @@ public class UDFsV2 {
   public static String ST_Transform(
       String geometry, String sourceCRS, String targetCRS, boolean lenient) {
     return GeometrySerde.serGeoJson(
-        GeoToolsWrapper.transform(
+        FunctionsProj4.transform(
             GeometrySerde.deserGeoJson(geometry), sourceCRS, targetCRS, lenient));
   }
 
@@ -1378,7 +1419,7 @@ public class UDFsV2 {
       returnTypes = "Geometry")
   public static String ST_VoronoiPolygons(String geometry) {
     return GeometrySerde.serGeoJson(
-        FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserGeoJson(geometry), 0.0, null));
+        Functions.voronoiPolygons(GeometrySerde.deserGeoJson(geometry), 0.0, null));
   }
 
   @UDFAnnotations.ParamMeta(
@@ -1387,7 +1428,7 @@ public class UDFsV2 {
       returnTypes = "Geometry")
   public static String ST_VoronoiPolygons(String geometry, double tolerance) {
     return GeometrySerde.serGeoJson(
-        FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserGeoJson(geometry), tolerance, null));
+        Functions.voronoiPolygons(GeometrySerde.deserGeoJson(geometry), tolerance, null));
   }
 
   @UDFAnnotations.ParamMeta(
@@ -1396,7 +1437,7 @@ public class UDFsV2 {
       returnTypes = "Geometry")
   public static String ST_VoronoiPolygons(String geometry, double tolerance, String extent) {
     return GeometrySerde.serGeoJson(
-        FunctionsGeoTools.voronoiPolygons(
+        Functions.voronoiPolygons(
             GeometrySerde.deserGeoJson(geometry), tolerance, GeometrySerde.deserGeoJson(extent)));
   }
 
@@ -1418,14 +1459,14 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"})
-  public static double ST_XMax(String geometry) {
+  public static Double ST_XMax(String geometry) {
     return Functions.xMax(GeometrySerde.deserGeoJson(geometry));
   }
 
   @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"})
-  public static double ST_XMin(String geometry) {
+  public static Double ST_XMin(String geometry) {
     return Functions.xMin(GeometrySerde.deserGeoJson(geometry));
   }
 
@@ -1439,14 +1480,14 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"})
-  public static double ST_YMax(String geometry) {
+  public static Double ST_YMax(String geometry) {
     return Functions.yMax(GeometrySerde.deserGeoJson(geometry));
   }
 
   @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"})
-  public static double ST_YMin(String geometry) {
+  public static Double ST_YMin(String geometry) {
     return Functions.yMin(GeometrySerde.deserGeoJson(geometry));
   }
 
@@ -1511,7 +1552,7 @@ public class UDFsV2 {
   @UDFAnnotations.ParamMeta(
       argNames = {"geomA", "geomB"},
       argTypes = {"Geometry", "Geometry"})
-  public static double ST_FrechetDistance(String geomA, String geomB) {
+  public static Double ST_FrechetDistance(String geomA, String geomB) {
     return Functions.frechetDistance(
         GeometrySerde.deserGeoJson(geomA), GeometrySerde.deserGeoJson(geomB));
   }
@@ -1726,5 +1767,66 @@ public class UDFsV2 {
   public static String ST_Rotate(String geom, double angle, double originX, double originY) {
     return GeometrySerde.serGeoJson(
         Functions.rotate(GeometrySerde.deserGeoJson(geom), angle, originX, originY));
+  }
+
+  // Bing Tile functions
+
+  @UDFAnnotations.ParamMeta(argNames = {"tileX", "tileY", "zoomLevel"})
+  public static String ST_BingTile(int tileX, int tileY, int zoomLevel) {
+    return Functions.bingTile(tileX, tileY, zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"longitude", "latitude", "zoomLevel"})
+  public static String ST_BingTileAt(double longitude, double latitude, int zoomLevel) {
+    return Functions.bingTileAt(longitude, latitude, zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"longitude", "latitude", "zoomLevel"})
+  public static String[] ST_BingTilesAround(double longitude, double latitude, int zoomLevel) {
+    return Functions.bingTilesAround(longitude, latitude, zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"quadKey"},
+      argTypes = {"String"})
+  public static int ST_BingTileZoomLevel(String quadKey) {
+    return Functions.bingTileZoomLevel(quadKey);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"quadKey"},
+      argTypes = {"String"})
+  public static int ST_BingTileX(String quadKey) {
+    return Functions.bingTileX(quadKey);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"quadKey"},
+      argTypes = {"String"})
+  public static int ST_BingTileY(String quadKey) {
+    return Functions.bingTileY(quadKey);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"quadKey"},
+      argTypes = {"String"},
+      returnTypes = "Geometry")
+  public static String ST_BingTilePolygon(String quadKey) {
+    return GeometrySerde.serGeoJson(Functions.bingTilePolygon(quadKey));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "zoomLevel"},
+      argTypes = {"Geometry", "int"})
+  public static String[] ST_BingTileCellIDs(String geometry, int zoomLevel) {
+    return Functions.bingTileCellIDs(GeometrySerde.deserGeoJson(geometry), zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"quadKeys"},
+      returnTypes = "Geometry")
+  public static String ST_BingTileToGeom(String[] quadKeys) {
+    Geometry[] geoms = Functions.bingTileToGeom(quadKeys);
+    return GeometrySerde.serGeoJson(GeometrySerde.GEOMETRY_FACTORY.createGeometryCollection(geoms));
   }
 }

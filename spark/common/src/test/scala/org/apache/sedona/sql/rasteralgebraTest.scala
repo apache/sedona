@@ -472,6 +472,77 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(metadata(9) == metadata_4326(9))
     }
 
+    it("Passed RS_SetCRS should handle null values") {
+      val result = sparkSession.sql("select RS_SetCRS(null, null)").first().get(0)
+      assert(result == null)
+    }
+
+    it("Passed RS_SetCRS with EPSG code string") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df
+        .selectExpr("RS_SRID(RS_SetCRS(RS_FromGeoTiff(content), 'EPSG:4326'))")
+        .first()
+        .getInt(0)
+      assert(result == 4326)
+    }
+
+    it("Passed RS_SetCRS with PROJ string") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df
+        .selectExpr(
+          "RS_SRID(RS_SetCRS(RS_FromGeoTiff(content), '+proj=longlat +datum=WGS84 +no_defs'))")
+        .first()
+        .getInt(0)
+      assert(result == 4326)
+    }
+
+    it("Passed RS_SetCRS with WKT1 string") {
+      val wkt1 =
+        "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433]]"
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      // WKT1 without AUTHORITY clause: RS_SRID returns 0, but RS_CRS still works
+      val srid =
+        df.selectExpr(s"RS_SRID(RS_SetCRS(RS_FromGeoTiff(content), '${wkt1}'))").first().getInt(0)
+      assert(srid == 0)
+      val crs =
+        df.selectExpr(s"RS_CRS(RS_SetCRS(RS_FromGeoTiff(content), '${wkt1}'), 'wkt1')")
+          .first()
+          .getString(0)
+      assert(crs != null && crs.contains("WGS"))
+    }
+
+    it("Passed RS_CRS should handle null values") {
+      val result = sparkSession.sql("select RS_CRS(null)").first().get(0)
+      assert(result == null)
+    }
+
+    it("Passed RS_CRS returns PROJJSON by default") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_CRS(RS_FromGeoTiff(content))").first().getString(0)
+      assert(result != null)
+      assert(result.contains("\"type\""))
+    }
+
+    it("Passed RS_CRS with wkt1 format") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_CRS(RS_FromGeoTiff(content), 'wkt1')").first().getString(0)
+      assert(result != null)
+      assert(result.contains("PROJCS"))
+    }
+
+    it("Passed RS_CRS with proj format") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val result = df.selectExpr("RS_CRS(RS_FromGeoTiff(content), 'proj')").first().getString(0)
+      assert(result != null)
+      assert(result.contains("+proj="))
+    }
+
+    it("Passed RS_CRS returns null for raster without CRS") {
+      val result =
+        sparkSession.sql("select RS_CRS(RS_MakeEmptyRaster(1, 10, 10, 0, 0, 1))").first().get(0)
+      assert(result == null)
+    }
+
     it("Passed RS_SetGeoReference should handle null values") {
       val result = sparkSession.sql("select RS_SetGeoReference(null, null)").first().get(0)
       assertNull(result)
@@ -1087,6 +1158,87 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(
         resultRaw.startsWith(
           "iVBORw0KGgoAAAANSUhEUgAABaAAAALQCAMAAABR+ye1AAADAFBMVEXE9/W48vOq7PGa5u6L3"))
+    }
+
+    it("Passed RS_AsCOG with defaults") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val rasterDf = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val original = rasterDf.first().getAs[GridCoverage2D]("raster")
+
+      // Round-trip: GeoTiff -> raster -> COG bytes -> raster
+      val roundTripped = rasterDf
+        .selectExpr("RS_AsCOG(raster) as cog")
+        .selectExpr("RS_FromGeoTiff(cog) as raster_new")
+        .first()
+        .getAs[GridCoverage2D]("raster_new")
+      assert(roundTripped != null)
+      assertEquals(original.getEnvelope.toString, roundTripped.getEnvelope.toString)
+      assertEquals(original.getRenderedImage.getWidth, roundTripped.getRenderedImage.getWidth)
+      assertEquals(original.getRenderedImage.getHeight, roundTripped.getRenderedImage.getHeight)
+    }
+
+    it("Passed RS_AsCOG round-trip with compression") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val rasterDf = df.selectExpr("RS_FromGeoTiff(content) as raster")
+      val original = rasterDf.first().getAs[GridCoverage2D]("raster")
+
+      val roundTripped = rasterDf
+        .selectExpr("RS_AsCOG(raster, 'LZW', 256) as cog")
+        .selectExpr("RS_FromGeoTiff(cog) as raster_new")
+        .first()
+        .getAs[GridCoverage2D]("raster_new")
+      assert(roundTripped != null)
+      assertEquals(original.getEnvelope.toString, roundTripped.getEnvelope.toString)
+      assertEquals(original.getRenderedImage.getWidth, roundTripped.getRenderedImage.getWidth)
+      assertEquals(original.getRenderedImage.getHeight, roundTripped.getRenderedImage.getHeight)
+    }
+
+    it("Passed RS_AsCOG with compression") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val resultDf = df
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+        .selectExpr(
+          "RS_AsCOG(raster, 'LZW') as cog_lzw",
+          "RS_AsCOG(raster, 'Deflate') as cog_deflate")
+      val row = resultDf.first()
+      val cogLzw = row.getAs[Array[Byte]]("cog_lzw")
+      val cogDeflate = row.getAs[Array[Byte]]("cog_deflate")
+      assert(cogLzw.length > 0)
+      assert(cogDeflate.length > 0)
+      assert(cogLzw.length != cogDeflate.length)
+    }
+
+    it("Passed RS_AsCOG with compression and tileSize") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val cogBytes = df
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+        .selectExpr("RS_AsCOG(raster, 'Deflate', 512) as cog")
+        .first()
+        .getAs[Array[Byte]]("cog")
+      assert(cogBytes != null)
+      assert(cogBytes.length > 0)
+    }
+
+    it("Passed RS_AsCOG with all arguments") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val cogBytes = df
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+        .selectExpr("RS_AsCOG(raster, 'LZW', 256, 0.5, 'Nearest', 2) as cog")
+        .first()
+        .getAs[Array[Byte]]("cog")
+      assert(cogBytes != null)
+      assert(cogBytes.length > 0)
+    }
+
+    it("Passed RS_AsCOG case-insensitive args") {
+      val df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
+      val cogBytes = df
+        .selectExpr("RS_FromGeoTiff(content) as raster")
+        .selectExpr("RS_AsCOG(raster, 'lzw', 256, 0.5, 'BILINEAR', 2) as cog")
+        .first()
+        .getAs[Array[Byte]]("cog")
+      assert(cogBytes != null)
+      assert(cogBytes.length > 0)
     }
 
     it("Passed RS_AsArcGrid") {

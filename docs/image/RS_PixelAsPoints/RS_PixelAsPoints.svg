@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 380" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="700" height="380" fill="#ffffff"/>
+  <text x="350" y="30" text-anchor="middle" font-size="16" font-weight="600" fill="#2c3e50">RS_PixelAsPoints</text>
+  <text x="350" y="50" text-anchor="middle" font-size="12" fill="#7f8c8d">Returns points at the upper-left corner of every pixel</text>
+  <rect x="140" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="120" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="120" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="160" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="160" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="160" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="160" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="160" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="160" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="160" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="160" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="200" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="200" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="200" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="200" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="200" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="200" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="200" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="200" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="240" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="240" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="80" width="400" height="240" fill="none" stroke="#c8cdd0" stroke-width="1.2"/>
+  <circle cx="140" cy="80" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="190" cy="80" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="240" cy="80" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="290" cy="80" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="340" cy="80" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="390" cy="80" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="440" cy="80" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="490" cy="80" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="140" cy="120" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="190" cy="120" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="240" cy="120" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="290" cy="120" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="340" cy="120" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="390" cy="120" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="440" cy="120" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="490" cy="120" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="140" cy="160" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="190" cy="160" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="240" cy="160" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="290" cy="160" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="340" cy="160" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="390" cy="160" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="440" cy="160" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="490" cy="160" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="140" cy="200" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="190" cy="200" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="240" cy="200" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="290" cy="200" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="340" cy="200" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="390" cy="200" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="440" cy="200" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="490" cy="200" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="140" cy="240" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="190" cy="240" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="240" cy="240" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="290" cy="240" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="340" cy="240" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="390" cy="240" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="440" cy="240" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="490" cy="240" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="140" cy="280" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="190" cy="280" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="240" cy="280" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="290" cy="280" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="340" cy="280" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="390" cy="280" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="440" cy="280" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="490" cy="280" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <text x="135" y="70" text-anchor="start" font-size="9" fill="#e74c3c">(x=1,y=1)</text>
+  <text x="346" y="155" text-anchor="start" font-size="9" fill="#e74c3c">(x=5,y=3)</text>
+  <circle cx="140" cy="340" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <text x="148" y="344" text-anchor="start" font-size="10" fill="#7f8c8d">= upper-left corner point with (x, y) coordinates</text>
+</svg>

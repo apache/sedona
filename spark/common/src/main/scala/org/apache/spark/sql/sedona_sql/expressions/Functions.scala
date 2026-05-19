@@ -18,7 +18,8 @@
  */
 package org.apache.spark.sql.sedona_sql.expressions
 
-import org.apache.sedona.common.{Functions, FunctionsGeoTools}
+import org.apache.sedona.common.{Functions, FunctionsGeoTools, FunctionsProj4}
+import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.common.utils.{InscribedCircle, ValidDetail}
 import org.apache.sedona.core.utils.SedonaConf
@@ -32,6 +33,7 @@ import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.types._
 import org.locationtech.jts.algorithm.MinimumBoundingCircle
 import org.locationtech.jts.geom._
+import org.locationtech.jts.geom.Geometry
 import org.apache.spark.sql.sedona_sql.expressions.InferrableFunctionConverter._
 import org.apache.spark.sql.sedona_sql.expressions.LibPostalUtils.{getExpanderFromConf, getParserFromConf}
 import org.apache.spark.unsafe.types.UTF8String
@@ -58,7 +60,9 @@ private[apache] case class ST_LabelPoint(inputExpressions: Seq[Expression])
  *   This function takes two geometries and calculates the distance between two objects.
  */
 private[apache] case class ST_Distance(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.distance _) {
+    extends InferredExpression(
+      Functions.distance _,
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.distance)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -66,7 +70,9 @@ private[apache] case class ST_Distance(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_YMax(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.yMax _) {
+    extends InferredExpression(
+      inferrableFunction1((g: Geometry) => Functions.yMax(g)),
+      inferrableFunction1((b: Box2D) => Functions.yMax(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -74,7 +80,9 @@ private[apache] case class ST_YMax(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_YMin(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.yMin _) {
+    extends InferredExpression(
+      inferrableFunction1((g: Geometry) => Functions.yMin(g)),
+      inferrableFunction1((b: Box2D) => Functions.yMin(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -157,7 +165,9 @@ private[apache] case class ST_CrossesDateLine(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_NPoints(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.nPoints _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.nPoints),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.nPoints)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -187,7 +197,17 @@ private[apache] case class ST_Buffer(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction2(Functions.buffer),
       inferrableFunction3(Functions.buffer),
-      inferrableFunction4(Functions.buffer)) {
+      inferrableFunction4(Functions.buffer),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.buffer),
+      // Explicit type ascription disambiguates the two 3-arg Geography buffer overloads
+      // (`(Geography, double, String)` for the JTS-style parameters string, and
+      // `(Geography, double, boolean)` which throws a clear error if `useSpheroid` is passed).
+      inferrableFunction3(
+        org.apache.sedona.common.geography.Functions
+          .buffer(_: org.apache.sedona.common.S2Geography.Geography, _: Double, _: String)),
+      inferrableFunction3(
+        org.apache.sedona.common.geography.Functions
+          .buffer(_: org.apache.sedona.common.S2Geography.Geography, _: Double, _: Boolean))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -225,11 +245,27 @@ private[apache] case class ST_Envelope(inputExpressions: Seq[Expression])
   }
 }
 
+/**
+ * Return the planar bounding box (Box2D) of a Geometry. Returns NULL for null or empty input.
+ *
+ * @param inputExpressions
+ */
+private[apache] case class ST_Box2D(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.box2D _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 private[apache] case class ST_Expand(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction4(Functions.expand),
-      inferrableFunction3(Functions.expand),
-      inferrableFunction2(Functions.expand)) {
+      inferrableFunction4((g: Geometry, dx: Double, dy: Double, dz: Double) =>
+        Functions.expand(g, dx, dy, dz)),
+      inferrableFunction3((g: Geometry, dx: Double, dy: Double) => Functions.expand(g, dx, dy)),
+      inferrableFunction2((g: Geometry, delta: Double) => Functions.expand(g, delta)),
+      inferrableFunction3((b: Box2D, dx: Double, dy: Double) => Functions.expand(b, dx, dy)),
+      inferrableFunction2((b: Box2D, delta: Double) => Functions.expand(b, delta))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -237,12 +273,17 @@ private[apache] case class ST_Expand(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the length measurement of a Geometry
+ * Return the length measurement of a Geometry or Geography. Supports both Geometry (JTS, planar
+ * length in the input's coordinate units) and Geography (S2, geodesic length in meters on the
+ * WGS84 spheroid) via InferredExpression dual dispatch.
  *
  * @param inputExpressions
+ *   Geometry or Geography
  */
 private[apache] case class ST_Length(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.length _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.length),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.length)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -263,12 +304,17 @@ private[apache] case class ST_Length2D(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the area measurement of a Geometry.
+ * Return the area measurement of a Geometry or Geography. Supports both Geometry (JTS, planar
+ * area in the input's coordinate units) and Geography (S2, geodesic area in square meters on the
+ * WGS84 spheroid) via InferredExpression dual dispatch.
  *
  * @param inputExpressions
+ *   Geometry or Geography
  */
 private[apache] case class ST_Area(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.area _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.area),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.area)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -281,7 +327,9 @@ private[apache] case class ST_Area(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_Centroid(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.getCentroid _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.getCentroid),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.centroid)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -292,16 +340,95 @@ private[apache] case class ST_Centroid(inputExpressions: Seq[Expression])
  * Given a geometry, sourceEPSGcode, and targetEPSGcode, convert the geometry's Spatial Reference
  * System / Coordinate Reference System.
  *
+ * The CRS transformation backend is controlled by the `spark.sedona.crs.geotools` config:
+ *   - `none`: Use proj4sedona for all vector transformations
+ *   - `raster` (default): Use proj4sedona for vector, GeoTools for raster
+ *   - `all`: Use GeoTools for everything (legacy behavior)
+ *
+ * Note: For the 4-argument version with lenient parameter, proj4sedona ignores the lenient
+ * parameter (it always performs strict transformation). GeoTools uses the lenient parameter.
+ *
+ * The default fallback (when config cannot be read) is proj4sedona, ensuring consistent behavior
+ * during Spark's query optimization phases like constant folding.
+ *
  * @param inputExpressions
+ * @param useGeoTools
  */
-private[apache] case class ST_Transform(inputExpressions: Seq[Expression])
+private[apache] case class ST_Transform(
+    inputExpressions: Seq[Expression],
+    useGeoTools: Boolean,
+    crsUrlBase: String,
+    crsUrlPathTemplate: String,
+    crsUrlFormat: String)
     extends InferredExpression(
-      inferrableFunction4(FunctionsGeoTools.transform),
-      inferrableFunction3(FunctionsGeoTools.transform),
-      inferrableFunction2(FunctionsGeoTools.transform)) {
+      inferrableFunction4(FunctionsProj4.transform),
+      inferrableFunction3(FunctionsProj4.transform),
+      inferrableFunction2(FunctionsProj4.transform)) {
+
+  private def this(
+      inputExpressions: Seq[Expression],
+      config: (Boolean, String, String, String)) = {
+    this(inputExpressions, config._1, config._2, config._3, config._4)
+  }
+
+  def this(inputExpressions: Seq[Expression]) = {
+    // Read all config from SedonaConf on the driver and pass to primary constructor.
+    // SparkSession may not be available on executors, so config is captured here
+    // and serialized to executors along with the expression node.
+    this(inputExpressions, ST_Transform.readConfig())
+  }
+
+  // Define proj4sedona function overloads (2, 3, 4-arg versions)
+  // Note: 4-arg version ignores the lenient parameter
+  private lazy val proj4Functions: Seq[InferrableFunction] = Seq(
+    inferrableFunction4(FunctionsProj4.transform),
+    inferrableFunction3(FunctionsProj4.transform),
+    inferrableFunction2(FunctionsProj4.transform))
+
+  // Define GeoTools function overloads (2, 3, 4-arg versions)
+  private lazy val geoToolsFunctions: Seq[InferrableFunction] = Seq(
+    inferrableFunction4(FunctionsGeoTools.transform),
+    inferrableFunction3(FunctionsGeoTools.transform),
+    inferrableFunction2(FunctionsGeoTools.transform))
+
+  override lazy val f: InferrableFunction = {
+    // Register URL CRS provider on executor if configured (lazy, once per JVM).
+    // This runs inside lazy val f so it only executes on executors during row
+    // evaluation, never on the driver during query planning.
+    if (crsUrlBase.nonEmpty) {
+      FunctionsProj4.registerUrlCrsProvider(crsUrlBase, crsUrlPathTemplate, crsUrlFormat)
+    }
+
+    // Check config to decide between proj4sedona and GeoTools
+    // Note: 4-arg lenient parameter is ignored by proj4sedona
+    val candidateFunctions = if (useGeoTools) geoToolsFunctions else proj4Functions
+    FunctionResolver.resolveFunction(inputExpressions, candidateFunctions)
+  }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
+  }
+}
+
+object ST_Transform {
+
+  /**
+   * Read all ST_Transform config from SedonaConf in one call. Defaults are handled by SedonaConf
+   * itself. Returns safe fallbacks (proj4sedona, no URL provider) when no active session exists.
+   */
+  private def readConfig(): (Boolean, String, String, String) = {
+    try {
+      val conf = SedonaConf.fromActiveSession()
+      (
+        conf.getCRSTransformMode.useGeoToolsForVector(),
+        conf.getCrsUrlBase,
+        conf.getCrsUrlPathTemplate,
+        conf.getCrsUrlFormat)
+    } catch {
+      case _: Exception =>
+        // No active session (e.g., during constant folding) — use safe defaults
+        (false, "", "", "")
+    }
   }
 }
 
@@ -341,9 +468,9 @@ private[apache] case class ST_IsValidDetail(children: Seq[Expression])
 
   override def inputTypes: Seq[AbstractDataType] = {
     if (nArgs == 2) {
-      Seq(GeometryUDT, IntegerType)
+      Seq(GeometryUDT(), IntegerType)
     } else if (nArgs == 1) {
-      Seq(GeometryUDT)
+      Seq(GeometryUDT())
     } else {
       throw new IllegalArgumentException(s"Invalid number of arguments: $nArgs")
     }
@@ -387,7 +514,7 @@ private[apache] case class ST_IsValidDetail(children: Seq[Expression])
   override def dataType: DataType = new StructType()
     .add("valid", BooleanType, nullable = false)
     .add("reason", StringType, nullable = true)
-    .add("location", GeometryUDT, nullable = true)
+    .add("location", GeometryUDT(), nullable = true)
 }
 
 private[apache] case class ST_IsValidTrajectory(inputExpressions: Seq[Expression])
@@ -487,7 +614,11 @@ private[apache] case class ST_SimplifyPolygonHull(inputExpressions: Seq[Expressi
 }
 
 private[apache] case class ST_AsText(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.asWKT _) {
+    extends InferredExpression(
+      inferrableFunction1((g: Geometry) => Functions.asWKT(g)),
+      inferrableFunction1((g: Geography) =>
+        org.apache.sedona.common.geography.Functions.asText(g)),
+      inferrableFunction1((b: Box2D) => Functions.box2dAsText(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -547,7 +678,9 @@ private[apache] case class ST_SetSRID(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_GeometryType(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.geometryType _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.geometryType),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.geometryType)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -683,7 +816,7 @@ private[apache] case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expres
 
   override def dataType: DataType = DataTypes.createStructType(
     Array(
-      DataTypes.createStructField("center", GeometryUDT, false),
+      DataTypes.createStructField("center", GeometryUDT(), false),
       DataTypes.createStructField("radius", DataTypes.DoubleType, false)))
 
   override def children: Seq[Expression] = inputExpressions
@@ -695,6 +828,14 @@ private[apache] case class ST_MinimumBoundingRadius(inputExpressions: Seq[Expres
 
 private[apache] case class ST_MinimumBoundingCircle(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.minimumBoundingCircle _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_OrientedEnvelope(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.orientedEnvelope _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -916,6 +1057,24 @@ private[apache] case class ST_ClosestPoint(inputExpressions: Seq[Expression])
   }
 }
 
+private[apache] case class ST_ShortestLine(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.shortestLine _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_OffsetCurve(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction2(Functions.offsetCurve),
+      inferrableFunction3(Functions.offsetCurve)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 private[apache] case class ST_IsPolygonCW(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.isPolygonCW _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -941,16 +1100,19 @@ private[apache] object ST_IsRing {
 }
 
 /**
- * Returns the number of Geometries. If geometry is a GEOMETRYCOLLECTION (or MULTI*) return the
- * number of geometries, for single geometries will return 1
+ * Returns the number of sub-geometries. For a GEOMETRYCOLLECTION or MULTI* input, returns the
+ * number of component geometries; for single geometries returns 1. Supports both Geometry (JTS)
+ * and Geography (S2) inputs via InferredExpression dual dispatch.
  *
- * This method implements the SQL/MM specification. SQL-MM 3: 9.1.4
+ * For Geometry inputs this method implements the SQL/MM specification (SQL-MM 3: 9.1.4).
  *
  * @param inputExpressions
- *   Geometry
+ *   Geometry or Geography
  */
 private[apache] case class ST_NumGeometries(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.numGeometries _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.numGeometries),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.numGeometries)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1008,7 +1170,7 @@ private[apache] case class ST_SubDivideExplode(children: Seq[Expression])
 
   override def elementSchema: StructType = {
     new StructType()
-      .add("geom", GeometryUDT, true)
+      .add("geom", GeometryUDT(), true)
   }
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -1127,8 +1289,8 @@ private[apache] case class ST_MaximumInscribedCircle(children: Seq[Expression])
   override def nullable: Boolean = true
 
   override def dataType: DataType = new StructType()
-    .add("center", GeometryUDT, nullable = false)
-    .add("nearest", GeometryUDT, nullable = false)
+    .add("center", GeometryUDT(), nullable = false)
+    .add("nearest", GeometryUDT(), nullable = false)
     .add("radius", DoubleType, nullable = false)
 }
 
@@ -1142,6 +1304,22 @@ private[apache] case class ST_MaxDistance(inputExpressions: Seq[Expression])
 
 private[apache] case class ST_GeoHash(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.geohash _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_GeoHashNeighbors(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.geohashNeighbors _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_GeoHashNeighbor(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.geohashNeighbor _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1321,7 +1499,9 @@ private[apache] case class ST_IsEmpty(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_XMax(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.xMax _) {
+    extends InferredExpression(
+      inferrableFunction1((g: Geometry) => Functions.xMax(g)),
+      inferrableFunction1((b: Box2D) => Functions.xMax(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1334,7 +1514,9 @@ private[apache] case class ST_XMax(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_XMin(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.xMin _) {
+    extends InferredExpression(
+      inferrableFunction1((g: Geometry) => Functions.xMin(g)),
+      inferrableFunction1((b: Box2D) => Functions.xMin(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1436,6 +1618,83 @@ private[apache] case class ST_H3KRing(inputExpressions: Seq[Expression])
 
 private[apache] case class ST_H3ToGeom(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.h3ToGeom _)
+    with FoldableExpression {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+// =========================================================================
+// Bing Tile expressions
+// =========================================================================
+
+private[apache] case class ST_BingTile(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTile _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTileAt(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTileAt _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTilesAround(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTilesAround _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTileZoomLevel(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTileZoomLevel _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTileX(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTileX _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTileY(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTileY _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTilePolygon(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTilePolygon _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTileCellIDs(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTileCellIDs _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_BingTileToGeom(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.bingTileToGeom _)
     with FoldableExpression {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
@@ -1616,13 +1875,13 @@ private[apache] case class ST_GeneratePoints(inputExpressions: Seq[Expression], 
 
   override def nullable: Boolean = true
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def inputTypes: Seq[AbstractDataType] = {
     if (nArgs == 3) {
-      Seq(GeometryUDT, IntegerType, IntegerType)
+      Seq(GeometryUDT(), IntegerType, IntegerType)
     } else if (nArgs == 2) {
-      Seq(GeometryUDT, IntegerType)
+      Seq(GeometryUDT(), IntegerType)
     } else {
       throw new IllegalArgumentException(s"Invalid number of arguments: $nArgs")
     }
@@ -1673,7 +1932,7 @@ private[apache] case class ST_TriangulatePolygon(inputExpressions: Seq[Expressio
 }
 
 private[apache] case class ST_VoronoiPolygons(inputExpressions: Seq[Expression])
-    extends InferredExpression(nullTolerantInferrableFunction3(FunctionsGeoTools.voronoiPolygons))
+    extends InferredExpression(nullTolerantInferrableFunction3(Functions.voronoiPolygons))
     with FoldableExpression {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

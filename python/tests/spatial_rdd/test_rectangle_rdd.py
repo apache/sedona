@@ -24,7 +24,6 @@ from sedona.spark.core.enums import FileDataSplitter, IndexType
 from sedona.spark.core.geom.envelope import Envelope
 from sedona.spark.core.SpatialRDD import RectangleRDD
 
-
 inputLocation = os.path.join(tests_resource, "zcta510-small.csv")
 queryWindowSet = os.path.join(tests_resource, "zcta510-small.csv")
 offset = 0

@@ -26,7 +26,7 @@ import com.esotericsoftware.kryo.io.Output;
 import java.io.IOException;
 import java.io.Serializable;
 import org.apache.sedona.common.S2Geography.Geography;
-import org.apache.sedona.common.S2Geography.GeographySerializer;
+import org.apache.sedona.common.S2Geography.GeographyWKBSerializer;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -91,7 +91,7 @@ public class GeometrySerde extends Serializer implements Serializable {
   }
 
   private void writeGeography(Output out, Geography geography) throws IOException {
-    byte[] data = GeographySerializer.serialize(geography);
+    byte[] data = GeographyWKBSerializer.serialize(geography);
     out.writeInt(data.length);
     out.write(data, 0, data.length);
   }
@@ -170,7 +170,7 @@ public class GeometrySerde extends Serializer implements Serializable {
     int length = input.readInt();
     byte[] bytes = new byte[length];
     input.readBytes(bytes);
-    Geography geography = GeographySerializer.deserialize(bytes);
+    Geography geography = GeographyWKBSerializer.deserialize(bytes);
     return geography;
   }
 

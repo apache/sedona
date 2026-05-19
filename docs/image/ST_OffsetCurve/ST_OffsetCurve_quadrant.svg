@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="18" text-anchor="middle" font-size="15" font-weight="bold" fill="#333333">ST_OffsetCurve — quadrantSegments Effect</text>
+
+  <!-- LEFT CHART: default qs=8 -->
+  <!-- Mapping: x[0,13]→[20,230], y[-3,10]→[230,40] -->
+  <!-- cx = x*16.2+20, cy = 230 - (y+3)*14.6 -->
+  <!-- (0,0)→(20,186) (10,0)→(182,186) (10,10)→(182,40) -->
+  <!-- (0,-3)→(20,230) (13,0)→(231,186) (13,10)→(231,40) -->
+
+  <text x="125" y="36" text-anchor="middle" font-size="13" font-weight="bold" fill="#e67e22">default (qs=8): 11 points</text>
+
+  <!-- Input -->
+  <polyline points="20,186 182,186 182,40" fill="none" stroke="#4a90d9" stroke-width="2" />
+
+  <!-- Default arc: 9 arc points from JTS -->
+  <!-- (10,-3)→(182,230) (10.59,-2.94)→(192,229) (11.15,-2.77)→(201,226) (11.67,-2.49)→(209,222) -->
+  <!-- (12.12,-2.12)→(216,217) (12.49,-1.67)→(222,211) (12.77,-1.15)→(227,203) (12.94,-0.59)→(230,195) (13,0)→(231,186) -->
+  <polyline points="20,230 182,230 192,229 201,226 209,222 216,217 222,211 227,203 230,195 231,186 231,40"
+    fill="none" stroke="#e67e22" stroke-width="2" />
+  <circle cx="182" cy="230" r="2.5" fill="#e67e22" />
+  <circle cx="192" cy="229" r="2.5" fill="#e67e22" />
+  <circle cx="201" cy="226" r="2.5" fill="#e67e22" />
+  <circle cx="209" cy="222" r="2.5" fill="#e67e22" />
+  <circle cx="216" cy="217" r="2.5" fill="#e67e22" />
+  <circle cx="222" cy="211" r="2.5" fill="#e67e22" />
+  <circle cx="227" cy="203" r="2.5" fill="#e67e22" />
+  <circle cx="230" cy="195" r="2.5" fill="#e67e22" />
+  <circle cx="231" cy="186" r="2.5" fill="#e67e22" />
+
+  <!-- Divider -->
+  <line x1="250" y1="30" x2="250" y2="250" stroke="#ddd" stroke-width="1" />
+
+  <!-- RIGHT CHART: qs=16 -->
+  <!-- Mapping: x[0,13]→[270,480], y[-3,10]→[230,40] -->
+  <!-- cx = x*16.2+270, cy = 230 - (y+3)*14.6 -->
+  <!-- (0,0)→(270,186) (10,0)→(432,186) (10,10)→(432,40) -->
+  <!-- (13,0)→(481,186) (13,10)→(481,40) -->
+
+  <text x="375" y="36" text-anchor="middle" font-size="13" font-weight="bold" fill="#9b59b6">qs=16: 19 points</text>
+
+  <!-- Input -->
+  <polyline points="270,186 432,186 432,40" fill="none" stroke="#4a90d9" stroke-width="2" />
+
+  <!-- qs=16 arc: 17 arc points from JTS -->
+  <!-- (10,-3)→(432,230) (10.29,-2.99)→(437,230) (10.59,-2.94)→(442,229) (10.87,-2.87)→(448,228) -->
+  <!-- (11.15,-2.77)→(451,226) (11.41,-2.65)→(455,223) (11.67,-2.49)→(459,222) (11.90,-2.32)→(463,219) -->
+  <!-- (12.12,-2.12)→(466,217) (12.32,-1.90)→(470,214) (12.49,-1.67)→(472,211) (12.65,-1.41)→(475,207) -->
+  <!-- (12.77,-1.15)→(477,203) (12.87,-0.87)→(478,199) (12.94,-0.59)→(480,195) (12.99,-0.29)→(481,190) (13,0)→(481,186) -->
+  <polyline points="270,230 432,230 437,230 442,229 448,228 451,226 455,223 459,222 463,219 466,217 470,214 472,211 475,207 477,203 478,199 480,195 481,190 481,186 481,40"
+    fill="none" stroke="#9b59b6" stroke-width="2" />
+  <circle cx="432" cy="230" r="2" fill="#9b59b6" />
+  <circle cx="437" cy="230" r="2" fill="#9b59b6" />
+  <circle cx="442" cy="229" r="2" fill="#9b59b6" />
+  <circle cx="448" cy="228" r="2" fill="#9b59b6" />
+  <circle cx="451" cy="226" r="2" fill="#9b59b6" />
+  <circle cx="455" cy="223" r="2" fill="#9b59b6" />
+  <circle cx="459" cy="222" r="2" fill="#9b59b6" />
+  <circle cx="463" cy="219" r="2" fill="#9b59b6" />
+  <circle cx="466" cy="217" r="2" fill="#9b59b6" />
+  <circle cx="470" cy="214" r="2" fill="#9b59b6" />
+  <circle cx="472" cy="211" r="2" fill="#9b59b6" />
+  <circle cx="475" cy="207" r="2" fill="#9b59b6" />
+  <circle cx="477" cy="203" r="2" fill="#9b59b6" />
+  <circle cx="478" cy="199" r="2" fill="#9b59b6" />
+  <circle cx="480" cy="195" r="2" fill="#9b59b6" />
+  <circle cx="481" cy="190" r="2" fill="#9b59b6" />
+  <circle cx="481" cy="186" r="2" fill="#9b59b6" />
+
+  <!-- Caption -->
+  <text x="250" y="280" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Higher quadrantSegments adds more line segments to approximate the arc</text>
+  <!-- Legend -->
+  <rect x="73" y="258" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="89" y="269" font-size="12" fill="#333333">Input</text>
+  <rect x="163" y="258" width="12" height="12" rx="2" fill="#e67e22" stroke="#e67e22" stroke-width="1" />
+  <text x="179" y="269" font-size="12" fill="#333333">Offset (qs=8)</text>
+  <rect x="293" y="258" width="12" height="12" rx="2" fill="#9b59b6" stroke="#9b59b6" stroke-width="1" />
+  <text x="309" y="269" font-size="12" fill="#333333">Offset (qs=16)</text>
+</svg>

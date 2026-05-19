@@ -70,13 +70,13 @@ public class RasterizationUtils implements Serializable {
       datasetBoundary = datasetBoundaryOriginal;
     }
     /*
-     if(spatialCoordinate.x < datasetBoundary.getMinX() || spatialCoordinate.x > datasetBoundary.getMaxX())
+    if(spatialCoordinate.x < datasetBoundary.getMinX() || spatialCoordinate.x > datasetBoundary.getMaxX())
     {
-    	throw new Exception("[RasterizationUtils][FindOnePixelCoordinate] This spatial coordinate is out of the given boundary. Should be ignored.");
+      throw new Exception("[RasterizationUtils][FindOnePixelCoordinate] This spatial coordinate is out of the given boundary. Should be ignored.");
     }
     if(spatialCoordinate.y < datasetBoundaryOriginal.getMinY() || spatialCoordinate.y > datasetBoundaryOriginal.getMaxY())
     {
-    	throw new Exception("[RasterizationUtils][FindOnePixelCoordinate] This spatial coordinate is out of the given boundary. Should be ignored.");
+      throw new Exception("[RasterizationUtils][FindOnePixelCoordinate] This spatial coordinate is out of the given boundary. Should be ignored.");
     }*/
 
     Double pixelXDouble =
@@ -221,7 +221,7 @@ public class RasterizationUtils implements Serializable {
     /*
     if((twoDimensionIdX+twoDimensionIdY*resolutionX)<0 ||(twoDimensionIdX+twoDimensionIdY*resolutionX)>(resolutionX*resolutionY-1))
     {
-    	throw new Exception("[RasterizationUtils][Encode2DTo1DId] This given 2 dimension coordinate is "+twoDimensionIdX+" "+twoDimensionIdY+". This coordinate is out of the given boundary and will be dropped.");
+      throw new Exception("[RasterizationUtils][Encode2DTo1DId] This given 2 dimension coordinate is "+twoDimensionIdX+" "+twoDimensionIdY+". This coordinate is out of the given boundary and will be dropped.");
     }
     */
     return twoDimensionIdX + twoDimensionIdY * resolutionX;

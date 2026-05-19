@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="130" viewBox="0 0 400 130">
+  <rect width="400" height="130" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_Envelope_Agg</text>
+
+  <defs><marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#666"/></marker></defs>
+  <polygon points="48.8,95.0 76.2,95.0 76.2,67.5 48.8,67.5 48.8,95.0" stroke="#1565C0" stroke-width="1.5" fill="rgba(21,101,192,0.15)"/>
+  <polygon points="62.5,81.2 103.8,81.2 103.8,40.0 62.5,40.0 62.5,81.2" stroke="#7B1FA2" stroke-width="1.5" fill="rgba(123,31,162,0.15)"/>
+  <polygon points="90.0,95.0 131.2,95.0 131.2,53.8 90.0,53.8 90.0,95.0" stroke="#FF6F00" stroke-width="1.5" fill="rgba(255,111,0,0.15)"/>
+  <line x1="175" y1="68" x2="225" y2="68" stroke="#666" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  <text x="200" y="60" font-family="monospace" font-size="9" fill="#666" text-anchor="middle">Envelope</text>
+  <polygon points="258.8,95.0 341.2,95.0 341.2,40.0 258.8,40.0 258.8,95.0" stroke="#E53935" stroke-width="2" fill="rgba(229,57,53,0.10)" stroke-dasharray="5,3"/>
+  <text x="300" y="118" font-family="monospace" font-size="9" fill="#E53935" text-anchor="middle">Bounding Box</text>
+</svg>

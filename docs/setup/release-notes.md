@@ -17,6 +17,263 @@
  under the License.
  -->
 
+## Sedona 1.9.0
+
+Sedona 1.9.0 is compiled against:
+
+- **Spark**: 3.4, 3.5, 4.0, 4.1
+- **Flink**: 1.19
+- **Snowflake**: 7+
+
+**Java Requirements:**
+
+- Spark 3.4 & 3.5: Java 11
+- Spark 4.0 & 4.1: Java 17
+
+This is a major release that includes bug fixes, new features, and improvements.
+
+### New Contributors
+
+* @piyushka-ally made their first contribution in https://github.com/apache/sedona/pull/2771
+* @Takch02 made their first contribution in https://github.com/apache/sedona/pull/2767
+* @terry-blessing made their first contribution in https://github.com/apache/sedona/pull/2835
+
+### Highlights
+
+* [X] [<a href='https://github.com/apache/sedona/issues/2609'>GH-2609</a>] - Support Spark 4.1
+* [X] [<a href='https://github.com/apache/sedona/issues/2610'>GH-2610</a>] - Integrate proj4sedona for CRS transformation, with full support for PROJJSON, PROJ strings, WKT2, and other CRS formats, plus grid file support for high-accuracy datum shifts
+* [X] [<a href='https://github.com/apache/sedona/issues/1327'>GH-1327</a>] - Add Bing Tile functions
+* [X] [<a href='https://github.com/apache/sedona/issues/908'>GH-908</a>] - Add ST_GeoHashNeighbors and ST_GeoHashNeighbor functions
+* [X] [<a href='https://github.com/apache/sedona/issues/2652'>GH-2652</a>] - Add RS_AsCOG SQL function for Cloud Optimized GeoTiff output
+* [X] [<a href='https://github.com/apache/sedona/issues/2674'>GH-2674</a>] - Add RS_SetCRS and RS_CRS for custom CRS string support
+* [X] [<a href='https://github.com/apache/sedona/issues/2672'>GH-2672</a>] - Add a new raster data source reader that automatically tiles GeoTiffs to bypass Spark's 2GB record size limit and avoid OOM issues when loading single large rasters
+* [X] [<a href='https://github.com/apache/sedona/issues/2646'>GH-2646</a>] - Auto-populate covering metadata for GeoParquet 1.1.0 writes
+* [X] [<a href='https://github.com/apache/sedona/issues/2664'>GH-2664</a>] - GeoParquet writer utilizes geometry SRID to produce projjson CRS metadata
+* [X] Multiple GeoPandas API improvements including clip_by_rect, shortest_line, offset_curve, minimum_clearance, and more
+* [X] [<a href='https://github.com/apache/sedona/issues/2678'>GH-2678</a>] - SVG visual illustrations for SQL function documentation
+
+### New Features
+
+#### Core Features
+
+* [<a href='https://github.com/apache/sedona/issues/2609'>GH-2609</a>] - Support Spark 4.1
+* [<a href='https://github.com/apache/sedona/issues/2610'>GH-2610</a>] - Integrate proj4sedona for CRS transformation
+* [<a href='https://github.com/apache/sedona/issues/1327'>GH-1327</a>] - Add Bing Tile functions
+* [<a href='https://github.com/apache/sedona/issues/908'>GH-908</a>] - Add ST_GeoHashNeighbors and ST_GeoHashNeighbor functions
+* [<a href='https://github.com/apache/sedona/issues/2799'>GH-2799</a>] - Add ST_OffsetCurve function
+* [<a href='https://github.com/apache/sedona/issues/2798'>GH-2798</a>] - Add ST_ShortestLine function
+* [<a href='https://github.com/apache/sedona/issues/2652'>GH-2652</a>] - Add RS_AsCOG SQL function for Cloud Optimized GeoTiff output
+* [<a href='https://github.com/apache/sedona/issues/2674'>GH-2674</a>] - Add RS_SetCRS and RS_CRS for custom CRS string support
+* [<a href='https://github.com/apache/sedona/issues/2672'>GH-2672</a>] - Add a new raster data source reader that can automatically tile GeoTiffs
+* [<a href='https://github.com/apache/sedona/issues/2360'>GH-2360</a>] - Support fetching libpostal model data from HDFS/object store
+
+#### GeoParquet
+
+* [<a href='https://github.com/apache/sedona/issues/2646'>GH-2646</a>] - Auto-populate covering metadata for GeoParquet 1.1.0 writes
+* [<a href='https://github.com/apache/sedona/issues/2376'>GH-2376</a>] - Preserve CRS SRID from GeoParquet metadata when reading geometries
+* [<a href='https://github.com/apache/sedona/issues/2664'>GH-2664</a>] - GeoParquet writer utilizes geometry SRID to produce projjson CRS metadata
+
+#### Data Source Readers
+
+* [<a href='https://github.com/apache/sedona/issues/2760'>GH-2760</a>] - Extend OSM PBF reader to support additional metadata fields
+* [<a href='https://issues.apache.org/jira/browse/SEDONA-729'>SEDONA-729</a>] - Add _metadata hidden column support for shapefile DataSource V2 reader
+* [<a href='https://github.com/apache/sedona/issues/2651'>GH-2651</a>] - Add _metadata hidden column support for GeoPackage DataSource V2 reader
+
+#### GeoPandas API
+
+* [<a href='https://github.com/apache/sedona/issues/2230'>GH-2230</a>] - Implement GeoSeries.clip_by_rect
+* [<a href='https://github.com/apache/sedona/issues/2230'>GH-2230</a>] - Implement GeoSeries.shortest_line and GeoSeries.offset_curve
+* [<a href='https://github.com/apache/sedona/issues/2230'>GH-2230</a>] - Implement GeoSeries.minimum_clearance
+* [<a href='https://github.com/apache/sedona/issues/2230'>GH-2230</a>] - Implement GeoSeries: reverse, normalize, representative_point
+* [<a href='https://github.com/apache/sedona/issues/2725'>GH-2725</a>] - Implement GeoSeries: type, unary_union, delaunay_triangles, voronoi_polygons, disjoint, m
+* [<a href='https://github.com/apache/sedona/issues/2709'>GH-2709</a>] - Implement GeoSeries: line_merge, count_coordinates, count_geometries, count_interior_rings, concave_hull, minimum_rotated_rectangle, exterior, extract_unique_points, remove_repeated_points
+* [<a href='https://github.com/apache/sedona/issues/2731'>GH-2731</a>] - Implement GeoSeries: frechet_distance, hausdorff_distance, geom_equals, interpolate, project
+* [<a href='https://github.com/apache/sedona/issues/2765'>GH-2765</a>] - Implement GeoSeries: relate_pattern, contains_properly, build_area, polygonize
+* [<a href='https://github.com/apache/sedona/issues/2768'>GH-2768</a>] - Replace len(self)==0 with cheaper _is_empty() check in GeoSeries
+
+### Bug Fixes
+
+* [<a href='https://github.com/apache/sedona/issues/2781'>GH-2781</a>] - Fix EOFException in OSM PBF reader when file is split across partitions
+* [<a href='https://github.com/apache/sedona/issues/2720'>GH-2720</a>], [<a href='https://github.com/apache/sedona/issues/2721'>GH-2721</a>], [<a href='https://github.com/apache/sedona/issues/2722'>GH-2722</a>], [<a href='https://github.com/apache/sedona/issues/2723'>GH-2723</a>] - Fix geometry function bugs
+* [<a href='https://github.com/apache/sedona/issues/2702'>GH-2702</a>] - Fix ST_LineMerge returning empty collection for LineString input
+* [<a href='https://github.com/apache/sedona/issues/2704'>GH-2704</a>] - Disable TransformNestedUDTParquet on Spark 4.1+
+* [<a href='https://github.com/apache/sedona/issues/2640'>GH-2640</a>] - Simplify warning messages of SedonaContext.create()
+* [<a href='https://github.com/apache/sedona/issues/2659'>GH-2659</a>] - Fix file-based readers on Databricks by using reflection for DataSource.checkAndGlobPathIfNecessary
+* [<a href='https://github.com/apache/sedona/issues/2650'>GH-2650</a>] - Fix warning message when reading shapefiles from S3
+* [<a href='https://github.com/apache/sedona/issues/2640'>GH-2640</a>] - Skip re-registration of functions in SedonaContext.create()
+* [<a href='https://github.com/apache/sedona/issues/2608'>GH-2608</a>] - Fix RasterUDT JSON schema serialization for Delta/Parquet write
+* [<a href='https://github.com/apache/sedona/issues/2407'>GH-2407</a>] - Auto-detect raster columns in SedonaUtils.display_image
+* [<a href='https://github.com/apache/sedona/issues/1979'>GH-1979</a>] - Fix ST_Envelope and ST_Envelope_Aggr empty geometry handling
+* [<a href='https://github.com/apache/sedona/issues/2373'>GH-2373</a>] - Fix ST_Azimuth returning 0.0 instead of null for identical points
+* [<a href='https://github.com/apache/sedona/issues/1874'>GH-1874</a>] - Fix ST_XYMin/Max returning sentinel values for EMPTY geometries
+* [<a href='https://github.com/apache/sedona/issues/2403'>GH-2403</a>] - SetSRID handle empty geometry types
+* [<a href='https://github.com/apache/sedona/issues/2408'>GH-2408</a>] - RS_ZonalStats: fix incorrect 4-arg function signature
+* [<a href='https://github.com/apache/sedona/issues/2390'>GH-2390</a>] - GeometryType: add regression test for EMPTY geometries
+* [<a href='https://github.com/apache/sedona/issues/2148'>GH-2148</a>] - fix(ST_MakePolygon) warn when holes lie outside shell
+* [<a href='https://github.com/apache/sedona/issues/2611'>GH-2611</a>] - Merge linestring splitting results to avoid extra segments
+* [<a href='https://github.com/apache/sedona/issues/2603'>GH-2603</a>] - Fix ST_AreaSpheroid for polygons with holes
+* [<a href='https://github.com/apache/sedona/issues/2396'>GH-2396</a>] - Making splitting polygon by line robust
+* [<a href='https://github.com/apache/sedona/issues/2590'>GH-2590</a>] - Upgrade campskeleton
+
+### Improvements
+
+* [<a href='https://github.com/apache/sedona/issues/2657'>GH-2657</a>] - Upgrade proj4sedona to 0.0.4 and adopt UrlCRSProvider
+* [<a href='https://github.com/apache/sedona/issues/2823'>GH-2823</a>] - Bump graphframes version to 0.11.0
+* [<a href='https://github.com/apache/sedona/issues/2589'>GH-2589</a>] - Bump graphframes to 0.10.1
+* [<a href='https://github.com/apache/sedona/issues/2744'>GH-2744</a>] - Clean up Maven build logs
+* [<a href='https://github.com/apache/sedona/issues/2679'>GH-2679</a>] - Add return data type to SQL function docs
+* [<a href='https://github.com/apache/sedona/issues/2676'>GH-2676</a>] - Convert monolithic function pages into individual doc pages
+* [<a href='https://github.com/apache/sedona/issues/2678'>GH-2678</a>] - SVG visual illustrations for SQL function documentation (Phases 1-13)
+* [<a href='https://github.com/apache/sedona/issues/2769'>GH-2769</a>] - Improve raster loader, writer, and viz docs
+* [<a href='https://github.com/apache/sedona/issues/2791'>GH-2791</a>] - Add platform tags to docs search results
+* [<a href='https://github.com/apache/sedona/issues/2815'>GH-2815</a>] - Disable offline link detection in maven-javadoc-plugin
+* [<a href='https://github.com/apache/sedona/issues/2652'>GH-2652</a>] - Add a pure Java single-thread COG writer
+
+## Sedona 1.8.1
+
+Sedona 1.8.1 is compiled against:
+
+- **Spark**: 3.4, 3.5, 4.0
+- **Flink**: 1.19
+- **Snowflake**: 7+
+
+**Java Requirements:**
+
+- Spark 3.4 & 3.5: Java 11
+- Spark 4.0: Java 17
+
+This is a minor release that includes bug fixes, new features, and improvements.
+
+### New Contributors
+
+* @andrii-marushchak made their first contribution in https://github.com/apache/sedona/pull/2296
+* @yunchipang made their first contribution in https://github.com/apache/sedona/pull/2378
+* @bunnysocks made their first contribution in https://github.com/apache/sedona/pull/2451
+* @gauravbyte made their first contribution in https://github.com/apache/sedona/pull/2455
+* @joonaspessi made their first contribution in https://github.com/apache/sedona/pull/2467
+* @chay0112 made their first contribution in https://github.com/apache/sedona/pull/2484
+* @aleczoeller made their first contribution in https://github.com/apache/sedona/pull/2475
+* @alexeyegorov made their first contribution in https://github.com/apache/sedona/pull/2561
+* @radekaadek made their first contribution in https://github.com/apache/sedona/pull/2452
+
+### Highlights
+
+* [X] [<a href='https://github.com/apache/sedona/issues/2402'>GH-2402</a>] - Add Sedona Flink SQL module for enhanced Flink integration
+* [X] [<a href='https://github.com/apache/sedona/issues/2419'>GH-2419</a>] - Register Sedona functions as built-in functions to support permanent VIEW creation
+* [X] [<a href='https://github.com/apache/sedona/issues/2522'>GH-2522</a>] - STAC authentication support for both Python and Scala APIs
+* [X] [<a href='https://github.com/apache/sedona/issues/2367'>GH-2367</a>] - Add ST_ApproximateMedialAxis and ST_StraightSkeleton functions
+* [X] [<a href='https://github.com/apache/sedona/issues/2545'>GH-2545</a>] - Add ST_Collect_Agg aggregate function
+* [X] [<a href='https://github.com/apache/sedona/issues/2552'>GH-2552</a>] - Add ST_OrientedEnvelope function
+* [X] [<a href='https://github.com/apache/sedona/issues/2365'>GH-2365</a>] - Modernize Sedona Python project by switching to pyproject.toml and uv
+* [X] Multiple GeoPandas API improvements including is_closed, symmetric_difference, union, convex_hull, and more
+* [X] Enhanced compatibility with Databricks Runtime 17.3 LTS
+* [X] Improved example projects with better documentation
+
+### New Features
+
+#### Core Features
+
+* [<a href='https://github.com/apache/sedona/issues/2367'>GH-2367</a>] - Add ST_ApproximateMedialAxis and ST_StraightSkeleton UDFs
+* [<a href='https://github.com/apache/sedona/issues/2419'>GH-2419</a>] - Register Sedona functions as built-in functions to support permanent VIEW creation
+* [<a href='https://github.com/apache/sedona/issues/2545'>GH-2545</a>] - Add ST_Collect_Agg aggregate function
+* [<a href='https://github.com/apache/sedona/issues/2552'>GH-2552</a>] - Add ST_OrientedEnvelope function
+* [<a href='https://github.com/apache/sedona/issues/2547'>GH-2547</a>] - Support `*_Agg` alias for `*_Aggr` functions
+* [<a href='https://github.com/apache/sedona/issues/2356'>GH-2356</a>] - Implement barrier udf function
+* [<a href='https://github.com/apache/sedona/issues/2522'>GH-2522</a>] - Implement STAC authentication for both Python and Scala APIs
+
+#### Flink
+
+* [<a href='https://github.com/apache/sedona/issues/2402'>GH-2402</a>] - Add Sedona Flink SQL module
+
+#### GeoPandas API
+
+* [<a href='https://github.com/apache/sedona/issues/2377'>GH-2377</a>] - Implement is_closed
+* [<a href='https://github.com/apache/sedona/issues/2394'>GH-2394</a>] - Implement symmetric_difference
+* [<a href='https://github.com/apache/sedona/issues/2398'>GH-2398</a>] - Implement union
+* [<a href='https://github.com/apache/sedona/issues/2476'>GH-2476</a>] - Implement convex_hull
+* [<a href='https://github.com/apache/sedona/issues/2485'>GH-2485</a>] - Implement minimum_bounding_circle
+* [<a href='https://github.com/apache/sedona/issues/2482'>GH-2482</a>] - Implement intersection_all
+* [<a href='https://github.com/apache/sedona/issues/2491'>GH-2491</a>] - Implement force_2d
+* [<a href='https://github.com/apache/sedona/issues/2489'>GH-2489</a>] - Implement minimum_bounding_radius
+* [<a href='https://github.com/apache/sedona/issues/2504'>GH-2504</a>] - Implement force_3d
+* [<a href='https://github.com/apache/sedona/issues/2454'>GH-2454</a>] - Implement binary predicate relate
+* [<a href='https://github.com/apache/sedona/issues/2389'>GH-2389</a>] - Replace GeometryType() with ST_GeometryType()
+
+### Bug Fixes
+
+#### Core & Spark
+
+* [<a href='https://issues.apache.org/jira/browse/SEDONA-745'>SEDONA-745</a>] - Fix OSM parser
+* [<a href='https://issues.apache.org/jira/browse/SEDONA-746'>SEDONA-746</a>] - Fix RS_Clip behavior
+* [<a href='https://issues.apache.org/jira/browse/SEDONA-748'>SEDONA-748</a>] - Fix issue with no optimization for weighting function
+* [<a href='https://github.com/apache/sedona/issues/2240'>GH-2240</a>] - Fix write and read nested geometry array using vectorized parquet reader
+* [<a href='https://github.com/apache/sedona/issues/2406'>GH-2406</a>] - Make ST_Distance return null instead of 0.0 when arg is empty geom
+* [<a href='https://github.com/apache/sedona/issues/2470'>GH-2470</a>] - Fix ST_Envelope behavior to return input geom for empty geom cases
+* [<a href='https://github.com/apache/sedona/issues/2137'>GH-2137</a>] - Make ST_LineMerge return merged lines instead of original when there are more than one
+* [<a href='https://github.com/apache/sedona/issues/2525'>GH-2525</a>] - Make ST_Force3D return multipolygons even if it's a single polygon inside
+* [<a href='https://github.com/apache/sedona/issues/2506'>GH-2506</a>] - Fix segmentize array-like input and support lists as 'array-like'
+* [<a href='https://github.com/apache/sedona/issues/2565'>GH-2565</a>] - Fix NULL handling for various aggregation functions in SedonaSpark
+* [<a href='https://github.com/apache/sedona/issues/2465'>GH-2465</a>] - Fix Log4j Class Initialization Deadlock in SedonaKryoRegistrator Class
+* [<a href='https://github.com/apache/sedona/issues/2472'>GH-2472</a>] - Fix compatibility issue with DBR 17.3 LTS
+
+#### STAC
+
+* [<a href='https://github.com/apache/sedona/issues/2348'>GH-2348</a>] - Make STAC tests resilient to external server failures (Python and Scala)
+
+#### Build & Examples
+
+* [<a href='https://github.com/apache/sedona/issues/2441'>GH-2441</a>] - Fix failed example project build
+* [<a href='https://github.com/apache/sedona/issues/2496'>GH-2496</a>] - Fix failed docs build
+
+### Improvements
+
+#### Python
+
+* [<a href='https://github.com/apache/sedona/issues/2365'>GH-2365</a>] - Modernize Sedona Python project by switching to pyproject.toml and uv
+* [<a href='https://github.com/apache/sedona/issues/2365'>GH-2365</a>] - Consolidate Python dependency files for building docs to pyproject.toml
+* [<a href='https://github.com/apache/sedona/issues/2566'>GH-2566</a>] - Temporarily set pyspark < 4.1.0
+
+#### Infrastructure & Build
+
+* [<a href='https://github.com/apache/sedona/issues/2460'>GH-2460</a>] - Increment graphframes version
+* [<a href='https://github.com/apache/sedona/issues/2422'>GH-2422</a>] - Bump minio version to 8.6.0 due to CVE-2025-59952
+* [<a href='https://github.com/apache/sedona/issues/2424'>GH-2424</a>] - Remove gulp-minify from doc build
+* [<a href='https://github.com/apache/sedona/issues/2549'>GH-2549</a>] - Upgrade Testcontainers to 2.0.2
+* [<a href='https://github.com/apache/sedona/issues/2551'>GH-2551</a>] - Pin sphinx version to fix the doc build
+
+#### Docker & Examples
+
+* [<a href='https://github.com/apache/sedona/issues/2489'>GH-2489</a>] - Update the old dependencies in Sedona docker image
+* [<a href='https://github.com/apache/sedona/issues/2489'>GH-2489</a>] - Improve the docker image build process
+* [<a href='https://github.com/apache/sedona/issues/2509'>GH-2509</a>] - Refactor the example projects to include better examples
+* [<a href='https://github.com/apache/sedona/issues/2474'>GH-2474</a>] - New Java Spark Example
+
+#### GeoPandas
+
+* [<a href='https://github.com/apache/sedona/issues/2404'>GH-2404</a>] - Add empty cases to match test suite + fix edge cases
+* [<a href='https://github.com/apache/sedona/issues/2456'>GH-2456</a>] - Remove 'IMPLEMENTATION_STATUS' global variables
+* [<a href='https://github.com/apache/sedona/issues/2513'>GH-2513</a>] - Make 'assert_geometry_almost_equal' check for Z and M dimensions too
+* Replace assert_series_equal with check_pd_series_equal in geopandas tests
+
+#### CI & Testing
+
+* [<a href='https://github.com/apache/sedona/issues/2351'>GH-2351</a>] - Fix R CI flakiness with Spark download from PySpark
+* [<a href='https://github.com/apache/sedona/issues/2524'>GH-2524</a>] - Fix testthat compatibility issues with version 3.3.0
+* [<a href='https://github.com/apache/sedona/issues/2432'>GH-2432</a>] - Fix first-interaction workflow by adding permissions
+* Multiple pre-commit hook improvements and additions
+* Dependabot configuration optimizations
+
+### Documentation
+
+* [<a href='https://github.com/apache/sedona/issues/2296'>GH-2296</a>] - Homepage redesign
+* [<a href='https://github.com/apache/sedona/issues/2355'>GH-2355</a>] - Fix comment and doc consistency issues in GeoPandas API
+* [<a href='https://github.com/apache/sedona/issues/2519'>GH-2519</a>] - Restructure navigation
+* [<a href='https://github.com/apache/sedona/issues/2561'>GH-2561</a>] - Add spatial left join docs solution
+* [<a href='https://github.com/apache/sedona/issues/2572'>GH-2572</a>] - Add doc example of specifying broadcast hint in SQL
+* [<a href='https://github.com/apache/sedona/issues/2577'>GH-2577</a>] - Bump Sedona Python, R, and Zeppelin version to 1.8.1
+* Multiple documentation typo fixes and improvements
+* New blog posts: SedonaDB announcement, SpatialBench, and spatial tables in data lakehouses
+
 ## Sedona 1.8.0
 
 Sedona 1.8.0 is compiled against:
@@ -1178,7 +1435,7 @@ Sedona 1.5.0 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 * Add 36 more RS functions in Sedona Spark to support [comprehensive raster data ETL and analytics](../tutorial/raster.md)
 	* You can now directly join vector and raster datasets together
 	* Flexible map algebra equations: `SELECT RS_MapAlgebra(rast, 'D', 'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);') as ndvi FROM raster_table`
-* Add native support of [Uber H3 functions](../api/sql/Function.md#st_h3celldistance) in Sedona Spark and Sedona Flink.
+* Add native support of [Uber H3 functions](../api/sql/Geometry-Functions.md#spatial-indexing) in Sedona Spark and Sedona Flink.
 * Add SedonaKepler and SedonaPyDeck for [interactive map visualization](../tutorial/sql.md#visualize-query-results) on Sedona Spark.
 
 ### Bug
@@ -1411,7 +1668,7 @@ Sedona 1.4.1 is compiled against Spark 3.3 / Spark 3.4 / Flink 1.12, Java 8.
 
 ### Highlights
 
-* [X] **Sedona Spark** More raster functions and bridge RasterUDT and Map Algebra operators. See [Raster based operators](../api/sql/Raster-operators.md#raster-based-operators) and [Raster to Map Algebra operators](../api/sql/Raster-operators.md#raster-to-map-algebra-operators).
+* [X] **Sedona Spark** More raster functions and bridge RasterUDT and Map Algebra operators. See [Raster based operators](../api/sql/Raster-Functions.md#raster-operators) and [Raster to Map Algebra operators](../api/sql/Raster-Functions.md#raster-map-algebra-operators).
 * [X] **Sedona Spark & Flink** Added geodesic / geography functions:
     * ST_DistanceSphere
     * ST_DistanceSpheroid

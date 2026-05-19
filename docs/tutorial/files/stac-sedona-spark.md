@@ -78,6 +78,8 @@ root
  |-- constellation: string (nullable = true)
  |-- mission: string (nullable = true)
  |-- grid:code: string (nullable = true)
+ |-- eo:cloud_cover: double (nullable = true)
+ |-- eo:snow_cover: double (nullable = true)
  |-- gsd: double (nullable = true)
  |-- collection: string (nullable = true)
  |-- links: array (nullable = true)
@@ -152,6 +154,16 @@ In this example, the data source will push down the temporal filter to the under
 ```
 
 In this example, the data source will push down the spatial filter to the underlying data source.
+
+### SQL Select With EO Extension Filter
+
+```sql
+  SELECT id, datetime, geometry, `eo:cloud_cover`
+  FROM STAC_TABLE
+  WHERE `eo:cloud_cover` < 20.0
+```
+
+This example filters items by cloud cover percentage from the [EO extension](https://github.com/stac-extensions/eo). The `eo:cloud_cover` and `eo:snow_cover` fields are automatically extracted when present in the STAC item properties.
 
 ### Sedona Configuration for STAC Reader
 
@@ -466,5 +478,3 @@ Returns:
 - STAC Specification: https://stacspec.org/
 
 - STAC Browser: https://github.com/radiantearth/stac-browser
-
-- STAC YouTube Video: https://www.youtube.com/watch?v=stac-video

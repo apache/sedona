@@ -26,6 +26,7 @@ from pyspark.sql import functions as f
 from shapely.geometry.base import BaseGeometry
 from tests.test_base import TestBase
 
+from sedona.spark.core.geom.box2d import Box2D
 from sedona.spark.core.geom.geography import Geography
 from sedona.spark.sql import st_aggregates as sta
 from sedona.spark.sql import st_constructors as stc
@@ -167,6 +168,25 @@ test_configurations = [
         "constructor",
         "ST_AsText(geom)",
         "POINT M(0 1 2)",
+    ),
+    (
+        stc.ST_MakeBox2D,
+        ("a", "b"),
+        "two_points",
+        "",
+        # two_points has a=(0,0,0), b=(3,0,4); ST_MakeBox2D drops Z, so y is 0 for both.
+        Box2D(0.0, 0.0, 3.0, 0.0),
+    ),
+    (
+        stc.ST_GeomFromBox2D,
+        (
+            lambda: stc.ST_MakeBox2D(
+                f.expr("ST_Point(1.0, 2.0)"), f.expr("ST_Point(4.0, 5.0)")
+            ),
+        ),
+        "min_max_x_y",
+        "ST_AsText(geom)",
+        "POLYGON ((1 2, 1 5, 4 5, 4 2, 1 2))",
     ),
     (
         stc.ST_MakeEnvelope,
@@ -383,7 +403,7 @@ test_configurations = [
     ),
     (stf.ST_AsText, ("point",), "point_geom", "", "POINT (0 1)"),
     (stf.ST_Azimuth, ("a", "b"), "two_points", "geom * 180.0 / pi()", 90.0),
-    (stf.ST_BestSRID, ("geom",), "triangle_geom", "", 3395),
+    (stf.ST_BestSRID, ("geom",), "triangle_geom", "", 32631),
     (
         stf.ST_Boundary,
         ("geom",),
@@ -443,6 +463,16 @@ test_configurations = [
         "point_and_line",
         "",
         "POINT (0 1)",
+    ),
+    (
+        stf.ST_ShortestLine,
+        (
+            "point",
+            "line",
+        ),
+        "point_and_line",
+        "",
+        "LINESTRING (0 1, 0 0)",
     ),
     (
         stf.ST_CollectionExtract,
@@ -510,6 +540,13 @@ test_configurations = [
         ],
     ),
     (stf.ST_EndPoint, ("line",), "linestring_geom", "", "POINT (5 0)"),
+    (
+        stf.ST_Box2D,
+        ("line",),
+        "linestring_geom",
+        "",
+        Box2D(0.0, 0.0, 5.0, 0.0),
+    ),
     (
         stf.ST_Envelope,
         ("geom",),
@@ -612,6 +649,29 @@ test_configurations = [
     ),
     (stf.ST_GeometryN, ("geom", 0), "multipoint", "", "POINT (0 0)"),
     (stf.ST_GeometryType, ("point",), "point_geom", "", "ST_Point"),
+    (
+        stf.ST_GeoHashNeighbors,
+        ("geohash",),
+        "constructor",
+        "",
+        [
+            "s00twy01mk",
+            "s00twy01mm",
+            "s00twy01mq",
+            "s00twy01ms",
+            "s00twy01mu",
+            "s00twy01mv",
+            "s00twy01mw",
+            "s00twy01my",
+        ],
+    ),
+    (
+        stf.ST_GeoHashNeighbor,
+        ("geohash", lambda: f.lit("n")),
+        "constructor",
+        "",
+        "s00twy01mw",
+    ),
     (
         stf.ST_HausdorffDistance,
         (
@@ -867,6 +927,27 @@ test_configurations = [
     (stf.ST_NumInteriorRings, ("geom",), "geom_with_hole", "", 1),
     (stf.ST_NumInteriorRing, ("geom",), "geom_with_hole", "", 1),
     (stf.ST_NumPoints, ("line",), "linestring_geom", "", 6),
+    (
+        stf.ST_OrientedEnvelope,
+        ("geom",),
+        "diagonal_geom",
+        "",
+        "POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))",
+    ),
+    (
+        stf.ST_OffsetCurve,
+        ("line", 1.0),
+        "linestring_geom",
+        "ST_AsText(geom)",
+        "LINESTRING (0 1, 5 1)",
+    ),
+    (
+        stf.ST_OffsetCurve,
+        ("line", 1.0, 4),
+        "linestring_geom",
+        "ST_AsText(geom)",
+        "LINESTRING (0 1, 5 1)",
+    ),
     (stf.ST_PointN, ("line", 2), "linestring_geom", "", "POINT (1 0)"),
     (stf.ST_PointOnSurface, ("line",), "linestring_geom", "", "POINT (2 0)"),
     (
@@ -1046,7 +1127,7 @@ test_configurations = [
         ("point", lambda: f.lit("EPSG:4326"), lambda: f.lit("EPSG:32649")),
         "point_geom",
         "ST_ReducePrecision(geom, 2)",
-        "POINT (-34870890.91 1919456.06)",
+        "POINT (-10300622.99 19680322.66)",
     ),
     (
         stf.ST_Translate,
@@ -1223,6 +1304,42 @@ test_configurations = [
         "",
         "POLYGON ((0 0, 0 1, 1 1, 2 1, 2 0, 1 0, 0 0))",
     ),
+    (
+        sta.ST_Collect_Agg,
+        ("geom",),
+        "exploded_points",
+        "",
+        "MULTIPOINT ((0 0), (1 1))",
+    ),
+    (
+        sta.ST_Extent,
+        ("geom",),
+        "exploded_points",
+        "",
+        Box2D(0.0, 0.0, 1.0, 1.0),
+    ),
+    # Test aliases for *_Aggr functions with *_Agg suffix
+    (
+        sta.ST_Envelope_Agg,
+        ("geom",),
+        "exploded_points",
+        "",
+        "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))",
+    ),
+    (
+        sta.ST_Intersection_Agg,
+        ("geom",),
+        "exploded_polys",
+        "",
+        "LINESTRING (1 0, 1 1)",
+    ),
+    (
+        sta.ST_Union_Agg,
+        ("geom",),
+        "exploded_polys",
+        "",
+        "POLYGON ((0 0, 0 1, 1 1, 2 1, 2 0, 1 0, 0 0))",
+    ),
 ]
 
 wrong_type_configurations = [
@@ -1321,6 +1438,9 @@ wrong_type_configurations = [
     (stf.ST_GeometryN, ("", None)),
     (stf.ST_GeometryN, ("", 0.0)),
     (stf.ST_GeometryType, (None,)),
+    (stf.ST_GeoHashNeighbors, (None,)),
+    (stf.ST_GeoHashNeighbor, (None, "n")),
+    (stf.ST_GeoHashNeighbor, ("", None)),
     (stf.ST_GeneratePoints, (None, 0.0)),
     (stf.ST_GeneratePoints, ("", None)),
     (stf.ST_InteriorRingN, (None, 0)),
@@ -1371,6 +1491,8 @@ wrong_type_configurations = [
     (stf.ST_MinimumClearanceLine, (None,)),
     (stf.ST_MinimumBoundingCircle, (None,)),
     (stf.ST_MinimumBoundingRadius, (None,)),
+    (stf.ST_OrientedEnvelope, (None,)),
+    (stf.ST_OffsetCurve, (None, 1.0)),
     (stf.ST_Multi, (None,)),
     (stf.ST_Normalize, (None,)),
     (stf.ST_NPoints, (None,)),
@@ -1475,7 +1597,6 @@ wrong_type_configurations = [
 
 
 class TestDataFrameAPI(TestBase):
-
     @pytest.fixture
     def base_df(self, request):
         wkbLine = "0102000000020000000000000084d600c00000000080b5d6bf00000060e1eff7bf00000080075de5bf"
@@ -1622,6 +1743,10 @@ class TestDataFrameAPI(TestBase):
             return TestDataFrameAPI.spark.sql(
                 "SELECT ST_GeomFromWKT('POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))') AS geom"
             )
+        elif request.param == "diagonal_geom":
+            return TestDataFrameAPI.spark.sql(
+                "SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))') AS geom"
+            )
         elif request.param == "four_points":
             return TestDataFrameAPI.spark.sql(
                 "SELECT ST_GeomFromWKT('POINT (0 0)') AS p1, ST_GeomFromWKT('POINT (1 1)') AS p2, ST_GeomFromWKT('POINT (1 0)') AS p3, ST_GeomFromWKT('POINT (6 2)') AS p4"
@@ -1724,7 +1849,7 @@ class TestDataFrameAPI(TestBase):
         elif isinstance(actual_result, Geography):
             # self.assert_geometry_almost_equal(expected_result, actual_result.geometry)
             return
-        elif isinstance(actual_result, bytearray):
+        elif isinstance(actual_result, (bytes, bytearray)):
             actual_result = actual_result.hex()
         elif isinstance(actual_result, Row):
             actual_result = {

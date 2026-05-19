@@ -22,7 +22,7 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.Functions;
-import org.apache.sedona.common.FunctionsGeoTools;
+import org.apache.sedona.common.FunctionsProj4;
 import org.apache.sedona.common.Predicates;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.sphere.Haversine;
@@ -171,7 +171,7 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"left", "right"})
-  public static double ST_Azimuth(byte[] left, byte[] right) {
+  public static Double ST_Azimuth(byte[] left, byte[] right) {
     return Functions.azimuth(GeometrySerde.deserialize(left), GeometrySerde.deserialize(right));
   }
 
@@ -373,6 +373,11 @@ public class UDFs {
     return GeometrySerde.serialize(Functions.envelope(GeometrySerde.deserialize(geometry)));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+  public static byte[] ST_OrientedEnvelope(byte[] geometry) {
+    return GeometrySerde.serialize(Functions.orientedEnvelope(GeometrySerde.deserialize(geometry)));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "uniformDelta"})
   public static byte[] ST_Expand(byte[] geometry, double uniformDelta) {
     return GeometrySerde.serialize(
@@ -432,6 +437,16 @@ public class UDFs {
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "precision"})
   public static String ST_GeoHash(byte[] geometry, int precision) {
     return Functions.geohash(GeometrySerde.deserialize(geometry), precision);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geohash"})
+  public static String[] ST_GeoHashNeighbors(String geohash) {
+    return Functions.geohashNeighbors(geohash);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geohash", "direction"})
+  public static String ST_GeoHashNeighbor(String geohash, String direction) {
+    return Functions.geohashNeighbor(geohash, direction);
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"gml"})
@@ -623,7 +638,7 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geom", "point"})
-  public static double ST_LineLocatePoint(byte[] geom, byte[] point) {
+  public static Double ST_LineLocatePoint(byte[] geom, byte[] point) {
     return Functions.lineLocatePoint(
         GeometrySerde.deserialize(geom), GeometrySerde.deserialize(point));
   }
@@ -781,6 +796,18 @@ public class UDFs {
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static byte[] ST_Normalize(byte[] geometry) {
     return GeometrySerde.serialize(Functions.normalize(GeometrySerde.deserialize(geometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "distance"})
+  public static byte[] ST_OffsetCurve(byte[] geometry, double distance) {
+    return GeometrySerde.serialize(
+        Functions.offsetCurve(GeometrySerde.deserialize(geometry), distance));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "distance", "quadrantSegments"})
+  public static byte[] ST_OffsetCurve(byte[] geometry, double distance, int quadrantSegments) {
+    return GeometrySerde.serialize(
+        Functions.offsetCurve(GeometrySerde.deserialize(geometry), distance, quadrantSegments));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
@@ -1130,14 +1157,14 @@ public class UDFs {
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "sourceCRS", "targetCRS"})
   public static byte[] ST_Transform(byte[] geometry, String sourceCRS, String targetCRS) {
     return GeometrySerde.serialize(
-        GeoToolsWrapper.transform(GeometrySerde.deserialize(geometry), sourceCRS, targetCRS));
+        FunctionsProj4.transform(GeometrySerde.deserialize(geometry), sourceCRS, targetCRS));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "sourceCRS", "targetCRS", "lenient"})
   public static byte[] ST_Transform(
       byte[] geometry, String sourceCRS, String targetCRS, boolean lenient) {
     return GeometrySerde.serialize(
-        GeoToolsWrapper.transform(
+        FunctionsProj4.transform(
             GeometrySerde.deserialize(geometry), sourceCRS, targetCRS, lenient));
   }
 
@@ -1155,19 +1182,19 @@ public class UDFs {
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static byte[] ST_VoronoiPolygons(byte[] geometry) {
     return GeometrySerde.serialize(
-        FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserialize(geometry), 0.0, null));
+        Functions.voronoiPolygons(GeometrySerde.deserialize(geometry), 0.0, null));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "tolerance"})
   public static byte[] ST_VoronoiPolygons(byte[] geometry, double tolerance) {
     return GeometrySerde.serialize(
-        FunctionsGeoTools.voronoiPolygons(GeometrySerde.deserialize(geometry), tolerance, null));
+        Functions.voronoiPolygons(GeometrySerde.deserialize(geometry), tolerance, null));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "tolerance", "extent"})
   public static byte[] ST_VoronoiPolygons(byte[] geometry, double tolerance, byte[] extent) {
     return GeometrySerde.serialize(
-        FunctionsGeoTools.voronoiPolygons(
+        Functions.voronoiPolygons(
             GeometrySerde.deserialize(geometry), tolerance, GeometrySerde.deserialize(extent)));
   }
 
@@ -1183,12 +1210,12 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
-  public static double ST_XMax(byte[] geometry) {
+  public static Double ST_XMax(byte[] geometry) {
     return Functions.xMax(GeometrySerde.deserialize(geometry));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
-  public static double ST_XMin(byte[] geometry) {
+  public static Double ST_XMin(byte[] geometry) {
     return Functions.xMin(GeometrySerde.deserialize(geometry));
   }
 
@@ -1198,12 +1225,12 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
-  public static double ST_YMax(byte[] geometry) {
+  public static Double ST_YMax(byte[] geometry) {
     return Functions.yMax(GeometrySerde.deserialize(geometry));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
-  public static double ST_YMin(byte[] geometry) {
+  public static Double ST_YMin(byte[] geometry) {
     return Functions.yMin(GeometrySerde.deserialize(geometry));
   }
 
@@ -1250,7 +1277,7 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geomA", "geomB"})
-  public static double ST_FrechetDistance(byte[] geomA, byte[] geomB) {
+  public static Double ST_FrechetDistance(byte[] geomA, byte[] geomB) {
     return Functions.frechetDistance(
         GeometrySerde.deserialize(geomA), GeometrySerde.deserialize(geomB));
   }
@@ -1401,5 +1428,53 @@ public class UDFs {
   public static byte[] ST_Rotate(byte[] geom, double angle, double originX, double originY) {
     return GeometrySerde.serialize(
         Functions.rotate(GeometrySerde.deserialize(geom), angle, originX, originY));
+  }
+
+  // Bing Tile functions
+
+  @UDFAnnotations.ParamMeta(argNames = {"tileX", "tileY", "zoomLevel"})
+  public static String ST_BingTile(int tileX, int tileY, int zoomLevel) {
+    return Functions.bingTile(tileX, tileY, zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"longitude", "latitude", "zoomLevel"})
+  public static String ST_BingTileAt(double longitude, double latitude, int zoomLevel) {
+    return Functions.bingTileAt(longitude, latitude, zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"longitude", "latitude", "zoomLevel"})
+  public static String[] ST_BingTilesAround(double longitude, double latitude, int zoomLevel) {
+    return Functions.bingTilesAround(longitude, latitude, zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"quadKey"})
+  public static int ST_BingTileZoomLevel(String quadKey) {
+    return Functions.bingTileZoomLevel(quadKey);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"quadKey"})
+  public static int ST_BingTileX(String quadKey) {
+    return Functions.bingTileX(quadKey);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"quadKey"})
+  public static int ST_BingTileY(String quadKey) {
+    return Functions.bingTileY(quadKey);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"quadKey"})
+  public static byte[] ST_BingTilePolygon(String quadKey) {
+    return GeometrySerde.serialize(Functions.bingTilePolygon(quadKey));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "zoomLevel"})
+  public static String[] ST_BingTileCellIDs(byte[] geometry, int zoomLevel) {
+    return Functions.bingTileCellIDs(GeometrySerde.deserialize(geometry), zoomLevel);
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"quadKeys"})
+  public static byte[] ST_BingTileToGeom(String[] quadKeys) {
+    Geometry[] geoms = Functions.bingTileToGeom(quadKeys);
+    return GeometrySerde.serialize(GeometrySerde.GEOMETRY_FACTORY.createGeometryCollection(geoms));
   }
 }

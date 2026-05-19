@@ -18,7 +18,7 @@
  */
 package org.apache.sedona.sql.datasources.osm
 
-import org.apache.spark.sql.types.{ArrayType, DoubleType, LongType, MapType, StringType, StructField, StructType}
+import org.apache.spark.sql.types.{ArrayType, BooleanType, DoubleType, IntegerType, LongType, MapType, StringType, StructField, StructType, TimestampType}
 
 trait SchemaProvider {
   def schema: StructType =
@@ -39,5 +39,11 @@ trait SchemaProvider {
           nullable = true),
         StructField("refs", ArrayType(LongType), nullable = true),
         StructField("ref_roles", ArrayType(StringType), nullable = true),
-        StructField("ref_types", ArrayType(StringType), nullable = true)))
+        StructField("ref_types", ArrayType(StringType), nullable = true),
+        StructField("changeset", LongType, nullable = true),
+        StructField("timestamp", TimestampType, nullable = true),
+        StructField("uid", IntegerType, nullable = true),
+        StructField("user", StringType, nullable = true),
+        StructField("version", IntegerType, nullable = true),
+        StructField("visible", BooleanType, nullable = true)))
 }

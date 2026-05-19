@@ -23,9 +23,11 @@ updates:
     schedule:
       interval: monthly
     groups:
-      github-dependencies:
+      github-actions-dependencies:
         patterns:
           - '*'
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: pip
     directory: /docker
@@ -33,6 +35,20 @@ updates:
     schedule:
       interval: monthly
     groups:
-      github-dependencies:
+      pip-dependencies:
         patterns:
           - '*'
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: pre-commit
+    directory: /
+    open-pull-requests-limit: 2
+    schedule:
+      interval: monthly
+    groups:
+      pre-commit-hooks:
+        patterns:
+          - '*'
+    cooldown:
+      default-days: 7

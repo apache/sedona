@@ -44,6 +44,8 @@ import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.Tuple2;
 
 // TODO: Auto-generated Javadoc
@@ -51,6 +53,8 @@ import scala.Tuple2;
 /** The Class ShapefileRDD. */
 @Deprecated
 public class ShapefileRDD implements Serializable {
+
+  private static final Logger log = LoggerFactory.getLogger(ShapefileRDD.class);
 
   /** The geometry factory. */
   public static GeometryFactory geometryFactory = new GeometryFactory();
@@ -75,7 +79,7 @@ public class ShapefileRDD implements Serializable {
   private final VoidFunction<Geometry> PrintShape =
       new VoidFunction<Geometry>() {
         public void call(Geometry shape) throws Exception {
-          System.out.println(shape.toText());
+          log.debug("{}", shape.toText());
         }
       };
   /** shape collection. */

@@ -21,6 +21,7 @@ package org.apache.sedona.core.utils;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.nio.file.Paths;
+import java.util.Locale;
 import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.enums.JoinBuildSide;
@@ -32,8 +33,54 @@ import org.apache.spark.sql.RuntimeConfig;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.util.Utils;
 import org.locationtech.jts.geom.Envelope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SedonaConf implements Serializable {
+  static final Logger logger = LoggerFactory.getLogger(SedonaConf.class);
+
+  /**
+   * CRS transformation mode for ST_Transform function.
+   *
+   * <ul>
+   *   <li>{@link #NONE} - Use proj4sedona for all CRS transformations (raster not yet supported)
+   *   <li>{@link #RASTER} - Use proj4sedona for vector, GeoTools for raster (default)
+   *   <li>{@link #ALL} - Use GeoTools for all CRS transformations (legacy behavior)
+   * </ul>
+   *
+   * @since 1.9.0
+   */
+  public enum CRSTransformMode {
+    /** Use proj4sedona for all transformations. Raster transform not yet supported. */
+    NONE,
+    /** Use proj4sedona for vector, GeoTools for raster (default). */
+    RASTER,
+    /** Use GeoTools for all transformations (legacy behavior). */
+    ALL;
+
+    public static CRSTransformMode fromString(String value) {
+      if (value == null || value.isEmpty()) {
+        return RASTER; // default
+      }
+      try {
+        return valueOf(value.toUpperCase(Locale.ROOT));
+      } catch (IllegalArgumentException e) {
+        logger.warn(
+            "Invalid value '{}' for spark.sedona.crs.geotools, using default 'raster'", value);
+        return RASTER;
+      }
+    }
+
+    /** Returns true if GeoTools should be used for vector CRS transformations. */
+    public boolean useGeoToolsForVector() {
+      return this == ALL;
+    }
+
+    /** Returns true if GeoTools should be used for raster CRS transformations. */
+    public boolean useGeoToolsForRaster() {
+      return this == RASTER || this == ALL;
+    }
+  }
 
   // Global parameters of Sedona. All these parameters can be initialized through SparkConf.
 
@@ -68,6 +115,14 @@ public class SedonaConf implements Serializable {
   // Parameters for libpostal integration
   private String libPostalDataDir;
   private Boolean libPostalUseSenzing = false;
+
+  // Parameter for CRS transformation mode
+  private CRSTransformMode crsTransformMode;
+
+  // Parameters for URL-based CRS provider
+  private String crsUrlBase;
+  private String crsUrlPathTemplate;
+  private String crsUrlFormat;
 
   public static SedonaConf fromActiveSession() {
     return new SedonaConf(SparkSession.active().conf());
@@ -177,6 +232,29 @@ public class SedonaConf implements Serializable {
 
     this.libPostalUseSenzing =
         Boolean.parseBoolean(confGetter.get("spark.sedona.libpostal.useSenzing", "true"));
+
+    // CRS transformation mode configuration
+    // - "none": Use proj4sedona for all transformations (raster not yet supported)
+    // - "raster" (default): Use proj4sedona for vector, GeoTools for raster
+    // - "all": Use GeoTools for all transformations (legacy behavior)
+    this.crsTransformMode =
+        CRSTransformMode.fromString(confGetter.get("spark.sedona.crs.geotools", "raster"));
+
+    // Geography eager ShapeIndex configuration
+    // When true, WKBGeography eagerly builds S2 Geography and ShapeIndex at deserialization time.
+    // This eliminates cold-path overhead for predicate-heavy workloads (ST_Contains, ST_Intersects)
+    // at the cost of slower deserialization for metric-only workloads.
+    boolean eagerShapeIndex =
+        Boolean.parseBoolean(confGetter.get("spark.sedona.geography.eagerShapeIndex", "false"));
+    org.apache.sedona.common.S2Geography.WKBGeography.setEagerShapeIndex(eagerShapeIndex);
+
+    // URL-based CRS provider configuration
+    // When spark.sedona.crs.url.base is set, a UrlCRSProvider is registered to resolve
+    // SRID definitions from the given HTTP(S) endpoint before falling back to built-in defs.
+    this.crsUrlBase = confGetter.get("spark.sedona.crs.url.base", "");
+    this.crsUrlPathTemplate =
+        confGetter.get("spark.sedona.crs.url.pathTemplate", "/{authority}/{code}.json");
+    this.crsUrlFormat = confGetter.get("spark.sedona.crs.url.format", "projjson");
   }
 
   // Helper method to prioritize `sedona.*` over `spark.sedona.*`
@@ -274,5 +352,47 @@ public class SedonaConf implements Serializable {
 
   public Boolean getLibPostalUseSenzing() {
     return libPostalUseSenzing;
+  }
+
+  /**
+   * Get the CRS transformation mode for ST_Transform.
+   *
+   * @return The CRS transformation mode
+   * @since 1.9.0
+   */
+  public CRSTransformMode getCRSTransformMode() {
+    return crsTransformMode;
+  }
+
+  /**
+   * Get the base URL for the URL-based CRS provider. When non-empty, a {@code UrlCRSProvider} is
+   * registered to resolve SRID definitions from this HTTP(S) endpoint.
+   *
+   * @return The base URL, or empty string if disabled
+   * @since 1.9.0
+   */
+  public String getCrsUrlBase() {
+    return crsUrlBase;
+  }
+
+  /**
+   * Get the path template for the URL-based CRS provider. Supports placeholders: {@code
+   * {authority}} and {@code {code}}.
+   *
+   * @return The path template (default: "/{authority}/{code}.json")
+   * @since 1.9.0
+   */
+  public String getCrsUrlPathTemplate() {
+    return crsUrlPathTemplate;
+  }
+
+  /**
+   * Get the expected response format for the URL-based CRS provider.
+   *
+   * @return The format string: "projjson", "proj", "wkt1", or "wkt2" (default: "projjson")
+   * @since 1.9.0
+   */
+  public String getCrsUrlFormat() {
+    return crsUrlFormat;
   }
 }

@@ -383,7 +383,8 @@ public class WKBReaderTest {
 
   @Test
   public void EmptyTest() throws ParseException {
-    TestHelper.checkWKBGeography("0101000000", "POINT EMPTY");
+    // PostGIS-compatible WKB for POINT EMPTY uses NaN for both coordinates.
+    TestHelper.checkWKBGeography("0101000000000000000000F87F000000000000F87F", "POINT EMPTY");
     TestHelper.checkWKBGeography("010300000000000000", "POLYGON EMPTY");
     TestHelper.checkWKBGeography("010200000000000000", "LINESTRING EMPTY");
   }

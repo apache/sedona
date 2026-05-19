@@ -44,6 +44,7 @@ object ScalaExample extends App {
   Logger.getLogger("akka").setLevel(Level.WARN)
   val prop = new Properties()
   val resourcePath = "/../spark/common/src/test/resources/"
+  var ConfFile = new FileInputStream(resourcePath + "babylon.point.properties")
   val demoOutputPath = "target/demo"
   val scatterPlotOutputPath =
     System.getProperty("user.dir") + "/" + demoOutputPath + "/scatterplot"
@@ -96,7 +97,6 @@ object ScalaExample extends App {
   val HDFDataVariableList = Array("LST", "QC", "Error_LST", "Emis_31", "Emis_32")
   val HDFswitchXY = true
   val urlPrefix = System.getProperty("user.dir") + "/../spark/common/src/test/resources/modis/"
-  var ConfFile = new FileInputStream(resourcePath + "babylon.point.properties")
 
   if (buildScatterPlot(scatterPlotOutputPath) && buildHeatMap(heatMapOutputPath)
     && buildChoroplethMap(choroplethMapOutputPath) && parallelFilterRenderStitch(
@@ -104,8 +104,8 @@ object ScalaExample extends App {
     && parallelFilterRenderNoStitch(
       parallelFilterRenderStitchOutputPath) && earthdataVisualization(
       earthdataScatterPlotOutputPath))
-    System.out.println("All 5 Demos have passed.")
-  else System.out.println("Demos failed.")
+    println("All 5 Demos have passed.")
+  else println("Demos failed.")
 
   /**
    * Builds the scatter plot.

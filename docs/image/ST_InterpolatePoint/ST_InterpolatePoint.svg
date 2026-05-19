@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="150" viewBox="0 0 400 150">
+  <rect width="400" height="150" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_InterpolatePoint</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Returns M value at closest point</text>
+  <polyline points="102.5,110.0 200.0,45.0 297.5,77.5" fill="none" stroke="#1565C0" stroke-width="2"/>
+  <circle cx="102.5" cy="110.0" r="2.5" fill="#1565C0"/>
+  <circle cx="200.0" cy="45.0" r="2.5" fill="#1565C0"/>
+  <circle cx="297.5" cy="77.5" r="2.5" fill="#1565C0"/>
+  <circle cx="167.5" cy="110.0" r="5" fill="#FF9800" stroke="#fff" stroke-width="1"/>
+  <text x="167.5" y="102.0" font-family="monospace" font-size="9" fill="#FF9800" text-anchor="middle">Query</text>
+  <circle cx="151.2" cy="77.5" r="4" fill="#E53935" stroke="#fff" stroke-width="1"/>
+  <text x="151.2" y="69.5" font-family="monospace" font-size="9" fill="#E53935" text-anchor="middle">M=175</text>
+  <line x1="167.5" y1="110.0" x2="151.2" y2="77.5" stroke="#999" stroke-width="1" stroke-dasharray="3,2"/>
+  <rect x="65" y="132" width="8" height="8" fill="rgba(21,101,192,0.2)" stroke="#1565C0" stroke-width="1"/>
+  <text x="77" y="140" font-family="monospace" font-size="9" fill="#1565C0">LineStringM</text>
+  <rect x="155" y="132" width="8" height="8" fill="#FF9800" stroke="#FF9800" stroke-width="1"/>
+  <text x="167" y="140" font-family="monospace" font-size="9" fill="#FF9800">Query</text>
+  <rect x="245" y="132" width="8" height="8" fill="#E53935" stroke="#E53935" stroke-width="1"/>
+  <text x="257" y="140" font-family="monospace" font-size="9" fill="#E53935">Result</text>
+</svg>

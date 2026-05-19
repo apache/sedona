@@ -42,6 +42,21 @@ def ST_Envelope_Aggr(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_Extent(geometry: ColumnOrName) -> Column:
+    """Aggregate Function: Get the bounding box (Box2D) of a geometry column.
+
+    Returns NULL when the input contains no rows or all rows are null/empty
+    geometries. Mirrors PostGIS ST_Extent.
+
+    :param geometry: Geometry column to aggregate.
+    :type geometry: ColumnOrName
+    :return: Box2D representing the union of bounding boxes of the geometry column.
+    :rtype: Column
+    """
+    return _call_aggregate_function("ST_Extent", geometry)
+
+
+@validate_argument_types
 def ST_Intersection_Aggr(geometry: ColumnOrName) -> Column:
     """Aggregate Function: Get the aggregate intersection of a geometry column.
 
@@ -63,6 +78,65 @@ def ST_Union_Aggr(geometry: ColumnOrName) -> Column:
     :rtype: Column
     """
     return _call_aggregate_function("ST_Union_Aggr", geometry)
+
+
+@validate_argument_types
+def ST_Collect_Agg(geometry: ColumnOrName) -> Column:
+    """Aggregate Function: Collect all geometries into a multi-geometry.
+
+    Unlike ST_Union_Aggr, this function does not dissolve boundaries between geometries.
+    It simply collects all geometries into a MultiPoint, MultiLineString, MultiPolygon,
+    or GeometryCollection based on the input geometry types.
+
+    :param geometry: Geometry column to aggregate.
+    :type geometry: ColumnOrName
+    :return: Multi-geometry representing the collection of all geometries in the column.
+    :rtype: Column
+    """
+    return _call_aggregate_function("ST_Collect_Agg", geometry)
+
+
+# Aliases for *_Aggr functions with *_Agg suffix
+@validate_argument_types
+def ST_Envelope_Agg(geometry: ColumnOrName) -> Column:
+    """Aggregate Function: Get the aggregate envelope of a geometry column.
+
+    This is an alias for ST_Envelope_Aggr.
+
+    :param geometry: Geometry column to aggregate.
+    :type geometry: ColumnOrName
+    :return: Geometry representing the aggregate envelope of the geometry column.
+    :rtype: Column
+    """
+    return ST_Envelope_Aggr(geometry)
+
+
+@validate_argument_types
+def ST_Intersection_Agg(geometry: ColumnOrName) -> Column:
+    """Aggregate Function: Get the aggregate intersection of a geometry column.
+
+    This is an alias for ST_Intersection_Aggr.
+
+    :param geometry: Geometry column to aggregate.
+    :type geometry: ColumnOrName
+    :return: Geometry representing the aggregate intersection of the geometry column.
+    :rtype: Column
+    """
+    return ST_Intersection_Aggr(geometry)
+
+
+@validate_argument_types
+def ST_Union_Agg(geometry: ColumnOrName) -> Column:
+    """Aggregate Function: Get the aggregate union of a geometry column.
+
+    This is an alias for ST_Union_Aggr.
+
+    :param geometry: Geometry column to aggregate.
+    :type geometry: ColumnOrName
+    :return: Geometry representing the aggregate union of the geometry column.
+    :rtype: Column
+    """
+    return ST_Union_Aggr(geometry)
 
 
 # Automatically populate __all__

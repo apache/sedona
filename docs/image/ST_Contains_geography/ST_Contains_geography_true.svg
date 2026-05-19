@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Title (two cases) -->
+  <text x="250" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">ST_Contains(A, B) is TRUE</text>
+  <text x="250" y="42" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">ST_Contains(A, C) is TRUE</text>
+
+  <!-- Sphere/globe A: large lavender ellipse (spherical polygon on the globe) -->
+  <ellipse cx="250" cy="160" rx="195" ry="85" fill="#c5c5eb" fill-opacity="0.55" stroke="#8e8ed0" stroke-width="1.8" />
+
+  <!-- Polygon C: smaller green rectangle fully inside A -->
+  <rect x="205" y="145" width="90" height="34" rx="2" fill="#5fbf5f" fill-opacity="0.55" stroke="#3c9a3c" stroke-width="1.6" />
+  <text x="250" y="136" text-anchor="middle" font-size="12" font-weight="bold" fill="#3c9a3c">C</text>
+
+  <!-- Point B in the interior of C (and thus A) -->
+  <circle cx="250" cy="162" r="5.5" fill="#2e7d32" stroke="#ffffff" stroke-width="1.2" />
+  <text x="258" y="158" font-size="12" font-weight="bold" fill="#2e7d32">B</text>
+
+  <!-- Label A just outside the top of the ellipse -->
+  <text x="82" y="90" font-size="13" font-weight="bold" fill="#6060c8">A</text>
+
+  <!-- Legend -->
+  <rect x="90" y="265" width="14" height="14" rx="2" fill="#c5c5eb" fill-opacity="0.7" stroke="#8e8ed0" stroke-width="1" />
+  <text x="108" y="276" font-size="12" fill="#333333">Polygon A</text>
+
+  <circle cx="191" cy="272" r="5.5" fill="#2e7d32" stroke="#ffffff" stroke-width="1" />
+  <text x="201" y="276" font-size="12" fill="#333333">Point B (Interior)</text>
+
+  <rect x="300" y="265" width="14" height="14" rx="2" fill="#5fbf5f" fill-opacity="0.7" stroke="#3c9a3c" stroke-width="1" />
+  <text x="318" y="276" font-size="12" fill="#333333">Polygon C (Fully Inside)</text>
+</svg>

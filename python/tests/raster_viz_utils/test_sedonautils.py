@@ -26,12 +26,29 @@ class TestSedonaUtils(TestBase):
         raster_bin_df = self.spark.read.format("binaryFile").load(
             world_map_raster_input_location
         )
-        raster_bin_df.createOrReplaceTempView("raster_binary_table")
-        raster_df = self.spark.sql(
-            "SELECT RS_FromGeotiff(content) as raster from raster_binary_table"
-        )
+        raster_df = raster_bin_df.selectExpr("RS_FromGeotiff(content) as raster")
         raster_image_df = raster_df.selectExpr("RS_AsImage(raster) as rast_img")
         html_call = SedonaUtils.display_image(raster_image_df)
         assert (
             html_call is None
         )  # just test that this function was called and returned no output
+
+    def test_display_image_raw_raster(self):
+        """Test that display_image auto-detects raster columns and applies RS_AsImage."""
+        raster_bin_df = self.spark.read.format("binaryFile").load(
+            world_map_raster_input_location
+        )
+        raster_df = raster_bin_df.selectExpr("RS_FromGeotiff(content) as raster")
+        html_call = SedonaUtils.display_image(raster_df)
+        assert html_call is None
+
+    def test_display_image_preserves_non_raster_columns(self):
+        """Test that non-raster columns are preserved alongside raster columns."""
+        raster_bin_df = self.spark.read.format("binaryFile").load(
+            world_map_raster_input_location
+        )
+        raster_df = raster_bin_df.selectExpr(
+            "path", "RS_FromGeotiff(content) as raster"
+        )
+        html_call = SedonaUtils.display_image(raster_df)
+        assert html_call is None

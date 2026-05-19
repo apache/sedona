@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="200" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_CoveredBy(A, B)</text>
+  <rect x="325" y="8" width="60" height="22" rx="4" fill="#27ae60" />
+  <text x="355" y="24" text-anchor="middle" font-size="12" font-weight="bold" fill="white">TRUE</text>
+  <path d="M 102.94 230.88 L 297.06 230.88 L 297.06 69.12 L 102.94 69.12 L 102.94 230.88 Z" fill="rgba(217,74,74,0.25)" stroke="#d94a4a" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="180.59" y="166.18" text-anchor="middle" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+  <path d="M 135.29 198.53 L 232.35 198.53 L 232.35 133.82 L 135.29 133.82 L 135.29 198.53 Z" fill="rgba(74,144,217,0.25)" stroke="#4a90d9" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="174.12" y="172.65" text-anchor="middle" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <text x="200" y="290" text-anchor="middle" font-size="12" fill="#666666" font-style="italic">A is covered by B (A on boundary of B is OK)</text>
+</svg>

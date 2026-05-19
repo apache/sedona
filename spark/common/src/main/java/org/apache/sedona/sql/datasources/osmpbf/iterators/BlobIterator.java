@@ -72,9 +72,8 @@ public class BlobIterator implements Iterator<OSMEntity> {
 
   Iterator<OSMEntity> resolveIterator() {
     return IteratorUtils.chainedIterator(
-        new WayIterator(currentPrimitiveGroup.getWaysList(), primitiveBlock.getStringtable()),
-        new RelationIterator(
-            currentPrimitiveGroup.getRelationsList(), primitiveBlock.getStringtable()),
+        new WayIterator(currentPrimitiveGroup.getWaysList(), primitiveBlock),
+        new RelationIterator(currentPrimitiveGroup.getRelationsList(), primitiveBlock),
         new NodeIterator(currentPrimitiveGroup.getNodesList(), primitiveBlock),
         currentPrimitiveGroup.getDense() != null
             ? new DenseNodeIterator(
@@ -84,7 +83,8 @@ public class BlobIterator implements Iterator<OSMEntity> {
                     currentPrimitiveGroup.getDense(),
                     primitiveBlock.getLatOffset(),
                     primitiveBlock.getLonOffset(),
-                    primitiveBlock.getGranularity()))
+                    primitiveBlock.getGranularity(),
+                    primitiveBlock.getDateGranularity()))
             : Collections.emptyIterator());
   }
 }

@@ -73,7 +73,7 @@ object ScalaExample extends App {
   testDistanceJoinQuery()
   testDistanceJoinQueryUsingIndex()
   sc.stop()
-  System.out.println("All DEMOs passed!")
+  println("All DEMOs passed!")
 
   /**
    * Test spatial range query.

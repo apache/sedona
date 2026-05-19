@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowGrev" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <path d="M8,0 L0,3 L8,6" fill="#2ecc71" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_Angle</text>
+  <polyline points="121.43,78.57 264.29,221.43" fill="none" stroke="#4a90d9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="121.43" cy="78.57" r="3" fill="#4a90d9" />
+  <circle cx="264.29" cy="221.43" r="3" fill="#4a90d9" />
+  <polyline points="264.29,221.43 378.57,107.14" fill="none" stroke="#d94a4a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="264.29" cy="221.43" r="3" fill="#d94a4a" />
+  <circle cx="378.57" cy="107.14" r="3" fill="#d94a4a" />
+  <text x="127" y="73" font-size="13" fill="#333333">P1</text>
+  <text x="270" y="215" font-size="13" fill="#333333">P2</text>
+  <text x="270" y="215" font-size="13" fill="#333333">P3</text>
+  <text x="385" y="101" font-size="13" fill="#333333">P4</text>
+  <path d="M 243.08 200.22 A 30 30 0 0 1 285.5 200.22" fill="none" stroke="#2ecc71" stroke-width="2" />
+  <text x="264" y="181" text-anchor="middle" font-size="15" font-weight="bold" fill="#2ecc71" font-style="italic">θ</text>
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns the angle between two vectors (in radians)</text>
+  <rect x="145" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="161" y="266" font-size="13" fill="#333333">Ray 1</text>
+  <rect x="215" y="255" width="12" height="12" rx="2" fill="#d94a4a" stroke="#d94a4a" stroke-width="1" />
+  <text x="231" y="266" font-size="13" fill="#333333">Ray 2</text>
+  <rect x="285" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="301" y="266" font-size="13" fill="#333333">Angle</text>
+</svg>

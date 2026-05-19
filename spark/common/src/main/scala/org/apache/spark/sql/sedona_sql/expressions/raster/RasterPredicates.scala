@@ -47,9 +47,9 @@ abstract class RS_Predicate
     val leftType = inputExpressions.head.dataType
     val rightType = inputExpressions(1).dataType
     (leftType, rightType) match {
-      case (_: RasterUDT, _: GeometryUDT) => Seq(RasterUDT, GeometryUDT)
-      case (_: GeometryUDT, _: RasterUDT) => Seq(GeometryUDT, RasterUDT)
-      case (_: RasterUDT, _: RasterUDT) => Seq(RasterUDT, RasterUDT)
+      case (_: RasterUDT, _: GeometryUDT) => Seq(RasterUDT(), GeometryUDT())
+      case (_: GeometryUDT, _: RasterUDT) => Seq(GeometryUDT(), RasterUDT())
+      case (_: RasterUDT, _: RasterUDT) => Seq(RasterUDT(), RasterUDT())
       case _ =>
         throw new IllegalArgumentException(s"Unsupported input types: $leftType, $rightType")
     }

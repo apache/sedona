@@ -376,6 +376,14 @@ public class TestFunctionsV2 extends TestBase {
   }
 
   @Test
+  public void test_ST_OrientedEnvelope() {
+    registerUDFV2("ST_OrientedEnvelope", String.class);
+    verifySqlSingleRes(
+        "select ST_AsText(sedona.ST_OrientedEnvelope(ST_GeometryFromWKT('POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))')))",
+        "POLYGON((0 0,4.5 4.5,5 4,0.5 -0.5,0 0))");
+  }
+
+  @Test
   public void test_ST_Expand() {
     registerUDFV2("ST_Expand", String.class, double.class);
     verifySqlSingleRes(
@@ -441,6 +449,19 @@ public class TestFunctionsV2 extends TestBase {
     verifySqlSingleRes(
         "select sedona.ST_GeoHash(ST_GeometryFromWKT('POINT(21.427834 52.042576573)'), 5)",
         "u3r0p");
+  }
+
+  @Test
+  public void test_ST_GeoHashNeighbors() {
+    registerUDFV2("ST_GeoHashNeighbors", String.class);
+    verifySqlSingleRes("select ARRAY_SIZE(sedona.ST_GeoHashNeighbors('u1pb'))", 8);
+  }
+
+  @Test
+  public void test_ST_GeoHashNeighbor() {
+    registerUDFV2("ST_GeoHashNeighbor", String.class, String.class);
+    verifySqlSingleRes("select sedona.ST_GeoHashNeighbor('u1pb', 'n')", "u1pc");
+    verifySqlSingleRes("select sedona.ST_GeoHashNeighbor('u1pb', 'e')", "u300");
   }
 
   @Test
@@ -693,6 +714,19 @@ public class TestFunctionsV2 extends TestBase {
     registerUDFV2("ST_NPoints", String.class);
     verifySqlSingleRes(
         "select sedona.ST_NPoints(ST_GeometryFromWKT('LINESTRING(1 2, 3 4, 5 6)'))", 3);
+  }
+
+  @Test
+  public void test_ST_OffsetCurve() {
+    registerUDFV2("ST_OffsetCurve", String.class, double.class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_OffsetCurve(ST_GeometryFromWKT('LINESTRING(0 0, 10 0)'), 5.0))",
+        "LINESTRING (0 5, 10 5)");
+    registerUDFV2("ST_OffsetCurve", String.class, double.class, int.class);
+    registerUDFV2("ST_NPoints", String.class);
+    verifySqlSingleRes(
+        "select sedona.ST_NPoints(sedona.ST_OffsetCurve(ST_GeometryFromWKT('LINESTRING(0 0, 10 0, 10 10)'), -3.0, 16))",
+        19);
   }
 
   @Test
@@ -977,7 +1011,7 @@ public class TestFunctionsV2 extends TestBase {
     registerUDFV2("ST_Transform", String.class, String.class, String.class, boolean.class);
     verifySqlSingleRes(
         "select ST_AsText(SEDONA.ST_Transform(ST_geomFromWKT('POLYGON ((110.54671 55.818002, 110.54671 55.143743, 110.940494 55.143743, 110.940494 55.818002, 110.54671 55.818002))'),'EPSG:4326', 'EPSG:32649', false))",
-        "POLYGON((471596.691674602 6185916.95119129,471107.562364101 6110880.97422817,496207.109151055 6110788.80471244,496271.319370462 6185825.60569904,471596.691674602 6185916.95119129))");
+        "POLYGON((471596.691674603 6185916.95118885,471107.562364101 6110880.97422586,496207.109151055 6110788.80471013,496271.319370462 6185825.6056966,471596.691674603 6185916.95118885))");
   }
 
   @Test
@@ -1322,5 +1356,65 @@ public class TestFunctionsV2 extends TestBase {
     verifySqlSingleRes(
         "select sedona.GeometryType(sedona.ST_ApproximateMedialAxis(ST_GeometryFromWKT('POLYGON ((0 0, 10 0, 10 5, 5 5, 5 10, 0 10, 0 0))'), 100))",
         "MULTILINESTRING");
+  }
+
+  @Test
+  public void test_ST_BingTile() {
+    registerUDFV2("ST_BingTile", int.class, int.class, int.class);
+    verifySqlSingleRes("select sedona.ST_BingTile(3, 5, 3)", "213");
+  }
+
+  @Test
+  public void test_ST_BingTileAt() {
+    registerUDFV2("ST_BingTileAt", double.class, double.class, int.class);
+    verifySqlSingleRes("select sedona.ST_BingTileAt(60, 30.12, 15)", "123030123010121");
+  }
+
+  @Test
+  public void test_ST_BingTilesAround() {
+    registerUDFV2("ST_BingTilesAround", double.class, double.class, int.class);
+    verifySqlSingleRes("select ARRAY_SIZE(sedona.ST_BingTilesAround(60, 30.12, 15))", 9);
+  }
+
+  @Test
+  public void test_ST_BingTileZoomLevel() {
+    registerUDFV2("ST_BingTileZoomLevel", String.class);
+    verifySqlSingleRes("select sedona.ST_BingTileZoomLevel('213')", 3);
+  }
+
+  @Test
+  public void test_ST_BingTileX() {
+    registerUDFV2("ST_BingTileX", String.class);
+    verifySqlSingleRes("select sedona.ST_BingTileX('213')", 3);
+  }
+
+  @Test
+  public void test_ST_BingTileY() {
+    registerUDFV2("ST_BingTileY", String.class);
+    verifySqlSingleRes("select sedona.ST_BingTileY('213')", 5);
+  }
+
+  @Test
+  public void test_ST_BingTilePolygon() {
+    registerUDFV2("ST_BingTilePolygon", String.class);
+    registerUDFV2("GeometryType", String.class);
+    verifySqlSingleRes("select sedona.GeometryType(sedona.ST_BingTilePolygon('213'))", "POLYGON");
+  }
+
+  @Test
+  public void test_ST_BingTileCellIDs() {
+    registerUDFV2("ST_BingTileCellIDs", String.class, int.class);
+    verifySqlSingleRes(
+        "select ARRAY_SIZE(sedona.ST_BingTileCellIDs(ST_GeometryFromWKT('POINT(60 30.12)'), 10))",
+        1);
+  }
+
+  @Test
+  public void test_ST_BingTileToGeom() {
+    registerUDFV2("ST_BingTileToGeom", String[].class);
+    registerUDFV2("GeometryType", String.class);
+    verifySqlSingleRes(
+        "select sedona.GeometryType(sedona.ST_BingTileToGeom(ARRAY_CONSTRUCT('0', '1')))",
+        "GEOMETRYCOLLECTION");
   }
 }

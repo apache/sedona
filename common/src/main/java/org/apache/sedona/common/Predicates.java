@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.common;
 
+import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.operation.relate.RelateOp;
@@ -25,6 +26,55 @@ import org.locationtech.jts.operation.relate.RelateOp;
 public class Predicates {
   public static boolean contains(Geometry leftGeometry, Geometry rightGeometry) {
     return leftGeometry.contains(rightGeometry);
+  }
+
+  /**
+   * Closed-interval bbox intersection: true if {@code a} and {@code b} overlap on <em>both</em> the
+   * X and Y axes (matches PostGIS {@code &&} on box2d). Edge- and corner-touching boxes count as
+   * intersecting.
+   *
+   * <p>Both arguments must have ordered bounds ({@code xmin <= xmax} and {@code ymin <= ymax}).
+   * Sedona's Box2D type allows inverted bounds ({@code xmin > xmax}) — that ordering is reserved
+   * for a future antimeridian-wraparound semantics on geography bboxes (cf. sedona-db's {@code
+   * WraparoundInterval}). Until those semantics ship, planar predicates throw on inverted input
+   * rather than silently returning misleading results. SQL callers see NULL in/out null
+   * propagation; this Java entry point throws on null.
+   */
+  public static boolean boxIntersects(Box2D a, Box2D b) {
+    requireOrderedPlanarBox(a, "a");
+    requireOrderedPlanarBox(b, "b");
+    return !(a.getXMax() < b.getXMin()
+        || a.getXMin() > b.getXMax()
+        || a.getYMax() < b.getYMin()
+        || a.getYMin() > b.getYMax());
+  }
+
+  /**
+   * True if {@code a} fully contains {@code b} on <em>both</em> the X and Y axes (closed intervals;
+   * matches PostGIS {@code ~} on box2d). Equal boxes contain each other.
+   *
+   * <p>Same ordered-bound contract as {@link #boxIntersects(Box2D, Box2D)} — inverted bounds throw
+   * because planar containment with inverted intervals has no defined meaning until antimeridian
+   * wraparound semantics ship.
+   */
+  public static boolean boxContains(Box2D a, Box2D b) {
+    requireOrderedPlanarBox(a, "a");
+    requireOrderedPlanarBox(b, "b");
+    return a.getXMin() <= b.getXMin()
+        && a.getYMin() <= b.getYMin()
+        && a.getXMax() >= b.getXMax()
+        && a.getYMax() >= b.getYMax();
+  }
+
+  private static void requireOrderedPlanarBox(Box2D box, String argName) {
+    if (box.getXMin() > box.getXMax() || box.getYMin() > box.getYMax()) {
+      throw new IllegalArgumentException(
+          "Box2D argument '"
+              + argName
+              + "' has inverted bounds (xmin > xmax or ymin > ymax). Planar Box2D predicates "
+              + "require ordered intervals; inverted bounds are reserved for future antimeridian "
+              + "wraparound semantics.");
+    }
   }
 
   public static boolean intersects(Geometry leftGeometry, Geometry rightGeometry) {
@@ -56,7 +106,10 @@ public class Predicates {
   }
 
   public static boolean equals(Geometry leftGeometry, Geometry rightGeometry) {
-    return leftGeometry.symDifference(rightGeometry).isEmpty();
+    if (leftGeometry.isEmpty() && rightGeometry.isEmpty()) {
+      return true;
+    }
+    return leftGeometry.equalsTopo(rightGeometry);
   }
 
   public static boolean disjoint(Geometry leftGeometry, Geometry rightGeometry) {
@@ -79,6 +132,25 @@ public class Predicates {
     } else {
       return leftGeometry.isWithinDistance(rightGeometry, distance);
     }
+  }
+
+  /**
+   * Closed-interval planar distance test between two Box2D rectangles. Returns true if the minimum
+   * Euclidean distance between the rectangles is less than or equal to {@code distance}.
+   *
+   * <p>Overlapping or edge/corner-touching boxes have distance 0 and therefore match for any {@code
+   * distance >= 0}. Inverted bounds throw for the same reason {@link #boxIntersects(Box2D, Box2D)}
+   * does — planar predicates have no defined meaning on inverted intervals.
+   */
+  public static boolean dWithin(Box2D a, Box2D b, double distance) {
+    requireOrderedPlanarBox(a, "a");
+    requireOrderedPlanarBox(b, "b");
+    double dx = Math.max(0.0, Math.max(a.getXMin() - b.getXMax(), b.getXMin() - a.getXMax()));
+    double dy = Math.max(0.0, Math.max(a.getYMin() - b.getYMax(), b.getYMin() - a.getYMax()));
+    // Compare squared distance to avoid a sqrt; bail out fast if either delta already exceeds
+    // the supplied radius.
+    if (dx > distance || dy > distance) return false;
+    return dx * dx + dy * dy <= distance * distance;
   }
 
   public static String relate(Geometry leftGeometry, Geometry rightGeometry) {

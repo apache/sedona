@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowGrev" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <path d="M8,0 L0,3 L8,6" fill="#2ecc71" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_Degrees</text>
+  <circle cx="250" cy="160" r="80" fill="none" stroke="#cccccc" stroke-width="1" stroke-dasharray="4,3" />
+  <path d="M 330 160 A 80 80 0 0 0 290.0 90.72" fill="none" stroke="#2ecc71" stroke-width="3" />
+  <line x1="250" y1="160" x2="330" y2="160" stroke="#4a90d9" stroke-width="2" />
+  <line x1="250" y1="160" x2="290.0" y2="90.72" stroke="#4a90d9" stroke-width="2" />
+  <path d="M 280 160 A 30 30 0 0 0 265.0 134.02" fill="none" stroke="#2ecc71" stroke-width="2" />
+  <text x="290" y="141" text-anchor="middle" font-size="14" font-weight="bold" fill="#2ecc71">60°</text>
+  <text x="333" y="116" text-anchor="middle" font-size="14" fill="#4a90d9">π/3 rad</text>
+  <circle cx="250" cy="160" r="3" fill="#4a90d9" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Converts an angle from radians to degrees</text>
+  <rect x="180" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="196" y="266" font-size="13" fill="#333333">Radii</text>
+  <rect x="250" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="266" y="266" font-size="13" fill="#333333">Angle</text>
+</svg>

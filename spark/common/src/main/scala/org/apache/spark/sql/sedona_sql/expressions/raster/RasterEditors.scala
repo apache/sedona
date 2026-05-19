@@ -31,6 +31,13 @@ private[apache] case class RS_SetSRID(inputExpressions: Seq[Expression])
   }
 }
 
+private[apache] case class RS_SetCRS(inputExpressions: Seq[Expression])
+    extends InferredExpression(RasterEditors.setCrs _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 private[apache] case class RS_SetGeoReference(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction2(RasterEditors.setGeoReference),

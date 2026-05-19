@@ -26,7 +26,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
 public class HaversineEnvelopeTest {
-  private static final int SPHERE_RADIUS = 6357000;
+  private static final double SPHERE_RADIUS = Haversine.EARTH_POLAR_RADIUS;
   private static final GeometryFactory factory = new GeometryFactory();
 
   @Test

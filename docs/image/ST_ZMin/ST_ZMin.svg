@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="220" viewBox="0 0 400 220">
+  <rect width="400" height="220" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_ZMin</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">POLYGON Z with vertices at varying Z heights</text>
+  <!-- Isometric axes from origin at (70,160) -->
+  <line x1="70" y1="160" x2="210" y2="160" stroke="#aaa" stroke-width="1"/>
+  <text x="215" y="163" font-family="monospace" font-size="9" fill="#999">X</text>
+  <line x1="70" y1="160" x2="170" y2="118" stroke="#aaa" stroke-width="1"/>
+  <text x="175" y="116" font-family="monospace" font-size="9" fill="#999">Y</text>
+  <line x1="70" y1="160" x2="70" y2="38" stroke="#aaa" stroke-width="1"/>
+  <text x="64" y="35" font-family="monospace" font-size="9" fill="#999">Z</text>
+  <!-- Projection: sx = 70 + x*16 + y*10, sy = 160 - z*13 - y*4 -->
+  <!-- Pentagon vertices (x,y,z): A(0,0,5) B(5,1,7) C(8,5,3) D(3,7,1) E(0,4,4) -->
+  <!-- A: (70, 160-65-0) = (70, 95) gnd=(70,160) -->
+  <!-- B: (70+80+10, 160-91-4) = (160, 65) gnd=(160,156) -->
+  <!-- C: (70+128+50, 160-39-20) = (248, 101) gnd=(248,140) -->
+  <!-- D: (70+48+70, 160-13-28) = (188, 119) gnd=(188,132) -->
+  <!-- E: (70+0+40, 160-52-16) = (110, 92) gnd=(110,144) -->
+  <!-- Ground shadow polygon -->
+  <polygon points="70,160 160,156 248,140 188,132 110,144" fill="rgba(0,0,0,0.04)" stroke="#ccc" stroke-width="0.8" stroke-dasharray="3,2"/>
+  <!-- Vertical pillars -->
+  <line x1="70" y1="95" x2="70" y2="160" stroke="#bbb" stroke-width="0.8" stroke-dasharray="2,2"/>
+  <line x1="160" y1="65" x2="160" y2="156" stroke="#bbb" stroke-width="0.8" stroke-dasharray="2,2"/>
+  <line x1="248" y1="101" x2="248" y2="140" stroke="#bbb" stroke-width="0.8" stroke-dasharray="2,2"/>
+  <line x1="188" y1="119" x2="188" y2="132" stroke="#E53935" stroke-width="1" stroke-dasharray="2,2"/>
+  <line x1="110" y1="92" x2="110" y2="144" stroke="#bbb" stroke-width="0.8" stroke-dasharray="2,2"/>
+  <!-- 3D polygon face -->
+  <polygon points="70,95 160,65 248,101 188,119 110,92" fill="rgba(21,101,192,0.15)" stroke="#1565C0" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Side faces (walls) for depth effect -->
+  <polygon points="70,95 70,160 160,156 160,65" fill="rgba(21,101,192,0.06)" stroke="#1565C0" stroke-width="0.5"/>
+  <polygon points="248,101 248,140 188,132 188,119" fill="rgba(21,101,192,0.06)" stroke="#1565C0" stroke-width="0.5"/>
+  <polygon points="110,92 110,144 70,160 70,95" fill="rgba(21,101,192,0.06)" stroke="#1565C0" stroke-width="0.5"/>
+  <!-- Vertices -->
+  <circle cx="70" cy="95" r="3.5" fill="#1565C0" stroke="#fff" stroke-width="1"/>
+  <text x="58" y="92" font-family="monospace" font-size="8" fill="#1565C0" text-anchor="end">Z=5</text>
+  <circle cx="160" cy="65" r="3.5" fill="#1565C0" stroke="#fff" stroke-width="1"/>
+  <text x="172" y="63" font-family="monospace" font-size="8" fill="#1565C0" text-anchor="start">Z=7</text>
+  <circle cx="248" cy="101" r="3.5" fill="#1565C0" stroke="#fff" stroke-width="1"/>
+  <text x="260" y="99" font-family="monospace" font-size="8" fill="#1565C0" text-anchor="start">Z=3</text>
+  <!-- ZMin highlighted -->
+  <circle cx="188" cy="119" r="6" fill="#E53935" stroke="#fff" stroke-width="1.5"/>
+  <text x="200" y="117" font-family="monospace" font-size="9" fill="#E53935" text-anchor="start" font-weight="bold">Z=1 (min)</text>
+  <circle cx="110" cy="92" r="3.5" fill="#1565C0" stroke="#fff" stroke-width="1"/>
+  <text x="98" y="89" font-family="monospace" font-size="8" fill="#1565C0" text-anchor="end">Z=4</text>
+  <!-- Result -->
+  <text x="200" y="185" font-family="monospace" font-size="10" fill="#E53935" text-anchor="middle">Returns: 1.0</text>
+  <!-- Legend -->
+  <rect x="100" y="200" width="8" height="8" fill="rgba(21,101,192,0.15)" stroke="#1565C0" stroke-width="1"/>
+  <text x="112" y="208" font-family="monospace" font-size="9" fill="#1565C0">Polygon Z</text>
+  <circle cx="194" cy="204" r="4" fill="#E53935"/>
+  <text x="202" y="208" font-family="monospace" font-size="9" fill="#E53935">Min Z vertex</text>
+</svg>

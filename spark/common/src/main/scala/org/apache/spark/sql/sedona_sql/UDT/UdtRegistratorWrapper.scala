@@ -19,6 +19,7 @@
 package org.apache.spark.sql.sedona_sql.UDT
 
 import org.apache.sedona.common.S2Geography.Geography
+import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.spark.sql.types.UDTRegistration
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.index.SpatialIndex
@@ -26,8 +27,15 @@ import org.locationtech.jts.index.SpatialIndex
 object UdtRegistratorWrapper {
 
   def registerAll(): Unit = {
-    UDTRegistration.register(classOf[Geometry].getName, classOf[GeometryUDT].getName)
-    UDTRegistration.register(classOf[Geography].getName, classOf[GeographyUDT].getName)
-    UDTRegistration.register(classOf[SpatialIndex].getName, classOf[IndexUDT].getName)
+    registerIfNotExists(classOf[Geometry].getName, classOf[GeometryUDT].getName)
+    registerIfNotExists(classOf[Geography].getName, classOf[GeographyUDT].getName)
+    registerIfNotExists(classOf[Box2D].getName, classOf[Box2DUDT].getName)
+    registerIfNotExists(classOf[SpatialIndex].getName, classOf[IndexUDT].getName)
+  }
+
+  private def registerIfNotExists(userClass: String, udtClass: String): Unit = {
+    if (!UDTRegistration.exists(userClass)) {
+      UDTRegistration.register(userClass, udtClass)
+    }
   }
 }

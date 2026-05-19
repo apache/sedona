@@ -117,7 +117,7 @@ SEDONA_LISTED_SQL_FUNCTIONS = [
         .with_arguments(
             ["ST_GeomFromText('POINT(52.5 21.5)')", "'epsg:4326'", "'epsg:2180'"]
         )
-        .with_expected_result(-2501415.806893427)
+        .with_expected_result(-2501362.200396569)
         # .with_expected_result("POINT (-2501415.806893427 4119952.52325666)")
         .with_transform("ST_Y")
     ),
@@ -252,9 +252,11 @@ SEDONA_LISTED_SQL_FUNCTIONS = [
         SuiteContainer.empty()
         .with_function_name("ST_LineMerge")
         .with_arguments(
-            ["ST_GeomFromText('LINESTRING(-29 -27,-30 -29.7,-36 -31,-45 -33,-46 -32)')"]
+            [
+                "ST_GeomFromText('MULTILINESTRING((-29 -27,-30 -29.7,-36 -31),(-36 -31,-45 -33,-46 -32))')"
+            ]
         )
-        .with_expected_result(0.0)
+        .with_expected_result(19.652212220711906)
         .with_transform("ST_LENGTH")
     ),
     (

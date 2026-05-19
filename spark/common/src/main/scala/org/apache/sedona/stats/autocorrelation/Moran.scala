@@ -19,7 +19,6 @@
 package org.apache.sedona.stats.autocorrelation
 
 import org.apache.commons.math3.distribution.NormalDistribution
-import org.apache.sedona.stats.autocorrelation.MoranResult
 import org.apache.spark.sql.{DataFrame, functions}
 import org.apache.spark.sql.functions.{col, explode, pow}
 

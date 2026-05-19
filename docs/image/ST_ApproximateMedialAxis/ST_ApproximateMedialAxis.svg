@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="230" viewBox="0 0 400 230">
+  <rect width="400" height="230" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_ApproximateMedialAxis</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Approximate medial axis (pruned skeleton)</text>
+  <polygon points="84.0,162.0 106.0,162.0 106.0,74.0 139.0,74.0 139.0,52.0 51.0,52.0 51.0,74.0 84.0,74.0" fill="rgba(74,144,217,0.1)" stroke="#90CAF5" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <line x1="62.0" y1="63.0" x2="51.0" y2="63.0" stroke="#FFCDD2" stroke-width="2" stroke-dasharray="3,2"/>
+  <line x1="62.0" y1="63.0" x2="73.0" y2="74.0" stroke="#FFCDD2" stroke-width="2" stroke-dasharray="3,2"/>
+  <line x1="128.0" y1="63.0" x2="139.0" y2="63.0" stroke="#FFCDD2" stroke-width="2" stroke-dasharray="3,2"/>
+  <line x1="128.0" y1="63.0" x2="117.0" y2="74.0" stroke="#FFCDD2" stroke-width="2" stroke-dasharray="3,2"/>
+  <line x1="95.0" y1="151.0" x2="84.0" y2="151.0" stroke="#FFCDD2" stroke-width="2" stroke-dasharray="3,2"/>
+  <line x1="95.0" y1="151.0" x2="106.0" y2="151.0" stroke="#FFCDD2" stroke-width="2" stroke-dasharray="3,2"/>
+  <line x1="95.0" y1="151.0" x2="95.0" y2="63.0" stroke="#E53935" stroke-width="2"/>
+  <line x1="62.0" y1="63.0" x2="128.0" y2="63.0" stroke="#E53935" stroke-width="2"/>
+  <text x="95" y="190" font-family="monospace" font-size="9" fill="#999" text-anchor="middle" font-weight="bold">Full skeleton (before pruning)</text>
+  <defs><marker id="arrma" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#666"/></marker></defs>
+  <line x1="180" y1="105" x2="210" y2="105" stroke="#666" stroke-width="1.5" marker-end="url(#arrma)"/>
+  <text x="195" y="98" font-family="monospace" font-size="7" fill="#666" text-anchor="middle">prune</text>
+  <polygon points="289.0,162.0 311.0,162.0 311.0,74.0 344.0,74.0 344.0,52.0 256.0,52.0 256.0,74.0 289.0,74.0" fill="rgba(74,144,217,0.1)" stroke="#90CAF5" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <line x1="300.0" y1="151.0" x2="300.0" y2="63.0" stroke="#2ecc71" stroke-width="2.5"/>
+  <line x1="267.0" y1="63.0" x2="333.0" y2="63.0" stroke="#2ecc71" stroke-width="2.5"/>
+  <circle cx="300.0" cy="151.0" r="3" fill="#2ecc71"/>
+  <circle cx="300.0" cy="63.0" r="3" fill="#2ecc71"/>
+  <circle cx="333.0" cy="63.0" r="3" fill="#2ecc71"/>
+  <circle cx="267.0" cy="63.0" r="3" fill="#2ecc71"/>
+  <text x="300" y="190" font-family="monospace" font-size="9" fill="#2ecc71" text-anchor="middle" font-weight="bold">Medial axis (pruned)</text>
+  <line x1="40" y1="205" x2="60" y2="205" stroke="#2ecc71" stroke-width="2.5"/>
+  <text x="64" y="209" font-family="monospace" font-size="8" fill="#2ecc71">Medial axis</text>
+  <line x1="160" y1="205" x2="180" y2="205" stroke="#FFCDD2" stroke-width="2" stroke-dasharray="3,2"/>
+  <text x="184" y="209" font-family="monospace" font-size="8" fill="#E53935">Pruned branches</text>
+  <line x1="290" y1="205" x2="310" y2="205" stroke="#90CAF5" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <text x="314" y="209" font-family="monospace" font-size="8" fill="#1565C0">Polygon</text>
+</svg>

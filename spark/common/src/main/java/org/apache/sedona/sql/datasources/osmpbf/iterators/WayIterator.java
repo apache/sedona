@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.sedona.sql.datasources.osmpbf.build.Osmformat;
+import org.apache.sedona.sql.datasources.osmpbf.features.InfoResolver;
 import org.apache.sedona.sql.datasources.osmpbf.features.TagsResolver;
 import org.apache.sedona.sql.datasources.osmpbf.model.OSMEntity;
 import org.apache.sedona.sql.datasources.osmpbf.model.Way;
@@ -31,12 +32,14 @@ public class WayIterator implements Iterator<OSMEntity> {
   long waysCount;
   List<Osmformat.Way> ways;
   Osmformat.StringTable stringTable;
+  Osmformat.PrimitiveBlock primitiveBlock;
 
-  public WayIterator(List<Osmformat.Way> ways, Osmformat.StringTable stringTable) {
+  public WayIterator(List<Osmformat.Way> ways, Osmformat.PrimitiveBlock primitiveBlock) {
     this.idx = 0;
     this.waysCount = 0;
     this.ways = ways;
-    this.stringTable = stringTable;
+    this.stringTable = primitiveBlock.getStringtable();
+    this.primitiveBlock = primitiveBlock;
 
     if (ways != null) {
       this.waysCount = ways.size();
@@ -79,6 +82,13 @@ public class WayIterator implements Iterator<OSMEntity> {
     HashMap<String, String> tags =
         TagsResolver.resolveTags(way.getKeysCount(), way::getKeys, way::getVals, stringTable);
 
-    return new Way(way.getId(), tags, refs);
+    Way wayEntity = new Way(way.getId(), tags, refs);
+
+    if (way.hasInfo()) {
+      InfoResolver.populateInfo(
+          wayEntity, way.getInfo(), stringTable, primitiveBlock.getDateGranularity());
+    }
+
+    return wayEntity;
   }
 }

@@ -19,6 +19,7 @@
 package org.apache.sedona.flink.expressions;
 
 import org.apache.flink.table.annotation.DataTypeHint;
+import org.apache.sedona.flink.GeometryTypeSerializer;
 import org.locationtech.jts.geom.Geometry;
 
 /** Mutable accumulator of structured type for the aggregate function */
@@ -39,7 +40,10 @@ public class Accumulators {
   }
 
   public static class AccGeometry {
-    @DataTypeHint(value = "RAW", bridgedTo = Geometry.class)
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryTypeSerializer.class,
+        bridgedTo = Geometry.class)
     public Geometry geom;
   }
 

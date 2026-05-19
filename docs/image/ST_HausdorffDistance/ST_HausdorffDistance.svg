@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowGrev" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <path d="M8,0 L0,3 L8,6" fill="#2ecc71" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_HausdorffDistance</text>
+  <polyline points="147.94,184.02 215.98,93.3 284.02,138.66 352.06,70.62" fill="none" stroke="#4a90d9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="147.94" cy="184.02" r="3" fill="#4a90d9" />
+  <circle cx="215.98" cy="93.3" r="3" fill="#4a90d9" />
+  <circle cx="284.02" cy="138.66" r="3" fill="#4a90d9" />
+  <circle cx="352.06" cy="70.62" r="3" fill="#4a90d9" />
+  <text x="290.02" y="130.66" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <polyline points="147.94,229.38 238.66,161.34 329.38,206.7" fill="none" stroke="#d94a4a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="147.94" cy="229.38" r="3" fill="#d94a4a" />
+  <circle cx="238.66" cy="161.34" r="3" fill="#d94a4a" />
+  <circle cx="329.38" cy="206.7" r="3" fill="#d94a4a" />
+  <text x="244.66" y="153.34" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+  <line x1="352.06" y1="70.62" x2="329.38" y2="206.7" stroke="#2ecc71" stroke-width="2" stroke-dasharray="6,3" marker-start="url(#arrowGrev)" marker-end="url(#arrowG)" />
+  <text x="349" y="133" font-size="15" font-weight="bold" fill="#2ecc71" font-style="italic">d_H</text>
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns the Hausdorff distance between two geometries</text>
+  <rect x="93" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="109" y="266" font-size="13" fill="#333333">Geometry A</text>
+  <rect x="203" y="255" width="12" height="12" rx="2" fill="#d94a4a" stroke="#d94a4a" stroke-width="1" />
+  <text x="219" y="266" font-size="13" fill="#333333">Geometry B</text>
+  <rect x="313" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="329" y="266" font-size="13" fill="#333333">Distance</text>
+</svg>

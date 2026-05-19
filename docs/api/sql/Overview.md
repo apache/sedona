@@ -35,20 +35,45 @@ myDataFrame.withColumn("geometry", expr("ST_*")).selectExpr("ST_*")
 
 * Constructor: Construct a Geometry given an input string or coordinates
 	* Example: ST_GeomFromWKT (string). Create a Geometry from a WKT String.
-	* Documentation: [Here](Constructor.md)
+	* Documentation: [Here](Geometry-Functions.md)
 * Function: Execute a function on the given column or columns
 	* Example: ST_Distance (A, B). Given two Geometry A and B, return the Euclidean distance of A and B.
-	* Documentation: [Here](Function.md)
+	* Documentation: Functions are organized by category. See [Geometry Accessors](Geometry-Functions.md), [Geometry Editors](Geometry-Functions.md), [Measurement Functions](Geometry-Functions.md#measurement-functions), [Geometry Processing](Geometry-Functions.md), [Overlay Functions](Geometry-Functions.md#overlay-functions), and other categories in the sidebar.
 * Aggregate function: Return the aggregated value on the given column
 	* Example: ST_Envelope_Aggr (Geometry column). Given a Geometry column, calculate the entire envelope boundary of this column.
-	* Documentation: [Here](AggregateFunction.md)
+	* Documentation: [Here](Geometry-Functions.md#aggregate-functions)
 * Predicate: Execute a logic judgement on the given columns and return true or false
 	* Example: ST_Contains (A, B). Check if A fully contains B. Return "True" if yes, else return "False".
-	* Documentation: [Here](Predicate.md)
+	* Documentation: [Here](Geometry-Functions.md#predicates)
 
 Sedona also provides an Adapter to convert SpatialRDD <-> DataFrame. Please read [Adapter Scaladoc](../../scaladoc/spark/org/apache/sedona/sql/utils/index.html)
 
 SedonaSQL supports SparkSQL query optimizer, documentation is [Here](Optimizer.md)
+
+## Raster function list
+
+SedonaSQL also supports raster data processing. Raster functions use the `RS_` prefix. All raster operators can be called in the same way as vector operators:
+
+```scala
+var myDataFrame = sedona.sql("YOUR_SQL")
+```
+
+* Constructor: Construct a Raster given an input file or parameters
+	* Example: RS_FromGeoTiff (binary). Create a Raster from a GeoTiff binary.
+	* Documentation: [Here](Raster-Functions.md#raster-constructors)
+* Function: Execute a function on the given Raster column or columns
+	* Example: RS_Value (raster, point). Given a Raster and a Point geometry, return the pixel value at that location.
+	* Documentation: Functions are organized by category. See [Raster Accessors](Raster-Functions.md#raster-accessors), [Raster Operators](Raster-Functions.md#raster-operators), [Raster Band Accessors](Raster-Functions.md#raster-band-accessors), [Raster Output](Raster-Functions.md#raster-output), and other categories in the sidebar.
+* Aggregate function: Return the aggregated value on the given Raster column
+	* Example: RS_Union_Aggr (Raster column). Given a Raster column, combine all rasters into a single multiband raster.
+	* Documentation: [Here](Raster-Functions.md#raster-aggregate-functions)
+* Predicate: Execute a logic judgement on the given columns and return true or false
+	* Example: RS_Intersects (raster, geometry). Check if a raster intersects a geometry. Return "True" if yes, else return "False".
+	* Documentation: [Here](Raster-Functions.md#raster-predicates)
+
+## Raster quick start
+
+The detailed explanation is here [Write a Raster DataFrame/SQL application](../../tutorial/raster.md).
 
 ## Quick start
 

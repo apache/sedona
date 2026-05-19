@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="250" y="22" text-anchor="middle" font-size="15" font-weight="bold" fill="#333333">How ST_Distance "Sees" the Path</text>
+
+  <!-- Chart axes: lon [0,10] -> x [70,430]; lat [0,2.2] -> y [230,60] -->
+  <!-- Plot background -->
+  <rect x="70" y="60" width="360" height="170" fill="#fbfbfc" stroke="#cfd6dd" stroke-width="1" />
+
+  <!-- Gridlines (vertical) -->
+  <line x1="142" y1="60" x2="142" y2="230" stroke="#e5e9ee" stroke-width="0.75" stroke-dasharray="2,3" />
+  <line x1="214" y1="60" x2="214" y2="230" stroke="#e5e9ee" stroke-width="0.75" stroke-dasharray="2,3" />
+  <line x1="286" y1="60" x2="286" y2="230" stroke="#e5e9ee" stroke-width="0.75" stroke-dasharray="2,3" />
+  <line x1="358" y1="60" x2="358" y2="230" stroke="#e5e9ee" stroke-width="0.75" stroke-dasharray="2,3" />
+
+  <!-- Gridlines (horizontal) -->
+  <line x1="70" y1="191" x2="430" y2="191" stroke="#e5e9ee" stroke-width="0.75" stroke-dasharray="2,3" />
+  <line x1="70" y1="153" x2="430" y2="153" stroke="#e5e9ee" stroke-width="0.75" stroke-dasharray="2,3" />
+  <line x1="70" y1="115" x2="430" y2="115" stroke="#e5e9ee" stroke-width="0.75" stroke-dasharray="2,3" />
+  <line x1="70" y1="76" x2="430" y2="76" stroke="#e5e9ee" stroke-width="0.75" stroke-dasharray="2,3" />
+
+  <!-- X-axis ticks and labels -->
+  <text x="70" y="244" text-anchor="middle" font-size="11" fill="#555555">0</text>
+  <text x="142" y="244" text-anchor="middle" font-size="11" fill="#555555">2</text>
+  <text x="214" y="244" text-anchor="middle" font-size="11" fill="#555555">4</text>
+  <text x="286" y="244" text-anchor="middle" font-size="11" fill="#555555">6</text>
+  <text x="358" y="244" text-anchor="middle" font-size="11" fill="#555555">8</text>
+  <text x="430" y="244" text-anchor="middle" font-size="11" fill="#555555">10</text>
+  <text x="250" y="260" text-anchor="middle" font-size="12" fill="#333333">Longitude</text>
+
+  <!-- Y-axis ticks and labels -->
+  <text x="62" y="234" text-anchor="end" font-size="11" fill="#555555">0.0</text>
+  <text x="62" y="195" text-anchor="end" font-size="11" fill="#555555">0.5</text>
+  <text x="62" y="157" text-anchor="end" font-size="11" fill="#555555">1.0</text>
+  <text x="62" y="119" text-anchor="end" font-size="11" fill="#555555">1.5</text>
+  <text x="62" y="80" text-anchor="end" font-size="11" fill="#555555">2.0</text>
+  <text x="22" y="148" text-anchor="middle" font-size="12" fill="#333333" transform="rotate(-90 22 148)">Latitude</text>
+
+  <!-- Planar straight line from A(0,0)->B(10,2): (70,230)->(430,76) -->
+  <line x1="70" y1="230" x2="430" y2="76" stroke="#2a4db3" stroke-width="2" stroke-dasharray="7,4" />
+
+  <!-- Spherical great-circle arc: quadratic Bezier with control (270,20) -> peaks near lon≈8.1, lat≈2.15 -->
+  <path d="M 70 230 Q 270 20 430 76" fill="none" stroke="#e02020" stroke-width="2.6" />
+
+  <!-- Endpoints A and B -->
+  <circle cx="70" cy="230" r="4.5" fill="#000000" />
+  <text x="70" y="278" text-anchor="middle" font-size="12" fill="#333333">Point A</text>
+  <circle cx="430" cy="76" r="4.5" fill="#000000" />
+  <text x="438" y="90" font-size="12" fill="#333333">Point B</text>
+
+  <!-- Legend -->
+  <rect x="178" y="268" width="204" height="26" rx="4" fill="#ffffff" stroke="#d0d4d8" stroke-width="1" />
+  <line x1="188" y1="276" x2="210" y2="276" stroke="#2a4db3" stroke-width="2" stroke-dasharray="6,3" />
+  <text x="215" y="280" font-size="10.5" fill="#333333">Planar (Geometry)</text>
+  <line x1="188" y1="289" x2="210" y2="289" stroke="#e02020" stroke-width="2.4" />
+  <text x="215" y="292" font-size="10.5" fill="#333333">Spherical (Geography): Great-Circle Arc</text>
+</svg>

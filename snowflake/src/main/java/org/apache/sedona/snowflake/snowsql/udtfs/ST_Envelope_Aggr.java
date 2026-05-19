@@ -49,7 +49,13 @@ public class ST_Envelope_Aggr {
   public ST_Envelope_Aggr() {}
 
   public Stream<OutputRow> process(byte[] geom) throws ParseException {
+    if (geom == null) {
+      return Stream.empty();
+    }
     Geometry geometry = GeometrySerde.deserialize(geom);
+    if (geometry == null || geometry.isEmpty()) {
+      return Stream.empty();
+    }
     if (buffer == null) {
       buffer = geometry.getEnvelopeInternal();
     } else {
@@ -59,6 +65,9 @@ public class ST_Envelope_Aggr {
   }
 
   public Stream<OutputRow> endPartition() {
+    if (buffer == null || buffer.isNull()) {
+      return Stream.of(new OutputRow(null));
+    }
     // Returns the value we initialized in the constructor.
     Polygon poly =
         geometryFactory.createPolygon(

@@ -39,7 +39,8 @@ case class SpatialIndexExec(
     indexType: IndexType,
     isRasterPredicate: Boolean,
     isGeography: Boolean,
-    distance: Option[Expression] = None)
+    distance: Option[Expression] = None,
+    geographyShape: Boolean = false)
     extends SedonaUnaryExecNode
     with TraitJoinQueryBase
     with Logging {
@@ -55,6 +56,11 @@ case class SpatialIndexExec(
     val boundShape = BindReferences.bindReference(shape, child.output)
     val resultRaw = child.execute().asInstanceOf[RDD[UnsafeRow]].coalesce(1)
     val spatialRDD = distance match {
+      case Some(distanceExpression) if geographyShape =>
+        toExpandedGeographyEnvelopeRDD(
+          resultRaw,
+          boundShape,
+          BindReferences.bindReference(distanceExpression, child.output))
       case Some(distanceExpression) =>
         toExpandedEnvelopeRDD(
           resultRaw,
@@ -64,6 +70,8 @@ case class SpatialIndexExec(
       case None =>
         if (isRasterPredicate) {
           toWGS84EnvelopeRDD(resultRaw, boundShape)
+        } else if (geographyShape) {
+          toGeographySpatialRDD(resultRaw, boundShape)
         } else {
           toSpatialRDD(resultRaw, boundShape)
         }

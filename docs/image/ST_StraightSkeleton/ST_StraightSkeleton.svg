@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="230" viewBox="0 0 400 230">
+  <rect width="400" height="230" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_StraightSkeleton</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Straight skeleton of a polygon</text>
+  <polygon points="84.0,162.0 106.0,162.0 106.0,74.0 139.0,74.0 139.0,52.0 51.0,52.0 51.0,74.0 84.0,74.0" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="2"/>
+  <circle cx="84.0" cy="162.0" r="2.5" fill="#1565C0"/>
+  <circle cx="106.0" cy="162.0" r="2.5" fill="#1565C0"/>
+  <circle cx="106.0" cy="74.0" r="2.5" fill="#1565C0"/>
+  <circle cx="139.0" cy="74.0" r="2.5" fill="#1565C0"/>
+  <circle cx="139.0" cy="52.0" r="2.5" fill="#1565C0"/>
+  <circle cx="51.0" cy="52.0" r="2.5" fill="#1565C0"/>
+  <circle cx="51.0" cy="74.0" r="2.5" fill="#1565C0"/>
+  <circle cx="84.0" cy="74.0" r="2.5" fill="#1565C0"/>
+  <text x="95" y="190" font-family="monospace" font-size="9" fill="#1565C0" text-anchor="middle" font-weight="bold">Input polygon</text>
+  <defs><marker id="arrsk" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#666"/></marker></defs>
+  <line x1="180" y1="105" x2="210" y2="105" stroke="#666" stroke-width="1.5" marker-end="url(#arrsk)"/>
+  <polygon points="289.0,162.0 311.0,162.0 311.0,74.0 344.0,74.0 344.0,52.0 256.0,52.0 256.0,74.0 289.0,74.0" fill="rgba(74,144,217,0.1)" stroke="#90CAF5" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <line x1="300.0" y1="151.0" x2="300.0" y2="63.0" stroke="#E53935" stroke-width="2"/>
+  <line x1="300.0" y1="63.0" x2="267.0" y2="63.0" stroke="#E53935" stroke-width="2"/>
+  <line x1="300.0" y1="63.0" x2="333.0" y2="63.0" stroke="#E53935" stroke-width="2"/>
+  <line x1="267.0" y1="63.0" x2="256.0" y2="63.0" stroke="#E53935" stroke-width="2"/>
+  <line x1="267.0" y1="63.0" x2="278.0" y2="74.0" stroke="#E53935" stroke-width="2"/>
+  <line x1="333.0" y1="63.0" x2="344.0" y2="63.0" stroke="#E53935" stroke-width="2"/>
+  <line x1="333.0" y1="63.0" x2="322.0" y2="74.0" stroke="#E53935" stroke-width="2"/>
+  <line x1="300.0" y1="151.0" x2="289.0" y2="151.0" stroke="#E53935" stroke-width="2"/>
+  <line x1="300.0" y1="151.0" x2="311.0" y2="151.0" stroke="#E53935" stroke-width="2"/>
+  <circle cx="344.0" cy="63.0" r="2.5" fill="#E53935"/>
+  <circle cx="311.0" cy="151.0" r="2.5" fill="#E53935"/>
+  <circle cx="322.0" cy="74.0" r="2.5" fill="#E53935"/>
+  <circle cx="300.0" cy="63.0" r="2.5" fill="#E53935"/>
+  <circle cx="267.0" cy="63.0" r="2.5" fill="#E53935"/>
+  <circle cx="256.0" cy="63.0" r="2.5" fill="#E53935"/>
+  <circle cx="333.0" cy="63.0" r="2.5" fill="#E53935"/>
+  <circle cx="300.0" cy="151.0" r="2.5" fill="#E53935"/>
+  <circle cx="289.0" cy="151.0" r="2.5" fill="#E53935"/>
+  <circle cx="278.0" cy="74.0" r="2.5" fill="#E53935"/>
+  <text x="300" y="190" font-family="monospace" font-size="9" fill="#E53935" text-anchor="middle" font-weight="bold">Straight skeleton</text>
+  <line x1="80" y1="205" x2="100" y2="205" stroke="#90CAF5" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <text x="104" y="209" font-family="monospace" font-size="8" fill="#1565C0">Polygon boundary</text>
+  <line x1="220" y1="205" x2="240" y2="205" stroke="#E53935" stroke-width="2"/>
+  <text x="244" y="209" font-family="monospace" font-size="8" fill="#E53935">Skeleton edges</text>
+</svg>

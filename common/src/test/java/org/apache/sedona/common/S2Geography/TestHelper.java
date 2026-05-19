@@ -29,8 +29,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import org.locationtech.jts.io.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestHelper {
+
+  private static final Logger log = LoggerFactory.getLogger(TestHelper.class);
 
   private static final double EPS = 1e-6;
 
@@ -170,15 +174,22 @@ public class TestHelper {
     WKTReader wktReader = new WKTReader();
     Geography geoWKT = wktReader.read(expectedWKT);
 
-    boolean isEqual = compareTo(geoWKT, geoWKT) == 0;
+    boolean isEqual = compareTo(geoWKB, geoWKT) == 0;
     if (!isEqual) {
-      System.out.println(geoWKB);
-      System.out.println(geoWKT);
+      log.debug("geoWKB: {}", geoWKB);
+      log.debug("geoWKT: {}", geoWKT);
     }
     assertTrue(isEqual);
   }
 
   public static int compareTo(Geography geo1, Geography geo2) {
+    // Empty geometries of the same runtime subtype are treated as equal, even when the WKB and
+    // WKT readers tag them with different GeographyKind values (e.g. SINGLEPOINT vs POINT for
+    // an empty POINT). This check must come before the kind-based ordering below.
+    if (S2_isEmpty(geo1) && S2_isEmpty(geo2) && geo1.getClass() == geo2.getClass()) {
+      return 0;
+    }
+
     int compare = geo1.kind.getKind() - geo2.kind.getKind();
     if (compare != 0) {
       return compare;

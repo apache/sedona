@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.sedona.sql.datasources.osmpbf.build.Osmformat;
+import org.apache.sedona.sql.datasources.osmpbf.features.InfoResolver;
 import org.apache.sedona.sql.datasources.osmpbf.features.TagsResolver;
 import org.apache.sedona.sql.datasources.osmpbf.model.OSMEntity;
 import org.apache.sedona.sql.datasources.osmpbf.model.OsmNode;
@@ -85,6 +86,13 @@ public class NodeIterator implements Iterator<OSMEntity> {
     HashMap<String, String> tags =
         TagsResolver.resolveTags(node.getKeysCount(), node::getKeys, node::getVals, stringTable);
 
-    return new OsmNode(id, lat, lon, tags);
+    OsmNode osmNode = new OsmNode(id, lat, lon, tags);
+
+    if (node.hasInfo()) {
+      InfoResolver.populateInfo(
+          osmNode, node.getInfo(), stringTable, primitiveBlock.getDateGranularity());
+    }
+
+    return osmNode;
   }
 }

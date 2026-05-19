@@ -18,7 +18,12 @@
  */
 package org.apache.spark.sql.execution.datasources.geoparquet
 
+import scala.util.control.NonFatal
+
+import org.apache.spark.sql.sedona_sql.UDT.Box2DUDT
 import org.apache.spark.sql.types.{DoubleType, FloatType, StructType}
+import org.datasyslab.proj4sedona.core.Proj
+import org.datasyslab.proj4sedona.parser.CRSSerializer
 import org.json4s.jackson.JsonMethods.parse
 import org.json4s.jackson.compactJson
 import org.json4s.{DefaultFormats, Extraction, JField, JNothing, JNull, JObject, JValue}
@@ -30,7 +35,9 @@ import org.json4s.{DefaultFormats, Extraction, JField, JNothing, JNull, JObject,
  * @param geometryTypes
  *   The geometry types of all geometries, or an empty array if they are not known.
  * @param bbox
- *   Bounding Box of the geometries in the file, formatted according to RFC 7946, section 5.
+ *   Bounding Box of the geometries in the file, formatted according to RFC 7946, section 5. None
+ *   if the file contains no geometries (per the GeoParquet 1.1 spec, bbox is optional and should
+ *   be omitted when there is no extent to describe).
  * @param crs
  *   The CRS of the geometries in the file. None if crs metadata is absent, Some(JNull) if crs is
  *   null, Some(value) if the crs is present and not null.
@@ -40,7 +47,7 @@ import org.json4s.{DefaultFormats, Extraction, JField, JNothing, JNull, JObject,
 case class GeometryFieldMetaData(
     encoding: String,
     geometryTypes: Seq[String],
-    bbox: Seq[Double],
+    bbox: Option[Seq[Double]],
     crs: Option[JValue] = None,
     covering: Option[Covering] = None)
 
@@ -92,6 +99,18 @@ object GeoParquetMetaData {
    */
   val GEOPARQUET_COVERING_KEY = "geoparquet.covering"
 
+  /**
+   * Configuration key for controlling default covering behavior.
+   *
+   * Supported values:
+   *   - `auto`: automatically generate/reuse `<geometryColumnName>_bbox` covering columns for
+   *     GeoParquet 1.1.0 when explicit covering options are not provided.
+   *   - `legacy`: disable automatic covering generation and keep legacy behavior.
+   */
+  val GEOPARQUET_COVERING_MODE_KEY = "geoparquet.covering.mode"
+  val GEOPARQUET_COVERING_MODE_AUTO = "auto"
+  val GEOPARQUET_COVERING_MODE_LEGACY = "legacy"
+
   def parseKeyValueMetaData(
       keyValueMetaData: java.util.Map[String, String]): Option[GeoParquetMetaData] = {
     Option(keyValueMetaData.get("geo")).map { geo =>
@@ -125,16 +144,92 @@ object GeoParquetMetaData {
 
     // We are not using transformField here for binary compatibility with various json4s versions shipped with
     // Spark 3.0.x ~ Spark 3.5.x
-    val serializedGeoObject = geoObject.underscoreKeys mapField {
-      case field @ (jField: JField) =>
-        if (jField._1 == "columns") {
-          JField("columns", JObject(columnsMap.toList))
-        } else {
-          field
-        }
-      case field: Any => field
+    val serializedGeoObject = geoObject.underscoreKeys mapField { case field @ (jField: JField) =>
+      if (jField._1 == "columns") {
+        JField("columns", JObject(columnsMap.toList))
+      } else {
+        field
+      }
     }
     compactJson(serializedGeoObject)
+  }
+
+  /**
+   * Default SRID for GeoParquet files where the CRS field is omitted. Per the GeoParquet spec,
+   * omitting the CRS implies OGC:CRS84, which is equivalent to EPSG:4326.
+   */
+  val DEFAULT_SRID: Int = 4326
+
+  /**
+   * Extract SRID from a GeoParquet CRS metadata value.
+   *
+   * Per the GeoParquet specification:
+   *   - If the CRS field is absent (None), the CRS is OGC:CRS84 (EPSG:4326).
+   *   - If the CRS field is explicitly null, the CRS is unknown (SRID 0).
+   *   - If the CRS field is a PROJJSON object with an "id" containing "authority" and "code", the
+   *     EPSG code is used as the SRID.
+   *
+   * @param crs
+   *   The CRS field from GeoParquet column metadata.
+   * @return
+   *   The SRID corresponding to the CRS. Returns 4326 for omitted CRS, 0 for null or unrecognized
+   *   CRS, and the EPSG code for PROJJSON with an EPSG identifier.
+   */
+  def extractSridFromCrs(crs: Option[JValue]): Int = {
+    crs match {
+      case None =>
+        // CRS omitted: default to OGC:CRS84 (EPSG:4326) per GeoParquet spec
+        DEFAULT_SRID
+      case Some(JNull) =>
+        // CRS explicitly null: unknown CRS
+        0
+      case Some(projjson) =>
+        // Use proj4sedona to extract authority and code from PROJJSON
+        try {
+          val jsonStr = compactJson(projjson)
+          val result = new Proj(jsonStr).toAuthority()
+          if (result != null && result.length == 2) {
+            result(0) match {
+              case "EPSG" =>
+                try { result(1).toInt }
+                catch { case _: NumberFormatException => 0 }
+              case "OGC" if result(1) == "CRS84" => DEFAULT_SRID
+              case _ => 0
+            }
+          } else {
+            0
+          }
+        } catch {
+          case NonFatal(_) => 0
+        }
+    }
+  }
+
+  /**
+   * Convert an SRID to a PROJJSON JValue using proj4sedona.
+   *
+   * The generated PROJJSON includes an `id` field with the EPSG authority and code, which enables
+   * round-trip SRID preservation when reading the GeoParquet file back.
+   *
+   * @param srid
+   *   The SRID to convert (e.g., 4326 for WGS 84).
+   * @return
+   *   Some(JValue) containing the PROJJSON if conversion succeeds, None if the SRID is 0
+   *   (unknown), 4326 (GeoParquet default CRS), or if conversion fails.
+   */
+  def sridToProjJson(srid: Int): Option[JValue] = {
+    if (srid == 0 || srid == DEFAULT_SRID) return None
+    try {
+      val proj = new Proj("EPSG:" + srid)
+      val projjsonStr = CRSSerializer.toProjJson(proj)
+      if (projjsonStr != null && projjsonStr.nonEmpty) {
+        Some(parse(projjsonStr))
+      } else {
+        None
+      }
+    } catch {
+      case NonFatal(_) => None
+    }
   }
 
   def createCoveringColumnMetadata(coveringColumnName: String, schema: StructType): Covering = {
@@ -142,6 +237,18 @@ object GeoParquetMetaData {
     schema(coveringColumnIndex).dataType match {
       case coveringColumnType: StructType =>
         coveringColumnTypeToCovering(coveringColumnName, coveringColumnType)
+      case udt: Box2DUDT =>
+        // Box2DUDT exposes a struct<xmin, ymin, xmax, ymax: double> sqlType, which is the exact
+        // shape required by GeoParquet 1.1 bbox covering columns. Treat the underlying struct as
+        // the covering struct so users can write a Box2D column and have it referenced as a
+        // covering column in GeoParquet metadata without any manual struct construction.
+        udt.sqlType match {
+          case structType: StructType =>
+            coveringColumnTypeToCovering(coveringColumnName, structType)
+          case other =>
+            throw new IllegalStateException(
+              s"Box2DUDT.sqlType is expected to be a StructType, got $other")
+        }
       case _ =>
         throw new IllegalArgumentException(
           s"Covering column $coveringColumnName is not a struct type")

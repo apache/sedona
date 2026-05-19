@@ -111,8 +111,7 @@ And here are a few rows from the countries table:
 Here’s how to perform a spatial join to compute the country of each city:
 
 ```python
-sd.sql(
-    """
+sd.sql("""
 select
     cities.name as city_name,
     countries.name as country_name,
@@ -120,8 +119,7 @@ select
 from cities
 join countries
 where ST_Intersects(cities.geometry, countries.geometry)
-"""
-).show(3)
+""").show(3)
 ```
 
 The code utilizes `ST_Intersects` to determine if a city is contained within a given country.
@@ -261,13 +259,11 @@ Let’s expose these two tables as views and run a spatial join to see how many 
 buildings.to_view("buildings", overwrite=True)
 vermont.to_view("vermont", overwrite=True)
 
-sd.sql(
-    """
+sd.sql("""
 select count(*) from buildings
 join vermont
 where ST_Intersects(buildings.geometry, vermont.geometry)
-"""
-).show()
+""").show()
 ```
 
 This command correctly errors out because the tables have different CRSs.  For safety, SedonaDB errors out rather than give you the wrong answer! Here's the error message that's easy to debug:
@@ -282,13 +278,11 @@ Use ST_Transform() or ST_SetSRID() to ensure arguments are compatible.
 Let’s rewrite the spatial join to convert the `vermont` CRS to EPSG:4326, so it’s compatible with the `buildings` CRS.
 
 ```python
-sd.sql(
-    """
+sd.sql("""
 select count(*) from buildings
 join vermont
 where ST_Intersects(buildings.geometry, ST_Transform(vermont.geometry, 'EPSG:4326'))
-"""
-).show()
+""").show()
 ```
 
 We now get the correct result!

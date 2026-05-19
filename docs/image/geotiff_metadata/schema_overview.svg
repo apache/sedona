@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 400" width="580" height="400" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="290" y="26" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">geotiff.metadata Output Schema</text>
+  <text x="290" y="44" text-anchor="middle" font-size="12" fill="#666666">One row per GeoTIFF file — no pixel data loaded</text>
+
+  <!-- Top-level fields column -->
+  <rect x="20" y="60" width="180" height="325" rx="5" fill="rgba(74,144,217,0.06)" stroke="#4a90d9" stroke-width="1.5"/>
+  <text x="110" y="78" text-anchor="middle" font-size="12" font-weight="bold" fill="#4a90d9">Top-level Fields</text>
+
+  <g font-size="11" fill="#333333">
+    <text x="32" y="98" font-family="monospace">path</text><text x="130" y="98" fill="#888">String</text>
+    <text x="32" y="114" font-family="monospace">driver</text><text x="130" y="114" fill="#888">String</text>
+    <text x="32" y="130" font-family="monospace">fileSize</text><text x="130" y="130" fill="#888">Long</text>
+    <text x="32" y="146" font-family="monospace">width</text><text x="130" y="146" fill="#888">Int</text>
+    <text x="32" y="162" font-family="monospace">height</text><text x="130" y="162" fill="#888">Int</text>
+    <text x="32" y="178" font-family="monospace">numBands</text><text x="130" y="178" fill="#888">Int</text>
+    <text x="32" y="194" font-family="monospace">srid</text><text x="130" y="194" fill="#888">Int</text>
+    <text x="32" y="210" font-family="monospace">crs</text><text x="130" y="210" fill="#888">String</text>
+  </g>
+
+  <!-- Struct references -->
+  <g font-size="11" font-weight="bold">
+    <rect x="28" y="220" width="165" height="18" rx="3" fill="rgba(74,144,217,0.12)"/>
+    <text x="32" y="234" font-family="monospace" fill="#4a90d9">geoTransform</text><text x="140" y="234" fill="#4a90d9" font-weight="normal" font-size="10">Struct</text>
+
+    <rect x="28" y="242" width="165" height="18" rx="3" fill="rgba(74,144,217,0.12)"/>
+    <text x="32" y="256" font-family="monospace" fill="#4a90d9">cornerCoordinates</text>
+
+    <rect x="28" y="264" width="165" height="18" rx="3" fill="rgba(142,68,173,0.12)"/>
+    <text x="32" y="278" font-family="monospace" fill="#8e44ad">bands</text><text x="90" y="278" fill="#8e44ad" font-weight="normal" font-size="10">Array[Struct]</text>
+
+    <rect x="28" y="286" width="165" height="18" rx="3" fill="rgba(39,174,96,0.12)"/>
+    <text x="32" y="300" font-family="monospace" fill="#27ae60">overviews</text><text x="110" y="300" fill="#27ae60" font-weight="normal" font-size="10">Array[Struct]</text>
+  </g>
+
+  <g font-size="11" fill="#333333">
+    <text x="32" y="322" font-family="monospace">metadata</text><text x="130" y="322" fill="#888">Map</text>
+    <text x="32" y="338" font-family="monospace">isTiled</text><text x="130" y="338" fill="#888">Boolean</text>
+    <text x="32" y="354" font-family="monospace">compression</text><text x="130" y="354" fill="#888">String</text>
+  </g>
+
+  <!-- geoTransform struct -->
+  <line x1="200" y1="229" x2="222" y2="229" stroke="#4a90d9" stroke-width="1.2"/>
+  <rect x="222" y="60" width="160" height="110" rx="4" fill="rgba(74,144,217,0.06)" stroke="#4a90d9" stroke-width="1"/>
+  <text x="302" y="78" text-anchor="middle" font-size="11" font-weight="bold" fill="#4a90d9">geoTransform</text>
+  <g font-size="10" fill="#333333" font-family="monospace">
+    <text x="230" y="96">upperLeftX</text><text x="340" y="96" fill="#888">Double</text>
+    <text x="230" y="112">upperLeftY</text><text x="340" y="112" fill="#888">Double</text>
+    <text x="230" y="128">scaleX</text><text x="340" y="128" fill="#888">Double</text>
+    <text x="230" y="144">scaleY</text><text x="340" y="144" fill="#888">Double</text>
+    <text x="230" y="160">skewX, skewY</text><text x="340" y="160" fill="#888">Double</text>
+  </g>
+
+  <!-- cornerCoordinates struct -->
+  <line x1="200" y1="251" x2="222" y2="200" stroke="#4a90d9" stroke-width="1.2"/>
+  <rect x="222" y="178" width="160" height="70" rx="4" fill="rgba(74,144,217,0.06)" stroke="#4a90d9" stroke-width="1"/>
+  <text x="302" y="196" text-anchor="middle" font-size="11" font-weight="bold" fill="#4a90d9">cornerCoordinates</text>
+  <g font-size="10" fill="#333333" font-family="monospace">
+    <text x="230" y="214">minX, minY</text><text x="340" y="214" fill="#888">Double</text>
+    <text x="230" y="230">maxX, maxY</text><text x="340" y="230" fill="#888">Double</text>
+  </g>
+
+  <!-- bands struct -->
+  <line x1="200" y1="273" x2="402" y2="273" stroke="#8e44ad" stroke-width="1.2"/>
+  <rect x="402" y="60" width="162" height="162" rx="4" fill="rgba(142,68,173,0.06)" stroke="#8e44ad" stroke-width="1"/>
+  <text x="483" y="78" text-anchor="middle" font-size="11" font-weight="bold" fill="#8e44ad">bands[ ]</text>
+  <g font-size="10" fill="#333333" font-family="monospace">
+    <text x="410" y="96">band</text><text x="522" y="96" fill="#888">Int</text>
+    <text x="410" y="112">dataType</text><text x="522" y="112" fill="#888">String</text>
+    <text x="410" y="128">colorInterp</text><text x="522" y="128" fill="#888">String</text>
+    <text x="410" y="144">noDataValue</text><text x="522" y="144" fill="#888">Double?</text>
+    <text x="410" y="160">blockWidth</text><text x="522" y="160" fill="#888">Int</text>
+    <text x="410" y="176">blockHeight</text><text x="522" y="176" fill="#888">Int</text>
+    <text x="410" y="192">description</text><text x="522" y="192" fill="#888">String?</text>
+    <text x="410" y="208">unit</text><text x="522" y="208" fill="#888">String?</text>
+  </g>
+
+  <!-- overviews struct -->
+  <line x1="200" y1="295" x2="402" y2="295" stroke="#27ae60" stroke-width="1.2"/>
+  <rect x="402" y="238" width="162" height="72" rx="4" fill="rgba(39,174,96,0.06)" stroke="#27ae60" stroke-width="1"/>
+  <text x="483" y="256" text-anchor="middle" font-size="11" font-weight="bold" fill="#27ae60">overviews[ ]</text>
+  <g font-size="10" fill="#333333" font-family="monospace">
+    <text x="410" y="274">level</text><text x="522" y="274" fill="#888">Int</text>
+    <text x="410" y="290">width</text><text x="522" y="290" fill="#888">Int</text>
+    <text x="410" y="306">height</text><text x="522" y="306" fill="#888">Int</text>
+  </g>
+
+  <!-- Bottom note -->
+  <rect x="402" y="325" width="162" height="48" rx="4" fill="rgba(217,74,74,0.06)" stroke="#d94a4a" stroke-width="1"/>
+  <text x="483" y="344" text-anchor="middle" font-size="10" font-weight="bold" fill="#d94a4a">COG Detection</text>
+  <text x="483" y="360" text-anchor="middle" font-size="9" fill="#333333" font-family="monospace">isTiled AND</text>
+  <text x="483" y="372" text-anchor="middle" font-size="9" fill="#333333" font-family="monospace">size(overviews) &gt; 0</text>
+</svg>

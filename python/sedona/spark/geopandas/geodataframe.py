@@ -51,6 +51,7 @@ IMPLEMENTATION_PRIORITY = {
         "_to_geopandas",
         "contains",
         "contains_properly",
+        "clip_by_rect",
         "convex_hull",
         "count_coordinates",
         "count_geometries",
@@ -1237,10 +1238,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
     @property
     def type(self):
-        # Implementation of the abstract method
-        raise NotImplementedError(
-            _not_implemented_error("type", "Returns numeric geometry type codes.")
-        )
+        return self.geom_type
 
     def plot(self, *args, **kwargs):
         """

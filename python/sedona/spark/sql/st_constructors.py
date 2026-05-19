@@ -193,6 +193,123 @@ def ST_GeogFromWKT(
 
 
 @validate_argument_types
+def ST_GeogFromText(
+    wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None
+) -> Column:
+    """Generate a geography column from a Well-Known Text (WKT) string column.
+    This is an alias of ST_GeogFromWKT.
+
+    :param wkt: WKT string column to generate from.
+    :type wkt: ColumnOrName
+    :return: Geography column representing the WKT string.
+    :rtype: Column
+    """
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_GeogFromText", args)
+
+
+@validate_argument_types
+def ST_GeogFromWKB(
+    wkb: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None
+) -> Column:
+    """Generate a geography column from a Well-Known Binary (WKB) binary column.
+
+    :param wkb: WKB binary column to generate from.
+    :type wkb: ColumnOrName
+    :return: Geography column representing the WKB binary.
+    :rtype: Column
+    """
+    args = (wkb) if srid is None else (wkb, srid)
+
+    return _call_constructor_function("ST_GeogFromWKB", args)
+
+
+@validate_argument_types
+def ST_GeogFromEWKB(wkb: ColumnOrName) -> Column:
+    """Generate a geography column from an OGC Extended Well-Known Binary (EWKB) binary column.
+
+    :param wkb: EWKB binary column to generate from.
+    :type wkb: ColumnOrName
+    :return: Geography column representing the EWKB binary.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_GeogFromEWKB", wkb)
+
+
+@validate_argument_types
+def ST_GeogFromEWKT(ewkt: ColumnOrName) -> Column:
+    """Generate a geography column from an OGC Extended Well-Known Text (EWKT) string column.
+
+    :param ewkt: EWKT string column to generate from.
+    :type ewkt: ColumnOrName
+    :return: Geography column representing the EWKT string.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_GeogFromEWKT", ewkt)
+
+
+@validate_argument_types
+def ST_GeogFromGeoHash(
+    geohash: ColumnOrName, precision: Optional[Union[ColumnOrName, int]] = None
+) -> Column:
+    """Generate a geography column from a geohash column at a specified precision.
+
+    :param geohash: Geohash string column to generate from.
+    :type geohash: ColumnOrName
+    :param precision: Geohash precision to use, either an integer or an integer column.
+    :type precision: Union[ColumnOrName, int]
+    :return: Geography column representing the supplied geohash and precision level.
+    :rtype: Column
+    """
+    args = (geohash) if precision is None else (geohash, precision)
+
+    return _call_constructor_function("ST_GeogFromGeoHash", args)
+
+
+@validate_argument_types
+def ST_GeogCollFromText(
+    wkt: ColumnOrName, srid: Optional[ColumnOrNameOrNumber] = None
+) -> Column:
+    """Generate a GeometryCollection geography from a GeometryCollection WKT representation.
+
+    :param wkt: GeometryCollection WKT string column to generate from.
+    :type wkt: ColumnOrName
+    :param srid: SRID for the geography.
+    :type srid: ColumnOrNameOrNumber
+    :return: GeometryCollection geography generated from the wkt column.
+    :rtype: Column
+    """
+    args = (wkt) if srid is None else (wkt, srid)
+
+    return _call_constructor_function("ST_GeogCollFromText", args)
+
+
+@validate_argument_types
+def ST_GeogToGeometry(geog: ColumnOrName) -> Column:
+    """Convert a geography column into a geometry column.
+
+    :param geog: Geography column to convert.
+    :type geog: ColumnOrName
+    :return: Geometry column representing the geography.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_GeogToGeometry", geog)
+
+
+@validate_argument_types
+def ST_GeomToGeography(geom: ColumnOrName) -> Column:
+    """Convert a geometry column into a geography column.
+
+    :param geom: Geometry column to convert.
+    :type geom: ColumnOrName
+    :return: Geography column representing the geometry.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_GeomToGeography", geom)
+
+
+@validate_argument_types
 def ST_GeomFromEWKT(ewkt: ColumnOrName) -> Column:
     """Generate a geometry column from a OGC Extended Well-Known Text (WKT) string column.
 
@@ -431,6 +548,42 @@ def ST_MakePoint(
     if m is not None:
         args = args + (m,)
     return _call_constructor_function("ST_MakePoint", (args))
+
+
+@validate_argument_types
+def ST_MakeBox2D(
+    lower_left: ColumnOrName,
+    upper_right: ColumnOrName,
+) -> Column:
+    """Construct a Box2D from two corner points (lower-left, upper-right).
+
+    Coordinates are taken verbatim — no swapping or ordering validation. NULL or
+    empty point inputs return NULL. Non-point inputs raise an error.
+
+    :param lower_left: Lower-left corner Point.
+    :type lower_left: ColumnOrName
+    :param upper_right: Upper-right corner Point.
+    :type upper_right: ColumnOrName
+    :return: Box2D column.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_MakeBox2D", (lower_left, upper_right))
+
+
+@validate_argument_types
+def ST_GeomFromBox2D(box: ColumnOrName) -> Column:
+    """Convert a Box2D to a Geometry.
+
+    Dispatches on dimensionality (matching PostGIS box2d::geometry and
+    Sedona's ST_Envelope): POINT for 0-D boxes, LINESTRING for 1-D boxes,
+    POLYGON otherwise. NULL on null input.
+
+    :param box: Box2D column to convert.
+    :type box: ColumnOrName
+    :return: Geometry column.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_GeomFromBox2D", box)
 
 
 @validate_argument_types

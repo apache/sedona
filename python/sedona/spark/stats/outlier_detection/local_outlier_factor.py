@@ -16,6 +16,7 @@
 # under the License.
 
 """Functions related to calculating the local outlier factor of a dataset."""
+
 from typing import Optional
 
 from pyspark.sql import DataFrame, SparkSession

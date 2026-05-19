@@ -136,32 +136,32 @@ object VizExample {
       .filter("ST_Contains(ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000),shape)").createOrReplaceTempView("pointtable")
     sedona.sql(
       """
-				|CREATE OR REPLACE TEMP VIEW pixels AS
-				|SELECT pixel, shape FROM pointtable
-				|LATERAL VIEW Explode(ST_Pixelize(shape, 256, 256, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
-			""".stripMargin)
+                |CREATE OR REPLACE TEMP VIEW pixels AS
+                |SELECT pixel, shape FROM pointtable
+                |LATERAL VIEW Explode(ST_Pixelize(shape, 256, 256, ST_PolygonFromEnvelope(-126.790180,24.863836,-64.630926,50.000))) AS pixel
+            """.stripMargin)
     sedona.sql(
       """
-				|CREATE OR REPLACE TEMP VIEW pixelaggregates AS
-				|SELECT pixel, count(*) as weight
-				|FROM pixels
-				|GROUP BY pixel
-			""".stripMargin)
+                |CREATE OR REPLACE TEMP VIEW pixelaggregates AS
+                |SELECT pixel, count(*) as weight
+                |FROM pixels
+                |GROUP BY pixel
+            """.stripMargin)
     sedona.sql(
       """
-				|CREATE OR REPLACE TEMP VIEW images AS
-				|SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates), 'red')) AS image
-				|FROM pixelaggregates
-			""".stripMargin)
+                |CREATE OR REPLACE TEMP VIEW images AS
+                |SELECT ST_Render(pixel, ST_Colorize(weight, (SELECT max(weight) FROM pixelaggregates), 'red')) AS image
+                |FROM pixelaggregates
+            """.stripMargin)
     val image = sedona.table("images").take(1)(0)(0).asInstanceOf[ImageSerializableWrapper].getImage
     val imageGenerator = new ImageGenerator
     imageGenerator.SaveRasterImageAsLocalFile(image, sqlApiOutputPath, ImageType.PNG)
     sedona.sql(
       """
-				|CREATE OR REPLACE TEMP VIEW imagestring AS
-				|SELECT ST_EncodeImage(image)
-				|FROM images
-			""".stripMargin)
+                |CREATE OR REPLACE TEMP VIEW imagestring AS
+                |SELECT ST_EncodeImage(image)
+                |FROM images
+            """.stripMargin)
     sedona.table("imagestring").show()
   }
 

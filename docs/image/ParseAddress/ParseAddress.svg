@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="110" viewBox="0 0 400 110">
+  <rect width="400" height="110" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ParseAddress</text>
+
+  <defs><marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#666"/></marker></defs>
+  <text x="80" y="52" font-family="monospace" font-size="9" fill="#1565C0" text-anchor="middle">"123 Main St,</text>
+  <text x="80" y="64" font-family="monospace" font-size="9" fill="#1565C0" text-anchor="middle">Seattle, WA"</text>
+  <line x1="140" y1="55" x2="190" y2="55" stroke="#666" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+  <text x="310" y="42" font-family="monospace" font-size="9" fill="#43A047" text-anchor="middle">house: "123"</text>
+  <text x="310" y="56" font-family="monospace" font-size="9" fill="#43A047" text-anchor="middle">road: "Main St"</text>
+  <text x="310" y="70" font-family="monospace" font-size="9" fill="#43A047" text-anchor="middle">city: "Seattle"</text>
+  <text x="310" y="84" font-family="monospace" font-size="9" fill="#43A047" text-anchor="middle">state: "WA"</text>
+</svg>

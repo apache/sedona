@@ -1,0 +1,42 @@
+{% if config.extra.alternate and config.extra.alternate | length > 1 %}
+<details class="sd-lang-switch">
+  <summary class="sd-lang-switch__trigger" aria-label="{{ lang.t('select.language') }}" title="{{ lang.t('select.language') }}">
+    <span class="sd-lang-switch__glyph" aria-hidden="true"><span class="sd-lang-switch__glyph-cn">文</span><span class="sd-lang-switch__glyph-en">A</span></span>
+  </summary>
+  <ul class="sd-lang-switch__menu">
+    {#-
+      mkdocs-static-i18n derives `alt.link` from `urlsplit(site_url).path`, so
+      when mike rewrites site_url to include its canonical_version (e.g.
+      `https://sedona.apache.org/latest`) the alt links get that prefix baked
+      in — yielding paths like `/latest/zh/sedonaspark/`. Feeding that through
+      `| url` from a different mike alias (`/latest-snapshot/`) produces
+      broken targets like `/latest-snapshot/latest/zh/`. Strip the mike
+      canonical prefix, then any remaining leading slash, so `| url`
+      resolves against the docs root of the version actually being served.
+    -#}
+    {%- set mike_prefix = '' -%}
+    {%- if 'mike' in config.plugins and config.plugins.mike.config.canonical_version -%}
+      {%- set mike_prefix = '/' ~ config.plugins.mike.config.canonical_version ~ '/' -%}
+    {%- endif -%}
+    {% for alt in config.extra.alternate %}
+      {%- set is_active = (alt.lang == config.theme.language) -%}
+      {%- set alt_link = alt.link -%}
+      {%- if mike_prefix and alt_link.startswith(mike_prefix) -%}
+        {%- set alt_link = alt_link[mike_prefix|length:] -%}
+      {%- elif alt_link.startswith('/') -%}
+        {%- set alt_link = alt_link[1:] -%}
+      {%- endif -%}
+      <li>
+        <a
+          href="{{ alt_link | url }}"
+          hreflang="{{ alt.lang }}"
+          lang="{{ alt.lang }}"
+          target="_self"
+          class="sd-lang-switch__link{% if is_active %} sd-lang-switch__link--active{% endif %}"
+          {% if is_active %}aria-current="true"{% endif %}
+        >{{ alt.name }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+</details>
+{% endif %}

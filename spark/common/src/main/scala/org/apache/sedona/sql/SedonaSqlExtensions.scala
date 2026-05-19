@@ -22,6 +22,7 @@ import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SparkSessionExtensions
 import org.apache.spark.sql.parser.ParserFactory
+import org.apache.spark.sql.sedona_sql.optimization.Box2DCastResolutionRule
 import org.slf4j.{Logger, LoggerFactory}
 
 class SedonaSqlExtensions extends (SparkSessionExtensions => Unit) {
@@ -35,6 +36,11 @@ class SedonaSqlExtensions extends (SparkSessionExtensions => Unit) {
       SedonaContext.create(spark)
       _ => ()
     })
+
+    // Resolve geometry↔Box2D casts during analysis so the analyzer accepts
+    // `CAST(geom AS box2d)` / `CAST(box AS geometry)` despite Spark's stock cast resolver
+    // refusing arbitrary UDT-to-UDT casts.
+    e.injectResolutionRule(_ => new Box2DCastResolutionRule)
 
     // Inject Sedona SQL parser
     if (enableParser) {

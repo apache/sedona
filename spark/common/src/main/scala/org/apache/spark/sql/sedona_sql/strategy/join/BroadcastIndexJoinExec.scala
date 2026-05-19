@@ -18,6 +18,8 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
+import org.apache.sedona.common.S2Geography.GeographyWKBSerializer
+import org.apache.sedona.common.geography.{Functions => GeographyFunctions}
 import org.apache.sedona.core.spatialOperator.{SpatialPredicate, SpatialPredicateEvaluators}
 import org.apache.sedona.core.spatialOperator.SpatialPredicateEvaluators.SpatialPredicateEvaluator
 import org.apache.sedona.sql.utils.{GeometrySerializer, RasterSerializer}
@@ -50,7 +52,8 @@ case class BroadcastIndexJoinExec(
     joinType: JoinType,
     spatialPredicate: SpatialPredicate,
     extraCondition: Option[Expression] = None,
-    distance: Option[Expression] = None)
+    distance: Option[Expression] = None,
+    geographyShape: Boolean = false)
     extends SedonaBinaryExecNode
     with TraitJoinQueryBase
     with Logging {
@@ -118,6 +121,9 @@ case class BroadcastIndexJoinExec(
     case (Some(r), _, false) => s"ST_Distance($windowExpression, $objectExpression) < $r"
     case (None, _, false) => s"ST_$spatialPredicate($windowExpression, $objectExpression)"
     case (None, _, true) => s"RS_$spatialPredicate($windowExpression, $objectExpression)"
+    case (Some(r), _, true) =>
+      throw new UnsupportedOperationException(
+        "Distance joins are not supported for raster predicates")
   }
 
   override def simpleString(maxFields: Int): String =
@@ -130,56 +136,62 @@ case class BroadcastIndexJoinExec(
     SpatialPredicateEvaluators.create(SpatialPredicate.inverse(spatialPredicate))
   }
 
+  // True when the build (window) side is also the side that originally appeared as the
+  // left-hand argument of the spatial predicate. Mirrors the inverse logic used by
+  // `evaluator` for the JTS path; required for Geography because Functions.contains is
+  // asymmetric and we cannot rely on a SpatialPredicateEvaluator.
+  private lazy val refinerSwap: Boolean = indexBuildSide != windowJoinSide
+
+  private def newRefiner(): JoinRefiner = {
+    if (geographyShape) {
+      if (distance.isDefined) new GeographyDistanceRefiner(refinerSwap)
+      else new GeographyRelationRefiner(spatialPredicate, refinerSwap)
+    } else new JtsRefiner(evaluator)
+  }
+
   private def innerJoin(
       streamIter: Iterator[(Geometry, UnsafeRow)],
       index: Broadcast[SpatialIndex]): Iterator[InternalRow] = {
-    val factory = new PreparedGeometryFactory()
-    val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
+    val refiner = newRefiner()
     val joinedRow = new JoinedRow
     streamIter.flatMap { case (geom, row) =>
-      joinedRow.withLeft(row)
-      index.value
-        .query(geom.getEnvelopeInternal)
-        .iterator
-        .asScala
-        .asInstanceOf[Iterator[Geometry]]
-        .filter(candidate =>
-          evaluator.eval(
-            preparedGeometries.getOrElseUpdate(candidate, { factory.create(candidate) }),
-            geom))
-        .map(candidate => joinedRow.withRight(candidate.getUserData.asInstanceOf[UnsafeRow]))
-        .filter(boundCondition)
+      if (geom == null) {
+        Iterator.empty
+      } else {
+        joinedRow.withLeft(row)
+        index.value
+          .query(geom.getEnvelopeInternal)
+          .iterator
+          .asScala
+          .asInstanceOf[Iterator[Geometry]]
+          .filter(candidate => refiner.matches(candidate, geom))
+          .map(candidate => joinedRow.withRight(refiner.unpackRow(candidate)))
+          .filter(boundCondition)
+      }
     }
   }
 
   private def semiJoin(
       streamIter: Iterator[(Geometry, UnsafeRow)],
       index: Broadcast[SpatialIndex]): Iterator[InternalRow] = {
-    val factory = new PreparedGeometryFactory()
-    val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
+    val refiner = newRefiner()
     val joinedRow = new JoinedRow
     streamIter.flatMap { case (geom, row) =>
       val left = row
-      joinedRow.withLeft(left)
-      val anyMatches = index.value
-        .query(geom.getEnvelopeInternal)
-        .iterator
-        .asScala
-        .asInstanceOf[Iterator[Geometry]]
-        .filter(candidate =>
-          evaluator.eval(
-            preparedGeometries.getOrElseUpdate(
-              candidate, {
-                factory.create(candidate)
-              }),
-            geom))
-        .map(candidate => joinedRow.withRight(candidate.getUserData.asInstanceOf[UnsafeRow]))
-        .exists(boundCondition)
-
-      if (anyMatches) {
-        Iterator.single(left)
-      } else {
+      if (geom == null) {
         Iterator.empty
+      } else {
+        joinedRow.withLeft(left)
+        val anyMatches = index.value
+          .query(geom.getEnvelopeInternal)
+          .iterator
+          .asScala
+          .asInstanceOf[Iterator[Geometry]]
+          .filter(candidate => refiner.matches(candidate, geom))
+          .map(candidate => joinedRow.withRight(refiner.unpackRow(candidate)))
+          .exists(boundCondition)
+
+        if (anyMatches) Iterator.single(left) else Iterator.empty
       }
     }
   }
@@ -187,8 +199,7 @@ case class BroadcastIndexJoinExec(
   private def antiJoin(
       streamIter: Iterator[(Geometry, UnsafeRow)],
       index: Broadcast[SpatialIndex]): Iterator[InternalRow] = {
-    val factory = new PreparedGeometryFactory()
-    val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
+    val refiner = newRefiner()
     val joinedRow = new JoinedRow
     streamIter.flatMap { case (geom, row) =>
       val left = row
@@ -196,14 +207,8 @@ case class BroadcastIndexJoinExec(
       val anyMatches = (if (geom == null) Collections.EMPTY_LIST
                         else index.value.query(geom.getEnvelopeInternal)).iterator.asScala
         .asInstanceOf[Iterator[Geometry]]
-        .filter(candidate =>
-          evaluator.eval(
-            preparedGeometries.getOrElseUpdate(
-              candidate, {
-                factory.create(candidate)
-              }),
-            geom))
-        .map(candidate => joinedRow.withRight(candidate.getUserData.asInstanceOf[UnsafeRow]))
+        .filter(candidate => refiner.matches(candidate, geom))
+        .map(candidate => joinedRow.withRight(refiner.unpackRow(candidate)))
         .exists(boundCondition)
 
       if (anyMatches) {
@@ -217,8 +222,7 @@ case class BroadcastIndexJoinExec(
   private def outerJoin(
       streamIter: Iterator[(Geometry, UnsafeRow)],
       index: Broadcast[SpatialIndex]): Iterator[InternalRow] = {
-    val factory = new PreparedGeometryFactory()
-    val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
+    val refiner = newRefiner()
     val joinedRow = new JoinedRow
     val nullRow = new GenericInternalRow(broadcast.output.length)
 
@@ -227,19 +231,13 @@ case class BroadcastIndexJoinExec(
       val candidates = (if (geom == null) Collections.EMPTY_LIST
                         else index.value.query(geom.getEnvelopeInternal)).iterator.asScala
         .asInstanceOf[Iterator[Geometry]]
-        .filter(candidate =>
-          evaluator.eval(
-            preparedGeometries.getOrElseUpdate(
-              candidate, {
-                factory.create(candidate)
-              }),
-            geom))
+        .filter(candidate => refiner.matches(candidate, geom))
 
       new RowIterator {
         private var found = false
         override def advanceNext(): Boolean = {
           while (candidates.hasNext) {
-            val candidateRow = candidates.next().getUserData.asInstanceOf[UnsafeRow]
+            val candidateRow = refiner.unpackRow(candidates.next())
             if (boundCondition(joinedRow.withRight(candidateRow))) {
               found = true
               return true
@@ -293,13 +291,42 @@ case class BroadcastIndexJoinExec(
       streamResultsRaw: RDD[UnsafeRow],
       boundStreamShape: Expression) = {
     distance match {
-      case Some(distanceExpression) =>
+      case Some(distanceExpression) if geographyShape =>
+        val boundDistance =
+          BindReferences.bindReference(distanceExpression, streamed.output)
+        // When the broadcast side already expanded its envelope by `d` (the
+        // literal-radius case, where the planner forwards the same distance to
+        // both sides so the per-row radius is also available here for the
+        // refiner), keep the stream envelope unexpanded. The coarse filter then
+        // matches the geometry path: `expand(build, d) ∩ stream`, not the wider
+        // `expand(build, d) ∩ expand(stream, d)`. When only the stream side
+        // received the distance (per-row radius bound to the stream side), the
+        // build side is unexpanded and we still need to expand the stream
+        // envelope to ensure the index returns all candidates within `d`.
+        val streamSideExpands = broadcast.distance.isEmpty
         streamResultsRaw.map(row => {
-          val geom = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
-          if (geom == null) {
+          val serialized = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
+          if (serialized == null) {
             (null, row)
           } else {
-            val geometry = GeometrySerializer.deserialize(geom)
+            val geog = GeographyWKBSerializer.deserialize(serialized)
+            val radius = boundDistance.eval(row).asInstanceOf[Double]
+            val baseEnvelope = JoinedGeometry.geographyToEnvelopeGeometry(geog)
+            val shape = if (streamSideExpands) {
+              JoinedGeometry.geometryToExpandedEnvelope(baseEnvelope, radius, isGeography = true)
+            } else {
+              baseEnvelope
+            }
+            shape.setUserData(GeographyJoinShape(geog, row, radius))
+            (shape, row)
+          }
+        })
+      case Some(distanceExpression) =>
+        streamResultsRaw.map(row => {
+          val geometry = TraitJoinQueryBase.shapeToGeometry(boundStreamShape, row)
+          if (geometry == null) {
+            (null, row)
+          } else {
             val radius = BindReferences
               .bindReference(distanceExpression, streamed.output)
               .eval(row)
@@ -309,25 +336,35 @@ case class BroadcastIndexJoinExec(
             (geometry.getFactory.toGeometry(envelope), row)
           }
         })
-      case _ =>
+      case _ if geographyShape =>
         streamResultsRaw.map(row => {
-          val serializedObject = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
-          if (serializedObject == null) {
+          val serialized = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
+          if (serialized == null) {
             (null, row)
           } else {
-            val shape = if (isRasterPredicate) {
-              if (boundStreamShape.dataType.isInstanceOf[RasterUDT]) {
-                val raster = RasterSerializer.deserialize(serializedObject)
-                JoinedGeometryRaster.rasterToWGS84Envelope(raster)
-              } else {
-                val geom = GeometrySerializer.deserialize(serializedObject)
-                JoinedGeometryRaster.geometryToWGS84Envelope(geom)
-              }
-            } else {
-              GeometrySerializer.deserialize(serializedObject)
-            }
+            val geog = GeographyWKBSerializer.deserialize(serialized)
+            val shape = JoinedGeometry.geographyToEnvelopeGeometry(geog)
+            shape.setUserData(GeographyJoinShape(geog, row))
             (shape, row)
           }
+        })
+      case _ =>
+        streamResultsRaw.map(row => {
+          val shape = if (isRasterPredicate) {
+            // Raster path keeps the legacy bytes-only handling — Box2D doesn't apply here.
+            val serializedObject = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
+            if (serializedObject == null) null
+            else if (boundStreamShape.dataType.isInstanceOf[RasterUDT]) {
+              val raster = RasterSerializer.deserialize(serializedObject)
+              JoinedGeometryRaster.rasterToWGS84Envelope(raster)
+            } else {
+              val geom = GeometrySerializer.deserialize(serializedObject)
+              JoinedGeometryRaster.geometryToWGS84Envelope(geom)
+            }
+          } else {
+            TraitJoinQueryBase.shapeToGeometry(boundStreamShape, row)
+          }
+          (shape, row)
         })
     }
   }
@@ -335,4 +372,78 @@ case class BroadcastIndexJoinExec(
   protected def withNewChildrenInternal(newLeft: SparkPlan, newRight: SparkPlan): SparkPlan = {
     copy(left = newLeft, right = newRight)
   }
+}
+
+/**
+ * Per-iter helper that decides whether a candidate from the broadcast index actually satisfies
+ * the spatial predicate, and unpacks the candidate's `userData` into the output row.
+ *
+ * Three implementations: `JtsRefiner` for the planar JTS path, `GeographyRelationRefiner` for
+ * non-distance Geography predicates (CONTAINS, WITHIN, INTERSECTS, EQUALS), and
+ * `GeographyDistanceRefiner` for ST_DWithin on Geography.
+ */
+private sealed trait JoinRefiner {
+  def matches(candidate: Geometry, streamShape: Geometry): Boolean
+  def unpackRow(candidate: Geometry): UnsafeRow
+}
+
+private final class JtsRefiner(evaluator: SpatialPredicateEvaluator) extends JoinRefiner {
+  private val factory = new PreparedGeometryFactory()
+  private val preparedGeometries = new mutable.HashMap[Geometry, PreparedGeometry]
+  override def matches(candidate: Geometry, streamShape: Geometry): Boolean =
+    evaluator.eval(
+      preparedGeometries.getOrElseUpdate(candidate, factory.create(candidate)),
+      streamShape)
+  override def unpackRow(candidate: Geometry): UnsafeRow =
+    candidate.getUserData.asInstanceOf[UnsafeRow]
+}
+
+/**
+ * Refines candidates with the appropriate `org.apache.sedona.common.geography.Functions`
+ * predicate (CONTAINS / WITHIN / INTERSECTS / EQUALS). Caching of the per-Geography S2 ShapeIndex
+ * happens inside `WKBGeography.getShapeIndexGeography()`, so we do not need a JTS-style
+ * PreparedGeometry cache here — the build side keeps the same Geography JVM instances for the
+ * lifetime of the broadcast. `swap` flips operand order when the build side does not correspond
+ * to the predicate's left-hand argument (handles the `RIGHT JOIN` / right-broadcast case for
+ * asymmetric predicates).
+ */
+private final class GeographyRelationRefiner(predicate: SpatialPredicate, swap: Boolean)
+    extends JoinRefiner {
+  override def matches(candidate: Geometry, streamShape: Geometry): Boolean = {
+    val buildShape = candidate.getUserData.asInstanceOf[GeographyJoinShape]
+    val streamShapeData = streamShape.getUserData.asInstanceOf[GeographyJoinShape]
+    val (a, b) =
+      if (swap) (streamShapeData.geog, buildShape.geog)
+      else (buildShape.geog, streamShapeData.geog)
+    predicate match {
+      case SpatialPredicate.CONTAINS => GeographyFunctions.contains(a, b)
+      case SpatialPredicate.WITHIN => GeographyFunctions.within(a, b)
+      case SpatialPredicate.INTERSECTS => GeographyFunctions.intersects(a, b)
+      case SpatialPredicate.EQUALS => GeographyFunctions.equals(a, b)
+      case other =>
+        throw new UnsupportedOperationException(
+          s"Geography broadcast spatial join does not support predicate $other")
+    }
+  }
+
+  override def unpackRow(candidate: Geometry): UnsafeRow =
+    candidate.getUserData.asInstanceOf[GeographyJoinShape].row
+}
+
+/**
+ * Refines candidates for ST_DWithin on Geography. The per-row distance threshold is carried on
+ * the stream-side `GeographyJoinShape.radius`, populated when the stream shape is built.
+ */
+private final class GeographyDistanceRefiner(swap: Boolean) extends JoinRefiner {
+  override def matches(candidate: Geometry, streamShape: Geometry): Boolean = {
+    val buildShape = candidate.getUserData.asInstanceOf[GeographyJoinShape]
+    val streamShapeData = streamShape.getUserData.asInstanceOf[GeographyJoinShape]
+    val (a, b) =
+      if (swap) (streamShapeData.geog, buildShape.geog)
+      else (buildShape.geog, streamShapeData.geog)
+    GeographyFunctions.dWithin(a, b, streamShapeData.radius)
+  }
+
+  override def unpackRow(candidate: Geometry): UnsafeRow =
+    candidate.getUserData.asInstanceOf[GeographyJoinShape].row
 }

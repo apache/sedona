@@ -21,8 +21,10 @@ package org.apache.sedona.common.raster;
 import java.awt.geom.Point2D;
 import java.awt.image.RenderedImage;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Set;
 import org.apache.sedona.common.utils.RasterUtils;
+import org.datasyslab.proj4sedona.core.Proj;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.ReferenceIdentifier;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
@@ -31,12 +33,14 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.geotools.referencing.wkt.Formattable;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
 public class RasterAccessors {
+
   public static int srid(GridCoverage2D raster) throws FactoryException {
     CoordinateReferenceSystem crs = raster.getCoordinateReferenceSystem();
     if (crs instanceof DefaultEngineeringCRS) {
@@ -358,5 +362,102 @@ public class RasterAccessors {
         (int) meta[9],
         (int) meta[10],
         (int) meta[11]);
+  }
+
+  /**
+   * Returns the CRS of a raster as PROJJSON string.
+   *
+   * @param raster The input raster.
+   * @return The CRS definition as PROJJSON string, or null if no CRS is set.
+   */
+  public static String crs(GridCoverage2D raster) {
+    return crs(raster, "projjson");
+  }
+
+  /**
+   * Returns the CRS of a raster in the specified format.
+   *
+   * @param raster The input raster.
+   * @param format The desired output format: "projjson", "wkt2", "wkt1", or "proj".
+   * @return The CRS definition string in the requested format, or null if no CRS is set.
+   */
+  public static String crs(GridCoverage2D raster, String format) {
+    String fmt;
+    if (format == null || format.trim().isEmpty()) {
+      fmt = "projjson";
+    } else {
+      fmt = format.toLowerCase(Locale.ROOT).trim();
+    }
+    CoordinateReferenceSystem crsDef = raster.getCoordinateReferenceSystem();
+    if (crsDef instanceof DefaultEngineeringCRS) {
+      if (((DefaultEngineeringCRS) crsDef).isWildcard()) {
+        return null;
+      }
+    }
+
+    // Get WKT1 representation from GeoTools (native, no conversion needed)
+    String wkt1;
+    if (crsDef instanceof Formattable) {
+      wkt1 = ((Formattable) crsDef).toWKT(2, false);
+    } else {
+      wkt1 = crsDef.toWKT();
+    }
+
+    if ("wkt1".equals(fmt) || "wkt".equals(fmt)) {
+      return wkt1;
+    }
+
+    // For all other formats, convert through proj4sedona.
+    // Prefer EPSG SRID when available: GeoTools WKT1 projection names (e.g. Mercator_2SP)
+    // may not be recognized by proj4sedona, but EPSG codes always work.
+    try {
+      Proj proj;
+      int srid = srid(raster);
+      if (srid > 0) {
+        try {
+          proj = new Proj("EPSG:" + srid);
+        } catch (Exception e) {
+          // EPSG code not recognized by proj4sedona, fall back to WKT1
+          proj = createProjFromWkt1(wkt1);
+        }
+      } else {
+        proj = createProjFromWkt1(wkt1);
+      }
+      switch (fmt) {
+        case "projjson":
+          return proj.toProjJson();
+        case "wkt2":
+          return proj.toWkt2();
+        case "proj":
+        case "proj4":
+          return proj.toProjString();
+        default:
+          throw new IllegalArgumentException(
+              "Unsupported CRS format: '"
+                  + format
+                  + "'. Supported formats: projjson, wkt2, wkt1, proj");
+      }
+    } catch (IllegalArgumentException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Failed to convert CRS to format '" + format + "': " + e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Create a Proj object from GeoTools WKT1, with normalization fallback for projection names that
+   * proj4sedona does not recognize (e.g. Mercator_2SP).
+   */
+  private static Proj createProjFromWkt1(String wkt1) {
+    try {
+      return new Proj(wkt1);
+    } catch (Exception wktError) {
+      String normalized = CrsNormalization.normalizeWkt1ForProj4sedona(wkt1);
+      if (!normalized.equals(wkt1)) {
+        return new Proj(normalized);
+      }
+      throw wktError;
+    }
   }
 }

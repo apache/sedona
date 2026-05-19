@@ -19,6 +19,8 @@
 
 This page explains the basic concepts of Affine Transformation in Sedona Raster.
 
+![Raster_Affine_Transformation](../../image/Raster_Affine_Transformation/Raster_Affine_Transformation.svg "Raster Affine Transformation")
+
 ## Affine Transformations
 
 Affine transformations are a fundamental concept in computer graphics, geometry, and image processing that involve manipulating an object in a way that preserves lines and parallelism (but not necessarily distances and angles). These transformations are linear transformations followed by a translation, which means they can translate, scale, rotate, and shear objects without altering the relative arrangement of points, lines, or planes.

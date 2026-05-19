@@ -17,6 +17,7 @@
 import os
 import shutil
 import tempfile
+import warnings
 import pytest
 import numpy as np
 import pandas as pd
@@ -291,7 +292,13 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_m(self):
-        pass
+        # M coordinate is not well supported in Shapely/geopandas
+        # so we just check that ST_M returns NaN for standard 2D/3D points
+        sgpd_result = GeoSeries(self.points).m
+        assert isinstance(sgpd_result, ps.Series)
+        # Standard 2D/3D points have no M, should be NaN
+        expected = pd.Series([np.nan] * len(self.points))
+        self.check_pd_series_equal(sgpd_result, expected)
 
     def test_from_file(self):
         pass
@@ -488,6 +495,20 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
     def test_clip(self):
         pass
 
+    def test_clip_by_rect(self):
+        # Use rect (0.3, 0.3, 1.7, 1.7) so no test-geometry vertex or hole
+        # coordinate (0, 0.1, 0.2, 1, 2, …) lands on a rectangle boundary.
+        # This avoids boundary-handling differences between JTS and GEOS.
+        for geom in self.geoms:
+            # JTS throws TopologyException on invalid geometries (e.g.
+            # self-intersecting polygons) during ST_Intersection, while
+            # GEOS handles them gracefully.
+            if not gpd.GeoSeries(geom).is_valid.all():
+                continue
+            sgpd_result = GeoSeries(geom).clip_by_rect(0.3, 0.3, 1.7, 1.7)
+            gpd_result = gpd.GeoSeries(geom).clip_by_rect(0.3, 0.3, 1.7, 1.7)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_geom_type(self):
         for geom in self.geoms:
             # Sedona converts it to LineString, so the outputs will be different
@@ -498,7 +519,13 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_type(self):
-        pass
+        for geom in self.geoms:
+            # Sedona converts LinearRing to LineString
+            if isinstance(geom[0], LinearRing):
+                continue
+            sgpd_result = GeoSeries(geom).type
+            gpd_result = gpd.GeoSeries(geom).type
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_length(self):
         for geom in self.geoms:
@@ -549,13 +576,22 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_count_coordinates(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).count_coordinates()
+            gpd_result = gpd.GeoSeries(geom).count_coordinates()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_count_geometries(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).count_geometries()
+            gpd_result = gpd.GeoSeries(geom).count_geometries()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_count_interior_rings(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).count_interior_rings()
+            gpd_result = gpd.GeoSeries(geom).count_interior_rings()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_dwithin(self):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
@@ -723,7 +759,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_concave_hull(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).concave_hull(ratio=0.5)
+            gpd_result = gpd.GeoSeries(geom).concave_hull(ratio=0.5)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_convex_hull(self):
         for geom in self.geoms:
@@ -737,10 +776,20 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_delaunay_triangles(self):
-        pass
+        # Sedona ST_DelaunayTriangles is element-wise (returns a GeometryCollection
+        # per input geometry), while geopandas operates on all points across the
+        # GeoSeries as a single set. Cannot compare directly.
+        for geom in self.geoms:
+            result = GeoSeries(geom).delaunay_triangles()
+            assert len(result) == len(geom)
 
     def test_voronoi_polygons(self):
-        pass
+        # Sedona ST_VoronoiPolygons is element-wise, while geopandas operates on
+        # all points across the GeoSeries as a single set. Cannot compare directly.
+        for geom in self.geoms:
+            result = GeoSeries(geom).voronoi_polygons()
+            collected = result.to_geopandas()
+            assert len(collected) == len(geom)
 
     def test_envelope(self):
         for geom in self.geoms:
@@ -749,28 +798,73 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_minimum_rotated_rectangle(self):
-        pass
+        # Sedona (ST_OrientedEnvelope) and geopandas may return different
+        # but geometrically valid oriented envelopes, so we compare areas.
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).minimum_rotated_rectangle()
+            gpd_result = gpd.GeoSeries(geom).minimum_rotated_rectangle()
+            sgpd_gdf = sgpd_result.to_geopandas()
+            for a, e in zip(sgpd_gdf, gpd_result):
+                if (a is None or a.is_empty) and (e is None or e.is_empty):
+                    continue
+                assert (
+                    abs(a.area - e.area) < 1e-6
+                ), f"area mismatch: {a.area} vs {e.area}"
 
     def test_exterior(self):
-        pass
+        for geom in [self.polygons, self.multipolygons]:
+            sgpd_result = GeoSeries(geom).exterior
+            gpd_result = gpd.GeoSeries(geom).exterior
+            # Sedona returns LINESTRING, geopandas returns LINEARRING;
+            # compare coordinates instead of geometry type.
+            sgpd_gdf = sgpd_result.to_geopandas()
+            for a, e in zip(sgpd_gdf, gpd_result):
+                if (a is None or a.is_empty) and (e is None or e.is_empty):
+                    continue
+                assert list(a.coords) == list(
+                    e.coords
+                ), f"exterior coords mismatch: {a} vs {e}"
 
     def test_extract_unique_points(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).extract_unique_points()
+            gpd_result = gpd.GeoSeries(geom).extract_unique_points()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_offset_curve(self):
-        pass
+        for geom in self.geoms:
+            # offset_curve only works on linear geometries
+            if not all(
+                isinstance(g, (LineString, LinearRing, MultiLineString))
+                for g in geom
+                if not g.is_empty
+            ):
+                continue
+            sgpd_result = GeoSeries(geom).offset_curve(1.0)
+            gpd_result = gpd.GeoSeries(geom).offset_curve(1.0)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+            sgpd_result = GeoSeries(geom).offset_curve(-0.5)
+            gpd_result = gpd.GeoSeries(geom).offset_curve(-0.5)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_interiors(self):
         pass
 
     def test_remove_repeated_points(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).remove_repeated_points()
+            gpd_result = gpd.GeoSeries(geom).remove_repeated_points()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_set_precision(self):
         pass
 
     def test_representative_point(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).representative_point()
+            gpd_result = gpd.GeoSeries(geom).representative_point()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_minimum_bounding_circle(self):
         for geom in self.geoms:
@@ -785,10 +879,16 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_minimum_clearance(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).minimum_clearance()
+            gpd_result = gpd.GeoSeries(geom).minimum_clearance()
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_normalize(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).normalize()
+            gpd_result = gpd.GeoSeries(geom).normalize()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_make_valid(self):
         import shapely
@@ -818,7 +918,10 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             GeoSeries([Point(0, 0)]).make_valid(method="linework")
 
     def test_reverse(self):
-        pass
+        for geom in self.geoms:
+            sgpd_result = GeoSeries(geom).reverse()
+            gpd_result = gpd.GeoSeries(geom).reverse()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     @pytest.mark.skipif(
         parse_version(gpd.__version__) < parse_version("0.14.0"),
@@ -878,13 +981,86 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         self.check_sgpd_equals_gpd(sgpd_3d, gpd_3d)
 
     def test_force_3d(self):
-        pass
+        # force_3d was added from geopandas 1.0.0
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas force_3d requires version 1.0.0 or higher")
+        # 1) Promote 2D to 3D with z = 4
+        for geom in self.geoms:
+            if isinstance(geom[0], (LinearRing)):
+                continue
+            sgpd_result = GeoSeries(geom).force_3d(4)
+            gpd_result = gpd.GeoSeries(geom).force_3d(4)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # 2) Minimal sample for various geometry types with custom z=7.5
+        data = [
+            Point(1, 2),  # 2D
+            Point(0.5, 2.5, 2),  # 3D (Z)
+            LineString([(1, 1), (0, 1), (1, 0)]),  # 2D
+            Polygon([(0, 0), (0, 10), (10, 10)]),  # 2D
+        ]
+        sgpd_result = GeoSeries(data).force_3d(7.5)
+        gpd_result = gpd.GeoSeries(data).force_3d(7.5)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # 3) Array-like z tests
+        geoms = self.polygons
+        lst = list(range(1, len(geoms) + 1))
+
+        # Traditional python list
+        sgpd_result = GeoSeries(geoms).force_3d(lst)
+        gpd_result = gpd.GeoSeries(geoms).force_3d(lst)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # numpy array
+        np_array = np.array(lst)
+        sgpd_result = GeoSeries(geoms).force_3d(np_array)
+        gpd_result = gpd.GeoSeries(geoms).force_3d(np_array)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # pandas-on-Spark Series
+        psser = ps.Series(lst)
+        sgpd_result = GeoSeries(geoms).force_3d(psser)
+        gpd_result = gpd.GeoSeries(geoms).force_3d(psser.to_pandas())
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_line_merge(self):
-        pass
+        for geom in [self.multilinestrings]:
+            sgpd_result = GeoSeries(geom).line_merge()
+            gpd_result = gpd.GeoSeries(geom).line_merge()
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_build_area(self):
+        # build_area is aggregate: use linestrings forming a triangle
+        geom = [
+            LineString([(0, 0), (1, 0)]),
+            LineString([(1, 0), (0.5, 1)]),
+            LineString([(0.5, 1), (0, 0)]),
+        ]
+        sgpd_result = GeoSeries(geom).build_area()
+        gpd_result = gpd.GeoSeries(geom).build_area()
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_polygonize(self):
+        # polygonize is aggregate: use linestrings forming a closed ring
+        geom = [
+            LineString([(0, 0), (1, 0)]),
+            LineString([(1, 0), (0.5, 1)]),
+            LineString([(0.5, 1), (0, 0)]),
+        ]
+        sgpd_result = GeoSeries(geom).polygonize()
+        gpd_result = gpd.GeoSeries(geom).polygonize()
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_unary_union(self):
-        pass
+        lst = [g for geom in self.geoms for g in geom if g.is_valid]
+        with pytest.warns(FutureWarning, match="unary_union"):
+            sgpd_result = GeoSeries(lst).unary_union
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", FutureWarning)
+            gpd_result = gpd.GeoSeries(lst).unary_union
+        self.check_geom_equals(sgpd_result, gpd_result)
 
     def test_union_all(self):
         if parse_version(gpd.__version__) < parse_version("1.1.0"):
@@ -934,7 +1110,17 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_disjoint(self):
-        pass
+        for geom, geom2 in self.pairs:
+            sgpd_result = GeoSeries(geom).disjoint(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).disjoint(gpd.GeoSeries(geom2), align=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).disjoint(GeoSeries(geom2), align=False)
+                gpd_result = gpd.GeoSeries(geom).disjoint(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_intersects(self):
         for geom, geom2 in self.pairs:
@@ -1015,6 +1201,23 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 gpd.GeoSeries(geom2), tol, align=align
             )
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_shortest_line(self):
+        for geom, geom2 in self.pairs:
+            if self.contains_any_geom_collection(geom, geom2):
+                continue
+            sgpd_result = GeoSeries(geom).shortest_line(GeoSeries(geom2))
+            gpd_result = gpd.GeoSeries(geom).shortest_line(gpd.GeoSeries(geom2))
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).shortest_line(
+                    GeoSeries(geom2), align=False
+                )
+                gpd_result = gpd.GeoSeries(geom).shortest_line(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_intersection_all(self):
         pass
@@ -1137,7 +1340,25 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_contains_properly(self):
-        pass
+        for geom, geom2 in self.pairs:
+            if geom == geom2 or self.contains_any_geom_collection(geom, geom2):
+                continue
+            sgpd_result = GeoSeries(geom).contains_properly(
+                GeoSeries(geom2), align=True
+            )
+            gpd_result = gpd.GeoSeries(geom).contains_properly(
+                gpd.GeoSeries(geom2), align=True
+            )
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).contains_properly(
+                    GeoSeries(geom2), align=False
+                )
+                gpd_result = gpd.GeoSeries(geom).contains_properly(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_relate(self):
         for geom, geom2 in self.pairs:
@@ -1151,6 +1372,103 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                     gpd.GeoSeries(geom2), align=False
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_relate_pattern(self):
+        for geom, geom2 in self.pairs:
+            for pattern in ["T********", "T*F**FFF*", "FF*FF****"]:
+                sgpd_result = GeoSeries(geom).relate_pattern(
+                    GeoSeries(geom2), pattern, align=True
+                )
+                gpd_result = gpd.GeoSeries(geom).relate_pattern(
+                    gpd.GeoSeries(geom2), pattern, align=True
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+                if len(geom) == len(geom2):
+                    sgpd_result = GeoSeries(geom).relate_pattern(
+                        GeoSeries(geom2), pattern, align=False
+                    )
+                    gpd_result = gpd.GeoSeries(geom).relate_pattern(
+                        gpd.GeoSeries(geom2), pattern, align=False
+                    )
+                    self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_frechet_distance(self):
+        line_pairs = [
+            (self.linestrings, self.linestrings),
+            (self.linearrings, self.linearrings),
+            (self.linestrings, self.linearrings),
+        ]
+        for geom, geom2 in line_pairs:
+            sgpd_result = GeoSeries(geom).frechet_distance(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).frechet_distance(
+                gpd.GeoSeries(geom2), align=True
+            )
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).frechet_distance(
+                    GeoSeries(geom2), align=False
+                )
+                gpd_result = gpd.GeoSeries(geom).frechet_distance(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_hausdorff_distance(self):
+        for geom, geom2 in self.pairs:
+            sgpd_result = GeoSeries(geom).hausdorff_distance(
+                GeoSeries(geom2), align=True
+            )
+            gpd_result = gpd.GeoSeries(geom).hausdorff_distance(
+                gpd.GeoSeries(geom2), align=True
+            )
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).hausdorff_distance(
+                    GeoSeries(geom2), align=False
+                )
+                gpd_result = gpd.GeoSeries(geom).hausdorff_distance(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_geom_equals(self):
+        for geom, geom2 in self.pairs:
+            sgpd_result = GeoSeries(geom).geom_equals(GeoSeries(geom2), align=True)
+            gpd_result = gpd.GeoSeries(geom).geom_equals(
+                gpd.GeoSeries(geom2), align=True
+            )
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            if len(geom) == len(geom2):
+                sgpd_result = GeoSeries(geom).geom_equals(GeoSeries(geom2), align=False)
+                gpd_result = gpd.GeoSeries(geom).geom_equals(
+                    gpd.GeoSeries(geom2), align=False
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_interpolate(self):
+        for geom in [self.linestrings, self.linearrings]:
+            sgpd_result = GeoSeries(geom).interpolate(1.0)
+            gpd_result = gpd.GeoSeries(geom).interpolate(1.0)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+            sgpd_result = GeoSeries(geom).interpolate(0.5, normalized=True)
+            gpd_result = gpd.GeoSeries(geom).interpolate(0.5, normalized=True)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_project(self):
+        for geom in [self.linestrings, self.linearrings]:
+            point = Point(1, 1)
+            sgpd_result = GeoSeries(geom).project(point)
+            gpd_result = gpd.GeoSeries(geom).project(point)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
+
+            sgpd_result = GeoSeries(geom).project(point, normalized=True)
+            gpd_result = gpd.GeoSeries(geom).project(point, normalized=True)
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_set_crs(self):
         for geom in self.geoms:

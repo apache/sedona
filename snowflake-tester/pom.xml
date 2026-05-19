@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.sedona</groupId>
         <artifactId>sedona-parent</artifactId>
-        <version>1.8.1-SNAPSHOT</version>
+        <version>1.9.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -32,7 +32,7 @@
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A cluster computing system for processing large-scale spatial data: Snowflake tester programs.</description>
-    <url>http://sedona.apache.org/</url>
+    <url>https://sedona.apache.org/</url>
 
     <properties>
         <maven.deploy.skip>${skip.deploy.common.modules}</maven.deploy.skip>
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>net.snowflake</groupId>
             <artifactId>snowflake-jdbc</artifactId>
-            <version>3.23.1</version>
+            <version>3.28.0</version>
         </dependency>
     </dependencies>
 </project>

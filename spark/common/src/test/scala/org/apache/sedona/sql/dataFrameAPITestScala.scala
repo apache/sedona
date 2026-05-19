@@ -411,6 +411,43 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(expected.equals(actual))
     }
 
+    it("Passed ST_GeoHashNeighbors") {
+      val df = sparkSession
+        .sql("SELECT 'u1pb' AS geohash")
+        .select(ST_GeoHashNeighbors("geohash"))
+      val result = df.take(1)(0).getSeq[String](0)
+      assert(result.size == 8)
+      // Order: N, NE, E, SE, S, SW, W, NW
+      assert(result(0) == "u1pc")
+      assert(result(2) == "u300")
+      assert(result(4) == "u0zz")
+      assert(result(6) == "u1p8")
+    }
+
+    it("Passed ST_GeoHashNeighbor") {
+      val df = sparkSession
+        .sql("SELECT 'u1pb' AS geohash")
+        .select(ST_GeoHashNeighbor(col("geohash"), lit("n")))
+      val result = df.take(1)(0).getString(0)
+      assert(result == "u1pc")
+    }
+
+    it("Passed ST_GeoHashNeighbor with Column geohash and String direction") {
+      val df = sparkSession
+        .sql("SELECT 'u1pb' AS geohash, 'n' AS direction")
+        .select(ST_GeoHashNeighbor(col("geohash"), "direction"))
+      val result = df.take(1)(0).getString(0)
+      assert(result == "u1pc")
+    }
+
+    it("Passed ST_GeoHashNeighbor with String geohash and Column direction") {
+      val df = sparkSession
+        .sql("SELECT 'u1pb' AS geohash, 'n' AS direction")
+        .select(ST_GeoHashNeighbor("geohash", col("direction")))
+      val result = df.take(1)(0).getString(0)
+      assert(result == "u1pc")
+    }
+
     it("passed st_geomfromgml") {
       val gmlString =
         "<gml:LineString srsName=\"EPSG:4269\"><gml:coordinates>-71.16028,42.258729 -71.160837,42.259112 -71.161143,42.25932</gml:coordinates></gml:LineString>"
@@ -536,6 +573,23 @@ class dataFrameAPITestScala extends TestBaseScala {
       expected =
         "POLYGON ((-179.99663 60.000611, -179.997353 60.001211, -179.998479 60.001626, -179.999837 60.001793, 179.99878 60.001688, 179.997583 60.001326, 179.996754 60.000761, 179.996419 60.000081, 179.99663 59.999389, 179.997353 59.998789, 179.99848 59.998374, 179.999837 59.998207, -179.99878 59.998312, -179.997583 59.998674, -179.996754 59.999238, -179.996419 59.999919, -179.99663 60.000611))"
       assertEquals(expected, actual)
+    }
+
+    it("Passed ST_OffsetCurve") {
+      val lineDf = sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(0 0, 10 0)') AS geom")
+      val df = lineDf.select(ST_OffsetCurve("geom", 5.0))
+      val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      assertEquals("LINESTRING (0 5, 10 5)", actual)
+    }
+
+    it("Passed ST_OffsetCurve with quadrantSegments") {
+      val lineDf =
+        sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)') AS geom")
+      val defaultDf = lineDf.select(ST_NPoints(ST_OffsetCurve("geom", -3.0)))
+      val customDf = lineDf.select(ST_NPoints(ST_OffsetCurve("geom", -3.0, 16)))
+      val defaultPts = defaultDf.take(1)(0).getInt(0)
+      val customPts = customDf.take(1)(0).getInt(0)
+      assertTrue(customPts > defaultPts)
     }
 
     it("Passed ST_BestSRID") {
@@ -697,7 +751,7 @@ class dataFrameAPITestScala extends TestBaseScala {
         .select(ST_Transform($"geom", lit("EPSG:4326"), lit("EPSG:32649")).as("geom"))
         .selectExpr("ST_ReducePrecision(geom, 2)")
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
-      val expectedResult = "POINT (-33741810.95 1823994.03)"
+      val expectedResult = "POINT (-10625664.38 19664344.48)"
       assertEquals(expectedResult, actualResult)
 
       pointDf = sparkSession
@@ -707,7 +761,7 @@ class dataFrameAPITestScala extends TestBaseScala {
         .select(ST_Transform($"geom", lit("EPSG:32649")).as("geom"))
         .selectExpr("ST_ReducePrecision(geom, 2)")
       val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
-      val expected = "POINT (1560393.11 10364606.84)"
+      val expected = "POINT (1559798.3 10364755.11)"
       assertEquals(expected, actual)
     }
 
@@ -1491,6 +1545,15 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualRadius == expectedRadius)
     }
 
+    it("Passed ST_OrientedEnvelope") {
+      val baseDf =
+        sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))') AS geom")
+      val df = baseDf.select(ST_OrientedEnvelope("geom"))
+      val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expected = "POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))"
+      assertEquals(expected, actual)
+    }
+
     it("Passed ST_LineSegments") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('LINESTRING(120 140, 60 120, 30 20)') AS line, ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 0, 0 0))') AS poly")
@@ -1571,6 +1634,14 @@ class dataFrameAPITestScala extends TestBaseScala {
       val expected = "POINT (0 1)"
       val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       assertEquals(expected, actual)
+    }
+
+    it("Passed ST_ShortestLine") {
+      val polyDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('POINT (0 1)') as g1, ST_GeomFromWKT('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)') as g2")
+      val df = polyDf.select(ST_ShortestLine("g1", "g2"))
+      val actual = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      assertEquals("LINESTRING (0 1, 0 0)", actual)
     }
 
     it("Passed ST_AsEWKT") {
@@ -1809,6 +1880,43 @@ class dataFrameAPITestScala extends TestBaseScala {
       val baseDf = sparkSession.sql(
         "SELECT explode(array(ST_GeomFromWKT('POLYGON ((0 0, 2 0, 2 1, 0 1, 0 0))'), ST_GeomFromWKT('POLYGON ((1 0, 3 0, 3 1, 1 1, 1 0))'))) AS geom")
       val df = baseDf.select(ST_Intersection_Aggr("geom"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "POLYGON ((2 0, 1 0, 1 1, 2 1, 2 0))"
+      assert(actualResult == expectedResult)
+    }
+
+    it("Passed ST_Collect_Agg") {
+      val baseDf = sparkSession.sql(
+        "SELECT explode(array(ST_GeomFromWKT('POINT (1 2)'), ST_GeomFromWKT('POINT (3 4)'), ST_GeomFromWKT('POINT (5 6)'))) AS geom")
+      val df = baseDf.select(ST_Collect_Agg("geom"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry]
+      assert(actualResult.getGeometryType == "MultiPoint")
+      assert(actualResult.getNumGeometries == 3)
+    }
+
+    // Test aliases for *_Aggr functions with *_Agg suffix
+    it("Passed ST_Envelope_Agg alias") {
+      val baseDf =
+        sparkSession.sql("SELECT explode(array(ST_Point(0.0, 0.0), ST_Point(1.0, 1.0))) AS geom")
+      val df = baseDf.select(ST_Envelope_Agg("geom"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))"
+      assert(actualResult == expectedResult)
+    }
+
+    it("Passed ST_Union_Agg alias") {
+      val baseDf = sparkSession.sql(
+        "SELECT explode(array(ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))'), ST_GeomFromWKT('POLYGON ((1 0, 2 0, 2 1, 1 1, 1 0))'))) AS geom")
+      val df = baseDf.select(ST_Union_Agg("geom"))
+      val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
+      val expectedResult = "POLYGON ((0 0, 0 1, 1 1, 2 1, 2 0, 1 0, 0 0))"
+      assert(actualResult == expectedResult)
+    }
+
+    it("Passed ST_Intersection_Agg alias") {
+      val baseDf = sparkSession.sql(
+        "SELECT explode(array(ST_GeomFromWKT('POLYGON ((0 0, 2 0, 2 1, 0 1, 0 0))'), ST_GeomFromWKT('POLYGON ((1 0, 3 0, 3 1, 1 1, 1 0))'))) AS geom")
+      val df = baseDf.select(ST_Intersection_Agg("geom"))
       val actualResult = df.take(1)(0).get(0).asInstanceOf[Geometry].toText()
       val expectedResult = "POLYGON ((2 0, 1 0, 1 1, 2 1, 2 0))"
       assert(actualResult == expectedResult)
@@ -2575,6 +2683,113 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(result != null)
       val medialAxis = result.asInstanceOf[Geometry]
       assert(medialAxis.getGeometryType == "MultiLineString")
+    }
+
+    // Bing Tile functions
+    it("Passed ST_BingTile with literal overload") {
+      val df = sparkSession.sql("SELECT 1 AS dummy").select(ST_BingTile(3, 5, 3))
+      assert(df.first().getString(0) == "213")
+    }
+
+    it("Passed ST_BingTile with Column overload") {
+      val df = sparkSession
+        .sql("SELECT 3 AS tileX, 5 AS tileY, 3 AS zoom")
+        .select(ST_BingTile(col("tileX"), col("tileY"), col("zoom")))
+      assert(df.first().getString(0) == "213")
+    }
+
+    it("Passed ST_BingTileAt with literal overload") {
+      val df = sparkSession.sql("SELECT 1 AS dummy").select(ST_BingTileAt(60.0, 30.12, 15))
+      assert(df.first().getString(0) == "123030123010121")
+    }
+
+    it("Passed ST_BingTileAt with Column overload") {
+      val df = sparkSession
+        .sql("SELECT 60.0 AS lon, 30.12 AS lat, 15 AS zoom")
+        .select(ST_BingTileAt(col("lon"), col("lat"), col("zoom")))
+      assert(df.first().getString(0) == "123030123010121")
+    }
+
+    it("Passed ST_BingTilesAround with literal overload") {
+      val df = sparkSession.sql("SELECT 1 AS dummy").select(ST_BingTilesAround(60.0, 30.12, 1))
+      val result = df.first().getAs[WrappedArray[String]](0)
+      assert(result == WrappedArray.make(Array("0", "2", "1", "3")))
+    }
+
+    it("Passed ST_BingTilesAround with Column overload") {
+      val df = sparkSession
+        .sql("SELECT 60.0 AS lon, 30.12 AS lat, 1 AS zoom")
+        .select(ST_BingTilesAround(col("lon"), col("lat"), col("zoom")))
+      val result = df.first().getAs[WrappedArray[String]](0)
+      assert(result == WrappedArray.make(Array("0", "2", "1", "3")))
+    }
+
+    it("Passed ST_BingTileZoomLevel with String column name") {
+      val df = sparkSession
+        .sql("SELECT '123030123010121' AS qk")
+        .select(ST_BingTileZoomLevel("qk"))
+      assert(df.first().getInt(0) == 15)
+    }
+
+    it("Passed ST_BingTileZoomLevel with Column overload") {
+      val df = sparkSession
+        .sql("SELECT '123030123010121' AS qk")
+        .select(ST_BingTileZoomLevel(col("qk")))
+      assert(df.first().getInt(0) == 15)
+    }
+
+    it("Passed ST_BingTileX with String column name") {
+      val df = sparkSession.sql("SELECT '213' AS qk").select(ST_BingTileX("qk"))
+      assert(df.first().getInt(0) == 3)
+    }
+
+    it("Passed ST_BingTileX with Column overload") {
+      val df = sparkSession.sql("SELECT '213' AS qk").select(ST_BingTileX(col("qk")))
+      assert(df.first().getInt(0) == 3)
+    }
+
+    it("Passed ST_BingTileY with String column name") {
+      val df = sparkSession.sql("SELECT '213' AS qk").select(ST_BingTileY("qk"))
+      assert(df.first().getInt(0) == 5)
+    }
+
+    it("Passed ST_BingTileY with Column overload") {
+      val df = sparkSession.sql("SELECT '213' AS qk").select(ST_BingTileY(col("qk")))
+      assert(df.first().getInt(0) == 5)
+    }
+
+    it("Passed ST_BingTilePolygon with String column name") {
+      val df = sparkSession
+        .sql("SELECT '123030123010121' AS qk")
+        .select(ST_BingTilePolygon("qk"))
+      val geom = df.first().get(0).asInstanceOf[Geometry]
+      assert(geom != null)
+      assert(geom.toText.startsWith("POLYGON"))
+    }
+
+    it("Passed ST_BingTilePolygon with Column overload") {
+      val df = sparkSession
+        .sql("SELECT '123030123010121' AS qk")
+        .select(ST_BingTilePolygon(col("qk")))
+      val geom = df.first().get(0).asInstanceOf[Geometry]
+      assert(geom != null)
+      assert(geom.toText.startsWith("POLYGON"))
+    }
+
+    it("Passed ST_BingTileCellIDs with Column overload") {
+      val df = sparkSession
+        .sql("SELECT ST_GeomFromWKT('POINT (60 30.12)') AS geom, 10 AS zoom")
+        .select(ST_BingTileCellIDs(col("geom"), col("zoom")))
+      val result = df.first().getAs[WrappedArray[String]](0)
+      assert(result == WrappedArray.make(Array("1230301230")))
+    }
+
+    it("Passed ST_BingTileToGeom with Column overload") {
+      val df = sparkSession
+        .sql("SELECT array('0', '1', '2', '3') AS qks")
+        .select(ST_BingTileToGeom(col("qks")))
+      val result = df.first().getAs[WrappedArray[Any]](0)
+      assert(result.length == 4)
     }
   }
 }

@@ -94,7 +94,6 @@ You can verify the installation by running the following code in the notebook.
 ```python
 from sedona.spark import *
 
-
 sedona = SedonaContext.create(spark)
 
 

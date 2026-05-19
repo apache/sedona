@@ -164,6 +164,34 @@ class TestConstructors(TestBase):
         )
         assert polygon_df.count() == 8
 
+    def test_st_make_box_2d(self):
+        bbox_df = self.spark.sql(
+            "SELECT ST_MakeBox2D(ST_Point(1.0, 2.0), ST_Point(4.0, 5.0)) AS bbox"
+        )
+        bbox = bbox_df.first()[0]
+        assert bbox.xmin == 1.0
+        assert bbox.ymin == 2.0
+        assert bbox.xmax == 4.0
+        assert bbox.ymax == 5.0
+
+        # NULL right-hand input → NULL
+        null_df = self.spark.sql(
+            "SELECT ST_MakeBox2D(ST_Point(1.0, 2.0), ST_GeomFromText(NULL)) AS bbox"
+        )
+        assert null_df.first()[0] is None
+
+    def test_st_geom_from_box_2d(self):
+        df = self.spark.sql("""
+            SELECT
+              ST_AsText(ST_GeomFromBox2D(ST_MakeBox2D(ST_Point(1.0, 2.0), ST_Point(4.0, 5.0)))) AS poly,
+              ST_AsText(ST_GeomFromBox2D(ST_MakeBox2D(ST_Point(3.0, 3.0), ST_Point(3.0, 3.0)))) AS pt,
+              ST_AsText(ST_GeomFromBox2D(ST_MakeBox2D(ST_Point(1.0, 5.0), ST_Point(4.0, 5.0)))) AS line
+            """)
+        row = df.first()
+        assert row[0] == "POLYGON ((1 2, 1 5, 4 5, 4 2, 1 2))"
+        assert row[1] == "POINT (3 3)"
+        assert row[2] == "LINESTRING (1 5, 4 5)"
+
     def test_st_make_envelope(self):
         polygonDF = self.spark.sql(
             "select ST_MakeEnvelope(double(1.234),double(2.234),double(3.345),double(3.345), 1111) as geom"

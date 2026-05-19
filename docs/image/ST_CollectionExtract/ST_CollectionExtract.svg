@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowResult" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowA" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5" fill="#4a90d9" />
+    </marker>
+    <marker id="arrowGray" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5" fill="#999999" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_CollectionExtract</text>
+  <circle cx="92.86" cy="150.0" r="5" fill="#999999" stroke="#999999" stroke-width="1.5" />
+  <polyline points="155.71,212.86 250.0,118.57" fill="none" stroke="#999999" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4,3" />
+  <circle cx="155.71" cy="212.86" r="3" fill="#999999" />
+  <circle cx="250.0" cy="118.57" r="3" fill="#999999" />
+  <path d="M 281.43 212.86 L 407.14 212.86 L 407.14 87.14 L 281.43 87.14 L 281.43 212.86 Z" fill="rgba(153,153,153,0.1)" stroke="#999999" stroke-width="2.5" fill-rule="evenodd" stroke-dasharray="4,3" />
+  <path d="M 281.43 212.86 L 407.14 212.86 L 407.14 87.14 L 281.43 87.14 L 281.43 212.86 Z" fill="rgba(46,204,113,0.25)" stroke="#2ecc71" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Extracts a specific geometry type from a collection</text>
+  <rect x="84" y="255" width="12" height="12" rx="2" fill="#999999" stroke="#999999" stroke-width="1" />
+  <text x="100" y="266" font-size="13" fill="#333333">Input collection</text>
+  <rect x="242" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="258" y="266" font-size="13" fill="#333333">Extracted (type=3)</text>
+</svg>

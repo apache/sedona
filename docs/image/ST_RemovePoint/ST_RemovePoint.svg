@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowResult" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowA" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5" fill="#4a90d9" />
+    </marker>
+    <marker id="arrowGray" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5" fill="#999999" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_RemovePoint</text>
+  <polyline points="96.51,213.95 198.84,137.21 250.0,86.05 301.16,188.37 403.49,111.63" fill="none" stroke="#4a90d9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,3" />
+  <circle cx="96.51" cy="213.95" r="3" fill="#4a90d9" />
+  <circle cx="198.84" cy="137.21" r="3" fill="#4a90d9" />
+  <circle cx="250.0" cy="86.05" r="3" fill="#4a90d9" />
+  <circle cx="301.16" cy="188.37" r="3" fill="#4a90d9" />
+  <circle cx="403.49" cy="111.63" r="3" fill="#4a90d9" />
+  <polyline points="96.51,213.95 198.84,137.21 301.16,188.37 403.49,111.63" fill="none" stroke="#2ecc71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="96.51" cy="213.95" r="3" fill="#2ecc71" />
+  <circle cx="198.84" cy="137.21" r="3" fill="#2ecc71" />
+  <circle cx="301.16" cy="188.37" r="3" fill="#2ecc71" />
+  <circle cx="403.49" cy="111.63" r="3" fill="#2ecc71" />
+  <line x1="244.0" y1="80.05" x2="256.0" y2="92.05" stroke="#d94a4a" stroke-width="3" stroke-linecap="round" />
+  <line x1="256.0" y1="80.05" x2="244.0" y2="92.05" stroke="#d94a4a" stroke-width="3" stroke-linecap="round" />
+  <text x="260" y="78" font-size="13" fill="#d94a4a" font-weight="bold">removed</text>
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Removes a point from a LineString at the given index</text>
+  <rect x="133" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="149" y="266" font-size="13" fill="#333333">Input</text>
+  <rect x="203" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="219" y="266" font-size="13" fill="#333333">Result</text>
+  <rect x="281" y="255" width="12" height="12" rx="2" fill="#d94a4a" stroke="#d94a4a" stroke-width="1" />
+  <text x="297" y="266" font-size="13" fill="#333333">Removed</text>
+</svg>

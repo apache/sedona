@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.*;
 import org.apache.sedona.common.S2Geography.*;
 import org.apache.sedona.common.S2Geography.Geography;
-import org.apache.sedona.common.S2Geography.WKBReader;
 import org.apache.sedona.common.S2Geography.WKTReader;
 import org.apache.sedona.common.utils.GeoHashDecoder;
 import org.locationtech.jts.geom.*;
@@ -32,19 +31,56 @@ import org.locationtech.jts.io.ParseException;
 public class Constructors {
 
   public static Geography geogFromWKB(byte[] wkb) throws ParseException {
-    return new WKBReader().read(wkb);
+    int srid = extractSRIDFromEWKB(wkb);
+    return WKBGeography.fromWKB(wkb, srid);
   }
 
   public static Geography geogFromWKB(byte[] wkb, int SRID) throws ParseException {
-    Geography geog = geogFromWKB(wkb);
-    geog.setSRID(SRID);
-    return geog;
+    return WKBGeography.fromWKB(wkb, SRID);
+  }
+
+  /**
+   * Extract SRID from EWKB bytes if the SRID flag is set. Returns 0 if no SRID is embedded.
+   * Supports both little-endian (0x01) and big-endian (0x00) byte order.
+   */
+  private static int extractSRIDFromEWKB(byte[] wkb) {
+    if (wkb == null || wkb.length < 5) return 0;
+    boolean littleEndian = (wkb[0] == 0x01);
+    int typeInt;
+    if (littleEndian) {
+      typeInt =
+          (wkb[1] & 0xFF)
+              | ((wkb[2] & 0xFF) << 8)
+              | ((wkb[3] & 0xFF) << 16)
+              | ((wkb[4] & 0xFF) << 24);
+    } else {
+      typeInt =
+          ((wkb[1] & 0xFF) << 24)
+              | ((wkb[2] & 0xFF) << 16)
+              | ((wkb[3] & 0xFF) << 8)
+              | (wkb[4] & 0xFF);
+    }
+    boolean hasSRID = (typeInt & 0x20000000) != 0;
+    if (!hasSRID || wkb.length < 9) return 0;
+    if (littleEndian) {
+      return (wkb[5] & 0xFF)
+          | ((wkb[6] & 0xFF) << 8)
+          | ((wkb[7] & 0xFF) << 16)
+          | ((wkb[8] & 0xFF) << 24);
+    } else {
+      return ((wkb[5] & 0xFF) << 24)
+          | ((wkb[6] & 0xFF) << 16)
+          | ((wkb[7] & 0xFF) << 8)
+          | (wkb[8] & 0xFF);
+    }
   }
 
   public static Geography geogFromWKT(String wkt, int srid) throws ParseException {
-    Geography geog = new WKTReader().read(wkt);
-    geog.setSRID(srid);
-    return geog;
+    // Use S2Geography WKTReader for proper spherical normalization and error messages,
+    // then wrap in WKBGeography for WKB-based storage.
+    Geography s2Geog = new WKTReader().read(wkt);
+    s2Geog.setSRID(srid);
+    return WKBGeography.fromS2Geography(s2Geog);
   }
 
   public static Geography geogFromEWKT(String ewkt) throws ParseException {
@@ -85,6 +121,10 @@ public class Constructors {
   }
 
   public static Geometry geogToGeometry(Geography geography) {
+    if (geography == null) return null;
+    if (geography instanceof WKBGeography) {
+      return ((WKBGeography) geography).getJTSGeometry();
+    }
     GeometryFactory geometryFactory =
         new GeometryFactory(new PrecisionModel(), geography.getSRID());
     return geogToGeometry(geography, geometryFactory);
@@ -92,6 +132,9 @@ public class Constructors {
 
   public static Geometry geogToGeometry(Geography geography, GeometryFactory geometryFactory) {
     if (geography == null) return null;
+    if (geography instanceof WKBGeography) {
+      return ((WKBGeography) geography).getJTSGeometry();
+    }
     Geography.GeographyKind kind = Geography.GeographyKind.fromKind(geography.getKind());
     switch (kind) {
       case SINGLEPOINT:
@@ -269,6 +312,20 @@ public class Constructors {
     if (geom == null) {
       return null;
     }
+    // Build S2 Geography first for proper spherical normalization (e.g., deduplication),
+    // then wrap in WKBGeography for WKB-based storage.
+    Geography s2geog = geomToS2Geography(geom);
+    return WKBGeography.fromS2Geography(s2geog);
+  }
+
+  /**
+   * Convert a JTS Geometry to an S2 Geography by building S2 shapes directly. This is used
+   * internally when S2 objects are needed (e.g., for predicate operations).
+   */
+  static Geography geomToS2Geography(Geometry geom) {
+    if (geom == null) {
+      return null;
+    }
     Geography geography;
     if (geom instanceof Point) {
       geography = pointToGeog((Point) geom);
@@ -389,7 +446,7 @@ public class Constructors {
     List<Geography> features = new ArrayList<>();
     for (int i = 0; i < geom.getNumGeometries(); i++) {
       Geometry g = geom.getGeometryN(i);
-      Geography sub = geomToGeography(g);
+      Geography sub = geomToS2Geography(g);
       if (sub != null) features.add(sub);
     }
     return new GeographyCollection(features);

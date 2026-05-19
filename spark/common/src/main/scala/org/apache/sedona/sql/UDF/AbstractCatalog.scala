@@ -24,6 +24,7 @@ import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, ExpressionInfo, Literal}
 import org.apache.spark.sql.expressions.Aggregator
+import org.apache.spark.sql.sedona_sql.expressions.{ST_Envelope_Aggr, ST_Intersection_Aggr, ST_Union_Aggr}
 import org.locationtech.jts.geom.Geometry
 
 import scala.reflect.ClassTag
@@ -82,24 +83,45 @@ abstract class AbstractCatalog {
   }
 
   def registerAll(sparkSession: SparkSession): Unit = {
+    val registry = sparkSession.sessionState.functionRegistry
     expressions.foreach { case (functionIdentifier, expressionInfo, functionBuilder) =>
-      sparkSession.sessionState.functionRegistry.registerFunction(
-        functionIdentifier,
-        expressionInfo,
-        functionBuilder)
-      FunctionRegistry.builtin.registerFunction(
-        functionIdentifier,
-        expressionInfo,
-        functionBuilder)
+      val shouldRegister = registry.lookupFunction(functionIdentifier) match {
+        case Some(existingInfo) =>
+          // Skip if Sedona already registered this function (e.g., SedonaContext.create called
+          // twice). Overwrite if it's a Spark native function (e.g., Spark 4.1's ST_GeomFromWKB).
+          !existingInfo.getClassName.startsWith("org.apache.sedona.")
+        case None => true
+      }
+      if (shouldRegister) {
+        registry.registerFunction(functionIdentifier, expressionInfo, functionBuilder)
+        FunctionRegistry.builtin.registerFunction(
+          functionIdentifier,
+          expressionInfo,
+          functionBuilder)
+      }
     }
     aggregateExpressions.foreach { f =>
-      sparkSession.udf.register(f.getClass.getSimpleName, functions.udaf(f))
+      registerAggregateFunction(sparkSession, f.getClass.getSimpleName, f)
+    }
+    // Register aliases for *_Aggr functions with *_Agg suffix
+    registerAggregateFunction(sparkSession, "ST_Envelope_Agg", new ST_Envelope_Aggr)
+    registerAggregateFunction(sparkSession, "ST_Intersection_Agg", new ST_Intersection_Aggr)
+    registerAggregateFunction(sparkSession, "ST_Union_Agg", new ST_Union_Aggr())
+  }
+
+  private def registerAggregateFunction(
+      sparkSession: SparkSession,
+      functionName: String,
+      aggregator: Aggregator[Geometry, _, _]): Unit = {
+    val functionIdentifier = FunctionIdentifier(functionName)
+    if (!sparkSession.sessionState.functionRegistry.functionExists(functionIdentifier)) {
+      sparkSession.udf.register(functionName, functions.udaf(aggregator))
       FunctionRegistry.builtin.registerFunction(
-        FunctionIdentifier(f.getClass.getSimpleName),
-        new ExpressionInfo(f.getClass.getCanonicalName, null, f.getClass.getSimpleName),
+        functionIdentifier,
+        new ExpressionInfo(aggregator.getClass.getCanonicalName, null, functionName),
         (_: Seq[Expression]) =>
           throw new UnsupportedOperationException(
-            s"Aggregate function ${f.getClass.getSimpleName} cannot be used as a regular function"))
+            s"Aggregate function $functionName cannot be used as a regular function"))
     }
   }
 
@@ -110,5 +132,9 @@ abstract class AbstractCatalog {
     aggregateExpressions.foreach(f =>
       sparkSession.sessionState.functionRegistry.dropFunction(
         FunctionIdentifier(f.getClass.getSimpleName)))
+    // Drop aliases for *_Aggr functions
+    Seq("ST_Envelope_Agg", "ST_Intersection_Agg", "ST_Union_Agg").foreach { aliasName =>
+      sparkSession.sessionState.functionRegistry.dropFunction(FunctionIdentifier(aliasName))
+    }
   }
 }

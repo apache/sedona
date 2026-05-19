@@ -21,6 +21,8 @@ package org.apache.spark.sql.sedona_sql.UDT
 import org.apache.sedona.common.raster.serde.Serde
 import org.apache.spark.sql.types.{BinaryType, DataType, UserDefinedType}
 import org.geotools.coverage.grid.GridCoverage2D
+import org.json4s.JsonDSL._
+import org.json4s.JsonAST.JValue
 
 class RasterUDT extends UserDefinedType[GridCoverage2D] {
   override def sqlType: DataType = BinaryType
@@ -41,12 +43,23 @@ class RasterUDT extends UserDefinedType[GridCoverage2D] {
 
   override def userClass: Class[GridCoverage2D] = classOf[GridCoverage2D]
 
+  override private[sql] def jsonValue: JValue = {
+    super.jsonValue mapField {
+      case ("class", _) => "class" -> this.getClass.getName.stripSuffix("$")
+      case other: Any => other
+    }
+  }
+
   override def equals(other: Any): Boolean = other match {
     case _: UserDefinedType[_] => other.isInstanceOf[RasterUDT]
     case _ => false
   }
 
   override def hashCode(): Int = userClass.hashCode()
+
+  override def toString: String = "RasterUDT"
 }
 
-case object RasterUDT extends RasterUDT with Serializable
+case object RasterUDT extends RasterUDT with Serializable {
+  def apply(): RasterUDT = new RasterUDT()
+}

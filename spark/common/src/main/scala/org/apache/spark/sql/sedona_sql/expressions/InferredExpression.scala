@@ -20,11 +20,12 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.sedona.common.S2Geography.Geography
+import org.apache.sedona.common.geometryObjects.Box2D
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.CodegenFallback
 import org.apache.spark.sql.catalyst.expressions.{Expression, ImplicitCastInputTypes}
 import org.apache.spark.sql.catalyst.util.ArrayData
-import org.apache.spark.sql.sedona_sql.UDT.{GeographyUDT, GeometryUDT}
+import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, GeographyUDT, GeometryUDT}
 import org.apache.spark.sql.sedona_sql.expressions.implicits._
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
@@ -164,6 +165,8 @@ object InferrableType {
     new InferrableType[Geography] {}
   implicit val geographyArrayInstance: InferrableType[Array[Geography]] =
     new InferrableType[Array[Geography]] {}
+  implicit val box2DInstance: InferrableType[Box2D] =
+    new InferrableType[Box2D] {}
   implicit val javaDoubleInstance: InferrableType[java.lang.Double] =
     new InferrableType[java.lang.Double] {}
   implicit val javaIntegerInstance: InferrableType[java.lang.Integer] =
@@ -194,6 +197,8 @@ object InferrableType {
     new InferrableType[Array[java.lang.Long]] {}
   implicit val doubleArrayInstance: InferrableType[Array[Double]] =
     new InferrableType[Array[Double]] {}
+  implicit val stringArrayInstance: InferrableType[Array[String]] =
+    new InferrableType[Array[String]] {}
   implicit val javaDoubleListInstance: InferrableType[java.util.List[java.lang.Double]] =
     new InferrableType[java.util.List[java.lang.Double]] {}
   implicit val javaGeomListInstance: InferrableType[java.util.List[Geometry]] =
@@ -212,6 +217,8 @@ object InferredTypes {
       expr.toGeography(input)
     } else if (t =:= typeOf[Array[Geography]]) { expr => input =>
       expr.toGeographyArray(input)
+    } else if (t =:= typeOf[Box2D]) { expr => input =>
+      expr.toBox2D(input)
     } else if (InferredRasterExpression.isRasterType(t)) {
       InferredRasterExpression.rasterExtractor
     } else if (t =:= typeOf[Array[Double]]) { expr => input =>
@@ -220,6 +227,22 @@ object InferredTypes {
       expr.asString(input)
     } else if (t =:= typeOf[Array[Long]]) { expr => input =>
       expr.eval(input).asInstanceOf[ArrayData].toLongArray()
+    } else if (t =:= typeOf[Array[String]]) { expr => input =>
+      expr.eval(input).asInstanceOf[ArrayData] match {
+        case null => null
+        case arrayData: ArrayData =>
+          val n = arrayData.numElements()
+          val result = new Array[String](n)
+          var i = 0
+          while (i < n) {
+            if (!arrayData.isNullAt(i)) {
+              val utf8 = arrayData.getUTF8String(i)
+              if (utf8 != null) result(i) = utf8.toString
+            }
+            i += 1
+          }
+          result
+      }
     } else if (t =:= typeOf[Array[Int]]) { expr => input =>
       expr.eval(input).asInstanceOf[ArrayData] match {
         case null => null
@@ -248,6 +271,14 @@ object InferredTypes {
       } else {
         null
       }
+    } else if (t =:= typeOf[Box2D]) {
+      val udt = Box2DUDT
+      output =>
+        if (output != null) {
+          udt.serialize(output.asInstanceOf[Box2D])
+        } else {
+          null
+        }
     } else if (InferredRasterExpression.isRasterType(t)) {
       InferredRasterExpression.rasterSerializer
     } else if (t =:= typeOf[String]) { output =>
@@ -260,6 +291,14 @@ object InferredTypes {
       t =:= typeOf[Array[Double]]) { output =>
       if (output != null) {
         ArrayData.toArrayData(output)
+      } else {
+        null
+      }
+    } else if (t =:= typeOf[Array[String]]) { output =>
+      if (output != null) {
+        ArrayData.toArrayData(output.asInstanceOf[Array[String]].map { s =>
+          if (s != null) UTF8String.fromString(s) else null
+        })
       } else {
         null
       }
@@ -299,13 +338,15 @@ object InferredTypes {
 
   def inferSparkType(t: Type): DataType = {
     if (t =:= typeOf[Geometry]) {
-      GeometryUDT
+      GeometryUDT()
     } else if (t =:= typeOf[Array[Geometry]] || t =:= typeOf[java.util.List[Geometry]]) {
-      DataTypes.createArrayType(GeometryUDT)
+      DataTypes.createArrayType(GeometryUDT())
     } else if (t =:= typeOf[Geography]) {
-      GeographyUDT
+      GeographyUDT()
     } else if (t =:= typeOf[Array[Geography]] || t =:= typeOf[java.util.List[Geography]]) {
-      DataTypes.createArrayType(GeographyUDT)
+      DataTypes.createArrayType(GeographyUDT())
+    } else if (t =:= typeOf[Box2D]) {
+      Box2DUDT()
     } else if (InferredRasterExpression.isRasterType(t)) {
       InferredRasterExpression.rasterUDT
     } else if (InferredRasterExpression.isRasterArrayType(t)) {
@@ -330,6 +371,8 @@ object InferredTypes {
       DataTypes.createArrayType(LongType)
     } else if (t =:= typeOf[Array[Double]] || t =:= typeOf[java.util.List[java.lang.Double]]) {
       DataTypes.createArrayType(DoubleType)
+    } else if (t =:= typeOf[Array[String]]) {
+      DataTypes.createArrayType(StringType)
     } else if (t =:= typeOf[Option[Boolean]]) {
       BooleanType
     } else if (t =:= typeOf[Boolean]) {

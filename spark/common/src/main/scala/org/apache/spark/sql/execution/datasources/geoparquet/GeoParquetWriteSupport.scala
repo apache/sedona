@@ -30,7 +30,7 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.SpecializedGetters
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
-import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData.{GEOPARQUET_COVERING_KEY, GEOPARQUET_CRS_KEY, GEOPARQUET_VERSION_KEY, VERSION, createCoveringColumnMetadata}
+import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData.{GEOPARQUET_COVERING_KEY, GEOPARQUET_COVERING_MODE_AUTO, GEOPARQUET_COVERING_MODE_KEY, GEOPARQUET_COVERING_MODE_LEGACY, GEOPARQUET_CRS_KEY, GEOPARQUET_VERSION_KEY, VERSION, createCoveringColumnMetadata}
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetWriteSupport.GeometryColumnInfo
 import org.apache.spark.sql.execution.datasources.geoparquet.internal.{DataSourceUtils, LegacyBehaviorPolicy, PortableSQLConf}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -108,8 +108,11 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
 
   private var geoParquetVersion: Option[String] = None
   private var defaultGeoParquetCrs: Option[JValue] = None
+  private var userExplicitlySetDefaultCrs: Boolean = false
   private val geoParquetColumnCrsMap: mutable.Map[String, Option[JValue]] = mutable.Map.empty
   private val geoParquetColumnCoveringMap: mutable.Map[String, Covering] = mutable.Map.empty
+  private val generatedCoveringColumnOrdinals: mutable.Map[Int, Int] = mutable.Map.empty
+  private var geoParquetCoveringMode: String = GEOPARQUET_COVERING_MODE_AUTO
 
   override def init(configuration: Configuration): WriteContext = {
     val schemaString = configuration.get(internal.ParquetWriteSupport.SPARK_ROW_SCHEMA)
@@ -126,11 +129,11 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       PortableSQLConf.ParquetOutputTimestampType.withName(configuration.get(key))
     }
 
-    this.rootFieldWriters = schema.zipWithIndex
-      .map { case (field, ordinal) =>
-        makeWriter(field.dataType, Some(ordinal))
+    schema.zipWithIndex.foreach { case (field, ordinal) =>
+      if (field.dataType == GeometryUDT) {
+        geometryColumnInfoMap.getOrElseUpdate(ordinal, new GeometryColumnInfo())
       }
-      .toArray[ValueWriter]
+    }
 
     if (geometryColumnInfoMap.isEmpty) {
       throw new RuntimeException("No geometry column found in the schema")
@@ -140,13 +143,30 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       case null => Some(VERSION)
       case version: String => Some(version)
     }
+    geoParquetCoveringMode = Option(configuration.get(GEOPARQUET_COVERING_MODE_KEY))
+      .map(_.trim)
+      .filter(_.nonEmpty)
+      .getOrElse(GEOPARQUET_COVERING_MODE_AUTO)
+      .toLowerCase(java.util.Locale.ROOT)
+    if (geoParquetCoveringMode != GEOPARQUET_COVERING_MODE_AUTO &&
+      geoParquetCoveringMode != GEOPARQUET_COVERING_MODE_LEGACY) {
+      throw new IllegalArgumentException(
+        s"Invalid value '$geoParquetCoveringMode' for $GEOPARQUET_COVERING_MODE_KEY. " +
+          s"Supported values are '$GEOPARQUET_COVERING_MODE_AUTO' and " +
+          s"'$GEOPARQUET_COVERING_MODE_LEGACY'.")
+    }
     defaultGeoParquetCrs = configuration.get(GEOPARQUET_CRS_KEY) match {
       case null =>
-        // If no CRS is specified, we write null to the crs metadata field. This is for compatibility with
-        // geopandas 0.10.0 and earlier versions, which requires crs field to be present.
+        // If no CRS is specified, we default to deriving CRS from the geometry SRID in finalizeWrite.
+        // This JNull value is used as a fallback when SRID is 0 or SRID-to-PROJJSON conversion fails,
+        // maintaining compatibility with geopandas 0.10.0 and earlier versions, which require a crs field.
         Some(org.json4s.JNull)
-      case "" => None
-      case crs: String => Some(parse(crs))
+      case "" =>
+        userExplicitlySetDefaultCrs = true
+        None
+      case crs: String =>
+        userExplicitlySetDefaultCrs = true
+        Some(parse(crs))
     }
     geometryColumnInfoMap.keys.map(schema(_).name).foreach { name =>
       Option(configuration.get(GEOPARQUET_CRS_KEY + "." + name)).foreach {
@@ -165,12 +185,26 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       geoParquetColumnCoveringMap.put(geometryColumnName, covering)
     }
     geometryColumnInfoMap.keys.map(schema(_).name).foreach { name =>
-      Option(configuration.get(GEOPARQUET_COVERING_KEY + "." + name)).foreach {
-        coveringColumnName =>
+      val perColumnKey = GEOPARQUET_COVERING_KEY + "." + name
+      // Skip keys that collide with reserved option keys (e.g. geoparquet.covering.mode)
+      if (perColumnKey != GEOPARQUET_COVERING_MODE_KEY) {
+        Option(configuration.get(perColumnKey)).foreach { coveringColumnName =>
           val covering = createCoveringColumnMetadata(coveringColumnName, schema)
           geoParquetColumnCoveringMap.put(name, covering)
+        }
       }
     }
+
+    maybeAutoGenerateCoveringColumns()
+
+    this.rootFieldWriters = schema.zipWithIndex
+      .map { case (field, ordinal) =>
+        generatedCoveringColumnOrdinals.get(ordinal) match {
+          case Some(geometryOrdinal) => makeGeneratedCoveringWriter(geometryOrdinal)
+          case None => makeWriter(field.dataType, Some(ordinal))
+        }
+      }
+      .toArray[ValueWriter]
 
     val messageType = new internal.SparkToParquetSchemaConverter(configuration).convert(schema)
     val sparkSqlParquetRowMetadata = GeoParquetWriteSupport.getSparkSqlParquetRowMetadata(schema)
@@ -211,14 +245,34 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       val columns = geometryColumnInfoMap.map { case (ordinal, columnInfo) =>
         val columnName = schema.fields(ordinal).name
         val geometryTypes = columnInfo.seenGeometryTypes.toSeq
+        // Omit bbox from column metadata when no geometries were observed (e.g. an empty
+        // Spark partition produces a zero-row file). Per the GeoParquet 1.1 spec, bbox is
+        // optional and represents the extent of the geometries in the file; emitting
+        // [0, 0, 0, 0] for an empty file falsely advertises data at Null Island and breaks
+        // bbox-based file pruning in downstream readers.
         val bbox = if (geometryTypes.nonEmpty) {
-          Seq(
-            columnInfo.bbox.minX,
-            columnInfo.bbox.minY,
-            columnInfo.bbox.maxX,
-            columnInfo.bbox.maxY)
-        } else Seq(0.0, 0.0, 0.0, 0.0)
-        val crs = geoParquetColumnCrsMap.getOrElse(columnName, defaultGeoParquetCrs)
+          Some(
+            Seq(
+              columnInfo.bbox.minX,
+              columnInfo.bbox.minY,
+              columnInfo.bbox.maxX,
+              columnInfo.bbox.maxY))
+        } else None
+        val crs = geoParquetColumnCrsMap.getOrElse(
+          columnName, {
+            if (!userExplicitlySetDefaultCrs) {
+              // No explicit CRS option was provided; try to derive from geometry SRID.
+              // For SRID 4326 (OGC:CRS84), omit CRS entirely per GeoParquet spec default.
+              columnInfo.observedSrid match {
+                case Some(srid) if srid == GeoParquetMetaData.DEFAULT_SRID => None
+                case Some(srid) if srid > 0 =>
+                  GeoParquetMetaData.sridToProjJson(srid).orElse(defaultGeoParquetCrs)
+                case _ => defaultGeoParquetCrs
+              }
+            } else {
+              defaultGeoParquetCrs
+            }
+          })
         val covering = geoParquetColumnCoveringMap.get(columnName)
         columnName -> GeometryFieldMetaData("WKB", geometryTypes, bbox, crs, covering)
       }.toMap
@@ -240,14 +294,107 @@ class GeoParquetWriteSupport extends WriteSupport[InternalRow] with Logging {
       schema: StructType,
       fieldWriters: Array[ValueWriter]): Unit = {
     var i = 0
-    while (i < row.numFields) {
-      if (!row.isNullAt(i)) {
-        consumeField(schema(i).name, i) {
-          fieldWriters(i).apply(row, i)
-        }
+    while (i < schema.length) {
+      generatedCoveringColumnOrdinals.get(i) match {
+        case Some(geometryOrdinal) =>
+          if (!row.isNullAt(geometryOrdinal)) {
+            consumeField(schema(i).name, i) {
+              fieldWriters(i).apply(row, i)
+            }
+          }
+        case None =>
+          if (i < row.numFields && !row.isNullAt(i)) {
+            consumeField(schema(i).name, i) {
+              fieldWriters(i).apply(row, i)
+            }
+          }
       }
       i += 1
     }
+  }
+
+  private def maybeAutoGenerateCoveringColumns(): Unit = {
+    if (!isAutoCoveringEnabled) {
+      return
+    }
+
+    // If the user provided any explicit covering options, don't auto-generate for
+    // the remaining geometry columns. Explicit options signal intentional configuration.
+    if (geoParquetColumnCoveringMap.nonEmpty) {
+      return
+    }
+
+    val generatedCoveringFields = mutable.ArrayBuffer.empty[StructField]
+    val geometryColumns =
+      geometryColumnInfoMap.keys.toSeq.sorted.map(ordinal => ordinal -> schema(ordinal).name)
+
+    geometryColumns.foreach { case (geometryOrdinal, geometryColumnName) =>
+      if (!geoParquetColumnCoveringMap.contains(geometryColumnName)) {
+        val coveringColumnName = s"${geometryColumnName}_bbox"
+        if (schema.fieldNames.contains(coveringColumnName)) {
+          // Reuse an existing column if it is a valid covering struct; otherwise skip.
+          try {
+            val covering = createCoveringColumnMetadata(coveringColumnName, schema)
+            geoParquetColumnCoveringMap.put(geometryColumnName, covering)
+          } catch {
+            case _: IllegalArgumentException =>
+              logWarning(
+                s"Existing column '$coveringColumnName' is not a valid covering struct " +
+                  s"(expected struct<xmin, ymin, xmax, ymax> with float/double fields; " +
+                  s"optional zmin/zmax fields are also supported). " +
+                  s"Skipping automatic covering for geometry column '$geometryColumnName'.")
+          }
+        } else {
+          val coveringStructType = StructType(
+            Seq(
+              StructField("xmin", DoubleType, nullable = false),
+              StructField("ymin", DoubleType, nullable = false),
+              StructField("xmax", DoubleType, nullable = false),
+              StructField("ymax", DoubleType, nullable = false)))
+          generatedCoveringFields +=
+            StructField(coveringColumnName, coveringStructType, nullable = true)
+          val generatedOrdinal = schema.length + generatedCoveringFields.length - 1
+          generatedCoveringColumnOrdinals.put(generatedOrdinal, geometryOrdinal)
+        }
+      }
+    }
+
+    if (generatedCoveringFields.nonEmpty) {
+      schema = StructType(schema.fields ++ generatedCoveringFields)
+      generatedCoveringFields.foreach { generatedField =>
+        val covering = createCoveringColumnMetadata(generatedField.name, schema)
+        val geometryColumnName = generatedField.name.stripSuffix("_bbox")
+        geoParquetColumnCoveringMap.put(geometryColumnName, covering)
+      }
+    }
+  }
+
+  private def isGeoParquet11: Boolean = {
+    geoParquetVersion.contains(VERSION)
+  }
+
+  private def isAutoCoveringEnabled: Boolean = {
+    geoParquetCoveringMode == GEOPARQUET_COVERING_MODE_AUTO && isGeoParquet11
+  }
+
+  private def makeGeneratedCoveringWriter(geometryOrdinal: Int): ValueWriter = {
+    (row: SpecializedGetters, _: Int) =>
+      val geom = GeometryUDT.deserialize(row.getBinary(geometryOrdinal))
+      val envelope = geom.getEnvelopeInternal
+      consumeGroup {
+        consumeField("xmin", 0) {
+          recordConsumer.addDouble(envelope.getMinX)
+        }
+        consumeField("ymin", 1) {
+          recordConsumer.addDouble(envelope.getMinY)
+        }
+        consumeField("xmax", 2) {
+          recordConsumer.addDouble(envelope.getMaxX)
+        }
+        consumeField("ymax", 3) {
+          recordConsumer.addDouble(envelope.getMaxY)
+        }
+      }
   }
 
   private def makeWriter(dataType: DataType, rootOrdinal: Option[Int] = None): ValueWriter = {
@@ -591,6 +738,22 @@ object GeoParquetWriteSupport {
     // that are present in the column.
     val seenGeometryTypes: mutable.Set[String] = mutable.Set.empty
 
+    // Track SRIDs seen in geometry values. A consistent SRID can be used to
+    // auto-generate CRS (projjson) metadata when no explicit CRS is provided:
+    // SRID 4326 results in omitted CRS (GeoParquet default), positive non-4326
+    // SRIDs generate PROJJSON, and SRID 0 or mixed SRIDs result in null CRS.
+    private var _srid: Int = -1 // -1 = no geometries seen yet
+    private var _mixedSrids: Boolean = false
+
+    /**
+     * Returns the observed SRID if all geometries had the same SRID, or None if no geometries
+     * were seen or if mixed SRIDs were encountered.
+     */
+    def observedSrid: Option[Int] = {
+      if (_mixedSrids || _srid == -1) None
+      else Some(_srid)
+    }
+
     def update(geom: Geometry): Unit = {
       bbox.update(geom)
       // In case of 3D geometries, a " Z" suffix gets added (e.g. ["Point Z"]).
@@ -600,6 +763,16 @@ object GeoParquetWriteSupport {
       }
       val geometryType = if (!hasZ) geom.getGeometryType else geom.getGeometryType + " Z"
       seenGeometryTypes.add(geometryType)
+
+      // Track SRID consistency across all geometries in this column
+      if (!_mixedSrids) {
+        val geomSrid = geom.getSRID
+        if (_srid == -1) {
+          _srid = geomSrid
+        } else if (_srid != geomSrid) {
+          _mixedSrids = true
+        }
+      }
     }
   }
 

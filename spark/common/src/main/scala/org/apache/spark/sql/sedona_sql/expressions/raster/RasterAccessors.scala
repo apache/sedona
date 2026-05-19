@@ -38,6 +38,15 @@ private[apache] case class RS_SRID(inputExpressions: Seq[Expression])
   }
 }
 
+private[apache] case class RS_CRS(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction1(RasterAccessors.crs),
+      inferrableFunction2(RasterAccessors.crs)) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 private[apache] case class RS_Width(inputExpressions: Seq[Expression])
     extends InferredExpression(RasterAccessors.getWidth _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

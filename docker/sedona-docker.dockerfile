@@ -21,8 +21,8 @@ ARG shared_workspace=/opt/workspace
 ARG spark_version=4.0.1
 ARG hadoop_s3_version=3.4.1
 ARG aws_sdk_version=2.38.2
-ARG sedona_version=1.8.0
-ARG geotools_wrapper_version=1.8.1-33.1
+ARG sedona_version=1.9.0
+ARG geotools_wrapper_version=1.9.0-33.5
 ARG spark_extension_version=2.14.2
 ARG zeppelin_version=0.12.0
 
@@ -43,14 +43,14 @@ ENV PYTHONPATH=${SPARK_HOME}/python
 # Set up OS libraries and PySpark
 RUN apt-get update
 RUN apt-get install -y openjdk-17-jdk-headless curl python3-pip maven
-RUN pip3 install pipenv --break-system-packages
+RUN pip3 install --no-cache-dir pipenv --break-system-packages
 COPY ./docker/install-spark.sh ${SEDONA_HOME}/docker/
 RUN chmod +x ${SEDONA_HOME}/docker/install-spark.sh
 RUN ${SEDONA_HOME}/docker/install-spark.sh ${spark_version} ${hadoop_s3_version} ${aws_sdk_version}
 
 # Install Python dependencies
 COPY docker/requirements.txt /opt/requirements.txt
-RUN pip3 install -r /opt/requirements.txt --break-system-packages
+RUN pip3 install --no-cache-dir -r /opt/requirements.txt --break-system-packages
 
 
 # Copy local compiled jars and python code to the docker environment

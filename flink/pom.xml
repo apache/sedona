@@ -22,14 +22,14 @@
     <parent>
         <groupId>org.apache.sedona</groupId>
         <artifactId>sedona-parent</artifactId>
-        <version>1.8.1-SNAPSHOT</version>
+        <version>1.9.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>sedona-flink_${scala.compat.version}</artifactId>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A cluster computing system for processing large-scale spatial data: Streaming API for Apache Flink.</description>
-    <url>http://sedona.apache.org/</url>
+    <url>https://sedona.apache.org/</url>
     <packaging>jar</packaging>
 
     <properties>
@@ -117,6 +117,11 @@
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-hsql</artifactId>
+        </dependency>
+        <!-- proj4sedona for CRS transformation (pure Java, no LGPL dependencies) -->
+        <dependency>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>proj4sedona</artifactId>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>

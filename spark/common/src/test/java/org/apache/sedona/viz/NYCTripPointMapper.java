@@ -28,11 +28,15 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // TODO: Auto-generated Javadoc
 
 /** The Class NYCTripPointMapper. */
 class NYCTripPointMapper implements FlatMapFunction<String, Object> {
+
+  private static final Logger log = LoggerFactory.getLogger(NYCTripPointMapper.class);
 
   /** The result. */
   List<Point> result = new ArrayList<Point>();
@@ -54,7 +58,7 @@ class NYCTripPointMapper implements FlatMapFunction<String, Object> {
     } catch (NumberFormatException e) {
       return result.iterator();
     } catch (ArrayIndexOutOfBoundsException e) {
-      System.out.println(line);
+      log.warn("ArrayIndexOutOfBoundsException for line: {}", line);
       // e.printStackTrace();
     }
 

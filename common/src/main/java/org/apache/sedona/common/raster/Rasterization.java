@@ -18,6 +18,9 @@
  */
 package org.apache.sedona.common.raster;
 
+import static org.apache.sedona.common.utils.RasterUtils.getRasterScaleY;
+import static org.apache.sedona.common.utils.RasterUtils.getRasterUpperLeftY;
+
 import java.awt.image.WritableRaster;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -67,6 +70,11 @@ public class Rasterization {
       rasterized = coverageFactory.create("rasterized", params.writableRaster, geomExtent);
     } else {
       rasterized = coverageFactory.create("rasterized", params.writableRaster, rasterExtent);
+    }
+
+    // If original raster is bottom-up, flip the rasterized result vertically
+    if (params.bottomUp) {
+      rasterized = RasterUtils.flipVerticallyGridSpace(rasterized);
     }
 
     // Return results compatible with the original function
@@ -136,16 +144,22 @@ public class Rasterization {
     int x = startX;
     int y = startY;
 
-    for (double worldY = geomExtent.getMinY();
-        worldY < geomExtent.getMaxY();
-        worldY += params.scaleY, y++) {
+    for (double worldY = geomExtent.getMaxY();
+        worldY > geomExtent.getMinY();
+        worldY += params.scaleY, y--) {
       x = startX;
       for (double worldX = geomExtent.getMinX();
           worldX < geomExtent.getMaxX();
           worldX += params.scaleX, x++) {
 
-        // Flip y-axis (since raster Y starts from top-left)
-        int yIndex = -y - 1;
+        // Make zero indexed
+        int yIndex = y - 1;
+
+        // Adjust for bottom-up rasters
+        // Reverse the y index
+        if (params.bottomUp) {
+          yIndex = params.writableRaster.getHeight() - 1 - yIndex;
+        }
 
         // Create envelope for this pixel
         double cellMaxX = worldX + params.scaleX;
@@ -182,9 +196,9 @@ public class Rasterization {
         }
 
         double x0 = (start.x - params.upperLeftX) / params.scaleX;
-        double y0 = (params.upperLeftY - start.y) / params.scaleY;
+        double y0 = (start.y - params.upperLeftY) / params.scaleY;
         double x1 = (end.x - params.upperLeftX) / params.scaleX;
-        double y1 = (params.upperLeftY - end.y) / params.scaleY;
+        double y1 = (end.y - params.upperLeftY) / params.scaleY;
 
         // Apply Bresenham for this segment
         drawLineBresenham(params, x0, y0, x1, y1, value, 0.2);
@@ -220,6 +234,12 @@ public class Rasterization {
     for (int i = 0; i <= steps; i++) {
       int rasterX = (int) (Math.floor(x));
       int rasterY = (int) (Math.floor(y));
+
+      // Adjust for bottom-up rasters
+      // Reverse the y index
+      if (params.bottomUp) {
+        rasterY = params.writableRaster.getHeight() - 1 - rasterY;
+      }
 
       // Only write if within raster bounds
       if (rasterX >= 0
@@ -338,9 +358,9 @@ public class Rasterization {
 
     // Using BigDecimal to avoid floating point errors
     double upperLeftX = metadata[0];
-    double upperLeftY = metadata[1];
+    double upperLeftY = getRasterUpperLeftY(metadata);
     double scaleX = metadata[4];
-    double scaleY = metadata[5];
+    double scaleY = getRasterScaleY(metadata);
 
     // Compute the aligned min/max values
     double alignedMinX =
@@ -464,13 +484,14 @@ public class Rasterization {
       upperLeftY = geomExtent.getMaxY();
     } else {
       upperLeftX = metadata[0];
-      upperLeftY = metadata[1];
+      upperLeftY = getRasterUpperLeftY(metadata);
     }
 
     WritableRaster writableRaster;
     if (useGeometryExtent) {
       int geomExtentWidth = (int) (Math.round(geomExtent.getWidth() / metadata[4]));
-      int geomExtentHeight = (int) (Math.round(geomExtent.getHeight() / -metadata[5]));
+      int geomExtentHeight =
+          (int) (Math.round(geomExtent.getHeight() / -getRasterScaleY(metadata)));
 
       writableRaster =
           RasterFactory.createBandedRaster(
@@ -483,19 +504,30 @@ public class Rasterization {
               RasterUtils.getDataTypeCode(pixelType), rasterWidth, rasterHeight, 1, null);
     }
 
+    boolean bottomUp = metadata[5] > 0;
+
     return new RasterizationParams(
-        writableRaster, pixelType, metadata[4], -metadata[5], upperLeftX, upperLeftY);
+        writableRaster,
+        pixelType,
+        metadata[4],
+        getRasterScaleY(metadata),
+        upperLeftX,
+        upperLeftY,
+        bottomUp);
   }
 
   private static void validateRasterMetadata(double[] rasterMetadata) {
     if (rasterMetadata[4] < 0) {
-      throw new IllegalArgumentException("ScaleX cannot be negative");
-    }
-    if (rasterMetadata[5] > 0) {
-      throw new IllegalArgumentException("ScaleY must be negative");
+      throw new IllegalArgumentException(
+          String.format(
+              "Invalid raster metadata: scaleX is negative (%.2f). Right-to-left rasters are not supported.",
+              rasterMetadata[4]));
     }
     if (rasterMetadata[6] != 0 || rasterMetadata[7] != 0) {
-      throw new IllegalArgumentException("SkewX and SkewY must be zero");
+      throw new IllegalArgumentException(
+          String.format(
+              "Invalid raster metadata: skewX is %.2f and skewY is %.2f. Both values must be zero.",
+              rasterMetadata[6], rasterMetadata[7]));
     }
   }
 
@@ -506,6 +538,7 @@ public class Rasterization {
     double scaleY;
     double upperLeftX;
     double upperLeftY;
+    boolean bottomUp;
 
     RasterizationParams(
         WritableRaster writableRaster,
@@ -513,13 +546,15 @@ public class Rasterization {
         double scaleX,
         double scaleY,
         double upperLeftX,
-        double upperLeftY) {
+        double upperLeftY,
+        boolean bottomUp) {
       this.writableRaster = writableRaster;
       this.pixelType = pixelType;
       this.scaleX = scaleX;
       this.scaleY = scaleY;
       this.upperLeftX = upperLeftX;
       this.upperLeftY = upperLeftY;
+      this.bottomUp = bottomUp;
     }
   }
 
@@ -602,15 +637,15 @@ public class Rasterization {
         // Using BigDecimal to avoid floating point errors
         double yStart =
             Math.round(
-                (BigDecimal.valueOf(params.upperLeftY)
-                        .subtract(BigDecimal.valueOf(worldP1.y))
+                (BigDecimal.valueOf(worldP1.y)
+                        .subtract(BigDecimal.valueOf(params.upperLeftY))
                         .divide(BigDecimal.valueOf(params.scaleY), RoundingMode.CEILING))
                     .doubleValue());
 
         double yEnd =
             Math.round(
-                (BigDecimal.valueOf(params.upperLeftY)
-                        .subtract(BigDecimal.valueOf(worldP2.y))
+                (BigDecimal.valueOf(worldP2.y)
+                        .subtract(BigDecimal.valueOf(params.upperLeftY))
                         .divide(BigDecimal.valueOf(params.scaleY), RoundingMode.FLOOR))
                     .doubleValue());
 
@@ -619,16 +654,13 @@ public class Rasterization {
         yStart = Math.min((params.writableRaster.getHeight() - 0.5), Math.abs(yStart) - 0.5);
 
         double p1X = (worldP1.x - params.upperLeftX) / params.scaleX;
-        double p1Y = (params.upperLeftY - worldP1.y) / params.scaleY;
+        double p1Y = (worldP1.y - params.upperLeftY) / params.scaleY;
 
         if (worldP1.x == worldP2.x) {
           // Vertical line case: directly set xIntercept. Avoid divide by zero error when
           // calculating slope
           for (double y = yStart; y >= yEnd; y--) {
             double xIntercept = p1X; // Vertical line, xIntercept is constant
-            if (xIntercept < 0 || xIntercept > params.writableRaster.getWidth()) {
-              continue; // Skip xIntercepts outside geomExtent
-            }
             scanlineIntersections.computeIfAbsent(y, k -> new TreeSet<>()).add(xIntercept);
           }
         } else {
@@ -695,6 +727,13 @@ public class Rasterization {
 
     for (Map.Entry<Integer, List<int[]>> entry : scanlineFillRanges.entrySet()) {
       int y = entry.getKey();
+
+      // Adjust for bottom-up rasters
+      // Reverse the y index
+      if (params.bottomUp) {
+        y = params.writableRaster.getHeight() - 1 - y;
+      }
+
       for (int[] range : entry.getValue()) {
         if (range.length == 1) {
           params.writableRaster.setSample(range[0], y, 0, value);

@@ -124,6 +124,47 @@ public class TestTableFunctions extends TestBase {
         Constructors.geomFromWKT("GEOMETRYCOLLECTION (POINT (40 10), LINESTRING (0 5, 0 10))", 0));
   }
 
+  // Test aliases for *_Aggr functions with *_Agg suffix
+  @Test
+  public void test_ST_Envelope_Agg() throws ParseException {
+    registerUDTF(ST_Envelope_Agg.class);
+    verifySqlSingleRes(
+        "with src_tbl as (\n"
+            + "select sedona.ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))') geom\n"
+            + "union\n"
+            + "select sedona.ST_GeomFromText('POLYGON ((0.5 0.5, 0.5 1.5, 1.5 1.5, 1.5 0.5, 0.5 0.5))') geom\n"
+            + ")\n"
+            + "select sedona.ST_AsText(envelope) from src_tbl, table(sedona.ST_Envelope_Agg(src_tbl.geom) OVER (PARTITION BY 1));",
+        Constructors.geomFromWKT("POLYGON ((0 0, 0 1.5, 1.5 1.5, 1.5 0, 0 0))", 0));
+  }
+
+  @Test
+  public void test_ST_Intersection_Agg() throws ParseException {
+    registerUDTF(ST_Intersection_Agg.class);
+    verifySqlSingleRes(
+        "with src_tbl as (\n"
+            + "select sedona.ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))') geom\n"
+            + "union\n"
+            + "select sedona.ST_GeomFromText('POLYGON ((0.5 0.5, 0.5 1.5, 1.5 1.5, 1.5 0.5, 0.5 0.5))') geom\n"
+            + ")\n"
+            + "select sedona.ST_AsText(intersected) from src_tbl, table(sedona.ST_Intersection_Agg(src_tbl.geom) OVER (PARTITION BY 1));",
+        Constructors.geomFromWKT("POLYGON ((0.5 1, 1 1, 1 0.5, 0.5 0.5, 0.5 1))", 0));
+  }
+
+  @Test
+  public void test_ST_Union_Agg() throws ParseException {
+    registerUDTF(ST_Union_Agg.class);
+    verifySqlSingleRes(
+        "with src_tbl as (\n"
+            + "select sedona.ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))') geom\n"
+            + "union\n"
+            + "select sedona.ST_GeomFromText('POLYGON ((0.5 0.5, 0.5 1.5, 1.5 1.5, 1.5 0.5, 0.5 0.5))') geom\n"
+            + ")\n"
+            + "select sedona.ST_AsText(unioned) from src_tbl, table(sedona.ST_Union_Agg(src_tbl.geom) OVER (PARTITION BY 1));",
+        Constructors.geomFromWKT(
+            "POLYGON ((0 0, 0 1, 0.5 1, 0.5 1.5, 1.5 1.5, 1.5 0.5, 1 0.5, 1 0, 0 0))", 0));
+  }
+
   @Test
   public void test_ST_DumpExplode() {
     registerUDTF(ST_Dump.class);

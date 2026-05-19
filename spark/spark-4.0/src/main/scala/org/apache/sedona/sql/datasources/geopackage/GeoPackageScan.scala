@@ -36,9 +36,13 @@ case class GeoPackageScan(
     fileIndex: PartitioningAwareFileIndex,
     readDataSchema: StructType,
     readPartitionSchema: StructType,
+    metadataSchema: StructType,
     options: CaseInsensitiveStringMap,
     loadOptions: GeoPackageOptions)
     extends FileScan {
+
+  override def readSchema(): StructType =
+    StructType(readDataSchema.fields ++ readPartitionSchema.fields ++ metadataSchema.fields)
 
   override def partitionFilters: Seq[Expression] = {
     Seq.empty
@@ -54,6 +58,11 @@ case class GeoPackageScan(
     val broadcastedConf =
       sparkSession.sparkContext.broadcast(new SerializableConfiguration(hadoopConf))
 
-    GeoPackagePartitionReaderFactory(sparkSession, broadcastedConf, loadOptions, dataSchema)
+    GeoPackagePartitionReaderFactory(
+      sparkSession,
+      broadcastedConf,
+      loadOptions,
+      dataSchema,
+      metadataSchema)
   }
 }

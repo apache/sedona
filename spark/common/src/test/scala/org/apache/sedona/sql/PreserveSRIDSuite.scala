@@ -74,6 +74,8 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
       ("ST_RemoveRepeatedPoints(geom3, 1)", 1000),
       ("ST_SetPoint(geom3, 1, ST_Point(0.5, 0.5))", 1000),
       ("ST_ClosestPoint(geom1, geom2)", 1000),
+      ("ST_ShortestLine(geom1, geom2)", 1000),
+      ("ST_OffsetCurve(geom3, 1.0)", 1000),
       ("ST_FlipCoordinates(geom1)", 1000),
       ("ST_SubDivide(geom4, 5)", 1000),
       ("ST_Segmentize(geom4, 0.1)", 1000),
@@ -144,12 +146,12 @@ class PreserveSRIDSuite extends TestBaseScala with TableDrivenPropertyChecks {
 
     val schema = StructType(
       Seq(
-        StructField("geom1", GeometryUDT),
-        StructField("geom2", GeometryUDT),
-        StructField("geom3", GeometryUDT),
-        StructField("geom4", GeometryUDT),
-        StructField("geom5", GeometryUDT),
-        StructField("geom6", GeometryUDT)))
+        StructField("geom1", GeometryUDT()),
+        StructField("geom2", GeometryUDT()),
+        StructField("geom3", GeometryUDT()),
+        StructField("geom4", GeometryUDT()),
+        StructField("geom5", GeometryUDT()),
+        StructField("geom6", GeometryUDT())))
     val geom1 = Constructors.geomFromWKT("POLYGON ((0 0, 1 0, 0.5 0.5, 1 1, 0 1, 0 0))", 1000)
     val geom2 =
       Constructors.geomFromWKT("MULTILINESTRING ((0 0, 0 1), (0 1, 1 1), (1 1, 1 0))", 1000)

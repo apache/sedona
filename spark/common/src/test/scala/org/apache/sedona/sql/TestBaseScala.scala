@@ -48,7 +48,10 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   def defaultSparkConfig: Map[String, String] = Map(
     "spark.sql.warehouse.dir" -> (System.getProperty("user.dir") + "/target/"),
     "sedona.join.autoBroadcastJoinThreshold" -> "-1",
-    "spark.kryoserializer.buffer.max" -> "64m")
+    "spark.kryoserializer.buffer.max" -> "64m",
+    // Disable Spark 4.1+ native geospatial functions that shadow Sedona's ST functions.
+    // This config is ignored on Spark versions that don't have it.
+    "spark.sql.geospatial.enabled" -> "false")
 
   // Method to be overridden by subclasses to provide additional configurations
   def sparkConfig: Map[String, String] = defaultSparkConfig

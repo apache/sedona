@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowResult" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowA" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5" fill="#4a90d9" />
+    </marker>
+    <marker id="arrowGray" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5" fill="#999999" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_ShiftLongitude</text>
+  <rect x="80" y="85" width="340" height="140" fill="none" stroke="#cccccc" stroke-width="1" />
+  <line x1="80" y1="85" x2="80" y2="225" stroke="#dddddd" stroke-width="1" />
+  <text x="80" y="239" text-anchor="middle" font-size="11" fill="#999999">-180°</text>
+  <line x1="165" y1="85" x2="165" y2="225" stroke="#dddddd" stroke-width="1" />
+  <text x="165" y="239" text-anchor="middle" font-size="11" fill="#999999">-90°</text>
+  <line x1="250" y1="85" x2="250" y2="225" stroke="#dddddd" stroke-width="1" />
+  <text x="250" y="239" text-anchor="middle" font-size="11" fill="#999999">0°</text>
+  <line x1="335" y1="85" x2="335" y2="225" stroke="#dddddd" stroke-width="1" />
+  <text x="335" y="239" text-anchor="middle" font-size="11" fill="#999999">90°</text>
+  <line x1="420" y1="85" x2="420" y2="225" stroke="#dddddd" stroke-width="1" />
+  <text x="420" y="239" text-anchor="middle" font-size="11" fill="#999999">180°</text>
+  <circle cx="99" cy="155" r="5" fill="#4a90d9" />
+  <text x="99" y="145" text-anchor="middle" font-size="12" fill="#4a90d9" font-weight="bold">-160°</text>
+  <circle cx="269" cy="155" r="5" fill="#2ecc71" />
+  <text x="269" y="145" text-anchor="middle" font-size="12" fill="#2ecc71" font-weight="bold">200°</text>
+  <path d="M 105 159 C 184 195 184 195 263 159" fill="none" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowResult)" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Shifts longitude values between -180..0 and 180..360 ranges</text>
+  <rect x="88" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="104" y="266" font-size="13" fill="#333333">Input (-180..0)</text>
+  <rect x="238" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="254" y="266" font-size="13" fill="#333333">Shifted (180..360)</text>
+</svg>

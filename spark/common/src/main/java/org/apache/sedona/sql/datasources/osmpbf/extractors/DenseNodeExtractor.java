@@ -26,23 +26,42 @@ public class DenseNodeExtractor implements Extractor {
   long latOffset;
   long lonOffset;
   long granularity;
+  int dateGranularity;
   long firstId;
   long firstLat;
   long firstLon;
   Integer keyIndex;
 
+  // DenseInfo delta accumulators
+  boolean hasDenseInfo;
+  long firstTimestamp;
+  long firstChangeset;
+  int firstUid;
+  int firstUserSid;
+
   Osmformat.DenseNodes nodes;
 
   public DenseNodeExtractor(
-      Osmformat.DenseNodes nodes, long latOffset, long lonOffset, long granularity) {
+      Osmformat.DenseNodes nodes,
+      long latOffset,
+      long lonOffset,
+      long granularity,
+      int dateGranularity) {
     this.firstId = 0;
     this.firstLat = 0;
     this.firstLon = 0;
     this.latOffset = latOffset;
     this.lonOffset = lonOffset;
     this.granularity = granularity;
+    this.dateGranularity = dateGranularity;
     this.nodes = nodes;
     this.keyIndex = 0;
+
+    this.hasDenseInfo = nodes.hasDenseinfo() && nodes.getDenseinfo().getVersionCount() > 0;
+    this.firstTimestamp = 0;
+    this.firstChangeset = 0;
+    this.firstUid = 0;
+    this.firstUserSid = 0;
   }
 
   public OsmNode extract(int idx, Osmformat.StringTable stringTable) {
@@ -63,7 +82,53 @@ public class DenseNodeExtractor implements Extractor {
 
     HashMap<String, String> tags = parseTags(stringTable);
 
-    return new OsmNode(id, lat, lon, tags);
+    OsmNode node = new OsmNode(id, lat, lon, tags);
+
+    if (hasDenseInfo) {
+      Osmformat.DenseInfo denseInfo = nodes.getDenseinfo();
+
+      // version is NOT delta-encoded
+      if (denseInfo.getVersionCount() > idx) {
+        node.setVersion(denseInfo.getVersion(idx));
+      }
+
+      // timestamp, changeset, uid, user_sid are delta-encoded
+      if (denseInfo.getTimestampCount() > idx) {
+        long timestamp = denseInfo.getTimestamp(idx) + firstTimestamp;
+        firstTimestamp = timestamp;
+        node.setTimestamp(timestamp * dateGranularity);
+      }
+
+      if (denseInfo.getChangesetCount() > idx) {
+        long changeset = denseInfo.getChangeset(idx) + firstChangeset;
+        firstChangeset = changeset;
+        node.setChangeset(changeset);
+      }
+
+      if (denseInfo.getUidCount() > idx) {
+        int uid = denseInfo.getUid(idx) + firstUid;
+        firstUid = uid;
+        node.setUid(uid);
+      }
+
+      if (denseInfo.getUserSidCount() > idx) {
+        int userSid = denseInfo.getUserSid(idx) + firstUserSid;
+        firstUserSid = userSid;
+        if (userSid > 0) {
+          node.setUser(stringTable.getS(userSid).toStringUtf8());
+        }
+      }
+
+      // visible is NOT delta-encoded, and may not be present
+      if (denseInfo.getVisibleCount() > idx) {
+        node.setVisible(denseInfo.getVisible(idx));
+      } else {
+        // Per OSM PBF spec, missing 'visible' must be treated as true (especially in history files)
+        node.setVisible(true);
+      }
+    }
+
+    return node;
   }
 
   HashMap<String, String> parseTags(Osmformat.StringTable stringTable) {

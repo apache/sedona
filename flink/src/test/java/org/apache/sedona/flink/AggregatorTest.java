@@ -20,9 +20,11 @@ package org.apache.sedona.flink;
 
 import static org.apache.flink.table.api.Expressions.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.apache.flink.table.api.*;
 import org.apache.flink.types.Row;
+import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.flink.expressions.Functions;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -44,6 +46,46 @@ public class AggregatorTest extends TestBase {
             "POLYGON ((0 0, 0 %s, %s %s, %s 0, 0 0))",
             testDataSize - 1, testDataSize - 1, testDataSize - 1, testDataSize - 1),
         last.getField(0).toString());
+  }
+
+  @Test
+  public void testExtent() {
+    tableEnv.executeSql(
+        "CREATE OR REPLACE TEMPORARY VIEW extent_view AS "
+            + "SELECT ST_GeomFromWKT(wkt) as geom FROM ("
+            + "VALUES ('POINT (1 2)'), ('POINT (4 5)'), ('LINESTRING (-3 0, 0 0)')"
+            + ") AS t(wkt)");
+    Table result = tableEnv.sqlQuery("SELECT ST_Extent(geom) FROM extent_view");
+    Row last = last(result);
+    Box2D bbox = (Box2D) last.getField(0);
+    assertEquals(-3.0, bbox.getXMin(), 0.0);
+    assertEquals(0.0, bbox.getYMin(), 0.0);
+    assertEquals(4.0, bbox.getXMax(), 0.0);
+    assertEquals(5.0, bbox.getYMax(), 0.0);
+  }
+
+  @Test
+  public void testExtent_EmptyAndNullGeometries() {
+    tableEnv.executeSql(
+        "CREATE OR REPLACE TEMPORARY VIEW null_extent_view AS "
+            + "SELECT ST_GeomFromWKT(wkt) as geom FROM ("
+            + "VALUES (CAST(NULL AS STRING)), ('POINT EMPTY'), ('POLYGON EMPTY')"
+            + ") AS t(wkt)");
+    Table result = tableEnv.sqlQuery("SELECT ST_Extent(geom) FROM null_extent_view");
+    Row last = last(result);
+    assertNull(last.getField(0));
+  }
+
+  @Test
+  public void testEnvelope_Aggr_EmptyGeometries() {
+    tableEnv.executeSql(
+        "CREATE OR REPLACE TEMPORARY VIEW empty_geom_view AS "
+            + "SELECT ST_GeomFromWKT(wkt) as geom FROM ("
+            + "VALUES ('POINT EMPTY'), ('LINESTRING EMPTY'), ('POLYGON EMPTY')"
+            + ") AS t(wkt)");
+    Table result = tableEnv.sqlQuery("SELECT ST_Envelope_Aggr(geom) FROM empty_geom_view");
+    Row last = last(result);
+    assertNull(last.getField(0));
   }
 
   @Test
@@ -90,6 +132,40 @@ public class AggregatorTest extends TestBase {
   public void testUnion_Aggr() {
     Table polygonTable = createPolygonOverlappingTable(testDataSize);
     Table result = polygonTable.select(call("ST_Union_Aggr", $(polygonColNames[0])));
+    Row last = last(result);
+    assertEquals(1001, ((Polygon) last.getField(0)).getArea(), 0);
+  }
+
+  // Test aliases for *_Aggr functions with *_Agg suffix
+  @Test
+  public void testEnvelop_Agg_Alias() {
+    Table pointTable = createPointTable(testDataSize);
+    Table result = pointTable.select(call("ST_Envelope_Agg", $(pointColNames[0])));
+    Row last = last(result);
+    assertEquals(
+        String.format(
+            "POLYGON ((0 0, 0 %s, %s %s, %s 0, 0 0))",
+            testDataSize - 1, testDataSize - 1, testDataSize - 1, testDataSize - 1),
+        last.getField(0).toString());
+  }
+
+  @Test
+  public void testIntersection_Agg_Alias() {
+    Table polygonTable = createPolygonOverlappingTable(testDataSize);
+    Table result = polygonTable.select(call("ST_Intersection_Agg", $(polygonColNames[0])));
+    Row last = last(result);
+    assertEquals("LINESTRING EMPTY", last.getField(0).toString());
+
+    polygonTable = createPolygonOverlappingTable(3);
+    result = polygonTable.select(call("ST_Intersection_Agg", $(polygonColNames[0])));
+    last = last(result);
+    assertEquals("LINESTRING (1 1, 1 0)", last.getField(0).toString());
+  }
+
+  @Test
+  public void testUnion_Agg_Alias() {
+    Table polygonTable = createPolygonOverlappingTable(testDataSize);
+    Table result = polygonTable.select(call("ST_Union_Agg", $(polygonColNames[0])));
     Row last = last(result);
     assertEquals(1001, ((Polygon) last.getField(0)).getArea(), 0);
   }

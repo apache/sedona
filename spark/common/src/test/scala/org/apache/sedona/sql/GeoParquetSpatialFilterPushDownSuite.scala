@@ -30,6 +30,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.FileSourceScanExec
 import org.apache.spark.sql.execution.SimpleMode
 import org.apache.spark.sql.execution.datasources.geoparquet.{GeoParquetFileFormat, GeoParquetMetaData, GeoParquetSpatialFilter}
+import org.apache.spark.sql.functions.expr
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.GeometryFactory
@@ -317,6 +318,114 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
         assert(getPushedDownSpatialFilter(dfFiltered).isEmpty)
       }
     }
+
+    it("Push down ST_BoxIntersects against a Box2D column") {
+      val (box2dDf, box2dDir) = setupBox2DCoveringFixture()
+      try {
+        // Q1 region only (region 1, center +10/+10)
+        val q1Filter =
+          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(5.0, 5.0), ST_Point(15.0, 15.0)))"
+        verifyBox2DFilter(box2dDf, q1Filter)
+
+        // Window covering Q2 and Q4 (negative X)
+        val leftHalfFilter =
+          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(-20.0, -20.0), ST_Point(-1.0, 20.0)))"
+        verifyBox2DFilter(box2dDf, leftHalfFilter)
+
+        // Disjoint window prunes everything
+        val disjointFilter =
+          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(100.0, 100.0), ST_Point(200.0, 200.0)))"
+        verifyBox2DFilter(box2dDf, disjointFilter)
+
+        // Reverse argument order: ST_BoxIntersects(lit, col) is symmetric.
+        val reversedFilter =
+          "ST_BoxIntersects(ST_MakeBox2D(ST_Point(5.0, 5.0), ST_Point(15.0, 15.0)), geom_bbox)"
+        verifyBox2DFilter(box2dDf, reversedFilter)
+      } finally {
+        FileUtils.deleteDirectory(new File(box2dDir).getParentFile)
+      }
+    }
+
+    it("ST_BoxIntersects with inverted-bound literal falls back to runtime throw") {
+      val (box2dDf, box2dDir) = setupBox2DCoveringFixture()
+      try {
+        // xmin > xmax: must not push down — otherwise Parquet's row-group filter could prune all
+        // matches and hide the expected IllegalArgumentException from the predicate's runtime
+        // evaluation.
+        val invertedFilter =
+          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(20.0, -20.0), ST_Point(-20.0, 20.0)))"
+        val dfFiltered = box2dDf.where(invertedFilter)
+        assert(
+          getPushedDownSpatialFilter(dfFiltered).isEmpty,
+          "Inverted-bound Box2D literal must not be pushed down")
+        val ex = intercept[Exception](dfFiltered.collect())
+        assert(
+          Iterator
+            .iterate(ex: Throwable)(_.getCause)
+            .takeWhile(_ != null)
+            .exists(_.isInstanceOf[IllegalArgumentException]),
+          s"Expected IllegalArgumentException in cause chain, got: $ex")
+      } finally {
+        FileUtils.deleteDirectory(new File(box2dDir).getParentFile)
+      }
+    }
+
+    it("Push down ST_BoxContains against a Box2D column") {
+      val (box2dDf, box2dDir) = setupBox2DCoveringFixture()
+      try {
+        // ST_BoxContains(box_col, lit_box) — the column box must contain the literal box. A tiny
+        // query inside Q1 is contained only by rows from region 1.
+        val containsFilter =
+          "ST_BoxContains(geom_bbox, ST_MakeBox2D(ST_Point(9.0, 9.0), ST_Point(10.0, 10.0)))"
+        verifyBox2DFilter(box2dDf, containsFilter)
+
+        // Reverse argument order: ST_BoxContains(lit_box, col) — the literal box must contain the
+        // column box. The 10x10 window in Q1 contains the 2x2 polygons centered at (5,5), (5,15),
+        // (15,5), (15,15) only partially; only rows whose envelopes lie entirely inside the window
+        // survive.
+        val reversedFilter =
+          "ST_BoxContains(ST_MakeBox2D(ST_Point(4.0, 4.0), ST_Point(16.0, 16.0)), geom_bbox)"
+        verifyBox2DFilter(box2dDf, reversedFilter)
+      } finally {
+        FileUtils.deleteDirectory(new File(box2dDir).getParentFile)
+      }
+    }
+  }
+
+  private def setupBox2DCoveringFixture(): (DataFrame, String) = {
+    val box2dParent =
+      Files.createTempDirectory("sedona_geoparquet_box2d_").toFile.getAbsolutePath
+    val box2dDir = box2dParent + "/data"
+    val withBox = df.withColumn("geom_bbox", expr("ST_Box2D(geom)"))
+    withBox.coalesce(1).write.partitionBy("region").format("geoparquet").save(box2dDir)
+    val box2dDf = sparkSession.read.format("geoparquet").load(box2dDir)
+    (box2dDf, box2dDir)
+  }
+
+  private def verifyBox2DFilter(box2dDf: DataFrame, condition: String): Unit = {
+    val dfFiltered = box2dDf.where(condition)
+
+    // Pushdown is attached and translates to a Parquet row-group filter.
+    val pushed = getPushedDownSpatialFilter(dfFiltered)
+    assert(pushed.isDefined, s"Expected spatial filter push-down for: $condition")
+    assert(
+      pushed.get.toParquetFilter.isDefined,
+      s"Expected a Parquet FilterPredicate for: $condition")
+
+    // Correctness: pushdown must not drop any matching rows. Compare against a run with the
+    // spatial filter rule disabled (so no Parquet predicate is injected from Sedona).
+    val expectedResult =
+      withConf(Map("spark.sedona.geoparquet.spatialFilterPushDown" -> "false")) {
+        box2dDf
+          .where(condition)
+          .orderBy("region", "id")
+          .select("region", "id")
+          .collect()
+          .toSeq
+      }
+    val actualResult =
+      dfFiltered.orderBy("region", "id").select("region", "id").collect().toSeq
+    assert(expectedResult == actualResult, s"Result mismatch under push-down for: $condition")
   }
 
   /**

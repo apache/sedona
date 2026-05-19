@@ -57,6 +57,14 @@ class GeoParquetToSparkSchemaConverter(
   private val geoParquetMetaData: GeoParquetMetaData =
     GeoParquetUtils.parseGeoParquetMetaData(keyValueMetaData, parameters)
 
+  /**
+   * Cached SRID values per geometry column, computed once from CRS metadata to avoid repeated
+   * PROJJSON parsing during row conversion.
+   */
+  private val sridCache: Map[String, Int] = geoParquetMetaData.columns.map {
+    case (name, fieldMetadata) => name -> GeoParquetMetaData.extractSridFromCrs(fieldMetadata.crs)
+  }
+
   def this(
       keyValueMetaData: java.util.Map[String, String],
       conf: PortableSQLConf,
@@ -77,6 +85,21 @@ class GeoParquetToSparkSchemaConverter(
     inferTimestampNTZ =
       conf.get(PortableSQLConf.PARQUET_INFER_TIMESTAMP_NTZ_ENABLED.key).toBoolean,
     parameters = parameters)
+
+  /**
+   * Returns the SRID for a geometry column based on the CRS metadata in the GeoParquet file. The
+   * result is served from a pre-computed cache to avoid repeated PROJJSON parsing.
+   *
+   * @param columnName
+   *   name of the geometry column
+   * @return
+   *   the SRID extracted from the CRS metadata. Returns 4326 if the CRS is omitted, 0 if the CRS
+   *   is null or unrecognized, or the EPSG code if the PROJJSON contains an EPSG identifier. If
+   *   the column name is not found in the GeoParquet metadata, returns 0.
+   */
+  def getSrid(columnName: String): Int = {
+    sridCache.getOrElse(columnName, 0)
+  }
 
   /**
    * Returns true if TIMESTAMP_NTZ type is enabled in this ParquetToSparkSchemaConverter.
@@ -193,7 +216,7 @@ class GeoParquetToSparkSchemaConverter(
       case BINARY =>
         originalType match {
           case UTF8 | ENUM | JSON => StringType
-          case null if isGeometryField(field.getName) => GeometryUDT
+          case null if isGeometryField(field.getName) => GeometryUDT()
           case null if assumeBinaryIsString => StringType
           case null => BinaryType
           case BSON => BinaryType

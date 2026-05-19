@@ -177,7 +177,7 @@ private[apache] case class ST_GeomFromWKB(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def inputTypes: Seq[AbstractDataType] = Seq(TypeCollection(StringType, BinaryType))
 
@@ -217,7 +217,7 @@ private[apache] case class ST_GeomFromEWKB(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def inputTypes: Seq[AbstractDataType] = Seq(TypeCollection(StringType, BinaryType))
 
@@ -272,7 +272,7 @@ private[apache] case class ST_LineFromWKB(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def inputTypes: Seq[AbstractDataType] =
     if (inputExpressions.length == 1) Seq(TypeCollection(StringType, BinaryType))
@@ -329,7 +329,7 @@ private[apache] case class ST_LinestringFromWKB(inputExpressions: Seq[Expression
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def inputTypes: Seq[AbstractDataType] =
     if (inputExpressions.length == 1) Seq(TypeCollection(StringType, BinaryType))
@@ -386,7 +386,7 @@ private[apache] case class ST_PointFromWKB(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def inputTypes: Seq[AbstractDataType] =
     if (inputExpressions.length == 1) Seq(TypeCollection(StringType, BinaryType))
@@ -435,7 +435,7 @@ private[apache] case class ST_GeomFromGeoJSON(inputExpressions: Seq[Expression])
     }
   }
 
-  override def dataType: DataType = GeometryUDT
+  override def dataType: DataType = GeometryUDT()
 
   override def children: Seq[Expression] = inputExpressions
 
@@ -532,6 +532,35 @@ private[apache] case class ST_MakeEnvelope(inputExpressions: Seq[Expression])
  */
 private[apache] case class ST_PolygonFromEnvelope(inputExpressions: Seq[Expression])
     extends InferredExpression(Constructors.polygonFromEnvelope _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Construct a Box2D from two corner points (lower-left, upper-right). Coordinates are taken
+ * verbatim; ordering is not validated.
+ *
+ * @param inputExpressions
+ */
+private[apache] case class ST_MakeBox2D(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.makeBox2D _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Convert a Box2D to a closed rectangular polygon Geometry. Equivalent to PostGIS {@code
+ * box2d::geometry}. `CAST(box AS geometry)` is also accepted (resolved to this expression by the
+ * Box2D cast resolution rule).
+ *
+ * @param inputExpressions
+ */
+private[apache] case class ST_GeomFromBox2D(inputExpressions: Seq[Expression])
+    extends InferredExpression(Constructors.geomFromBox2D _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

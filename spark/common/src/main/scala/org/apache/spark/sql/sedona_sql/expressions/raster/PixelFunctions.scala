@@ -59,7 +59,7 @@ private[apache] case class RS_PixelAsPoints(inputExpressions: Seq[Expression])
 
   override def dataType: DataType = ArrayType(
     new StructType()
-      .add("geom", GeometryUDT)
+      .add("geom", GeometryUDT())
       .add("value", DoubleType)
       .add("x", IntegerType)
       .add("y", IntegerType))
@@ -88,7 +88,7 @@ private[apache] case class RS_PixelAsPoints(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, IntegerType)
+  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT(), IntegerType)
 }
 
 private[apache] case class RS_PixelAsPolygon(inputExpressions: Seq[Expression])
@@ -107,7 +107,7 @@ private[apache] case class RS_PixelAsPolygons(inputExpressions: Seq[Expression])
 
   override def dataType: DataType = ArrayType(
     new StructType()
-      .add("geom", GeometryUDT)
+      .add("geom", GeometryUDT())
       .add("value", DoubleType)
       .add("x", IntegerType)
       .add("y", IntegerType))
@@ -137,7 +137,7 @@ private[apache] case class RS_PixelAsPolygons(inputExpressions: Seq[Expression])
     copy(inputExpressions = newChildren)
   }
 
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, IntegerType)
+  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT(), IntegerType)
 }
 
 private[apache] case class RS_PixelAsCentroid(inputExpressions: Seq[Expression])
@@ -156,7 +156,7 @@ private[apache] case class RS_PixelAsCentroids(inputExpressions: Seq[Expression]
 
   override def dataType: DataType = ArrayType(
     new StructType()
-      .add("geom", GeometryUDT)
+      .add("geom", GeometryUDT())
       .add("value", DoubleType)
       .add("x", IntegerType)
       .add("y", IntegerType))
@@ -186,7 +186,7 @@ private[apache] case class RS_PixelAsCentroids(inputExpressions: Seq[Expression]
     copy(inputExpressions = newChildren)
   }
 
-  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT, IntegerType)
+  override def inputTypes: Seq[AbstractDataType] = Seq(RasterUDT(), IntegerType)
 }
 
 private[apache] case class RS_Values(inputExpressions: Seq[Expression])

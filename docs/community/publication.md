@@ -19,7 +19,7 @@
 
 # Publication
 
-Apache Sedona was formerly called GeoSpark, initiated by Arizona State University [Data Systems Lab](https://www.datasyslab.net/).
+Apache Sedona was formerly called GeoSpark, initiated by Arizona State University [Data Systems Lab](https://www.datasyslab.org/).
 
 ## Key publications
 

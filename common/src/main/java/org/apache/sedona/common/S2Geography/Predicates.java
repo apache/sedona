@@ -29,6 +29,22 @@ public class Predicates {
     return S2BooleanOperation.intersects(geo1.shapeIndex, geo2.shapeIndex, options);
   }
 
+  /**
+   * Fast intersects between a single point and a ShapeIndex. Avoids building a ShapeIndex for the
+   * point side — only the complex geometry needs an index. Uses S2ClosestEdgeQuery with
+   * includeInteriors=true (default) so a point in a polygon interior returns distance 0.
+   */
+  public static boolean S2_intersectsPointWithIndex(S2Point point, ShapeIndexGeography geo) {
+    S2ClosestEdgeQuery query = S2ClosestEdgeQuery.builder().build(geo.shapeIndex);
+    S2ClosestEdgeQuery.PointTarget<S1ChordAngle> target =
+        new S2ClosestEdgeQuery.PointTarget<>(point);
+    Optional<S2BestEdgesQueryBase.Result> result = query.findClosestEdge(target);
+    if (!result.isPresent()) {
+      return false;
+    }
+    return ((S1ChordAngle) result.get().distance()).getLength2() == 0.0;
+  }
+
   public boolean S2_equals(
       ShapeIndexGeography geo1, ShapeIndexGeography geo2, S2BooleanOperation.Options options) {
     return S2BooleanOperation.equals(geo1.shapeIndex, geo2.shapeIndex, options);

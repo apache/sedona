@@ -40,6 +40,12 @@ public class Haversine {
    */
   public static final double AVG_EARTH_RADIUS = 6371008.0;
 
+  /**
+   * Polar radius of the WGS-84 spheroid, in meters. Used as a sphere radius when expanding
+   * envelopes so that the expansion upper-bounds both spherical and spheroidal distances.
+   */
+  public static final double EARTH_POLAR_RADIUS = 6357000.0;
+
   public static double distance(Geometry geom1, Geometry geom2, double avg_earth_radius) {
     Coordinate coordinate1 =
         geom1.getGeometryType().equals("Point")

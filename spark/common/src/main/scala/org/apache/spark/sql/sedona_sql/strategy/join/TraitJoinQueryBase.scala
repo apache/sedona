@@ -18,14 +18,17 @@
  */
 package org.apache.spark.sql.sedona_sql.strategy.join
 
+import org.apache.sedona.common.Constructors
+import org.apache.sedona.common.S2Geography.GeographyWKBSerializer
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.utils.{GeometrySerializer, RasterSerializer}
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeRow}
 import org.apache.spark.sql.execution.SparkPlan
-import org.apache.spark.sql.sedona_sql.UDT.RasterUDT
-import org.locationtech.jts.geom.Geometry
+import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, RasterUDT}
+import org.locationtech.jts.geom.{Geometry, GeometryFactory}
 
 trait TraitJoinQueryBase {
   self: SparkPlan =>
@@ -48,10 +51,40 @@ trait TraitJoinQueryBase {
     spatialRdd.setRawSpatialRDD(
       rdd
         .map { x =>
-          val shape =
-            GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
+          // Null shape rows materialise as an empty geometry collection so they carry the row
+          // payload through the partitioner / index without participating in any spatial match
+          // — mirrors the pre-existing `GeometrySerializer.deserialize(null)` fallback.
+          val shape = TraitJoinQueryBase.shapeToGeometryOrEmpty(shapeExpression, x)
           shape.setUserData(x.copy)
           shape
+        }
+        .toJavaRDD())
+    spatialRdd
+  }
+
+  /**
+   * Builds a SpatialRDD from a column of GeographyUDT bytes. Each row becomes a JTS geometry
+   * whose envelope is the Geography's lat/lng bounding rectangle (full-longitude when the
+   * rectangle wraps the antimeridian). The Geography object is carried alongside the original row
+   * in `userData` via [[GeographyJoinShape]] so the join executor can perform S2-based predicate
+   * refinement and emit the row.
+   */
+  def toGeographySpatialRDD(
+      rdd: RDD[UnsafeRow],
+      shapeExpression: Expression): SpatialRDD[Geometry] = {
+    val spatialRdd = new SpatialRDD[Geometry]
+    spatialRdd.setRawSpatialRDD(
+      rdd
+        .flatMap { x =>
+          val geogBytes = shapeExpression.eval(x).asInstanceOf[Array[Byte]]
+          if (geogBytes == null) {
+            None
+          } else {
+            val geog = GeographyWKBSerializer.deserialize(geogBytes)
+            val shape = JoinedGeometry.geographyToEnvelopeGeometry(geog)
+            shape.setUserData(GeographyJoinShape(geog, x.copy))
+            Some(shape)
+          }
         }
         .toJavaRDD())
     spatialRdd
@@ -94,8 +127,7 @@ trait TraitJoinQueryBase {
     spatialRdd.setRawSpatialRDD(
       rdd
         .map { x =>
-          val shape =
-            GeometrySerializer.deserialize(shapeExpression.eval(x).asInstanceOf[Array[Byte]])
+          val shape = TraitJoinQueryBase.shapeToGeometryOrEmpty(shapeExpression, x)
           val distance = boundRadius.eval(x).asInstanceOf[Double]
           val expandedEnvelope =
             JoinedGeometry.geometryToExpandedEnvelope(shape, distance, isGeography)
@@ -103,6 +135,38 @@ trait TraitJoinQueryBase {
           expandedEnvelope
         }
         .toJavaRDD())
+    spatialRdd
+  }
+
+  /**
+   * Geography variant of [[toExpandedEnvelopeRDD]]. Each row becomes a JTS geometry whose
+   * envelope is the Geography's lat/lng bounding rectangle expanded by `boundRadius` meters using
+   * the Haversine-based polar-radius approximation in
+   * [[JoinedGeometry.geometryToExpandedEnvelope]] (with `isGeography=true`). The Geography object
+   * and per-row radius are carried alongside the original row in `userData` via
+   * [[GeographyJoinShape]] so the join executor can perform S2-based ST_DWithin refinement.
+   */
+  def toExpandedGeographyEnvelopeRDD(
+      rdd: RDD[UnsafeRow],
+      shapeExpression: Expression,
+      boundRadius: Expression): SpatialRDD[Geometry] = {
+    val spatialRdd = new SpatialRDD[Geometry]
+    spatialRdd.setRawSpatialRDD(rdd
+      .flatMap { x =>
+        val geogBytes = shapeExpression.eval(x).asInstanceOf[Array[Byte]]
+        if (geogBytes == null) {
+          None
+        } else {
+          val geog = GeographyWKBSerializer.deserialize(geogBytes)
+          val distance = boundRadius.eval(x).asInstanceOf[Double]
+          val baseEnvelope = JoinedGeometry.geographyToEnvelopeGeometry(geog)
+          val expandedEnvelope =
+            JoinedGeometry.geometryToExpandedEnvelope(baseEnvelope, distance, isGeography = true)
+          expandedEnvelope.setUserData(GeographyJoinShape(geog, x.copy, distance))
+          Some(expandedEnvelope)
+        }
+      }
+      .toJavaRDD())
     spatialRdd
   }
 
@@ -115,5 +179,63 @@ trait TraitJoinQueryBase {
       dominantShapes.spatialPartitioning(sedonaConf.getJoinGridType, numPartitions)
       followerShapes.spatialPartitioning(dominantShapes.getPartitioner)
     }
+  }
+}
+
+object TraitJoinQueryBase {
+
+  /**
+   * Materialise a shape column value as a JTS [[Geometry]]. Box2D-typed columns are turned into
+   * the closed rectangular polygon implied by their `(xmin, ymin, xmax, ymax)` bounds; all other
+   * shape columns are deserialised from the Sedona geometry binary form.
+   *
+   * Producing a JTS rectangle here lets the rest of the join machinery — partitioner, R-tree
+   * `IndexBuilder`, refine evaluator — stay shape-agnostic. JTS already short-circuits
+   * rectangle-rectangle predicates (`Polygon.isRectangle` triggers `RectangleIntersects` /
+   * `RectangleContains`), so a `ST_BoxIntersects` join naturally pays only the four-double
+   * envelope comparison at refine time.
+   *
+   * Inverted Box2D bounds (`xmin > xmax` / `ymin > ymax`) are rejected with the same
+   * `IllegalArgumentException` raised by `Predicates.boxIntersects` / `boxContains`. Inverted
+   * bounds have no defined planar meaning today (they are reserved for future
+   * antimeridian-wraparound semantics on Geography bboxes) and would silently mis-prune the
+   * R-tree if accepted here.
+   *
+   * Returns `null` when the shape column evaluates to NULL; the caller is expected to either skip
+   * the row or substitute an empty geometry.
+   */
+  def shapeToGeometry(shapeExpression: Expression, row: InternalRow): Geometry = {
+    val evaluated = shapeExpression.eval(row)
+    if (evaluated == null) {
+      null
+    } else
+      shapeExpression.dataType match {
+        case _: Box2DUDT =>
+          val box = evaluated.asInstanceOf[InternalRow]
+          val xmin = box.getDouble(0)
+          val ymin = box.getDouble(1)
+          val xmax = box.getDouble(2)
+          val ymax = box.getDouble(3)
+          if (xmin > xmax || ymin > ymax) {
+            throw new IllegalArgumentException(
+              "Box2D join input has inverted bounds (xmin > xmax or ymin > ymax). " +
+                "Planar Box2D predicates require ordered intervals; inverted bounds are " +
+                "reserved for future antimeridian wraparound semantics.")
+          }
+          Constructors.polygonFromEnvelope(xmin, ymin, xmax, ymax)
+        case _ =>
+          GeometrySerializer.deserialize(evaluated.asInstanceOf[Array[Byte]])
+      }
+  }
+
+  /**
+   * Convenience wrapper that substitutes an empty geometry collection for NULL shapes. Used by
+   * the partitioned-RDD path where each row must carry a non-null geometry so the original
+   * `UnsafeRow` survives to outer-join output; spatial predicates against the empty geometry
+   * produce no matches, matching the legacy `GeometrySerializer.deserialize(null)` behaviour.
+   */
+  def shapeToGeometryOrEmpty(shapeExpression: Expression, row: InternalRow): Geometry = {
+    val shape = shapeToGeometry(shapeExpression, row)
+    if (shape == null) new GeometryFactory().createGeometryCollection() else shape
   }
 }

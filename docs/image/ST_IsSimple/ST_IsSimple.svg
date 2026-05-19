@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="300" viewBox="0 0 500 300">
+  <defs>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <rect width="500" height="300" fill="white" rx="8"/>
+  <polyline points="140.0,260.0 360.0,40.0 360.0,260.0 140.0,40.0" fill="none" stroke="#4a90d9" stroke-width="2.5" stroke-opacity="1.0"/>
+  <circle cx="250.0" cy="150.0" r="8" fill="#e74c3c" fill-opacity="0.3" stroke="#e74c3c" stroke-width="2"/>
+  <line x1="245.0" y1="145.0" x2="255.0" y2="155.0" stroke="#e74c3c" stroke-width="2"/>
+  <line x1="255.0" y1="145.0" x2="245.0" y2="155.0" stroke="#e74c3c" stroke-width="2"/>
+  <rect x="164" y="8" width="172" height="28" rx="14" fill="#e74c3c" fill-opacity="0.15" stroke="#e74c3c" stroke-width="1.5"/>
+  <text x="250" y="27" text-anchor="middle" fill="#e74c3c" font-size="14" font-weight="bold">→ false</text>
+  <text x="250" y="275" text-anchor="middle" fill="#777" font-size="11">Self-intersecting</text>
+  <text x="490" y="290" text-anchor="end" fill="#999" font-size="11">ST_IsSimple</text>
+</svg>

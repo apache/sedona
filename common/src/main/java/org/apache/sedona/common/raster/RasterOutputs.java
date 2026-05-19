@@ -36,6 +36,8 @@ import javax.imageio.ImageWriteParam;
 import javax.media.jai.InterpolationNearest;
 import javax.media.jai.JAI;
 import javax.media.jai.RenderedOp;
+import org.apache.sedona.common.raster.cog.CogOptions;
+import org.apache.sedona.common.raster.cog.CogWriter;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.coverage.grid.GridCoverageWriter;
 import org.geotools.api.metadata.spatial.PixelOrientation;
@@ -85,6 +87,81 @@ public class RasterOutputs {
 
   public static byte[] asGeoTiff(GridCoverage2D raster) {
     return asGeoTiff(raster, null, -1);
+  }
+
+  /**
+   * Creates a Cloud Optimized GeoTIFF (COG) byte array from the given raster. The COG format
+   * arranges tiles and overviews in an order optimized for HTTP range-request based access,
+   * enabling efficient partial reads from cloud storage.
+   *
+   * @param raster The input raster
+   * @param options COG generation options (compression, tileSize, resampling, overviewCount). Use
+   *     {@link CogOptions#defaults()} for default settings or {@link CogOptions#builder()} to
+   *     customize.
+   * @return COG file as byte array
+   */
+  public static byte[] asCloudOptimizedGeoTiff(GridCoverage2D raster, CogOptions options) {
+    try {
+      return CogWriter.write(raster, options);
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to write Cloud Optimized GeoTIFF", e);
+    }
+  }
+
+  // ---------- asCOG overloads (used by RS_AsCOG via InferredExpression) ----------
+
+  public static byte[] asCOG(GridCoverage2D raster) {
+    return asCloudOptimizedGeoTiff(raster, CogOptions.defaults());
+  }
+
+  public static byte[] asCOG(GridCoverage2D raster, String compression) {
+    return asCloudOptimizedGeoTiff(raster, CogOptions.builder().compression(compression).build());
+  }
+
+  public static byte[] asCOG(GridCoverage2D raster, String compression, int tileSize) {
+    return asCloudOptimizedGeoTiff(
+        raster, CogOptions.builder().compression(compression).tileSize(tileSize).build());
+  }
+
+  public static byte[] asCOG(
+      GridCoverage2D raster, String compression, int tileSize, double quality) {
+    return asCloudOptimizedGeoTiff(
+        raster,
+        CogOptions.builder()
+            .compression(compression)
+            .tileSize(tileSize)
+            .compressionQuality(quality)
+            .build());
+  }
+
+  public static byte[] asCOG(
+      GridCoverage2D raster, String compression, int tileSize, double quality, String resampling) {
+    return asCloudOptimizedGeoTiff(
+        raster,
+        CogOptions.builder()
+            .compression(compression)
+            .tileSize(tileSize)
+            .compressionQuality(quality)
+            .resampling(resampling)
+            .build());
+  }
+
+  public static byte[] asCOG(
+      GridCoverage2D raster,
+      String compression,
+      int tileSize,
+      double quality,
+      String resampling,
+      int overviewCount) {
+    return asCloudOptimizedGeoTiff(
+        raster,
+        CogOptions.builder()
+            .compression(compression)
+            .tileSize(tileSize)
+            .compressionQuality(quality)
+            .resampling(resampling)
+            .overviewCount(overviewCount)
+            .build());
   }
 
   /**

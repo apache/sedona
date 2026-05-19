@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_MinimumBoundingRadius</text>
+  <path d="M 334.62 150.0 L 333.89 138.96 L 331.73 128.1 L 328.17 117.62 L 323.28 107.69 L 317.13 98.49 L 309.83 90.17 L 301.51 82.87 L 292.31 76.72 L 282.38 71.83 L 271.9 68.27 L 261.04 66.11 L 250.0 65.38 L 238.96 66.11 L 228.1 68.27 L 217.62 71.83 L 207.69 76.72 L 198.49 82.87 L 190.17 90.17 L 182.87 98.49 L 176.72 107.69 L 171.83 117.62 L 168.27 128.1 L 166.11 138.96 L 165.38 150.0 L 166.11 161.04 L 168.27 171.9 L 171.83 182.38 L 176.72 192.31 L 182.87 201.51 L 190.17 209.83 L 198.49 217.13 L 207.69 223.28 L 217.62 228.17 L 228.1 231.73 L 238.96 233.89 L 250.0 234.62 L 261.04 233.89 L 271.9 231.73 L 282.38 228.17 L 292.31 223.28 L 301.51 217.13 L 309.83 209.83 L 317.13 201.51 L 323.28 192.31 L 328.17 182.38 L 331.73 171.9 L 333.89 161.04 L 334.62 150.0 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="2.5" fill-rule="evenodd" />
+  <path d="M 177.06 193.04 L 322.94 193.04 L 250.0 65.38 L 177.06 193.04 Z" fill="rgba(74,144,217,0.15)" stroke="#4a90d9" stroke-width="2" fill-rule="evenodd" />
+  <circle cx="250.0" cy="150.0" r="8" fill="white" stroke="#2ecc71" stroke-width="2.5" />
+  <circle cx="250.0" cy="150.0" r="4" fill="#2ecc71" />
+  <line x1="250.0" y1="150.0" x2="250.0" y2="65.38" stroke="#2ecc71" stroke-width="2" stroke-dasharray="4,3" />
+  <text x="258" y="103" font-size="13" fill="#2ecc71" font-style="italic">radius</text>
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns center and radius of the smallest bounding circle</text>
+  <rect x="176" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="192" y="266" font-size="13" fill="#333333">Input</text>
+  <rect x="246" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="262" y="266" font-size="13" fill="#333333">Result</text>
+</svg>

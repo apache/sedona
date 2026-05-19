@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="190" viewBox="0 0 400 190">
+  <rect width="400" height="190" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_BingTilePolygon</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Get bounding Polygon of a Bing Tile</text>
+  <rect x="80" y="48" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="80" y="83" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="80" y="118" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="115" y="48" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="115" y="83" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="115" y="118" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="150" y="48" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="150" y="83" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="150" y="118" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="185" y="48" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="185" y="83" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="185" y="118" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="220" y="48" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="220" y="83" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="220" y="118" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="255" y="48" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="255" y="83" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="255" y="118" width="35" height="35" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="150" y="83" width="35" height="35" fill="rgba(74,144,217,0.3)" stroke="#1565C0" stroke-width="2"/>
+  <circle cx="150" cy="83" r="2.5" fill="#1565C0"/>
+  <circle cx="185" cy="83" r="2.5" fill="#1565C0"/>
+  <circle cx="185" cy="118" r="2.5" fill="#1565C0"/>
+  <circle cx="150" cy="118" r="2.5" fill="#1565C0"/>
+  <text x="167" y="104" font-family="monospace" font-size="7" fill="#1565C0" text-anchor="middle" font-weight="bold">quadkey</text>
+  <text x="200" y="162" font-family="monospace" font-size="10" fill="#1565C0" text-anchor="middle">Returns the tile's bounding Polygon geometry</text>
+  <text x="200" y="178" font-family="monospace" font-size="9" fill="#666" text-anchor="middle">with corner coordinates as vertices</text>
+</svg>

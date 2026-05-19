@@ -21,7 +21,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "apache-sedona"
-version = "1.8.0"
+version = "1.9.0"
 description = "Apache Sedona is a cluster computing system for processing large-scale spatial data"
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -37,13 +37,17 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-spark = ["pyspark>=3.4.0"]
+spark = [
+  "pyspark>=3.4.0,<4.1.0; python_version < '3.10'",
+  "pyspark>=3.4.0,<4.2.0; python_version >= '3.10'",
+]
 pydeck-map = ["geopandas", "pydeck==0.8.0"]
 kepler-map = ["geopandas", "keplergl==0.3.2"]
 flink = ["apache-flink>=1.19.0"]
 db = ["sedonadb[geopandas]; python_version >= '3.9'"]
 all = [
-  "pyspark>=3.4.0",
+  "pyspark>=3.4.0,<4.1.0; python_version < '3.10'",
+  "pyspark>=3.4.0,<4.2.0; python_version >= '3.10'",
   "geopandas",
   "pydeck==0.8.0",
   "keplergl==0.3.2",
@@ -54,6 +58,7 @@ all = [
 dev = [
   "pytest",
   "pytest-cov",
+  "setuptools>=69,<82",
   "notebook==6.4.12",
   "jupyter",
   "mkdocs",
@@ -63,14 +68,15 @@ dev = [
   "matplotlib",  # implicit dependency of esda
   # prevent incompatibility with pysal 4.7.0, which is what is resolved to when shapely >2 is specified
   "scipy<=1.10.0",
-  "pandas>=2.0.0",
+  "pandas>=2.0.0,<3.0.0",
   "numpy<2",
   "geopandas",
   # https://stackoverflow.com/questions/78949093/how-to-resolve-attributeerror-module-fiona-has-no-attribute-path
   # cannot set geopandas>=0.14.4 since it doesn't support python 3.8, so we pin fiona to <1.10.0
   "fiona<1.10.0",
   "pyarrow",
-  "pyspark>=3.4.0",
+  "pyspark>=3.4.0,<4.1.0; python_version < '3.10'",
+  "pyspark>=3.4.0,<4.2.0; python_version >= '3.10'",
   "keplergl==0.3.2",
   "pydeck==0.8.0",
   "pystac==1.5.0",

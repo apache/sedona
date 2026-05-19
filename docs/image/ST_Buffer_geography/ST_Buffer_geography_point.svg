@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <radialGradient id="globePoint" cx="42%" cy="38%" r="65%">
+      <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="60%" stop-color="#e7e7f7" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#c5c5eb" stop-opacity="0.95"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Title -->
+  <text x="250" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">ST_Buffer(point, distance) on the sphere</text>
+  <text x="250" y="40" text-anchor="middle" font-size="11" fill="#666666">distance is measured in meters along the spheroid</text>
+
+  <!-- Globe (curvature suggested by gradient) -->
+  <circle cx="250" cy="160" r="88" fill="url(#globePoint)" stroke="#8e8ed0" stroke-width="1.6"/>
+  <!-- Latitude / longitude hints -->
+  <ellipse cx="250" cy="160" rx="88" ry="22" fill="none" stroke="#8e8ed0" stroke-width="0.6" stroke-opacity="0.7"/>
+  <ellipse cx="250" cy="160" rx="22" ry="88" fill="none" stroke="#8e8ed0" stroke-width="0.6" stroke-opacity="0.7"/>
+
+  <!-- Geodesic buffer (an octagonal approximation around the point) -->
+  <polygon points="250,118 280,128 294,158 280,188 250,202 220,188 206,158 220,128"
+           fill="rgba(46,204,113,0.22)" stroke="#2ecc71" stroke-width="1.8"/>
+
+  <!-- Original point -->
+  <circle cx="250" cy="158" r="4.5" fill="#1565C0" stroke="#ffffff" stroke-width="1.2"/>
+
+  <!-- Distance arrow from point to buffer edge -->
+  <line x1="250" y1="158" x2="294" y2="158" stroke="#E53935" stroke-width="1.5"/>
+  <line x1="250" y1="154" x2="250" y2="162" stroke="#E53935" stroke-width="1"/>
+  <line x1="294" y1="148" x2="294" y2="168" stroke="#E53935" stroke-width="1"/>
+  <text x="270" y="151" text-anchor="middle" font-size="11" fill="#E53935" font-weight="bold">d (m)</text>
+
+  <!-- Legend -->
+  <rect x="60" y="265" width="14" height="14" rx="2" fill="url(#globePoint)" stroke="#8e8ed0" stroke-width="1"/>
+  <text x="78" y="276" font-size="11" fill="#333333">Sphere (Earth)</text>
+
+  <circle cx="180" cy="272" r="5" fill="#1565C0" stroke="#ffffff" stroke-width="1"/>
+  <text x="190" y="276" font-size="11" fill="#1565C0">Input point</text>
+
+  <rect x="262" y="265" width="14" height="14" rx="2" fill="rgba(46,204,113,0.4)" stroke="#2ecc71" stroke-width="1"/>
+  <text x="280" y="276" font-size="11" fill="#2ecc71">Buffer (Geography polygon)</text>
+</svg>

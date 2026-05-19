@@ -21,8 +21,8 @@ package org.apache.sedona.common.utils;
 import org.locationtech.jts.geom.Point;
 
 public class PointGeoHashEncoder {
-  private static String base32 = "0123456789bcdefghjkmnpqrstuvwxyz";
-  private static int[] bits = new int[] {16, 8, 4, 2, 1};
+  private static final String base32 = GeoHashUtils.BASE32;
+  private static final int[] bits = GeoHashUtils.BITS;
 
   public static String calculateGeoHash(Point geom, long precision) {
     BBox bbox = new BBox(-180, 180, -90, 90);

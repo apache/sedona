@@ -328,7 +328,7 @@ case class StacBatch(
             val geometryFieldMetaData = GeometryFieldMetaData(
               encoding = "WKB",
               geometryTypes = geometryTypes,
-              bbox = bbox,
+              bbox = Some(bbox),
               crs = None,
               covering = None)
 

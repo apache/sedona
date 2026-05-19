@@ -112,11 +112,12 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
     val geom = df.head().getAs[Geometry]("geom")
     assert(geom.getGeometryType == "MultiPolygon")
 
+    // S2 normalizes polygon loop orientation, so hole winding may differ from input
     val expectedWkt =
       "MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), " +
-        "(20 20, 20 60, 60 60, 60 20, 20 20)), " +
+        "(20 20, 60 20, 60 60, 20 60, 20 20)), " +
         "((30 30, 50 30, 50 50, 30 50, 30 30), " +
-        "(36 36, 36 44, 44 44, 44 36, 36 36)))"
+        "(36 36, 44 36, 44 44, 36 44, 36 36)))"
 
     val writer = new WKTWriter()
     writer.setFormatted(false)
@@ -135,6 +136,44 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
       .select(st_constructors.ST_GeomToGeography(col("geom")).as("geog"))
     val geog = df.head().getAs[Geography]("geog")
     assertEquals(wkt, geog.toString)
+  }
+
+  it("passed ST_GeogFromText with srid") {
+    val df = sparkSession
+      .sql("SELECT 'POINT (0.0 1.0)' AS wkt")
+      .select(st_constructors.ST_GeogFromText(col("wkt"), lit(4326)).as("g"))
+    val geog = df.first().get(0).asInstanceOf[Geography]
+    assertEquals("POINT (0 1)", geog.toString(new PrecisionModel(PrecisionModel.FIXED)))
+    assertEquals(4326, geog.getSRID)
+  }
+
+  it("passed ST_GeogFromText without srid") {
+    val df = sparkSession
+      .sql("SELECT 'POINT (3 4)' AS wkt")
+      .select(st_constructors.ST_GeogFromText(col("wkt")).as("g"))
+    val geog = df.first().get(0).asInstanceOf[Geography]
+    assertEquals("POINT (3 4)", geog.toString(new PrecisionModel(PrecisionModel.FIXED)))
+    assertEquals(0, geog.getSRID)
+  }
+
+  it("passed ST_GeogCollFromText with srid") {
+    val wkt = "GEOMETRYCOLLECTION (POINT (1 2), LINESTRING (0 0, 1 1))"
+    val df = sparkSession
+      .sql(s"SELECT '$wkt' AS wkt")
+      .select(st_constructors.ST_GeogCollFromText(col("wkt"), lit(4326)).as("g"))
+    val geog = df.first().get(0).asInstanceOf[Geography]
+    assertEquals(4326, geog.getSRID)
+    assertEquals("GEOMETRYCOLLECTION", geog.toString.takeWhile(_ != ' '))
+  }
+
+  it("passed ST_GeogCollFromText without srid") {
+    val wkt = "GEOMETRYCOLLECTION (POINT (1 2), LINESTRING (0 0, 1 1))"
+    val df = sparkSession
+      .sql(s"SELECT '$wkt' AS wkt")
+      .select(st_constructors.ST_GeogCollFromText(col("wkt")).as("g"))
+    val geog = df.first().get(0).asInstanceOf[Geography]
+    assertEquals(0, geog.getSRID)
+    assertEquals("GEOMETRYCOLLECTION", geog.toString.takeWhile(_ != ' '))
   }
 
 }

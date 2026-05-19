@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="200" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_DWithin(A, B, d)</text>
+  <rect x="325" y="8" width="60" height="22" rx="4" fill="#27ae60" />
+  <text x="355" y="24" text-anchor="middle" font-size="12" font-weight="bold" fill="white">TRUE</text>
+  <circle cx="200.0" cy="150.0" r="84.62" fill="rgba(243,156,18,0.1)" stroke="#f39c12" stroke-width="1.5" stroke-dasharray="6,4" />
+  <line x1="200.0" y1="150.0" x2="263.46" y2="150.0" stroke="#f39c12" stroke-width="1.5" stroke-dasharray="6,4" />
+  <text x="237.73" y="144.0" font-size="13" fill="#f39c12" font-style="italic">d</text>
+  <circle cx="263.46" cy="150.0" r="5" fill="#d94a4a" stroke="#d94a4a" stroke-width="1.5" />
+  <text x="272.46" y="143.0" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+  <circle cx="200.0" cy="150.0" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <text x="209.0" y="143.0" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <text x="200" y="290" text-anchor="middle" font-size="12" fill="#666666" font-style="italic">Distance between A and B ≤ d</text>
+</svg>

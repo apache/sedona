@@ -200,7 +200,7 @@ def unique_srid_from_ewkb(obj):
         return None
 
     # WKB Z high byte is 0x80
-    # WKB M high byte is is 0x40
+    # WKB M high byte is 0x40
     # EWKB SRID high byte is 0x20
     # High bytes where the SRID is set would be
     # [0x20, 0x20 | 0x40, 0x20 | 0x80, 0x20 | 0x40 | 0x80]

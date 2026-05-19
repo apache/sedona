@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="170" viewBox="0 0 400 170">
+  <rect width="400" height="170" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_DBSCAN</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">epsilon=0.8, minPoints=3</text>
+  <circle cx="163.4" cy="118.1" r="5" fill="#1565C0" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="170.3" cy="113.6" r="5" fill="#1565C0" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="158.9" cy="120.4" r="5" fill="#1565C0" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="165.7" cy="125.0" r="5" fill="#1565C0" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="172.6" cy="115.9" r="5" fill="#1565C0" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="232.0" cy="49.6" r="5" fill="#43A047" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="236.6" cy="54.1" r="5" fill="#43A047" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="229.7" cy="47.3" r="5" fill="#43A047" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="238.9" cy="45.0" r="5" fill="#43A047" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="227.4" cy="56.4" r="5" fill="#43A047" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="232.0" cy="118.1" r="5" fill="#FF6F00" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="238.9" cy="122.7" r="5" fill="#FF6F00" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="227.4" cy="113.6" r="5" fill="#FF6F00" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="234.3" cy="111.3" r="5" fill="#FF6F00" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="241.1" cy="118.1" r="5" fill="#FF6F00" fill-opacity="0.7" stroke="#fff" stroke-width="1"/>
+  <circle cx="197.7" cy="61.0" r="5" fill="#E53935" fill-opacity="0.5" stroke="#E53935" stroke-width="1.5" stroke-dasharray="2,2"/>
+  <text x="205.7" y="65.0" font-family="monospace" font-size="8" fill="#E53935">noise</text>
+  <text x="166.2" y="104.6" font-family="monospace" font-size="8" fill="#1565C0" text-anchor="middle">Cluster 0</text>
+  <text x="232.9" y="36.5" font-family="monospace" font-size="8" fill="#43A047" text-anchor="middle">Cluster 1</text>
+  <text x="234.7" y="102.8" font-family="monospace" font-size="8" fill="#FF6F00" text-anchor="middle">Cluster 2</text>
+  <rect x="110" y="152" width="8" height="8" fill="#1565C0" stroke="#1565C0" stroke-width="1"/>
+  <text x="122" y="160" font-family="monospace" font-size="9" fill="#1565C0">Cluster</text>
+  <rect x="200" y="152" width="8" height="8" fill="none" stroke="#E53935" stroke-width="1" stroke-dasharray="2,1"/>
+  <text x="212" y="160" font-family="monospace" font-size="9" fill="#E53935">Noise</text>
+</svg>

@@ -46,6 +46,22 @@ public class GridSampleDimensionSerializer extends Serializer<GridSampleDimensio
     KryoUtil.writeObjectWithLength(kryo, output, categories.toArray());
   }
 
+  /**
+   * Skip past a serialized GridSampleDimension without fully deserializing it. Reads the UTF-8
+   * description, skips offset+scale+nodata (24 bytes), then skips the length-prefixed categories
+   * blob.
+   */
+  public static void skip(Input input) {
+    // Skip description (UTF-8 string: int length + length bytes)
+    KryoUtil.skipUTF8String(input);
+    // Skip offset (8B) + scale (8B) + noDataValue (8B) = 24 bytes
+    input.skip(24);
+    // Skip categories (length-prefixed via writeObjectWithLength:
+    // the length prefix is a 4-byte int giving the number of bytes that follow)
+    int categoriesLength = input.readInt();
+    input.skip(categoriesLength);
+  }
+
   @Override
   public GridSampleDimension read(Kryo kryo, Input input, Class aClass) {
     String description = KryoUtil.readUTF8String(input);

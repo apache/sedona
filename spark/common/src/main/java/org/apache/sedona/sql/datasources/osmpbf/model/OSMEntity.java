@@ -31,6 +31,14 @@ public class OSMEntity {
   private String[] refRoles;
   private String[] refTypes;
 
+  // Metadata fields from Info/DenseInfo
+  private Integer version;
+  private Long timestamp; // milliseconds since epoch
+  private Long changeset;
+  private Integer uid;
+  private String user;
+  private Boolean visible;
+
   public OSMEntity(
       long id, double latitude, double longitude, HashMap<String, String> tags, String kind) {
     this.id = id;
@@ -92,5 +100,53 @@ public class OSMEntity {
 
   public long getId() {
     return id;
+  }
+
+  public Integer getVersion() {
+    return version;
+  }
+
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  public Long getTimestamp() {
+    return timestamp;
+  }
+
+  public void setTimestamp(Long timestamp) {
+    this.timestamp = timestamp;
+  }
+
+  public Long getChangeset() {
+    return changeset;
+  }
+
+  public void setChangeset(Long changeset) {
+    this.changeset = changeset;
+  }
+
+  public Integer getUid() {
+    return uid;
+  }
+
+  public void setUid(Integer uid) {
+    this.uid = uid;
+  }
+
+  public String getUser() {
+    return user;
+  }
+
+  public void setUser(String user) {
+    this.user = user;
+  }
+
+  public Boolean getVisible() {
+    return visible;
+  }
+
+  public void setVisible(Boolean visible) {
+    this.visible = visible;
   }
 }

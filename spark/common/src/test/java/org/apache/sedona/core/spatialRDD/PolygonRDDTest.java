@@ -211,8 +211,8 @@ public class PolygonRDDTest extends SpatialRDDTestBase {
   @Test
   public void testPolygonUnion()
   {
-  	PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, numPartitions);
-  	assert polygonRDD.PolygonUnion() instanceof Polygon;
+    PolygonRDD polygonRDD = new PolygonRDD(sc, InputLocation, offset, splitter, numPartitions);
+    assert polygonRDD.PolygonUnion() instanceof Polygon;
   }
   */
 

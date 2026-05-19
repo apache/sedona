@@ -686,9 +686,9 @@ public abstract class VisualizationOperator implements Serializable {
       List<Tuple2<Pixel,Integer>> colorMatrix = this.distributedRasterColorMatrix.collect();
       for(Tuple2<Pixel,Integer> pixelColor:colorMatrix)
       {
-      	int pixelX = pixelColor._1().getX();
-      	int pixelY = pixelColor._1().getY();
-      	renderedImage.setRGB(pixelX, (this.resolutionY-1)-pixelY, pixelColor._2);
+        int pixelX = pixelColor._1().getX();
+        int pixelY = pixelColor._1().getY();
+        renderedImage.setRGB(pixelX, (this.resolutionY-1)-pixelY, pixelColor._2);
       }
       this.rasterImage = renderedImage;
       */
@@ -886,19 +886,19 @@ public abstract class VisualizationOperator implements Serializable {
     /*
           spatialRDDwithPixelId = spatialRDDwithPixelId.reduceByKey(new Function2<Double,Double,Double>()
     {
-    	@Override
-    	public Double call(Double count1, Double count2) throws Exception {
-    		if(colorizeOption==ColorizeOption.SPATIALAGGREGATION)
-    		{
-    			return count1+count2;
-    		}
-    		else
-    		{
-    			//TODO, colorizeOption for uniform color and z-axis color follow the same aggregate strategy
-    			// which takes the large value. We need to find a better strategy to distinguish them.
-    			return count1>count2?count1:count2;
-    		}
-    	}
+      @Override
+      public Double call(Double count1, Double count2) throws Exception {
+        if(colorizeOption==ColorizeOption.SPATIALAGGREGATION)
+        {
+          return count1+count2;
+        }
+        else
+        {
+          //TODO, colorizeOption for uniform color and z-axis color follow the same aggregate strategy
+          // which takes the large value. We need to find a better strategy to distinguish them.
+          return count1>count2?count1:count2;
+        }
+      }
     });
     */
     this.distributedRasterCountMatrix = spatialRDDwithPixelId;
@@ -956,16 +956,16 @@ public abstract class VisualizationOperator implements Serializable {
     /*
     spatialRDDwithPixelId = spatialRDDwithPixelId.reduceByKey(new Function2<Double,Double,Double>()
     {
-    	@Override
-    	public Double call(Double count1, Double count2) throws Exception {
-    		if(colorizeOption==ColorizeOption.SPATIALAGGREGATION)
-    		{
-    			return count1+count2;
-    		}
-    		else {
-    			return count1>count2?count1:count2;
-    		}
-    	}
+      @Override
+      public Double call(Double count1, Double count2) throws Exception {
+        if(colorizeOption==ColorizeOption.SPATIALAGGREGATION)
+        {
+          return count1+count2;
+        }
+        else {
+          return count1>count2?count1:count2;
+        }
+      }
     });
     */
 

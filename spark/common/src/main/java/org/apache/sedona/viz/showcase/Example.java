@@ -46,11 +46,12 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Polygon;
-
 // TODO: Auto-generated Javadoc
 
 /** The Class Example. */
 public class Example {
+
+  private static final Logger log = Logger.getLogger(Example.class);
 
   /** The spark context. */
   static JavaSparkContext sparkContext;
@@ -445,9 +446,9 @@ public class Example {
         && parallelFilterRenderStitch(parallelFilterRenderStitchOutputPath + "-stitched")
         && parallelFilterRenderNoStitch(parallelFilterRenderStitchOutputPath)
         && earthdataVisualization(earthdataScatterPlotOutputPath)) {
-      System.out.println("All 5 Demos have passed.");
+      log.info("All 5 Demos have passed.");
     } else {
-      System.out.println("Demos failed.");
+      log.info("Demos failed.");
     }
     sparkContext.stop();
   }

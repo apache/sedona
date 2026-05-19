@@ -141,9 +141,9 @@ object ShapefileUtils {
           throw new IllegalArgumentException(s"geometry.name and key.name cannot be the same")
         }
         StructType(
-          Seq(StructField(options.geometryFieldName, GeometryUDT), StructField(name, LongType)))
+          Seq(StructField(options.geometryFieldName, GeometryUDT()), StructField(name, LongType)))
       case _ =>
-        StructType(StructField(options.geometryFieldName, GeometryUDT) :: Nil)
+        StructType(StructField(options.geometryFieldName, GeometryUDT()) :: Nil)
     }
   }
 

@@ -22,13 +22,13 @@
     <parent>
         <groupId>org.apache.sedona</groupId>
         <artifactId>sedona-parent</artifactId>
-        <version>1.8.1-SNAPSHOT</version>
+        <version>1.9.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>shade-proto</artifactId>
     <name>${project.groupId}:${project.artifactId}</name>
-    <url>http://sedona.apache.org/</url>
+    <url>https://sedona.apache.org/</url>
     <packaging>jar</packaging>
 
     <properties>

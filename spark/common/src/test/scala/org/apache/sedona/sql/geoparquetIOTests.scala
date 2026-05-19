@@ -148,7 +148,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val geoParquetSavePath = geoparquetoutputlocation + "/gp_sample4.parquet"
       df.write.format("geoparquet").mode(SaveMode.Overwrite).save(geoParquetSavePath)
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
-      val newRows = df2.collect()
+      val newRows = df2.select(df.columns.map(col(_)): _*).collect()
       assert(rows.length == newRows.length)
       assert(newRows(0).getAs[AnyRef]("geometry").isInstanceOf[Geometry])
       assert(rows sameElements newRows)
@@ -169,7 +169,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         val geomTypes = (geo \ "columns" \ "geometry" \ "geometry_types").extract[Seq[String]]
         assert(geomTypes.nonEmpty)
         val sparkSqlRowMetadata = metadata.get(ParquetReadSupport.SPARK_METADATA_KEY)
-        assert(!sparkSqlRowMetadata.contains("GeometryUDT"))
+        assert(!sparkSqlRowMetadata.contains("GeometryUDT()"))
       }
     }
     it("GEOPARQUET Test example-1.1.0.parquet") {
@@ -182,7 +182,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val geoParquetSavePath = geoparquetoutputlocation + "/gp_sample5.parquet"
       df.write.format("geoparquet").mode(SaveMode.Overwrite).save(geoParquetSavePath)
       val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
-      val newRows = df2.collect()
+      val newRows = df2.select(df.columns.map(col(_)): _*).collect()
       assert(rows.length == newRows.length)
       assert(newRows(0).getAs[AnyRef]("geometry").isInstanceOf[Geometry])
       assert(rows sameElements newRows)
@@ -206,8 +206,8 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val schema = StructType(
         Seq(
           StructField("id", IntegerType, nullable = false),
-          StructField("g0", GeometryUDT, nullable = false),
-          StructField("g1", GeometryUDT, nullable = false)))
+          StructField("g0", GeometryUDT(), nullable = false),
+          StructField("g1", GeometryUDT(), nullable = false)))
       val df = sparkSession.createDataFrame(testData.asJava, schema).repartition(1)
       val geoParquetSavePath = geoparquetoutputlocation + "/multi_geoms.parquet"
       df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
@@ -241,7 +241,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val schema = StructType(
         Seq(
           StructField("id", IntegerType, nullable = false),
-          StructField("g", GeometryUDT, nullable = false)))
+          StructField("g", GeometryUDT(), nullable = false)))
       val df = sparkSession.createDataFrame(Collections.emptyList[Row](), schema)
       val geoParquetSavePath = geoparquetoutputlocation + "/empty.parquet"
       df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
@@ -252,9 +252,12 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       validateGeoParquetMetadata(geoParquetSavePath) { geo =>
         implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
         val g0Types = (geo \ "columns" \ "g" \ "geometry_types").extract[Seq[String]]
-        val g0BBox = (geo \ "columns" \ "g" \ "bbox").extract[Seq[Double]]
         assert(g0Types.isEmpty)
-        assert(g0BBox == Seq(0.0, 0.0, 0.0, 0.0))
+        // Per the GeoParquet spec, bbox is optional and represents the extent of the geometries
+        // in the file; for a file with no geometries we omit it entirely rather than emit a
+        // bogus [0, 0, 0, 0] (which would falsely advertise data at Null Island and break
+        // bbox-based file pruning in downstream readers). See issue #2880.
+        assert((geo \ "columns" \ "g" \ "bbox") == org.json4s.JNothing)
       }
     }
 
@@ -262,7 +265,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val schema = StructType(
         Seq(
           StructField("id", IntegerType, nullable = false),
-          StructField("geom_column", GeometryUDT, nullable = false)))
+          StructField("geom_column", GeometryUDT(), nullable = false)))
       val df = sparkSession.createDataFrame(Collections.emptyList[Row](), schema)
       val geoParquetSavePath = geoparquetoutputlocation + "/snake_case_column_name.parquet"
       df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
@@ -277,7 +280,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val schema = StructType(
         Seq(
           StructField("id", IntegerType, nullable = false),
-          StructField("geomColumn", GeometryUDT, nullable = false)))
+          StructField("geomColumn", GeometryUDT(), nullable = false)))
       val df = sparkSession.createDataFrame(Collections.emptyList[Row](), schema)
       val geoParquetSavePath = geoparquetoutputlocation + "/camel_case_column_name.parquet"
       df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
@@ -400,8 +403,8 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       val schema = StructType(
         Seq(
           StructField("id", IntegerType, nullable = false),
-          StructField("g0", GeometryUDT, nullable = false),
-          StructField("g1", GeometryUDT, nullable = false)))
+          StructField("g0", GeometryUDT(), nullable = false),
+          StructField("g1", GeometryUDT(), nullable = false)))
       val df = sparkSession.createDataFrame(testData.asJava, schema).repartition(1)
 
       val projjson0 =
@@ -572,6 +575,330 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
 
+    it("GeoParquet save should omit CRS for SRID 4326 per GeoParquet default") {
+      val wktReader = new WKTReader()
+      val geom = wktReader.read("POINT (1 2)")
+      geom.setSRID(4326)
+      val testData = Seq(Row(1, geom))
+      val schema = StructType(
+        Seq(
+          StructField("id", IntegerType, nullable = false),
+          StructField("geometry", GeometryUDT(), nullable = false)))
+      val df = sparkSession.createDataFrame(testData.asJava, schema).repartition(1)
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_srid_4326_omit_crs.parquet"
+      df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        val crs = geo \ "columns" \ "geometry" \ "crs"
+        // SRID 4326 = OGC:CRS84, the GeoParquet default. CRS field should be omitted.
+        assert(
+          crs == org.json4s.JNothing,
+          s"Expected omitted CRS for SRID 4326 (GeoParquet default), got $crs")
+      }
+      // Round-trip: read back and verify SRID is preserved (omitted CRS -> 4326)
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      geoms.foreach { g =>
+        assert(g.getSRID == 4326, s"Expected SRID 4326 after round-trip, got ${g.getSRID}")
+      }
+    }
+
+    it("GeoParquet save should auto-generate projjson from non-default SRID") {
+      val wktReader = new WKTReader()
+      val geom = wktReader.read("POINT (500000 4649776)")
+      geom.setSRID(32632)
+      val testData = Seq(Row(1, geom))
+      val schema = StructType(
+        Seq(
+          StructField("id", IntegerType, nullable = false),
+          StructField("geometry", GeometryUDT(), nullable = false)))
+      val df = sparkSession.createDataFrame(testData.asJava, schema).repartition(1)
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_auto_crs_from_srid_32632.parquet"
+      df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val crs = geo \ "columns" \ "geometry" \ "crs"
+        // CRS should be auto-generated from SRID 32632
+        assert(
+          crs.isInstanceOf[org.json4s.JObject],
+          s"Expected JObject for auto-generated CRS, got $crs")
+        val authority = (crs \ "id" \ "authority").extract[String]
+        val code = (crs \ "id" \ "code").extract[Int]
+        assert(authority == "EPSG")
+        assert(code == 32632)
+      }
+      // Round-trip: read back and verify SRID is preserved
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      geoms.foreach { g =>
+        assert(g.getSRID == 32632, s"Expected SRID 32632 after round-trip, got ${g.getSRID}")
+      }
+    }
+
+    it("GeoParquet save should keep crs null when geometry SRID is 0") {
+      val wktReader = new WKTReader()
+      val geom = wktReader.read("POINT (1 2)")
+      // SRID defaults to 0
+      assert(geom.getSRID == 0)
+      val testData = Seq(Row(1, geom))
+      val schema = StructType(
+        Seq(
+          StructField("id", IntegerType, nullable = false),
+          StructField("geometry", GeometryUDT(), nullable = false)))
+      val df = sparkSession.createDataFrame(testData.asJava, schema).repartition(1)
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_srid_zero_crs_null.parquet"
+      df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        val crs = geo \ "columns" \ "geometry" \ "crs"
+        assert(crs == org.json4s.JNull, s"Expected null CRS for SRID 0, got $crs")
+      }
+    }
+
+    it("GeoParquet save should use explicit CRS option over SRID-derived CRS") {
+      val wktReader = new WKTReader()
+      val geom = wktReader.read("POINT (1 2)")
+      geom.setSRID(4326)
+      val testData = Seq(Row(1, geom))
+      val schema = StructType(
+        Seq(
+          StructField("id", IntegerType, nullable = false),
+          StructField("geometry", GeometryUDT(), nullable = false)))
+      val df = sparkSession.createDataFrame(testData.asJava, schema).repartition(1)
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_explicit_crs_overrides_srid.parquet"
+
+      // Explicitly set CRS to null — should override SRID-derived CRS
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.crs", "null")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        val crs = geo \ "columns" \ "geometry" \ "crs"
+        assert(crs == org.json4s.JNull, s"Expected null CRS when explicitly set, got $crs")
+      }
+
+      // Explicitly omit CRS — should override SRID-derived CRS
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.crs", "")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        val crs = geo \ "columns" \ "geometry" \ "crs"
+        assert(
+          crs == org.json4s.JNothing,
+          s"Expected omitted CRS when explicitly set to empty, got $crs")
+      }
+    }
+
+    it("GeoParquet save should keep crs null for mixed SRIDs in one column") {
+      val wktReader = new WKTReader()
+      val geom1 = wktReader.read("POINT (1 2)")
+      geom1.setSRID(4326)
+      val geom2 = wktReader.read("POINT (3 4)")
+      geom2.setSRID(32632)
+      val testData = Seq(Row(1, geom1), Row(2, geom2))
+      val schema = StructType(
+        Seq(
+          StructField("id", IntegerType, nullable = false),
+          StructField("geometry", GeometryUDT(), nullable = false)))
+      val df = sparkSession.createDataFrame(testData.asJava, schema).repartition(1)
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_mixed_srid.parquet"
+      df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        val crs = geo \ "columns" \ "geometry" \ "crs"
+        assert(crs == org.json4s.JNull, s"Expected null CRS for mixed SRIDs, got $crs")
+      }
+    }
+
+    it("GeoParquet read should set SRID from PROJJSON CRS with EPSG identifier") {
+      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation4)
+      val projjson =
+        """
+          |{
+          |  "$schema": "https://proj.org/schemas/v0.4/projjson.schema.json",
+          |  "type": "GeographicCRS",
+          |  "name": "NAD83(2011)",
+          |  "datum": {
+          |    "type": "GeodeticReferenceFrame",
+          |    "name": "NAD83 (National Spatial Reference System 2011)",
+          |    "ellipsoid": {
+          |      "name": "GRS 1980",
+          |      "semi_major_axis": 6378137,
+          |      "inverse_flattening": 298.257222101
+          |    }
+          |  },
+          |  "coordinate_system": {
+          |    "subtype": "ellipsoidal",
+          |    "axis": [
+          |      {
+          |        "name": "Geodetic latitude",
+          |        "abbreviation": "Lat",
+          |        "direction": "north",
+          |        "unit": "degree"
+          |      },
+          |      {
+          |        "name": "Geodetic longitude",
+          |        "abbreviation": "Lon",
+          |        "direction": "east",
+          |        "unit": "degree"
+          |      }
+          |    ]
+          |  },
+          |  "id": {
+          |    "authority": "EPSG",
+          |    "code": 6318
+          |  }
+          |}
+          |""".stripMargin
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_srid_epsg.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.crs", projjson)
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      assert(geoms.nonEmpty)
+      geoms.foreach { geom =>
+        assert(geom.getSRID == 6318, s"Expected SRID 6318, got ${geom.getSRID}")
+      }
+    }
+
+    it("GeoParquet read should set SRID 4326 when CRS is omitted") {
+      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation4)
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_srid_omit.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.crs", "")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      assert(geoms.nonEmpty)
+      geoms.foreach { geom =>
+        assert(geom.getSRID == 4326, s"Expected SRID 4326 for omitted CRS, got ${geom.getSRID}")
+      }
+    }
+
+    it("GeoParquet read should set SRID 0 when CRS is null") {
+      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation4)
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_srid_null.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.crs", "null")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      assert(geoms.nonEmpty)
+      geoms.foreach { geom =>
+        assert(geom.getSRID == 0, s"Expected SRID 0 for null CRS, got ${geom.getSRID}")
+      }
+    }
+
+    it("GeoParquet read should set SRID 0 for CRS without EPSG identifier") {
+      val df = sparkSession.read.format("geoparquet").load(geoparquetdatalocation4)
+      // A PROJJSON without the "id" field
+      val projjsonNoId =
+        """
+          |{
+          |  "$schema": "https://proj.org/schemas/v0.4/projjson.schema.json",
+          |  "type": "GeographicCRS",
+          |  "name": "Unknown CRS",
+          |  "datum": {
+          |    "type": "GeodeticReferenceFrame",
+          |    "name": "Unknown datum",
+          |    "ellipsoid": {
+          |      "name": "GRS 1980",
+          |      "semi_major_axis": 6378137,
+          |      "inverse_flattening": 298.257222101
+          |    }
+          |  },
+          |  "coordinate_system": {
+          |    "subtype": "ellipsoidal",
+          |    "axis": [
+          |      {
+          |        "name": "Geodetic latitude",
+          |        "abbreviation": "Lat",
+          |        "direction": "north",
+          |        "unit": "degree"
+          |      },
+          |      {
+          |        "name": "Geodetic longitude",
+          |        "abbreviation": "Lon",
+          |        "direction": "east",
+          |        "unit": "degree"
+          |      }
+          |    ]
+          |  }
+          |}
+          |""".stripMargin
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_srid_no_id.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.crs", projjsonNoId)
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      val geoms = df2.select("geometry").collect().map(_.getAs[Geometry](0))
+      assert(geoms.nonEmpty)
+      geoms.foreach { geom =>
+        assert(geom.getSRID == 0, s"Expected SRID 0 for CRS without id, got ${geom.getSRID}")
+      }
+    }
+
+    it("GeoParquet read should set per-column SRID from different CRSes") {
+      val wktReader = new WKTReader()
+      val testData = Seq(
+        Row(
+          1,
+          wktReader.read("POINT (1 2)"),
+          wktReader.read("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))")))
+      val schema = StructType(
+        Seq(
+          StructField("id", IntegerType, nullable = false),
+          StructField("g0", GeometryUDT(), nullable = false),
+          StructField("g1", GeometryUDT(), nullable = false)))
+      val df = sparkSession.createDataFrame(testData.asJava, schema).repartition(1)
+
+      // g0: EPSG:4326, g1: EPSG:32632
+      val projjson4326 =
+        """{"type":"GeographicCRS","name":"WGS 84","id":{"authority":"EPSG","code":4326}}"""
+      val projjson32632 =
+        """{"type":"ProjectedCRS","name":"WGS 84 / UTM zone 32N",""" +
+          """"base_crs":{"name":"WGS 84","datum":{"type":"GeodeticReferenceFrame",""" +
+          """"name":"World Geodetic System 1984",""" +
+          """"ellipsoid":{"name":"WGS 84","semi_major_axis":6378137,"inverse_flattening":298.257223563}}},""" +
+          """"conversion":{"name":"UTM zone 32N","method":{"name":"Transverse Mercator"},""" +
+          """"parameters":[{"name":"Latitude of natural origin","value":0},""" +
+          """{"name":"Longitude of natural origin","value":9},""" +
+          """{"name":"Scale factor at natural origin","value":0.9996},""" +
+          """{"name":"False easting","value":500000},""" +
+          """{"name":"False northing","value":0}]},""" +
+          """"coordinate_system":{"subtype":"Cartesian","axis":[""" +
+          """{"name":"Easting","direction":"east","unit":"metre"},""" +
+          """{"name":"Northing","direction":"north","unit":"metre"}]},""" +
+          """"id":{"authority":"EPSG","code":32632}}"""
+
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_srid_multi_column.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.crs", projjson4326)
+        .option("geoparquet.crs.g1", projjson32632)
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+
+      val df2 = sparkSession.read.format("geoparquet").load(geoParquetSavePath)
+      val rows = df2.collect()
+      assert(rows.length == 1)
+      val g0 = rows(0).getAs[Geometry](rows(0).fieldIndex("g0"))
+      val g1 = rows(0).getAs[Geometry](rows(0).fieldIndex("g1"))
+      assert(g0.getSRID == 4326, s"Expected g0 SRID 4326, got ${g0.getSRID}")
+      assert(g1.getSRID == 32632, s"Expected g1 SRID 32632, got ${g1.getSRID}")
+    }
+
     it("GeoParquet load should raise exception when loading plain parquet files") {
       val e = intercept[SparkException] {
         sparkSession.read.format("geoparquet").load(resourceFolder + "geoparquet/plain.parquet")
@@ -694,6 +1021,147 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
 
+    it("GeoParquet supports writing covering metadata from a Box2D column") {
+      // User-provided Box2D column referenced via the geoparquet.covering option.
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+        .withColumn("test_cov", expr("ST_Box2D(geometry)"))
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_with_box2d_covering.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.covering.geometry", "test_cov")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val coveringJsValue = geo \ "columns" \ "geometry" \ "covering"
+        val covering = coveringJsValue.extract[Covering]
+        assert(covering.bbox.xmin == Seq("test_cov", "xmin"))
+        assert(covering.bbox.ymin == Seq("test_cov", "ymin"))
+        assert(covering.bbox.xmax == Seq("test_cov", "xmax"))
+        assert(covering.bbox.ymax == Seq("test_cov", "ymax"))
+      }
+    }
+
+    it("GeoParquet auto populates covering metadata for a Box2D <geom>_bbox column") {
+      // Auto-detect path: when a column named <geom>_bbox is a Box2D, reuse it as the
+      // covering column instead of synthesizing a separate float64 struct.
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+        .withColumn("geometry_bbox", expr("ST_Box2D(geometry)"))
+      val geoParquetSavePath = geoparquetoutputlocation + "/gp_box2d_auto_covering.parquet"
+      df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val coveringJsValue = geo \ "columns" \ "geometry" \ "covering"
+        val covering = coveringJsValue.extract[Covering]
+        assert(covering.bbox.xmin == Seq("geometry_bbox", "xmin"))
+        assert(covering.bbox.ymin == Seq("geometry_bbox", "ymin"))
+        assert(covering.bbox.xmax == Seq("geometry_bbox", "xmax"))
+        assert(covering.bbox.ymax == Seq("geometry_bbox", "ymax"))
+      }
+    }
+
+    it("GeoParquet auto populates covering metadata for single geometry column") {
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+        .withColumn(
+          "geometry_bbox",
+          expr("struct(id AS xmin, id + 1 AS ymin, id AS xmax, id + 1 AS ymax)"))
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_with_covering_metadata_auto_single.parquet"
+      df.write
+        .format("geoparquet")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val coveringJsValue = geo \ "columns" \ "geometry" \ "covering"
+        val covering = coveringJsValue.extract[Covering]
+        assert(covering.bbox.xmin == Seq("geometry_bbox", "xmin"))
+        assert(covering.bbox.ymin == Seq("geometry_bbox", "ymin"))
+        assert(covering.bbox.xmax == Seq("geometry_bbox", "xmax"))
+        assert(covering.bbox.ymax == Seq("geometry_bbox", "ymax"))
+      }
+    }
+
+    it("GeoParquet auto generates covering column and metadata for GeoParquet 1.1.0") {
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_with_generated_covering_column.parquet"
+      df.write
+        .format("geoparquet")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+
+      val parquetDf = sparkSession.read.parquet(geoParquetSavePath)
+      assert(parquetDf.columns.contains("geometry_bbox"))
+
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        val coveringJsValue = geo \ "columns" \ "geometry" \ "covering"
+        val covering = coveringJsValue.extract[Covering]
+        assert(covering.bbox.xmin == Seq("geometry_bbox", "xmin"))
+        assert(covering.bbox.ymin == Seq("geometry_bbox", "ymin"))
+        assert(covering.bbox.xmax == Seq("geometry_bbox", "xmax"))
+        assert(covering.bbox.ymax == Seq("geometry_bbox", "ymax"))
+      }
+    }
+
+    it("GeoParquet covering mode legacy disables auto covering generation") {
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_without_generated_covering_column_legacy_mode.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.covering.mode", "legacy")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+
+      val parquetDf = sparkSession.read.parquet(geoParquetSavePath)
+      assert(!parquetDf.columns.contains("geometry_bbox"))
+
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        assert(geo \ "columns" \ "geometry" \ "covering" == org.json4s.JNothing)
+      }
+    }
+
+    it("GeoParquet covering mode should reject invalid value") {
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+
+      val e = intercept[SparkException] {
+        df.write
+          .format("geoparquet")
+          .option("geoparquet.covering.mode", "invalid-mode")
+          .mode("overwrite")
+          .save(geoparquetoutputlocation + "/gp_invalid_covering_mode.parquet")
+      }
+      assert(e.getMessage.contains("geoparquet.covering.mode"))
+      assert(e.getMessage.contains("auto"))
+      assert(e.getMessage.contains("legacy"))
+    }
+
     it("GeoParquet supports writing covering metadata for multiple columns") {
       val df = sparkSession
         .range(0, 100)
@@ -744,6 +1212,88 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
         assert(covering.bbox.ymax == Seq("test_cov2", "ymax"))
       }
     }
+
+    it("GeoParquet auto populates covering metadata for multiple geometry columns") {
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geom1", expr("ST_Point(id, id + 1)"))
+        .withColumn(
+          "geom1_bbox",
+          expr("struct(id AS xmin, id + 1 AS ymin, id AS xmax, id + 1 AS ymax)"))
+        .withColumn("geom2", expr("ST_Point(10 * id, 10 * id + 1)"))
+        .withColumn(
+          "geom2_bbox",
+          expr(
+            "struct(10 * id AS xmin, 10 * id + 1 AS ymin, 10 * id AS xmax, 10 * id + 1 AS ymax)"))
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_with_covering_metadata_auto_multiple.parquet"
+      df.write
+        .format("geoparquet")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+        Seq(("geom1", "geom1_bbox"), ("geom2", "geom2_bbox")).foreach {
+          case (geomName, coveringName) =>
+            val coveringJsValue = geo \ "columns" \ geomName \ "covering"
+            val covering = coveringJsValue.extract[Covering]
+            assert(covering.bbox.xmin == Seq(coveringName, "xmin"))
+            assert(covering.bbox.ymin == Seq(coveringName, "ymin"))
+            assert(covering.bbox.xmax == Seq(coveringName, "xmax"))
+            assert(covering.bbox.ymax == Seq(coveringName, "ymax"))
+        }
+      }
+    }
+
+    it("GeoParquet does not auto generate covering column for non-1.1.0 version") {
+      val df = sparkSession
+        .range(0, 100)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_without_generated_covering_column.parquet"
+      df.write
+        .format("geoparquet")
+        .option("geoparquet.version", "1.0.0")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+
+      val parquetDf = sparkSession.read.parquet(geoParquetSavePath)
+      assert(!parquetDf.columns.contains("geometry_bbox"))
+
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        assert(geo \ "columns" \ "geometry" \ "covering" == org.json4s.JNothing)
+      }
+    }
+
+    it("GeoParquet auto covering skips invalid existing _bbox column gracefully") {
+      // Create a DataFrame with a geometry_bbox column that has wrong field types (String instead of Double)
+      val df = sparkSession
+        .range(0, 10)
+        .toDF("id")
+        .withColumn("id", expr("CAST(id AS DOUBLE)"))
+        .withColumn("geometry", expr("ST_Point(id, id + 1)"))
+        .withColumn(
+          "geometry_bbox",
+          expr(
+            "struct(CAST(id AS STRING) AS xmin, CAST(id AS STRING) AS ymin, " +
+              "CAST(id AS STRING) AS xmax, CAST(id AS STRING) AS ymax)"))
+      val geoParquetSavePath =
+        geoparquetoutputlocation + "/gp_with_invalid_bbox_column.parquet"
+      // Should succeed without throwing
+      df.write
+        .format("geoparquet")
+        .mode("overwrite")
+        .save(geoParquetSavePath)
+
+      // No covering metadata should be generated for the invalid bbox column
+      validateGeoParquetMetadata(geoParquetSavePath) { geo =>
+        assert(geo \ "columns" \ "geometry" \ "covering" == org.json4s.JNothing)
+      }
+    }
   }
 
   describe("Spark types tests") {
@@ -764,7 +1314,11 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
 
       // Read it back
       val df2 =
-        sparkSession.read.format("geoparquet").load(geoparquetoutputlocation).sort(col("id"))
+        sparkSession.read
+          .format("geoparquet")
+          .load(geoparquetoutputlocation)
+          .select(df.columns.map(col(_)): _*)
+          .sort(col("id"))
       assert(df2.schema.fields(1).dataType == TimestampNTZType)
       val data1 = df.sort(col("id")).collect()
       val data2 = df2.collect()
@@ -882,6 +1436,59 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
 
       val result = readDf.collect()
       assert(result.length == 1)
+    }
+  }
+
+  describe("GeoParquetMetaData.extractSridFromCrs") {
+    it("should return 4326 when CRS is omitted (None)") {
+      assert(GeoParquetMetaData.extractSridFromCrs(None) == 4326)
+    }
+
+    it("should return 0 when CRS is null") {
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(org.json4s.JNull)) == 0)
+    }
+
+    it("should extract EPSG code from PROJJSON") {
+      val projjson =
+        parseJson("""{"type":"GeographicCRS","id":{"authority":"EPSG","code":4326}}""")
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 4326)
+    }
+
+    it("should extract non-4326 EPSG code") {
+      // Use a complete ProjectedCRS PROJJSON so proj4sedona can parse it
+      val projjson = parseJson(
+        """{"type":"ProjectedCRS","name":"WGS 84 / UTM zone 32N",""" +
+          """"base_crs":{"name":"WGS 84","datum":{"type":"GeodeticReferenceFrame",""" +
+          """"name":"World Geodetic System 1984",""" +
+          """"ellipsoid":{"name":"WGS 84","semi_major_axis":6378137,"inverse_flattening":298.257223563}}},""" +
+          """"conversion":{"name":"UTM zone 32N","method":{"name":"Transverse Mercator"},""" +
+          """"parameters":[{"name":"Latitude of natural origin","value":0},""" +
+          """{"name":"Longitude of natural origin","value":9},""" +
+          """{"name":"Scale factor at natural origin","value":0.9996},""" +
+          """{"name":"False easting","value":500000},""" +
+          """{"name":"False northing","value":0}]},""" +
+          """"coordinate_system":{"subtype":"Cartesian","axis":[""" +
+          """{"name":"Easting","direction":"east","unit":"metre"},""" +
+          """{"name":"Northing","direction":"north","unit":"metre"}]},""" +
+          """"id":{"authority":"EPSG","code":32632}}""")
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 32632)
+    }
+
+    it("should return 4326 for OGC:CRS84") {
+      val projjson =
+        parseJson("""{"type":"GeographicCRS","id":{"authority":"OGC","code":"CRS84"}}""")
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 4326)
+    }
+
+    it("should return 0 for CRS without id field") {
+      val projjson = parseJson("""{"type":"GeographicCRS","name":"Unknown"}""")
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 0)
+    }
+
+    it("should return 0 for CRS with non-EPSG authority") {
+      val projjson =
+        parseJson("""{"type":"GeographicCRS","id":{"authority":"IAU","code":49900}}""")
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 0)
     }
   }
 

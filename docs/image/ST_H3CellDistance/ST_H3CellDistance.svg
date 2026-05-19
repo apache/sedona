@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="210" viewBox="0 0 400 210">
+  <rect width="400" height="210" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_H3CellDistance</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Grid distance between two H3 cells</text>
+  <polygon points="93.0,95.0 84.0,110.6 66.0,110.6 57.0,95.0 66.0,79.5 84.0,79.5" fill="#4a90d9" stroke="#1565C0" stroke-width="1.5" fill-opacity="0.35"/>
+  <polygon points="121.8,105.0 112.8,120.5 94.8,120.5 85.8,105.0 94.8,89.4 112.8,89.4" fill="#FFF9C4" stroke="#FFB300" stroke-width="1" fill-opacity="0.5"/>
+  <polygon points="150.6,95.0 141.6,110.6 123.6,110.6 114.6,95.0 123.6,79.5 141.6,79.5" fill="#FFF9C4" stroke="#FFB300" stroke-width="1" fill-opacity="0.5"/>
+  <polygon points="179.4,105.0 170.4,120.5 152.4,120.5 143.4,105.0 152.4,89.4 170.4,89.4" fill="#FFF9C4" stroke="#FFB300" stroke-width="1" fill-opacity="0.5"/>
+  <polygon points="208.2,95.0 199.2,110.6 181.2,110.6 172.2,95.0 181.2,79.5 199.2,79.5" fill="#FFF9C4" stroke="#FFB300" stroke-width="1" fill-opacity="0.5"/>
+  <polygon points="237.0,105.0 228.0,120.5 210.0,120.5 201.0,105.0 210.0,89.4 228.0,89.4" fill="#FFF9C4" stroke="#FFB300" stroke-width="1" fill-opacity="0.5"/>
+  <polygon points="265.8,95.0 256.8,110.6 238.8,110.6 229.8,95.0 238.8,79.5 256.8,79.5" fill="#d94a4a" stroke="#C62828" stroke-width="1.5" fill-opacity="0.35"/>
+  <line x1="75" y1="95" x2="104" y2="105" stroke="#FFB300" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <line x1="104" y1="105" x2="133" y2="95" stroke="#FFB300" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <line x1="133" y1="95" x2="161" y2="105" stroke="#FFB300" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <line x1="161" y1="105" x2="190" y2="95" stroke="#FFB300" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <line x1="190" y1="95" x2="219" y2="105" stroke="#FFB300" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <line x1="219" y1="105" x2="248" y2="95" stroke="#FFB300" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <text x="75" y="99" font-family="monospace" font-size="9" fill="#1565C0" text-anchor="middle" font-weight="bold">A</text>
+  <text x="248" y="99" font-family="monospace" font-size="9" fill="#C62828" text-anchor="middle" font-weight="bold">B</text>
+  <text x="104" y="109" font-family="monospace" font-size="7" fill="#F57F17" text-anchor="middle">1</text>
+  <text x="133" y="99" font-family="monospace" font-size="7" fill="#F57F17" text-anchor="middle">2</text>
+  <text x="161" y="109" font-family="monospace" font-size="7" fill="#F57F17" text-anchor="middle">3</text>
+  <text x="190" y="99" font-family="monospace" font-size="7" fill="#F57F17" text-anchor="middle">4</text>
+  <text x="219" y="109" font-family="monospace" font-size="7" fill="#F57F17" text-anchor="middle">5</text>
+  <text x="200" y="150" font-family="monospace" font-size="11" fill="#2ecc71" text-anchor="middle" font-weight="bold">Distance = 6</text>
+  <text x="200" y="170" font-family="monospace" font-size="10" fill="#333" text-anchor="middle">Returns min grid steps between two H3 cells</text>
+  <circle cx="85" cy="192" r="5" fill="#4a90d9" fill-opacity="0.35" stroke="#1565C0" stroke-width="0.8"/>
+  <text x="94" y="196" font-family="monospace" font-size="8" fill="#1565C0">Cell A</text>
+  <circle cx="160" cy="192" r="5" fill="#d94a4a" fill-opacity="0.35" stroke="#C62828" stroke-width="0.8"/>
+  <text x="169" y="196" font-family="monospace" font-size="8" fill="#C62828">Cell B</text>
+  <circle cx="235" cy="192" r="5" fill="#FFF9C4" fill-opacity="0.5" stroke="#FFB300" stroke-width="0.8"/>
+  <text x="244" y="196" font-family="monospace" font-size="8" fill="#F57F17">Path cells</text>
+</svg>

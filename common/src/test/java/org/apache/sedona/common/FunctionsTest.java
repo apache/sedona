@@ -26,6 +26,7 @@ import com.google.common.geometry.S2CellId;
 import com.google.common.math.DoubleMath;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.apache.sedona.common.utils.*;
@@ -35,13 +36,17 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.operation.projection.ProjectionException;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FunctionsTest extends TestBase {
+  private static final Logger log = LoggerFactory.getLogger(FunctionsTest.class);
   public static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
   protected static final double FP_TOLERANCE = 1e-12;
@@ -160,6 +165,39 @@ public class FunctionsTest extends TestBase {
     actual = geomFromEWKT(expectedResult);
     assertEquals(geometry, actual);
     assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void box2dAsText() {
+    assertEquals("BOX(1.0 2.0, 4.0 5.0)", Functions.box2dAsText(new Box2D(1.0, 2.0, 4.0, 5.0)));
+    assertEquals(
+        "BOX(-180.0 -90.0, 180.0 90.0)",
+        Functions.box2dAsText(new Box2D(-180.0, -90.0, 180.0, 90.0)));
+    assertNull(Functions.box2dAsText(null));
+  }
+
+  @Test
+  public void expandBox2D() {
+    Box2D box = new Box2D(1.0, 2.0, 4.0, 5.0);
+
+    Box2D uniform = Functions.expand(box, 1.0);
+    assertEquals(0.0, uniform.getXMin(), 0.0);
+    assertEquals(1.0, uniform.getYMin(), 0.0);
+    assertEquals(5.0, uniform.getXMax(), 0.0);
+    assertEquals(6.0, uniform.getYMax(), 0.0);
+
+    Box2D perAxis = Functions.expand(box, 2.0, 0.5);
+    assertEquals(-1.0, perAxis.getXMin(), 0.0);
+    assertEquals(1.5, perAxis.getYMin(), 0.0);
+    assertEquals(6.0, perAxis.getXMax(), 0.0);
+    assertEquals(5.5, perAxis.getYMax(), 0.0);
+
+    // Negative deltas may produce a degenerate bbox (xmin > xmax); we return as-is.
+    Box2D shrunkPastZero = Functions.expand(new Box2D(0.0, 0.0, 1.0, 1.0), -2.0);
+    assertTrue(shrunkPastZero.getXMin() > shrunkPastZero.getXMax());
+
+    assertNull(Functions.expand((Box2D) null, 1.0));
+    assertNull(Functions.expand((Box2D) null, 1.0, 1.0));
   }
 
   @Test
@@ -375,7 +413,7 @@ public class FunctionsTest extends TestBase {
     PreparedGeometryFactory factory = new PreparedGeometryFactory();
     PreparedGeometry prepLineString = factory.create(lineString);
     boolean intersects = prepLineString.intersects(point);
-    System.out.println(intersects);
+    log.debug("intersects: {}", intersects);
   }
 
   @Test
@@ -529,6 +567,66 @@ public class FunctionsTest extends TestBase {
     Geometry actualResult = Functions.split(geometryCollection, lineString);
 
     assertNull(actualResult);
+  }
+
+  @Test
+  public void splitCircleInto2SemiCircles() throws ParseException {
+    String polygonWkt =
+        "POLYGON ((-117.76405581088967 34.111876749328026, -117.76407506132291 34.11170068822483, "
+            + "-117.76413523652074 34.111531133837936, -117.76423402376724 34.11137460199335, -117.76436762657538 34.11123710803779, "
+            + "-117.76453091060647 34.11112393568514, -117.76471760098879 34.11103943398174, -117.76492052345083 34.11098685019075, "
+            + "-117.76513188000408 34.1109682050154, -117.76534354858369 34.11098421495394, -117.76554739513688 34.11103426476887, "
+            + "-117.76573558617179 34.11111643112786, -117.76590088976099 34.111227556508084, -117.76603695343799 34.11136337052523, "
+            + "-117.76613854831002 34.11151865402651, -117.76620177000793 34.11168743964393, -117.76622418874936 34.111863241103265, "
+            + "-117.76620494274577 34.11203930247842, -117.76614477135817 34.11220885781403, -117.7660459867224 34.11236539113964, "
+            + "-117.76591238492807 34.11250288688306, -117.7657491001595 34.11261606105824, -117.7655624074007 34.11270056434135, "
+            + "-117.76535948128496 34.112753149228745, -117.76514812035703 34.11277179485027, -117.76493644734776 34.112755784639766, "
+            + "-117.76473259698435 34.112705733876126, -117.76454440333869 34.11262356603611, -117.76437909873567 34.11251243886801, "
+            + "-117.76424303579616 34.11237662302835, -117.76414144330062 34.112221337947354, -117.76407822525644 34.11205255123353, "
+            + "-117.76405581088967 34.111876749328026))";
+    String knifeWkt =
+        "LINESTRING (-117.7640751398563 34.111535124121441, -117.76628486838135 34.112204866513046)";
+
+    Geometry polygon = Constructors.geomFromWKT(polygonWkt, 4326);
+    Geometry knife = Constructors.geomFromWKT(knifeWkt, 4326);
+    Geometry resultPolygon = Functions.split(polygon, knife);
+    assertEquals(2, resultPolygon.getNumGeometries());
+
+    double circleArea = polygon.getArea();
+    for (int i = 0; i < resultPolygon.getNumGeometries(); i++) {
+      double actualArea = resultPolygon.getGeometryN(i).getArea();
+      assertEquals(2.0, circleArea / actualArea, 0.1);
+    }
+  }
+
+  @Test
+  public void splitCircleExteriorRingInto2LineStrings() throws ParseException {
+    String polygonWkt =
+        "POLYGON ((-117.76405581088967 34.111876749328026, -117.76407506132291 34.11170068822483, "
+            + "-117.76413523652074 34.111531133837936, -117.76423402376724 34.11137460199335, -117.76436762657538 34.11123710803779, "
+            + "-117.76453091060647 34.11112393568514, -117.76471760098879 34.11103943398174, -117.76492052345083 34.11098685019075, "
+            + "-117.76513188000408 34.1109682050154, -117.76534354858369 34.11098421495394, -117.76554739513688 34.11103426476887, "
+            + "-117.76573558617179 34.11111643112786, -117.76590088976099 34.111227556508084, -117.76603695343799 34.11136337052523, "
+            + "-117.76613854831002 34.11151865402651, -117.76620177000793 34.11168743964393, -117.76622418874936 34.111863241103265, "
+            + "-117.76620494274577 34.11203930247842, -117.76614477135817 34.11220885781403, -117.7660459867224 34.11236539113964, "
+            + "-117.76591238492807 34.11250288688306, -117.7657491001595 34.11261606105824, -117.7655624074007 34.11270056434135, "
+            + "-117.76535948128496 34.112753149228745, -117.76514812035703 34.11277179485027, -117.76493644734776 34.112755784639766, "
+            + "-117.76473259698435 34.112705733876126, -117.76454440333869 34.11262356603611, -117.76437909873567 34.11251243886801, "
+            + "-117.76424303579616 34.11237662302835, -117.76414144330062 34.112221337947354, -117.76407822525644 34.11205255123353, "
+            + "-117.76405581088967 34.111876749328026))";
+    String knifeWkt =
+        "LINESTRING (-117.7640751398563 34.111535124121441, -117.76628486838135 34.112204866513046)";
+
+    Polygon polygon = (Polygon) Constructors.geomFromWKT(polygonWkt, 4326);
+    Geometry knife = Constructors.geomFromWKT(knifeWkt, 4326);
+    Geometry resultLineStrings = Functions.split(polygon.getExteriorRing(), knife);
+    double perimeter = polygon.getExteriorRing().getLength();
+
+    assertEquals(2, resultLineStrings.getNumGeometries());
+    for (int i = 0; i < resultLineStrings.getNumGeometries(); i++) {
+      double length = resultLineStrings.getGeometryN(i).getLength();
+      assertEquals(2.0, perimeter / length, 0.1);
+    }
   }
 
   @Test
@@ -748,12 +846,101 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void envelopeEmptyGeometry() throws ParseException {
+    // ST_Envelope of EMPTY should return same-type EMPTY (matching PostGIS behavior)
+    Geometry emptyLineString = Constructors.geomFromWKT("LINESTRING EMPTY", 0);
+    Geometry result = Functions.envelope(emptyLineString);
+    assertTrue(result.isEmpty());
+    assertEquals("LineString", result.getGeometryType());
+
+    Geometry emptyPolygon = Constructors.geomFromWKT("POLYGON EMPTY", 0);
+    result = Functions.envelope(emptyPolygon);
+    assertTrue(result.isEmpty());
+    assertEquals("Polygon", result.getGeometryType());
+
+    Geometry emptyPoint = Constructors.geomFromWKT("POINT EMPTY", 0);
+    result = Functions.envelope(emptyPoint);
+    assertTrue(result.isEmpty());
+    assertEquals("Point", result.getGeometryType());
+  }
+
+  @Test
   public void envelopeAndCentroidSRID() throws ParseException {
     Geometry geom = Constructors.geomFromWKT("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", 3857);
     Geometry envelope = Functions.envelope(geom);
     assertEquals(3857, envelope.getSRID());
     Geometry centroid = Functions.getCentroid(geom);
     assertEquals(3857, centroid.getSRID());
+  }
+
+  @Test
+  public void orientedEnvelope() throws ParseException {
+    Geometry axisAlignedRect = Constructors.geomFromWKT("POLYGON ((0 0, 4 0, 4 2, 0 2, 0 0))", 0);
+    String actual = Functions.asWKT(Functions.orientedEnvelope(axisAlignedRect));
+    String expected = "POLYGON ((0 0, 0 2, 4 2, 4 0, 0 0))";
+    assertEquals(expected, actual);
+
+    Geometry rotatedSquare = Constructors.geomFromWKT("POLYGON ((1 0, 2 1, 1 2, 0 1, 1 0))", 0);
+    actual = Functions.asWKT(Functions.orientedEnvelope(rotatedSquare));
+    expected = "POLYGON ((1 0, 0 1, 1 2, 2 1, 1 0))";
+    assertEquals(expected, actual);
+
+    Geometry diagonalPolygon = Constructors.geomFromWKT("POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))", 0);
+    actual = Functions.asWKT(Functions.orientedEnvelope(diagonalPolygon));
+    expected = "POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))";
+    assertEquals(expected, actual);
+
+    Geometry narrowRect = Constructors.geomFromWKT("POLYGON ((0 0, 10 0, 10 1, 0 1, 0 0))", 0);
+    actual = Functions.asWKT(Functions.orientedEnvelope(narrowRect));
+    expected = "POLYGON ((0 0, 0 1, 10 1, 10 0, 0 0))";
+    assertEquals(expected, actual);
+
+    Geometry triangle = Constructors.geomFromWKT("POLYGON ((0 0, 4 0, 2 3, 0 0))", 0);
+    actual = Functions.asWKT(Functions.orientedEnvelope(triangle));
+    expected = "POLYGON ((4 0, 0 0, 0 3, 4 3, 4 0))";
+    assertEquals(expected, actual);
+
+    Geometry irregularPolygon =
+        Constructors.geomFromWKT("POLYGON ((0 0, 3 1, 5 0, 4 4, 1 3, 0 0))", 0);
+    actual =
+        Functions.asWKT(Functions.reducePrecision(Functions.orientedEnvelope(irregularPolygon), 2));
+    expected = "POLYGON ((5 0, 0.29 -1.18, -0.71 2.82, 4 4, 5 0))";
+    assertEquals(expected, actual);
+
+    Geometry point = Constructors.geomFromWKT("POINT (1 2)", 0);
+    actual = Functions.asWKT(Functions.orientedEnvelope(point));
+    expected = "POINT (1 2)";
+    assertEquals(expected, actual);
+
+    Geometry line = Constructors.geomFromWKT("LINESTRING (0 0, 10 0)", 0);
+    actual = Functions.asWKT(Functions.orientedEnvelope(line));
+    expected = "LINESTRING (0 0, 10 0)";
+    assertEquals(expected, actual);
+
+    Geometry diagonalLine = Constructors.geomFromWKT("LINESTRING (0 0, 5 5)", 0);
+    actual = Functions.asWKT(Functions.orientedEnvelope(diagonalLine));
+    expected = "LINESTRING (0 0, 5 5)";
+    assertEquals(expected, actual);
+
+    Geometry empty = Constructors.geomFromWKT("POLYGON EMPTY", 0);
+    Geometry orientedEmpty = Functions.orientedEnvelope(empty);
+    assertTrue(orientedEmpty.isEmpty());
+
+    Geometry geomWithSRID = Constructors.geomFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    Geometry orientedWithSRID = Functions.orientedEnvelope(geomWithSRID);
+    assertEquals(4326, orientedWithSRID.getSRID());
+
+    Geometry multiPoint = Constructors.geomFromWKT("MULTIPOINT ((0 0), (-1 -1), (3 2))", 0);
+    actual = Functions.asWKT(Functions.reducePrecision(Functions.orientedEnvelope(multiPoint), 2));
+    expected = "POLYGON ((-1 -1, -1.12 -0.84, 2.88 2.16, 3 2, -1 -1))";
+    assertEquals(expected, actual);
+
+    Geometry linestring = Constructors.geomFromWKT("LINESTRING (55 75, 125 150)", 0);
+    Geometry pointGeom = Constructors.geomFromWKT("POINT (20 80)", 0);
+    Geometry collection = linestring.union(pointGeom);
+    actual = Functions.asWKT(Functions.reducePrecision(Functions.orientedEnvelope(collection), 2));
+    expected = "POLYGON ((125 150, 138.08 130.38, 33.08 60.38, 20 80, 125 150))";
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -926,6 +1113,182 @@ public class FunctionsTest extends TestBase {
     assertTrue(polygons[0].intersects(target));
     assertTrue(polygons[20].intersects(target));
     assertTrue(polygons[100].intersects(target));
+  }
+
+  @Test
+  public void testS2CoverageContainsInput() throws ParseException {
+    String wkt =
+        "POLYGON ((-102.060778 39.9999603, -102.0535384 40.0119065, -101.98532 40.0122906, "
+            + "-95.30829 40.009008, -95.2456364 39.9564784, -95.1982467 39.9455019, "
+            + "-95.1964657 39.9113444, -95.1460439 39.9142017, -95.1316877 39.8855881, "
+            + "-95.087643 39.8717975, -95.0389987 39.8749063, -95.0146232 39.9088422, "
+            + "-94.9403146 39.906409, -94.9183761 39.8846514, -94.9329504 39.8578468, "
+            + "-94.8824331 39.8409102, -94.8675709 39.8227528, -94.878404 39.787242, "
+            + "-94.9266292 39.7786779, -94.9070076 39.7679231, -94.8631596 39.779774, "
+            + "-94.8497103 39.7604914, -94.8545514 39.7397163, -94.8985678 39.7150641, "
+            + "-94.9584897 39.7331377, -94.9637588 39.6814526, -95.0187723 39.6615712, "
+            + "-95.0456083 39.6252182, -95.0430365 39.5826542, -95.0650104 39.5677387, "
+            + "-95.0985514 39.570063, -95.1012286 39.5462821, -95.0459187 39.5064755, "
+            + "-95.0320969 39.4709074, -94.976457 39.4475392, -94.9362514 39.3964717, "
+            + "-94.8781205 39.3949417, -94.8733156 39.3663291, -94.9014695 39.3495654, "
+            + "-94.8963639 39.3135051, -94.8237994 39.2609956, -94.8194328 39.2178517, "
+            + "-94.7789019 39.214907, -94.7398645 39.1789812, -94.6785238 39.1931279, "
+            + "-94.6533801 39.1816662, -94.6517728 39.1640754, -94.605515 39.1696807, "
+            + "-94.5791896 39.1504025, -94.5983384 39.1134256, -94.6095667 36.9948123, "
+            + "-102.045765 36.9847897, -102.060778 39.9999603))";
+    Geometry input = geomFromWKT(wkt, 0);
+    Long[] cellIds = Functions.s2CellIDs(input, 12);
+    Geometry[] polygons =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(polygons);
+    if (!coverage.covers(input)) {
+      // The union above is unavoidable for an exact containment check; we additionally
+      // skip the (expensive, ~50k-cell) difference on the happy path and only compute it
+      // on failure to surface a useful diagnostic.
+      Geometry uncovered = input.difference(coverage);
+      double uncoveredArea = uncovered.getArea();
+      fail(
+          String.format(
+              "Coverage does not contain input. Missing %.8f deg^2 (%.6f%%)",
+              uncoveredArea, (uncoveredArea / input.getArea()) * 100.0));
+    }
+  }
+
+  @Test
+  public void testS2CoverageContainsLineString() throws ParseException {
+    // Long east-west line at mid-latitude. The great-circle arc bulges poleward of the JTS
+    // chord, so before the buffer fix the cells along the parallel were missed in the middle.
+    Geometry line = geomFromWKT("LINESTRING (-102 37, -94 37)", 0);
+    Long[] cellIds = Functions.s2CellIDs(line, 12);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    assertTrue(
+        "S2 cell coverage of LineString does not contain the line itself.", coverage.covers(line));
+  }
+
+  @Test
+  public void testS2CoverageContainsMultiPolygon() throws ParseException {
+    // Two disjoint polygons, both at mid-northern latitude with long east-west edges.
+    String wkt =
+        "MULTIPOLYGON ("
+            + "((-102 37, -94 37, -94 40, -102 40, -102 37)),"
+            + "((-90 50, -80 50, -80 53, -90 53, -90 50)))";
+    Geometry input = geomFromWKT(wkt, 0);
+    Long[] cellIds = Functions.s2CellIDs(input, 10);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    assertTrue(
+        "S2 cell coverage does not contain every member of the MultiPolygon.",
+        coverage.covers(input));
+  }
+
+  @Test
+  public void testS2CoverageContainsMultiLineString() throws ParseException {
+    // Three disjoint multi-segment lines: northern hemisphere, southern hemisphere, and a
+    // diagonal climb. Each is decomposed and buffered independently before S2 covering.
+    String wkt =
+        "MULTILINESTRING ("
+            + "(-102 37, -98 37, -94 37),"
+            + "(-90 -42, -85 -42, -80 -42),"
+            + "(-100 50, -95 55, -90 60))";
+    Geometry input = geomFromWKT(wkt, 0);
+    Long[] cellIds = Functions.s2CellIDs(input, 10);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    assertTrue(
+        "S2 cell coverage does not contain every member of the MultiLineString.",
+        coverage.covers(input));
+  }
+
+  @Test
+  public void testS2CoverageContainsGeometryCollection() throws ParseException {
+    String wkt =
+        "GEOMETRYCOLLECTION ("
+            + "POLYGON ((-102 37, -94 37, -94 40, -102 40, -102 37)),"
+            + "LINESTRING (10 60, 20 60, 30 60))";
+    Geometry input = geomFromWKT(wkt, 0);
+    Long[] cellIds = Functions.s2CellIDs(input, 10);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    assertTrue(
+        "S2 cell coverage does not contain every member of the GeometryCollection.",
+        coverage.covers(input));
+  }
+
+  @Test
+  public void testS2CoverageContainsPolygonWithHole() throws ParseException {
+    // Outer ring at mid-latitude with long east-west edges; an inner hole. Both rings need
+    // their great-circle bulge accounted for so the buffer applies to interior rings too.
+    String wkt =
+        "POLYGON ("
+            + "(-102 37, -94 37, -94 40, -102 40, -102 37),"
+            + "(-100 38, -96 38, -96 39, -100 39, -100 38))";
+    Geometry input = geomFromWKT(wkt, 0);
+    Long[] cellIds = Functions.s2CellIDs(input, 12);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    assertTrue("S2 cell coverage does not contain a polygon with a hole.", coverage.covers(input));
+  }
+
+  @Test
+  public void testS2CoverageContainsAntimeridianLine() throws ParseException {
+    // Edge crossing the antimeridian. The naive chord midpoint (a.x+b.x)/2 would land at
+    // 0° longitude — the opposite side of the planet — and produce a ~180° bogus deviation.
+    // Verify that the buffer stays small (so we don't blow up the cell count) and that the
+    // returned cells still cover the line.
+    Geometry line = geomFromWKT("LINESTRING (179 5, -179 5)", 0);
+    Long[] cellIds = Functions.s2CellIDs(line, 12);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    // Sanity check: a 2°-long edge near the equator at level 12 should not produce
+    // millions of cells. If antimeridian chord-midpoint handling is wrong the buffer
+    // explodes by ~180° and the cell count would be enormous.
+    assertTrue(
+        "Antimeridian-spanning line produced too many cells (chord midpoint likely wrong): "
+            + cellIds.length,
+        cellIds.length < 5000);
+    assertTrue(
+        "S2 cell coverage of antimeridian-spanning LineString does not contain the line.",
+        coverage.covers(line));
+  }
+
+  @Test
+  public void testS2CoverageContainsWideNonAntimeridianPolygon() throws ParseException {
+    // Polygon whose envelope spans 200° in longitude but every individual edge has
+    // |Δlng| < 180°. An envelope-width-based antimeridian heuristic would skip the buffer
+    // here and reintroduce GH-2857 miscoverage along the long east-west edges; the
+    // per-edge heuristic correctly leaves the buffer on.  Intermediate vertices on the
+    // east-west edges keep each segment under 180° of longitudinal span.
+    String wkt = "POLYGON ((-100 30, -10 30, 100 30, 100 50, 10 50, -100 50, -100 30))";
+    Geometry input = geomFromWKT(wkt, 0);
+    Long[] cellIds = Functions.s2CellIDs(input, 6);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    assertTrue(
+        "S2 cell coverage does not contain a wide non-antimeridian polygon (>180° lng span).",
+        coverage.covers(input));
+  }
+
+  @Test
+  public void testS2CoverageContainsHighLatitudePolygon() throws ParseException {
+    // Polygon near 80°N with a long east-west edge: the great-circle/chord deviation grows
+    // sharply with latitude, so the arc-chord bound has to stay correct without any rigid
+    // cap on the buffer or latitude clamp on the deviation calculation.
+    String wkt = "POLYGON ((-30 80, 30 80, 30 82, -30 82, -30 80))";
+    Geometry input = geomFromWKT(wkt, 0);
+    Long[] cellIds = Functions.s2CellIDs(input, 8);
+    Geometry[] cells =
+        Functions.s2ToGeom(Arrays.stream(cellIds).mapToLong(Long::longValue).toArray());
+    Geometry coverage = Functions.union(cells);
+    assertTrue(
+        "S2 cell coverage does not contain a high-latitude polygon.", coverage.covers(input));
   }
 
   @Test
@@ -1473,6 +1836,46 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void makePolygonWithValidHoles() {
+    Geometry shell =
+        GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    Geometry hole1 = GEOMETRY_FACTORY.createLineString(coordArray(2, 2, 4, 2, 4, 4, 2, 4, 2, 2));
+    Geometry hole2 = GEOMETRY_FACTORY.createLineString(coordArray(6, 6, 8, 6, 8, 8, 6, 8, 6, 6));
+    Geometry result = Functions.makePolygon(shell, new Geometry[] {hole1, hole2});
+    assertNotNull(result);
+    assertEquals(
+        "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (2 2, 4 2, 4 4, 2 4, 2 2), (6 6, 8 6, 8 8, 6 8, 6 6))",
+        result.toText());
+  }
+
+  @Test
+  public void makePolygonWithHolesOutsideShell() {
+    Geometry shell =
+        GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    Geometry hole =
+        GEOMETRY_FACTORY.createLineString(coordArray(20, 20, 30, 20, 30, 30, 20, 30, 20, 20));
+    Geometry result = Functions.makePolygon(shell, new Geometry[] {hole});
+    // Matches PostGIS behavior: polygon is created but is invalid
+    assertNotNull(result);
+    assertFalse(result.isValid());
+    assertEquals(
+        "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (20 20, 30 20, 30 30, 20 30, 20 20))",
+        result.toText());
+  }
+
+  @Test
+  public void makePolygonWithHolesPartiallyOutsideShell() {
+    Geometry shell =
+        GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 10, 0, 10, 10, 0, 10, 0, 0));
+    Geometry hole =
+        GEOMETRY_FACTORY.createLineString(coordArray(-1, -1, 5, -1, 5, 5, -1, 5, -1, -1));
+    Geometry result = Functions.makePolygon(shell, new Geometry[] {hole});
+    // Matches PostGIS behavior: polygon is created but is invalid
+    assertNotNull(result);
+    assertFalse(result.isValid());
+  }
+
+  @Test
   public void distance_empty_geometries() throws ParseException {
     Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(90, 0));
     LineString lineString = GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 0, 90));
@@ -1644,6 +2047,31 @@ public class FunctionsTest extends TestBase {
     GeometryCollection geometryCollection =
         GEOMETRY_FACTORY.createGeometryCollection(new Geometry[] {point, polygon2, polygon3});
     assertEquals(4.036497016235249E11, Spheroid.area(geometryCollection), 0.1);
+
+    // Polygon with hole: ensure interior rings subtract from total area
+    Polygon shell = GEOMETRY_FACTORY.createPolygon(coordArray(0, 0, 0, 10, 10, 10, 10, 0, 0, 0));
+    Polygon hole = GEOMETRY_FACTORY.createPolygon(coordArray(2, 2, 2, 8, 8, 8, 8, 2, 2, 2));
+    Polygon polygonWithHole =
+        GEOMETRY_FACTORY.createPolygon(
+            (LinearRing) shell.getExteriorRing(),
+            new LinearRing[] {(LinearRing) hole.getExteriorRing()});
+    assertTrue(Spheroid.area(polygonWithHole) > 0);
+    assertTrue(Spheroid.area(polygonWithHole) < Spheroid.area(shell));
+  }
+
+  // Temporary regression test for https://github.com/apache/sedona/issues/2603
+  @Test
+  public void spheroidAreaRegressionGH2603() throws ParseException {
+    String wkt =
+        "POLYGON((6.8782696039776 49.2766437532092,6.87823957674903 49.2766222406843,6.87815807078698 49.2765638879958,6.87804125519739 49.2764802462174,6.87799662173375 49.2764482636995,6.87797514117841 49.2764339340827,6.87813462196488 49.2763400751467,6.87818408824614 49.2763110269219,6.87825299096468 49.2762705688469,6.87853657017451 49.2761040516002,6.8786024223574 49.2761481365701,6.87859913601082 49.2761500643444,6.87873887570276 49.2762627881616,6.87878141030736 49.2763020366733,6.8788169319621 49.2763457893589,6.87875164140889 49.2763674403031,6.87876841511752 49.2763927755128,6.87870854199672 49.276408012758,6.87863940411241 49.2764337671641,6.87857096366803 49.2764656966649,6.87848222914642 49.2765181242911,6.8782696039776 49.2766437532092),(6.87850040159497 49.2764227396398,6.87859708638203 49.2763756847604,6.87871844977398 49.2763302705537,6.87867981298025 49.276294071318,6.87863493352534 49.2762569207702,6.87858951083054 49.2762253827861,6.87855281366443 49.276201022011,6.87833112115166 49.2763319631125,6.87842939578059 49.2764016619201,6.87845249629829 49.2763878544337,6.87850040159497 49.2764227396398),(6.87812388117695 49.2764487395748,6.87822630044844 49.276523102708,6.87836942156031 49.2764375161839,6.87826604803956 49.2763642421665,6.87812388117695 49.2764487395748))";
+    double expectedPostgisArea = 1232.39;
+
+    Geometry geom = wktReader.read(wkt);
+    geom.setSRID(4326);
+
+    double actual = Spheroid.area(geom);
+    double delta = Math.max(1e-6, expectedPostgisArea * 1e-3);
+    assertEquals(expectedPostgisArea, actual, delta);
   }
 
   @Test
@@ -2906,7 +3334,7 @@ public class FunctionsTest extends TestBase {
     actual = Functions.asWKT(Functions.buffer(lineString, 5, false, "side=both endcap=square"));
     expected =
         "POLYGON ((45.93133264396633 72.90619096859548, 46.607775042289525 73.6732560265092, 47.42614312881237 74.2866374708669, 48.35219759000809 74.72067232686456, 49.34719367328685 74.9572012163925, 50.36950221028991 74.9863281196278, 51.37635131988457 74.80683440990555, 52.32561592057597 74.4262298392609, 53.17758018177616 73.86043834148188, 53.896599175569165 73.13313179820986, 54.452590207913495 72.27473964233116, 54.82229143418446 71.321175735393, 74.82229143418445 -1.6788242646069989, 76.14346716957745 -6.501115698791454, 66.49888430120855 -9.143467169577455, 47.95639322710423 58.5366252509033, 4.068667356033674 -2.9061909685954816, 1.162476387438193 -6.974858324629158, -6.974858324629155 -1.1624763874381943, 45.93133264396633 72.90619096859548))";
-    assertEquals(expected, actual);
+    assertGeometryEquals(expected, actual);
   }
 
   @Test
@@ -2997,10 +3425,10 @@ public class FunctionsTest extends TestBase {
             "POLYGON ((-179.908607846266 24.025403116254306, -177.99876698499668 23.825660822056278, -176.1851748144233 23.267372220454533, -174.54862792786022 22.380090414241554, -173.15522797402008 21.20765453023379, -172.05367901642606 19.803908497939666, -171.27542809803106 18.22850022788734, -170.83670228698406 16.543486102335997, -170.7412636921777 14.811036901560918, -170.9829095910743 13.092142713348924, -171.5471495735382 11.445952123266512, -172.41190582467604 9.929276420592164, -173.54741832839647 8.595821727211286, -174.91577148479777 7.494852554680671, -176.47058207976102 6.669211334615649, -178.157376393358 6.152879352694568, -179.9150124655878 5.968498588196282, 179.9878642700213 5.967715967762297, 178.22454996382154 6.1243064565567416, 176.52190735292885 6.617190677478861, 174.94354089208682 7.427303247307942, 173.5475157235323 8.522934832546376, 172.38432738193248 9.861905503007021, 171.4959038990676 11.393986435009106, 170.9153886431351 13.063103234007537, 170.66721922346738 14.80905645479948, 170.76695775874103 16.568760623485606, 171.22043647400534 18.277247812024235, 172.02203612722943 19.86884329704546, 173.1522881340142 21.278955415388584, 174.5754355707626 22.446796923405344, 176.2379815998183 23.319060447498003, 178.06938085914476 23.854152382752126, 179.98566424517946 24.026184454399257, -179.908607846266 24.025403116254306))");
     Geometry expected8 =
         geomFromEWKT(
-            "POLYGON ((179 -15.000873160293315, 178.999824747382 -15.000856382797105, 178.99965622962375 -15.000806695050459, 178.9995009227683 -15.000726006503347, 178.999364795171 -15.000617417938033, 178.99925307813902 -15.000485102312915, 178.9991700648953 -15.000334144403906, 178.99911894559222 -15.00017034540551, 178.9991016847159 -14.999999999999092, 178.9991016847159 14.99999999999908, 178.99911894559222 15.00017034540551, 178.9991700648953 15.000334144403906, 178.99925307813902 15.000485102312902, 178.999364795171 15.000617417938045, 178.9995009227683 15.000726006503333, 178.99965622962375 15.000806695050459, 178.999824747382 15.000856382797105, 179 15.000873160293315, -179.00000000000003 15.000873160293315, -178.99982474738198 15.000856382797105, -178.99965622962375 15.000806695050459, -178.9995009227683 15.000726006503333, -178.99936479517098 15.000617417938045, -178.99925307813902 15.000485102312902, -178.99917006489528 15.000334144403906, -178.9991189455922 15.00017034540551, -178.99910168471592 14.99999999999908, -178.99910168471592 -14.999999999999092, -178.9991189455922 -15.00017034540551, -178.99917006489528 -15.000334144403906, -178.99925307813902 -15.000485102312915, -178.99936479517098 -15.000617417938033, -178.9995009227683 -15.000726006503347, -178.99965622962375 -15.000806695050459, -178.99982474738198 -15.000856382797105, -179.00000000000003 -15.000873160293315, 179 -15.000873160293315))");
+            "POLYGON ((178.9999957907089 -15.000903596473622, 178.99981605472888 -15.000885740363822, 178.9996432665321 -15.000834429161598, 178.99948395250945 -15.000751600936063, 178.99934413010374 -15.000640384187193, 178.999229080519 -15.000504979676391, 178.99914314924223 -15.00035050175554, 178.99908958191227 -15.000182785188626, 178.99907040173593 -15.000008164763253, 178.99907040173593 15.000008164763253, 178.99908958191227 15.000182785188626, 178.99914314924223 15.00035050175554, 178.999229080519 15.000504979676391, 178.99934413010374 15.000640384187193, 178.99948395250945 15.000751600936063, 178.9996432665321 15.000834429161598, 178.99981605472888 15.000885740363822, 178.9999957907089 15.000903596473622, -178.99999579488448 15.000902045906788, -178.99981328322758 15.000883609256881, -178.9996380712079 15.000830628745314, -178.9994770086097 15.000745175629842, -178.99933639202962 15.000630590654932, -178.99922171871367 15.000491353441594, -178.99913747164914 15.000332907354343, -178.9990869443138 15.000161446693122, -178.9990721119315 14.999983674530355, -178.9990721119315 -14.999983674530355, -178.9990869443138 -15.000161446693122, -178.99913747164914 -15.000332907354343, -178.99922171871367 -15.000491353441594, -178.99933639202962 -15.000630590654932, -178.9994770086097 -15.000745175629842, -178.9996380712079 -15.000830628745314, -178.99981328322758 -15.000883609256881, -178.99999579488448 -15.000902045906788, 178.9999957907089 -15.000903596473622))");
     Geometry expected9 =
         geomFromEWKT(
-            "POLYGON ((178 -18.747248844374, 176.24747381949112 -18.582729101204464, 174.5622962372712 -18.0945531116537, 173.0092276827665 -17.29887379200776, 171.64795170955566 -16.222572896097414, 170.53078138987692 -14.903037762363958, 169.70064895259912 -13.387566659631126, 169.18945592174327 -11.73221950803158, 169.01684715880478 -9.999999999999265, 169.01684715880478 9.999999999999238, 169.18945592174327 11.73221950803157, 169.70064895259912 13.387566659631101, 170.53078138987692 14.903037762363944, 171.64795170955566 16.2225728960974, 173.0092276827665 17.298873792007747, 174.5622962372712 18.094553111653685, 176.24747381949112 18.582729101204453, 178 18.747248844373974, -178 18.747248844373974, -176.24747381949115 18.582729101204453, -174.56229623727123 18.094553111653685, -173.00922768276646 17.298873792007747, -171.64795170955566 16.2225728960974, -170.5307813898769 14.903037762363944, -169.70064895259912 13.387566659631101, -169.18945592174325 11.73221950803157, -169.0168471588048 9.999999999999238, -169.0168471588048 -9.999999999999265, -169.18945592174325 -11.73221950803158, -169.70064895259912 -13.387566659631126, -170.5307813898769 -14.903037762363972, -171.64795170955566 -16.222572896097414, -173.00922768276646 -17.29887379200776, -174.56229623727123 -18.0945531116537, -176.24747381949115 -18.582729101204464, -178 -18.747248844374, 178 -18.747248844374))");
+            "POLYGON ((177.9549995416554 -19.040094935317835, 176.11434781653608 -18.85284309323023, 174.35693335915332 -18.312833546632955, 172.75892069701706 -17.445729285603573, 171.38477758716215 -16.29151182562638, 170.28436137749944 -14.900872725390832, 169.49233786416985 -13.331457888391856, 169.02929359537578 -11.64464082255408, 168.9036172802648 -9.903154239380708, 168.9036172802648 9.903154239380708, 169.02929359537578 11.644640822554088, 169.49233786416985 13.331457888391858, 170.28436137749944 14.900872725390835, 171.38477758716215 16.291511825626383, 172.75892069701706 17.445729285603576, 174.35693335915332 18.31283354663296, 176.11434781653608 18.85284309323023, 177.9549995416554 19.040094935317835, -177.87900985512576 19.007598545952018, -176.03054595864288 18.788450939408023, -174.2789941686595 18.21455302093928, -172.69957660725598 17.31634002547884, -171.35403397135434 16.137635031716854, -170.28849568727753 14.731558908748932, -169.53373124250396 13.156632392026058, -169.1069396813116 11.47370649042299, -169.01406048680477 9.743956042208017, -169.01406048680477 -9.743956042208017, -169.1069396813116 -11.47370649042299, -169.53373124250396 -13.156632392026058, -170.28849568727753 -14.731558908748932, -171.35403397135434 -16.137635031716854, -172.69957660725598 -17.31634002547884, -174.2789941686595 -18.21455302093928, -176.03054595864288 -18.788450939408023, -177.87900985512576 -19.007598545952018, 177.9549995416554 -19.040094935317835))");
 
     Geometry postgis_result1 =
         geomFromEWKT(
@@ -3171,6 +3599,18 @@ public class FunctionsTest extends TestBase {
 
     assertEquals(
         "Expected World Mercator projection for wide range geometry", expectedEPSG, actualEPSG);
+  }
+
+  @Test
+  public void testBestSRIDNearSouthPole() throws ParseException {
+    int actualEPSG =
+        Functions.bestSRID(
+            geomFromWKT("LINESTRING (-179.9999994 -82.42408, -157.330902 -85.0511284)", 4326));
+
+    assertEquals(
+        "Expected South Pole Lambert Azimuthal Equal Area projection near the south pole",
+        Spheroid.EPSG_SOUTH_LAMBERT,
+        actualEPSG);
   }
 
   @Test
@@ -3349,9 +3789,8 @@ public class FunctionsTest extends TestBase {
   public void testFrechetGeomEmpty() {
     Polygon p1 = GEOMETRY_FACTORY.createPolygon(coordArray(1, 0, 1, 1, 2, 1, 2, 0, 1, 0));
     LineString emptyPoint = GEOMETRY_FACTORY.createLineString();
-    double expected = 0.0;
-    double actual = Functions.frechetDistance(p1, emptyPoint);
-    assertEquals(expected, actual, 1e-9);
+    Double actual = Functions.frechetDistance(p1, emptyPoint);
+    assertNull(actual);
   }
 
   @Test
@@ -3422,6 +3861,62 @@ public class FunctionsTest extends TestBase {
     String expected = "LINESTRING (10 5, 10 5)";
     String actual = Functions.boundingDiagonal(point).toText();
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void azimuthNorth() {
+    Point a = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    Point b = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 1));
+    Double result = Functions.azimuth(a, b);
+    assertNotNull(result);
+    assertEquals(0.0, result, 1e-9);
+  }
+
+  @Test
+  public void azimuthSouth() {
+    Point a = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 25));
+    Point b = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    Double result = Functions.azimuth(a, b);
+    assertNotNull(result);
+    assertEquals(Math.PI, result, 1e-9);
+  }
+
+  @Test
+  public void azimuthIdenticalPoints() {
+    Point a = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 25));
+    Point b = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 25));
+    Double result = Functions.azimuth(a, b);
+    assertNull(result);
+  }
+
+  @Test
+  public void boundsEmptyGeometryReturnsNull() {
+    Geometry emptyPoint = GEOMETRY_FACTORY.createPoint();
+    assertNull(Functions.xMin(emptyPoint));
+    assertNull(Functions.xMax(emptyPoint));
+    assertNull(Functions.yMin(emptyPoint));
+    assertNull(Functions.yMax(emptyPoint));
+
+    Geometry emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+    assertNull(Functions.xMin(emptyPolygon));
+    assertNull(Functions.xMax(emptyPolygon));
+    assertNull(Functions.yMin(emptyPolygon));
+    assertNull(Functions.yMax(emptyPolygon));
+
+    Geometry emptyLineString = GEOMETRY_FACTORY.createLineString();
+    assertNull(Functions.xMin(emptyLineString));
+    assertNull(Functions.xMax(emptyLineString));
+    assertNull(Functions.yMin(emptyLineString));
+    assertNull(Functions.yMax(emptyLineString));
+  }
+
+  @Test
+  public void boundsNonEmptyGeometry() throws ParseException {
+    Geometry polygon = Constructors.geomFromWKT("POLYGON ((-1 -11, 0 10, 1 11, 2 12, -1 -11))", 0);
+    assertEquals(-1.0, Functions.xMin(polygon), 1e-9);
+    assertEquals(2.0, Functions.xMax(polygon), 1e-9);
+    assertEquals(-11.0, Functions.yMin(polygon), 1e-9);
+    assertEquals(12.0, Functions.yMax(polygon), 1e-9);
   }
 
   @Test
@@ -3797,6 +4292,48 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void geometryTypeWithMeasuredEmpty() {
+    // Regression test for GH-2390: GeometryType fails on all EMPTY geometries
+    assertEquals("POINT", Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createEmpty(0)));
+    assertEquals(
+        "LINESTRING", Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createLineString()));
+    assertEquals(
+        "POLYGON",
+        Functions.geometryTypeWithMeasured(
+            GEOMETRY_FACTORY.createPolygon(GEOMETRY_FACTORY.createLinearRing())));
+    assertEquals(
+        "MULTIPOINT", Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createMultiPoint()));
+    assertEquals(
+        "MULTILINESTRING",
+        Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createMultiLineString()));
+    assertEquals(
+        "MULTIPOLYGON", Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createMultiPolygon()));
+    assertEquals(
+        "GEOMETRYCOLLECTION",
+        Functions.geometryTypeWithMeasured(GEOMETRY_FACTORY.createGeometryCollection()));
+  }
+
+  @Test
+  public void setSRIDEmptyGeometries() throws ParseException {
+    // Regression test for GH-2403: SetSRID doesn't work on POLYGON EMPTY
+    String[] emptyWkts = {
+      "POINT EMPTY",
+      "LINESTRING EMPTY",
+      "POLYGON EMPTY",
+      "MULTIPOINT EMPTY",
+      "MULTILINESTRING EMPTY",
+      "MULTIPOLYGON EMPTY",
+      "GEOMETRYCOLLECTION EMPTY"
+    };
+    for (String wkt : emptyWkts) {
+      Geometry geom = Constructors.geomFromWKT(wkt, 0);
+      Geometry result = Functions.setSRID(geom, 4236);
+      assertEquals("SRID should be set for " + wkt, 4236, result.getSRID());
+      assertTrue("Result should be empty for " + wkt, result.isEmpty());
+    }
+  }
+
+  @Test
   public void closestPoint() {
     Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
     LineString lineString1 =
@@ -3878,6 +4415,107 @@ public class FunctionsTest extends TestBase {
             IllegalArgumentException.class,
             () -> Functions.closestPoint(emptyPolygon, emptyLineString));
     assertEquals(expected, e2.getMessage());
+  }
+
+  @Test
+  public void shortestLinePointToPoint() {
+    Point point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    Point point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(3, 4));
+    String expected = "LINESTRING (0 0, 3 4)";
+    String actual = Functions.shortestLine(point1, point2).toText();
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void shortestLinePointToLineString() {
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(160, 40));
+    LineString lineString =
+        GEOMETRY_FACTORY.createLineString(
+            coordArray(10, 30, 50, 50, 30, 110, 70, 90, 180, 140, 130, 190));
+    Geometry result = Functions.shortestLine(point, lineString);
+    assertNotNull(result);
+    assertEquals("LineString", result.getGeometryType());
+    // First point should be on the point geometry, second on the linestring
+    assertEquals(160.0, result.getCoordinates()[0].x, 1e-6);
+    assertEquals(40.0, result.getCoordinates()[0].y, 1e-6);
+  }
+
+  @Test
+  public void shortestLinePolygonToPolygon() {
+    Polygon polygonA =
+        GEOMETRY_FACTORY.createPolygon(coordArray(190, 150, 20, 10, 160, 70, 190, 150));
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(80, 160));
+    Geometry polygonB = Functions.buffer(point, 30);
+    Geometry result = Functions.shortestLine(polygonA, polygonB);
+    assertNotNull(result);
+    assertEquals("LineString", result.getGeometryType());
+    // The length of the shortest line should equal the distance between the polygons
+    assertEquals(Functions.distance(polygonA, polygonB), result.getLength(), 1e-6);
+  }
+
+  @Test
+  public void shortestLineEmptyGeometry() {
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+    LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
+    assertNull(Functions.shortestLine(point, emptyLineString));
+
+    Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+    assertNull(Functions.shortestLine(emptyPolygon, emptyLineString));
+  }
+
+  @Test
+  public void shortestLineSameGeometry() {
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(5, 5));
+    Geometry result = Functions.shortestLine(point, point);
+    assertNotNull(result);
+    assertEquals("LINESTRING (5 5, 5 5)", result.toText());
+    assertEquals(0.0, result.getLength(), 1e-6);
+  }
+
+  @Test
+  public void offsetCurvePositiveDistance() throws ParseException {
+    // Offset to the left of a horizontal line
+    Geometry line = Constructors.geomFromWKT("LINESTRING (0 0, 10 0)", 0);
+    Geometry result = Functions.offsetCurve(line, 5.0);
+    String actual = Functions.asWKT(result);
+    assertEquals("LINESTRING (0 5, 10 5)", actual);
+  }
+
+  @Test
+  public void offsetCurveNegativeDistance() throws ParseException {
+    // Offset to the right of a horizontal line
+    Geometry line = Constructors.geomFromWKT("LINESTRING (0 0, 10 0)", 0);
+    Geometry result = Functions.offsetCurve(line, -5.0);
+    String actual = Functions.asWKT(result);
+    assertEquals("LINESTRING (0 -5, 10 -5)", actual);
+  }
+
+  @Test
+  public void offsetCurveZeroDistance() throws ParseException {
+    // Zero distance returns a copy of the input
+    Geometry line = Constructors.geomFromWKT("LINESTRING (0 0, 10 0)", 0);
+    Geometry result = Functions.offsetCurve(line, 0.0);
+    String actual = Functions.asWKT(result);
+    assertEquals("LINESTRING (0 0, 10 0)", actual);
+  }
+
+  @Test
+  public void offsetCurveEmptyGeometry() throws ParseException {
+    // Empty geometry returns null
+    Geometry empty = Constructors.geomFromWKT("LINESTRING EMPTY", 0);
+    Geometry result = Functions.offsetCurve(empty, 5.0);
+    assertNull(result);
+  }
+
+  @Test
+  public void offsetCurveWithQuadrantSegments() throws ParseException {
+    // Test with custom quadrant segments on a line with a corner
+    Geometry line = Constructors.geomFromWKT("LINESTRING (0 0, 10 0, 10 10)", 0);
+    Geometry defaultResult = Functions.offsetCurve(line, -3.0);
+    Geometry customResult = Functions.offsetCurve(line, -3.0, 16);
+    assertNotNull(customResult);
+    // Higher quadrantSegments produces more points on the arc at outer corners
+    assertTrue(customResult.getNumPoints() > defaultResult.getNumPoints());
   }
 
   @Test
@@ -3965,18 +4603,16 @@ public class FunctionsTest extends TestBase {
   public void hausdorffDistanceEmptyGeom() throws Exception {
     Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 2, 2, 1, 2, 0, 4, 1, 1, 2));
     LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
-    Double expected = 0.0;
     Double actual = Functions.hausdorffDistance(polygon, emptyLineString, 0.00001);
-    assertEquals(expected, actual);
+    assertNull(actual);
   }
 
   @Test
   public void hausdorffDistanceDefaultEmptyGeom() throws Exception {
     Polygon polygon = GEOMETRY_FACTORY.createPolygon(coordArray(1, 2, 2, 1, 2, 0, 4, 1, 1, 2));
     LineString emptyLineString = GEOMETRY_FACTORY.createLineString();
-    Double expected = 0.0;
     Double actual = Functions.hausdorffDistance(polygon, emptyLineString);
-    assertEquals(expected, actual);
+    assertNull(actual);
   }
 
   @Test
@@ -4054,26 +4690,26 @@ public class FunctionsTest extends TestBase {
   @Test
   public void voronoiPolygons() {
     MultiPoint multiPoint = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0, 0, 2, 2));
-    Geometry actual1 = FunctionsGeoTools.voronoiPolygons(multiPoint, 0, null);
+    Geometry actual1 = Functions.voronoiPolygons(multiPoint, 0, null);
     assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 -2, -2 -2)), POLYGON ((-2 4, 4 4, 4 -2, -2 4)))",
         actual1.toText());
 
-    Geometry actual2 = FunctionsGeoTools.voronoiPolygons(multiPoint, 30, null);
+    Geometry actual2 = Functions.voronoiPolygons(multiPoint, 30, null);
     assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-2 -2, -2 4, 4 4, 4 -2, -2 -2)))", actual2.toText());
 
     Geometry buf = Functions.buffer(GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1)), 10);
-    Geometry actual3 = FunctionsGeoTools.voronoiPolygons(multiPoint, 0, buf);
+    Geometry actual3 = Functions.voronoiPolygons(multiPoint, 0, buf);
     assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 -9, -9 -9)), POLYGON ((-9 11, 11 11, 11 -9, -9 11)))",
         actual3.toText());
 
-    Geometry actual4 = FunctionsGeoTools.voronoiPolygons(multiPoint, 30, buf);
+    Geometry actual4 = Functions.voronoiPolygons(multiPoint, 30, buf);
     assertGeometryEquals(
         "GEOMETRYCOLLECTION (POLYGON ((-9 -9, -9 11, 11 11, 11 -9, -9 -9)))", actual4.toText());
 
-    Geometry actual5 = FunctionsGeoTools.voronoiPolygons(null, 0, null);
+    Geometry actual5 = Functions.voronoiPolygons(null, 0, null);
     assertEquals(null, actual5);
   }
 
@@ -4095,6 +4731,40 @@ public class FunctionsTest extends TestBase {
     assertEquals(expectedResult1, actual1, FP_TOLERANCE);
     assertEquals(expectedResult2, actual2, FP_TOLERANCE);
     assertEquals(expectedResult3, actual3, FP_TOLERANCE);
+  }
+
+  @Test
+  public void lineLocatePointEmpty() {
+    LineString emptyLine = GEOMETRY_FACTORY.createLineString();
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+    assertNull(Functions.lineLocatePoint(emptyLine, point));
+  }
+
+  @Test
+  public void lineLocatePointEmptyPoint() {
+    LineString line =
+        GEOMETRY_FACTORY.createLineString(
+            new Coordinate[] {new Coordinate(0, 0), new Coordinate(1, 1)});
+    Geometry emptyPoint = GEOMETRY_FACTORY.createPoint();
+    assertNull(Functions.lineLocatePoint(line, emptyPoint));
+  }
+
+  @Test
+  public void lineLocatePointZeroLength() {
+    LineString zeroLen =
+        GEOMETRY_FACTORY.createLineString(
+            new Coordinate[] {new Coordinate(1, 1), new Coordinate(1, 1)});
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(2, 2));
+    Double result = Functions.lineLocatePoint(zeroLen, point);
+    assertTrue(Double.isNaN(result));
+  }
+
+  @Test
+  public void lineInterpolatePointEmpty() {
+    LineString emptyLine = GEOMETRY_FACTORY.createLineString();
+    Geometry actual = Functions.lineInterpolatePoint(emptyLine, 0.5);
+    assertTrue(actual.isEmpty());
+    assertEquals("Point", actual.getGeometryType());
   }
 
   @Test
@@ -4960,5 +5630,429 @@ public class FunctionsTest extends TestBase {
             + ", Raw: "
             + straightSkel.getNumGeometries(),
         result.getNumGeometries() <= straightSkel.getNumGeometries());
+  }
+
+  @Test
+  public void testGeoHashNeighborsKnownValues() {
+    // Known values from geohash-java: GeoHashTest.testKnownNeighbouringHashes()
+    // Center: "u1pb"
+    assertEquals("u1pc", Functions.geohashNeighbor("u1pb", "n"));
+    assertEquals("u0zz", Functions.geohashNeighbor("u1pb", "s"));
+    assertEquals("u300", Functions.geohashNeighbor("u1pb", "e"));
+    assertEquals("u1p8", Functions.geohashNeighbor("u1pb", "w"));
+
+    // Double east: u1pb -> e -> u300 -> e -> u302
+    assertEquals("u302", Functions.geohashNeighbor(Functions.geohashNeighbor("u1pb", "e"), "e"));
+  }
+
+  @Test
+  public void testGeoHashNeighborsAllEight() {
+    // Known values from geohash-java: GeoHashTest.testKnownAdjacentNeighbours()
+    // Center: "dqcjqc"
+    String[] neighbors = Functions.geohashNeighbors("dqcjqc");
+    assertNotNull(neighbors);
+    assertEquals(8, neighbors.length);
+    // Verify all 8 expected values are present
+    java.util.Set<String> expected =
+        new java.util.HashSet<>(
+            java.util.Arrays.asList(
+                "dqcjqf", "dqcjr4", "dqcjr1", "dqcjr0", "dqcjq9", "dqcjq8", "dqcjqb", "dqcjqd"));
+    java.util.Set<String> actual = new java.util.HashSet<>(java.util.Arrays.asList(neighbors));
+    assertEquals(expected, actual);
+
+    // Center: "u1x0dfg" (7-char precision)
+    neighbors = Functions.geohashNeighbors("u1x0dfg");
+    assertNotNull(neighbors);
+    assertEquals(8, neighbors.length);
+    expected =
+        new java.util.HashSet<>(
+            java.util.Arrays.asList(
+                "u1x0dg4", "u1x0dg5", "u1x0dgh", "u1x0dfu", "u1x0dfs", "u1x0dfe", "u1x0dfd",
+                "u1x0dff"));
+    actual = new java.util.HashSet<>(java.util.Arrays.asList(neighbors));
+    assertEquals(expected, actual);
+
+    // Center: "sp2j" (near prime meridian — neighbors cross into "ezr*" prefix)
+    neighbors = Functions.geohashNeighbors("sp2j");
+    assertNotNull(neighbors);
+    assertEquals(8, neighbors.length);
+    expected =
+        new java.util.HashSet<>(
+            java.util.Arrays.asList(
+                "ezry", "sp2n", "sp2q", "sp2m", "sp2k", "sp2h", "ezru", "ezrv"));
+    actual = new java.util.HashSet<>(java.util.Arrays.asList(neighbors));
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testGeoHashNeighborNearMeridian() {
+    // From geohash-java: GeoHashTest.testNeibouringHashesNearMeridian()
+    // "sp2j" is near the prime meridian; western neighbors cross into "ezr*" prefix
+    assertEquals("ezrv", Functions.geohashNeighbor("sp2j", "w"));
+    assertEquals("ezrt", Functions.geohashNeighbor(Functions.geohashNeighbor("sp2j", "w"), "w"));
+  }
+
+  @Test
+  public void testGeoHashNeighborCircleMovement() {
+    // Moving E -> S -> W -> N should return to the starting cell
+    // From geohash-java: GeoHashTest.testMovingInCircle()
+    String[] testHashes = {"u1pb", "sp2j", "ezrv", "dqcjqc", "u1x0dfg", "pbpbpbpbpbpb"};
+    for (String start : testHashes) {
+      String result = Functions.geohashNeighbor(start, "e");
+      result = Functions.geohashNeighbor(result, "s");
+      result = Functions.geohashNeighbor(result, "w");
+      result = Functions.geohashNeighbor(result, "n");
+      assertEquals("Circle movement failed for " + start, start, result);
+    }
+  }
+
+  @Test
+  public void testGeoHashNeighborCaseInsensitive() {
+    assertEquals(Functions.geohashNeighbor("u1pb", "n"), Functions.geohashNeighbor("u1pb", "N"));
+    assertEquals(Functions.geohashNeighbor("u1pb", "ne"), Functions.geohashNeighbor("u1pb", "NE"));
+    assertEquals(Functions.geohashNeighbor("u1pb", "sw"), Functions.geohashNeighbor("u1pb", "SW"));
+  }
+
+  @Test
+  public void testGeoHashNeighborsNullInput() {
+    assertNull(Functions.geohashNeighbors(null));
+    assertNull(Functions.geohashNeighbor(null, "n"));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testGeoHashNeighborsEmptyInput() {
+    Functions.geohashNeighbors("");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testGeoHashNeighborInvalidDirection() {
+    Functions.geohashNeighbor("u1pb", "north");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testGeoHashNeighborNullDirection() {
+    Functions.geohashNeighbor("u1pb", null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testGeoHashNeighborsInvalidCharacter() {
+    Functions.geohashNeighbors("u1pb!");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testGeoHashNeighborsTooLongInput() {
+    // 13 chars * 5 bits = 65 > 64 (MAX_BIT_PRECISION)
+    Functions.geohashNeighbors("0123456789abc");
+  }
+
+  // =========================================================================
+  // Bing Tile function tests
+  // =========================================================================
+
+  // --- ST_BingTile (from coordinates and from quadkey) ---
+
+  @Test
+  public void testBingTileFromCoordinates() {
+    // bing_tile(3, 5, 3) = quadkey "213"
+    assertEquals("213", Functions.bingTile(3, 5, 3));
+    // bing_tile(21845, 13506, 15) = quadkey "123030123010121"
+    assertEquals("123030123010121", Functions.bingTile(21845, 13506, 15));
+  }
+
+  @Test
+  public void testBingTileQuadKeyRoundTrip() {
+    assertEquals("213", Functions.bingTileQuadKey(Functions.bingTile(3, 5, 3)));
+    assertEquals(
+        "123030123010121", Functions.bingTileQuadKey(Functions.bingTile(21845, 13506, 15)));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileInvalidEmptyQuadKey() {
+    Functions.bingTileQuadKey("");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileInvalidQuadKeyDigits() {
+    Functions.bingTileQuadKey("test");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileInvalidQuadKeyDigits2() {
+    // "12345" contains '4' and '5' which are invalid
+    Functions.bingTileQuadKey("12345");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileQuadKeyTooLong() {
+    // quadkey > 23 chars
+    Functions.bingTileQuadKey("101010101010101010101010101010100101010101001010");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileXYOutOfRange() {
+    // x=10 at zoom 3 is out of [0, 8) range
+    Functions.bingTile(10, 2, 3);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileXYOutOfRange2() {
+    // y=10 at zoom 3 is out of [0, 8) range
+    Functions.bingTile(2, 10, 3);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileZoomOutOfRange() {
+    // zoom=37 > 23
+    Functions.bingTile(2, 7, 37);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileZoomZero() {
+    // zoom=0 is invalid
+    Functions.bingTile(0, 0, 0);
+  }
+
+  // --- ST_BingTileAt (point to tile) ---
+
+  @Test
+  public void testBingTileAt() {
+    // bingTileAt(lon=60, lat=30.12, zoom=15) = tile(21845, 13506, 15)
+    String qk = Functions.bingTileAt(60, 30.12, 15);
+    assertEquals("123030123010121", qk);
+    assertEquals(21845, Functions.bingTileX(qk));
+    assertEquals(13506, Functions.bingTileY(qk));
+
+    // bingTileAt(lon=-0.002, lat=0, zoom=1) = tile(0, 1, 1)
+    qk = Functions.bingTileAt(-0.002, 0, 1);
+    assertEquals(0, Functions.bingTileX(qk));
+    assertEquals(1, Functions.bingTileY(qk));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileAtLongitudeOutOfRange() {
+    // longitude 600 is out of range
+    Functions.bingTileAt(600, 30.12, 15);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileAtLatitudeOutOfRange() {
+    // latitude 300.12 is out of range
+    Functions.bingTileAt(60, 300.12, 15);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileAtZoomTooSmall() {
+    // zoom=0
+    Functions.bingTileAt(60, 30.12, 0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileAtZoomTooLarge() {
+    // zoom=40
+    Functions.bingTileAt(60, 30.12, 40);
+  }
+
+  // --- ST_BingTileCoordinates (X, Y) ---
+
+  @Test
+  public void testBingTileCoordinates() {
+    // bing_tile_coordinates('213') = (3, 5)
+    assertEquals(3, Functions.bingTileX("213"));
+    assertEquals(5, Functions.bingTileY("213"));
+
+    // bing_tile_coordinates('123030123010121') = (21845, 13506)
+    assertEquals(21845, Functions.bingTileX("123030123010121"));
+    assertEquals(13506, Functions.bingTileY("123030123010121"));
+  }
+
+  // --- ST_BingTileZoomLevel ---
+
+  @Test
+  public void testBingTileZoomLevel() {
+    assertEquals(3, Functions.bingTileZoomLevel("213"));
+    assertEquals(15, Functions.bingTileZoomLevel("123030123010121"));
+  }
+
+  // --- ST_BingTilesAround ---
+
+  @Test
+  public void testBingTilesAround() {
+    // bingTilesAround(lon=60, lat=30.12, zoom=1) = ["0", "2", "1", "3"]
+    String[] tiles = Functions.bingTilesAround(60, 30.12, 1);
+    assertEquals(4, tiles.length);
+    assertArrayEquals(new String[] {"0", "2", "1", "3"}, tiles);
+
+    // bingTilesAround(lon=60, lat=30.12, zoom=15) = 9 tiles (3x3 neighborhood)
+    tiles = Functions.bingTilesAround(60, 30.12, 15);
+    assertEquals(9, tiles.length);
+    assertArrayEquals(
+        new String[] {
+          "123030123010102",
+          "123030123010120",
+          "123030123010122",
+          "123030123010103",
+          "123030123010121",
+          "123030123010123",
+          "123030123010112",
+          "123030123010130",
+          "123030123010132"
+        },
+        tiles);
+  }
+
+  @Test
+  public void testBingTilesAroundCorner() {
+    // corner case at (lon=-180, lat=-85.05112878, zoom=1) = all 4 tiles
+    String[] tiles = Functions.bingTilesAround(-180, -85.05112878, 1);
+    assertArrayEquals(new String[] {"0", "2", "1", "3"}, tiles);
+
+    // corner at (lon=-180, lat=-85.05112878, zoom=3) = 4 tiles
+    tiles = Functions.bingTilesAround(-180, -85.05112878, 3);
+    assertArrayEquals(new String[] {"220", "222", "221", "223"}, tiles);
+  }
+
+  @Test
+  public void testBingTilesAroundEdge() {
+    // edge case at (lon=0, lat=-85.05112878, zoom=2) = 6 tiles
+    String[] tiles = Functions.bingTilesAround(0, -85.05112878, 2);
+    assertArrayEquals(new String[] {"21", "23", "30", "32", "31", "33"}, tiles);
+
+    // edge at (lon=0, lat=85.05112878, zoom=2) = 6 tiles
+    tiles = Functions.bingTilesAround(0, 85.05112878, 2);
+    assertArrayEquals(new String[] {"01", "03", "10", "12", "11", "13"}, tiles);
+  }
+
+  // --- ST_BingTilePolygon ---
+
+  @Test
+  public void testBingTilePolygon() {
+    // bing_tile_polygon('123030123010121')
+    Geometry polygon = Functions.bingTilePolygon("123030123010121");
+    assertNotNull(polygon);
+    assertTrue(polygon instanceof Polygon);
+    assertEquals(5, polygon.getCoordinates().length);
+
+    // Expected envelope for tile '123030123010121'
+    Envelope env = polygon.getEnvelopeInternal();
+    assertEquals(59.996337890625, env.getMinX(), 1e-10);
+    assertEquals(60.00732421875, env.getMaxX(), 1e-10);
+    assertEquals(30.11662158281937, env.getMinY(), 1e-10);
+    assertEquals(30.12612436422458, env.getMaxY(), 1e-10);
+  }
+
+  @Test
+  public void testBingTilePolygonBottomRightCorner() {
+    // bottom-right corner of tile(1,1,1) = (180, -85.05112877980659)
+    Geometry polygon = Functions.bingTilePolygon(Functions.bingTile(1, 1, 1));
+    Envelope env = polygon.getEnvelopeInternal();
+    assertEquals(180.0, env.getMaxX(), 1e-10);
+    assertEquals(-85.05112877980659, env.getMinY(), 1e-10);
+
+    // bottom-right corner of tile(3,3,2) = (180, -85.05112877980659)
+    polygon = Functions.bingTilePolygon(Functions.bingTile(3, 3, 2));
+    env = polygon.getEnvelopeInternal();
+    assertEquals(180.0, env.getMaxX(), 1e-10);
+    assertEquals(-85.05112877980659, env.getMinY(), 1e-10);
+  }
+
+  @Test
+  public void testBingTilePolygonOriginCorner() {
+    // top-left corner of tile(0,0,1) bottom-right = (0, 0)
+    Geometry polygon = Functions.bingTilePolygon(Functions.bingTile(0, 0, 1));
+    Envelope env = polygon.getEnvelopeInternal();
+    assertEquals(0.0, env.getMaxX(), 1e-10);
+    assertEquals(0.0, env.getMinY(), 1e-10);
+
+    // top-left corner of tile(0,0,1) = (-180, 85.05112877980659)
+    assertEquals(-180.0, env.getMinX(), 1e-10);
+    assertEquals(85.05112877980659, env.getMaxY(), 1e-10);
+  }
+
+  // --- ST_BingTileCellIDs (geometry_to_bing_tiles) ---
+
+  @Test
+  public void testBingTileCellIDsPoint() {
+    // geometry_to_bing_tiles(POINT(60 30.12), 10) = ["1230301230"]
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(60, 30.12));
+    String[] tiles = Functions.bingTileCellIDs(point, 10);
+    assertArrayEquals(new String[] {"1230301230"}, tiles);
+
+    // geometry_to_bing_tiles(POINT(60 30.12), 15) = ["123030123010121"]
+    tiles = Functions.bingTileCellIDs(point, 15);
+    assertArrayEquals(new String[] {"123030123010121"}, tiles);
+
+    // geometry_to_bing_tiles(POINT(60 30.12), 16) = ["1230301230101212"]
+    tiles = Functions.bingTileCellIDs(point, 16);
+    assertArrayEquals(new String[] {"1230301230101212"}, tiles);
+  }
+
+  @Test
+  public void testBingTileCellIDsPolygon() {
+    // geometry_to_bing_tiles(POLYGON((0 0, 0 10, 10 10, 10 0)), 6)
+    Geometry polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0));
+    String[] tiles = Functions.bingTileCellIDs(polygon, 6);
+    assertArrayEquals(new String[] {"122220", "122222", "122221", "122223"}, tiles);
+  }
+
+  @Test
+  public void testBingTileCellIDsTriangle() {
+    // geometry_to_bing_tiles(POLYGON((10 10, -10 10, -20 -15, 10 10)), 3)
+    Geometry triangle =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(10.0, 10.0, -10.0, 10.0, -20.0, -15.0, 10.0, 10.0));
+    String[] tiles = Functions.bingTileCellIDs(triangle, 3);
+    assertArrayEquals(new String[] {"033", "211", "122"}, tiles);
+  }
+
+  @Test
+  public void testBingTileCellIDsEmpty() {
+    // POINT EMPTY, POLYGON EMPTY → empty list
+    Geometry emptyPoint = GEOMETRY_FACTORY.createPoint();
+    assertEquals(0, Functions.bingTileCellIDs(emptyPoint, 10).length);
+
+    Geometry emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+    assertEquals(0, Functions.bingTileCellIDs(emptyPolygon, 10).length);
+  }
+
+  @Test
+  public void testBingTileCellIDsSelfRoundTrip() {
+    // geometry_to_bing_tiles(bing_tile_polygon('1230301230'), 10) = ["1230301230"]
+    Geometry tilePolygon = Functions.bingTilePolygon("1230301230");
+    String[] tiles = Functions.bingTileCellIDs(tilePolygon, 10);
+    assertArrayEquals(new String[] {"1230301230"}, tiles);
+
+    // expanding to zoom 11 = 4 child tiles
+    tiles = Functions.bingTileCellIDs(tilePolygon, 11);
+    assertArrayEquals(
+        new String[] {"12303012300", "12303012302", "12303012301", "12303012303"}, tiles);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileCellIDsZoomTooSmall() {
+    // zoom=0 is invalid
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(60, 30.12));
+    Functions.bingTileCellIDs(point, 0);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testBingTileCellIDsZoomTooLarge() {
+    // zoom=40 is invalid
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(60, 30.12));
+    Functions.bingTileCellIDs(point, 40);
+  }
+
+  // --- ST_BingTileToGeom ---
+
+  @Test
+  public void testBingTileToGeom() {
+    String[] quadkeys = new String[] {"0", "1", "2", "3"};
+    Geometry[] polygons = Functions.bingTileToGeom(quadkeys);
+    assertEquals(4, polygons.length);
+    for (Geometry g : polygons) {
+      assertTrue(g instanceof Polygon);
+      assertEquals(5, g.getCoordinates().length);
+    }
   }
 }

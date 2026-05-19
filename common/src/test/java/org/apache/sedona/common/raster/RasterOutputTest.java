@@ -254,4 +254,103 @@ public class RasterOutputTest extends RasterTestBase {
       }
     }
   }
+
+  // ---- RS_AsCOG / asCOG tests ----
+
+  @Test
+  public void testAsCOGDefaults() throws IOException {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    byte[] cogBytes = RasterOutputs.asCOG(raster);
+    assertNotNull(cogBytes);
+    assertTrue(cogBytes.length >= 2);
+    // Verify it is a valid TIFF (starts with II or MM)
+    assertTrue(
+        (cogBytes[0] == 'I' && cogBytes[1] == 'I') || (cogBytes[0] == 'M' && cogBytes[1] == 'M'));
+  }
+
+  @Test
+  public void testAsCOGRoundTrip() throws IOException {
+    GridCoverage2D original = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    byte[] cogBytes = RasterOutputs.asCOG(original, "LZW", 256);
+    // Read COG bytes back as a raster via GeoTiff reader
+    GridCoverage2D roundTripped = RasterConstructors.fromGeoTiff(cogBytes);
+    assertNotNull(roundTripped);
+    // Verify envelope is preserved
+    assertEquals(original.getEnvelope2D().toString(), roundTripped.getEnvelope2D().toString());
+    // Verify dimensions are preserved
+    assertEquals(
+        original.getRenderedImage().getWidth(), roundTripped.getRenderedImage().getWidth());
+    assertEquals(
+        original.getRenderedImage().getHeight(), roundTripped.getRenderedImage().getHeight());
+    // Verify number of bands is preserved
+    assertEquals(original.getNumSampleDimensions(), roundTripped.getNumSampleDimensions());
+  }
+
+  @Test
+  public void testAsCOGWithCompression() throws IOException {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    byte[] cogLZW = RasterOutputs.asCOG(raster, "LZW");
+    byte[] cogDeflate = RasterOutputs.asCOG(raster, "Deflate");
+    assertNotNull(cogLZW);
+    assertNotNull(cogDeflate);
+    assertTrue(cogLZW.length > 0);
+    assertTrue(cogDeflate.length > 0);
+    // Different compressions should produce different sizes
+    assertNotEquals(cogLZW.length, cogDeflate.length);
+  }
+
+  @Test
+  public void testAsCOGWithCompressionAndTileSize() throws IOException {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    byte[] cog256 = RasterOutputs.asCOG(raster, "Deflate", 256);
+    byte[] cog512 = RasterOutputs.asCOG(raster, "Deflate", 512);
+    assertNotNull(cog256);
+    assertNotNull(cog512);
+    assertTrue(cog256.length > 0);
+    assertTrue(cog512.length > 0);
+  }
+
+  @Test
+  public void testAsCOGWithCompressionTileSizeAndQuality() throws IOException {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    byte[] cogHighQ = RasterOutputs.asCOG(raster, "Deflate", 256, 1.0);
+    byte[] cogLowQ = RasterOutputs.asCOG(raster, "Deflate", 256, 0.1);
+    assertNotNull(cogHighQ);
+    assertNotNull(cogLowQ);
+    assertTrue(cogHighQ.length > 0);
+    assertTrue(cogLowQ.length > 0);
+  }
+
+  @Test
+  public void testAsCOGWithResampling() throws IOException {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    byte[] cog = RasterOutputs.asCOG(raster, "Deflate", 256, 0.2, "Bilinear");
+    assertNotNull(cog);
+    assertTrue(cog.length > 0);
+  }
+
+  @Test
+  public void testAsCOGAllArgs() throws IOException {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    byte[] cog = RasterOutputs.asCOG(raster, "LZW", 256, 0.5, "Nearest", 2);
+    assertNotNull(cog);
+    assertTrue(cog.length > 0);
+  }
+
+  @Test
+  public void testAsCOGCaseInsensitive() throws IOException {
+    GridCoverage2D raster = rasterFromGeoTiff(resourceFolder + "raster/test1.tiff");
+    // compression and resampling should be case-insensitive
+    byte[] cog = RasterOutputs.asCOG(raster, "lzw", 256, 0.5, "bilinear", 2);
+    assertNotNull(cog);
+    assertTrue(cog.length > 0);
+    // uppercase
+    byte[] cog2 = RasterOutputs.asCOG(raster, "DEFLATE", 256, 0.5, "NEAREST", 2);
+    assertNotNull(cog2);
+    assertTrue(cog2.length > 0);
+    // mixed case: packbits
+    byte[] cog3 = RasterOutputs.asCOG(raster, "packbits");
+    assertNotNull(cog3);
+    assertTrue(cog3.length > 0);
+  }
 }

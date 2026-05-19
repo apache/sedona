@@ -22,14 +22,14 @@
     <parent>
         <groupId>org.apache.sedona</groupId>
         <artifactId>sedona-parent</artifactId>
-        <version>1.8.1-SNAPSHOT</version>
+        <version>1.9.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>sedona-common</artifactId>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A cluster computing system for processing large-scale spatial data: Common API.</description>
-    <url>http://sedona.apache.org/</url>
+    <url>https://sedona.apache.org/</url>
     <packaging>jar</packaging>
 
     <properties>
@@ -123,6 +123,16 @@
         <dependency>
             <groupId>org.datasyslab</groupId>
             <artifactId>campskeleton</artifactId>
+        </dependency>
+        <!-- proj4sedona for CRS transformation (pure Java, no LGPL dependencies) -->
+        <dependency>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>proj4sedona</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>

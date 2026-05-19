@@ -120,8 +120,8 @@ class GeoParquetMetadataTests extends TestBaseScala with BeforeAndAfterAll {
       val schema = StructType(
         Seq(
           StructField("id", IntegerType, nullable = false),
-          StructField("geom_column_1", GeometryUDT, nullable = false),
-          StructField("geomColumn2", GeometryUDT, nullable = false)))
+          StructField("geom_column_1", GeometryUDT(), nullable = false),
+          StructField("geomColumn2", GeometryUDT(), nullable = false)))
       val df = sparkSession.createDataFrame(Collections.emptyList[Row](), schema)
       val geoParquetSavePath = geoparquetoutputlocation + "/gp_column_name_styles.parquet"
       df.write.format("geoparquet").mode("overwrite").save(geoParquetSavePath)

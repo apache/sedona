@@ -115,12 +115,10 @@ class TestGeometryConvert(TestBase):
         )
 
     def test_geometry_collection_deserialization(self):
-        geom = self.spark.sql(
-            """SELECT st_geomFromWKT('GEOMETRYCOLLECTION (
+        geom = self.spark.sql("""SELECT st_geomFromWKT('GEOMETRYCOLLECTION (
                 MULTILINESTRING((1 2, 3 4), (5 6, 7 8)),
                 MULTILINESTRING((1 2, 3 4), (5 6, 7 8), (9 10, 11 12)),
-                POINT(10 20))') as geom"""
-        ).collect()[0][0]
+                POINT(10 20))') as geom""").collect()[0][0]
 
         assert type(geom) == GeometryCollection
         assert (

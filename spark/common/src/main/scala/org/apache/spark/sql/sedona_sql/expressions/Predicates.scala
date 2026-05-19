@@ -40,7 +40,7 @@ abstract class ST_Predicate
 
   override def nullable: Boolean = children.exists(_.nullable)
 
-  override def inputTypes: Seq[AbstractDataType] = Seq(GeometryUDT, GeometryUDT)
+  override def inputTypes: Seq[AbstractDataType] = Seq(GeometryUDT(), GeometryUDT())
 
   override def dataType: DataType = BooleanType
 
@@ -74,17 +74,15 @@ abstract class ST_Predicate
 }
 
 /**
- * Test if leftGeometry full contains rightGeometry
+ * Test if leftGeometry full contains rightGeometry. Supports both Geometry (JTS) and Geography
+ * (S2) inputs via InferredExpression dual dispatch.
  *
  * @param inputExpressions
  */
 private[apache] case class ST_Contains(inputExpressions: Seq[Expression])
-    extends ST_Predicate
-    with CodegenFallback {
-
-  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    Predicates.contains(leftGeometry, rightGeometry)
-  }
+    extends InferredExpression(
+      inferrableFunction2(Predicates.contains),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.contains)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -92,17 +90,47 @@ private[apache] case class ST_Contains(inputExpressions: Seq[Expression])
 }
 
 /**
- * Test if leftGeometry full intersects rightGeometry
+ * Closed-interval bbox intersection over two Box2D arguments. Returns true if the boxes overlap
+ * on both the X and Y axes (matches PostGIS `&&` on box2d). Edge- and corner-touching boxes count
+ * as intersecting. Throws on inverted bounds (xmin>xmax / ymin>ymax) since planar predicates have
+ * no defined meaning for inverted intervals; that ordering is reserved for future
+ * antimeridian-wraparound semantics.
+ *
+ * @param inputExpressions
+ */
+private[apache] case class ST_BoxIntersects(inputExpressions: Seq[Expression])
+    extends InferredExpression(Predicates.boxIntersects _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Closed-interval bbox containment over two Box2D arguments. Returns true if argument `a` fully
+ * contains argument `b` on both axes (matches PostGIS `~` on box2d). Equal boxes contain each
+ * other. Throws on inverted bounds for the same reason as ST_BoxIntersects.
+ *
+ * @param inputExpressions
+ */
+private[apache] case class ST_BoxContains(inputExpressions: Seq[Expression])
+    extends InferredExpression(Predicates.boxContains _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Test if leftGeometry full intersects rightGeometry. Supports both Geometry (JTS) and Geography
+ * (S2) inputs via InferredExpression dual dispatch.
  *
  * @param inputExpressions
  */
 private[apache] case class ST_Intersects(inputExpressions: Seq[Expression])
-    extends ST_Predicate
-    with CodegenFallback {
-
-  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    Predicates.intersects(leftGeometry, rightGeometry)
-  }
+    extends InferredExpression(
+      inferrableFunction2(Predicates.intersects),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.intersects)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -110,17 +138,15 @@ private[apache] case class ST_Intersects(inputExpressions: Seq[Expression])
 }
 
 /**
- * Test if leftGeometry is full within rightGeometry
+ * Test if leftGeometry is fully within rightGeometry. Supports both Geometry (JTS) and Geography
+ * (S2) inputs via InferredExpression dual dispatch.
  *
  * @param inputExpressions
  */
 private[apache] case class ST_Within(inputExpressions: Seq[Expression])
-    extends ST_Predicate
-    with CodegenFallback {
-
-  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    Predicates.within(leftGeometry, rightGeometry)
-  }
+    extends InferredExpression(
+      inferrableFunction2(Predicates.within),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.within)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -236,18 +262,15 @@ private[apache] case class ST_RelateMatch(inputExpressions: Seq[Expression])
 }
 
 /**
- * Test if leftGeometry is equal to rightGeometry
+ * Test if leftGeometry is equal to rightGeometry. Supports both Geometry (JTS) and Geography (S2)
+ * inputs via InferredExpression dual dispatch.
  *
  * @param inputExpressions
  */
 private[apache] case class ST_Equals(inputExpressions: Seq[Expression])
-    extends ST_Predicate
-    with CodegenFallback {
-
-  override def evalGeom(leftGeometry: Geometry, rightGeometry: Geometry): Boolean = {
-    // Returns GeometryCollection object
-    Predicates.equals(leftGeometry, rightGeometry)
-  }
+    extends InferredExpression(
+      inferrableFunction2(Predicates.equals),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.equals)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -292,8 +315,14 @@ private[apache] case class ST_OrderingEquals(inputExpressions: Seq[Expression])
 
 private[apache] case class ST_DWithin(inputExpressions: Seq[Expression])
     extends InferredExpression(
-      inferrableFunction3(Predicates.dWithin),
-      inferrableFunction4(Predicates.dWithin)) {
+      inferrableFunction3((l: Geometry, r: Geometry, d: Double) => Predicates.dWithin(l, r, d)),
+      inferrableFunction4(Predicates.dWithin),
+      inferrableFunction3(org.apache.sedona.common.geography.Functions.dWithin),
+      inferrableFunction3(
+        (
+            a: org.apache.sedona.common.geometryObjects.Box2D,
+            b: org.apache.sedona.common.geometryObjects.Box2D,
+            distance: Double) => Predicates.dWithin(a, b, distance))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

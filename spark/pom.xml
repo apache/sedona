@@ -22,14 +22,14 @@
     <parent>
         <groupId>org.apache.sedona</groupId>
         <artifactId>sedona-parent</artifactId>
-        <version>1.8.1-SNAPSHOT</version>
+        <version>1.9.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>sedona-spark-parent-${spark.compat.version}_${scala.compat.version}</artifactId>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A cluster computing system for processing large-scale spatial data: Parent module for SQL API.</description>
-    <url>http://sedona.apache.org/</url>
+    <url>https://sedona.apache.org/</url>
     <packaging>pom</packaging>
 
     <properties>
@@ -50,6 +50,7 @@
             <modules>
                 <module>spark-3.5</module>
                 <module>spark-4.0</module>
+                <module>spark-4.1</module>
             </modules>
         </profile>
     </profiles>

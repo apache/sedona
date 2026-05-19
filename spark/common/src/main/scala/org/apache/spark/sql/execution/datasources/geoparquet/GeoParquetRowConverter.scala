@@ -215,11 +215,14 @@ private[geoparquet] class GeoParquetRowConverter(
         new ParquetPrimitiveConverter(updater)
 
       case GeometryUDT =>
+        // Compute SRID once per column converter, not per row
+        val srid = schemaConverter.getSrid(parquetType.getName)
         if (parquetType.isPrimitive) {
           new ParquetPrimitiveConverter(updater) {
             override def addBinary(value: Binary): Unit = {
               val wkbReader = new WKBReader()
               val geom = wkbReader.read(value.getBytes)
+              geom.setSRID(srid)
               this.updater.set(GeometryUDT.serialize(geom))
             }
           }
@@ -233,6 +236,7 @@ private[geoparquet] class GeoParquetRowConverter(
                 val wkbReader = new WKBReader()
                 val byteArray = currentArray.map(_.asInstanceOf[Byte]).toArray
                 val geom = wkbReader.read(byteArray)
+                geom.setSRID(srid)
                 this.updater.set(GeometryUDT.serialize(geom))
               }
             }

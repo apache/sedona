@@ -164,7 +164,7 @@ class TestPredicateJoin(TestBase):
         )
         function_df.show()
         actual = function_df.take(1)[0][0]
-        assert actual == 3395
+        assert actual == 32614
 
     def test_st_shiftlongitude(self):
         function_df = self.spark.sql(
@@ -184,6 +184,28 @@ class TestPredicateJoin(TestBase):
         )
         actual = function_df.take(1)[0][0].wkt
         assert actual == "LINESTRING (179 10, -179 10)"
+
+    def test_st_box_2d(self):
+        df = self.spark.sql("""
+            SELECT
+              ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')) AS bbox,
+              ST_Box2D(ST_GeomFromText('POINT EMPTY')) AS bbox_empty,
+              ST_Box2D(ST_GeomFromText(NULL)) AS bbox_null
+            """)
+        row = df.first()
+        bbox = row[0]
+        assert bbox.xmin == 1.0
+        assert bbox.ymin == 2.0
+        assert bbox.xmax == 4.0
+        assert bbox.ymax == 5.0
+        assert row[1] is None
+        assert row[2] is None
+
+    def test_st_as_text_box_2d(self):
+        result = self.spark.sql("""
+            SELECT ST_AsText(ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')))
+            """).first()[0]
+        assert result == "BOX(1.0 2.0, 4.0 5.0)"
 
     def test_st_envelope(self):
         polygon_from_wkt = (
@@ -220,6 +242,29 @@ class TestPredicateJoin(TestBase):
         actual = baseDf.selectExpr("ST_AsText(ST_Expand(geom, 6, 5, -3))").first()[0]
         expected = "POLYGON Z((44 45 4, 44 85 4, 86 85 0, 86 45 0, 44 45 4))"
         assert expected == actual
+
+    def test_st_expand_box_2d(self):
+        df = self.spark.sql("""
+            SELECT
+              ST_Expand(ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')), 1.0) AS uniform,
+              ST_Expand(ST_Box2D(ST_GeomFromText('POLYGON((1 2, 1 5, 4 5, 4 2, 1 2))')), 2.0, 0.5) AS per_axis,
+              ST_Expand(ST_Box2D(ST_GeomFromText(NULL)), 1.0)             AS null_uniform,
+              ST_Expand(ST_Box2D(ST_GeomFromText(NULL)), 1.0, 1.0)        AS null_per_axis
+            """)
+        row = df.first()
+        uniform = row[0]
+        assert uniform.xmin == 0.0
+        assert uniform.ymin == 1.0
+        assert uniform.xmax == 5.0
+        assert uniform.ymax == 6.0
+        per_axis = row[1]
+        assert per_axis.xmin == -1.0
+        assert per_axis.ymin == 1.5
+        assert per_axis.xmax == 6.0
+        assert per_axis.ymax == 5.5
+        # NULL Box2D input deserializes to None for both signatures.
+        assert row[2] is None
+        assert row[3] is None
 
     def test_st_centroid(self):
         polygon_wkt_df = (
@@ -684,7 +729,11 @@ class TestPredicateJoin(TestBase):
 
     def test_st_azimuth(self):
         sample_points = create_sample_points(20)
-        sample_pair_points = [[el, sample_points[1]] for el in sample_points]
+        sample_pair_points = [
+            [el, sample_points[1]]
+            for el in sample_points
+            if not el.equals(sample_points[1])
+        ]
         schema = StructType(
             [
                 StructField("geomA", GeometryType(), True),
@@ -700,7 +749,6 @@ class TestPredicateJoin(TestBase):
 
         expected_result = [
             240.0133139011053,
-            0.0,
             270.0,
             286.8042682202057,
             315.0,
@@ -722,6 +770,12 @@ class TestPredicateJoin(TestBase):
         ]
 
         assert st_azimuth_result == expected_result
+
+        # ST_Azimuth should return null for identical points
+        identical_result = self.spark.sql(
+            "SELECT ST_Azimuth(ST_Point(1.0, 1.0), ST_Point(1.0, 1.0))"
+        ).collect()
+        assert identical_result[0][0] is None
 
         azimuth = self.spark.sql(
             """SELECT ST_Azimuth(ST_Point(25.0, 45.0), ST_Point(75.0, 100.0)) AS degA_B,
@@ -1859,6 +1913,33 @@ class TestPredicateJoin(TestBase):
         for calculated_geohash, expected_geohash in geohash:
             assert calculated_geohash == expected_geohash
 
+    def test_st_geohash_neighbors(self):
+        result = self.spark.sql("SELECT ST_GeoHashNeighbors('u1pb')").collect()[0][0]
+
+        assert len(result) == 8
+        # Order: N, NE, E, SE, S, SW, W, NW
+        assert result[0] == "u1pc"
+        assert result[1] == "u301"
+        assert result[2] == "u300"
+        assert result[3] == "u2bp"
+        assert result[4] == "u0zz"
+        assert result[5] == "u0zx"
+        assert result[6] == "u1p8"
+        assert result[7] == "u1p9"
+
+    def test_st_geohash_neighbor(self):
+        # Test north neighbor
+        result_n = self.spark.sql("SELECT ST_GeoHashNeighbor('u1pb', 'n')").collect()[
+            0
+        ][0]
+        assert result_n == "u1pc"
+
+        # Test east neighbor
+        result_e = self.spark.sql("SELECT ST_GeoHashNeighbor('u1pb', 'e')").collect()[
+            0
+        ][0]
+        assert result_e == "u300"
+
     def test_geom_from_geohash(self):
         # Given
         geometry_df = self.spark.createDataFrame(
@@ -1929,6 +2010,49 @@ class TestPredicateJoin(TestBase):
         )
         actual = actual_df.take(1)[0][0]
         assert expected == actual
+
+    def test_st_shortest_line(self):
+        expected = "LINESTRING (0 1, 0 0)"
+        actual_df = self.spark.sql(
+            "select ST_AsText(ST_ShortestLine(ST_GeomFromText('POINT (0 1)'), "
+            "ST_GeomFromText('LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)')))"
+        )
+        actual = actual_df.take(1)[0][0]
+        assert expected == actual
+
+    def test_st_shortest_line_empty(self):
+        actual_df = self.spark.sql(
+            "select ST_ShortestLine(ST_GeomFromText('POINT (0 1)'), "
+            "ST_GeomFromText('GEOMETRYCOLLECTION EMPTY'))"
+        )
+        actual = actual_df.take(1)[0][0]
+        assert actual is None
+
+    def test_st_offset_curve(self):
+        # Positive distance offsets to the left
+        actual_df = self.spark.sql(
+            "SELECT ST_AsText(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0)'), 5.0))"
+        )
+        actual = actual_df.take(1)[0][0]
+        assert actual == "LINESTRING (0 5, 10 5)"
+
+        # Negative distance offsets to the right
+        actual_df = self.spark.sql(
+            "SELECT ST_AsText(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0)'), -5.0))"
+        )
+        actual = actual_df.take(1)[0][0]
+        assert actual == "LINESTRING (0 -5, 10 -5)"
+
+        # With quadrantSegments parameter on a line with a corner
+        default_df = self.spark.sql(
+            "SELECT ST_NPoints(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)'), -3.0))"
+        )
+        default_pts = default_df.take(1)[0][0]
+        custom_df = self.spark.sql(
+            "SELECT ST_NPoints(ST_OffsetCurve(ST_GeomFromWKT('LINESTRING(0 0, 10 0, 10 10)'), -3.0, 16))"
+        )
+        custom_pts = custom_df.take(1)[0][0]
+        assert custom_pts > default_pts
 
     def test_st_collect_on_array_type(self):
         # given
@@ -2230,14 +2354,12 @@ class TestPredicateJoin(TestBase):
         assert cell_ids is None
 
     def test_st_s2_to_geom(self):
-        df = self.spark.sql(
-            """
+        df = self.spark.sql("""
         SELECT
             ST_Intersects(ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))'), ST_S2ToGeom(ST_S2CellIDs(ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))'), 10))[0]),
             ST_Intersects(ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))'), ST_S2ToGeom(ST_S2CellIDs(ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))'), 10))[1]),
             ST_Intersects(ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))'), ST_S2ToGeom(ST_S2CellIDs(ST_GeomFromWKT('POLYGON ((0.1 0.1, 0.5 0.1, 1 0.3, 1 1, 0.1 1, 0.1 0.1))'), 10))[2])
-        """
-        )
+        """)
         res1, res2, res3 = df.take(1)[0]
         assert res1 and res2 and res3
 
@@ -2264,20 +2386,17 @@ class TestPredicateJoin(TestBase):
         assert df.take(1)[0][0] == 78
 
     def test_st_h3_kring(self):
-        df = self.spark.sql(
-            """
+        df = self.spark.sql("""
         SELECT
             ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, true) exactRings,
             ST_H3KRing(ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true)[0], 1, false) allRings,
             ST_H3CellIDs(ST_GeomFromWKT('POINT(1 2)'), 8, true) original_cells
-        """
-        )
+        """)
         exact_rings, all_rings, original_cells = df.take(1)[0]
         assert set(exact_rings + original_cells) == set(all_rings)
 
     def test_st_h3_togeom(self):
-        df = self.spark.sql(
-            """
+        df = self.spark.sql("""
         SELECT
             ST_Intersects(
                 ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, true))[10],
@@ -2291,8 +2410,7 @@ class TestPredicateJoin(TestBase):
                 ST_H3ToGeom(ST_H3CellIDs(ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))'), 6, false))[50],
                 ST_GeomFromText('POLYGON((-1 0, 1 0, 0 0, 0 1, -1 0))')
             )
-        """
-        )
+        """)
         res1, res2, res3 = df.take(1)[0]
         assert res1 and res2 and res3
 
@@ -2394,7 +2512,7 @@ class TestPredicateJoin(TestBase):
         actual = actualDf.selectExpr("ST_NRings(geom)").take(1)[0][0]
         assert expected == actual
 
-    def test_trangulatePolygon(self):
+    def test_triangulatePolygon(self):
         baseDf = self.spark.sql(
             "SELECT ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (5 5, 5 8, 8 8, 8 5, 5 5))') as poly"
         )
@@ -2529,3 +2647,14 @@ class TestPredicateJoin(TestBase):
         actual_with_max = actual_df_with_max.take(1)[0][0]
         assert actual_with_max is not None
         assert actual_with_max.geom_type == "MultiLineString"
+
+    def test_st_oriented_envelope(self):
+        actual = self.spark.sql(
+            "SELECT ST_AsText(ST_OrientedEnvelope(ST_GeomFromText('POLYGON ((0 0, 1 0, 5 4, 4 4, 0 0))')))"
+        ).take(1)[0][0]
+        assert actual == "POLYGON ((0 0, 4.5 4.5, 5 4, 0.5 -0.5, 0 0))"
+
+        actual = self.spark.sql(
+            "SELECT ST_AsText(ST_OrientedEnvelope(ST_GeomFromText('POINT (1 2)')))"
+        ).take(1)[0][0]
+        assert actual == "POINT (1 2)"

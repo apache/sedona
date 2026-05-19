@@ -143,7 +143,7 @@ object Adapter {
       val stringRow = extractUserData(geom)
       Row.fromSeq(stringRow)
     })
-    var cols: Seq[StructField] = Seq(StructField("geometry", GeometryUDT))
+    var cols: Seq[StructField] = Seq(StructField("geometry", GeometryUDT()))
     if (fieldNames != null && fieldNames.nonEmpty) {
       cols = cols ++ fieldNames.map(f => StructField(f, StringType))
     }
@@ -195,10 +195,10 @@ object Adapter {
         rightFieldnames = rightFieldNames)
       Row.fromSeq(stringRow)
     })
-    var cols: Seq[StructField] = Seq(StructField("leftgeometry", GeometryUDT))
+    var cols: Seq[StructField] = Seq(StructField("leftgeometry", GeometryUDT()))
     if (leftFieldnames != null && leftFieldnames.nonEmpty)
       cols = cols ++ leftFieldnames.map(fName => StructField(fName, StringType))
-    cols = cols ++ Seq(StructField("rightgeometry", GeometryUDT))
+    cols = cols ++ Seq(StructField("rightgeometry", GeometryUDT()))
     if (rightFieldNames != null && rightFieldNames.nonEmpty)
       cols = cols ++ rightFieldNames.map(fName => StructField(fName, StringType))
     val schema = StructType(cols)

@@ -81,6 +81,17 @@ if [ "$SEDONA_VERSION" = "latest" ]; then
 
     # The compilation must take place outside Docker to avoid unnecessary maven packages
     mvn clean install -DskipTests -Dspark="${SEDONA_SPARK_VERSION}" -Dscala=2.13
+else
+    # When building against a published Sedona version, install-sedona.sh
+    # downloads the shaded JAR from Maven Central inside the container and
+    # never reads spark-shaded/target/. Any stale Maven artifacts in the
+    # local tree would still be pulled into the build context by the
+    # `COPY ./spark-shaded/` step, ship in the published manifest, and add
+    # to every pull's download size — even though the dockerfile's trailing
+    # `RUN rm -rf ${SEDONA_HOME}` deletes them from the runtime filesystem.
+    # apache/sedona:1.9.0 hit this regression and shipped 1.1 GB heavier than
+    # 1.8.1 (4.03 GB vs 2.97 GB compressed) for exactly this reason.
+    rm -rf spark-shaded/target python/build python/dist
 fi
 
 # -- Building the image

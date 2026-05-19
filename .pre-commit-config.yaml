@@ -19,22 +19,20 @@
 # https://pre-commit.com/#installation
 default_stages: [pre-commit, pre-push]
 default_language_version:
-  # force all unspecified Python hooks to run python3
   python: python3
-  # force all unspecified Node hooks to run Node.js v22.17.0 LTS
-  node: 22.20.0
+  node: 24.13.0
 minimum_pre_commit_version: '3.2.0'
 repos:
   - repo: meta
     hooks:
       - id: identity
         name: run identity check
-        description: check you have set your git identity
+        description: a simple hook which prints all arguments passed to it, useful for debugging
       - id: check-hooks-apply
         name: run check hooks apply
         description: check that all the hooks apply to the repository
   - repo: https://github.com/thlorenz/doctoc.git
-    rev: v2.2.0
+    rev: v2.4.1
     hooks:
       - id: doctoc
         name: add TOC for Markdown files
@@ -42,13 +40,22 @@ repos:
         files: ^README\.md$
   - repo: local
     hooks:
+      - id: npm-install
+        name: Install Zeppelin Node dependencies
+        entry: bash -c "cd zeppelin && npm install"
+        language: system
+        pass_filenames: false
+        files: ^zeppelin/(package\.json|package-lock\.json)$
+        description: Ensures local node_modules match the lockfile
+        stages: [manual]
       - id: prettier
         name: run prettier
         description: format files with prettier
         entry: prettier --write '**/*.js' '**/*.yaml' '**/*.yml'
         files: \.(js|ya?ml)$
         language: node
-        additional_dependencies: ['prettier@3.6.2']
+        additional_dependencies: ['prettier@3.8.1']
+        pass_filenames: false
       - id: maven-spotless-apply
         name: maven spotless apply
         description: automatically formats Java and Scala code using mvn spotless:apply.
@@ -79,8 +86,15 @@ repos:
         pass_filenames: true # <-- Crucial change: pass filenames to the script
         types: [file] # Ensure only regular files are passed, not directories
         stages: [manual]
+      - id: validate-dependabot-yml
+        name: validate dependabot.yml
+        description: ensures the dependabot config file is valid
+        entry: validate-dependabot-yaml
+        language: node
+        additional_dependencies: ['@bugron/validate-dependabot-yaml@0.3.3']
+        files: ^\.github/dependabot\.yml$
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.5
+    rev: v1.5.6
     hooks:
       - id: chmod
         name: set file permissions
@@ -90,6 +104,7 @@ repos:
         stages: [manual]
       - id: insert-license
         name: add license for all Batch files
+        description: automatically adds a licence header to all Batch files that don't have a license header
         files: \.bat$
         args:
           - --comment-style
@@ -118,6 +133,16 @@ repos:
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
       - id: insert-license
+        name: add license for all ini files
+        description: automatically adds a licence header to all ini files that don't have a license header
+        files: \.ini$
+        args:
+          - --comment-style
+          - '|;|'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
+      - id: insert-license
         name: add license for all Java files
         description: automatically adds a licence header to all Java files that don't have a license header
         files: \.java$
@@ -137,7 +162,23 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-        exclude: ^docs/index\.md$|^\.github/pull_request_template\.md$|\.github/issue_template\.md$|^docs/blog/.*\.md$
+        exclude: |
+          (?x)^(
+            \.github/issue_template\.md|
+            \.github/pull_request_template\.md|
+            docs/blog/.*\.md|
+            docs/index\.md
+          )$
+      - id: insert-license
+        name: add license for all R Markdown files
+        description: automatically adds a licence header to all R Markdown files that don't have a license header
+        files: \.Rmd$
+        args:
+          - --comment-style
+          - '<!--||-->'
+          - --license-filepath
+          - .github/workflows/license-templates/LICENSE.txt
+          - --fuzzy-match-generates-todo
       - id: insert-license
         name: add license for all Makefile files
         description: automatically adds a licence header to all Makefiles that don't have a license header
@@ -190,8 +231,14 @@ repos:
           - --fuzzy-match-generates-todo
       - id: insert-license
         name: add license for all XML files
+        description: automatically adds a licence header to all XML files that don't have a license header
         files: \.xml$
-        exclude: scalastyle_config\.xml$|^docker/zeppelin/conf/zeppelin-site\.xml$|^spark/common/src/test/resources/.*$
+        exclude: |
+          (?x)(
+            scalastyle_config\.xml|
+            ^docker/zeppelin/conf/zeppelin-site\.xml|
+            ^spark/common/src/test/resources/.*
+          )$
         args:
           - --comment-style
           - '<!--||-->'
@@ -238,10 +285,12 @@ repos:
             \.gitattributes|
             \.prettierignore|
             \.prettierrc|
-            \.shellcheckrc|
+            \.github/linters/\.clang-format|
+            \.github/linters/\.shellcheckrc|
             \.github/CODEOWNERS|
             .*/\.gitignore|
-            tools/maven/scalafmt\.conf
+            tools/maven/scalafmt\.conf|
+            CITATION\.cff
           )$
         args:
           - --comment-style
@@ -249,29 +298,45 @@ repos:
           - --license-filepath
           - .github/workflows/license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
+      - id: forbid-tabs
+        name: run forbid-tabs
+        description: check the codebase for tabs
+        exclude: ^python/sedona/doc/make\.bat$|^spark/common/src/test/resources/.*$|(^|/)Makefile$|\.csv$|\.md$|\.tsv$
+      - id: remove-tabs
+        name: run remove-tabs
+        description: find and convert tabs to spaces
+        args: [--whitespaces-count, '2']
+        exclude: ^python/sedona/doc/make\.bat$|^spark/common/src/test/resources/.*$|(^|/)Makefile$|\.csv$|\.md$|\.tsv$
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.21.0
+    rev: v3.21.2
     hooks:
       - id: pyupgrade
         name: run pyupgrade
         description: a tool (and pre-commit hook) to automatically upgrade syntax for newer versions of the language
         args: [--py37-plus]
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 25.9.0
+    rev: 26.3.1
     hooks:
       - id: black-jupyter
         name: run black-jupyter
         description: format Python files and Jupyter Notebooks with black
+  - repo: https://github.com/pypa/pip-audit
+    rev: v2.10.0
+    hooks:
+      - id: pip-audit
+        name: run pip-audit
+        description: audits Python environments, requirements files and dependency trees for known security vulnerabilities, and can automatically fix them
+        args: ['.']
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v20.1.7
+    rev: v22.1.4
     hooks:
       - id: clang-format
         name: run clang-format
         description: format C files with clang-format
-        args: [--style=Google]
+        args: ['--style=file:.github/linters/.clang-format']
         types_or: [c]
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.8.6
+    rev: 1.9.4
     hooks:
       - id: bandit
         name: run bandit
@@ -279,19 +344,28 @@ repos:
         args: ['-c=pyproject.toml', '-r']
         additional_dependencies: ['bandit[toml]']
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.2
     hooks:
       - id: codespell
         name: run codespell
         description: check spelling with codespell
         args: [--ignore-words=.github/linters/codespell.txt]
         exclude: ^docs/image|^spark/common/src/test/resources|^docs/usecases|^tools/maven/scalafmt|osmpbf/build|^docker/zeppelin|^docs-overrides
-  # - repo: https://github.com/gitleaks/gitleaks
-  #   rev: v8.28.0
-  #   hooks:
-  #     - id: gitleaks
-  #       name: run gitleaks
-  #       description: check for secrets with gitleaks
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+        name: run gitleaks
+        description: check for secrets with gitleaks
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.24.1
+    hooks:
+      - id: zizmor
+        name: run zizmor
+        description: zizmor is a static analysis tool for GitHub Actions
+        args: [--config=.github/linters/zizmor.yml]
+        files: ^\.github/workflows/.*$
+        types: [yaml]
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
@@ -402,13 +476,13 @@ repos:
         args: [--pytest-test-first]
         exclude: |
           (?x)^(
-              python/tests/properties/crs_transform\.py|
-              python/tests/properties/linestring_properties\.py|
-              python/tests/properties/point_properties\.py|
-              python/tests/properties/polygon_properties\.py|
-              python/tests/sql/resource/sample_data\.py|
-              python/tests/streaming/spark/cases_builder\.py|
-              python/tests/tools\.py
+            python/tests/properties/crs_transform\.py|
+            python/tests/properties/linestring_properties\.py|
+            python/tests/properties/point_properties\.py|
+            python/tests/properties/polygon_properties\.py|
+            python/tests/sql/resource/sample_data\.py|
+            python/tests/streaming/spark/cases_builder\.py|
+            python/tests/tools\.py
           )$
       - id: requirements-txt-fixer
         name: run requirements-txt-fixer
@@ -420,7 +494,7 @@ repos:
         args: [--markdown-linebreak-ext=md]
         exclude: ^docs-overrides/main\.html$|\.Rd$
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.45.0
+    rev: v0.48.0
     hooks:
       - id: markdownlint
         name: run markdownlint
@@ -428,15 +502,16 @@ repos:
         args: [--config=.github/linters/.markdown-lint.yml]
         exclude: ^\.github/.*$
         types: [markdown]
-        files: \.(md|mdown|markdown)$
+        files: \.md$
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.11.0.1
     hooks:
       - id: shellcheck
         name: run shellcheck
         description: check Shell scripts with shellcheck
+        args: [--rcfile=.github/linters/.shellcheckrc]
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.37.1
+    rev: v1.38.0
     hooks:
       - id: yamllint
         name: run yamllint
@@ -445,7 +520,7 @@ repos:
         types: [yaml]
         files: \.ya?ml$
   - repo: https://github.com/oxipng/oxipng
-    rev: v9.1.5
+    rev: v10.1.1
     hooks:
       - id: oxipng
         name: run oxipng
@@ -458,4 +533,44 @@ repos:
       - id: blacken-docs
         name: run blacken-docs
         description: run `black` on python code blocks in documentation files
-        additional_dependencies: [black==25.1.0]
+        additional_dependencies: [black==26.3.1]
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 3.6.1
+    hooks:
+      - id: editorconfig-checker
+        name: run editorconfig-checker
+        description: a tool to verify that your files are in harmony with your .editorconfig
+        exclude: ^docs/image/.*$|^R/man/.*\.Rd$|^spark/common/src/test/resources/.*$
+        alias: ec
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+        name: run actionlint
+        description: actionlint is a static checker for GitHub Actions workflow files
+        args:
+          - -ignore
+          - 'SC2015'
+          - -ignore
+          - 'SC2061'
+          - -ignore
+          - 'SC2072'
+          - -ignore
+          - 'SC2086'
+          - -ignore
+          - 'SC2102'
+          - -ignore
+          - 'SC2155'
+  - repo: https://github.com/checkmake/checkmake.git
+    rev: v0.3.2
+    hooks:
+      - id: checkmake
+        name: run checkmake (root)
+        description: checkmake is a linter for Makefiles
+        files: ^Makefile$
+        args: ['--config=checkmake.ini']
+      - id: checkmake
+        name: run checkmake (python/sedona/doc)
+        description: checkmake is a linter for Makefiles
+        files: ^python/sedona/doc/Makefile$
+        args: ['--config=python/sedona/doc/checkmake.ini']

@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 300" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="700" height="300" fill="#ffffff"/>
+  <text x="350" y="28" text-anchor="middle" font-size="16" font-weight="600" fill="#2c3e50">RS_Intersects</text>
+  <text x="350" y="48" text-anchor="middle" font-size="12" fill="#7f8c8d">Returns true if the raster extent intersects the geometry</text>
+  <text x="170" y="78" text-anchor="middle" font-size="13" fill="#2c3e50">Case 1</text>
+  <rect x="60" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="88" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="116" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="144" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="172" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="200" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="228" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="256" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="60" y="117" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="88" y="117" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="116" y="117" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="144" y="117" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="172" y="117" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="200" y="117" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="228" y="117" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="256" y="117" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="60" y="139" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="88" y="139" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="116" y="139" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="144" y="139" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="172" y="139" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="200" y="139" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="228" y="139" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="256" y="139" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="60" y="161" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="88" y="161" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="116" y="161" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="144" y="161" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="172" y="161" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="200" y="161" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="228" y="161" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="256" y="161" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="60" y="183" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="88" y="183" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="116" y="183" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="144" y="183" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="172" y="183" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="200" y="183" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="228" y="183" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="256" y="183" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="60" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="88" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="116" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="144" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="172" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="200" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="228" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="256" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="60" y="95" width="224" height="132" fill="none" stroke="#c8cdd0" stroke-width="1.2"/>
+  <rect x="60" y="95" width="224" height="132" fill="none" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="244,110 334,120 324,190 249,180" fill="rgba(39,174,96,0.2)" stroke="#27ae60" stroke-width="2"/>
+  <text x="170" y="249" text-anchor="middle" font-size="14" fill="#27ae60">-> true</text>
+  <text x="172.0" y="87" text-anchor="middle" font-size="10" fill="#2980b9">Raster</text>
+  <text x="294" y="155" text-anchor="middle" font-size="10" fill="#27ae60">Geom</text>
+  <text x="530" y="78" text-anchor="middle" font-size="13" fill="#2c3e50">Case 2</text>
+  <rect x="395" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="423" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="451" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="479" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="507" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="535" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="563" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="591" y="95" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="395" y="117" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="423" y="117" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="451" y="117" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="479" y="117" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="507" y="117" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="535" y="117" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="563" y="117" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="591" y="117" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="395" y="139" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="423" y="139" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="451" y="139" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="479" y="139" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="507" y="139" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="535" y="139" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="563" y="139" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="591" y="139" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="395" y="161" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="423" y="161" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="451" y="161" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="479" y="161" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="507" y="161" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="535" y="161" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="563" y="161" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="591" y="161" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="395" y="183" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="423" y="183" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="451" y="183" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="479" y="183" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="507" y="183" width="28" height="22" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="535" y="183" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="563" y="183" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="591" y="183" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="395" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="423" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="451" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="479" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="507" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="535" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="563" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="591" y="205" width="28" height="22" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="395" y="95" width="224" height="132" fill="none" stroke="#c8cdd0" stroke-width="1.2"/>
+  <rect x="395" y="95" width="224" height="132" fill="none" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="631,120 671,125 666,170 636,165" fill="rgba(39,174,96,0.2)" stroke="#27ae60" stroke-width="2"/>
+  <text x="530" y="249" text-anchor="middle" font-size="14" fill="#e74c3c">-> false</text>
+  <text x="507.0" y="87" text-anchor="middle" font-size="10" fill="#2980b9">Raster</text>
+  <text x="651" y="145" text-anchor="middle" font-size="10" fill="#27ae60">Geom</text>
+  <line x1="350" y1="70" x2="350" y2="280" stroke="#c8cdd0" stroke-width="1" stroke-dasharray="4,4"/>
+</svg>

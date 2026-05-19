@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_ReducePrecision</text>
+  <path d="M 163.57 222.68 L 246.07 224.64 L 332.5 216.79 L 340.36 136.25 L 291.25 75.36 L 206.79 69.46 L 159.64 130.36 L 163.57 222.68 Z" fill="rgba(74,144,217,0.15)" stroke="#4a90d9" stroke-width="2" fill-rule="evenodd" stroke-dasharray="6,3" />
+  <path d="M 171.43 230.54 L 250.0 230.54 L 328.57 210.89 L 348.21 132.32 L 289.29 73.39 L 210.71 73.39 L 151.79 132.32 L 171.43 230.54 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="3" fill-rule="evenodd" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Reduces coordinate precision to the given number of decimal places</text>
+  <rect x="176" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="192" y="266" font-size="13" fill="#333333">Input</text>
+  <rect x="246" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="262" y="266" font-size="13" fill="#333333">Result</text>
+</svg>

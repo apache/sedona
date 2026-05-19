@@ -55,7 +55,12 @@ from sedona.spark.sql.st_aggregates import *
 from sedona.spark.sql.st_constructors import *
 from sedona.spark.sql.st_functions import *
 from sedona.spark.sql.st_predicates import *
-from sedona.spark.sql.types import GeometryType, GeographyType, RasterType
+from sedona.spark.sql.types import (
+    Box2DType,
+    GeometryType,
+    GeographyType,
+    RasterType,
+)
 from sedona.spark.stac import Client
 from sedona.spark.stac.collection_client import CollectionClient
 from sedona.spark.stats.clustering.dbscan import dbscan

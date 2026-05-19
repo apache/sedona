@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.common.raster;
 
+import static org.apache.sedona.common.utils.RasterUtils.flipVerticallyPixelSpace;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -127,6 +128,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
   public void testZonalStats() throws FactoryException, ParseException, IOException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+    GridCoverage2D raster_bottom_up = flipVerticallyPixelSpace(raster);
     String polygon =
         "POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))";
     Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
@@ -180,6 +182,15 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         () ->
             RasterBandAccessors.getZonalStats(
                 raster, nonIntersectingGeom, 1, "sum", false, false, false));
+
+    // Test bottom-up raster case
+    geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
+    actual = RasterBandAccessors.getZonalStats(raster_bottom_up, geom, 1, "sum", false, false);
+    assertEquals(1.0795427E7, actual, 0d);
+
+    actual = RasterBandAccessors.getZonalStats(raster_bottom_up, geom, 2, "mean", false, false);
+    expected = 220.7711988936036;
+    assertEquals(expected, actual, FP_TOLERANCE);
   }
 
   @Test
@@ -206,6 +217,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
   public void testZonalStatsWithNoData() throws IOException, FactoryException, ParseException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+    GridCoverage2D raster_bottom_up = flipVerticallyPixelSpace(raster);
     String polygon =
         "POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))";
     // Testing implicit CRS transformation
@@ -238,6 +250,47 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sd", false, true);
     expected = 74.81287592054916;
     assertEquals(expected, actual, FP_TOLERANCE);
+
+    // Test bottom-up raster case
+    actual = RasterBandAccessors.getZonalStats(raster_bottom_up, geom, 1, "sum", false, true);
+    expected = 3229013.0;
+    assertEquals(expected, actual, 0d);
+
+    actual = RasterBandAccessors.getZonalStats(raster_bottom_up, geom, 1, "mean", false, true);
+    expected = 226.61330619692416;
+    assertEquals(expected, actual, FP_TOLERANCE);
+  }
+
+  // Test ZonalStats with floating point arithmetic causing scan line intersection falling outside
+  // raster extent by 5e-13
+  // After clipping to raster extent, Rasterization.computeScanlineIntersections() computes
+  // xIntercept on clipped edge (along raster edge) to be 256.0000000000005 (outside raster bounds),
+  // causing incorrect behavior.
+  // This was fixed by removing unnecessary within-raster-bounds-check on clipped polygon.
+  @Test
+  public void testZonalStatsEdgeCase() throws ParseException, FactoryException {
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(
+            1,
+            "D",
+            256,
+            256,
+            -5.235834032390009,
+            56.37583344383,
+            8.3333333E-4,
+            -8.3333333E-4,
+            0,
+            0,
+            4326);
+    String wkt =
+        "MULTIPOLYGON (((-5.07766 56.18581, -5.07762 56.18626, -5.07603 56.18822, -5.07587 56.18853, -5.07538 56.18902, -5.07542 56.18923, -5.07477 56.18982, -5.07446 56.19031, -5.07449 56.19056, -5.074 56.19147, -5.07343 56.19197, -5.07286 56.19344, -5.0725 56.1942, -5.07165 56.19497, -5.07135 56.19551, -5.07119 56.19614, -5.07075 56.1966, -5.07063 56.19698, -5.0686 56.19829, -5.06785 56.19884, -5.06733 56.19944, -5.06622 56.20057, -5.06515 56.20131, -5.06378 56.20241, -5.06313 56.20271, -5.06182 56.20353, -5.06141 56.20396, -5.06096 56.20416, -5.0608 56.20442, -5.06022 56.20496, -5.06048 56.20558, -5.06112 56.20626, -5.06155 56.2066, -5.06095 56.20706, -5.06057 56.20751, -5.06014 56.2076, -5.05914 56.20832, -5.0583 56.20868, -5.05725 56.20963, -5.05627 56.21018, -5.05563 56.21046, -5.05516 56.21092, -5.05472 56.21098, -5.05429 56.2112, -5.05144 56.2124, -5.05114 56.21268, -5.05022 56.21299, -5.04974 56.21321, -5.04936 56.21325, -5.04905 56.21344, -5.04827 56.21364, -5.04731 56.21412, -5.04704 56.21441, -5.04661 56.21446, -5.04609 56.21475, -5.04582 56.21503, -5.04532 56.21524, -5.04506 56.21548, -5.04465 56.21559, -5.04411 56.21596, -5.04408 56.21614, -5.0432 56.21646, -5.04284 56.21697, -5.04203 56.21756, -5.04132 56.21779, -5.04079 56.21826, -5.03856 56.21919, -5.03797 56.21967, -5.03712 56.2201, -5.03662 56.22044, -5.03616 56.22091, -5.03597 56.22095, -5.03498 56.22166, -5.03441 56.22196, -5.03417 56.22189, -5.03357 56.22223, -5.03309 56.22271, -5.03252 56.22295, -5.03219 56.22326, -5.03141 56.22328, -5.03101 56.22339, -5.03009 56.22378, -5.02842 56.22406, -5.02764 56.22436, -5.02689 56.22475, -5.02638 56.22509, -5.02558 56.2252, -5.02498 56.22543, -5.02437 56.22555, -5.02336 56.22608, -5.02277 56.22631, -5.02223 56.2264, -5.02151 56.22668, -5.02095 56.22713, -5.01921 56.22715, -5.01882 56.22731, -5.01853 56.22725, -5.01807 56.22745, -5.01702 56.22774, -5.01643 56.22783, -5.01592 56.22812, -5.015 56.22824, -5.01399 56.22846, -5.01387 56.22861, -5.01332 56.22884, -5.0127 56.22891, -5.01182 56.22917, -5.00943 56.22968, -5.00718 56.23031, -5.00611 56.23088, -5.00589 56.2313, -5.00555 56.23131, -5.00501 56.23116, -5.00425 56.23105, -5.0034 56.23126, -5.0028 56.23129, -5.00211 56.23141, -4.99647 56.22941, -4.99597 56.22921, -4.99337 56.22778, -4.99305 56.22758, -4.99144 56.22716, -4.9882 56.22646, -4.98733 56.22631, -4.98634 56.22626, -4.98503 56.22633, -4.98428 56.22645, -4.98319 56.22675, -4.98213 56.2272, -4.98259 56.22693, -5.06091 56.18059, -5.07702 56.18592, -5.07766 56.18581)))";
+    Geometry geom = Constructors.geomFromWKT(wkt, 4326);
+
+    double actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "count", false);
+    assertEquals(1738.0, actual, 0d);
+
+    actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "count", true);
+    assertEquals(1832.0, actual, 0d);
   }
 
   @Test
