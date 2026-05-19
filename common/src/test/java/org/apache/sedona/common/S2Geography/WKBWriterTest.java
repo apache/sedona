@@ -133,8 +133,8 @@ public class WKBWriterTest {
    * point count is N+1 with the closing vertex equal to the first. S2Loop stores N distinct
    * vertices internally (closure is implicit) but the OGC WKB spec requires the closing duplicate;
    * dropping it produces non-OGC bytes that strict downstream readers (e.g., {@code
-   * GeoArrowWKBReader} used by sedona-db's s2geography kernels) treat as a degenerate / open
-   * ring, which makes {@code ST_Intersects} return {@code true} against every geometry.
+   * GeoArrowWKBReader} used by sedona-db's s2geography kernels) treat as a degenerate / open ring,
+   * which makes {@code ST_Intersects} return {@code true} against every geometry.
    */
   @Test
   public void PolygonRingClosureTest() throws ParseException, IOException {
@@ -169,9 +169,7 @@ public class WKBWriterTest {
     assertEquals(0, TestHelper.compareTo(geo, decoded));
   }
 
-  /**
-   * Same invariant for {@code MULTIPOLYGON} (per-ring N+1 closure inside each polygon).
-   */
+  /** Same invariant for {@code MULTIPOLYGON} (per-ring N+1 closure inside each polygon). */
   @Test
   public void MultiPolygonRingClosureTest() throws ParseException, IOException {
     String wkt =
@@ -180,7 +178,8 @@ public class WKBWriterTest {
     byte[] wkb = new WKBWriter(2, ByteOrderValues.LITTLE_ENDIAN).write(geo);
 
     // Crawl the WKB: outer MULTIPOLYGON header is 1+4+4 = 9 bytes.
-    // Each inner POLYGON: 1 byte order + 4 type + 4 num_rings + (per ring: 4 num_points + 16*N pts).
+    // Each inner POLYGON: 1 byte order + 4 type + 4 num_rings + (per ring: 4 num_points + 16*N
+    // pts).
     // We assert every ring's num_points >= 4 AND its last point equals its first.
     ByteBuffer bb = ByteBuffer.wrap(wkb).order(ByteOrder.LITTLE_ENDIAN);
     assertEquals(0x01, bb.get(0));
