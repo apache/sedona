@@ -313,38 +313,7 @@ public class WKBWriter {
       throws IOException {
     writeByteOrder(os);
     writeGeometryType(geometryType, poly, os);
-    S2Polygon s2poly = poly.polygon;
-    List<S2Loop> loops = s2poly.getLoops();
-    writeInt(loops.size(), os);
-    for (S2Loop loop : loops) {
-      // S2Loop stores N distinct vertices (loop is implicitly closed from
-      // vertex(n-1) back to vertex(0)). OGC WKB requires N+1 vertices with
-      // last == first. Emit the closing duplicate so downstream OGC-strict
-      // readers (e.g., geoarrow-c's WKB reader used by sedona-db's
-      // s2geography kernels) don't treat the ring as unclosed/degenerate.
-      // For a degenerate empty loop (n == 0) we keep the prior behavior of
-      // writing a 0-point ring rather than fabricating a closing vertex.
-      int n = loop.numVertices();
-      if (n == 0) {
-        writeInt(0, os);
-      } else {
-        writeInt(n + 1, os);
-        for (int i = 0; i < n; i++) {
-          writeS2PointLonLat(loop.vertex(i), os);
-        }
-        // Closing duplicate (== vertex(0))
-        writeS2PointLonLat(loop.vertex(0), os);
-      }
-    }
-  }
-
-  /** Write a single S2Point as (lon, lat) doubles in WKB ordering. */
-  private void writeS2PointLonLat(S2Point point, OutStream os) throws IOException {
-    S2LatLng ll = new S2LatLng(point);
-    ByteOrderValues.putDouble(ll.lngDegrees(), buf, byteOrder);
-    os.write(buf, 8);
-    ByteOrderValues.putDouble(ll.latDegrees(), buf, byteOrder);
-    os.write(buf, 8);
+    writeS2PolygonRings(poly.polygon, os);
   }
 
   private void writeMultiPolygon(int geometryType, MultiPolygonGeography multiPoly, OutStream os)
@@ -367,33 +336,49 @@ public class WKBWriter {
       // 4a) Nested Polygon header
       writeByteOrder(os);
       writeGeometryType(WKBConstants.wkbPolygon, pg, os);
-
-      // 4b) Number of rings
-      PolygonGeography s2poly = (PolygonGeography) pg;
-      List<S2Loop> loops = s2poly.polygon.getLoops();
-      writeInt(loops.size(), os);
-
-      // 4c) For each ring, write vertex count + coords.
-      // Emit N+1 vertices with last == first for OGC WKB compliance; see the
-      // explanatory comment in writePolygon(). Degenerate empty rings
-      // (n == 0) keep the prior behavior of writing a 0-point ring.
-      for (S2Loop loop : loops) {
-        int n = loop.numVertices();
-        if (n == 0) {
-          writeInt(0, os);
-        } else {
-          writeInt(n + 1, os);
-          for (int i = 0; i < n; i++) {
-            writeS2PointLonLat(loop.vertex(i), os);
-          }
-          // Closing duplicate (== vertex(0))
-          writeS2PointLonLat(loop.vertex(0), os);
-        }
-      }
+      // 4b) Ring count + rings
+      writeS2PolygonRings(((PolygonGeography) pg).polygon, os);
     }
 
     // 5) Restore SRID flag
     this.includeSRID = oldIncludeSRID;
+  }
+
+  /**
+   * Write the body of a POLYGON WKB: the ring count followed by each ring as {@code N+1}
+   * vertices with the closing vertex equal to the first (OGC closure). S2Loop stores N distinct
+   * vertices (loop is implicitly closed from {@code vertex(n-1)} back to {@code vertex(0)}); OGC
+   * WKB requires the closing duplicate so downstream OGC-strict readers (e.g., geoarrow-c's WKB
+   * reader used by sedona-db's s2geography kernels) don't treat the ring as unclosed/degenerate.
+   *
+   * <p>A degenerate empty loop ({@code n == 0}) is preserved as a 0-point ring rather than having
+   * a closing vertex fabricated for it.
+   */
+  private void writeS2PolygonRings(S2Polygon s2poly, OutStream os) throws IOException {
+    List<S2Loop> loops = s2poly.getLoops();
+    writeInt(loops.size(), os);
+    for (S2Loop loop : loops) {
+      int n = loop.numVertices();
+      if (n == 0) {
+        writeInt(0, os);
+      } else {
+        writeInt(n + 1, os);
+        for (int i = 0; i < n; i++) {
+          writeS2PointLonLat(loop.vertex(i), os);
+        }
+        // Closing duplicate (== vertex(0))
+        writeS2PointLonLat(loop.vertex(0), os);
+      }
+    }
+  }
+
+  /** Write a single S2Point as (lon, lat) doubles in WKB ordering. */
+  private void writeS2PointLonLat(S2Point point, OutStream os) throws IOException {
+    S2LatLng ll = new S2LatLng(point);
+    ByteOrderValues.putDouble(ll.lngDegrees(), buf, byteOrder);
+    os.write(buf, 8);
+    ByteOrderValues.putDouble(ll.latDegrees(), buf, byteOrder);
+    os.write(buf, 8);
   }
 
   private void writeGeographyCollection(int geometryType, GeographyCollection gc, OutStream os)
