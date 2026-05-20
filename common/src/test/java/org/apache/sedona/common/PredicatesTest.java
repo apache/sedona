@@ -23,6 +23,7 @@ import static org.apache.sedona.common.Functions.crossesDateLine;
 import static org.junit.Assert.*;
 
 import org.apache.sedona.common.geometryObjects.Box2D;
+import org.apache.sedona.common.geometryObjects.Box3D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -111,6 +112,43 @@ public class PredicatesTest extends TestBase {
     IllegalArgumentException ex2 =
         assertThrows(IllegalArgumentException.class, () -> Predicates.boxContains(normal, wrapY));
     assertTrue(ex2.getMessage().contains("inverted bounds"));
+  }
+
+  @Test
+  public void testBox3DIntersects() {
+    Box3D a = new Box3D(0.0, 0.0, 0.0, 5.0, 5.0, 5.0);
+
+    // Full overlap on all axes
+    assertTrue(Predicates.box3dIntersects(a, new Box3D(1.0, 1.0, 1.0, 2.0, 2.0, 2.0)));
+    // Partial overlap on all axes
+    assertTrue(Predicates.box3dIntersects(a, new Box3D(3.0, 3.0, 3.0, 7.0, 7.0, 7.0)));
+    // Face-touching (closed intervals)
+    assertTrue(Predicates.box3dIntersects(a, new Box3D(5.0, 0.0, 0.0, 10.0, 5.0, 5.0)));
+    // Corner-touching (closed intervals)
+    assertTrue(Predicates.box3dIntersects(a, new Box3D(5.0, 5.0, 5.0, 10.0, 10.0, 10.0)));
+    // Disjoint on Z only
+    assertFalse(Predicates.box3dIntersects(a, new Box3D(0.0, 0.0, 6.0, 5.0, 5.0, 10.0)));
+  }
+
+  @Test
+  public void testBox3DContains() {
+    Box3D outer = new Box3D(0.0, 0.0, 0.0, 10.0, 10.0, 10.0);
+
+    assertTrue(Predicates.box3dContains(outer, new Box3D(2.0, 2.0, 2.0, 5.0, 5.0, 5.0)));
+    // Equal boxes contain each other
+    assertTrue(Predicates.box3dContains(outer, new Box3D(0.0, 0.0, 0.0, 10.0, 10.0, 10.0)));
+    // Crosses on Z
+    assertFalse(Predicates.box3dContains(outer, new Box3D(2.0, 2.0, 2.0, 5.0, 5.0, 11.0)));
+  }
+
+  @Test
+  public void testBox3DRejectInvertedBounds() {
+    Box3D normal = new Box3D(0.0, 0.0, 0.0, 5.0, 5.0, 5.0);
+    Box3D wrapZ = new Box3D(0.0, 0.0, 5.0, 5.0, 5.0, 0.0); // zmin > zmax
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class, () -> Predicates.box3dIntersects(wrapZ, normal));
+    assertTrue(ex.getMessage().contains("inverted bounds"));
   }
 
   @Test
