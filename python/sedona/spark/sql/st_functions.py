@@ -664,6 +664,22 @@ def ST_Box2D(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_Box3D(geometry: ColumnOrName) -> Column:
+    """Get the 3D bounding box (Box3D) of a geometry.
+
+    Geometries without a Z dimension are treated as having ``z = 0``, matching
+    PostGIS's flat-XY-treated-as-XY[Z=0] convention. Returns NULL for null or
+    empty input.
+
+    :param geometry: Geometry column to compute the 3D bounding box of.
+    :type geometry: ColumnOrName
+    :return: Box3D bounding box of the geometry.
+    :rtype: Column
+    """
+    return _call_st_function("ST_Box3D", geometry)
+
+
+@validate_argument_types
 def ST_Envelope(geometry: ColumnOrName) -> Column:
     """Calculate the envelope boundary of a geometry column.
 

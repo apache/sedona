@@ -31,6 +31,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.approximate.StraightSkeleton;
 import org.apache.sedona.common.geometryObjects.Box2D;
+import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.common.geometryObjects.Circle;
 import org.apache.sedona.common.jts2geojson.GeoJSONWriter;
 import org.apache.sedona.common.sphere.Spheroid;
@@ -624,6 +625,10 @@ public class Functions {
 
   public static Box2D box2D(Geometry geometry) {
     return Box2D.fromGeometry(geometry);
+  }
+
+  public static Box3D box3D(Geometry geometry) {
+    return Box3D.fromGeometry(geometry);
   }
 
   public static Double distance(Geometry left, Geometry right) {

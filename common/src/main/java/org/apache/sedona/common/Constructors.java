@@ -25,6 +25,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.enums.GeometryType;
 import org.apache.sedona.common.geometryObjects.Box2D;
+import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.sedona.common.utils.GeoHashDecoder;
 import org.locationtech.jts.geom.*;
@@ -340,6 +341,29 @@ public class Constructors {
     Point ll = (Point) lowerLeft;
     Point ur = (Point) upperRight;
     return new Box2D(ll.getX(), ll.getY(), ur.getX(), ur.getY());
+  }
+
+  /**
+   * Build a {@link Box3D} from two corner POINT Z geometries. Mirrors PostGIS's {@code
+   * ST_3DMakeBox}. The corners are taken verbatim — no swapping or validation of ordering — so
+   * inverted bounds are preserved as supplied. POINT inputs without a Z dimension contribute {@code
+   * z = 0}, matching PostGIS. NULL or empty point inputs return NULL.
+   */
+  public static Box3D make3DBox(Geometry lowerLeft, Geometry upperRight) {
+    if (lowerLeft == null || upperRight == null) {
+      return null;
+    }
+    if (!(lowerLeft instanceof Point) || !(upperRight instanceof Point)) {
+      throw new IllegalArgumentException("ST_3DMakeBox requires two POINT geometries");
+    }
+    if (lowerLeft.isEmpty() || upperRight.isEmpty()) {
+      return null;
+    }
+    Point ll = (Point) lowerLeft;
+    Point ur = (Point) upperRight;
+    double llZ = Double.isNaN(ll.getCoordinate().getZ()) ? 0.0 : ll.getCoordinate().getZ();
+    double urZ = Double.isNaN(ur.getCoordinate().getZ()) ? 0.0 : ur.getCoordinate().getZ();
+    return new Box3D(ll.getX(), ll.getY(), llZ, ur.getX(), ur.getY(), urZ);
   }
 
   public static Geometry geomFromGeoHash(String geoHash, Integer precision) {

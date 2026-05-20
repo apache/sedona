@@ -651,6 +651,20 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_Box3D") {
+      val geomDf =
+        sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING Z(0 0 -3, 5 10 7)') AS geom")
+      val actual = geomDf.select(ST_Box3D("geom")).first().get(0).toString
+      assert(actual == "BOX3D(0.0 0.0 -3.0, 5.0 10.0 7.0)")
+    }
+
+    it("Passed ST_3DMakeBox") {
+      val pointsDf =
+        sparkSession.sql("SELECT ST_PointZ(0.0, 0.0, 0.0) AS ll, ST_PointZ(2.0, 4.0, 6.0) AS ur")
+      val actual = pointsDf.select(ST_3DMakeBox("ll", "ur")).first().get(0).toString
+      assert(actual == "BOX3D(0.0 0.0 0.0, 2.0 4.0 6.0)")
+    }
+
     it("Passed ST_Expand") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON ((50 50 1, 50 80 2, 80 80 3, 80 50 2, 50 50 1))') as geom")

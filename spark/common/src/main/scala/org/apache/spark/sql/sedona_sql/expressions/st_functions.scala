@@ -208,6 +208,9 @@ object st_functions {
   def ST_Box2D(geometry: Column): Column = wrapExpression[ST_Box2D](geometry)
   def ST_Box2D(geometry: String): Column = wrapExpression[ST_Box2D](geometry)
 
+  def ST_Box3D(geometry: Column): Column = wrapExpression[ST_Box3D](geometry)
+  def ST_Box3D(geometry: String): Column = wrapExpression[ST_Box3D](geometry)
+
   def ST_Envelope(geometry: Column): Column = wrapExpression[ST_Envelope](geometry)
   def ST_Envelope(geometry: String): Column = wrapExpression[ST_Envelope](geometry)
 
