@@ -345,14 +345,14 @@ public class WKBWriter {
   }
 
   /**
-   * Write the body of a POLYGON WKB: the ring count followed by each ring as {@code N+1}
-   * vertices with the closing vertex equal to the first (OGC closure). S2Loop stores N distinct
-   * vertices (loop is implicitly closed from {@code vertex(n-1)} back to {@code vertex(0)}); OGC
-   * WKB requires the closing duplicate so downstream OGC-strict readers (e.g., geoarrow-c's WKB
-   * reader used by sedona-db's s2geography kernels) don't treat the ring as unclosed/degenerate.
+   * Write the body of a POLYGON WKB: the ring count followed by each ring as {@code N+1} vertices
+   * with the closing vertex equal to the first (OGC closure). S2Loop stores N distinct vertices
+   * (loop is implicitly closed from {@code vertex(n-1)} back to {@code vertex(0)}); OGC WKB
+   * requires the closing duplicate so downstream OGC-strict readers (e.g., geoarrow-c's WKB reader
+   * used by sedona-db's s2geography kernels) don't treat the ring as unclosed/degenerate.
    *
-   * <p>A degenerate empty loop ({@code n == 0}) is preserved as a 0-point ring rather than having
-   * a closing vertex fabricated for it.
+   * <p>A degenerate empty loop ({@code n == 0}) is preserved as a 0-point ring rather than having a
+   * closing vertex fabricated for it.
    */
   private void writeS2PolygonRings(S2Polygon s2poly, OutStream os) throws IOException {
     List<S2Loop> loops = s2poly.getLoops();
