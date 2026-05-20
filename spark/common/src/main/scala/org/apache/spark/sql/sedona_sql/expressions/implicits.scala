@@ -19,7 +19,7 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.S2Geography.{Geography, GeographyWKBSerializer}
-import org.apache.sedona.common.geometryObjects.Box2D
+import org.apache.sedona.common.geometryObjects.{Box2D, Box3D}
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.Expression
@@ -82,6 +82,25 @@ object implicits {
           inputExpression.eval(input) match {
             case row: InternalRow =>
               new Box2D(row.getDouble(0), row.getDouble(1), row.getDouble(2), row.getDouble(3))
+            case _ => null
+          }
+      }
+    }
+
+    def toBox3D(input: InternalRow): Box3D = {
+      inputExpression match {
+        case serdeAware: SerdeAware =>
+          serdeAware.evalWithoutSerialization(input).asInstanceOf[Box3D]
+        case _ =>
+          inputExpression.eval(input) match {
+            case row: InternalRow =>
+              new Box3D(
+                row.getDouble(0),
+                row.getDouble(1),
+                row.getDouble(2),
+                row.getDouble(3),
+                row.getDouble(4),
+                row.getDouble(5))
             case _ => null
           }
       }
