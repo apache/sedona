@@ -1355,6 +1355,15 @@ test_configurations = [
         "",
         Box2D(0.0, 0.0, 1.0, 1.0),
     ),
+    (
+        sta.ST_3DExtent,
+        ("geom",),
+        "exploded_points",
+        # Box3DType has no Python UDT yet; cast to STRING uses Box3D.toString for comparison.
+        "CAST(geom AS STRING)",
+        # 2D inputs fold Z=0 per PostGIS semantics.
+        "BOX3D(0.0 0.0 0.0, 1.0 1.0 0.0)",
+    ),
     # Test aliases for *_Aggr functions with *_Agg suffix
     (
         sta.ST_Envelope_Agg,
