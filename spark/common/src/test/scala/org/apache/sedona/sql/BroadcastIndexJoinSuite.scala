@@ -641,6 +641,48 @@ class BroadcastIndexJoinSuite extends TestBaseScala {
       assert(buildingsDf.count() == resultLeftBroadcast)
     }
 
+    it("Passed RS_DWithin") {
+      val rasterDf = buildRasterDf.repartition(3)
+      val buildingsDf = buildBuildingsDf.repartition(5)
+      // `RS_DWithin` measures the minimum geodesic distance in meters; the global raster
+      // contains every building's location, so the minimum distance is 0 and any non-negative
+      // threshold matches. A tiny threshold is enough to verify the join plan.
+      val distance = 1.0
+
+      // raster on stream side, geometry broadcast
+      val streamRasterRightBroadcast = rasterDf
+        .alias("rasterDf")
+        .join(
+          broadcast(buildingsDf).alias("buildingsDf"),
+          expr(s"RS_DWithin(rasterDf.raster, buildingsDf.building, $distance)"))
+      assert(streamRasterRightBroadcast.queryExecution.sparkPlan.collect {
+        case p: BroadcastIndexJoinExec => p
+      }.size == 1)
+      // Buildings sit inside the global raster, so all of them are within any positive distance.
+      assert(buildingsDf.count() == streamRasterRightBroadcast.count())
+
+      // raster broadcast, geometry on stream side
+      val rasterBroadcast = broadcast(rasterDf.alias("rasterDf"))
+        .join(
+          buildingsDf.alias("buildingsDf"),
+          expr(s"RS_DWithin(rasterDf.raster, buildingsDf.building, $distance)"))
+      assert(rasterBroadcast.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec =>
+        p
+      }.size == 1)
+      assert(buildingsDf.count() == rasterBroadcast.count())
+
+      // geometry first arg, raster second arg — operand order swapped
+      val geomFirst = buildingsDf
+        .alias("buildingsDf")
+        .join(
+          broadcast(rasterDf).alias("rasterDf"),
+          expr(s"RS_DWithin(buildingsDf.building, rasterDf.raster, $distance)"))
+      assert(geomFirst.queryExecution.sparkPlan.collect { case p: BroadcastIndexJoinExec =>
+        p
+      }.size == 1)
+      assert(buildingsDf.count() == geomFirst.count())
+    }
+
     it("Passed RS_Within") {
       val smallRasterDf1 = buildSmallRasterDf.repartition(3)
       val smallRasterDf2 =

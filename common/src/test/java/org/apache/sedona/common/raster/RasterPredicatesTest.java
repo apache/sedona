@@ -36,6 +36,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 
 public class RasterPredicatesTest extends RasterTestBase {
   private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
@@ -487,6 +488,164 @@ public class RasterPredicatesTest extends RasterTestBase {
     Assert.assertFalse(RasterPredicates.rsContains(raster2, raster1));
     Assert.assertFalse(RasterPredicates.rsIntersects(raster2, raster3));
     Assert.assertFalse(RasterPredicates.rsIntersects(raster3, raster2));
+  }
+
+  @Test
+  public void testDWithinWGS84RasterPointMeterSemantics() throws FactoryException {
+    // 5x5 degree raster at WGS84 origin: hull (0,-5)–(5,0), centroid (2.5, -2.5).
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 4326);
+
+    // Point coincident with the raster centroid — distance is 0, so any non-negative
+    // threshold matches and the unit cannot silently fall back to degrees.
+    Geometry coincident = GEOMETRY_FACTORY.createPoint(new Coordinate(2.5, -2.5));
+    coincident.setSRID(4326);
+    Assert.assertTrue(RasterPredicates.rsDWithin(raster, coincident, 0.0));
+    Assert.assertTrue(RasterPredicates.rsDWithin(raster, coincident, 1.0));
+
+    // Point ~10° east at the same latitude — geodesic distance ≈ 1 112 km. Bracket the
+    // threshold above and below to catch unit mistakes (1° was the old buggy semantics)
+    // and projection regressions.
+    Geometry tenDegreesEast = GEOMETRY_FACTORY.createPoint(new Coordinate(12.5, -2.5));
+    tenDegreesEast.setSRID(4326);
+    Assert.assertTrue(RasterPredicates.rsDWithin(raster, tenDegreesEast, 2_000_000.0));
+    Assert.assertFalse(RasterPredicates.rsDWithin(raster, tenDegreesEast, 500_000.0));
+    // A degree-sized threshold (the pre-fix buggy unit) must reject this pair under the
+    // meters contract.
+    Assert.assertFalse(RasterPredicates.rsDWithin(raster, tenDegreesEast, 10.0));
+  }
+
+  @Test
+  public void testDWithinSwappedOperands() throws FactoryException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 4326);
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(12.5, -2.5));
+    point.setSRID(4326);
+    // The (raster, geom) and (geom, raster) overloads share the same minimum geodesic distance,
+    // so both must agree at and around the threshold.
+    Assert.assertEquals(
+        RasterPredicates.rsDWithin(raster, point, 2_000_000.0),
+        RasterPredicates.rsDWithin(raster, point, 2_000_000.0));
+    Assert.assertTrue(RasterPredicates.rsDWithin(raster, point, 2_000_000.0));
+    Assert.assertFalse(RasterPredicates.rsDWithin(raster, point, 500_000.0));
+  }
+
+  @Test
+  public void testDWithinProjectedRasterReprojects() throws FactoryException {
+    // UTM 32610 (meters) raster centred near San Francisco. The predicate must reproject
+    // both sides to WGS84 before measuring, regardless of the input CRS.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(
+            1, "B", 751, 742, 332385, 4258815, 300, -300, 0, 0, 32610);
+
+    // Point inside the raster footprint (≈ same area as the centroid): close geodesic
+    // distance, matches even with a small threshold.
+    Geometry nearby = GEOMETRY_FACTORY.createPoint(new Coordinate(-122.40, 37.75));
+    nearby.setSRID(4326);
+    Assert.assertTrue(RasterPredicates.rsDWithin(raster, nearby, 200_000.0));
+
+    // Point in Kansas — ≈ 2 400 km from the UTM-10N raster's WGS84 centroid.
+    Geometry farAway = GEOMETRY_FACTORY.createPoint(new Coordinate(-95.0, 39.0));
+    farAway.setSRID(4326);
+    Assert.assertTrue(RasterPredicates.rsDWithin(raster, farAway, 3_000_000.0));
+    Assert.assertFalse(RasterPredicates.rsDWithin(raster, farAway, 1_000_000.0));
+
+    // Same Kansas point expressed in EPSG:3857 (Web Mercator). Even though neither side is
+    // in WGS84, the predicate must still reproject and produce identical truth values.
+    Geometry farAwayMercator = GEOMETRY_FACTORY.createPoint(new Coordinate(-10575352, 4721671));
+    farAwayMercator.setSRID(3857);
+    Assert.assertTrue(RasterPredicates.rsDWithin(raster, farAwayMercator, 3_000_000.0));
+    Assert.assertFalse(RasterPredicates.rsDWithin(raster, farAwayMercator, 1_000_000.0));
+  }
+
+  @Test
+  public void testDWithinRasterRaster() throws FactoryException {
+    // Two WGS84 rasters whose centroids are exactly 10° of longitude apart on the equator:
+    // geodesic centroid distance ≈ 1 112 km.
+    GridCoverage2D rasterA = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 4326);
+    GridCoverage2D rasterB = RasterConstructors.makeEmptyRaster(1, 5, 5, 10, 0, 1, -1, 0, 0, 4326);
+    Assert.assertTrue(RasterPredicates.rsDWithin(rasterA, rasterB, 2_000_000.0));
+    Assert.assertFalse(RasterPredicates.rsDWithin(rasterA, rasterB, 500_000.0));
+    // Symmetry: swapping the operands does not change the truth value.
+    Assert.assertEquals(
+        RasterPredicates.rsDWithin(rasterA, rasterB, 2_000_000.0),
+        RasterPredicates.rsDWithin(rasterB, rasterA, 2_000_000.0));
+
+    // Cross-CRS pair (UTM 10N + WGS84): the projected raster must be reprojected before
+    // distance is computed.
+    GridCoverage2D utmRaster =
+        RasterConstructors.makeEmptyRaster(
+            1, "B", 751, 742, 332385, 4258815, 300, -300, 0, 0, 32610);
+    // WGS84 raster co-located with the UTM raster's footprint near SF.
+    GridCoverage2D wgs84Nearby =
+        RasterConstructors.makeEmptyRaster(1, 10, 10, -122.45, 37.80, 0.01, -0.01, 0, 0, 4326);
+    Assert.assertTrue(RasterPredicates.rsDWithin(utmRaster, wgs84Nearby, 500_000.0));
+    Assert.assertEquals(
+        RasterPredicates.rsDWithin(utmRaster, wgs84Nearby, 500_000.0),
+        RasterPredicates.rsDWithin(wgs84Nearby, utmRaster, 500_000.0));
+  }
+
+  @Test
+  public void testDWithinMixedOrientationMultiPolygon() throws FactoryException, ParseException {
+    // Regression: the helper used to flip the whole multipolygon based on the first shell's
+    // orientation, which left any later polygon with a different winding mis-oriented when
+    // handed to S2. Two semantically-identical multipolygons (one all-CCW, one with the second
+    // shell wound CW) must produce identical truth values.
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 4326);
+    WKTReader reader = new WKTReader();
+    Geometry allCcw =
+        reader.read(
+            "MULTIPOLYGON (((20 20, 21 20, 21 21, 20 21, 20 20)), "
+                + "((30 30, 31 30, 31 31, 30 31, 30 30)))");
+    allCcw.setSRID(4326);
+    Geometry mixed =
+        reader.read(
+            // First polygon CCW (as in `allCcw`); second polygon wound CW.
+            "MULTIPOLYGON (((20 20, 21 20, 21 21, 20 21, 20 20)), "
+                + "((30 30, 30 31, 31 31, 31 30, 30 30)))");
+    mixed.setSRID(4326);
+    // Both forms describe the same pair of squares, so the predicate must agree on every
+    // threshold around the actual geodesic distance.
+    Assert.assertEquals(
+        RasterPredicates.rsDWithin(raster, allCcw, 5_000_000.0),
+        RasterPredicates.rsDWithin(raster, mixed, 5_000_000.0));
+    Assert.assertEquals(
+        RasterPredicates.rsDWithin(raster, allCcw, 1_000_000.0),
+        RasterPredicates.rsDWithin(raster, mixed, 1_000_000.0));
+  }
+
+  @Test
+  public void testDWithinEmptyMultiPolygon() throws FactoryException, ParseException {
+    // Regression: `getGeometryN(0)` would throw IndexOutOfBoundsException on MULTIPOLYGON EMPTY.
+    // The predicate must accept an empty multipolygon operand without crashing.
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 4326);
+    WKTReader reader = new WKTReader();
+    Geometry empty = reader.read("MULTIPOLYGON EMPTY");
+    empty.setSRID(4326);
+    RasterPredicates.rsDWithin(raster, empty, 1_000_000.0);
+  }
+
+  @Test
+  public void testDWithinDoesNotMutateCallerGeometry() throws FactoryException {
+    // Regression: the predicate used to call setSRID(4326) directly on the caller's geometry
+    // when no orientation change was needed. Verify SRID and coordinate identity are untouched
+    // after the predicate runs, for both same-CRS (no transform) and cross-CRS paths.
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 4326);
+
+    // Same-CRS: no transform happens, so the predicate sees the caller's exact JTS object.
+    Geometry sameCrsPoint = GEOMETRY_FACTORY.createPoint(new Coordinate(2.5, -2.5));
+    sameCrsPoint.setSRID(0);
+    Coordinate originalCoord = sameCrsPoint.getCoordinate().copy();
+    RasterPredicates.rsDWithin(raster, sameCrsPoint, 1.0);
+    Assert.assertEquals(0, sameCrsPoint.getSRID());
+    Assert.assertEquals(originalCoord, sameCrsPoint.getCoordinate());
+
+    // Cross-CRS: JTS.transform produces a fresh geometry internally, but the caller's object
+    // must still be untouched.
+    GeometryFactory mercatorFactory = new GeometryFactory(new PrecisionModel(), 3857);
+    Geometry mercatorPoint = mercatorFactory.createPoint(new Coordinate(278300.0, -278300.0));
+    Coordinate originalMercatorCoord = mercatorPoint.getCoordinate().copy();
+    RasterPredicates.rsDWithin(raster, mercatorPoint, 1.0);
+    Assert.assertEquals(3857, mercatorPoint.getSRID());
+    Assert.assertEquals(originalMercatorCoord, mercatorPoint.getCoordinate());
   }
 
   @Test

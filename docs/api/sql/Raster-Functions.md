@@ -102,6 +102,7 @@ These functions test spatial relationships involving raster objects.
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
 | [RS_Contains](Raster-Predicates/RS_Contains.md) | Boolean | Returns true if the geometry or raster on the left side contains the geometry or raster on the right side. The convex hull of the raster is considered in the test. | v1.5.0 |
+| [RS_DWithin](Raster-Predicates/RS_DWithin.md) | Boolean | Returns true if the minimum geodesic distance between the raster or geometry on the left side and the raster or geometry on the right side is at most `distance` meters (inputs are projected to WGS84 before the test; overlap or touch returns 0). The convex hull of the raster is considered in the test. | v1.9.1 |
 | [RS_Intersects](Raster-Predicates/RS_Intersects.md) | Boolean | Returns true if raster or geometry on the left side intersects with the raster or geometry on the right side. The convex hull of the raster is considered in the test. | v1.5.0 |
 | [RS_Within](Raster-Predicates/RS_Within.md) | Boolean | Returns true if the geometry or raster on the left side is within the geometry or raster on the right side. The convex hull of the raster is considered in the test. | v1.5.0 |
 

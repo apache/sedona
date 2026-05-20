@@ -417,7 +417,11 @@ object Catalog extends AbstractCatalog with Logging {
 
   // Raster-Predicates
   val rasterPredicateExprs: Seq[FunctionDescription] =
-    Seq(function[RS_Contains](), function[RS_Intersects](), function[RS_Within]())
+    Seq(
+      function[RS_Contains](),
+      function[RS_DWithin](),
+      function[RS_Intersects](),
+      function[RS_Within]())
 
   // Raster-Geometry-Functions (raster → geometry derivations)
   val rasterGeometryExprs: Seq[FunctionDescription] =

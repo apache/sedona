@@ -21,7 +21,7 @@ package org.apache.spark.sql.sedona_sql.strategy.join
 import org.apache.spark.sql.catalyst.expressions.{And, Expression, LessThan, LessThanOrEqual, Literal}
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.sedona_sql.expressions._
-import org.apache.spark.sql.sedona_sql.expressions.raster.RS_Predicate
+import org.apache.spark.sql.sedona_sql.expressions.raster.{RS_DWithin, RS_Predicate}
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils
 
 case class OptimizableJoinCondition(left: LogicalPlan, right: LogicalPlan) {
@@ -73,6 +73,8 @@ case class OptimizableJoinCondition(left: LogicalPlan, right: LogicalPlan) {
       case ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid)) =>
         useSpheroid
           .isInstanceOf[Literal] && isDistanceJoinOptimizable(leftShape, rightShape, distance)
+      case RS_DWithin(Seq(leftShape, rightShape, distance)) =>
+        isDistanceJoinOptimizable(leftShape, rightShape, distance)
 
       case _: LessThan | _: LessThanOrEqual =>
         val (smaller, larger) = (expression.children.head, expression.children(1))
