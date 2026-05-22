@@ -119,8 +119,7 @@ jobs:
             version="${GITHUB_REF##*/branch-}"
             uv run mike deploy --update-aliases "$version" latest -b website -p
           fi
-      - run: mkdir staging
-      - run: cp -r site staging/
+      - run: cp -r site staging
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: generated-docs
