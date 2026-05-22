@@ -68,9 +68,74 @@ public final class GeometrySplitter {
       result = splitLines(input, blade);
     } else if (GeomUtils.geometryIsPolygonal(input)) {
       result = splitPolygons(input, blade);
+    } else if (GeomUtils.geometryIsPuntal(input)) {
+      result = splitPoints(input, blade);
     }
 
     return result;
+  }
+
+  /**
+   * Split puntal input geometry by the blade geometry. Mirrors the PostGIS 3.2+ behaviour:
+   *
+   * <ul>
+   *   <li>When the blade is polygonal, partition the input points into those inside (covered by)
+   *       the polygon and those outside, and return both groups as MULTIPOINTs wrapped in a
+   *       GEOMETRYCOLLECTION.
+   *   <li>When the blade is puntal, return a MULTIPOINT with the blade points removed from the
+   *       input (set-difference of coordinates).
+   * </ul>
+   *
+   * @param input puntal input geometry (Point or MultiPoint)
+   * @param blade blade geometry — polygonal or puntal
+   * @return result of the split, or {@code null} if the blade type is unsupported
+   */
+  public GeometryCollection splitPoints(Geometry input, Geometry blade) {
+    if (GeomUtils.geometryIsPolygonal(blade)) {
+      return splitPointsByPolygon(input, blade);
+    } else if (GeomUtils.geometryIsPuntal(blade)) {
+      return splitPointsByPoints(input, blade);
+    }
+    return null;
+  }
+
+  private GeometryCollection splitPointsByPolygon(Geometry points, Geometry polygons) {
+    List<Point> inside = new ArrayList<>();
+    List<Point> outside = new ArrayList<>();
+
+    for (int i = 0; i < points.getNumGeometries(); i++) {
+      Point p = (Point) points.getGeometryN(i);
+      if (polygons.covers(p)) {
+        inside.add(p);
+      } else {
+        outside.add(p);
+      }
+    }
+
+    List<Geometry> parts = new ArrayList<>();
+    if (!inside.isEmpty()) {
+      parts.add(geometryFactory.createMultiPoint(inside.toArray(new Point[0])));
+    }
+    if (!outside.isEmpty()) {
+      parts.add(geometryFactory.createMultiPoint(outside.toArray(new Point[0])));
+    }
+    return geometryFactory.createGeometryCollection(parts.toArray(new Geometry[0]));
+  }
+
+  private MultiPoint splitPointsByPoints(Geometry input, Geometry blade) {
+    java.util.Set<Coordinate> bladeCoords = new java.util.HashSet<>();
+    for (Coordinate c : blade.getCoordinates()) {
+      bladeCoords.add(c);
+    }
+
+    List<Point> remaining = new ArrayList<>();
+    for (int i = 0; i < input.getNumGeometries(); i++) {
+      Point p = (Point) input.getGeometryN(i);
+      if (!bladeCoords.contains(p.getCoordinate())) {
+        remaining.add(p);
+      }
+    }
+    return geometryFactory.createMultiPoint(remaining.toArray(new Point[0]));
   }
 
   /**

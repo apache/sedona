@@ -570,6 +570,103 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void splitMultiPointByPolygon() {
+    // PostGIS 3.2+ parity: partition a MultiPoint into points inside and outside the polygon.
+    MultiPoint multiPoint =
+        GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(1.0, 1.0, 5.0, 5.0, 15.0, 15.0));
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0, 0.0, 0.0));
+
+    String actualResult = Functions.split(multiPoint, polygon).norm().toText();
+    String expectedResult = "GEOMETRYCOLLECTION (MULTIPOINT ((1 1), (5 5)), MULTIPOINT ((15 15)))";
+
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void splitMultiPointAllInsidePolygon() {
+    MultiPoint multiPoint =
+        GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(1.0, 1.0, 5.0, 5.0));
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0, 0.0, 0.0));
+
+    String actualResult = Functions.split(multiPoint, polygon).norm().toText();
+    // Only the inside group is present — the outside group is omitted because it is empty.
+    String expectedResult = "GEOMETRYCOLLECTION (MULTIPOINT ((1 1), (5 5)))";
+
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void splitMultiPointAllOutsidePolygon() {
+    MultiPoint multiPoint =
+        GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(20.0, 20.0, 30.0, 30.0));
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0, 0.0, 0.0));
+
+    String actualResult = Functions.split(multiPoint, polygon).norm().toText();
+    String expectedResult = "GEOMETRYCOLLECTION (MULTIPOINT ((20 20), (30 30)))";
+
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void splitMultiPointOnPolygonBoundaryGoesToInside() {
+    // Points on the polygon boundary are covered by it, so they fall in the "inside" group.
+    MultiPoint multiPoint =
+        GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0.0, 5.0, 5.0, 5.0, 20.0, 20.0));
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0, 0.0, 0.0));
+
+    String actualResult = Functions.split(multiPoint, polygon).norm().toText();
+    String expectedResult = "GEOMETRYCOLLECTION (MULTIPOINT ((0 5), (5 5)), MULTIPOINT ((20 20)))";
+
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void splitPointByPolygon() {
+    // A single Point input is treated as a one-element MultiPoint.
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(5.0, 5.0));
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0, 0.0, 0.0));
+
+    String actualResult = Functions.split(point, polygon).norm().toText();
+    String expectedResult = "GEOMETRYCOLLECTION (MULTIPOINT ((5 5)))";
+
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void splitMultiPointByMultiPoint() {
+    // PostGIS 3.2+ parity: remove coordinates present in the blade from the input.
+    MultiPoint input =
+        GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(1.0, 1.0, 2.0, 2.0, 3.0, 3.0));
+    MultiPoint blade = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(2.0, 2.0));
+
+    String actualResult = Functions.split(input, blade).norm().toText();
+    String expectedResult = "MULTIPOINT ((1 1), (3 3))";
+
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void splitPointByUnsupportedBladeReturnsNull() {
+    // Puntal input with a lineal blade has no PostGIS-defined behavior — return null.
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(5.0, 5.0));
+    LineString blade = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 10.0, 10.0));
+
+    Geometry actualResult = Functions.split(point, blade);
+
+    assertNull(actualResult);
+  }
+
+  @Test
   public void splitCircleInto2SemiCircles() throws ParseException {
     String polygonWkt =
         "POLYGON ((-117.76405581088967 34.111876749328026, -117.76407506132291 34.11170068822483, "

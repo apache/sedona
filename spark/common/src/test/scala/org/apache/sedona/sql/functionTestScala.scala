@@ -3020,6 +3020,12 @@ class functionTestScala
     val geomTestCases = Map(
       ("'LINESTRING (0 0, 1.5 1.5, 2 2)'", "'MULTIPOINT (0.5 0.5, 1 1)'")
         -> "MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))",
+      // Puntal input by polygonal blade (PostGIS 3.2+ parity): partition points by the polygon.
+      ("'MULTIPOINT ((1 1), (5 5), (15 15))'", "'POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'")
+        -> "GEOMETRYCOLLECTION (MULTIPOINT ((1 1), (5 5)), MULTIPOINT ((15 15)))",
+      // Puntal input by puntal blade: subtract blade coordinates from the input.
+      ("'MULTIPOINT ((1 1), (2 2), (3 3))'", "'MULTIPOINT ((2 2))'")
+        -> "MULTIPOINT ((1 1), (3 3))",
       ("null", "'MULTIPOINT (0.5 0.5, 1 1)'")
         -> null,
       ("'LINESTRING (0 0, 1.5 1.5, 2 2)'", "null")
@@ -3028,7 +3034,7 @@ class functionTestScala
       var df =
         sparkSession.sql(s"SELECT ST_Split(ST_GeomFromText($target), ST_GeomFromText($blade))")
       var result = df.take(1)(0).get(0).asInstanceOf[Geometry]
-      var textResult = if (result == null) null else result.toText
+      var textResult = if (result == null) null else result.norm().toText
       assert(textResult == expected)
     }
   }
