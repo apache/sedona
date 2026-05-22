@@ -107,7 +107,7 @@ jobs:
           cp -r python/sedona/doc/_build/html/* docs/api/pydocs/
       - run: git config --global user.name = "GitHub Action"
       - run: git config --global user.email = "test@abc.com"
-      - run: uv run mkdocs build
+      - run: mkdir site
       - name: Deploy the doc to the website branch
         if: ${{ github.event_name != 'pull_request' && github.repository == 'apache/sedona' }}
         run: |
