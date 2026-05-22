@@ -21,7 +21,7 @@ check: install ## run all pre-commit checks
 	prek run --all-files
 
 check-from-ref: install ## will run prek checks for all changes since you branched off
-	prek run --from-ref main
+	prek run --from-ref master
 
 check-install: ## checks for a uv installation
 	@command -v uv >/dev/null 2>&1 || (echo 'uv not found, install via: curl -LsSf https://astral.sh/uv/install.sh | sh' && exit 1)
