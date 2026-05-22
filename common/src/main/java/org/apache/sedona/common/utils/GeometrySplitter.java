@@ -47,15 +47,16 @@ public final class GeometrySplitter {
 
   /**
    * Split input geometry by the blade geometry. Input geometry can be lineal (LineString or
-   * MultiLineString) or polygonal (Polygon or MultiPolygon). A GeometryCollection can also be used
-   * as an input, but it must be homogeneous. For lineal geometry refer to the {@link
-   * splitLines(Geometry, Geometry) splitLines} method for restrictions on the blade. Refer to
-   * {@link splitPolygons(Geometry, Geometry) splitPolygons} for restrictions on the blade for
-   * polygonal input geometry.
+   * MultiLineString), polygonal (Polygon or MultiPolygon), or puntal (Point or MultiPoint). A
+   * GeometryCollection can also be used as an input, but it must be homogeneous. For lineal
+   * geometry refer to the {@link splitLines(Geometry, Geometry) splitLines} method for restrictions
+   * on the blade. Refer to {@link splitPolygons(Geometry, Geometry) splitPolygons} for restrictions
+   * on the blade for polygonal input geometry. Puntal input is partitioned by polygon coverage —
+   * see {@link splitPoints(Geometry, Geometry) splitPoints}.
    *
    * <p>The result will be null if the input geometry and blade are either invalid in general or in
-   * relation to each other. Otherwise, the result will always be a MultiLineString or MultiPolygon
-   * depending on the input, and even if the result is a single geometry.
+   * relation to each other. Otherwise the result is a MultiLineString for lineal input, a
+   * MultiPolygon for polygonal input, or a GeometryCollection of MultiPoints for puntal input.
    *
    * @param input input geometry
    * @param blade geometry to use as a blade
