@@ -22,11 +22,10 @@
 Introduction: Split an input geometry by another geometry (called the blade).
 Linear (LineString or MultiLineString) geometry can be split by a Point, MultiPoint, LineString, MultiLineString, Polygon, or MultiPolygon.
 Polygonal (Polygon or MultiPolygon) geometry can be split by a LineString, MultiLineString, Polygon, or MultiPolygon.
-Puntal (Point or MultiPoint) geometry can be split by a Polygon, MultiPolygon, Point, or MultiPoint.
+As a Sedona-specific extension, puntal (Point or MultiPoint) input may be split by a Polygon or MultiPolygon: the points are partitioned into those covered by the blade and those that are not, and the union of the result reconstructs the input.
 In either case, when a polygonal blade is used then the boundary of the blade is what is actually split by.
-ST_Split returns a MultiLineString when the input is lineal, a MultiPolygon when the input is polygonal, and a GeometryCollection of MultiPoints when the input is puntal and the blade is polygonal.
-When both input and blade are puntal, ST_Split returns a MultiPoint with the blade coordinates removed from the input.
-Homogeneous GeometryCollections are treated as a multi-geometry of the type it contains.
+ST_Split returns a MultiLineString when the input is lineal, a MultiPolygon when the input is polygonal, and a GeometryCollection of MultiPoints when the input is puntal.
+Homogeneous GeometryCollections are treated as a multi-geometry of the type they contain.
 For example, if a GeometryCollection of only Point geometries is passed as a blade it is the same as passing a MultiPoint of the same geometries.
 
 ![ST_Split](../../../image/ST_Split/ST_Split.svg "ST_Split")

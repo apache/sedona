@@ -571,7 +571,8 @@ public class FunctionsTest extends TestBase {
 
   @Test
   public void splitMultiPointByPolygon() {
-    // PostGIS 3.2+ parity: partition a MultiPoint into points inside and outside the polygon.
+    // Partition a MultiPoint into points inside and outside the polygon. The union of the two
+    // MultiPoints reconstructs the original input.
     MultiPoint multiPoint =
         GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(1.0, 1.0, 5.0, 5.0, 15.0, 15.0));
     Polygon polygon =
@@ -579,6 +580,27 @@ public class FunctionsTest extends TestBase {
             coordArray(0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0, 0.0, 0.0));
 
     String actualResult = Functions.split(multiPoint, polygon).norm().toText();
+    String expectedResult = "GEOMETRYCOLLECTION (MULTIPOINT ((1 1), (5 5)), MULTIPOINT ((15 15)))";
+
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void splitHomogeneousPuntalGeometryCollectionByPolygon() {
+    // Nested puntal collection: GeometryCollection of a MultiPoint and a Point. Must be flattened
+    // by walking coordinates rather than casting children to Point (which would ClassCastException
+    // on the MultiPoint child).
+    Geometry collection =
+        GEOMETRY_FACTORY.createGeometryCollection(
+            new Geometry[] {
+              GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(1.0, 1.0, 5.0, 5.0)),
+              GEOMETRY_FACTORY.createPoint(new Coordinate(15.0, 15.0))
+            });
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0, 0.0, 0.0));
+
+    String actualResult = Functions.split(collection, polygon).norm().toText();
     String expectedResult = "GEOMETRYCOLLECTION (MULTIPOINT ((1 1), (5 5)), MULTIPOINT ((15 15)))";
 
     assertEquals(expectedResult, actualResult);
@@ -643,27 +665,14 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
-  public void splitMultiPointByMultiPoint() {
-    // PostGIS 3.2+ parity: remove coordinates present in the blade from the input.
-    MultiPoint input =
-        GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(1.0, 1.0, 2.0, 2.0, 3.0, 3.0));
-    MultiPoint blade = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(2.0, 2.0));
-
-    String actualResult = Functions.split(input, blade).norm().toText();
-    String expectedResult = "MULTIPOINT ((1 1), (3 3))";
-
-    assertEquals(expectedResult, actualResult);
-  }
-
-  @Test
-  public void splitPointByUnsupportedBladeReturnsNull() {
-    // Puntal input with a lineal blade has no PostGIS-defined behavior — return null.
+  public void splitPuntalByNonPolygonalBladeReturnsNull() {
+    // Only polygonal blades are supported for puntal input. Lineal and puntal blades return null.
     Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(5.0, 5.0));
-    LineString blade = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 10.0, 10.0));
+    LineString lineBlade = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 10.0, 10.0));
+    MultiPoint pointBlade = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(5.0, 5.0));
 
-    Geometry actualResult = Functions.split(point, blade);
-
-    assertNull(actualResult);
+    assertNull(Functions.split(point, lineBlade));
+    assertNull(Functions.split(point, pointBlade));
   }
 
   @Test

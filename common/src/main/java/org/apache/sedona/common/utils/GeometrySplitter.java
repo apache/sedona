@@ -76,35 +76,33 @@ public final class GeometrySplitter {
   }
 
   /**
-   * Split puntal input geometry by the blade geometry. Mirrors the PostGIS 3.2+ behaviour:
+   * Split puntal input geometry by the blade geometry. Sedona-specific extension on top of the
+   * lineal/polygonal cases described in the PostGIS docs: partition the input points into those
+   * covered by the polygonal blade and those that are not, and return both groups as MULTIPOINTs
+   * wrapped in a GEOMETRYCOLLECTION. The union of the two MULTIPOINTs reconstructs the input.
    *
-   * <ul>
-   *   <li>When the blade is polygonal, partition the input points into those inside (covered by)
-   *       the polygon and those outside, and return both groups as MULTIPOINTs wrapped in a
-   *       GEOMETRYCOLLECTION.
-   *   <li>When the blade is puntal, return a MULTIPOINT with the blade points removed from the
-   *       input (set-difference of coordinates).
-   * </ul>
+   * <p>Only polygonal blades are supported. The input may be a Point, MultiPoint, or a homogeneous
+   * GeometryCollection of points — nested puntal collections are flattened by walking coordinates.
    *
-   * @param input puntal input geometry (Point or MultiPoint)
-   * @param blade blade geometry — polygonal or puntal
+   * @param input puntal input geometry
+   * @param blade blade geometry; must be polygonal
    * @return result of the split, or {@code null} if the blade type is unsupported
    */
   public GeometryCollection splitPoints(Geometry input, Geometry blade) {
-    if (GeomUtils.geometryIsPolygonal(blade)) {
-      return splitPointsByPolygon(input, blade);
-    } else if (GeomUtils.geometryIsPuntal(blade)) {
-      return splitPointsByPoints(input, blade);
+    if (!GeomUtils.geometryIsPolygonal(blade)) {
+      return null;
     }
-    return null;
+    return splitPointsByPolygon(input, blade);
   }
 
   private GeometryCollection splitPointsByPolygon(Geometry points, Geometry polygons) {
     List<Point> inside = new ArrayList<>();
     List<Point> outside = new ArrayList<>();
 
-    for (int i = 0; i < points.getNumGeometries(); i++) {
-      Point p = (Point) points.getGeometryN(i);
+    // Walk coordinates so homogeneous puntal collections (including nested ones like
+    // GEOMETRYCOLLECTION(MULTIPOINT(...), POINT(...))) are flattened without a class cast.
+    for (Coordinate c : points.getCoordinates()) {
+      Point p = geometryFactory.createPoint(c);
       if (polygons.covers(p)) {
         inside.add(p);
       } else {
@@ -120,22 +118,6 @@ public final class GeometrySplitter {
       parts.add(geometryFactory.createMultiPoint(outside.toArray(new Point[0])));
     }
     return geometryFactory.createGeometryCollection(parts.toArray(new Geometry[0]));
-  }
-
-  private MultiPoint splitPointsByPoints(Geometry input, Geometry blade) {
-    java.util.Set<Coordinate> bladeCoords = new java.util.HashSet<>();
-    for (Coordinate c : blade.getCoordinates()) {
-      bladeCoords.add(c);
-    }
-
-    List<Point> remaining = new ArrayList<>();
-    for (int i = 0; i < input.getNumGeometries(); i++) {
-      Point p = (Point) input.getGeometryN(i);
-      if (!bladeCoords.contains(p.getCoordinate())) {
-        remaining.add(p);
-      }
-    }
-    return geometryFactory.createMultiPoint(remaining.toArray(new Point[0]));
   }
 
   /**

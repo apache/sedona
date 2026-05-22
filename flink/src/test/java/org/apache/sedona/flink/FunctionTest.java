@@ -2089,7 +2089,7 @@ public class FunctionTest extends TestBase {
 
   @Test
   public void testSplitMultiPointByPolygon() {
-    // PostGIS 3.2+ parity: ST_Split on a MultiPoint by a Polygon partitions points by coverage.
+    // ST_Split on a MultiPoint by a Polygon partitions points by polygon coverage.
     Table table =
         tableEnv.sqlQuery(
             "SELECT ST_Split(ST_GeomFromWKT('MULTIPOINT ((1 1), (5 5), (15 15))'),"
@@ -2097,17 +2097,6 @@ public class FunctionTest extends TestBase {
     assertEquals(
         "GEOMETRYCOLLECTION (MULTIPOINT ((1 1), (5 5)), MULTIPOINT ((15 15)))",
         ((Geometry) first(table).getField(0)).norm().toText());
-  }
-
-  @Test
-  public void testSplitMultiPointByMultiPoint() {
-    // PostGIS 3.2+ parity: subtract blade coordinates from a puntal input.
-    Table table =
-        tableEnv.sqlQuery(
-            "SELECT ST_Split(ST_GeomFromWKT('MULTIPOINT ((1 1), (2 2), (3 3))'),"
-                + " ST_GeomFromWKT('MULTIPOINT ((2 2))'))");
-    assertEquals(
-        "MULTIPOINT ((1 1), (3 3))", ((Geometry) first(table).getField(0)).norm().toText());
   }
 
   @Test
