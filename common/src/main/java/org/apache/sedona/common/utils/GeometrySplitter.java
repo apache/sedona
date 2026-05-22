@@ -47,15 +47,16 @@ public final class GeometrySplitter {
 
   /**
    * Split input geometry by the blade geometry. Input geometry can be lineal (LineString or
-   * MultiLineString) or polygonal (Polygon or MultiPolygon). A GeometryCollection can also be used
-   * as an input, but it must be homogeneous. For lineal geometry refer to the {@link
-   * splitLines(Geometry, Geometry) splitLines} method for restrictions on the blade. Refer to
-   * {@link splitPolygons(Geometry, Geometry) splitPolygons} for restrictions on the blade for
-   * polygonal input geometry.
+   * MultiLineString), polygonal (Polygon or MultiPolygon), or puntal (Point or MultiPoint). A
+   * GeometryCollection can also be used as an input, but it must be homogeneous. For lineal
+   * geometry refer to the {@link splitLines(Geometry, Geometry) splitLines} method for restrictions
+   * on the blade. Refer to {@link splitPolygons(Geometry, Geometry) splitPolygons} for restrictions
+   * on the blade for polygonal input geometry. Puntal input is partitioned by polygon coverage —
+   * see {@link splitPoints(Geometry, Geometry) splitPoints}.
    *
    * <p>The result will be null if the input geometry and blade are either invalid in general or in
-   * relation to each other. Otherwise, the result will always be a MultiLineString or MultiPolygon
-   * depending on the input, and even if the result is a single geometry.
+   * relation to each other. Otherwise the result is a MultiLineString for lineal input, a
+   * MultiPolygon for polygonal input, or a GeometryCollection of MultiPoints for puntal input.
    *
    * @param input input geometry
    * @param blade geometry to use as a blade
@@ -68,9 +69,56 @@ public final class GeometrySplitter {
       result = splitLines(input, blade);
     } else if (GeomUtils.geometryIsPolygonal(input)) {
       result = splitPolygons(input, blade);
+    } else if (GeomUtils.geometryIsPuntal(input)) {
+      result = splitPoints(input, blade);
     }
 
     return result;
+  }
+
+  /**
+   * Split puntal input geometry by the blade geometry. Sedona-specific extension on top of the
+   * lineal/polygonal cases described in the PostGIS docs: partition the input points into those
+   * covered by the polygonal blade and those that are not, and return both groups as MULTIPOINTs
+   * wrapped in a GEOMETRYCOLLECTION. The union of the two MULTIPOINTs reconstructs the input.
+   *
+   * <p>Only polygonal blades are supported. The input may be a Point, MultiPoint, or a homogeneous
+   * GeometryCollection of points — nested puntal collections are flattened by walking coordinates.
+   *
+   * @param input puntal input geometry
+   * @param blade blade geometry; must be polygonal
+   * @return result of the split, or {@code null} if the blade type is unsupported
+   */
+  public GeometryCollection splitPoints(Geometry input, Geometry blade) {
+    if (!GeomUtils.geometryIsPolygonal(blade)) {
+      return null;
+    }
+    return splitPointsByPolygon(input, blade);
+  }
+
+  private GeometryCollection splitPointsByPolygon(Geometry points, Geometry polygons) {
+    List<Point> inside = new ArrayList<>();
+    List<Point> outside = new ArrayList<>();
+
+    // Walk coordinates so homogeneous puntal collections (including nested ones like
+    // GEOMETRYCOLLECTION(MULTIPOINT(...), POINT(...))) are flattened without a class cast.
+    for (Coordinate c : points.getCoordinates()) {
+      Point p = geometryFactory.createPoint(c);
+      if (polygons.covers(p)) {
+        inside.add(p);
+      } else {
+        outside.add(p);
+      }
+    }
+
+    List<Geometry> parts = new ArrayList<>();
+    if (!inside.isEmpty()) {
+      parts.add(geometryFactory.createMultiPoint(inside.toArray(new Point[0])));
+    }
+    if (!outside.isEmpty()) {
+      parts.add(geometryFactory.createMultiPoint(outside.toArray(new Point[0])));
+    }
+    return geometryFactory.createGeometryCollection(parts.toArray(new Geometry[0]));
   }
 
   /**

@@ -570,6 +570,112 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void splitMultiPointByPolygon() {
+    // Partition a MultiPoint into points inside and outside the polygon. The union of the two
+    // MultiPoints reconstructs the original input.
+    MultiPoint multiPoint =
+        GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(1.0, 1.0, 5.0, 5.0, 15.0, 15.0));
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0, 0.0, 0.0));
+
+    String actualResult = Functions.split(multiPoint, polygon).norm().toText();
+    String expectedResult = "GEOMETRYCOLLECTION (MULTIPOINT ((1 1), (5 5)), MULTIPOINT ((15 15)))";
+
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void splitHomogeneousPuntalGeometryCollectionByPolygon() {
+    // Nested puntal collection: GeometryCollection of a MultiPoint and a Point. Must be flattened
+    // by walking coordinates rather than casting children to Point (which would ClassCastException
+    // on the MultiPoint child).
+    Geometry collection =
+        GEOMETRY_FACTORY.createGeometryCollection(
+            new Geometry[] {
+              GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(1.0, 1.0, 5.0, 5.0)),
+              GEOMETRY_FACTORY.createPoint(new Coordinate(15.0, 15.0))
+            });
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0, 0.0, 0.0));
+
+    String actualResult = Functions.split(collection, polygon).norm().toText();
+    String expectedResult = "GEOMETRYCOLLECTION (MULTIPOINT ((1 1), (5 5)), MULTIPOINT ((15 15)))";
+
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void splitMultiPointAllInsidePolygon() {
+    MultiPoint multiPoint =
+        GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(1.0, 1.0, 5.0, 5.0));
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0, 0.0, 0.0));
+
+    String actualResult = Functions.split(multiPoint, polygon).norm().toText();
+    // Only the inside group is present — the outside group is omitted because it is empty.
+    String expectedResult = "GEOMETRYCOLLECTION (MULTIPOINT ((1 1), (5 5)))";
+
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void splitMultiPointAllOutsidePolygon() {
+    MultiPoint multiPoint =
+        GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(20.0, 20.0, 30.0, 30.0));
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0, 0.0, 0.0));
+
+    String actualResult = Functions.split(multiPoint, polygon).norm().toText();
+    String expectedResult = "GEOMETRYCOLLECTION (MULTIPOINT ((20 20), (30 30)))";
+
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void splitMultiPointOnPolygonBoundaryGoesToInside() {
+    // Points on the polygon boundary are covered by it, so they fall in the "inside" group.
+    MultiPoint multiPoint =
+        GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(0.0, 5.0, 5.0, 5.0, 20.0, 20.0));
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0, 0.0, 0.0));
+
+    String actualResult = Functions.split(multiPoint, polygon).norm().toText();
+    String expectedResult = "GEOMETRYCOLLECTION (MULTIPOINT ((0 5), (5 5)), MULTIPOINT ((20 20)))";
+
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void splitPointByPolygon() {
+    // A single Point input is treated as a one-element MultiPoint.
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(5.0, 5.0));
+    Polygon polygon =
+        GEOMETRY_FACTORY.createPolygon(
+            coordArray(0.0, 0.0, 10.0, 0.0, 10.0, 10.0, 0.0, 10.0, 0.0, 0.0));
+
+    String actualResult = Functions.split(point, polygon).norm().toText();
+    String expectedResult = "GEOMETRYCOLLECTION (MULTIPOINT ((5 5)))";
+
+    assertEquals(expectedResult, actualResult);
+  }
+
+  @Test
+  public void splitPuntalByNonPolygonalBladeReturnsNull() {
+    // Only polygonal blades are supported for puntal input. Lineal and puntal blades return null.
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(5.0, 5.0));
+    LineString lineBlade = GEOMETRY_FACTORY.createLineString(coordArray(0.0, 0.0, 10.0, 10.0));
+    MultiPoint pointBlade = GEOMETRY_FACTORY.createMultiPointFromCoords(coordArray(5.0, 5.0));
+
+    assertNull(Functions.split(point, lineBlade));
+    assertNull(Functions.split(point, pointBlade));
+  }
+
+  @Test
   public void splitCircleInto2SemiCircles() throws ParseException {
     String polygonWkt =
         "POLYGON ((-117.76405581088967 34.111876749328026, -117.76407506132291 34.11170068822483, "

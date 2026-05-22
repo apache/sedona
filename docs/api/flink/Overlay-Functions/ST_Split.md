@@ -30,13 +30,11 @@ For example, if a GeometryCollection of only Point geometries is passed as a bla
 
 ![ST_Split](../../../image/ST_Split/ST_Split.svg "ST_Split")
 
-Return type: `Geometry`
-
-Since: `v1.4.0`
-
 Format: `ST_Split (input: Geometry, blade: Geometry)`
 
-SQL Example
+Return type: `Geometry`
+
+Example:
 
 ```sql
 SELECT ST_Split(
@@ -44,13 +42,13 @@ SELECT ST_Split(
     ST_GeomFromWKT('MULTIPOINT (0.5 0.5, 1 1)'))
 ```
 
-Output:
+Result:
 
 ```
 MULTILINESTRING ((0 0, 0.5 0.5), (0.5 0.5, 1 1), (1 1, 1.5 1.5, 2 2))
 ```
 
-SQL Example — partition a MultiPoint by a Polygon
+Example — partition a MultiPoint by a Polygon:
 
 ```sql
 SELECT ST_Split(
@@ -58,7 +56,7 @@ SELECT ST_Split(
     ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'))
 ```
 
-Output:
+Result:
 
 ```
 GEOMETRYCOLLECTION (MULTIPOINT ((1 1), (5 5)), MULTIPOINT ((15 15)))

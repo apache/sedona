@@ -2088,6 +2088,18 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testSplitMultiPointByPolygon() {
+    // ST_Split on a MultiPoint by a Polygon partitions points by polygon coverage.
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT ST_Split(ST_GeomFromWKT('MULTIPOINT ((1 1), (5 5), (15 15))'),"
+                + " ST_GeomFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))'))");
+    assertEquals(
+        "GEOMETRYCOLLECTION (MULTIPOINT ((1 1), (5 5)), MULTIPOINT ((15 15)))",
+        ((Geometry) first(table).getField(0)).norm().toText());
+  }
+
+  @Test
   public void testSubdivide() {
     Table table =
         tableEnv.sqlQuery(
