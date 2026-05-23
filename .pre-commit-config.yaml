@@ -589,3 +589,10 @@ repos:
         description: checkmake is a linter for Makefiles
         files: ^python/sedona/doc/Makefile$
         args: ['--config=python/sedona/doc/checkmake.ini']
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.37.2
+    hooks:
+      - id: check-citation-file-format
+        name: run check-citation-file-format
+        description: validate citation file format
+        files: ^CITATION\.cff$
