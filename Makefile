@@ -50,6 +50,7 @@ docsinstall: check-install
 
 install: check-install ## Sync all dependencies (including development) using uv
 	uv sync --all-groups
+	prek install
 
 run-docs:
 	docker build -f docker/docs/Dockerfile -t mkdocs-sedona .
