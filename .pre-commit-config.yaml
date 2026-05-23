@@ -86,13 +86,6 @@ repos:
         pass_filenames: true # <-- Crucial change: pass filenames to the script
         types: [file] # Ensure only regular files are passed, not directories
         stages: [manual]
-      - id: validate-dependabot-yml
-        name: validate dependabot.yml
-        description: ensures the dependabot config file is valid
-        entry: validate-dependabot-yaml
-        language: node
-        additional_dependencies: ['@bugron/validate-dependabot-yaml@0.3.3']
-        files: ^\.github/dependabot\.yml$
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.6
     hooks:
@@ -501,6 +494,13 @@ repos:
         exclude: ^\.github/.*$
         types: [markdown]
         files: \.md$
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.37.2
+    hooks:
+      - id: check-dependabot
+        name: validate dependabot.yml
+        description: ensures the dependabot config file is valid
+        files: ^\.github/dependabot\.yml$
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.11.0.1
     hooks:
