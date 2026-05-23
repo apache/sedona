@@ -271,7 +271,7 @@ body:has(.page-home) {
       color: rgba(255, 255, 255, 0.6);
     }
 
-    .bth-group {
+    .btn-group {
       margin-top: clamp-property(26, 32);
     }
   }
@@ -1018,7 +1018,7 @@ body:has(.page-home) {
     margin-right: auto;
   }
 
-  .bth-group {
+  .btn-group {
     display: flex;
     justify-content: center;
     align-items: center;
