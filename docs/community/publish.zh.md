@@ -65,7 +65,7 @@ rm report.txt
 请确认以下文件中的 Sedona 版本均为 {{ sedona_create_release.current_version }}：
 
 1. https://github.com/apache/sedona/blob/master/python/sedona/version.py
-2. https://github.com/apache/sedona/blob/master/python/pyproject.toml（`[project]` 下的 `version` 字段）
+2. [python/pyproject.toml](https://github.com/apache/sedona/blob/master/python/pyproject.toml)（`[project]` 下的 `version` 字段）
 3. https://github.com/apache/sedona/blob/master/R/DESCRIPTION
 4. https://github.com/apache/sedona/blob/99239524f17389fc4ae9548ea88756f8ea538bb9/R/R/dependencies.R#L42
 5. https://github.com/apache/sedona/blob/master/zeppelin/package.json
