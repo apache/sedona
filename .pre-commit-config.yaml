@@ -16,7 +16,7 @@
 # under the License.
 
 ---
-# https://pre-commit.com/#installation
+# https://prek.j178.dev/
 default_stages: [pre-commit, pre-push]
 default_language_version:
   python: python3
@@ -42,11 +42,11 @@ repos:
     hooks:
       - id: npm-install
         name: Install Zeppelin Node dependencies
+        description: Ensures local node_modules match the lockfile
         entry: bash -c "cd zeppelin && npm install"
         language: system
         pass_filenames: false
         files: ^zeppelin/(package\.json|package-lock\.json)$
-        description: Ensures local node_modules match the lockfile
         stages: [manual]
       - id: prettier
         name: run prettier
@@ -495,7 +495,7 @@ repos:
         name: run trailing-whitespace
         description: trims trailing whitespace
         args: [--markdown-linebreak-ext=md]
-        exclude: ^docs-overrides/main\.html$|\.Rd$
+        exclude: \.Rd$
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.48.0
     hooks:
@@ -509,6 +509,10 @@ repos:
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.37.2
     hooks:
+      - id: check-citation-file-format
+        name: run check-citation-file-format
+        description: validate citation file format
+        files: ^CITATION\.cff$
       - id: check-dependabot
         name: validate dependabot.yml
         description: ensures the dependabot config file is valid
@@ -589,10 +593,3 @@ repos:
         description: checkmake is a linter for Makefiles
         files: ^python/sedona/doc/Makefile$
         args: ['--config=python/sedona/doc/checkmake.ini']
-  - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.37.2
-    hooks:
-      - id: check-citation-file-format
-        name: run check-citation-file-format
-        description: validate citation file format
-        files: ^CITATION\.cff$
