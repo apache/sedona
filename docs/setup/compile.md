@@ -153,30 +153,33 @@ uv sync --group docs
 After installing MkDocs and MkDocs-Material, run these commands in the Sedona root folder:
 
 ```
-uv run mkdocs build
+cd docs-overrides && npm ci && npx gulp build
+cd ..
 uv run mike deploy --update-aliases latest-snapshot -b website -p
-uv run mike serve
+uv run mike serve -b website
 ```
 
 ## Code Quality Checks with `prek`, `uv`, and `make`
 
-This guide explains how Apache Sedona manages code quality checks, formatting, and linting locally. To ensure a fast and consistent developer experience, we combine `uv` (a lightning-fast Python package and environment manager) with `prek` (our internal pre-commit wrapper framework) and expose everything via a simple `Makefile`.
+This guide explains how Apache Sedona manages local code quality checks, formatting, and linting. To ensure a fast and consistent developer experience, we combine **`uv`** (a lightning-fast Python package and environment manager) with **`prek`** (our internal pre-commit wrapper framework) and expose everything via a simple, unified `Makefile`.
 
 ---
 
 ### Prerequisites
 
-Before running any checks, ensure you have `uv` installed on your machine. If you don't have it yet, you can install it via:
+Before running any checks, ensure you have `uv` installed on your machine. If you don't have it yet, you can install it via the official installer:
 
-`curl -LsSf https://astral.sh/uv/install.sh | sh`
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
-You do not need to manually install Python virtual environments, `pre-commit`, or `prek`. The `Makefile` handles environment isolation and dependency resolution automatically using `uv`.
+> 💡 **Note:** You do not need to manually install Python virtual environments, `pre-commit`, or `prek`. The `Makefile` handles environment isolation and dependency resolution automatically using `uv`.
 
 ---
 
 ### The Core Workflow: `uv` + `prek`
 
-Our codebase uses `prek` to orchestrate linting and formatting workflows (such as Black, markdownlint, or oxipng).
+Our codebase uses `prek` to orchestrate linting and formatting workflows (such as *Black*, *markdownlint*, or *oxipng*).
 
 Instead of forcing you to activate a virtual environment manually, the `Makefile` uses `uv sync` to build a perfectly isolated environment behind the scenes. When you run any `make check-*` command, it guarantees that `prek` is executed using the exact dependency versions locked in the project.
 
@@ -184,37 +187,13 @@ Instead of forcing you to activate a virtual environment manually, the `Makefile
 
 ### Available Make Commands
 
-For maximum convenience, you should interact with `prek` entirely through the following `make` shortcuts.
+For maximum convenience, you should interact with `prek` entirely through the following `make` shortcuts:
 
-#### 1. Run Checks on Staged Changes (Recommended before committing)
-
-This runs `prek` only against the files you have explicitly staged using `git add`. It is incredibly fast.
-
-`make check-stage`
-
-#### 2. Run Checks on the Full Codebase
-
-This forces `prek` to evaluate every single file in the repository, regardless of git status. Use this before opening a Pull Request.
-
-`make check`
-
-#### 3. Run Checks on Your Entire Branch History
-
-This automatically identifies all files changed since you branched off of the `main` branch and runs linting rules against them.
-
-`make check-from-ref`
-
-#### 4. Run Checks on Your Last Commit
-
-If you just committed code and want to double-check that everything passes post-commit:
-
-`make check-last`
-
-#### 5. Keeping Linter Hooks Up to Date
-
-To upgrade `prek` hooks to their latest respective upstream versions and update your local locked dependencies:
-
-`make update-deps`
+* **`make check-stage`** *Runs checks on staged changes only (Recommended before committing).* Evaluates `prek` only against the files you have explicitly staged using `git add`. It is incredibly fast.
+* **`make check`** *Runs checks on the full codebase.* Forces `prek` to evaluate every single file in the repository, regardless of git status. **Use this before opening a Pull Request.**
+* **`make check-from-ref`** *Runs checks on your entire branch history.* Automatically identifies all files changed since you branched off of the `main` branch and runs linting rules against them.
+* **`make check-last`** *Runs checks on your last commit.* If you just committed code and want to double-check that everything passes post-commit.
+* **`make update-deps`** *Keeps linter hooks up to date.* Upgrades `prek` hooks to their latest respective upstream versions and updates your local locked dependencies.
 
 ---
 
@@ -222,12 +201,19 @@ To upgrade `prek` hooks to their latest respective upstream versions and update 
 
 #### Skipping Specific Hooks Locally
 
-Sometimes a specific linter rule or hook blocks your workflow, or you want to isolate your testing to a single hook. You can bypass specific hooks by passing the `SKIP` environment variable directly to `prek`.
+Sometimes a specific linter rule blocks your workflow, or you want to isolate your testing to a single hook. You can bypass specific hooks by passing the `SKIP` environment variable directly to `prek`.
 
-* Example: Run all checks except the linter named codespell
-`SKIP=codespell make check-stage`
-* Example: Skip multiple hooks simultaneously (comma-separated)
-`SKIP=codespell,gitleaks make check`
+* **Example:** Run all checks except the linter named `codespell`
+
+```bash
+SKIP=codespell make check-stage
+```
+
+* **Example:** Skip multiple hooks simultaneously (comma-separated)
+
+```bash
+SKIP=codespell,gitleaks make check
+```
 
 #### Bypassing Automated Git Hooks (`--no-verify`)
 
@@ -235,21 +221,22 @@ If you have configured `prek` to run automatically as a native Git `pre-commit` 
 
 If you need to commit a work-in-progress (WIP) branch quickly without fixing style errors, you can bypass the `prek` gate entirely using Git's built-in `--no-verify` (or `-n`) flag.
 
-* Example: Force a commit despite failing linter checks
-`git add .`
-`git commit -m "WIP: basic structure for new feature" --no-verify`
+```bash
+git add .
+git commit -m "WIP: basic structure for new feature" --no-verify
+```
 
-Warning: Continuous Integration (CI) runners will still execute all `prek` gates on your Pull Request. Bypassing hooks with `--no-verify` should only be used for temporary local savepoints.
+> ⚠️ **Warning:** Continuous Integration (CI) runners will still execute all `prek` gates on your Pull Request. Bypassing hooks with `--no-verify` should only be used for temporary local savepoints.
 
 ---
 
 ### Housekeeping & Resetting Cache (`make clean`)
 
-If your Python environment behaves unexpectedly, or if the linters fail to pick up recent changes due to aggressive local caching, you should reset your workspace back to a pristine state.
+If your Python environment behaves unexpectedly, or if the linters fail to pick up recent changes due to aggressive local caching, you should reset your workspace back to a pristine state using:
 
-Run the following command:
-
-`make clean`
+```bash
+make clean
+```
 
 #### What happens under the hood?
 
@@ -267,8 +254,10 @@ Following a `make clean`, running any subsequent `make check` command will compl
 
 When you execute a command like `make check`, the automation engine follows these exact steps:
 
-1. `check-install`: Verifies `uv` is installed on your local path.
-2. `install`: Triggers `uv sync --all-groups`, which automatically creates/syncs a `.venv` folder containing `prek` and all development dependencies.
-3. `Execution`: Runs the target `prek` command within that guaranteed environment context.
+1. **`check-install`**: Verifies `uv` is installed on your local path.
+2. **`install`**: Triggers `uv sync --all-groups`, which automatically creates/syncs a `.venv` folder containing `prek` and all development dependencies.
+3. **`Execution`**: Runs the target `prek` command within that guaranteed environment context.
 
-`[ Your CLI ] ---> [ make check ] ---> [ uv syncs environment ] ---> [ prek executes hooks ]`
+```
+[ Your CLI ] ──> [ make check ] ──> [ uv syncs environment ] ──> [ prek executes hooks ]
+```
