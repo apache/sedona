@@ -779,6 +779,27 @@
     <span class="k">return</span> <span class="n">_call_constructor_function</span><span class="p">(</span><span class="s2">&quot;ST_MakeBox2D&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">lower_left</span><span class="p">,</span> <span class="n">upper_right</span><span class="p">))</span></div>
 
 
+<div class="viewcode-block" id="ST_3DMakeBox"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_constructors.ST_3DMakeBox">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_3DMakeBox</span><span class="p">(</span>
+    <span class="n">lower_left</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span>
+    <span class="n">upper_right</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Construct a Box3D from two corner POINTZ geometries.</span>
+
+<span class="sd">    Coordinates are taken verbatim — no swapping or ordering validation.</span>
+<span class="sd">    Point inputs without a Z dimension contribute ``z = 0``. NULL or empty</span>
+<span class="sd">    point inputs return NULL. Non-point inputs raise an error.</span>
+
+<span class="sd">    :param lower_left: Lower-left corner Point (POINTZ; missing Z treated as 0).</span>
+<span class="sd">    :type lower_left: ColumnOrName</span>
+<span class="sd">    :param upper_right: Upper-right corner Point (POINTZ; missing Z treated as 0).</span>
+<span class="sd">    :type upper_right: ColumnOrName</span>
+<span class="sd">    :return: Box3D column.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_constructor_function</span><span class="p">(</span><span class="s2">&quot;ST_3DMakeBox&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">lower_left</span><span class="p">,</span> <span class="n">upper_right</span><span class="p">))</span></div>
+
+
 <div class="viewcode-block" id="ST_GeomFromBox2D"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_constructors.ST_GeomFromBox2D">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_GeomFromBox2D</span><span class="p">(</span><span class="n">box</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a Box2D to a Geometry.</span>
