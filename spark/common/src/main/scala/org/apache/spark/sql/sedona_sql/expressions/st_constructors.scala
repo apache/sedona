@@ -258,6 +258,11 @@ object st_constructors {
   def ST_MakeBox2D(lowerLeft: String, upperRight: String): Column =
     wrapExpression[ST_MakeBox2D](lowerLeft, upperRight)
 
+  def ST_3DMakeBox(lowerLeft: Column, upperRight: Column): Column =
+    wrapExpression[ST_3DMakeBox](lowerLeft, upperRight)
+  def ST_3DMakeBox(lowerLeft: String, upperRight: String): Column =
+    wrapExpression[ST_3DMakeBox](lowerLeft, upperRight)
+
   def ST_GeomFromBox2D(box: Column): Column = wrapExpression[ST_GeomFromBox2D](box)
   def ST_GeomFromBox2D(box: String): Column = wrapExpression[ST_GeomFromBox2D](box)
 

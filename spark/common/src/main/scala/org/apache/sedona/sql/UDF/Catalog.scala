@@ -58,6 +58,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[ST_GeomFromWKB](),
     function[ST_GeomFromEWKB](),
     function[ST_GeomFromBox2D](),
+    function[ST_3DMakeBox](),
     function[ST_GeomFromGeoJSON](),
     function[ST_GeomFromGML](),
     function[ST_GeomFromKML](),
@@ -283,6 +284,7 @@ object Catalog extends AbstractCatalog with Logging {
   val boundingBoxExprs: Seq[FunctionDescription] = Seq(
     function[ST_BoundingDiagonal](),
     function[ST_Box2D](),
+    function[ST_Box3D](),
     function[ST_Envelope](),
     function[ST_Expand](),
     function[ST_MMax](),

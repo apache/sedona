@@ -571,6 +571,27 @@ def ST_MakeBox2D(
 
 
 @validate_argument_types
+def ST_3DMakeBox(
+    lower_left: ColumnOrName,
+    upper_right: ColumnOrName,
+) -> Column:
+    """Construct a Box3D from two corner POINTZ geometries.
+
+    Coordinates are taken verbatim — no swapping or ordering validation.
+    Point inputs without a Z dimension contribute ``z = 0``. NULL or empty
+    point inputs return NULL. Non-point inputs raise an error.
+
+    :param lower_left: Lower-left corner Point (POINTZ; missing Z treated as 0).
+    :type lower_left: ColumnOrName
+    :param upper_right: Upper-right corner Point (POINTZ; missing Z treated as 0).
+    :type upper_right: ColumnOrName
+    :return: Box3D column.
+    :rtype: Column
+    """
+    return _call_constructor_function("ST_3DMakeBox", (lower_left, upper_right))
+
+
+@validate_argument_types
 def ST_GeomFromBox2D(box: ColumnOrName) -> Column:
     """Convert a Box2D to a Geometry.
 

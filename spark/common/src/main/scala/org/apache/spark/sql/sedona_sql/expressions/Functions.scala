@@ -19,7 +19,7 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.{Functions, FunctionsGeoTools, FunctionsProj4}
-import org.apache.sedona.common.geometryObjects.Box2D
+import org.apache.sedona.common.geometryObjects.{Box2D, Box3D}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
 import org.apache.sedona.common.utils.{InscribedCircle, ValidDetail}
 import org.apache.sedona.core.utils.SedonaConf
@@ -252,6 +252,21 @@ private[apache] case class ST_Envelope(inputExpressions: Seq[Expression])
  */
 private[apache] case class ST_Box2D(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.box2D _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Return the 3D bounding box (Box3D) of a Geometry. Mirrors PostGIS `Box3D(geometry)`. Returns
+ * NULL for null or empty input. Geometries that have no Z dimension are treated as having `z = 0`
+ * (PostGIS-compatible).
+ *
+ * @param inputExpressions
+ */
+private[apache] case class ST_Box3D(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.box3D _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

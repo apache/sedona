@@ -178,6 +178,14 @@ test_configurations = [
         Box2D(0.0, 0.0, 3.0, 0.0),
     ),
     (
+        stc.ST_3DMakeBox,
+        ("a", "b"),
+        "two_points",
+        # Box3DType has no Python UDT yet; cast to STRING uses Box3D.toString for comparison.
+        "CAST(geom AS STRING)",
+        "BOX3D(0.0 0.0 0.0, 3.0 0.0 4.0)",
+    ),
+    (
         stc.ST_GeomFromBox2D,
         (
             lambda: stc.ST_MakeBox2D(
@@ -546,6 +554,15 @@ test_configurations = [
         "linestring_geom",
         "",
         Box2D(0.0, 0.0, 5.0, 0.0),
+    ),
+    (
+        stf.ST_Box3D,
+        ("line",),
+        "linestring_geom",
+        # Box3DType has no Python UDT yet; cast to STRING uses Box3D.toString for comparison.
+        "CAST(geom AS STRING)",
+        # linestring_geom is 2D so Z folds to 0 per PostGIS semantics.
+        "BOX3D(0.0 0.0 0.0, 5.0 0.0 0.0)",
     ),
     (
         stf.ST_Envelope,
