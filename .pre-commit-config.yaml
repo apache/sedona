@@ -40,7 +40,15 @@ repos:
         files: ^README\.md$
   - repo: local
     hooks:
-      - id: npm-install
+      - id: docs-overrides-install
+        name: Install docs-overrides Node dependencies
+        entry: bash -c "cd docs-overrides && npm install"
+        language: system
+        pass_filenames: false
+        files: ^docs-overrides/(package\.json|package-lock\.json)$
+        description: Ensures local node_modules match the lockfile
+        stages: [manual]
+      - id: zeppelin-install
         name: Install Zeppelin Node dependencies
         description: Ensures local node_modules match the lockfile
         entry: bash -c "cd zeppelin && npm install"
