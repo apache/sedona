@@ -281,9 +281,9 @@ test('other path', function (t) {
 test('path iterator', function (t) {
     var resolverDir = path.join(__dirname, 'resolver');
 
-    var exactIterator = function (x, start, getPackageCandidates, opts) {
+    function exactIterator(x, start, getPackageCandidates, opts) {
         return [path.join(resolverDir, x)];
-    };
+    }
 
     t.equal(
         resolve.sync('baz', { packageIterator: exactIterator }),
@@ -393,7 +393,7 @@ test('main: false', function (t) {
     t.end();
 });
 
-var stubStatSync = function stubStatSync(fn) {
+function stubStatSync(fn) {
     var statSync = fs.statSync;
     try {
         fs.statSync = function () {
@@ -403,7 +403,7 @@ var stubStatSync = function stubStatSync(fn) {
     } finally {
         fs.statSync = statSync;
     }
-};
+}
 
 test('#79 - re-throw non ENOENT errors from stat', function (t) {
     var dir = path.join(__dirname, 'resolver');

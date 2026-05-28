@@ -5,11 +5,12 @@
 
 "use strict";
 
-const SizeFormatHelpers = require("../SizeFormatHelpers");
-const WebpackError = require("../WebpackError");
+const WebpackError = require("../errors/WebpackError");
+const formatSize = require("../util/formatSize");
 
 class MinMaxSizeWarning extends WebpackError {
 	/**
+	 * Creates an instance of MinMaxSizeWarning.
 	 * @param {string[] | undefined} keys keys
 	 * @param {number} minSize minimum size
 	 * @param {number} maxSize maximum size
@@ -25,8 +26,8 @@ class MinMaxSizeWarning extends WebpackError {
 		super(
 			"SplitChunksPlugin\n" +
 				`${keysMessage}\n` +
-				`Configured minSize (${SizeFormatHelpers.formatSize(minSize)}) is ` +
-				`bigger than maxSize (${SizeFormatHelpers.formatSize(maxSize)}).\n` +
+				`Configured minSize (${formatSize(minSize)}) is ` +
+				`bigger than maxSize (${formatSize(maxSize)}).\n` +
 				"This seem to be a invalid optimization.splitChunks configuration."
 		);
 	}

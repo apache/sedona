@@ -53,7 +53,8 @@ function fastqueue (context, worker, _concurrency) {
     empty: noop,
     kill: kill,
     killAndDrain: killAndDrain,
-    error: error
+    error: error,
+    abort: abort
   }
 
   return self
@@ -190,6 +191,40 @@ function fastqueue (context, worker, _concurrency) {
     queueHead = null
     queueTail = null
     self.drain()
+    self.drain = noop
+  }
+
+  function abort () {
+    var current = queueHead
+    queueHead = null
+    queueTail = null
+
+    while (current) {
+      var next = current.next
+      var callback = current.callback
+      var errorHandler = current.errorHandler
+      var val = current.value
+      var context = current.context
+
+      // Reset the task state
+      current.value = null
+      current.callback = noop
+      current.errorHandler = null
+
+      // Call error handler if present
+      if (errorHandler) {
+        errorHandler(new Error('abort'), val)
+      }
+
+      // Call callback with error
+      callback.call(context, new Error('abort'))
+
+      // Release the task back to the pool
+      current.release(current)
+
+      current = next
+    }
+
     self.drain = noop
   }
 

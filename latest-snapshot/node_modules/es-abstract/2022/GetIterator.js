@@ -37,7 +37,7 @@ module.exports = function GetIterator(obj, hint, method) {
 			if (hasSymbols && $asyncIterator) {
 				actualMethod = GetMethod(obj, $asyncIterator);
 			}
-			if (actualMethod === undefined) {
+			if (typeof actualMethod === 'undefined') {
 				throw new $SyntaxError("async from sync iterators aren't currently supported");
 			}
 		} else {

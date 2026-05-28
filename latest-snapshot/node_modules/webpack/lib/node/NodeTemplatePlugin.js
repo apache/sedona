@@ -11,20 +11,23 @@ const EnableChunkLoadingPlugin = require("../javascript/EnableChunkLoadingPlugin
 /** @typedef {import("../Compiler")} Compiler */
 
 /**
+ * Represents the node template plugin runtime component.
  * @typedef {object} NodeTemplatePluginOptions
  * @property {boolean=} asyncChunkLoading enable async chunk loading
  */
 
 class NodeTemplatePlugin {
 	/**
+	 * Creates an instance of NodeTemplatePlugin.
 	 * @param {NodeTemplatePluginOptions=} options options object
 	 */
 	constructor(options = {}) {
+		/** @type {NodeTemplatePluginOptions} */
 		this._options = options;
 	}
 
 	/**
-	 * Apply the plugin
+	 * Applies the plugin by registering its hooks on the compiler.
 	 * @param {Compiler} compiler the compiler instance
 	 * @returns {void}
 	 */

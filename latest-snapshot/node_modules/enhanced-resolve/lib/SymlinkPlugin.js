@@ -6,7 +6,7 @@
 "use strict";
 
 const forEachBail = require("./forEachBail");
-const getPaths = require("./getPaths");
+const { getPathsCached } = require("./getPaths");
 const { PathType, getType } = require("./util/path");
 
 /** @typedef {import("./Resolver")} Resolver */
@@ -34,9 +34,20 @@ module.exports = class SymlinkPlugin {
 			.getHook(this.source)
 			.tapAsync("SymlinkPlugin", (request, resolveContext, callback) => {
 				if (request.ignoreSymlinks) return callback();
-				const pathsResult = getPaths(/** @type {string} */ (request.path));
-				const pathSegments = pathsResult.segments;
-				const { paths } = pathsResult;
+				const pathsResult = getPathsCached(
+					fs,
+					/** @type {string} */ (request.path),
+				);
+				const { paths, segments } = pathsResult;
+				// `pathsResult.segments` is shared across callers via the cache.
+				// The only place we need to mutate is `pathSegments[idx] = result`
+				// when `fs.readlink` succeeds — which is rare (the vast majority
+				// of paths contain no symlinks, e.g. every resolve on
+				// `cache-predicate`'s no-symlink fixture). Defer the copy until
+				// we actually see a symlink so the common no-symlink path stays
+				// allocation-free.
+				/** @type {string[] | null} */
+				let pathSegments = null;
 
 				let containsSymlink = false;
 				let idx = -1;
@@ -54,6 +65,12 @@ module.exports = class SymlinkPlugin {
 						}
 						fs.readlink(path, (err, result) => {
 							if (!err && result) {
+								// First symlink seen — take our own copy now, so
+								// the cached `segments` array stays pristine for
+								// sibling resolves.
+								if (pathSegments === null) {
+									pathSegments = [...segments];
+								}
 								pathSegments[idx] = /** @type {string} */ (result);
 								containsSymlink = true;
 								// Shortcut when absolute symlink found
@@ -75,10 +92,13 @@ module.exports = class SymlinkPlugin {
 					 */
 					(err, idx) => {
 						if (!containsSymlink) return callback();
+						// `containsSymlink === true` implies we took a copy in
+						// `pathSegments` already, so it's non-null. The copy is
+						// our own, so `slice` to trim is fine and spreading to
+						// "unshare" is no longer necessary.
+						const own = /** @type {string[]} */ (pathSegments);
 						const resultSegments =
-							typeof idx === "number"
-								? pathSegments.slice(0, idx + 1)
-								: [...pathSegments];
+							typeof idx === "number" ? own.slice(0, idx + 1) : own;
 						const result = resultSegments.reduceRight((a, b) =>
 							resolver.join(a, b),
 						);

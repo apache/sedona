@@ -14,18 +14,19 @@ const splitIntoLines = (str) => {
 	const len = str.length;
 	let i = 0;
 	while (i < len) {
-		const cc = str.charCodeAt(i);
-		// 10 is "\n".charCodeAt(0)
-		if (cc === 10) {
-			results.push("\n");
-			i++;
-		} else {
-			let j = i + 1;
-			// 10 is "\n".charCodeAt(0)
-			while (j < len && str.charCodeAt(j) !== 10) j++;
-			results.push(str.slice(i, j + 1));
-			i = j + 1;
+		// indexOf is implemented natively and is significantly faster than
+		// scanning char-by-char with charCodeAt for long lines.
+		const n = str.indexOf("\n", i);
+		if (n === -1) {
+			results.push(i === 0 ? str : str.slice(i));
+			break;
 		}
+		if (n === i) {
+			results.push("\n");
+		} else {
+			results.push(str.slice(i, n + 1));
+		}
+		i = n + 1;
 	}
 	return results;
 };

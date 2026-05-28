@@ -5,6 +5,19 @@ const {
 
 const env = typeof self === 'object' ? self : globalThis;
 
+const guard = (name, init) => {
+  switch (name) {
+    case 'Function':
+    case 'SharedWorker':
+    case 'Worker':
+    case 'eval':
+    case 'setInterval':
+    case 'setTimeout':
+      throw new TypeError('unable to deserialize ' + name);
+  }
+  return new env[name](init);
+};
+
 const deserializer = ($, _) => {
   const as = (out, index) => {
     $.set(index, out);
@@ -52,7 +65,7 @@ const deserializer = ($, _) => {
       }
       case ERROR: {
         const {name, message} = value;
-        return as(new env[name](message), index);
+        return as(guard(name, message), index);
       }
       case BIGINT:
         return as(BigInt(value), index);
@@ -65,7 +78,7 @@ const deserializer = ($, _) => {
         return as(new DataView(buffer), value);
       }
     }
-    return as(new env[type](value), index);
+    return as(guard(type, value), index);
   };
 
   return unpair;

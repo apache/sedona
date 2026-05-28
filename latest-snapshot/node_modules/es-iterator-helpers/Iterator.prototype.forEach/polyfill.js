@@ -3,7 +3,23 @@
 var implementation = require('./implementation');
 
 module.exports = function getPolyfill() {
-	return typeof Iterator === 'function' && typeof Iterator.prototype.forEach === 'function'
-		? Iterator.prototype.forEach
-		: implementation;
+	if (typeof Iterator === 'function' && typeof Iterator.prototype.forEach === 'function') {
+		var earlyCloseCount = 0;
+		try {
+			Iterator.prototype.forEach.call(
+				{
+					next: function () {},
+					'return': function () {
+						earlyCloseCount += 1;
+						return {};
+					}
+				},
+				null
+			);
+		} catch (e) { /**/ }
+		if (earlyCloseCount > 0) {
+			return Iterator.prototype.forEach;
+		}
+	}
+	return implementation;
 };

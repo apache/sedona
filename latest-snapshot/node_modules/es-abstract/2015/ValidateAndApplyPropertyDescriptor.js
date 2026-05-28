@@ -104,7 +104,7 @@ module.exports = function ValidateAndApplyPropertyDescriptor(O, P, extensible, D
 					{
 						'[[Configurable]]': current['[[Configurable]]'],
 						'[[Enumerable]]': current['[[Enumerable]]'],
-						'[[Get]]': undefined
+						'[[Get]]': void undefined
 					}
 				);
 			}
@@ -118,7 +118,7 @@ module.exports = function ValidateAndApplyPropertyDescriptor(O, P, extensible, D
 				{
 					'[[Configurable]]': current['[[Configurable]]'],
 					'[[Enumerable]]': current['[[Enumerable]]'],
-					'[[Value]]': undefined
+					'[[Value]]': void undefined
 				}
 			);
 		}

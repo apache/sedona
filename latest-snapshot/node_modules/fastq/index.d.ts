@@ -27,6 +27,8 @@ declare namespace fastq {
     kill(): any
     /** Same than `kill` but the `drain` function will be called before reset to empty. */
     killAndDrain(): any
+    /** Removes all tasks waiting to be processed, calls each task's callback with an abort error (rejects promises for promise-based queues), and resets `drain` to an empty function. */
+    abort(): any
     /** Set a global error handler. `handler(err, task)` will be called each time a task is completed, `err` will be not null if the task has thrown an error. */
     error(handler: errorHandler<T>): void
     /** Property that returns the number of concurrent tasks that could be executed in parallel. It can be altered at runtime. */

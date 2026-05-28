@@ -92,7 +92,7 @@ var $AsyncFromSyncIteratorPrototype = GetIntrinsic('%AsyncFromSyncIteratorProtot
 
 			if (typeof iteratorReturn === 'undefined') { // step 7
 				var iterResult = CreateIterResultObject(value, true); // step 7.a
-				Call(resolve, undefined, [iterResult]); // step 7.b
+				Call(resolve, void undefined, [iterResult]); // step 7.b
 				return;
 			}
 			var result;
@@ -102,7 +102,7 @@ var $AsyncFromSyncIteratorPrototype = GetIntrinsic('%AsyncFromSyncIteratorProtot
 				result = Call(iteratorReturn, syncIterator); // step 9.a
 			}
 			if (!isObject(result)) { // step 11
-				Call(reject, undefined, [new $TypeError('Iterator `return` method returned a non-object value.')]); // step 11.a
+				Call(reject, void undefined, [new $TypeError('Iterator `return` method returned a non-object value.')]); // step 11.a
 				return;
 			}
 
@@ -127,7 +127,7 @@ var $AsyncFromSyncIteratorPrototype = GetIntrinsic('%AsyncFromSyncIteratorProtot
 			var throwMethod = GetMethod(syncIterator, 'throw'); // step 5
 
 			if (typeof throwMethod === 'undefined') { // step 7
-				Call(reject, undefined, [value]); // step 7.a
+				Call(reject, void undefined, [value]); // step 7.a
 				return;
 			}
 
@@ -138,7 +138,7 @@ var $AsyncFromSyncIteratorPrototype = GetIntrinsic('%AsyncFromSyncIteratorProtot
 				result = Call(throwMethod, syncIterator); // step 9.a
 			}
 			if (!isObject(result)) { // step 11
-				Call(reject, undefined, [new $TypeError('Iterator `throw` method returned a non-object value.')]); // step 11.a
+				Call(reject, void undefined, [new $TypeError('Iterator `throw` method returned a non-object value.')]); // step 11.a
 				return;
 			}
 

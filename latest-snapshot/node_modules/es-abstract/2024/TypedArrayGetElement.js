@@ -22,7 +22,7 @@ module.exports = function TypedArrayGetElement(O, index) {
 	}
 
 	if (!IsValidIntegerIndex(O, index)) {
-		return undefined; // step 1
+		return void undefined; // step 1
 	}
 
 	var offset = typedArrayByteOffset(O); // step 2

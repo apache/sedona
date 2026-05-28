@@ -38,7 +38,7 @@ function Grid({
       slidesNumberEvenToRows = Math.ceil(slidesLength / rows) * rows;
     }
     if (slidesPerView !== 'auto' && fill === 'row') {
-      slidesNumberEvenToRows = Math.max(slidesNumberEvenToRows, slidesPerView * rows);
+      slidesNumberEvenToRows = Math.max(slidesNumberEvenToRows, Math.floor(slidesPerView) * rows);
     }
     slidesPerRow = slidesNumberEvenToRows / rows;
   };

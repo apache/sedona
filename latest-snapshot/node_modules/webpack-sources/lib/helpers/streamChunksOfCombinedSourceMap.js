@@ -76,7 +76,11 @@ const streamChunksOfCombinedSourceMap = (
 		if (line > innerSourceMapLineData.length) return -1;
 		const { mappingsData } = innerSourceMapLineData[line - 1];
 		let l = 0;
-		let r = mappingsData.length / 5;
+		// `mappingsData.length` is always a multiple of 5 (five values pushed
+		// per mapping), so dividing is exact. Coerce the bound to an int32 so
+		// the binary-search loop stays on V8's fast small-int path instead of
+		// comparing an int against a float.
+		let r = (mappingsData.length / 5) | 0;
 		while (l < r) {
 			const m = (l + r) >> 1;
 			if (mappingsData[m * 5] <= column) {

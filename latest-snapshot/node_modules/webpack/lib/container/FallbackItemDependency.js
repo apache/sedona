@@ -10,9 +10,11 @@ const makeSerializable = require("../util/makeSerializable");
 
 class FallbackItemDependency extends ModuleDependency {
 	/**
+	 * Creates an instance of FallbackItemDependency.
 	 * @param {string} request request
 	 */
 	constructor(request) {
+		/** @type {string} */
 		super(request);
 	}
 

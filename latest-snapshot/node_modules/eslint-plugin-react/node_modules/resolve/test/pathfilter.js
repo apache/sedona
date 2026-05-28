@@ -4,14 +4,14 @@ var resolve = require('../');
 
 var resolverDir = path.join(__dirname, '/pathfilter/deep_ref');
 
-var pathFilterFactory = function (t) {
+function pathFilterFactory(t) {
     return function (pkg, x, remainder) {
         t.equal(pkg.version, '1.2.3');
         t.equal(x, path.join(resolverDir, 'node_modules/deep/ref'));
         t.equal(remainder, 'ref');
         return 'alt';
     };
-};
+}
 
 test('#62: deep module references and the pathFilter', function (t) {
     t.test('deep/ref.js', function (st) {

@@ -9,6 +9,7 @@ var forEach = require('for-each');
 var debug = require('object-inspect');
 var v = require('es-value-fixtures');
 var hasSymbols = require('has-symbols/shams')();
+var hasPropertyDescriptors = require('has-property-descriptors')();
 var mockProperty = require('mock-property');
 
 var index = require('../Iterator.from');
@@ -128,6 +129,158 @@ module.exports = {
 				s2t.equal(observedType, 'string', 'string primitive -> primitive receiver in Symbol.iterator getter');
 				from(Object(''));
 				s2t.equal(observedType, 'object', 'boxed string -> boxed string in Symbol.iterator getter');
+
+				s2t.end();
+			});
+
+			st.test('262: get-next-method-only-once', { skip: !hasPropertyDescriptors }, function (s2t) {
+				var nextGets = 0;
+				var testIter = {
+					next: function () {
+						return { done: true, value: undefined };
+					}
+				};
+				Object.defineProperty(testIter, 'next', {
+					get: function () {
+						nextGets += 1;
+						return function () {
+							return { done: true, value: undefined };
+						};
+					}
+				});
+
+				var iter = from(testIter);
+				s2t.equal(nextGets, 1, 'next retrieved once on creation');
+				iter.next();
+				s2t.equal(nextGets, 1, 'next not retrieved again on next()');
+				iter.next();
+				s2t.equal(nextGets, 1, 'next still not retrieved again');
+
+				s2t.end();
+			});
+
+			st.test('262: get-next-method-throws', { skip: !hasPropertyDescriptors }, function (s2t) {
+				var testIter = {};
+				Object.defineProperty(testIter, 'next', {
+					get: function () {
+						throw new EvalError('next getter threw');
+					}
+				});
+
+				s2t['throws'](
+					function () { from(testIter); },
+					EvalError,
+					'throws when getting next throws'
+				);
+
+				s2t.end();
+			});
+
+			st.test('262: iterable-to-iterator-fallback', function (s2t) {
+				// When Symbol.iterator is null/undefined, treat object as iterator
+				var iteratorObj = {
+					next: function () {
+						return { done: true, value: undefined };
+					}
+				};
+				iteratorObj[Symbol.iterator] = null;
+				var iter1 = from(iteratorObj);
+				s2t.equal(typeof iter1.next, 'function', 'iterator with null Symbol.iterator is treated as iterator');
+
+				var iteratorObj2 = {
+					next: function () {
+						return { done: true, value: undefined };
+					}
+				};
+				iteratorObj2[Symbol.iterator] = undefined;
+				var iter2 = from(iteratorObj2);
+				s2t.equal(typeof iter2.next, 'function', 'iterator with undefined Symbol.iterator is treated as iterator');
+
+				s2t.end();
+			});
+
+			st.test('262: return-is-forwarded', function (s2t) {
+				var returnCalls = 0;
+				var testIter = {
+					next: function () {
+						return { done: false, value: 1 };
+					},
+					'return': function () {
+						returnCalls += 1;
+						return { done: true, value: undefined };
+					}
+				};
+
+				var iter = from(testIter);
+				iter.next();
+				s2t.equal(returnCalls, 0, 'return not called before calling return()');
+				iter['return']();
+				s2t.equal(returnCalls, 1, 'return called once after return()');
+
+				s2t.end();
+			});
+
+			st.test('262: return-method-returns-iterator-result', function (s2t) {
+				// When base iterator has no return method, wrapper's return() returns { done: true, value: undefined }
+				var testIter = {
+					next: function () {
+						return { done: false, value: 1 };
+					}
+				};
+
+				var iter = from(testIter);
+				iter.next();
+				var result = iter['return']();
+				s2t.equal(result.done, true, 'done is true');
+				s2t.equal(result.value, undefined, 'value is undefined');
+
+				s2t.end();
+			});
+
+			st.test('262: get-return-method-throws', { skip: !hasPropertyDescriptors }, function (s2t) {
+				var testIter = {
+					next: function () {
+						return { done: false, value: 1 };
+					}
+				};
+				Object.defineProperty(testIter, 'return', {
+					get: function () {
+						throw new SyntaxError('return getter threw');
+					}
+				});
+
+				var iter = from(testIter);
+				iter.next();
+				s2t['throws'](
+					function () { iter['return'](); },
+					SyntaxError,
+					'throws when getting return throws'
+				);
+
+				s2t.end();
+			});
+
+			st.test('262: supports-iterator', function (s2t) {
+				// Non-iterable iterator objects (no Symbol.iterator, but has next)
+				var plainIterator = {
+					next: function () {
+						return { done: true, value: 42 };
+					}
+				};
+
+				var iter = from(plainIterator);
+				s2t.equal(typeof iter.next, 'function', 'wrapped iterator has next method');
+				var result = iter.next();
+				s2t.equal(result.done, true, 'done is true');
+				s2t.equal(result.value, 42, 'value is passed through');
+
+				s2t.end();
+			});
+
+			st.test('262: supports-iterable', function (s2t) {
+				// Iterable objects work
+				var arr = [1, 2, 3];
+				testIterator(from(arr), [1, 2, 3], s2t, 'array iterable');
 
 				s2t.end();
 			});

@@ -2,7 +2,7 @@
 
 var $TypeError = require('es-errors/type');
 
-var CompletionRecord = require('es-abstract/2024/CompletionRecord');
+var CompletionRecord = require('es-abstract/2025/CompletionRecord');
 var IteratorCloseAll = require('./IteratorCloseAll');
 
 // https://tc39.es/proposal-joint-iteration/#sec-ifabruptcloseiterators

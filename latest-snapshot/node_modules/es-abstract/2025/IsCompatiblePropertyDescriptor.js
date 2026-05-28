@@ -5,5 +5,11 @@ var ValidateAndApplyPropertyDescriptor = require('./ValidateAndApplyPropertyDesc
 // https://262.ecma-international.org/13.0/#sec-iscompatiblepropertydescriptor
 
 module.exports = function IsCompatiblePropertyDescriptor(Extensible, Desc, Current) {
-	return ValidateAndApplyPropertyDescriptor(undefined, '', Extensible, Desc, Current);
+	return ValidateAndApplyPropertyDescriptor(
+		void undefined,
+		'',
+		Extensible,
+		Desc,
+		Current
+	);
 };

@@ -32,6 +32,7 @@ module.exports = function IteratorClose(iteratorRecord, completion) {
 		iteratorReturn = GetMethod(iterator, 'return'); // step 4
 	} catch (e) {
 		completionThunk(); // throws if `completion` is a throw completion // step 6
+		// eslint-disable-next-line no-useless-assignment
 		completionThunk = null; // ensure it's not called twice.
 		throw e; // step 7
 	}
@@ -46,12 +47,14 @@ module.exports = function IteratorClose(iteratorRecord, completion) {
 		// if we hit here, then "e" is the innerResult completion that needs re-throwing
 
 		completionThunk(); // throws if `completion` is a throw completion // step 6
+		// eslint-disable-next-line no-useless-assignment
 		completionThunk = null; // ensure it's not called twice.
 
 		// if not, then return the innerResult completion
 		throw e; // step 7
 	}
 	var completionRecord = completionThunk(); // if innerResult worked, then throw if the completion does
+	// eslint-disable-next-line no-useless-assignment
 	completionThunk = null; // ensure it's not called twice.
 
 	if (!isObject(innerResult)) {

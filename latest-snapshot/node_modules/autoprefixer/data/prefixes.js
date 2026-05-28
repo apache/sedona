@@ -617,18 +617,21 @@ f(prefixIntrinsic, { match: /x|\s#5/ }, browsers => {
 
 let prefixStretch = require('caniuse-lite/data/features/css-width-stretch')
 
-f(prefixStretch, browsers =>
-  prefix(['stretch'], {
+f(prefixStretch, browsers => {
+  f(prefixIntrinsic, { match: /x|\s#2/ }, firefox => {
+    browsers = browsers.concat(firefox)
+  })
+  return prefix(['stretch'], {
     browsers,
     feature: 'css-width-stretch',
     props: sizeProps
   })
-)
+})
 
 // Zoom cursors
-let prefixCursorsNewer = require('caniuse-lite/data/features/css3-cursors-newer')
+let prefixCursorsNew = require('caniuse-lite/data/features/css3-cursors-newer')
 
-f(prefixCursorsNewer, browsers =>
+f(prefixCursorsNew, browsers =>
   prefix(['zoom-in', 'zoom-out'], {
     browsers,
     feature: 'css3-cursors-newer',
@@ -747,6 +750,8 @@ f(prefixCssMasks, browsers => {
     [
       'mask',
       'mask-position',
+      'mask-position-x',
+      'mask-position-y',
       'mask-size',
       'mask-border',
       'mask-border-outset',

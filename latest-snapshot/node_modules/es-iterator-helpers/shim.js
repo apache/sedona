@@ -13,6 +13,7 @@ var shimIteratorFilter = require('./Iterator.prototype.filter/shim');
 var shimIteratorFind = require('./Iterator.prototype.find/shim');
 var shimIteratorFlatMap = require('./Iterator.prototype.flatMap/shim');
 var shimIteratorForEach = require('./Iterator.prototype.forEach/shim');
+var shimIncludes = require('./Iterator.prototype.includes/shim');
 var shimIteratorMap = require('./Iterator.prototype.map/shim');
 var shimIteratorReduce = require('./Iterator.prototype.reduce/shim');
 var shimIteratorSome = require('./Iterator.prototype.some/shim');
@@ -33,6 +34,7 @@ module.exports = function shimIteratorHelpers() {
 	shimIteratorFind();
 	shimIteratorFlatMap();
 	shimIteratorForEach();
+	shimIncludes();
 	shimIteratorMap();
 	shimIteratorReduce();
 	shimIteratorSome();

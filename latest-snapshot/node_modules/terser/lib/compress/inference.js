@@ -69,6 +69,7 @@ import {
   AST_Function,
   AST_If,
   AST_Import,
+  AST_DynamicImport,
   AST_ImportMeta,
   AST_Jump,
   AST_LabeledStatement,
@@ -128,7 +129,7 @@ import {
 import { make_sequence, best_of_expression, read_property, requires_sequence_to_maintain_binding } from "./common.js";
 
 import { INLINED, UNDEFINED, has_flag } from "./compressor-flags.js";
-import { pure_prop_access_globals, is_pure_native_fn, is_pure_native_method } from "./native-objects.js";
+import { is_pure_builtin_call, pure_prop_access_globals } from "./native-objects.js";
 
 // Functions and methods to infer certain facts about expressions
 // It's not always possible to be 100% sure about something just by static analysis,
@@ -403,6 +404,10 @@ export function is_nullish(node, compressor) {
             || this.alternative && this.alternative.has_side_effects(compressor);
     });
     def_has_side_effects(AST_ImportMeta, return_false);
+    def_has_side_effects(AST_DynamicImport, function() {
+        // `import.source(x)` only compiles the module, which is side-effect free
+        return this.phase !== "source";
+    });
     def_has_side_effects(AST_LabeledStatement, function(compressor) {
         return this.body.has_side_effects(compressor);
     });
@@ -958,21 +963,20 @@ var global_pure_fns = makePredicate("Boolean decodeURI decodeURIComponent Date e
 AST_Call.DEFMETHOD("is_callee_pure", function(compressor) {
     if (compressor.option("unsafe")) {
         var expr = this.expression;
-        var first_arg = (this.args && this.args[0] && this.args[0].evaluate(compressor));
+        var first_arg;
         if (
             expr.expression && expr.expression.name === "hasOwnProperty" &&
-            (first_arg == null || first_arg.thedef && first_arg.thedef.undeclared)
+            (
+                (first_arg = (this.args && this.args[0] && this.args[0].evaluate(compressor))) == null
+                || first_arg.thedef && first_arg.thedef.undeclared
+            )
         ) {
             return false;
         }
         if (is_undeclared_ref(expr) && global_pure_fns.has(expr.name)) return true;
-        if (
-            expr instanceof AST_Dot
-            && is_undeclared_ref(expr.expression)
-            && is_pure_native_fn(expr.expression.name, expr.property)
-        ) {
-            return true;
-        }
+        if (is_pure_builtin_call(compressor, this)) return true;
+    } else if (compressor.option("builtins_pure")) {
+        if (is_pure_builtin_call(compressor, this)) return true;
     }
     if ((this instanceof AST_New) && compressor.option("pure_new")) {
         return true;
@@ -1003,7 +1007,7 @@ AST_Dot.DEFMETHOD("is_call_pure", function(compressor) {
     } else if (!this.may_throw_on_access(compressor)) {
         native_obj = "Object";
     }
-    return native_obj != null && is_pure_native_method(native_obj, this.property);
+    return native_obj != null && compressor.is_pure_native_method(native_obj, this.property);
 });
 
 // tell me if a statement aborts

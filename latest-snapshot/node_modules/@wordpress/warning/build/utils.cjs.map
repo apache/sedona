@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/utils.ts"],
+  "sourcesContent": ["/**\n * Object map tracking messages which have been logged, for use in ensuring a\n * message is only logged once.\n */\nexport const logged: Set< string > = new Set();\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAIO,IAAM,SAAwB,oBAAI,IAAI;",
+  "names": []
+}

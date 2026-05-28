@@ -11,9 +11,9 @@ module.exports = function IfAbruptCloseIterator(value, iteratorRecord) {
 	if (!(value instanceof CompletionRecord)) {
 		throw new $TypeError('Assertion failed: `value` must be a Completion Record'); // step 1
 	}
-	if (value.type() === 'throw') {
+	if (value.type() !== 'normal') {
 		return IteratorClose(iteratorRecord, value); // step 2
 	}
 
-	return value['!'](); // step
+	return value['!'](); // step 3
 };

@@ -12,10 +12,12 @@ const RuntimeModule = require("../RuntimeModule");
 class GetFullHashRuntimeModule extends RuntimeModule {
 	constructor() {
 		super("getFullHash");
+		/** @type {boolean} */
 		this.fullHash = true;
 	}
 
 	/**
+	 * Generates runtime code for this runtime module.
 	 * @returns {string | null} runtime code
 	 */
 	generate() {

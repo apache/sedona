@@ -32,7 +32,8 @@ const streamChunksOfSourceMapFull = (
 	onName,
 ) => {
 	const lines = splitIntoLines(source);
-	if (lines.length === 0) {
+	const linesLength = lines.length;
+	if (linesLength === 0) {
 		return {
 			generatedLine: 1,
 			generatedColumn: 0,
@@ -52,9 +53,9 @@ const streamChunksOfSourceMapFull = (
 		}
 	}
 
-	const lastLine = lines[lines.length - 1];
+	const lastLine = lines[linesLength - 1];
 	const lastNewLine = lastLine.endsWith("\n");
-	const finalLine = lastNewLine ? lines.length + 1 : lines.length;
+	const finalLine = lastNewLine ? linesLength + 1 : linesLength;
 	const finalColumn = lastNewLine ? 0 : lastLine.length;
 
 	let currentGeneratedLine = 1;
@@ -83,7 +84,7 @@ const streamChunksOfSourceMapFull = (
 		originalColumn,
 		nameIndex,
 	) => {
-		if (mappingActive && currentGeneratedLine <= lines.length) {
+		if (mappingActive && currentGeneratedLine <= linesLength) {
 			let chunk;
 			const mappingLine = currentGeneratedLine;
 			const mappingColumn = currentGeneratedColumn;
@@ -110,7 +111,7 @@ const streamChunksOfSourceMapFull = (
 			mappingActive = false;
 		}
 		if (generatedLine > currentGeneratedLine && currentGeneratedColumn > 0) {
-			if (currentGeneratedLine <= lines.length) {
+			if (currentGeneratedLine <= linesLength) {
 				const chunk = lines[currentGeneratedLine - 1].slice(
 					currentGeneratedColumn,
 				);
@@ -127,22 +128,29 @@ const streamChunksOfSourceMapFull = (
 			currentGeneratedLine++;
 			currentGeneratedColumn = 0;
 		}
-		while (generatedLine > currentGeneratedLine) {
-			if (currentGeneratedLine <= lines.length) {
-				onChunk(
-					lines[currentGeneratedLine - 1],
-					currentGeneratedLine,
-					0,
-					-1,
-					-1,
-					-1,
-					-1,
-				);
-			}
+		// Emit each fully-passed generated line. Once we move past the last
+		// available line we stop emitting, but still need to advance the
+		// counter to `generatedLine` so subsequent state matches the caller.
+		while (
+			generatedLine > currentGeneratedLine &&
+			currentGeneratedLine <= linesLength
+		) {
+			onChunk(
+				lines[currentGeneratedLine - 1],
+				currentGeneratedLine,
+				0,
+				-1,
+				-1,
+				-1,
+				-1,
+			);
 			currentGeneratedLine++;
 		}
+		if (currentGeneratedLine < generatedLine) {
+			currentGeneratedLine = generatedLine;
+		}
 		if (generatedColumn > currentGeneratedColumn) {
-			if (currentGeneratedLine <= lines.length) {
+			if (currentGeneratedLine <= linesLength) {
 				const chunk = lines[currentGeneratedLine - 1].slice(
 					currentGeneratedColumn,
 					generatedColumn,
@@ -195,7 +203,8 @@ const streamChunksOfSourceMapLinesFull = (
 	_onName,
 ) => {
 	const lines = splitIntoLines(source);
-	if (lines.length === 0) {
+	const linesLength = lines.length;
+	if (linesLength === 0) {
 		return {
 			generatedLine: 1,
 			generatedColumn: 0,
@@ -232,39 +241,38 @@ const streamChunksOfSourceMapLinesFull = (
 		if (
 			sourceIndex < 0 ||
 			generatedLine < currentGeneratedLine ||
-			generatedLine > lines.length
+			generatedLine > linesLength
 		) {
 			return;
 		}
+		// `generatedLine <= linesLength` is guaranteed by the guard above, so
+		// every line we iterate over is in bounds — no per-iteration length
+		// check needed.
 		while (generatedLine > currentGeneratedLine) {
-			if (currentGeneratedLine <= lines.length) {
-				onChunk(
-					lines[currentGeneratedLine - 1],
-					currentGeneratedLine,
-					0,
-					-1,
-					-1,
-					-1,
-					-1,
-				);
-			}
-			currentGeneratedLine++;
-		}
-		if (generatedLine <= lines.length) {
 			onChunk(
-				lines[generatedLine - 1],
-				generatedLine,
+				lines[currentGeneratedLine - 1],
+				currentGeneratedLine,
 				0,
-				sourceIndex,
-				originalLine,
-				originalColumn,
+				-1,
+				-1,
+				-1,
 				-1,
 			);
 			currentGeneratedLine++;
 		}
+		onChunk(
+			lines[generatedLine - 1],
+			generatedLine,
+			0,
+			sourceIndex,
+			originalLine,
+			originalColumn,
+			-1,
+		);
+		currentGeneratedLine++;
 	};
 	readMappings(mappings, onMapping);
-	for (; currentGeneratedLine <= lines.length; currentGeneratedLine++) {
+	for (; currentGeneratedLine <= linesLength; currentGeneratedLine++) {
 		onChunk(
 			lines[currentGeneratedLine - 1],
 			currentGeneratedLine,
@@ -276,10 +284,10 @@ const streamChunksOfSourceMapLinesFull = (
 		);
 	}
 
-	const lastLine = lines[lines.length - 1];
+	const lastLine = lines[linesLength - 1];
 	const lastNewLine = lastLine.endsWith("\n");
 
-	const finalLine = lastNewLine ? lines.length + 1 : lines.length;
+	const finalLine = lastNewLine ? linesLength + 1 : linesLength;
 	const finalColumn = lastNewLine ? 0 : lastLine.length;
 
 	return {

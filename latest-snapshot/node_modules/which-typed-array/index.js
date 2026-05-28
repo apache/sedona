@@ -40,8 +40,12 @@ if (hasToStringTag && gOPD && getProto) {
 				// @ts-expect-error TS won't narrow inside a closure
 				descriptor = gOPD(superProto, Symbol.toStringTag);
 			}
-			// @ts-expect-error TODO: fix
-			cache['$' + typedArray] = callBind(descriptor.get);
+			if (descriptor && descriptor.get) {
+				var bound = callBind(descriptor.get);
+				cache[
+					/** @type {`$${import('.').TypedArrayName}`} */ ('$' + typedArray)
+				] = bound;
+			}
 		}
 	});
 } else {
@@ -49,12 +53,13 @@ if (hasToStringTag && gOPD && getProto) {
 		var arr = new g[typedArray]();
 		var fn = arr.slice || arr.set;
 		if (fn) {
-			cache[
-				/** @type {`$${import('.').TypedArrayName}`} */ ('$' + typedArray)
-			] = /** @type {import('./types').BoundSlice | import('./types').BoundSet} */ (
+			var bound = /** @type {import('./types').BoundSlice | import('./types').BoundSet} */ (
 				// @ts-expect-error TODO FIXME
 				callBind(fn)
 			);
+			cache[
+				/** @type {`$${import('.').TypedArrayName}`} */ ('$' + typedArray)
+			] = bound;
 		}
 	});
 }

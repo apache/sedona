@@ -18,7 +18,7 @@ module.exports = function getIteratorMethod(ES, iterable) {
 	} else if (IsArray(iterable)) {
 		usingIterator = function () {
 			var i = -1;
-			var arr = this; // eslint-disable-line no-invalid-this
+			var arr = this;
 			return {
 				next: function () {
 					i += 1;

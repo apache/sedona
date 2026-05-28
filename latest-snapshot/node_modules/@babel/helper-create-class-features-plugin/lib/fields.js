@@ -17,12 +17,9 @@ var _helperOptimiseCallExpression = require("@babel/helper-optimise-call-express
 var _helperAnnotateAsPure = require("@babel/helper-annotate-as-pure");
 var _helperSkipTransparentExpressionWrappers = require("@babel/helper-skip-transparent-expression-wrappers");
 var ts = require("./typescript.js");
-{
-  var newHelpers = file => {
-    ;
-    return file.availableHelper("classPrivateFieldGet2");
-  };
-}
+var newHelpers = file => {
+  return file.availableHelper("classPrivateFieldGet2");
+};
 function buildPrivateNamesMap(className, privateFieldsAsSymbolsOrProperties, props, file) {
   const privateNamesMap = new Map();
   let classBrandId;
@@ -556,15 +553,13 @@ function buildPrivateInstanceFieldInitSpec(ref, prop, privateNamesMap, state) {
     id
   } = privateNamesMap.get(prop.node.key.id.name);
   const value = prop.node.value || prop.scope.buildUndefinedNode();
-  {
-    if (!state.availableHelper("classPrivateFieldInitSpec")) {
-      return inheritPropComments(_core.template.statement.ast`${_core.types.cloneNode(id)}.set(${ref}, {
+  if (!state.availableHelper("classPrivateFieldInitSpec")) {
+    return inheritPropComments(_core.template.statement.ast`${_core.types.cloneNode(id)}.set(${ref}, {
           // configurable is always false for private elements
           // enumerable is always false for private elements
           writable: true,
           value: ${value},
         })`, prop);
-    }
   }
   const helper = state.addHelper("classPrivateFieldInitSpec");
   return inheritLoc(inheritPropComments(_core.types.expressionStatement(_core.types.callExpression(helper, [_core.types.thisExpression(), inheritLoc(_core.types.cloneNode(id), prop.node.key), newHelpers(state) ? value : _core.template.expression.ast`{ writable: true, value: ${value} }`])), prop), prop.node);
@@ -576,22 +571,21 @@ function buildPrivateStaticFieldInitSpec(prop, privateNamesMap, noUninitializedP
       }`;
   return inheritPropComments(_core.types.variableDeclaration("var", [_core.types.variableDeclarator(_core.types.cloneNode(privateName.id), value)]), prop);
 }
-{
-  var buildPrivateStaticFieldInitSpecOld = function (prop, privateNamesMap) {
-    const privateName = privateNamesMap.get(prop.node.key.id.name);
-    const {
-      id,
-      getId,
-      setId,
-      initAdded
-    } = privateName;
-    const isGetterOrSetter = getId || setId;
-    if (!prop.isProperty() && (initAdded || !isGetterOrSetter)) return;
-    if (isGetterOrSetter) {
-      privateNamesMap.set(prop.node.key.id.name, Object.assign({}, privateName, {
-        initAdded: true
-      }));
-      return inheritPropComments(_core.template.statement.ast`
+var buildPrivateStaticFieldInitSpecOld = function (prop, privateNamesMap) {
+  const privateName = privateNamesMap.get(prop.node.key.id.name);
+  const {
+    id,
+    getId,
+    setId,
+    initAdded
+  } = privateName;
+  const isGetterOrSetter = getId || setId;
+  if (!prop.isProperty() && (initAdded || !isGetterOrSetter)) return;
+  if (isGetterOrSetter) {
+    privateNamesMap.set(prop.node.key.id.name, Object.assign({}, privateName, {
+      initAdded: true
+    }));
+    return inheritPropComments(_core.template.statement.ast`
           var ${_core.types.cloneNode(id)} = {
             // configurable is false by default
             // enumerable is false by default
@@ -600,9 +594,9 @@ function buildPrivateStaticFieldInitSpec(prop, privateNamesMap, noUninitializedP
             set: ${setId ? setId.name : prop.scope.buildUndefinedNode()}
           }
         `, prop);
-    }
-    const value = prop.node.value || prop.scope.buildUndefinedNode();
-    return inheritPropComments(_core.template.statement.ast`
+  }
+  const value = prop.node.value || prop.scope.buildUndefinedNode();
+  return inheritPropComments(_core.template.statement.ast`
         var ${_core.types.cloneNode(id)} = {
           // configurable is false by default
           // enumerable is false by default
@@ -610,8 +604,7 @@ function buildPrivateStaticFieldInitSpec(prop, privateNamesMap, noUninitializedP
           value: ${value}
         };
       `, prop);
-  };
-}
+};
 function buildPrivateMethodInitLoose(ref, prop, privateNamesMap) {
   const privateName = privateNamesMap.get(prop.node.key.id.name);
   const {
@@ -669,15 +662,13 @@ function buildPrivateAccessorInitialization(ref, prop, privateNamesMap, state) {
   privateNamesMap.set(prop.node.key.id.name, Object.assign({}, privateName, {
     initAdded: true
   }));
-  {
-    if (!state.availableHelper("classPrivateFieldInitSpec")) {
-      return inheritPropComments(_core.template.statement.ast`
+  if (!state.availableHelper("classPrivateFieldInitSpec")) {
+    return inheritPropComments(_core.template.statement.ast`
           ${id}.set(${ref}, {
             get: ${getId ? getId.name : prop.scope.buildUndefinedNode()},
             set: ${setId ? setId.name : prop.scope.buildUndefinedNode()}
           });
         `, prop);
-    }
   }
   const helper = state.addHelper("classPrivateFieldInitSpec");
   return inheritLoc(inheritPropComments(_core.template.statement.ast`${helper}(
@@ -694,10 +685,8 @@ function buildPrivateInstanceMethodInitialization(ref, prop, privateNamesMap, st
   const {
     id
   } = privateName;
-  {
-    if (!state.availableHelper("classPrivateMethodInitSpec")) {
-      return inheritPropComments(_core.template.statement.ast`${id}.add(${ref})`, prop);
-    }
+  if (!state.availableHelper("classPrivateMethodInitSpec")) {
+    return inheritPropComments(_core.template.statement.ast`${id}.add(${ref})`, prop);
   }
   const helper = state.addHelper("classPrivateMethodInitSpec");
   return inheritPropComments(_core.template.statement.ast`${helper}(

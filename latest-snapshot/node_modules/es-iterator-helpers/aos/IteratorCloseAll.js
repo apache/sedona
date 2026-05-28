@@ -2,9 +2,9 @@
 
 var $TypeError = require('es-errors/type');
 
-var CompletionRecord = require('es-abstract/2024/CompletionRecord');
-var IteratorClose = require('es-abstract/2024/IteratorClose');
-var ThrowCompletion = require('es-abstract/2024/ThrowCompletion');
+var CompletionRecord = require('es-abstract/2025/CompletionRecord');
+var IteratorClose = require('es-abstract/2025/IteratorClose');
+var ThrowCompletion = require('es-abstract/2025/ThrowCompletion');
 
 var IsArray = require('es-abstract/helpers/IsArray');
 var every = require('es-abstract/helpers/every');

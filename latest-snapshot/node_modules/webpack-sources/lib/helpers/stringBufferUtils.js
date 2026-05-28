@@ -110,8 +110,8 @@ function internString(str) {
 module.exports = {
 	disableDualStringBufferCaching,
 	enableDualStringBufferCaching,
-	internString,
-	isDualStringBufferCachingEnabled,
 	enterStringInterningRange,
 	exitStringInterningRange,
+	internString,
+	isDualStringBufferCachingEnabled,
 };

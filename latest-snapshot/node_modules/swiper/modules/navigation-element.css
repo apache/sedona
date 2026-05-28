@@ -33,7 +33,10 @@
 .swiper-navigation-disabled .swiper-button-prev, .swiper-navigation-disabled .swiper-button-next {
     display: none !important;
   }
-.swiper-button-prev svg, .swiper-button-next svg {
+.swiper-button-prev ::slotted(svg),
+  .swiper-button-prev svg,
+  .swiper-button-next ::slotted(svg),
+  .swiper-button-next svg {
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -55,7 +58,8 @@
   left: var(--swiper-navigation-sides-offset, 4px);
   right: auto;
 }
-.swiper-button-prev .swiper-navigation-icon {
+.swiper-button-prev ::slotted(.swiper-navigation-icon),
+  .swiper-button-prev .swiper-navigation-icon {
     transform: rotate(180deg);
   }
 .swiper-button-next {
@@ -84,10 +88,20 @@
     right: var(--swiper-navigation-sides-offset, 4px);
     left: auto;
   }
-.swiper-horizontal .swiper-button-prev .swiper-navigation-icon, .swiper-horizontal ~ .swiper-button-prev .swiper-navigation-icon, .swiper-horizontal.swiper-rtl .swiper-button-next .swiper-navigation-icon, .swiper-horizontal.swiper-rtl ~ .swiper-button-next .swiper-navigation-icon {
+.swiper-horizontal .swiper-button-prev ::slotted(.swiper-navigation-icon),
+    .swiper-horizontal .swiper-button-prev .swiper-navigation-icon,
+    .swiper-horizontal ~ .swiper-button-prev ::slotted(.swiper-navigation-icon),
+    .swiper-horizontal ~ .swiper-button-prev .swiper-navigation-icon,
+    .swiper-horizontal.swiper-rtl .swiper-button-next ::slotted(.swiper-navigation-icon),
+    .swiper-horizontal.swiper-rtl .swiper-button-next .swiper-navigation-icon,
+    .swiper-horizontal.swiper-rtl ~ .swiper-button-next ::slotted(.swiper-navigation-icon),
+    .swiper-horizontal.swiper-rtl ~ .swiper-button-next .swiper-navigation-icon {
       transform: rotate(180deg);
     }
-.swiper-horizontal.swiper-rtl .swiper-button-prev .swiper-navigation-icon, .swiper-horizontal.swiper-rtl ~ .swiper-button-prev .swiper-navigation-icon {
+.swiper-horizontal.swiper-rtl .swiper-button-prev ::slotted(.swiper-navigation-icon),
+    .swiper-horizontal.swiper-rtl .swiper-button-prev .swiper-navigation-icon,
+    .swiper-horizontal.swiper-rtl ~ .swiper-button-prev ::slotted(.swiper-navigation-icon),
+    .swiper-horizontal.swiper-rtl ~ .swiper-button-prev .swiper-navigation-icon {
       transform: rotate(0deg);
     }
 .swiper-vertical .swiper-button-prev,
@@ -104,7 +118,10 @@
     top: var(--swiper-navigation-sides-offset, 4px);
     bottom: auto;
   }
-.swiper-vertical .swiper-button-prev .swiper-navigation-icon, .swiper-vertical ~ .swiper-button-prev .swiper-navigation-icon {
+.swiper-vertical .swiper-button-prev ::slotted(.swiper-navigation-icon),
+    .swiper-vertical .swiper-button-prev .swiper-navigation-icon,
+    .swiper-vertical ~ .swiper-button-prev ::slotted(.swiper-navigation-icon),
+    .swiper-vertical ~ .swiper-button-prev .swiper-navigation-icon {
       transform: rotate(-90deg);
     }
 .swiper-vertical .swiper-button-next,
@@ -112,6 +129,9 @@
     bottom: var(--swiper-navigation-sides-offset, 4px);
     top: auto;
   }
-.swiper-vertical .swiper-button-next .swiper-navigation-icon, .swiper-vertical ~ .swiper-button-next .swiper-navigation-icon {
+.swiper-vertical .swiper-button-next ::slotted(.swiper-navigation-icon),
+    .swiper-vertical .swiper-button-next .swiper-navigation-icon,
+    .swiper-vertical ~ .swiper-button-next ::slotted(.swiper-navigation-icon),
+    .swiper-vertical ~ .swiper-button-next .swiper-navigation-icon {
       transform: rotate(90deg);
     }

@@ -289,3 +289,37 @@ test('drained should handle undefined drain function', async function (t) {
 
   t.pass('drained resolved successfully with undefined drain')
 })
+
+test('abort rejects all pending promises', async function (t) {
+  const queue = buildQueue(worker, 1)
+  const promises = []
+  let rejectedCount = 0
+
+  // Pause queue to prevent tasks from starting
+  queue.pause()
+
+  for (let i = 0; i < 10; i++) {
+    promises.push(queue.push(i))
+  }
+
+  queue.abort()
+
+  // All promises should be rejected
+  for (const promise of promises) {
+    try {
+      await promise
+      t.fail('promise should have been rejected')
+    } catch (err) {
+      t.equal(err.message, 'abort', 'error message is abort')
+      rejectedCount++
+    }
+  }
+
+  t.equal(rejectedCount, 10, 'all promises were rejected')
+  t.equal(queue.length(), 0, 'queue is empty')
+
+  async function worker (arg) {
+    await sleep(500)
+    return arg
+  }
+})

@@ -38,7 +38,7 @@ module.exports = function AbstractRelationalComparison(x, y, LeftFirst) {
 	var nx = ToNumber(px);
 	var ny = ToNumber(py);
 	if ($isNaN(nx) || $isNaN(ny)) {
-		return undefined;
+		return void undefined;
 	}
 	if ($isFinite(nx) && $isFinite(ny) && nx === ny) {
 		return false;

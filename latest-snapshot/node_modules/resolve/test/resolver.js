@@ -268,9 +268,9 @@ test('path iterator', function (t) {
 
     var resolverDir = path.join(__dirname, 'resolver');
 
-    var exactIterator = function (x, start, getPackageCandidates, opts) {
+    function exactIterator(x, start, getPackageCandidates, opts) {
         return [path.join(resolverDir, x)];
-    };
+    }
 
     resolve('baz', { packageIterator: exactIterator }, function (err, res, pkg) {
         if (err) t.fail(err);

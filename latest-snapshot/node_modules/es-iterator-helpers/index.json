@@ -12,6 +12,7 @@
 	"Iterator.prototype.find",
 	"Iterator.prototype.flatMap",
 	"Iterator.prototype.forEach",
+	"Iterator.prototype.includes",
 	"Iterator.prototype.map",
 	"Iterator.prototype.reduce",
 	"Iterator.prototype.some",

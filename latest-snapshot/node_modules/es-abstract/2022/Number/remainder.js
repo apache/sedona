@@ -1,6 +1,7 @@
 'use strict';
 
 var $TypeError = require('es-errors/type');
+var isFinite = require('math-intrinsics/isFinite');
 
 var isNaN = require('../../helpers/isNaN');
 

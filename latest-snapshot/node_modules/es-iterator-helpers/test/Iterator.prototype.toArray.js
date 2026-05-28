@@ -9,6 +9,7 @@ var forEach = require('for-each');
 var debug = require('object-inspect');
 var v = require('es-value-fixtures');
 var hasSymbols = require('has-symbols/shams')();
+var hasPropertyDescriptors = require('has-property-descriptors')();
 var iterate = require('iterate-iterator');
 
 var index = require('../Iterator.prototype.toArray');
@@ -56,6 +57,191 @@ module.exports = {
 			testIterator(iterator(), [1, 2, 3], st, 'original');
 
 			st.deepEqual(toArray(iterator()), [1, 2, 3], 'toArray');
+
+			st.test('262: iterator-already-exhausted', function (s2t) {
+				var exhaustedIter = {
+					next: function () {
+						return { done: true, value: undefined };
+					}
+				};
+
+				var result = toArray(exhaustedIter);
+				s2t.ok(Array.isArray(result), 'result is an array');
+				s2t.deepEqual(result, [], 'empty array for exhausted iterator');
+
+				s2t.end();
+			});
+
+			st.test('262: get-next-method-only-once', { skip: !hasPropertyDescriptors }, function (s2t) {
+				var nextGets = 0;
+				var callCount = 0;
+				var testIter = {};
+				Object.defineProperty(testIter, 'next', {
+					get: function () {
+						nextGets += 1;
+						return function () {
+							callCount += 1;
+							if (callCount <= 2) {
+								return { done: false, value: callCount };
+							}
+							return { done: true, value: undefined };
+						};
+					}
+				});
+
+				var result = toArray(testIter);
+				s2t.equal(nextGets, 1, 'next retrieved once');
+				s2t.deepEqual(result, [1, 2], 'result is correct');
+
+				s2t.end();
+			});
+
+			st.test('262: get-next-method-throws', { skip: !hasPropertyDescriptors }, function (s2t) {
+				var testIter = {};
+				Object.defineProperty(testIter, 'next', {
+					get: function () {
+						throw new EvalError('next getter threw');
+					}
+				});
+
+				s2t['throws'](
+					function () { toArray(testIter); },
+					EvalError,
+					'throws when getting next throws'
+				);
+
+				s2t.end();
+			});
+
+			st.test('262: next-method-returns-non-object', function (s2t) {
+				var badIterator = {
+					next: function () {
+						return null;
+					}
+				};
+
+				s2t['throws'](
+					function () { toArray(badIterator); },
+					TypeError,
+					'throws when next returns null'
+				);
+
+				var badIterator2 = {
+					next: function () {
+						return 42;
+					}
+				};
+
+				s2t['throws'](
+					function () { toArray(badIterator2); },
+					TypeError,
+					'throws when next returns a number'
+				);
+
+				s2t.end();
+			});
+
+			st.test('262: next-method-returns-throwing-done', { skip: !hasPropertyDescriptors }, function (s2t) {
+				var throwingIterator = {
+					next: function () {
+						var result = { value: 1 };
+						Object.defineProperty(result, 'done', {
+							get: function () {
+								throw new EvalError('done getter threw');
+							}
+						});
+						return result;
+					}
+				};
+
+				s2t['throws'](
+					function () { toArray(throwingIterator); },
+					EvalError,
+					'throws when done getter throws'
+				);
+
+				s2t.end();
+			});
+
+			st.test('262: next-method-returns-throwing-value', { skip: !hasPropertyDescriptors }, function (s2t) {
+				var throwingIterator = {
+					next: function () {
+						var result = { done: false };
+						Object.defineProperty(result, 'value', {
+							get: function () {
+								throw new EvalError('value getter threw');
+							}
+						});
+						return result;
+					}
+				};
+
+				s2t['throws'](
+					function () { toArray(throwingIterator); },
+					EvalError,
+					'throws when value getter throws'
+				);
+
+				s2t.end();
+			});
+
+			st.test('262: next-method-returns-throwing-value-done', { skip: !hasPropertyDescriptors }, function (s2t) {
+				// Value property should not be accessed after done: true
+				var valueAccessed = false;
+				var doneIterator = {
+					next: function () {
+						var result = { done: true };
+						Object.defineProperty(result, 'value', {
+							get: function () {
+								valueAccessed = true;
+								throw new EvalError('value getter threw');
+							}
+						});
+						return result;
+					}
+				};
+
+				var result = toArray(doneIterator);
+				s2t.deepEqual(result, [], 'toArray returns empty array');
+				s2t.equal(valueAccessed, false, 'value not accessed when done is true');
+
+				s2t.end();
+			});
+
+			st.test('262: next-method-throws', function (s2t) {
+				var throwingIterator = {
+					next: function () {
+						throw new EvalError('next threw');
+					}
+				};
+
+				s2t['throws'](
+					function () { toArray(throwingIterator); },
+					EvalError,
+					'throws error from next'
+				);
+
+				s2t.end();
+			});
+
+			st.test('262: this-plain-iterator', function (s2t) {
+				// toArray works with plain iterator objects not inheriting from Iterator.prototype
+				var callCount = 0;
+				var plainIterator = {
+					next: function () {
+						callCount += 1;
+						if (callCount <= 3) {
+							return { done: false, value: callCount };
+						}
+						return { done: true, value: undefined };
+					}
+				};
+
+				var result = toArray(plainIterator);
+				s2t.deepEqual(result, [1, 2, 3], 'toArray works with plain iterator');
+
+				s2t.end();
+			});
 
 			st.end();
 		});

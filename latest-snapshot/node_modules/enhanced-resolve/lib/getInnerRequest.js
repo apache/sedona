@@ -5,6 +5,8 @@
 
 "use strict";
 
+const { isRelativeRequest } = require("./util/path");
+
 /** @typedef {import("./Resolver")} Resolver */
 /** @typedef {import("./Resolver").ResolveRequest} ResolveRequest */
 
@@ -25,7 +27,7 @@ module.exports = function getInnerRequest(resolver, request) {
 	let innerRequest;
 	if (request.request) {
 		innerRequest = request.request;
-		if (/^\.\.?(?:\/|$)/.test(innerRequest) && request.relativePath) {
+		if (request.relativePath && isRelativeRequest(innerRequest)) {
 			innerRequest = resolver.join(request.relativePath, innerRequest);
 		}
 	} else {

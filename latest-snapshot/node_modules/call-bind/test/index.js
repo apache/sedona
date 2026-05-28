@@ -25,7 +25,6 @@ test('callBind', function (t) {
 
 	var sentinel = { sentinel: true };
 	var func = function (a, b) {
-		// eslint-disable-next-line no-invalid-this
 		return [!hasStrictMode && this === global ? undefined : this, a, b];
 	};
 	t.equal(func.length, 2, 'original function length is 2');
@@ -44,6 +43,15 @@ test('callBind', function (t) {
 	t.deepEqual(boundR(), [sentinel, undefined, undefined], 'bound func with receiver, with too few args');
 	t.deepEqual(boundR(1, 2), [sentinel, 1, 2], 'bound func with receiver, with right args');
 	t.deepEqual(boundR(1, 2, 3), [sentinel, 1, 2], 'bound func with receiver, with too many args');
+
+	var zeroLen = function () {
+		return [!hasStrictMode && this === global ? undefined : this];
+	};
+	t.equal(zeroLen.length, 0, 'zero-length function has length 0');
+
+	var boundZero = callBind(zeroLen, sentinel);
+	t.equal(boundZero.length, 0, 'zero-length function with receiver has length 0', { skip: !boundFnsHaveConfigurableLengths });
+	t.deepEqual(boundZero(), [sentinel], 'zero-length bound func with receiver works');
 
 	var boundArg = callBind(func, sentinel, 1);
 	t.equal(boundArg.length, func.length - 1, 'function length is preserved', { skip: !boundFnsHaveConfigurableLengths });

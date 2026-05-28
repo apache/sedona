@@ -9,7 +9,14 @@ module.exports = os.homedir || function homedir() {
     var user = process.env.LOGNAME || process.env.USER || process.env.LNAME || process.env.USERNAME;
 
     if (process.platform === 'win32') {
-        return process.env.USERPROFILE || process.env.HOMEDRIVE + process.env.HOMEPATH || home || null;
+        return process.env.USERPROFILE
+            || (
+                process.env.HOMEDRIVE
+                && process.env.HOMEPATH
+                && (process.env.HOMEDRIVE + process.env.HOMEPATH)
+            )
+            || home
+            || null;
     }
 
     if (process.platform === 'darwin') {

@@ -3,8 +3,8 @@
 var callBind = require('call-bind');
 
 var I402 = typeof Intl === 'undefined' ? null : Intl;
-var DateTimeFormat = I402 && I402.DateTimeFormat;
-var resolvedOptions = DateTimeFormat && callBind(DateTimeFormat.prototype.resolvedOptions);
+var DateTimeFormat = !!I402 && I402.DateTimeFormat;
+var resolvedOptions = !!DateTimeFormat && callBind(DateTimeFormat.prototype.resolvedOptions);
 
 // https://262.ecma-international.org/15.0/#sec-systemtimezoneidentifier
 

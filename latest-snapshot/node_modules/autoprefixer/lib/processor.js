@@ -35,6 +35,17 @@ function hasRowsAndColumns(decl) {
   return hasRows && hasColumns
 }
 
+function insideGrid(decl) {
+  return decl.parent.nodes.some(node => {
+    if (node.type !== 'decl') return false
+    let displayGrid =
+      node.prop === 'display' && /(inline-)?grid/.test(node.value)
+    let gridTemplate = node.prop.startsWith('grid-template')
+    let gridGap = /^grid-([A-z]+-)?gap/.test(node.prop)
+    return displayGrid || gridTemplate || gridGap
+  })
+}
+
 class Processor {
   constructor(prefixes) {
     this.prefixes = prefixes
@@ -83,17 +94,6 @@ class Processor {
         return selector.process(rule, result)
       })
     })
-
-    function insideGrid(decl) {
-      return decl.parent.nodes.some(node => {
-        if (node.type !== 'decl') return false
-        let displayGrid =
-          node.prop === 'display' && /(inline-)?grid/.test(node.value)
-        let gridTemplate = node.prop.startsWith('grid-template')
-        let gridGap = /^grid-([A-z]+-)?gap/.test(node.prop)
-        return displayGrid || gridTemplate || gridGap
-      })
-    }
 
     let gridPrefixes =
       this.gridStatus(css, result) &&
@@ -586,6 +586,7 @@ class Processor {
 
     let parts = decl.raw('before').split('\n')
     let prevMin = parts[parts.length - 1].length
+    /** @type {number|false} */
     let diff = false
 
     this.prefixes.group(decl).down(other => {

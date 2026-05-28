@@ -1,6 +1,6 @@
 {
   "name": "synckit",
-  "version": "0.11.11",
+  "version": "0.11.12",
   "type": "module",
   "description": "Perform async work synchronously in Node.js using `worker_threads` with first-class TypeScript support.",
   "repository": "https://github.com/un-ts/synckit.git",

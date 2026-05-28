@@ -5,8 +5,6 @@
 
 "use strict";
 
-const CHAR_CODE_NEW_LINE = "\n".charCodeAt(0);
-
 /**
  * @typedef {object} GeneratedSourceInfo
  * @property {number=} generatedLine generated line
@@ -30,9 +28,14 @@ const getGeneratedSourceInfo = (source) => {
 			source,
 		};
 	}
+	// Use native indexOf to scan for newlines instead of charCodeAt loops.
+	// This is significantly faster on large sources since indexOf uses
+	// vectorized/native string scanning.
 	let generatedLine = 2;
-	for (let i = 0; i < lastLineStart; i++) {
-		if (source.charCodeAt(i) === CHAR_CODE_NEW_LINE) generatedLine++;
+	let idx = source.indexOf("\n");
+	while (idx !== -1 && idx < lastLineStart) {
+		generatedLine++;
+		idx = source.indexOf("\n", idx + 1);
 	}
 	return {
 		generatedLine,

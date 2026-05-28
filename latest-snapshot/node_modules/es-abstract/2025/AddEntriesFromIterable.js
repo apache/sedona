@@ -23,7 +23,7 @@ module.exports = function AddEntriesFromIterable(target, iterable, adder) {
 		throw new $TypeError('Assertion failed: `iterable` is present, and not nullish');
 	}
 	var iteratorRecord = GetIterator(iterable, 'SYNC');
-	while (true) { // eslint-disable-line no-constant-condition
+	while (true) {
 		var next = IteratorStep(iteratorRecord);
 		if (!next) {
 			return target;

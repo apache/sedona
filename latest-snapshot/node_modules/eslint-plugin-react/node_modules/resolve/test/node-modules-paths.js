@@ -5,7 +5,7 @@ var keys = require('object-keys');
 
 var nodeModulesPaths = require('../lib/node-modules-paths');
 
-var verifyDirs = function verifyDirs(t, start, dirs, moduleDirectories, paths) {
+function verifyDirs(t, start, dirs, moduleDirectories, paths) {
     var moduleDirs = [].concat(moduleDirectories || 'node_modules');
     if (paths) {
         for (var k = 0; k < paths.length; ++k) {
@@ -33,7 +33,7 @@ var verifyDirs = function verifyDirs(t, start, dirs, moduleDirectories, paths) {
         counts[foundModuleDirs[j]] = true;
     }
     t.equal(keys(counts).length, 1, 'all found module directories had the same count');
-};
+}
 
 test('node-modules-paths', function (t) {
     t.test('no options', function (t) {
@@ -65,9 +65,9 @@ test('node-modules-paths', function (t) {
     });
 
     t.test('with paths=function option', function (t) {
-        var paths = function paths(request, absoluteStart, getNodeModulesDirs, opts) {
+        function paths(request, absoluteStart, getNodeModulesDirs, opts) {
             return getNodeModulesDirs().concat(path.join(absoluteStart, 'not node modules', request));
-        };
+        }
 
         var start = path.join(__dirname, 'resolver');
         var dirs = nodeModulesPaths(start, { paths: paths }, 'pkg');
@@ -78,9 +78,9 @@ test('node-modules-paths', function (t) {
     });
 
     t.test('with paths=function skipping node modules resolution', function (t) {
-        var paths = function paths(request, absoluteStart, getNodeModulesDirs, opts) {
+        function paths(request, absoluteStart, getNodeModulesDirs, opts) {
             return [];
-        };
+        }
         var start = path.join(__dirname, 'resolver');
         var dirs = nodeModulesPaths(start, { paths: paths });
         t.deepEqual(dirs, [], 'no node_modules was computed');

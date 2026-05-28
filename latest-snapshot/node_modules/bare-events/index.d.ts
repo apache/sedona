@@ -16,20 +16,11 @@ declare class EventEmitterError extends Error {
 interface EventEmitter<in out M extends EventMap = EventMap> {
   addListener<E extends keyof M, R>(name: E, fn: EventHandler<M[E], R>): this
 
-  addOnceListener<E extends keyof M, R>(
-    name: E,
-    fn: EventHandler<M[E], R>
-  ): this
+  addOnceListener<E extends keyof M, R>(name: E, fn: EventHandler<M[E], R>): this
 
-  prependListener<E extends keyof M, R>(
-    name: E,
-    fn: EventHandler<M[E], R>
-  ): this
+  prependListener<E extends keyof M, R>(name: E, fn: EventHandler<M[E], R>): this
 
-  prependOnceListener<E extends keyof M, R>(
-    name: E,
-    fn: EventHandler<M[E], R>
-  ): this
+  prependOnceListener<E extends keyof M, R>(name: E, fn: EventHandler<M[E], R>): this
 
   removeListener<E extends keyof M, R>(name: E, fn: EventHandler<M[E], R>): this
 
@@ -66,11 +57,7 @@ declare namespace EventEmitter {
     opts?: { signal?: AbortSignal }
   ): Promise<M[E]>
 
-  export function forward<
-    F extends EventMap,
-    E extends keyof F,
-    T extends Pick<F, E>
-  >(
+  export function forward<F extends EventMap, E extends keyof F, T extends Pick<F, E>>(
     from: EventEmitter<F>,
     to: EventEmitter<T>,
     names: E | E[],

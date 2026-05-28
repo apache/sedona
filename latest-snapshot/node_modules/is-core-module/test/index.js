@@ -138,6 +138,107 @@ test('core modules', function (t) {
 		st.end();
 	});
 
+	t.test('isCore with explicit nodeVersion', function (st) {
+		st.ok(isCore('async_hooks', '8.0.0'), 'async_hooks is core in 8.0.0 (exact match on >= specifier)');
+		st.ok(isCore('buffer_ieee754', '0.5.0'), 'buffer_ieee754 is core in 0.5.0');
+		st.ok(!isCore('buffer_ieee754', '0.9.7'), 'buffer_ieee754 is not core in 0.9.7');
+		st.ok(!isCore('buffer_ieee754', '1.0.0'), 'buffer_ieee754 is not core in 1.0.0');
+		st.ok(isCore('buffer_ieee754', '0.8.0'), 'buffer_ieee754 is core in 0.8.0');
+
+		st['throws'](
+			function () { isCore('async_hooks', null); },
+			TypeError,
+			'isCore with non-string non-undefined nodeVersion throws TypeError'
+		);
+		st['throws'](
+			function () { isCore('async_hooks', 123); },
+			TypeError,
+			'isCore with numeric nodeVersion throws TypeError'
+		);
+
+		st.end();
+	});
+
+	t.test('isCore with non-boolean specifier and invalid nodeVersion', function (st) {
+		st['throws'](
+			function () { isCore('async_hooks', null); },
+			TypeError,
+			'isCore with null nodeVersion on non-boolean module throws TypeError'
+		);
+		st['throws'](
+			function () { isCore('async_hooks', 123); },
+			TypeError,
+			'isCore with numeric nodeVersion on non-boolean module throws TypeError'
+		);
+
+		st.end();
+	});
+
+	t.test('isCore with undefined nodeVersion and non-string process.versions.node', function (st) {
+		st.teardown(mockProperty(process, 'versions', { value: { node: null } }));
+
+		st['throws'](
+			function () { isCore('async_hooks'); },
+			TypeError,
+			'isCore throws when process.versions.node is not a string'
+		);
+
+		st.end();
+	});
+
+	t.test('isCore with undefined nodeVersion and falsy process.versions', function (st) {
+		st.teardown(mockProperty(process, 'versions', { value: null }));
+
+		st['throws'](
+			function () { isCore('async_hooks'); },
+			TypeError,
+			'isCore throws when process.versions is falsy'
+		);
+
+		st.end();
+	});
+
+	t.test('specifierIncluded with = operator (bare version)', function (st) {
+		var testKey = '__test_equal_op';
+		data[testKey] = '14.18';
+		st.teardown(function () { delete data[testKey]; });
+
+		st.ok(!isCore(testKey, '14.17.0'), 'returns false when minor version does not match with = op');
+		st.ok(!isCore(testKey, '15.0.0'), 'returns false when major version does not match with = op');
+		st.ok(!isCore(testKey, '14.18.0'), 'returns false for exact match with = op (= is not >=)');
+
+		st.end();
+	});
+
+	t.test('isCore with short version strings', function (st) {
+		st.ok(isCore('async_hooks', '8'), 'async_hooks is core with single-part version "8"');
+		st.ok(!isCore('async_hooks', '7'), 'async_hooks is not core with single-part version "7"');
+		st.ok(isCore('cluster', '0.5'), 'cluster is core with two-part version "0.5"');
+
+		st.end();
+	});
+
+	t.test('matchesRange with empty specifiers array', function (st) {
+		var testKey = '__test_empty_split';
+		var testRange = '__test_range__';
+		data[testKey] = testRange;
+		st.teardown(function () { delete data[testKey]; });
+
+		var origSplit = String.prototype.split;
+		st.teardown(mockProperty(String.prototype, 'split', {
+			value: function () {
+				if (String(this) === testRange) {
+					return [];
+				}
+				return origSplit.apply(this, arguments);
+			}
+		}));
+
+		st.ok(!isCore(testKey, '8.0.0'), 'returns false when specifiers array is empty');
+
+		st.end();
+	});
+
 	t.test('Object.prototype pollution', function (st) {
 		var nonKey = 'not a core module';
 		st.teardown(mockProperty(Object.prototype, 'fs', { value: false }));

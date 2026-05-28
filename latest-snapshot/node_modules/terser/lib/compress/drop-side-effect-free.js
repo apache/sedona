@@ -58,6 +58,7 @@ import {
     AST_Constant,
     AST_DefClass,
     AST_Dot,
+    AST_DynamicImport,
     AST_Expansion,
     AST_Function,
     AST_Node,
@@ -148,6 +149,12 @@ def_drop_side_effect_free(AST_Call, function (compressor, first_in_statement) {
         return this;
     }
 
+    var args = trim(this.args, compressor, first_in_statement);
+    return args && make_sequence(this, args);
+});
+
+def_drop_side_effect_free(AST_DynamicImport, function (compressor, first_in_statement) {
+    if (this.phase !== "source") return this;
     var args = trim(this.args, compressor, first_in_statement);
     return args && make_sequence(this, args);
 });
@@ -312,8 +319,8 @@ def_drop_side_effect_free([
     AST_ConciseMethod,
     AST_ObjectGetter,
     AST_ObjectSetter,
-], function () {
-    return this.computed_key() ? this.key : null;
+], function (compressor, first_in_statement) {
+    return this.computed_key() ? this.key.drop_side_effect_free(compressor, first_in_statement) : null;
 });
 
 def_drop_side_effect_free([

@@ -22,30 +22,34 @@ module.exports = function GeneratorResumeAbrupt(generator, abruptCompletion, gen
 	var state = GeneratorValidate(generator, generatorBrand); // step 1
 
 	if (state === 'SUSPENDED-START') { // step 2
-		SLOT.set(generator, '[[GeneratorState]]', 'COMPLETED'); // step 3.a
-		SLOT.set(generator, '[[GeneratorContext]]', null); // step 3.b
-		state = 'COMPLETED'; // step 3.c
+		SLOT.set(generator, '[[GeneratorState]]', 'COMPLETED'); // step 2.a
+		SLOT.set(generator, '[[GeneratorContext]]', null); // step 2.b
+		state = 'COMPLETED'; // step 2.c
 	}
 
 	var value = abruptCompletion.value();
 
 	if (state === 'COMPLETED') { // step 3
-		return CreateIteratorResultObject(value, true); // steps 3.a-b
+		if (abruptCompletion.type() === 'return') { // step 3.a
+			return CreateIteratorResultObject(value, true); // step 3.a.i
+		}
+		return abruptCompletion['?'](); // step 3.b
 	}
 
 	if (state !== 'SUSPENDED-YIELD') {
 		throw new $TypeError('Assertion failed: generator state is unexpected: ' + state); // step 4
-	}
-	if (abruptCompletion.type() === 'return') {
-		// due to representing `GeneratorContext` as a function, we can't safely re-invoke it, so we can't support sending it a return completion
-		return CreateIteratorResultObject(SLOT.get(generator, '[[CloseIfAbrupt]]')(NormalCompletion(abruptCompletion.value())), true);
 	}
 
 	var genContext = SLOT.get(generator, '[[GeneratorContext]]'); // step 5
 
 	SLOT.set(generator, '[[GeneratorState]]', 'EXECUTING'); // step 8
 
-	var result = genContext(value); // steps 6-7, 8-11
+	if (abruptCompletion.type() === 'return') {
+		// due to representing `GeneratorContext` as a function, we can't safely re-invoke it, so we can't support sending it a return completion
+		return CreateIteratorResultObject(SLOT.get(generator, '[[CloseIfAbrupt]]')(NormalCompletion(value)), true);
+	}
+
+	var result = genContext(value); // steps 6-7, 9-11
 
 	return result; // step 12
 };

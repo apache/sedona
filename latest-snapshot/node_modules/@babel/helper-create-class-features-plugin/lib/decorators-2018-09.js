@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.buildDecoratedClass = buildDecoratedClass;
 var _core = require("@babel/core");
 var _helperReplaceSupers = require("@babel/helper-replace-supers");
-;
 function prop(key, value) {
   if (!value) return null;
   return _core.types.objectProperty(_core.types.identifier(key), value);
@@ -57,10 +56,8 @@ function extractElementDescriptor(file, classRef, superRef, path) {
   }
   const properties = [prop("kind", _core.types.stringLiteral(_core.types.isClassMethod(node) ? node.kind : "field")), prop("decorators", takeDecorators(node)), prop("static", node.static && _core.types.booleanLiteral(true)), prop("key", getKey(node))].filter(Boolean);
   if (isMethod) {
-    {
-      var _path$ensureFunctionN;
-      (_path$ensureFunctionN = path.ensureFunctionName) != null ? _path$ensureFunctionN : path.ensureFunctionName = require("@babel/traverse").NodePath.prototype.ensureFunctionName;
-    }
+    var _path$ensureFunctionN;
+    (_path$ensureFunctionN = path.ensureFunctionName) != null ? _path$ensureFunctionN : path.ensureFunctionName = require("@babel/traverse").NodePath.prototype.ensureFunctionName;
     path.ensureFunctionName(false);
     properties.push(prop("value", _core.types.toExpression(path.node)));
   } else if (_core.types.isClassProperty(node) && node.value) {

@@ -18,14 +18,10 @@ const FEATURES = exports.FEATURES = Object.freeze({
 const featuresSameLoose = new Map([[FEATURES.fields, "@babel/plugin-transform-class-properties"], [FEATURES.privateMethods, "@babel/plugin-transform-private-methods"], [FEATURES.privateIn, "@babel/plugin-transform-private-property-in-object"]]);
 const featuresKey = "@babel/plugin-class-features/featuresKey";
 const looseKey = "@babel/plugin-class-features/looseKey";
-{
-  var looseLowPriorityKey = "@babel/plugin-class-features/looseLowPriorityKey/#__internal__@babel/preset-env__please-overwrite-loose-instead-of-throwing";
-}
-{
-  var canIgnoreLoose = function (file, feature) {
-    return !!(file.get(looseLowPriorityKey) & feature);
-  };
-}
+var looseLowPriorityKey = "@babel/plugin-class-features/looseLowPriorityKey/#__internal__@babel/preset-env__please-overwrite-loose-instead-of-throwing";
+var canIgnoreLoose = function (file, feature) {
+  return !!(file.get(looseLowPriorityKey) & feature);
+};
 function enableFeature(file, feature, loose) {
   if (!hasFeature(file, feature) || canIgnoreLoose(file, feature)) {
     file.set(featuresKey, file.get(featuresKey) | feature);
@@ -42,17 +38,13 @@ function enableFeature(file, feature, loose) {
   let resolvedLoose;
   for (const [mask, name] of featuresSameLoose) {
     if (!hasFeature(file, mask)) continue;
-    {
-      if (canIgnoreLoose(file, mask)) continue;
-    }
+    if (canIgnoreLoose(file, mask)) continue;
     const loose = isLoose(file, mask);
     if (resolvedLoose === !loose) {
       throw new Error("'loose' mode configuration must be the same for @babel/plugin-transform-class-properties, " + "@babel/plugin-transform-private-methods and " + "@babel/plugin-transform-private-property-in-object (when they are enabled)." + "\n\n" + getBabelShowConfigForHint(file));
     } else {
       resolvedLoose = loose;
-      {
-        var higherPriorityPluginName = name;
-      }
+      var higherPriorityPluginName = name;
     }
   }
   if (resolvedLoose !== undefined) {
@@ -87,9 +79,7 @@ function isLoose(file, feature) {
 }
 function setLoose(file, feature, loose) {
   if (loose) file.set(looseKey, file.get(looseKey) | feature);else file.set(looseKey, file.get(looseKey) & ~feature);
-  {
-    file.set(looseLowPriorityKey, file.get(looseLowPriorityKey) & ~feature);
-  }
+  file.set(looseLowPriorityKey, file.get(looseLowPriorityKey) & ~feature);
 }
 function shouldTransform(path, file) {
   let decoratorPath = null;

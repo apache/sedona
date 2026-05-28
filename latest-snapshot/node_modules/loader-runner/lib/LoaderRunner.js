@@ -5,18 +5,38 @@
 
 "use strict";
 
-const fs = require("fs");
-
-const readFile = fs.readFile.bind(fs);
+const { readFile } = require("fs");
 
 const loadLoader = require("./loadLoader");
 
+const HASH_ESCAPE_REGEXP = /#/g;
+
+// UTF-8 encoding of the BOM: EF BB BF
+const UTF8_BOM_0 = 0xef;
+const UTF8_BOM_1 = 0xbb;
+const UTF8_BOM_2 = 0xbf;
+
 function utf8BufferToString(buf) {
-	const str = buf.toString("utf8");
-	if (str.charCodeAt(0) === 0xfeff) {
-		return str.slice(1);
+	// Detect and skip the BOM at the buffer level to avoid materializing the
+	// prefix as JS string and then re-slicing it.
+	if (
+		buf.length >= 3 &&
+		buf[0] === UTF8_BOM_0 &&
+		buf[1] === UTF8_BOM_1 &&
+		buf[2] === UTF8_BOM_2
+	) {
+		return buf.toString("utf8", 3);
 	}
-	return str;
+	return buf.toString("utf8");
+}
+
+/**
+ * Escape `#` characters with a preceding `\0` byte. Short-circuits when the input contains no `#`, avoiding the regex scan for the common case.
+ * @param {string} str input string
+ * @returns {string} escaped string
+ */
+function escapeHash(str) {
+	return str.includes("#") ? str.replace(HASH_ESCAPE_REGEXP, "\0#") : str;
 }
 
 const PATH_QUERY_FRAGMENT_REGEXP =
@@ -105,11 +125,7 @@ function createLoaderObject(loader) {
 	Object.defineProperty(obj, "request", {
 		enumerable: true,
 		get() {
-			return (
-				obj.path.replace(/#/g, "\0#") +
-				obj.query.replace(/#/g, "\0#") +
-				obj.fragment
-			);
+			return escapeHash(obj.path) + escapeHash(obj.query) + obj.fragment;
 		},
 		set(value) {
 			if (typeof value === "string") {
@@ -119,32 +135,34 @@ function createLoaderObject(loader) {
 				obj.fragment = fragment;
 				obj.options = undefined;
 				obj.ident = undefined;
+				return;
+			}
+
+			if (!value.loader) {
+				throw new Error(
+					`request should be a string or object with loader and options (${JSON.stringify(
+						value
+					)})`
+				);
+			}
+
+			const { loader: path, fragment, type, options, ident } = value;
+			obj.path = path;
+			obj.fragment = fragment || "";
+			obj.type = type;
+			obj.options = options;
+			obj.ident = ident;
+
+			if (options === null || options === undefined) {
+				obj.query = "";
+			} else if (typeof options === "string") {
+				obj.query = `?${options}`;
+			} else if (ident) {
+				obj.query = `??${ident}`;
+			} else if (typeof options === "object" && options.ident) {
+				obj.query = `??${options.ident}`;
 			} else {
-				if (!value.loader) {
-					throw new Error(
-						`request should be a string or object with loader and options (${JSON.stringify(
-							value
-						)})`
-					);
-				}
-				obj.path = value.loader;
-				obj.fragment = value.fragment || "";
-				obj.type = value.type;
-				obj.options = value.options;
-				obj.ident = value.ident;
-				if (obj.options === null) {
-					obj.query = "";
-				} else if (obj.options === undefined) {
-					obj.query = "";
-				} else if (typeof obj.options === "string") {
-					obj.query = `?${obj.options}`;
-				} else if (obj.ident) {
-					obj.query = `??${obj.ident}`;
-				} else if (typeof obj.options === "object" && obj.options.ident) {
-					obj.query = `??${obj.options.ident}`;
-				} else {
-					obj.query = `?${JSON.stringify(obj.options)}`;
-				}
+				obj.query = `?${JSON.stringify(options)}`;
 			}
 		},
 	});
@@ -162,7 +180,9 @@ function runSyncOrAsync(fn, context, args, callback) {
 	let reportedError = false;
 
 	// eslint-disable-next-line func-name-matching
-	const innerCallback = (context.callback = function innerCallback() {
+	const innerCallback = (context.callback = function innerCallback(
+		...callbackArgs
+	) {
 		if (isDone) {
 			if (reportedError) return; // ignore
 			throw new Error("callback(): The callback was already called.");
@@ -172,7 +192,7 @@ function runSyncOrAsync(fn, context, args, callback) {
 		isSync = false;
 
 		try {
-			callback.apply(null, arguments);
+			callback(...callbackArgs);
 		} catch (err) {
 			isError = true;
 			throw err;
@@ -237,30 +257,29 @@ function convertArgs(args, raw) {
 }
 
 function iterateNormalLoaders(options, loaderContext, args, callback) {
-	if (loaderContext.loaderIndex < 0) return callback(null, args);
+	while (loaderContext.loaderIndex >= 0) {
+		const currentLoaderObject =
+			loaderContext.loaders[loaderContext.loaderIndex];
 
-	const currentLoaderObject = loaderContext.loaders[loaderContext.loaderIndex];
+		if (currentLoaderObject.normalExecuted) {
+			loaderContext.loaderIndex--;
+			continue;
+		}
 
-	// iterate
-	if (currentLoaderObject.normalExecuted) {
-		loaderContext.loaderIndex--;
-		return iterateNormalLoaders(options, loaderContext, args, callback);
+		const fn = currentLoaderObject.normal;
+		currentLoaderObject.normalExecuted = true;
+
+		if (!fn) continue;
+
+		convertArgs(args, currentLoaderObject.raw);
+
+		return runSyncOrAsync(fn, loaderContext, args, (err, ...nextArgs) => {
+			if (err) return callback(err);
+			iterateNormalLoaders(options, loaderContext, nextArgs, callback);
+		});
 	}
 
-	const fn = currentLoaderObject.normal;
-	currentLoaderObject.normalExecuted = true;
-	if (!fn) {
-		return iterateNormalLoaders(options, loaderContext, args, callback);
-	}
-
-	convertArgs(args, currentLoaderObject.raw);
-
-	runSyncOrAsync(fn, loaderContext, args, function runSyncOrAsyncCallback(err) {
-		if (err) return callback(err);
-
-		const args = Array.prototype.slice.call(arguments, 1);
-		iterateNormalLoaders(options, loaderContext, args, callback);
-	});
+	return callback(null, args);
 }
 
 function processResource(options, loaderContext, callback) {
@@ -269,72 +288,90 @@ function processResource(options, loaderContext, callback) {
 
 	const { resourcePath } = loaderContext;
 
-	if (resourcePath) {
-		options.processResource(
-			loaderContext,
-			resourcePath,
-			function processResourceCallback(err) {
-				if (err) return callback(err);
-				const args = Array.prototype.slice.call(arguments, 1);
-
-				[options.resourceBuffer] = args;
-
-				iterateNormalLoaders(options, loaderContext, args, callback);
-			}
-		);
-	} else {
-		iterateNormalLoaders(options, loaderContext, [null], callback);
+	if (!resourcePath) {
+		return iterateNormalLoaders(options, loaderContext, [null], callback);
 	}
+
+	options.processResource(loaderContext, resourcePath, (err, ...args) => {
+		if (err) return callback(err);
+
+		// eslint-disable-next-line prefer-destructuring
+		options.resourceBuffer = args[0];
+
+		iterateNormalLoaders(options, loaderContext, args, callback);
+	});
 }
 
 function iteratePitchingLoaders(options, loaderContext, callback) {
-	// abort after last loader
-	if (loaderContext.loaderIndex >= loaderContext.loaders.length) {
-		return processResource(options, loaderContext, callback);
-	}
+	// Iterative walk over already-pitched loaders without recursion.
+	while (loaderContext.loaderIndex < loaderContext.loaders.length) {
+		const currentLoaderObject =
+			loaderContext.loaders[loaderContext.loaderIndex];
 
-	const currentLoaderObject = loaderContext.loaders[loaderContext.loaderIndex];
-
-	// iterate
-	if (currentLoaderObject.pitchExecuted) {
-		loaderContext.loaderIndex++;
-		return iteratePitchingLoaders(options, loaderContext, callback);
-	}
-
-	// load loader module
-	loadLoader(currentLoaderObject, (err) => {
-		if (err) {
-			loaderContext.cacheable(false);
-			return callback(err);
+		if (currentLoaderObject.pitchExecuted) {
+			loaderContext.loaderIndex++;
+			continue;
 		}
-		const fn = currentLoaderObject.pitch;
-		currentLoaderObject.pitchExecuted = true;
-		if (!fn) return iteratePitchingLoaders(options, loaderContext, callback);
 
-		runSyncOrAsync(
-			fn,
-			loaderContext,
-			[
-				loaderContext.remainingRequest,
-				loaderContext.previousRequest,
-				(currentLoaderObject.data = {}),
-			],
-			function runSyncOrAsyncCallback(err) {
-				if (err) return callback(err);
-				const args = Array.prototype.slice.call(arguments, 1);
-				// Determine whether to continue the pitching process based on
-				// argument values (as opposed to argument presence) in order
-				// to support synchronous and asynchronous usages.
-				const hasArg = args.some((value) => value !== undefined);
-				if (hasArg) {
-					loaderContext.loaderIndex--;
-					iterateNormalLoaders(options, loaderContext, args, callback);
-				} else {
-					iteratePitchingLoaders(options, loaderContext, callback);
-				}
+		return loadLoader(currentLoaderObject, (err) => {
+			if (err) {
+				loaderContext.cacheable(false);
+				return callback(err);
 			}
-		);
-	});
+			const fn = currentLoaderObject.pitch;
+			currentLoaderObject.pitchExecuted = true;
+			if (!fn) return iteratePitchingLoaders(options, loaderContext, callback);
+
+			runSyncOrAsync(
+				fn,
+				loaderContext,
+				[
+					loaderContext.remainingRequest,
+					loaderContext.previousRequest,
+					(currentLoaderObject.data = {}),
+				],
+				(pitchErr, ...args) => {
+					if (pitchErr) return callback(pitchErr);
+					// Determine whether to continue the pitching process based on
+					// argument values (as opposed to argument presence) in order
+					// to support synchronous and asynchronous usages. Inline loop
+					// avoids allocating a predicate closure per pitched loader.
+					let hasArg = false;
+					for (let i = 0; i < args.length; i++) {
+						if (args[i] !== undefined) {
+							hasArg = true;
+							break;
+						}
+					}
+					if (hasArg) {
+						loaderContext.loaderIndex--;
+						iterateNormalLoaders(options, loaderContext, args, callback);
+					} else {
+						iteratePitchingLoaders(options, loaderContext, callback);
+					}
+				}
+			);
+		});
+	}
+
+	// Reached the end: move on to processing the resource itself.
+	return processResource(options, loaderContext, callback);
+}
+
+/**
+ * Join loader requests into a single `!`-separated string for a range of loader indices.
+ * @param {object[]} loaders loader objects
+ * @param {number} start inclusive start index
+ * @param {number} end exclusive end index
+ * @param {string} resource resource string
+ * @returns {string} joined request
+ */
+function joinRequests(loaders, start, end, resource) {
+	let result = "";
+	for (let i = start; i < end; i++) {
+		result += `${loaders[i].request}!`;
+	}
+	return result + resource;
 }
 
 module.exports.getContext = function getContext(resource) {
@@ -345,13 +382,12 @@ module.exports.getContext = function getContext(resource) {
 module.exports.runLoaders = function runLoaders(options, callback) {
 	// read options
 	const resource = options.resource || "";
-	let loaders = options.loaders || [];
 	const loaderContext = options.context || {};
-	const processResource =
+	const processResourceFn =
 		options.processResource ||
-		((readResource, context, resource, callback) => {
-			context.addDependency(resource);
-			readResource(resource, callback);
+		((readResource, context, res, cb) => {
+			context.addDependency(res);
+			readResource(res, cb);
 		}).bind(null, options.readResource || readFile);
 
 	const splittedResource = resource && parseIdentifier(resource);
@@ -367,7 +403,7 @@ module.exports.runLoaders = function runLoaders(options, callback) {
 	const missingDependencies = [];
 
 	// prepare loader objects
-	loaders = loaders.map(createLoaderObject);
+	const loaders = (options.loaders || []).map(createLoaderObject);
 
 	loaderContext.context = contextDirectory;
 	loaderContext.loaderIndex = 0;
@@ -377,31 +413,24 @@ module.exports.runLoaders = function runLoaders(options, callback) {
 	loaderContext.resourceFragment = resourceFragment;
 	loaderContext.async = null;
 	loaderContext.callback = null;
-	loaderContext.cacheable = function cacheable(flag) {
+	loaderContext.cacheable = (flag) => {
 		if (flag === false) {
 			requestCacheable = false;
 		}
 	};
-	loaderContext.dependency = loaderContext.addDependency =
-		function addDependency(file) {
-			fileDependencies.push(file);
-		};
-	loaderContext.addContextDependency = function addContextDependency(context) {
+	loaderContext.dependency = loaderContext.addDependency = (file) => {
+		fileDependencies.push(file);
+	};
+	loaderContext.addContextDependency = (context) => {
 		contextDependencies.push(context);
 	};
-	loaderContext.addMissingDependency = function addMissingDependency(context) {
+	loaderContext.addMissingDependency = (context) => {
 		missingDependencies.push(context);
 	};
-	loaderContext.getDependencies = function getDependencies() {
-		return [...fileDependencies];
-	};
-	loaderContext.getContextDependencies = function getContextDependencies() {
-		return [...contextDependencies];
-	};
-	loaderContext.getMissingDependencies = function getMissingDependencies() {
-		return [...missingDependencies];
-	};
-	loaderContext.clearDependencies = function clearDependencies() {
+	loaderContext.getDependencies = () => fileDependencies.slice();
+	loaderContext.getContextDependencies = () => contextDependencies.slice();
+	loaderContext.getMissingDependencies = () => missingDependencies.slice();
+	loaderContext.clearDependencies = () => {
 		fileDependencies.length = 0;
 		contextDependencies.length = 0;
 		missingDependencies.length = 0;
@@ -411,68 +440,67 @@ module.exports.runLoaders = function runLoaders(options, callback) {
 		enumerable: true,
 		get() {
 			return (
-				loaderContext.resourcePath.replace(/#/g, "\0#") +
-				loaderContext.resourceQuery.replace(/#/g, "\0#") +
+				escapeHash(loaderContext.resourcePath) +
+				escapeHash(loaderContext.resourceQuery) +
 				loaderContext.resourceFragment
 			);
 		},
 		set(value) {
-			const splittedResource = value && parseIdentifier(value);
-			loaderContext.resourcePath = splittedResource ? splittedResource[0] : "";
-			loaderContext.resourceQuery = splittedResource ? splittedResource[1] : "";
-			loaderContext.resourceFragment = splittedResource
-				? splittedResource[2]
-				: "";
+			const splitted = value && parseIdentifier(value);
+			loaderContext.resourcePath = splitted ? splitted[0] : "";
+			loaderContext.resourceQuery = splitted ? splitted[1] : "";
+			loaderContext.resourceFragment = splitted ? splitted[2] : "";
 		},
 	});
 	Object.defineProperty(loaderContext, "request", {
 		enumerable: true,
 		get() {
-			return loaderContext.loaders
-				.map((loader) => loader.request)
-				.concat(loaderContext.resource || "")
-				.join("!");
+			return joinRequests(
+				loaders,
+				0,
+				loaders.length,
+				loaderContext.resource || ""
+			);
 		},
 	});
 	Object.defineProperty(loaderContext, "remainingRequest", {
 		enumerable: true,
 		get() {
-			if (
-				loaderContext.loaderIndex >= loaderContext.loaders.length - 1 &&
-				!loaderContext.resource
-			) {
-				return "";
-			}
-			return loaderContext.loaders
-				.slice(loaderContext.loaderIndex + 1)
-				.map((loader) => loader.request)
-				.concat(loaderContext.resource || "")
-				.join("!");
+			return joinRequests(
+				loaders,
+				loaderContext.loaderIndex + 1,
+				loaders.length,
+				loaderContext.resource
+			);
 		},
 	});
 	Object.defineProperty(loaderContext, "currentRequest", {
 		enumerable: true,
 		get() {
-			return loaderContext.loaders
-				.slice(loaderContext.loaderIndex)
-				.map((loader) => loader.request)
-				.concat(loaderContext.resource || "")
-				.join("!");
+			return joinRequests(
+				loaders,
+				loaderContext.loaderIndex,
+				loaders.length,
+				loaderContext.resource
+			);
 		},
 	});
 	Object.defineProperty(loaderContext, "previousRequest", {
 		enumerable: true,
 		get() {
-			return loaderContext.loaders
-				.slice(0, loaderContext.loaderIndex)
-				.map((loader) => loader.request)
-				.join("!");
+			const end = loaderContext.loaderIndex;
+			if (end === 0) return "";
+			let result = loaders[0].request;
+			for (let i = 1; i < end; i++) {
+				result += `!${loaders[i].request}`;
+			}
+			return result;
 		},
 	});
 	Object.defineProperty(loaderContext, "query", {
 		enumerable: true,
 		get() {
-			const entry = loaderContext.loaders[loaderContext.loaderIndex];
+			const entry = loaders[loaderContext.loaderIndex];
 			return entry.options && typeof entry.options === "object"
 				? entry.options
 				: entry.query;
@@ -481,7 +509,7 @@ module.exports.runLoaders = function runLoaders(options, callback) {
 	Object.defineProperty(loaderContext, "data", {
 		enumerable: true,
 		get() {
-			return loaderContext.loaders[loaderContext.loaderIndex].data;
+			return loaders[loaderContext.loaderIndex].data;
 		},
 	});
 
@@ -492,7 +520,7 @@ module.exports.runLoaders = function runLoaders(options, callback) {
 
 	const processOptions = {
 		resourceBuffer: null,
-		processResource,
+		processResource: processResourceFn,
 	};
 	iteratePitchingLoaders(processOptions, loaderContext, (err, result) => {
 		if (err) {

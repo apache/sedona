@@ -651,3 +651,83 @@ test('paused flag', function (t) {
   queue.pause()
   t.equal(queue.paused, true)
 })
+
+test('abort', function (t) {
+  t.plan(11)
+
+  var queue = buildQueue(worker, 1)
+  var abortedTasks = 0
+
+  var predrain = queue.drain
+
+  queue.drain = function drain () {
+    t.fail('drain should never be called')
+  }
+
+  // Pause queue to prevent tasks from starting
+  queue.pause()
+  queue.push(1, doneAborted)
+  queue.push(4, doneAborted)
+  queue.unshift(3, doneAborted)
+  queue.unshift(2, doneAborted)
+
+  // Abort all queued tasks
+  queue.abort()
+
+  // Verify state after abort
+  t.equal(queue.length(), 0, 'no queued tasks after abort')
+  t.equal(queue.drain, predrain, 'drain is back to default')
+
+  setImmediate(function () {
+    t.equal(abortedTasks, 4, 'all queued tasks were aborted')
+  })
+
+  function doneAborted (err) {
+    t.ok(err, 'error is present')
+    t.equal(err.message, 'abort', 'error message is abort')
+    abortedTasks++
+  }
+
+  function worker (arg, cb) {
+    t.fail('worker should not be called')
+    setImmediate(function () {
+      cb(null, true)
+    })
+  }
+})
+
+test('abort with error handler', function (t) {
+  t.plan(7)
+
+  var queue = buildQueue(worker, 1)
+  var errorHandlerCalled = 0
+
+  queue.error(function (err, task) {
+    t.equal(err.message, 'abort', 'error handler receives abort error')
+    t.ok(task !== null, 'error handler receives task value')
+    errorHandlerCalled++
+  })
+
+  // Pause queue to prevent tasks from starting
+  queue.pause()
+  queue.push(1, doneAborted)
+  queue.push(2, doneAborted)
+
+  // Abort all queued tasks
+  queue.abort()
+
+  setImmediate(function () {
+    t.equal(errorHandlerCalled, 2, 'error handler called for all aborted tasks')
+  })
+
+  function doneAborted (err) {
+    t.ok(err, 'callback receives error')
+  }
+
+  function worker (arg, cb) {
+    t.fail('worker should not be called')
+    setImmediate(function () {
+      cb(null, true)
+    })
+  }
+})

@@ -33,12 +33,14 @@ module.exports = function IteratorClose(iterator, completion) {
 
 		// if the completion is of type "throw", this will throw.
 		completionThunk();
+		// eslint-disable-next-line no-useless-assignment
 		completionThunk = null; // ensure it's not called twice.
 
 		// if not, then return the innerResult completion
 		throw e;
 	}
 	completionRecord = completionThunk(); // if innerResult worked, then throw if the completion does
+	// eslint-disable-next-line no-useless-assignment
 	completionThunk = null; // ensure it's not called twice.
 
 	if (!isObject(innerResult)) {

@@ -51,7 +51,7 @@ module.exports = function GetSetRecord(obj) {
 	if (isSet(obj) && typeof StopIteration === 'object') {
 		var boundKeys = callBind(keys);
 		keys = function keys() { // eslint-disable-line no-shadow
-			return stopIterationIterator(boundKeys(this)); // eslint-disable-line no-invalid-this
+			return stopIterationIterator(boundKeys(this));
 		};
 	}
 

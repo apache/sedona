@@ -8,7 +8,22 @@ module.exports = function getPolyfill() {
 			// https://issues.chromium.org/issues/336839115
 			Iterator.prototype.flatMap.call({ next: null }, function () {}).next();
 		} catch (e) {
-			return Iterator.prototype.flatMap;
+			var earlyCloseCount = 0;
+			try {
+				Iterator.prototype.flatMap.call(
+					{
+						next: function () {},
+						'return': function () {
+							earlyCloseCount += 1;
+							return {};
+						}
+					},
+					null
+				);
+			} catch (e2) { /**/ }
+			if (earlyCloseCount > 0) {
+				return Iterator.prototype.flatMap;
+			}
 		}
 	}
 	return implementation;

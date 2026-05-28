@@ -192,7 +192,7 @@ class Prefixes {
             return true
           }
 
-          if (step === +1 && other.prop === unprefixed) {
+          if (step === 1 && other.prop === unprefixed) {
             if (!Browsers.withPrefix(other.value)) {
               break
             }
@@ -206,7 +206,7 @@ class Prefixes {
 
     return {
       down(callback) {
-        return checker(+1, callback)
+        return checker(1, callback)
       },
       up(callback) {
         return checker(-1, callback)

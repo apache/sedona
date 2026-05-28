@@ -675,7 +675,7 @@
     }
 
     function parseGroup(matchA, typeA, matchB, typeB) {
-      var type = null, from = pos;
+      var type, from = pos;
 
       if (match(matchA)) {
         type = typeA;
@@ -806,7 +806,7 @@
 
     function parseAtomAndExtendedAtom() {
       // Parsing Atom and ExtendedAtom together due to redundancy.
-      // ExtendedAtom is defined in Apendix B of the ECMA-262 standard.
+      // ExtendedAtom is defined in Appendix B of the ECMA-262 standard.
       //
       // SEE: https://www.ecma-international.org/ecma-262/10.0/index.html#prod-annexB-ExtendedPatternCharacter
       //
@@ -1057,11 +1057,11 @@
 
       if (res = matchReg(/^(?!0)\d+/)) {
         match = res[0];
-        var refIdx = parseInt(res[0], 10);
+        var refIdx = parseInt(match, 10);
         if (refIdx <= closedCaptureCounter && !insideCharacterClass) {
           // If the number is smaller than the normal-groups found so
           // far, then it is a reference...
-          return createReference(res[0]);
+          return createReference(match);
         } else {
           // ... otherwise it needs to be interpreted as a octal (if the
           // number is in an octal format). If it is NOT octal format,
@@ -1085,7 +1085,7 @@
           // Reset the position again, as maybe only parts of the previous
           // matched numbers are actual octal numbers. E.g. in '019' only
           // the '01' should be matched.
-          incr(-res[0].length);
+          incr(-match.length);
           if (res = matchReg(/^[0-7]{1,3}/)) {
             return createEscaped('octal', parseInt(res[0], 8), res[0], 1);
           } else {
@@ -1345,7 +1345,7 @@
       //      [ ^ ClassContents ]
 
       var res, from = pos;
-      if (res = match("[^")) {
+      if (match("[^")) {
         res = parseClassContents();
         skip(']');
         return createCharacterClass(res, true, from, pos);

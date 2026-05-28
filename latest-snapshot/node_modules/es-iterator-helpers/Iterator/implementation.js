@@ -4,6 +4,7 @@ var GetIntrinsic = require('get-intrinsic');
 var hasPropertyDescriptors = require('has-property-descriptors')();
 
 var $TypeError = require('es-errors/type');
+
 var $defineProperty = hasPropertyDescriptors && GetIntrinsic('%Object.defineProperty%', true);
 
 var iterProto = require('iterator.prototype');

@@ -6,7 +6,7 @@ var resolve = require('../');
 test('$NODE_PATH', function (t) {
     t.plan(8);
 
-    var isDir = function (dir, cb) {
+    function isDir(dir, cb) {
         if (dir === '/node_path' || dir === 'node_path/x') {
             return cb(null, true);
         }
@@ -17,7 +17,7 @@ test('$NODE_PATH', function (t) {
             if (err.code === 'ENOENT' || err.code === 'ENOTDIR') return cb(null, false);
             return cb(err);
         });
-    };
+    }
 
     resolve('aaa', {
         paths: [

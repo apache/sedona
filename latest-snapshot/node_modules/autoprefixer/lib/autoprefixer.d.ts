@@ -1,5 +1,5 @@
-import { Plugin } from 'postcss'
 import { Stats } from 'browserslist'
+import { Plugin } from 'postcss'
 
 declare function autoprefixer<T extends string[]>(
   ...args: [...T, autoprefixer.Options]
