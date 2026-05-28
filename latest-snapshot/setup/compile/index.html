@@ -5944,63 +5944,63 @@ uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </sp
 uv sync --group docs
 </code></pre></div>
 <p>After installing MkDocs and MkDocs-Material, run these commands in the Sedona root folder:</p>
-<div class="highlight"><pre><span></span><code>uv run mkdocs build
+<div class="highlight"><pre><span></span><code>cd docs-overrides &amp;&amp; npm ci &amp;&amp; npx gulp build
+cd ..
 uv run mike deploy --update-aliases latest-snapshot -b website -p
-uv run mike serve
+uv run mike serve -b website
 </code></pre></div>
 <h2 id="code-quality-checks-with-prek-uv-and-make">Code Quality Checks with <code>prek</code>, <code>uv</code>, and <code>make</code><a class="headerlink" href="#code-quality-checks-with-prek-uv-and-make" title="Permanent link">&para;</a></h2>
-<p>This guide explains how Apache Sedona manages code quality checks, formatting, and linting locally. To ensure a fast and consistent developer experience, we combine <code>uv</code> (a lightning-fast Python package and environment manager) with <code>prek</code> (our internal pre-commit wrapper framework) and expose everything via a simple <code>Makefile</code>.</p>
+<p>This guide explains how Apache Sedona manages local code quality checks, formatting, and linting. To ensure a fast and consistent developer experience, we combine <strong><code>uv</code></strong> (a lightning-fast Python package and environment manager) with <strong><code>prek</code></strong> (our internal pre-commit wrapper framework) and expose everything via a simple, unified <code>Makefile</code>.</p>
 <hr />
 <h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
-<p>Before running any checks, ensure you have <code>uv</code> installed on your machine. If you don't have it yet, you can install it via:</p>
-<p><code>curl -LsSf https://astral.sh/uv/install.sh | sh</code></p>
-<p>You do not need to manually install Python virtual environments, <code>pre-commit</code>, or <code>prek</code>. The <code>Makefile</code> handles environment isolation and dependency resolution automatically using <code>uv</code>.</p>
+<p>Before running any checks, ensure you have <code>uv</code> installed on your machine. If you don't have it yet, you can install it via the official installer:</p>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-LsSf<span class="w"> </span>https://astral.sh/uv/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+</code></pre></div>
+<blockquote>
+<p>💡 <strong>Note:</strong> You do not need to manually install Python virtual environments, <code>pre-commit</code>, or <code>prek</code>. The <code>Makefile</code> handles environment isolation and dependency resolution automatically using <code>uv</code>.</p>
+</blockquote>
 <hr />
 <h3 id="the-core-workflow-uv-prek">The Core Workflow: <code>uv</code> + <code>prek</code><a class="headerlink" href="#the-core-workflow-uv-prek" title="Permanent link">&para;</a></h3>
-<p>Our codebase uses <code>prek</code> to orchestrate linting and formatting workflows (such as Black, markdownlint, or oxipng).</p>
+<p>Our codebase uses <code>prek</code> to orchestrate linting and formatting workflows (such as <em>Black</em>, <em>markdownlint</em>, or <em>oxipng</em>).</p>
 <p>Instead of forcing you to activate a virtual environment manually, the <code>Makefile</code> uses <code>uv sync</code> to build a perfectly isolated environment behind the scenes. When you run any <code>make check-*</code> command, it guarantees that <code>prek</code> is executed using the exact dependency versions locked in the project.</p>
 <hr />
 <h3 id="available-make-commands">Available Make Commands<a class="headerlink" href="#available-make-commands" title="Permanent link">&para;</a></h3>
-<p>For maximum convenience, you should interact with <code>prek</code> entirely through the following <code>make</code> shortcuts.</p>
-<h4 id="1-run-checks-on-staged-changes-recommended-before-committing">1. Run Checks on Staged Changes (Recommended before committing)<a class="headerlink" href="#1-run-checks-on-staged-changes-recommended-before-committing" title="Permanent link">&para;</a></h4>
-<p>This runs <code>prek</code> only against the files you have explicitly staged using <code>git add</code>. It is incredibly fast.</p>
-<p><code>make check-stage</code></p>
-<h4 id="2-run-checks-on-the-full-codebase">2. Run Checks on the Full Codebase<a class="headerlink" href="#2-run-checks-on-the-full-codebase" title="Permanent link">&para;</a></h4>
-<p>This forces <code>prek</code> to evaluate every single file in the repository, regardless of git status. Use this before opening a Pull Request.</p>
-<p><code>make check</code></p>
-<h4 id="3-run-checks-on-your-entire-branch-history">3. Run Checks on Your Entire Branch History<a class="headerlink" href="#3-run-checks-on-your-entire-branch-history" title="Permanent link">&para;</a></h4>
-<p>This automatically identifies all files changed since you branched off of the <code>main</code> branch and runs linting rules against them.</p>
-<p><code>make check-from-ref</code></p>
-<h4 id="4-run-checks-on-your-last-commit">4. Run Checks on Your Last Commit<a class="headerlink" href="#4-run-checks-on-your-last-commit" title="Permanent link">&para;</a></h4>
-<p>If you just committed code and want to double-check that everything passes post-commit:</p>
-<p><code>make check-last</code></p>
-<h4 id="5-keeping-linter-hooks-up-to-date">5. Keeping Linter Hooks Up to Date<a class="headerlink" href="#5-keeping-linter-hooks-up-to-date" title="Permanent link">&para;</a></h4>
-<p>To upgrade <code>prek</code> hooks to their latest respective upstream versions and update your local locked dependencies:</p>
-<p><code>make update-deps</code></p>
+<p>For maximum convenience, you should interact with <code>prek</code> entirely through the following <code>make</code> shortcuts:</p>
+<ul>
+<li><strong><code>make check-stage</code></strong> <em>Runs checks on staged changes only (Recommended before committing).</em> Evaluates <code>prek</code> only against the files you have explicitly staged using <code>git add</code>. It is incredibly fast.</li>
+<li><strong><code>make check</code></strong> <em>Runs checks on the full codebase.</em> Forces <code>prek</code> to evaluate every single file in the repository, regardless of git status. <strong>Use this before opening a Pull Request.</strong></li>
+<li><strong><code>make check-from-ref</code></strong> <em>Runs checks on your entire branch history.</em> Automatically identifies all files changed since you branched off of the <code>main</code> branch and runs linting rules against them.</li>
+<li><strong><code>make check-last</code></strong> <em>Runs checks on your last commit.</em> If you just committed code and want to double-check that everything passes post-commit.</li>
+<li><strong><code>make update-deps</code></strong> <em>Keeps linter hooks up to date.</em> Upgrades <code>prek</code> hooks to their latest respective upstream versions and updates your local locked dependencies.</li>
+</ul>
 <hr />
 <h3 id="advanced-usage-examples">Advanced Usage &amp; Examples<a class="headerlink" href="#advanced-usage-examples" title="Permanent link">&para;</a></h3>
 <h4 id="skipping-specific-hooks-locally">Skipping Specific Hooks Locally<a class="headerlink" href="#skipping-specific-hooks-locally" title="Permanent link">&para;</a></h4>
-<p>Sometimes a specific linter rule or hook blocks your workflow, or you want to isolate your testing to a single hook. You can bypass specific hooks by passing the <code>SKIP</code> environment variable directly to <code>prek</code>.</p>
+<p>Sometimes a specific linter rule blocks your workflow, or you want to isolate your testing to a single hook. You can bypass specific hooks by passing the <code>SKIP</code> environment variable directly to <code>prek</code>.</p>
 <ul>
-<li>Example: Run all checks except the linter named codespell
-<code>SKIP=codespell make check-stage</code></li>
-<li>Example: Skip multiple hooks simultaneously (comma-separated)
-<code>SKIP=codespell,gitleaks make check</code></li>
+<li><strong>Example:</strong> Run all checks except the linter named <code>codespell</code></li>
 </ul>
+<div class="highlight"><pre><span></span><code><span class="nv">SKIP</span><span class="o">=</span>codespell<span class="w"> </span>make<span class="w"> </span>check-stage
+</code></pre></div>
+<ul>
+<li><strong>Example:</strong> Skip multiple hooks simultaneously (comma-separated)</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nv">SKIP</span><span class="o">=</span>codespell,gitleaks<span class="w"> </span>make<span class="w"> </span>check
+</code></pre></div>
 <h4 id="bypassing-automated-git-hooks-no-verify">Bypassing Automated Git Hooks (<code>--no-verify</code>)<a class="headerlink" href="#bypassing-automated-git-hooks-no-verify" title="Permanent link">&para;</a></h4>
 <p>If you have configured <code>prek</code> to run automatically as a native Git <code>pre-commit</code> hook on your system, it will block <code>git commit</code> if any files fail the quality gates.</p>
 <p>If you need to commit a work-in-progress (WIP) branch quickly without fixing style errors, you can bypass the <code>prek</code> gate entirely using Git's built-in <code>--no-verify</code> (or <code>-n</code>) flag.</p>
-<ul>
-<li>Example: Force a commit despite failing linter checks
-<code>git add .</code>
-<code>git commit -m "WIP: basic structure for new feature" --no-verify</code></li>
-</ul>
-<p>Warning: Continuous Integration (CI) runners will still execute all <code>prek</code> gates on your Pull Request. Bypassing hooks with <code>--no-verify</code> should only be used for temporary local savepoints.</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;WIP: basic structure for new feature&quot;</span><span class="w"> </span>--no-verify
+</code></pre></div>
+<blockquote>
+<p>⚠️ <strong>Warning:</strong> Continuous Integration (CI) runners will still execute all <code>prek</code> gates on your Pull Request. Bypassing hooks with <code>--no-verify</code> should only be used for temporary local savepoints.</p>
+</blockquote>
 <hr />
 <h3 id="housekeeping-resetting-cache-make-clean">Housekeeping &amp; Resetting Cache (<code>make clean</code>)<a class="headerlink" href="#housekeeping-resetting-cache-make-clean" title="Permanent link">&para;</a></h3>
-<p>If your Python environment behaves unexpectedly, or if the linters fail to pick up recent changes due to aggressive local caching, you should reset your workspace back to a pristine state.</p>
-<p>Run the following command:</p>
-<p><code>make clean</code></p>
+<p>If your Python environment behaves unexpectedly, or if the linters fail to pick up recent changes due to aggressive local caching, you should reset your workspace back to a pristine state using:</p>
+<div class="highlight"><pre><span></span><code>make<span class="w"> </span>clean
+</code></pre></div>
 <h4 id="what-happens-under-the-hood">What happens under the hood?<a class="headerlink" href="#what-happens-under-the-hood" title="Permanent link">&para;</a></h4>
 <p>This command triggers a multi-directory sweep to remove compiled local artifacts and temporary caches:</p>
 <ul>
@@ -6013,11 +6013,12 @@ uv run mike serve
 <h3 id="architecture-pipeline">Architecture Pipeline<a class="headerlink" href="#architecture-pipeline" title="Permanent link">&para;</a></h3>
 <p>When you execute a command like <code>make check</code>, the automation engine follows these exact steps:</p>
 <ol>
-<li><code>check-install</code>: Verifies <code>uv</code> is installed on your local path.</li>
-<li><code>install</code>: Triggers <code>uv sync --all-groups</code>, which automatically creates/syncs a <code>.venv</code> folder containing <code>prek</code> and all development dependencies.</li>
-<li><code>Execution</code>: Runs the target <code>prek</code> command within that guaranteed environment context.</li>
+<li><strong><code>check-install</code></strong>: Verifies <code>uv</code> is installed on your local path.</li>
+<li><strong><code>install</code></strong>: Triggers <code>uv sync --all-groups</code>, which automatically creates/syncs a <code>.venv</code> folder containing <code>prek</code> and all development dependencies.</li>
+<li><strong><code>Execution</code></strong>: Runs the target <code>prek</code> command within that guaranteed environment context.</li>
 </ol>
-<p><code>[ Your CLI ] ---&gt; [ make check ] ---&gt; [ uv syncs environment ] ---&gt; [ prek executes hooks ]</code></p>
+<div class="highlight"><pre><span></span><code>[ Your CLI ] ──&gt; [ make check ] ──&gt; [ uv syncs environment ] ──&gt; [ prek executes hooks ]
+</code></pre></div>
 
 
 
@@ -6038,7 +6039,7 @@ uv run mike serve
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 20, 2026 04:50:25 UTC">May 20, 2026 04:50:25</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 28, 2026 05:27:59 UTC">May 28, 2026 05:27:59</span>
   </span>
 
     
