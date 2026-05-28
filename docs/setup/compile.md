@@ -153,9 +153,10 @@ uv sync --group docs
 After installing MkDocs and MkDocs-Material, run these commands in the Sedona root folder:
 
 ```
-uv run mkdocs build
+cd docs-overrides && npm ci && npx gulp build
+cd ..
 uv run mike deploy --update-aliases latest-snapshot -b website -p
-uv run mike serve
+uv run mike serve -b website
 ```
 
 ## pre-commit
