@@ -72,7 +72,8 @@ private[apache] case class ST_Distance(inputExpressions: Seq[Expression])
 private[apache] case class ST_YMax(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction1((g: Geometry) => Functions.yMax(g)),
-      inferrableFunction1((b: Box2D) => Functions.yMax(b))) {
+      inferrableFunction1((b: Box2D) => Functions.yMax(b)),
+      inferrableFunction1((b: Box3D) => Functions.yMax(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -82,7 +83,8 @@ private[apache] case class ST_YMax(inputExpressions: Seq[Expression])
 private[apache] case class ST_YMin(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction1((g: Geometry) => Functions.yMin(g)),
-      inferrableFunction1((b: Box2D) => Functions.yMin(b))) {
+      inferrableFunction1((b: Box2D) => Functions.yMin(b)),
+      inferrableFunction1((b: Box3D) => Functions.yMin(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -90,13 +92,16 @@ private[apache] case class ST_YMin(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the Z maxima of the geometry.
+ * Return the Z maxima of a Geometry or a Box3D.
  *
  * @param inputExpressions
- *   This function takes a geometry and returns the maximum of all Z-coordinate values.
+ *   For a Geometry, returns the maximum of all Z-coordinate values. For a Box3D, returns the
+ *   stored {@code zmax} bound verbatim (no corner normalization).
  */
 private[apache] case class ST_ZMax(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.zMax _) {
+    extends InferredExpression(
+      inferrableFunction1((g: Geometry) => Functions.zMax(g)),
+      inferrableFunction1((b: Box3D) => Functions.zMax(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -104,13 +109,16 @@ private[apache] case class ST_ZMax(inputExpressions: Seq[Expression])
 }
 
 /**
- * Return the Z minima of the geometry.
+ * Return the Z minima of a Geometry or a Box3D.
  *
  * @param inputExpressions
- *   This function takes a geometry and returns the minimum of all Z-coordinate values.
+ *   For a Geometry, returns the minimum of all Z-coordinate values. For a Box3D, returns the
+ *   stored {@code zmin} bound verbatim (no corner normalization).
  */
 private[apache] case class ST_ZMin(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.zMin _) {
+    extends InferredExpression(
+      inferrableFunction1((g: Geometry) => Functions.zMin(g)),
+      inferrableFunction1((b: Box3D) => Functions.zMin(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -633,7 +641,8 @@ private[apache] case class ST_AsText(inputExpressions: Seq[Expression])
       inferrableFunction1((g: Geometry) => Functions.asWKT(g)),
       inferrableFunction1((g: Geography) =>
         org.apache.sedona.common.geography.Functions.asText(g)),
-      inferrableFunction1((b: Box2D) => Functions.box2dAsText(b))) {
+      inferrableFunction1((b: Box2D) => Functions.box2dAsText(b)),
+      inferrableFunction1((b: Box3D) => Functions.box3dAsText(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1516,7 +1525,8 @@ private[apache] case class ST_IsEmpty(inputExpressions: Seq[Expression])
 private[apache] case class ST_XMax(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction1((g: Geometry) => Functions.xMax(g)),
-      inferrableFunction1((b: Box2D) => Functions.xMax(b))) {
+      inferrableFunction1((b: Box2D) => Functions.xMax(b)),
+      inferrableFunction1((b: Box3D) => Functions.xMax(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1531,7 +1541,8 @@ private[apache] case class ST_XMax(inputExpressions: Seq[Expression])
 private[apache] case class ST_XMin(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction1((g: Geometry) => Functions.xMin(g)),
-      inferrableFunction1((b: Box2D) => Functions.xMin(b))) {
+      inferrableFunction1((b: Box2D) => Functions.xMin(b)),
+      inferrableFunction1((b: Box3D) => Functions.xMin(b))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
