@@ -19,6 +19,7 @@
 package org.apache.sedona.common;
 
 import org.apache.sedona.common.geometryObjects.Box2D;
+import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.operation.relate.RelateOp;
@@ -75,6 +76,50 @@ public class Predicates {
               + "require ordered intervals; inverted bounds are reserved for future antimeridian "
               + "wraparound semantics.");
     }
+  }
+
+  private static void requireOrderedBox3D(Box3D box, String argName) {
+    if (box.getXMin() > box.getXMax()
+        || box.getYMin() > box.getYMax()
+        || box.getZMin() > box.getZMax()) {
+      throw new IllegalArgumentException(
+          "Box3D argument '"
+              + argName
+              + "' has inverted bounds (xmin > xmax, ymin > ymax, or zmin > zmax). Box3D "
+              + "predicates require ordered intervals on all three axes.");
+    }
+  }
+
+  /**
+   * Closed-interval bbox intersection over two Box3D arguments. Returns true if the boxes overlap
+   * on <em>all three</em> axes. Mirrors PostGIS {@code &&&} on box3d. Edge-, face-, and
+   * corner-touching boxes count as intersecting. Throws on inverted bounds.
+   */
+  public static boolean box3dIntersects(Box3D a, Box3D b) {
+    requireOrderedBox3D(a, "a");
+    requireOrderedBox3D(b, "b");
+    return !(a.getXMax() < b.getXMin()
+        || a.getXMin() > b.getXMax()
+        || a.getYMax() < b.getYMin()
+        || a.getYMin() > b.getYMax()
+        || a.getZMax() < b.getZMin()
+        || a.getZMin() > b.getZMax());
+  }
+
+  /**
+   * Closed-interval bbox containment over two Box3D arguments. Returns true if {@code a} fully
+   * contains {@code b} on <em>all three</em> axes. Equal boxes contain each other. Throws on
+   * inverted bounds.
+   */
+  public static boolean box3dContains(Box3D a, Box3D b) {
+    requireOrderedBox3D(a, "a");
+    requireOrderedBox3D(b, "b");
+    return a.getXMin() <= b.getXMin()
+        && a.getYMin() <= b.getYMin()
+        && a.getZMin() <= b.getZMin()
+        && a.getXMax() >= b.getXMax()
+        && a.getYMax() >= b.getYMax()
+        && a.getZMax() >= b.getZMax();
   }
 
   public static boolean intersects(Geometry leftGeometry, Geometry rightGeometry) {

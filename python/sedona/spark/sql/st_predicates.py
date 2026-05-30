@@ -63,6 +63,42 @@ def ST_BoxIntersects(a: ColumnOrName, b: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_3DBoxContains(a: ColumnOrName, b: ColumnOrName) -> Column:
+    """Check whether Box3D a fully contains Box3D b (closed intervals on all three axes).
+
+    Mirrors PostGIS ``~~`` on box3d. NULL on null input. Raises
+    ``IllegalArgumentException`` if either argument has inverted bounds
+    (``xmin > xmax`` / ``ymin > ymax`` / ``zmin > zmax``).
+
+    :param a: Outer Box3D column.
+    :type a: ColumnOrName
+    :param b: Inner Box3D column.
+    :type b: ColumnOrName
+    :return: True if a contains b, false otherwise.
+    :rtype: Column
+    """
+    return _call_predicate_function("ST_3DBoxContains", (a, b))
+
+
+@validate_argument_types
+def ST_3DBoxIntersects(a: ColumnOrName, b: ColumnOrName) -> Column:
+    """Check whether Box3D a and Box3D b share any point (closed intervals on all three axes).
+
+    Mirrors PostGIS ``&&&`` on box3d. NULL on null input. Raises
+    ``IllegalArgumentException`` if either argument has inverted bounds
+    (``xmin > xmax`` / ``ymin > ymax`` / ``zmin > zmax``).
+
+    :param a: First Box3D column.
+    :type a: ColumnOrName
+    :param b: Second Box3D column.
+    :type b: ColumnOrName
+    :return: True if a and b overlap, false otherwise.
+    :rtype: Column
+    """
+    return _call_predicate_function("ST_3DBoxIntersects", (a, b))
+
+
+@validate_argument_types
 def ST_Contains(a: ColumnOrName, b: ColumnOrName) -> Column:
     """Check whether geometry a contains geometry b.
 
