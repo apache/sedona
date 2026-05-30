@@ -235,6 +235,10 @@
                         <a href="DataframePhysicalFunction.html" title="DataframePhysicalFunctions are Functions that will be replaced with a Physical Node for their evaluation.">DataframePhysicalFunction</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="Envelope3DBuffer.html" title="Aggregator-buffer for the 3D extent."></a>
+                        <a href="Envelope3DBuffer.html" title="Aggregator-buffer for the 3D extent.">Envelope3DBuffer</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="class" href="EnvelopeBuffer.html" title="A helper class to store envelope boundary during aggregation."></a>
                         <a href="EnvelopeBuffer.html" title="A helper class to store envelope boundary during aggregation.">EnvelopeBuffer</a>
                       </li><li class="current-entities indented6">
@@ -489,6 +493,24 @@ evaluation.</p><p>The physical node will transform the input dataframe into the 
 conversion of the RDD[InternalRow] to a DataFrame and back. Each DataframePhysicalFunction
 should implement transformDataframe. The output dataframe should have the same schema as the
 input dataframe, except for the resultAttrs which should be added to the output dataframe.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.expressions.Envelope3DBuffer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Envelope3DBufferextendsProductwithSerializable"></a><a id="Envelope3DBuffer:Envelope3DBuffer"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/expressions/Envelope3DBuffer.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Aggregator-buffer for the 3D extent." href="Envelope3DBuffer.html"><span class="name">Envelope3DBuffer</span></a><span class="params">(<span name="minX">minX: <span class="extype" name="scala.Double">Double</span></span>, <span name="maxX">maxX: <span class="extype" name="scala.Double">Double</span></span>, <span name="minY">minY: <span class="extype" name="scala.Double">Double</span></span>, <span name="maxY">maxY: <span class="extype" name="scala.Double">Double</span></span>, <span name="minZ">minZ: <span class="extype" name="scala.Double">Double</span></span>, <span name="maxZ">maxZ: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Aggregator-buffer for the 3D extent.</p><div class="fullcomment"><div class="comment cmt"><p>Aggregator-buffer for the 3D extent. Geometries without a Z dimension fold into the <code>z = 0</code>
+plane on a per-coordinate basis, matching PostGIS's flat-XY-treated-as-XY[Z=0] convention.
 </p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.expressions.EnvelopeBuffer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="EnvelopeBufferextendsProductwithSerializable"></a><a id="EnvelopeBuffer:EnvelopeBuffer"></a>
