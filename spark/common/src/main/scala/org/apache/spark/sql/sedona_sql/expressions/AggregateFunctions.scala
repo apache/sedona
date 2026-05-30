@@ -19,7 +19,7 @@
 package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.sedona.common.Functions
-import org.apache.sedona.common.geometryObjects.Box2D
+import org.apache.sedona.common.geometryObjects.{Box2D, Box3D}
 import org.apache.spark.sql.{Encoder, Encoders}
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.expressions.Aggregator
@@ -208,6 +208,85 @@ private[apache] class ST_Extent extends Aggregator[Geometry, Option[EnvelopeBuff
   def outputEncoder: ExpressionEncoder[Box2D] = outputSerde
 
   def zero: Option[EnvelopeBuffer] = None
+}
+
+/**
+ * Aggregator-buffer for the 3D extent. Geometries without a Z dimension fold into the `z = 0`
+ * plane on a per-coordinate basis, matching PostGIS's flat-XY-treated-as-XY[Z=0] convention.
+ */
+case class Envelope3DBuffer(
+    minX: Double,
+    maxX: Double,
+    minY: Double,
+    maxY: Double,
+    minZ: Double,
+    maxZ: Double) {
+  def isNull: Boolean = minX > maxX
+
+  def merge(other: Envelope3DBuffer): Envelope3DBuffer = {
+    if (this.isNull) other
+    else if (other.isNull) this
+    else
+      Envelope3DBuffer(
+        math.min(this.minX, other.minX),
+        math.max(this.maxX, other.maxX),
+        math.min(this.minY, other.minY),
+        math.max(this.maxY, other.maxY),
+        math.min(this.minZ, other.minZ),
+        math.max(this.maxZ, other.maxZ))
+  }
+}
+
+/**
+ * Return the 3D bounding box (Box3D) of all geometries in the given column. Returns NULL when the
+ * input contains no rows or all rows are null/empty geometries. Mirrors PostGIS `ST_3DExtent`.
+ * Geometries without a Z dimension are treated as having `z = 0`.
+ */
+private[apache] class ST_3DExtent extends Aggregator[Geometry, Option[Envelope3DBuffer], Box3D] {
+
+  val outputSerde: ExpressionEncoder[Box3D] = ExpressionEncoder[Box3D]()
+
+  def reduce(buffer: Option[Envelope3DBuffer], input: Geometry): Option[Envelope3DBuffer] = {
+    if (input == null || input.isEmpty) return buffer
+    val box = Box3D.fromGeometry(input)
+    if (box == null) return buffer
+    val incoming = Envelope3DBuffer(
+      box.getXMin,
+      box.getXMax,
+      box.getYMin,
+      box.getYMax,
+      box.getZMin,
+      box.getZMax)
+    buffer match {
+      case Some(b) => Some(b.merge(incoming))
+      case None => Some(incoming)
+    }
+  }
+
+  def merge(
+      buffer1: Option[Envelope3DBuffer],
+      buffer2: Option[Envelope3DBuffer]): Option[Envelope3DBuffer] = {
+    (buffer1, buffer2) match {
+      case (Some(b1), Some(b2)) => Some(b1.merge(b2))
+      case (Some(_), None) => buffer1
+      case (None, Some(_)) => buffer2
+      case (None, None) => None
+    }
+  }
+
+  def finish(reduction: Option[Envelope3DBuffer]): Box3D = {
+    reduction match {
+      case Some(b) => new Box3D(b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ)
+      case None => null
+    }
+  }
+
+  def bufferEncoder: Encoder[Option[Envelope3DBuffer]] =
+    Encoders.product[Option[Envelope3DBuffer]]
+
+  def outputEncoder: ExpressionEncoder[Box3D] = outputSerde
+
+  def zero: Option[Envelope3DBuffer] = None
 }
 
 /**

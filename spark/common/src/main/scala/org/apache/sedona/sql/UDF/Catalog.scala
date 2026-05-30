@@ -552,6 +552,7 @@ object Catalog extends AbstractCatalog with Logging {
     Seq(
       new ST_Envelope_Aggr,
       new ST_Extent,
+      new ST_3DExtent,
       new ST_Intersection_Aggr,
       new ST_Union_Aggr(),
       new ST_Collect_Agg())
