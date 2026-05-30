@@ -802,6 +802,32 @@ the Haversine-based polar-radius approximation in
 and per-row radius are carried alongside the original row in <code>userData</code> via
 <a href="GeographyJoinShape.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.GeographyJoinShape">GeographyJoinShape</a> so the join executor can perform S2-based ST_DWithin refinement.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a></dd></dl></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#toExpandedWGS84EnvelopeRDD" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toExpandedWGS84EnvelopeRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression,boundRadius:org.apache.spark.sql.catalyst.expressions.Expression):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]"></a><a id="toExpandedWGS84EnvelopeRDD(RDD[UnsafeRow],Expression,Expression):SpatialRDD[Geometry]"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/strategy/join/TraitJoinQueryExec.html#toExpandedWGS84EnvelopeRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression,boundRadius:org.apache.spark.sql.catalyst.expressions.Expression):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toExpandedWGS84EnvelopeRDD</span><span class="params">(<span name="rdd">rdd: <span class="extype" name="org.apache.spark.rdd.RDD">RDD</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.UnsafeRow">UnsafeRow</span>]</span>, <span name="shapeExpression">shapeExpression: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>, <span name="boundRadius">boundRadius: <span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span></span>)</span><span class="result">: <a href="../../../../../sedona/core/spatialRDD/SpatialRDD.html" class="extype" name="org.apache.sedona.core.spatialRDD.SpatialRDD">SpatialRDD</a>[<span class="extype" name="org.locationtech.jts.geom.Geometry">Geometry</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Raster variant of <a href="TraitJoinQueryBase.html#toExpandedEnvelopeRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression,boundRadius:org.apache.spark.sql.catalyst.expressions.Expression,isGeography:Boolean):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]" class="extmbr" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#toExpandedEnvelopeRDD">toExpandedEnvelopeRDD</a> for distance joins with raster predicates.</p><div class="fullcomment"><div class="comment cmt"><p>Raster variant of <a href="TraitJoinQueryBase.html#toExpandedEnvelopeRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression,boundRadius:org.apache.spark.sql.catalyst.expressions.Expression,isGeography:Boolean):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]" class="extmbr" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#toExpandedEnvelopeRDD">toExpandedEnvelopeRDD</a> for distance joins with raster predicates. Each
+row's shape (raster or geometry) is first projected to a WGS84 envelope (matching the
+non-distance raster path in <a href="TraitJoinQueryBase.html#toWGS84EnvelopeRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]" class="extmbr" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#toWGS84EnvelopeRDD">toWGS84EnvelopeRDD</a>) and then expanded by <code>boundRadius</code> meters
+using the Haversine polar-radius approximation — the same envelope expansion the
+<code>ST_DistanceSphere</code> distance-join uses. Treating <code>boundRadius</code> as meters everywhere (rather
+than the input CRS's native unit) keeps the coarse R-tree filter and the per-row <code>RS_DWithin</code>
+predicate aligned on a single unit.</p><p>Polar and antimeridian-crossing rasters already span half or more of the globe in their
+planar WGS84 envelope; for those rows the helper substitutes a global envelope so the R-tree
+filter pairs them with every counterpart and the per-row S2 predicate produces the final
+answer. Mid-latitude rasters retain the tight Haversine bound.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="TraitJoinQueryBase.html" class="extype" name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase">TraitJoinQueryBase</a></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#toGeographySpatialRDD" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toGeographySpatialRDD(rdd:org.apache.spark.rdd.RDD[org.apache.spark.sql.catalyst.expressions.UnsafeRow],shapeExpression:org.apache.spark.sql.catalyst.expressions.Expression):org.apache.sedona.core.spatialRDD.SpatialRDD[org.locationtech.jts.geom.Geometry]"></a><a id="toGeographySpatialRDD(RDD[UnsafeRow],Expression):SpatialRDD[Geometry]"></a>
       <span class="permalink">
