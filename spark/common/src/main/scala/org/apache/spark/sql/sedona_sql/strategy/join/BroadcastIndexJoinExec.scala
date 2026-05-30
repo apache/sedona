@@ -122,8 +122,7 @@ case class BroadcastIndexJoinExec(
     case (None, _, false) => s"ST_$spatialPredicate($windowExpression, $objectExpression)"
     case (None, _, true) => s"RS_$spatialPredicate($windowExpression, $objectExpression)"
     case (Some(r), _, true) =>
-      throw new UnsupportedOperationException(
-        "Distance joins are not supported for raster predicates")
+      s"RS_Distance($windowExpression, $objectExpression) < $r"
   }
 
   override def simpleString(maxFields: Int): String =
@@ -319,6 +318,30 @@ case class BroadcastIndexJoinExec(
             }
             shape.setUserData(GeographyJoinShape(geog, row, radius))
             (shape, row)
+          }
+        })
+      case Some(distanceExpression) if isRasterPredicate =>
+        val boundDistance =
+          BindReferences.bindReference(distanceExpression, streamed.output)
+        streamResultsRaw.map(row => {
+          val serialized = boundStreamShape.eval(row).asInstanceOf[Array[Byte]]
+          if (serialized == null) {
+            (null, row)
+          } else {
+            val baseShape = if (boundStreamShape.dataType.isInstanceOf[RasterUDT]) {
+              val raster = RasterSerializer.deserialize(serialized)
+              JoinedGeometryRaster.rasterToWGS84Envelope(raster)
+            } else {
+              val geom = GeometrySerializer.deserialize(serialized)
+              JoinedGeometryRaster.geometryToWGS84Envelope(geom)
+            }
+            val radius = boundDistance.eval(row).asInstanceOf[Double]
+            // Treat `radius` as meters; mid-latitude rasters get a tight Haversine bound while
+            // polar / antimeridian footprints fall back to a world envelope so the R-tree filter
+            // never excludes pairs the per-row S2 predicate would match. See
+            // `TraitJoinQueryBase.expandRasterFilterEnvelope` for the shared rule.
+            val expanded = expandRasterFilterEnvelope(baseShape, radius)
+            (expanded, row)
           }
         })
       case Some(distanceExpression) =>

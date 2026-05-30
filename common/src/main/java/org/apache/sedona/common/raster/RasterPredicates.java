@@ -21,6 +21,7 @@ package org.apache.sedona.common.raster;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.FunctionsGeoTools;
+import org.apache.sedona.common.S2Geography.WKBGeography;
 import org.apache.sedona.common.utils.CachedCRSTransformFinder;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.geotools.api.referencing.FactoryException;
@@ -34,7 +35,11 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Polygon;
 
 public class RasterPredicates {
   /**
@@ -80,6 +85,158 @@ public class RasterPredicates {
     Geometry leftGeometry = geometries.getLeft();
     Geometry rightGeometry = geometries.getRight();
     return leftGeometry.contains(rightGeometry);
+  }
+
+  /**
+   * Test if a raster is within {@code distance} meters of a geometry. Both shapes are projected to
+   * WGS84 unconditionally so the distance unit is always meters regardless of input CRS, then the
+   * minimum spherical distance between the two shapes (NOT centroid-to-centroid — uses S2's {@code
+   * ClosestEdgeQuery}) is compared against the threshold. Two raster footprints that overlap or
+   * touch therefore satisfy {@code RS_DWithin(a, b, 0)} just like {@link #rsIntersects}, which
+   * matches the natural reading of "are these shapes within d meters." The WGS84-only path is also
+   * what the join planner's R-tree filter assumes — see {@code
+   * TraitJoinQueryBase.toExpandedWGS84EnvelopeRDD} and the {@code isGeography = true} envelope
+   * expansion — so the index bound and the per-row predicate share one unit.
+   */
+  public static boolean rsDWithin(GridCoverage2D raster, Geometry geometry, double distance) {
+    Pair<Geometry, Geometry> geometries = toWGS84Pair(raster, geometry);
+    return geographyDWithin(geometries.getLeft(), geometries.getRight(), distance);
+  }
+
+  /** Raster-raster variant of {@link #rsDWithin(GridCoverage2D, Geometry, double)}. */
+  public static boolean rsDWithin(GridCoverage2D left, GridCoverage2D right, double distance) {
+    Pair<Geometry, Geometry> geometries = toWGS84Pair(left, right);
+    return geographyDWithin(geometries.getLeft(), geometries.getRight(), distance);
+  }
+
+  /**
+   * Run {@link org.apache.sedona.common.geography.Functions#dWithin} on two WGS84 JTS geometries by
+   * wrapping them as {@link WKBGeography}. The Geography path uses S2's {@code ClosestEdgeQuery}
+   * for the minimum geodesic distance — overlap/touch returns 0 — so the threshold is interpreted
+   * strictly as "meters between any two points on the shapes."
+   *
+   * <p>This intentionally does not go through {@code Constructors.geomToGeography}: that helper
+   * builds S2 loops via {@code S2Loop.normalize()}, which always picks the smaller hemisphere as
+   * the polygon interior. Raster convex hulls (especially global mosaics, polar projections, and
+   * antimeridian-crossing UTM zones) can be larger than a hemisphere after WGS84 reprojection, so
+   * normalisation would collapse the intended footprint to a tiny region between the projected
+   * corners. The WKB path preserves the orientation we set in {@link #ensureCcwForS2}.
+   */
+  private static boolean geographyDWithin(Geometry left, Geometry right, double distance) {
+    WKBGeography leftGeog = WKBGeography.fromJTS(toS2Ready(left));
+    WKBGeography rightGeog = WKBGeography.fromJTS(toS2Ready(right));
+    return org.apache.sedona.common.geography.Functions.dWithin(leftGeog, rightGeog, distance);
+  }
+
+  /**
+   * Produce a fresh JTS geometry ready for the S2-backed distance query: shell orientation forced
+   * to CCW (S2's expected interior side) and SRID stamped to 4326 (the caller has already
+   * reprojected to WGS84 via {@link #toWGS84Pair}). Returns a copy whenever the caller-owned
+   * geometry would otherwise be mutated, so this helper is side-effect-free with respect to its
+   * input — important because {@link #rsDWithin} is a public predicate that should not modify
+   * geometries handed to it.
+   */
+  private static Geometry toS2Ready(Geometry geom) {
+    Geometry oriented = ensureCcwForS2(geom);
+    if (oriented == geom) {
+      // ensureCcwForS2 returned the input unchanged (already CCW or non-polygon); clone before
+      // touching SRID so we don't write back into the caller's object.
+      oriented = geom.copy();
+    }
+    // S2 treats coordinates as lat/lng regardless of SRID metadata, but we tag the geography as
+    // EPSG:4326 since both inputs are guaranteed to be in WGS84 here. JTS.transform does not
+    // propagate SRID, so we set it explicitly on the (now-owned) copy.
+    oriented.setSRID(4326);
+    return oriented;
+  }
+
+  /**
+   * Return {@code geom} with every polygon shell oriented CCW (S2's expected orientation).
+   * Non-polygon geometries are returned unchanged. For MultiPolygons each component polygon is
+   * checked and reversed independently — JTS/OGC does not require consistent ring orientation
+   * across the components of a user-supplied MultiPolygon, so flipping the whole geometry based on
+   * the first shell would mis-orient any later polygon with the opposite winding. Empty polygons
+   * and {@code MULTIPOLYGON EMPTY} pass through untouched.
+   */
+  private static Geometry ensureCcwForS2(Geometry geom) {
+    if (geom instanceof Polygon) {
+      Polygon p = (Polygon) geom;
+      if (p.isEmpty() || Orientation.isCCW(p.getExteriorRing().getCoordinates())) {
+        return geom;
+      }
+      return geom.reverse();
+    }
+    if (geom instanceof MultiPolygon) {
+      int n = geom.getNumGeometries();
+      if (n == 0) {
+        return geom;
+      }
+      Polygon[] reoriented = new Polygon[n];
+      boolean anyReversal = false;
+      for (int i = 0; i < n; i++) {
+        Polygon p = (Polygon) geom.getGeometryN(i);
+        if (p.isEmpty() || Orientation.isCCW(p.getExteriorRing().getCoordinates())) {
+          reoriented[i] = p;
+        } else {
+          reoriented[i] = (Polygon) p.reverse();
+          anyReversal = true;
+        }
+      }
+      if (!anyReversal) {
+        return geom;
+      }
+      GeometryFactory factory = geom.getFactory();
+      return factory.createMultiPolygon(reoriented);
+    }
+    return geom;
+  }
+
+  private static Pair<Geometry, Geometry> toWGS84Pair(GridCoverage2D raster, Geometry queryWindow) {
+    Geometry rasterGeometry;
+    try {
+      rasterGeometry = GeometryFunctions.convexHull(raster);
+    } catch (FactoryException | TransformException e) {
+      throw new RuntimeException("Failed to calculate the convex hull of the raster", e);
+    }
+
+    CoordinateReferenceSystem rasterCRS = raster.getCoordinateReferenceSystem();
+    if (rasterCRS == null || rasterCRS instanceof DefaultEngineeringCRS) {
+      rasterCRS = DefaultGeographicCRS.WGS84;
+    }
+
+    int queryWindowSRID = queryWindow.getSRID();
+    if (queryWindowSRID <= 0) {
+      queryWindowSRID = 4326;
+    }
+    CoordinateReferenceSystem queryWindowCRS = FunctionsGeoTools.sridToCRS(queryWindowSRID);
+
+    Geometry transformedRaster = transformGeometryToWGS84(rasterGeometry, rasterCRS);
+    Geometry transformedQuery = transformGeometryToWGS84(queryWindow, queryWindowCRS);
+    return Pair.of(transformedRaster, transformedQuery);
+  }
+
+  private static Pair<Geometry, Geometry> toWGS84Pair(GridCoverage2D left, GridCoverage2D right) {
+    Geometry leftGeometry;
+    Geometry rightGeometry;
+    try {
+      leftGeometry = GeometryFunctions.convexHull(left);
+      rightGeometry = GeometryFunctions.convexHull(right);
+    } catch (FactoryException | TransformException e) {
+      throw new RuntimeException("Failed to calculate the convex hull of the raster", e);
+    }
+
+    CoordinateReferenceSystem leftCRS = left.getCoordinateReferenceSystem();
+    if (leftCRS == null || leftCRS instanceof DefaultEngineeringCRS) {
+      leftCRS = DefaultGeographicCRS.WGS84;
+    }
+    CoordinateReferenceSystem rightCRS = right.getCoordinateReferenceSystem();
+    if (rightCRS == null || rightCRS instanceof DefaultEngineeringCRS) {
+      rightCRS = DefaultGeographicCRS.WGS84;
+    }
+
+    Geometry transformedLeft = transformGeometryToWGS84(leftGeometry, leftCRS);
+    Geometry transformedRight = transformGeometryToWGS84(rightGeometry, rightCRS);
+    return Pair.of(transformedLeft, transformedRight);
   }
 
   private static Pair<Geometry, Geometry> convertCRSIfNeeded(

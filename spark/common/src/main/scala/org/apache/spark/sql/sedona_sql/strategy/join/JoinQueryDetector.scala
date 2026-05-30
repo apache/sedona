@@ -174,6 +174,32 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
         Some(condition)))
   }
 
+  /**
+   * Build a [[JoinQueryDetection]] for [[RS_DWithin]]. The coarse spatial join uses an expanded
+   * WGS84 envelope (driven by `distance`) and falls back to the per-row predicate for refinement,
+   * matching the pattern used for [[org.apache.spark.sql.sedona_sql.expressions.ST_DWithin]].
+   */
+  private def getRasterDistanceJoinDetection(
+      left: LogicalPlan,
+      right: LogicalPlan,
+      predicate: RS_DWithin,
+      extraCondition: Option[Expression] = None): Option[JoinQueryDetection] = {
+    val leftShape = predicate.inputExpressions.head
+    val rightShape = predicate.inputExpressions(1)
+    val distance = predicate.inputExpressions(2)
+    val condition = extraCondition.map(And(_, predicate)).getOrElse(predicate)
+    Some(
+      JoinQueryDetection(
+        left,
+        right,
+        leftShape,
+        rightShape,
+        SpatialPredicate.INTERSECTS,
+        isGeography = false,
+        extraCondition = Some(condition),
+        distance = Some(distance)))
+  }
+
   def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
     case Join(left, right, joinType, condition, JoinHint(leftHint, rightHint))
         if optimizationEnabled(left, right, condition) =>
@@ -320,6 +346,8 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
               getJoinDetection(left, right, pred, extraCondition)
             case pred: RS_Predicate =>
               getRasterJoinDetection(left, right, pred, extraCondition)
+            case pred: RS_DWithin =>
+              getRasterDistanceJoinDetection(left, right, pred, extraCondition)
             case ST_DWithin(Seq(leftShape, rightShape, distance)) =>
               val geographyShape =
                 isGeographyInput(leftShape) || isGeographyInput(rightShape)
@@ -903,9 +931,10 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
         case (None, _, true, _, true) =>
           throw new UnsupportedOperationException(
             "Geography joins are not yet supported for raster predicates")
-        case (Some(_), _, _, _, true) =>
+        case (Some(_), _, true, _, true) =>
           throw new UnsupportedOperationException(
-            "Distance joins are not supported for raster predicates")
+            "Geography distance joins are not yet supported for raster predicates")
+        case (Some(_), _, false, _, true) => "RS_DWithin"
       }
     val (distanceOnIndexSide, distanceOnStreamSide) = distance
       .map { distanceExpr =>

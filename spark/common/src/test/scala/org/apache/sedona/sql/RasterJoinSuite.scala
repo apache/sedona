@@ -20,7 +20,7 @@ package org.apache.sedona.sql
 
 import org.apache.sedona.common.raster.{RasterConstructors, RasterPredicates}
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.sedona_sql.strategy.join.{BroadcastIndexJoinExec, RangeJoinExec}
+import org.apache.spark.sql.sedona_sql.strategy.join.{BroadcastIndexJoinExec, DistanceJoinExec, RangeJoinExec}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.io.WKTReader
@@ -308,8 +308,73 @@ class RasterJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
   }
 
   private def isUsingOptimizedSpatialJoin(df: DataFrame): Boolean = {
-    df.queryExecution.executedPlan.collect { case _: BroadcastIndexJoinExec | _: RangeJoinExec =>
-      true
+    df.queryExecution.executedPlan.collect {
+      case _: BroadcastIndexJoinExec | _: RangeJoinExec | _: DistanceJoinExec =>
+        true
     }.nonEmpty
+  }
+
+  describe("RS_DWithin distance join") {
+    // Reuse the shared `rasters` / `geometries` set used by the RS_Intersects table above so the
+    // distance-join path is exercised against the same polar / antimeridian-crossing / no-CRS
+    // inputs. The world-envelope fallback in `TraitJoinQueryBase.expandRasterFilterEnvelope`
+    // guarantees the R-tree filter never excludes a pair that the per-row S2 predicate would
+    // match for those footprints.
+    val testDistance = 100000.0
+
+    def expectedDWithinPairs: Seq[(Int, Int)] =
+      rasters.flatMap { case (rast, rastId) =>
+        geometries.flatMap { case (geom, geomId) =>
+          if (RasterPredicates.rsDWithin(rast, geom, testDistance)) Some((rastId, geomId))
+          else None
+        }
+      }
+
+    it("non-broadcast distance join, raster-left geometry-right, left dominant") {
+      withConf(Map(spatialJoinPartitionSideConfKey -> "left")) {
+        val result = sparkSession.sql(
+          s"SELECT df1.id, df2.id FROM df1 JOIN df2 ON RS_DWithin(df1.rast, df2.geom, $testDistance)")
+        assert(result.queryExecution.executedPlan.collect { case p: DistanceJoinExec =>
+          p
+        }.nonEmpty)
+        verifyResult(expectedDWithinPairs, result)
+      }
+    }
+
+    it("non-broadcast distance join, raster-left geometry-right, right dominant") {
+      withConf(Map(spatialJoinPartitionSideConfKey -> "right")) {
+        val result = sparkSession.sql(
+          s"SELECT df1.id, df2.id FROM df1 JOIN df2 ON RS_DWithin(df1.rast, df2.geom, $testDistance)")
+        assert(result.queryExecution.executedPlan.collect { case p: DistanceJoinExec =>
+          p
+        }.nonEmpty)
+        verifyResult(expectedDWithinPairs, result)
+      }
+    }
+
+    it("non-broadcast distance join, geometry-left raster-right (swapped operands)") {
+      val result = sparkSession.sql(
+        s"SELECT df1.id, df2.id FROM df2 JOIN df1 ON RS_DWithin(df2.geom, df1.rast, $testDistance)")
+      assert(result.queryExecution.executedPlan.collect { case p: DistanceJoinExec =>
+        p
+      }.nonEmpty)
+      verifyResult(expectedDWithinPairs, result)
+    }
+
+    it("non-broadcast distance join, raster-raster") {
+      val expected = rasters.flatMap { case (rast, id1) =>
+        rasters.flatMap { case (otherRast, id2) =>
+          if (RasterPredicates.rsDWithin(rast, otherRast, testDistance)) Some((id1, id2))
+          else None
+        }
+      }
+      val result = sparkSession.sql(
+        s"SELECT df1.id, df3.id FROM df1 JOIN df3 ON RS_DWithin(df1.rast, df3.rast, $testDistance)")
+      assert(result.queryExecution.executedPlan.collect { case p: DistanceJoinExec =>
+        p
+      }.nonEmpty)
+      val actual = result.collect().map(row => (row.getInt(0), row.getInt(1))).sorted
+      assert(actual === expected.sorted)
+    }
   }
 }

@@ -61,6 +61,11 @@ case class SpatialIndexExec(
           resultRaw,
           boundShape,
           BindReferences.bindReference(distanceExpression, child.output))
+      case Some(distanceExpression) if isRasterPredicate =>
+        toExpandedWGS84EnvelopeRDD(
+          resultRaw,
+          boundShape,
+          BindReferences.bindReference(distanceExpression, child.output))
       case Some(distanceExpression) =>
         toExpandedEnvelopeRDD(
           resultRaw,

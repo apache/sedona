@@ -139,6 +139,66 @@ trait TraitJoinQueryBase {
   }
 
   /**
+   * Raster variant of [[toExpandedEnvelopeRDD]] for distance joins with raster predicates. Each
+   * row's shape (raster or geometry) is first projected to a WGS84 envelope (matching the
+   * non-distance raster path in [[toWGS84EnvelopeRDD]]) and then expanded by `boundRadius` meters
+   * using the Haversine polar-radius approximation — the same envelope expansion the
+   * `ST_DistanceSphere` distance-join uses. Treating `boundRadius` as meters everywhere (rather
+   * than the input CRS's native unit) keeps the coarse R-tree filter and the per-row `RS_DWithin`
+   * predicate aligned on a single unit.
+   *
+   * Polar and antimeridian-crossing rasters already span half or more of the globe in their
+   * planar WGS84 envelope; for those rows the helper substitutes a global envelope so the R-tree
+   * filter pairs them with every counterpart and the per-row S2 predicate produces the final
+   * answer. Mid-latitude rasters retain the tight Haversine bound.
+   */
+  def toExpandedWGS84EnvelopeRDD(
+      rdd: RDD[UnsafeRow],
+      shapeExpression: Expression,
+      boundRadius: Expression): SpatialRDD[Geometry] = {
+    val spatialRdd = new SpatialRDD[Geometry]
+    val expandedRdd = rdd.map { row =>
+      val serialized = shapeExpression.eval(row).asInstanceOf[Array[Byte]]
+      val baseShape =
+        if (serialized == null) {
+          new GeometryFactory().createGeometryCollection()
+        } else if (shapeExpression.dataType.isInstanceOf[RasterUDT]) {
+          val raster = RasterSerializer.deserialize(serialized)
+          JoinedGeometryRaster.rasterToWGS84Envelope(raster)
+        } else {
+          val geom = GeometrySerializer.deserialize(serialized)
+          JoinedGeometryRaster.geometryToWGS84Envelope(geom)
+        }
+      val distance = boundRadius.eval(row).asInstanceOf[Double]
+      val expanded = expandRasterFilterEnvelope(baseShape, distance)
+      expanded.setUserData(row.copy)
+      expanded
+    }
+    spatialRdd.setRawSpatialRDD(expandedRdd)
+    spatialRdd
+  }
+
+  /**
+   * Compute the R-tree filter envelope for a single side of a raster distance join. Mid-latitude
+   * / single-hemisphere rasters get a Haversine-expanded envelope (tight, optimization-friendly).
+   * Footprints whose planar WGS84 envelope already spans more than half the globe in longitude or
+   * grazes a pole fall back to a world envelope so the coarse filter never excludes a true match
+   * — the per-row S2 predicate decides correctness for those rows.
+   */
+  private[join] def expandRasterFilterEnvelope(
+      baseShape: Geometry,
+      distance: Double): Geometry = {
+    val envelope = baseShape.getEnvelopeInternal
+    val touchesPole = envelope.getMaxY >= 90.0 || envelope.getMinY <= -90.0
+    val tooWide = envelope.getWidth > 180.0
+    if (touchesPole || tooWide) {
+      baseShape.getFactory.toGeometry(new org.locationtech.jts.geom.Envelope(-180, 180, -90, 90))
+    } else {
+      JoinedGeometry.geometryToExpandedEnvelope(baseShape, distance, isGeography = true)
+    }
+  }
+
+  /**
    * Geography variant of [[toExpandedEnvelopeRDD]]. Each row becomes a JTS geometry whose
    * envelope is the Geography's lat/lng bounding rectangle expanded by `boundRadius` meters using
    * the Haversine-based polar-radius approximation in

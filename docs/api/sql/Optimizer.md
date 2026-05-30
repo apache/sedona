@@ -282,6 +282,24 @@ These queries could be planned as RangeJoin or BroadcastIndexJoin. Here is an ex
    +- LocalTableScan [geom#24, id#25]
 ```
 
+### Raster distance join
+
+`RS_DWithin(left, right, distance)` is recognised as a distance-join predicate. `distance` is always in **meters**: both sides are projected to WGS84 first, each side's envelope is expanded by `distance` meters using the Haversine polar-radius approximation (the same envelope expansion `ST_DistanceSphere` uses), and the resulting envelopes drive an R-tree filter. Surviving candidates are refined per-row by `RS_DWithin`, which delegates to the Geography `dWithin` to compute the minimum geodesic distance between the convex hulls via S2's `ClosestEdgeQuery` (overlap or touch returns 0). `BroadcastIndexJoinExec` is chosen when one side is small enough to broadcast, otherwise `DistanceJoinExec`.
+
+Rasters whose planar WGS84 envelope already spans more than half the globe in longitude or grazes a pole — e.g. polar projections (EPSG:3996, EPSG:3413) and antimeridian-crossing UTM zones (EPSG:32601) — are given a global filter envelope instead. The R-tree filter is intentionally permissive for those rows so they pair with every counterpart, and the per-row S2 predicate produces the final answer. Mid-latitude rasters retain the tight Haversine bound and the partitioning speedup that comes with it.
+
+```sql
+-- Raster-geometry distance join (broadcastable), 1 km radius
+SELECT /*+ BROADCAST(points) */ r.id, p.id
+FROM rasters r
+JOIN points p ON RS_DWithin(r.raster, p.geom, 1000)
+
+-- Raster-raster distance join (partitioned spatial join), 5 km radius
+SELECT a.id, b.id
+FROM rasters a
+JOIN rasters b ON RS_DWithin(a.raster, b.raster, 5000)
+```
+
 ## Google S2 based approximate equi-join
 
 If the performance of Sedona optimized join is not ideal, which is possibly caused by  complicated and overlapping geometries, you can resort to Sedona built-in Google S2-based approximate equi-join. This equi-join leverages Spark's internal equi-join algorithm and might be performant given that you can opt to skip the refinement step  by sacrificing query accuracy.
