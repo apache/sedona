@@ -1847,6 +1847,44 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
     def test_transform(self):
         pass
 
+    def test_rotate(self):
+        geoms = [
+            Point(1, 1),
+            LineString([(1, -1), (1, 0)]),
+            Polygon([(3, -1), (4, 0), (3, 1)]),
+            None,
+        ]
+        s = GeoSeries(geoms)
+        gpd_s = gpd.GeoSeries(geoms)
+
+        # Test default (degrees, origin='center')
+        self.check_sgpd_equals_gpd(s.rotate(90), gpd_s.rotate(90))
+
+        # Test with explicit origin tuple
+        self.check_sgpd_equals_gpd(
+            s.rotate(90, origin=(0, 0)), gpd_s.rotate(90, origin=(0, 0))
+        )
+
+        # Test use_radians
+        import math
+
+        self.check_sgpd_equals_gpd(
+            s.rotate(math.pi / 2, use_radians=True),
+            gpd_s.rotate(math.pi / 2, use_radians=True),
+        )
+
+        # Test origin='centroid'
+        self.check_sgpd_equals_gpd(
+            s.rotate(45, origin="centroid"), gpd_s.rotate(45, origin="centroid")
+        )
+
+        # Test GeoDataFrame works too
+        self.check_sgpd_equals_gpd(s.to_geoframe().rotate(90), gpd_s.rotate(90))
+
+        # Test invalid origin
+        with pytest.raises((ValueError, TypeError)):
+            s.rotate(90, origin="invalid")
+
     def test_force_2d(self):
         s = sgpd.GeoSeries(
             [

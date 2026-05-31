@@ -1160,6 +1160,36 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
 
+    def rotate(self, angle, origin="center", use_radians=False) -> "GeoSeries":
+        import math
+
+        if not use_radians:
+            angle = angle * math.pi / 180.0
+        if isinstance(origin, str):
+            if origin == "center":
+                origin_x = stf.ST_X(stf.ST_Centroid(stf.ST_Envelope(self.spark.column)))
+                origin_y = stf.ST_Y(stf.ST_Centroid(stf.ST_Envelope(self.spark.column)))
+                spark_expr = stf.ST_Rotate(self.spark.column, angle, origin_x, origin_y)
+            elif origin == "centroid":
+                origin_x = stf.ST_X(stf.ST_Centroid(self.spark.column))
+                origin_y = stf.ST_Y(stf.ST_Centroid(self.spark.column))
+                spark_expr = stf.ST_Rotate(self.spark.column, angle, origin_x, origin_y)
+            else:
+                raise ValueError(
+                    f"origin must be 'center', 'centroid', a Point, or (x, y) tuple, got {origin!r}"
+                )
+        elif isinstance(origin, tuple) and len(origin) == 2:
+            spark_expr = stf.ST_Rotate(
+                self.spark.column, angle, float(origin[0]), float(origin[1])
+            )
+        elif isinstance(origin, shapely.geometry.Point):
+            spark_expr = stf.ST_Rotate(self.spark.column, angle, origin.x, origin.y)
+        else:
+            raise TypeError(
+                f"origin must be 'center', 'centroid', a Point, or (x, y) tuple"
+            )
+        return self._query_geometry_column(spark_expr, returns_geom=True)
+
     def force_2d(self) -> "GeoSeries":
         spark_expr = stf.ST_Force_2D(self.spark.column)
         return self._query_geometry_column(spark_expr, returns_geom=True)

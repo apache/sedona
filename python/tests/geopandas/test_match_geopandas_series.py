@@ -956,6 +956,17 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
     def test_transform(self):
         pass
 
+    def test_rotate(self):
+        for geom in self.geoms:
+            # Sedona converts empty geometries to None, skip them
+            if not gpd.GeoSeries(geom).is_empty.any():
+                sgpd_result = GeoSeries(geom).rotate(45)
+                gpd_result = gpd.GeoSeries(geom).rotate(45)
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+                sgpd_result = GeoSeries(geom).rotate(45, origin=(0, 0))
+                gpd_result = gpd.GeoSeries(geom).rotate(45, origin=(0, 0))
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_force_2d(self):
         # force_2d was added from geopandas 1.0.0
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
