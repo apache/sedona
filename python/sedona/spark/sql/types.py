@@ -41,6 +41,7 @@ else:
 from sedona.spark.utils import geometry_serde
 from sedona.spark.core.geom.geography import Geography
 from sedona.spark.core.geom.box2d import Box2D
+from sedona.spark.core.geom.box3d import Box3D
 
 
 class GeometryType(UserDefinedType):
@@ -122,6 +123,39 @@ class Box2DType(UserDefinedType):
     @classmethod
     def scalaUDT(cls):
         return "org.apache.spark.sql.sedona_sql.UDT.Box2DUDT"
+
+
+class Box3DType(UserDefinedType):
+
+    @classmethod
+    def sqlType(cls):
+        return StructType(
+            [
+                StructField("xmin", DoubleType(), nullable=False),
+                StructField("ymin", DoubleType(), nullable=False),
+                StructField("zmin", DoubleType(), nullable=False),
+                StructField("xmax", DoubleType(), nullable=False),
+                StructField("ymax", DoubleType(), nullable=False),
+                StructField("zmax", DoubleType(), nullable=False),
+            ]
+        )
+
+    def serialize(self, obj):
+        return (obj.xmin, obj.ymin, obj.zmin, obj.xmax, obj.ymax, obj.zmax)
+
+    def deserialize(self, datum):
+        return Box3D(datum[0], datum[1], datum[2], datum[3], datum[4], datum[5])
+
+    @classmethod
+    def module(cls):
+        return "sedona.spark.sql.types"
+
+    def needConversion(self):
+        return True
+
+    @classmethod
+    def scalaUDT(cls):
+        return "org.apache.spark.sql.sedona_sql.UDT.Box3DUDT"
 
 
 class RasterType(UserDefinedType):

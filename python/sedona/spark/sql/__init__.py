@@ -32,6 +32,7 @@ from sedona.spark.sql.st_functions import *
 from sedona.spark.sql.st_predicates import *
 from sedona.spark.sql.types import (
     Box2DType,
+    Box3DType,
     GeometryType,
     GeographyType,
     RasterType,
