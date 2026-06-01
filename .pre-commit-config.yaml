@@ -328,7 +328,7 @@ repos:
         description: a tool (and pre-commit hook) to automatically upgrade syntax for newer versions of the language
         args: [--py37-plus]
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 26.3.1
+    rev: 26.5.1
     hooks:
       - id: black-jupyter
         name: run black-jupyter
@@ -341,7 +341,7 @@ repos:
         description: audits Python environments, requirements files and dependency trees for known security vulnerabilities, and can automatically fix them
         args: ['.']
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v22.1.4
+    rev: v22.1.5
     hooks:
       - id: clang-format
         name: run clang-format
@@ -369,7 +369,7 @@ repos:
         name: run gitleaks
         description: check for secrets with gitleaks
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.24.1
+    rev: v1.25.2
     hooks:
       - id: zizmor
         name: run zizmor
@@ -555,7 +555,7 @@ repos:
       - id: blacken-docs
         name: run blacken-docs
         description: run `black` on python code blocks in documentation files
-        additional_dependencies: [black==26.3.1]
+        additional_dependencies: [black==26.5.1]
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
     rev: 3.6.1
     hooks:
