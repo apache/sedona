@@ -251,6 +251,10 @@
                         <a href="Box2DCastResolutionRule.html" title="Analyzer rule that resolves Catalyst casts between Sedona UDTs that Spark's stock cast resolver does not handle.">Box2DCastResolutionRule</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
+                        <a class="class" href="Box3DCastResolutionRule.html" title="Analyzer rule that resolves Catalyst casts from Geometry to Box3D."></a>
+                        <a href="Box3DCastResolutionRule.html" title="Analyzer rule that resolves Catalyst casts from Geometry to Box3D.">Box3DCastResolutionRule</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
                         <a class="object" href="ExpressionUtils$.html" title="This class contains helper methods for transforming catalyst expressions."></a>
                         <a href="ExpressionUtils$.html" title="This class contains helper methods for transforming catalyst expressions.">ExpressionUtils</a>
                       </li><li class="current-entities indented6">
@@ -398,6 +402,30 @@ analyzer would reject the cast. We rewrite during analysis (before <code>CheckAn
 downstream optimizer and codegen path see the expression tree of an ordinary Sedona expression.</p><p>Implicit type coercion (e.g. passing a Geometry into a Box2D-typed function argument without an
 explicit cast) is intentionally out of scope here; it requires hooking into Catalyst's type
 coercion rules and is tracked separately.
+</p></div></div>
+    </li><li name="org.apache.spark.sql.sedona_sql.optimization.Box3DCastResolutionRule" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Box3DCastResolutionRuleextendsRule[org.apache.spark.sql.catalyst.plans.logical.LogicalPlan]"></a><a id="Box3DCastResolutionRule:Box3DCastResolutionRule"></a>
+      <span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Analyzer rule that resolves Catalyst casts from Geometry to Box3D." href="Box3DCastResolutionRule.html"><span class="name">Box3DCastResolutionRule</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.rules.Rule">Rule</span>[<span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Analyzer rule that resolves Catalyst casts from Geometry to Box3D.</p><div class="fullcomment"><div class="comment cmt"><p>Analyzer rule that resolves Catalyst casts from Geometry to Box3D. Spark's <code>Cast.canCast</code>
+returns <code>false</code> for arbitrary UDT-to-UDT casts, so without this rule the analyzer would reject
+<code>CAST(geom AS box3d)</code>. We rewrite during analysis (before <code>CheckAnalysis</code>) so the downstream
+optimizer and codegen path see the expression tree of an ordinary Sedona expression:</p><ul><li><code>CAST(geom AS box3d)</code> → <code>ST_Box3D(geom)</code> (planar 3D bounding box of the geometry;
+    geometries without a Z dimension fold into <code>zmin = zmax = 0</code> per PostGIS)</li></ul><p>The inverse direction (<code>CAST(box3d AS geometry)</code>) is intentionally deferred until Box3D has a
+<code>ST_GeomFromBox3D</code> counterpart and a concrete consumer has driven the choice of output geometry
+shape. Implicit type coercion is also out of scope here; it requires hooking into Catalyst's
+type coercion rules and is tracked separately.
 </p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SpatialFilterPushDownForGeoParquetextendsRule[org.apache.spark.sql.catalyst.plans.logical.LogicalPlan]"></a><a id="SpatialFilterPushDownForGeoParquet:SpatialFilterPushDownForGeoParquet"></a>

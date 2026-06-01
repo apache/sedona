@@ -3,9 +3,9 @@
         <head>
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-          <title>org.apache.sedona:sedona-spark-common-3.4_2.12 1.9.1-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet</title>
-          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.4 2.12 1.9.1 - SNAPSHOT API - org.apache.spark.sql.sedona sql.optimization.SpatialFilterPushDownForGeoParquet" />
-          <meta name="keywords" content="org.apache.sedona sedona spark common 3.4 2.12 1.9.1 SNAPSHOT API org.apache.spark.sql.sedona sql.optimization.SpatialFilterPushDownForGeoParquet" />
+          <title>org.apache.sedona:sedona-spark-common-3.4_2.12 1.9.1-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.optimization.Box3DCastResolutionRule</title>
+          <meta name="description" content="org.apache.sedona sedona - spark - common - 3.4 2.12 1.9.1 - SNAPSHOT API - org.apache.spark.sql.sedona sql.optimization.Box3DCastResolutionRule" />
+          <meta name="keywords" content="org.apache.sedona sedona spark common 3.4 2.12 1.9.1 SNAPSHOT API org.apache.spark.sql.sedona sql.optimization.Box3DCastResolutionRule" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       
@@ -171,8 +171,8 @@
                         <a href="Box2DCastResolutionRule.html" title="Analyzer rule that resolves Catalyst casts between Sedona UDTs that Spark's stock cast resolver does not handle.">Box2DCastResolutionRule</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
-                        <a class="class" href="Box3DCastResolutionRule.html" title="Analyzer rule that resolves Catalyst casts from Geometry to Box3D."></a>
-                        <a href="Box3DCastResolutionRule.html" title="Analyzer rule that resolves Catalyst casts from Geometry to Box3D.">Box3DCastResolutionRule</a>
+                        <a class="class" href="" title="Analyzer rule that resolves Catalyst casts from Geometry to Box3D."></a>
+                        <a href="" title="Analyzer rule that resolves Catalyst casts from Geometry to Box3D.">Box3DCastResolutionRule</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="object" href="ExpressionUtils$.html" title="This class contains helper methods for transforming catalyst expressions."></a>
@@ -183,8 +183,8 @@
                         <a href="ExtractPhysicalFunctions$.html" title="Extracts Physical functions from operators, rewriting the query plan so that the functions can be evaluated alone in its own physical executors.">ExtractPhysicalFunctions</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
-                        <a class="class" href="" title=""></a>
-                        <a href="" title="">SpatialFilterPushDownForGeoParquet</a>
+                        <a class="class" href="SpatialFilterPushDownForGeoParquet.html" title=""></a>
+                        <a href="SpatialFilterPushDownForGeoParquet.html" title="">SpatialFilterPushDownForGeoParquet</a>
                       </li><li class="current-entities indented6">
                         <span class="separator"></span>
                         <a class="class" href="SpatialTemporalFilterPushDownForStacScan.html" title=""></a>
@@ -198,8 +198,8 @@
       <div id="definition">
         <div class="big-circle class">c</div>
         <p id="owner"><a href="../../../../../index.html" class="extype" name="org">org</a>.<a href="../../../../index.html" class="extype" name="org.apache">apache</a>.<a href="../../../index.html" class="extype" name="org.apache.spark">spark</a>.<a href="../../index.html" class="extype" name="org.apache.spark.sql">sql</a>.<a href="../index.html" class="extype" name="org.apache.spark.sql.sedona_sql">sedona_sql</a>.<a href="index.html" class="extype" name="org.apache.spark.sql.sedona_sql.optimization">optimization</a></p>
-        <h1>SpatialFilterPushDownForGeoParquet<span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html" title="Permalink">
+        <h1>Box3DCastResolutionRule<span class="permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
@@ -212,22 +212,25 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">SpatialFilterPushDownForGeoParquet</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.rules.Rule">Rule</span>[<span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span>]</span>
+        <span class="name">Box3DCastResolutionRule</span><span class="result"> extends <span class="extype" name="org.apache.spark.sql.catalyst.rules.Rule">Rule</span>[<span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span>]</span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Analyzer rule that resolves Catalyst casts from Geometry to Box3D. Spark's <code>Cast.canCast</code>
+returns <code>false</code> for arbitrary UDT-to-UDT casts, so without this rule the analyzer would reject
+<code>CAST(geom AS box3d)</code>. We rewrite during analysis (before <code>CheckAnalysis</code>) so the downstream
+optimizer and codegen path see the expression tree of an ordinary Sedona expression:</p><ul><li><code>CAST(geom AS box3d)</code> → <code>ST_Box3D(geom)</code> (planar 3D bounding box of the geometry;
+    geometries without a Z dimension fold into <code>zmin = zmax = 0</code> per PostGIS)</li></ul><p>The inverse direction (<code>CAST(box3d AS geometry)</code>) is intentionally deferred until Box3D has a
+<code>ST_GeomFromBox3D</code> counterpart and a concrete consumer has driven the choice of output geometry
+shape. Implicit type coercion is also out of scope here; it requires hooking into Catalyst's
+type coercion rules and is tracked separately.
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
           <div class="superTypes hiddenContent"><span class="extype" name="org.apache.spark.sql.catalyst.rules.Rule">Rule</span>[<span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span>], <span class="extype" name="org.apache.spark.internal.Logging">Logging</span>, <span class="extype" name="org.apache.spark.sql.catalyst.SQLConfHelper">SQLConfHelper</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
-        </div><div class="toggleContainer block">
-            <span class="toggle">
-              Known Subclasses
-            </span>
-            <div class="subClasses hiddenContent"><a href="SpatialTemporalFilterPushDownForStacScan.html" class="extype" name="org.apache.spark.sql.sedona_sql.optimization.SpatialTemporalFilterPushDownForStacScan">SpatialTemporalFilterPushDownForStacScan</a></div>
-          </div></div>
+        </div></div>
         
 
       <div id="mbrsel">
@@ -252,7 +255,7 @@
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet"><span>SpatialFilterPushDownForGeoParquet</span></li><li class="in" name="org.apache.spark.sql.catalyst.rules.Rule"><span>Rule</span></li><li class="in" name="org.apache.spark.internal.Logging"><span>Logging</span></li><li class="in" name="org.apache.spark.sql.catalyst.SQLConfHelper"><span>SQLConfHelper</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="org.apache.spark.sql.sedona_sql.optimization.Box3DCastResolutionRule"><span>Box3DCastResolutionRule</span></li><li class="in" name="org.apache.spark.sql.catalyst.rules.Rule"><span>Rule</span></li><li class="in" name="org.apache.spark.internal.Logging"><span>Logging</span></li><li class="in" name="org.apache.spark.sql.catalyst.SQLConfHelper"><span>SQLConfHelper</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -272,10 +275,10 @@
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(sparkSession:org.apache.spark.sql.SparkSession):org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet"></a><a id="&lt;init&gt;:SpatialFilterPushDownForGeoParquet"></a>
+              <ol><li name="org.apache.spark.sql.sedona_sql.optimization.Box3DCastResolutionRule#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;():org.apache.spark.sql.sedona_sql.optimization.Box3DCastResolutionRule"></a><a id="&lt;init&gt;:Box3DCastResolutionRule"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#&lt;init&gt;(sparkSession:org.apache.spark.sql.SparkSession):org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#&lt;init&gt;():org.apache.spark.sql.sedona_sql.optimization.Box3DCastResolutionRule" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -284,7 +287,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">SpatialFilterPushDownForGeoParquet</span><span class="params">(<span name="sparkSession">sparkSession: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span>
+        <span class="name">Box3DCastResolutionRule</span><span class="params">()</span>
       </span>
       
       
@@ -301,7 +304,7 @@
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -317,7 +320,7 @@
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html###():Int" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -333,7 +336,7 @@
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -346,10 +349,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="org.apache.spark.sql.sedona_sql.optimization.Box3DCastResolutionRule#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply(plan:org.apache.spark.sql.catalyst.plans.logical.LogicalPlan):org.apache.spark.sql.catalyst.plans.logical.LogicalPlan"></a><a id="apply(LogicalPlan):LogicalPlan"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#apply(plan:org.apache.spark.sql.catalyst.plans.logical.LogicalPlan):org.apache.spark.sql.catalyst.plans.logical.LogicalPlan" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#apply(plan:org.apache.spark.sql.catalyst.plans.logical.LogicalPlan):org.apache.spark.sql.catalyst.plans.logical.LogicalPlan" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -361,11 +364,11 @@
         <span class="name">apply</span><span class="params">(<span name="plan">plan: <span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.catalyst.plans.logical.LogicalPlan">LogicalPlan</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet">SpatialFilterPushDownForGeoParquet</a> → Rule</dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="org.apache.spark.sql.sedona_sql.optimization.Box3DCastResolutionRule">Box3DCastResolutionRule</a> → Rule</dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -381,7 +384,7 @@
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#clone():Object" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -407,7 +410,7 @@
     </li><li name="org.apache.spark.sql.catalyst.SQLConfHelper#conf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="conf:org.apache.spark.sql.internal.SQLConf"></a><a id="conf:SQLConf"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#conf:org.apache.spark.sql.internal.SQLConf" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#conf:org.apache.spark.sql.internal.SQLConf" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -423,7 +426,7 @@
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -439,7 +442,7 @@
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -455,7 +458,7 @@
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -476,7 +479,7 @@
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#hashCode():Int" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -497,7 +500,7 @@
     </li><li name="org.apache.spark.internal.Logging#initializeLogIfNecessary" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="initializeLogIfNecessary(isInterpreter:Boolean,silent:Boolean):Boolean"></a><a id="initializeLogIfNecessary(Boolean,Boolean):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#initializeLogIfNecessary(isInterpreter:Boolean,silent:Boolean):Boolean" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#initializeLogIfNecessary(isInterpreter:Boolean,silent:Boolean):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -513,7 +516,7 @@
     </li><li name="org.apache.spark.internal.Logging#initializeLogIfNecessary" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="initializeLogIfNecessary(isInterpreter:Boolean):Unit"></a><a id="initializeLogIfNecessary(Boolean):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#initializeLogIfNecessary(isInterpreter:Boolean):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#initializeLogIfNecessary(isInterpreter:Boolean):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -529,7 +532,7 @@
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -545,7 +548,7 @@
     </li><li name="org.apache.spark.internal.Logging#isTraceEnabled" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isTraceEnabled():Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#isTraceEnabled():Boolean" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#isTraceEnabled():Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -561,7 +564,7 @@
     </li><li name="org.apache.spark.internal.Logging#log" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="log:org.slf4j.Logger"></a><a id="log:Logger"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#log:org.slf4j.Logger" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#log:org.slf4j.Logger" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -577,7 +580,7 @@
     </li><li name="org.apache.spark.internal.Logging#logDebug" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logDebug(msg:=&gt;String,throwable:Throwable):Unit"></a><a id="logDebug(⇒String,Throwable):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#logDebug(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#logDebug(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -593,7 +596,7 @@
     </li><li name="org.apache.spark.internal.Logging#logDebug" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logDebug(msg:=&gt;String):Unit"></a><a id="logDebug(⇒String):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#logDebug(msg:=&gt;String):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#logDebug(msg:=&gt;String):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -609,7 +612,7 @@
     </li><li name="org.apache.spark.internal.Logging#logError" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logError(msg:=&gt;String,throwable:Throwable):Unit"></a><a id="logError(⇒String,Throwable):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#logError(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#logError(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -625,7 +628,7 @@
     </li><li name="org.apache.spark.internal.Logging#logError" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logError(msg:=&gt;String):Unit"></a><a id="logError(⇒String):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#logError(msg:=&gt;String):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#logError(msg:=&gt;String):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -641,7 +644,7 @@
     </li><li name="org.apache.spark.internal.Logging#logInfo" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logInfo(msg:=&gt;String,throwable:Throwable):Unit"></a><a id="logInfo(⇒String,Throwable):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#logInfo(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#logInfo(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -657,7 +660,7 @@
     </li><li name="org.apache.spark.internal.Logging#logInfo" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logInfo(msg:=&gt;String):Unit"></a><a id="logInfo(⇒String):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#logInfo(msg:=&gt;String):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#logInfo(msg:=&gt;String):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -673,7 +676,7 @@
     </li><li name="org.apache.spark.internal.Logging#logName" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logName:String"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#logName:String" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#logName:String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -689,7 +692,7 @@
     </li><li name="org.apache.spark.internal.Logging#logTrace" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logTrace(msg:=&gt;String,throwable:Throwable):Unit"></a><a id="logTrace(⇒String,Throwable):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#logTrace(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#logTrace(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -705,7 +708,7 @@
     </li><li name="org.apache.spark.internal.Logging#logTrace" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logTrace(msg:=&gt;String):Unit"></a><a id="logTrace(⇒String):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#logTrace(msg:=&gt;String):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#logTrace(msg:=&gt;String):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -721,7 +724,7 @@
     </li><li name="org.apache.spark.internal.Logging#logWarning" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logWarning(msg:=&gt;String,throwable:Throwable):Unit"></a><a id="logWarning(⇒String,Throwable):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#logWarning(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#logWarning(msg:=&gt;String,throwable:Throwable):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -737,7 +740,7 @@
     </li><li name="org.apache.spark.internal.Logging#logWarning" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="logWarning(msg:=&gt;String):Unit"></a><a id="logWarning(⇒String):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#logWarning(msg:=&gt;String):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#logWarning(msg:=&gt;String):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -753,7 +756,7 @@
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -769,7 +772,7 @@
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#notify():Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -790,7 +793,7 @@
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -811,7 +814,7 @@
     </li><li name="org.apache.spark.sql.catalyst.rules.Rule#ruleId" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ruleId:org.apache.spark.sql.catalyst.rules.RuleId"></a><a id="ruleId:RuleId"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#ruleId:org.apache.spark.sql.catalyst.rules.RuleId" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#ruleId:org.apache.spark.sql.catalyst.rules.RuleId" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -827,7 +830,7 @@
     </li><li name="org.apache.spark.sql.catalyst.rules.Rule#ruleName" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ruleName:String"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#ruleName:String" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#ruleName:String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -843,7 +846,7 @@
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -859,7 +862,7 @@
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#toString():String" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -872,26 +875,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="org.apache.spark.sql.sedona_sql.optimization.SpatialFilterPushDownForGeoParquet#translateToGeoParquetSpatialFilters" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="translateToGeoParquetSpatialFilters(predicates:Seq[org.apache.spark.sql.catalyst.expressions.Expression]):Seq[org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter]"></a><a id="translateToGeoParquetSpatialFilters(Seq[Expression]):Seq[GeoParquetSpatialFilter]"></a>
-      <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#translateToGeoParquetSpatialFilters(predicates:Seq[org.apache.spark.sql.catalyst.expressions.Expression]):Seq[org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">translateToGeoParquetSpatialFilters</span><span class="params">(<span name="predicates">predicates: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="org.apache.spark.sql.catalyst.expressions.Expression">Expression</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="../../execution/datasources/geoparquet/GeoParquetSpatialFilter.html" class="extype" name="org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter">GeoParquetSpatialFilter</a>]</span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -913,7 +900,7 @@
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -937,7 +924,7 @@
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#wait():Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -967,7 +954,7 @@
               <ol><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/SpatialFilterPushDownForGeoParquet.html#finalize():Unit" title="Permalink">
+      <a href="../../../../../../org/apache/spark/sql/sedona_sql/optimization/Box3DCastResolutionRule.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
