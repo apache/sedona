@@ -40,9 +40,7 @@ class Box3DUDT extends UserDefinedType[Box3D] {
       StructField("ymax", DoubleType, nullable = false),
       StructField("zmax", DoubleType, nullable = false)))
 
-  // No `pyUDT` override yet — the Python `Box3DType` class is intentionally out of scope for
-  // Phase 1 (see #2973). It will be added together with the Python bindings follow-up, the
-  // same way Box2D paired `Box2DUDT.pyUDT` with `python/sedona/spark/sql/types.py::Box2DType`.
+  override def pyUDT: String = "sedona.spark.sql.types.Box3DType"
 
   override def userClass: Class[Box3D] = classOf[Box3D]
 
