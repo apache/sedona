@@ -174,6 +174,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[ST_Crosses](),
     function[ST_Disjoint](),
     function[ST_DWithin](),
+    function[ST_3DDWithin](),
     function[ST_Equals](),
     function[ST_Intersects](),
     function[ST_OrderingEquals](),

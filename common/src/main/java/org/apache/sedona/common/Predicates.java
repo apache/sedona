@@ -22,6 +22,7 @@ import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.common.sphere.Spheroid;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.operation.distance3d.Distance3DOp;
 import org.locationtech.jts.operation.relate.RelateOp;
 
 public class Predicates {
@@ -196,6 +197,42 @@ public class Predicates {
     // the supplied radius.
     if (dx > distance || dy > distance) return false;
     return dx * dx + dy * dy <= distance * distance;
+  }
+
+  /**
+   * 3D Euclidean distance-within predicate for Geometry inputs. Mirrors PostGIS {@code
+   * ST_3DDWithin}. Returns true iff the minimum 3D Euclidean distance between the two geometries is
+   * less than or equal to {@code distance}. Coordinates without a Z dimension are treated as {@code
+   * z = 0}, matching PostGIS and the {@code ST_Box3D} convention.
+   *
+   * <p>JTS's {@link Distance3DOp} only tolerates NaN Z on point-point inputs; segment-based
+   * distance math throws {@code IllegalArgumentException: Ordinates must not be NaN}. Fold missing
+   * Z to 0 on both arguments before dispatching so XY LineString / Polygon inputs (or any mix of XY
+   * and XYZ geometry kinds) behave as documented.
+   */
+  public static boolean dWithin3D(Geometry leftGeometry, Geometry rightGeometry, double distance) {
+    Geometry left = Functions.force3D(leftGeometry);
+    Geometry right = Functions.force3D(rightGeometry);
+    return new Distance3DOp(left, right).distance() <= distance;
+  }
+
+  /**
+   * Closed-interval 3D Euclidean distance test between two Box3D rectangular cuboids. Returns true
+   * if the minimum 3D Euclidean distance between the cuboids is less than or equal to {@code
+   * distance}.
+   *
+   * <p>Overlapping or edge/face/corner-touching boxes have distance 0 and therefore match for any
+   * {@code distance >= 0}. Inverted bounds throw for the same reason {@link #box3dIntersects(Box3D,
+   * Box3D)} does — Z has no wraparound convention, so all three axes must be ordered.
+   */
+  public static boolean dWithin3D(Box3D a, Box3D b, double distance) {
+    requireOrderedBox3D(a, "a");
+    requireOrderedBox3D(b, "b");
+    double dx = Math.max(0.0, Math.max(a.getXMin() - b.getXMax(), b.getXMin() - a.getXMax()));
+    double dy = Math.max(0.0, Math.max(a.getYMin() - b.getYMax(), b.getYMin() - a.getYMax()));
+    double dz = Math.max(0.0, Math.max(a.getZMin() - b.getZMax(), b.getZMin() - a.getZMax()));
+    if (dx > distance || dy > distance || dz > distance) return false;
+    return dx * dx + dy * dy + dz * dz <= distance * distance;
   }
 
   public static String relate(Geometry leftGeometry, Geometry rightGeometry) {

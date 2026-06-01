@@ -685,6 +685,17 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(!row.getBoolean(1))
     }
 
+    it("Passed ST_3DDWithin") {
+      val ptsDf = sparkSession.sql(
+        "SELECT ST_PointZ(0, 0, 0) AS a, ST_PointZ(1, 1, 1) AS b, ST_PointZ(5, 5, 5) AS c")
+      // 3D distance from a to b is sqrt(3) ≈ 1.732; threshold 2.0 includes, 1.0 excludes the a→c pair.
+      val row = ptsDf
+        .select(ST_3DDWithin("a", "b", 2.0), ST_3DDWithin("a", "c", 1.0))
+        .first()
+      assert(row.getBoolean(0))
+      assert(!row.getBoolean(1))
+    }
+
     it("Passed ST_3DExtent") {
       val pointsDf = sparkSession.sql("SELECT explode(array(" +
         "ST_PointZ(0.0, 0.0, -1.0), ST_PointZ(2.0, 4.0, 6.0), ST_PointZ(1.0, 1.0, 1.0))) AS geom")

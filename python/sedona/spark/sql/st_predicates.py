@@ -313,6 +313,31 @@ def ST_DWithin(
     return _call_predicate_function("ST_DWithin", args)
 
 
+@validate_argument_types
+def ST_3DDWithin(
+    a: ColumnOrName,
+    b: ColumnOrName,
+    distance: Union[ColumnOrName, float],
+) -> Column:
+    """Check whether two geometries (or two Box3D values) are within ``distance`` units using 3D
+    Euclidean distance.
+
+    Mirrors PostGIS ``ST_3DDWithin``. Coordinates without a Z dimension are treated as
+    ``z = 0``. For Box3D inputs the test is a closed-interval 3D distance between the two
+    cuboids; inverted bounds raise ``IllegalArgumentException``. NULL on null input.
+
+    :param a: First geometry or Box3D column.
+    :type a: ColumnOrName
+    :param b: Second geometry or Box3D column.
+    :type b: ColumnOrName
+    :param distance: Distance threshold.
+    :type distance: Union[ColumnOrName, float]
+    :return: True if the 3D distance between a and b is ≤ ``distance``.
+    :rtype: Column
+    """
+    return _call_predicate_function("ST_3DDWithin", (a, b, distance))
+
+
 # Automatically populate __all__
 __all__ = [
     name
