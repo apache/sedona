@@ -20,19 +20,20 @@ package org.apache.sedona.sql.parser
 
 import org.apache.spark.sql.catalyst.parser.SqlBaseParser._
 import org.apache.spark.sql.execution.SparkSqlAstBuilder
-import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, GeometryUDT}
+import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, Box3DUDT, GeometryUDT}
 import org.apache.spark.sql.types.DataType
 
 class SedonaSqlAstBuilder extends SparkSqlAstBuilder {
 
   /**
-   * Recognize Sedona UDT names (GEOMETRY, BOX2D) as primitive data types so SQL `CAST(... AS
-   * geometry)` / `CAST(... AS box2d)` parse to the matching UDT.
+   * Recognize Sedona UDT names (GEOMETRY, BOX2D, BOX3D) as primitive data types so SQL `CAST(...
+   * AS geometry)` / `CAST(... AS box2d)` / `CAST(... AS box3d)` parse to the matching UDT.
    */
   override def visitPrimitiveDataType(ctx: PrimitiveDataTypeContext): DataType = {
     ctx.getText.toUpperCase() match {
       case "GEOMETRY" => GeometryUDT()
       case "BOX2D" => Box2DUDT
+      case "BOX3D" => Box3DUDT
       case _ => super.visitPrimitiveDataType(ctx)
     }
   }
