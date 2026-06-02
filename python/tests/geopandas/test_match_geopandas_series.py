@@ -956,15 +956,17 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
     def test_transform(self):
         pass
 
-    def test_rotate(self):
+    @pytest.mark.parametrize("angle", [0, 45, 90, 180])
+    @pytest.mark.parametrize(
+        "origin_kwargs",
+        [{}, {"origin": (1, 2)}, {"origin": "centroid"}, {"origin": "point"}],
+    )
+    def test_rotate(self, angle, origin_kwargs):
         for geom in self.geoms:
             # Sedona converts empty geometries to None, skip them
             if not gpd.GeoSeries(geom).is_empty.any():
-                sgpd_result = GeoSeries(geom).rotate(45)
-                gpd_result = gpd.GeoSeries(geom).rotate(45)
-                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
-                sgpd_result = GeoSeries(geom).rotate(45, origin=(0, 0))
-                gpd_result = gpd.GeoSeries(geom).rotate(45, origin=(0, 0))
+                sgpd_result = GeoSeries(geom).rotate(angle, **origin_kwargs)
+                gpd_result = gpd.GeoSeries(geom).rotate(angle, **origin_kwargs)
                 self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_force_2d(self):

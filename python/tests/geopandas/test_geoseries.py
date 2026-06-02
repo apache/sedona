@@ -1855,33 +1855,66 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             None,
         ]
         s = GeoSeries(geoms)
-        gpd_s = gpd.GeoSeries(geoms)
 
-        # Test default (degrees, origin='center')
-        self.check_sgpd_equals_gpd(s.rotate(90), gpd_s.rotate(90))
-
-        # Test with explicit origin tuple
-        self.check_sgpd_equals_gpd(
-            s.rotate(90, origin=(0, 0)), gpd_s.rotate(90, origin=(0, 0))
+        # Test default
+        result = s.rotate(90)
+        expected = gpd.GeoSeries(
+            [
+                Point(1.0, 1.0),
+                LineString([(1.5, -0.5), (0.5, -0.5)]),
+                Polygon([(4.5, -0.5), (3.5, 0.5), (2.5, -0.5), (4.5, -0.5)]),
+                None,
+            ]
         )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Test with explicit origin tuple (90 degrees around 0,0)
+        result = s.rotate(90, origin=(0, 0))
+        expected = gpd.GeoSeries(
+            [
+                Point(-1.0, 1.0),
+                LineString([(1.0, 1.0), (0.0, 1.0)]),
+                Polygon([(1.0, 3.0), (0.0, 4.0), (-1.0, 3.0), (1.0, 3.0)]),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
 
         # Test use_radians
         import math
 
-        self.check_sgpd_equals_gpd(
-            s.rotate(math.pi / 2, use_radians=True),
-            gpd_s.rotate(math.pi / 2, use_radians=True),
-        )
+        result = s.rotate(math.pi / 2, origin=(0, 0), use_radians=True)
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Test with a Point object as the origin
+        result = s.rotate(90, origin=Point(0, 0))
+        self.check_sgpd_equals_gpd(result, expected)
 
         # Test origin='centroid'
-        self.check_sgpd_equals_gpd(
-            s.rotate(45, origin="centroid"), gpd_s.rotate(45, origin="centroid")
+        result = s.rotate(45, origin="centroid")
+        expected = gpd.GeoSeries(
+            [
+                Point(1.0, 1.0),
+                LineString(
+                    [
+                        (1.3535533905932737, -0.8535533905932737),
+                        (0.6464466094067263, -0.14644660940672627),
+                    ]
+                ),
+                Polygon(
+                    [
+                        (3.8047378541243653, -0.9428090415820636),
+                        (3.8047378541243653, 0.4714045207910314),
+                        (2.3905242917512703, 0.4714045207910314),
+                        (3.8047378541243653, -0.9428090415820636),
+                    ]
+                ),
+                None,
+            ]
         )
+        self.check_sgpd_equals_gpd(result, expected)
 
-        # Test GeoDataFrame works too
-        self.check_sgpd_equals_gpd(s.to_geoframe().rotate(90), gpd_s.rotate(90))
-
-        # Test invalid origin
+        # Test invalid origin strings
         with pytest.raises((ValueError, TypeError)):
             s.rotate(90, origin="invalid")
 

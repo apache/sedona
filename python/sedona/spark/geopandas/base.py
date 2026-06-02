@@ -1384,7 +1384,8 @@ class GeoFrame(metaclass=ABCMeta):
         Examples
         --------
         >>> from shapely.geometry import Point, LineString, Polygon
-        >>> s = geopandas.GeoSeries(
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries(
         ...     [
         ...         Point(1, 1),
         ...         LineString([(1, -1), (1, 0)]),
