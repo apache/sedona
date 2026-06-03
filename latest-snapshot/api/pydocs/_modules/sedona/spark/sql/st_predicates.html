@@ -522,6 +522,31 @@
     <span class="k">return</span> <span class="n">_call_predicate_function</span><span class="p">(</span><span class="s2">&quot;ST_DWithin&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="ST_3DDWithin"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_predicates.ST_3DDWithin">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_3DDWithin</span><span class="p">(</span>
+    <span class="n">a</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span>
+    <span class="n">b</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span>
+    <span class="n">distance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether two geometries (or two Box3D values) are within ``distance`` units using 3D</span>
+<span class="sd">    Euclidean distance.</span>
+
+<span class="sd">    Mirrors PostGIS ``ST_3DDWithin``. Coordinates without a Z dimension are treated as</span>
+<span class="sd">    ``z = 0``. For Box3D inputs the test is a closed-interval 3D distance between the two</span>
+<span class="sd">    cuboids; inverted bounds raise ``IllegalArgumentException``. NULL on null input.</span>
+
+<span class="sd">    :param a: First geometry or Box3D column.</span>
+<span class="sd">    :type a: ColumnOrName</span>
+<span class="sd">    :param b: Second geometry or Box3D column.</span>
+<span class="sd">    :type b: ColumnOrName</span>
+<span class="sd">    :param distance: Distance threshold.</span>
+<span class="sd">    :type distance: Union[ColumnOrName, float]</span>
+<span class="sd">    :return: True if the 3D distance between a and b is ≤ ``distance``.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_predicate_function</span><span class="p">(</span><span class="s2">&quot;ST_3DDWithin&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">distance</span><span class="p">))</span></div>
+
+
 <span class="c1"># Automatically populate __all__</span>
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">name</span>
