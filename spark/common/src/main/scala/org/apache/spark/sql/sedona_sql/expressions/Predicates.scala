@@ -358,6 +358,20 @@ private[apache] case class ST_DWithin(inputExpressions: Seq[Expression])
   }
 }
 
+private[apache] case class ST_3DDWithin(inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction3((l: Geometry, r: Geometry, d: Double) => Predicates.dWithin3D(l, r, d)),
+      inferrableFunction3(
+        (
+            a: org.apache.sedona.common.geometryObjects.Box3D,
+            b: org.apache.sedona.common.geometryObjects.Box3D,
+            distance: Double) => Predicates.dWithin3D(a, b, distance))) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 /**
  * Test if leftGeometry is one of the k nearest neighbors (KNN) of rightGeometry based on
  * approximate distance metric.

@@ -1230,6 +1230,18 @@ test_configurations = [
         "",
         True,
     ),
+    (
+        stp.ST_3DDWithin,
+        (
+            lambda: f.expr("ST_PointZ(0.0, 0.0, 0.0)"),
+            lambda: f.expr("ST_PointZ(1.0, 1.0, 1.0)"),
+            # 3D distance is sqrt(3) ≈ 1.732; 2.0 includes it.
+            2.0,
+        ),
+        "triangle_geom",
+        "",
+        True,
+    ),
     (stp.ST_Crosses, ("line", "poly"), "line_crossing_poly", "", True),
     (stp.ST_Disjoint, ("a", "b"), "two_points", "", True),
     (

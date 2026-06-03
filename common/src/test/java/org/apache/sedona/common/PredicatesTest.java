@@ -184,6 +184,106 @@ public class PredicatesTest extends TestBase {
   }
 
   @Test
+  public void testDWithin3DGeometryXY() {
+    // XY-only inputs fold to z=0, so 3D distance equals 2D distance.
+    Geometry point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1));
+    Geometry point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(2, 2));
+    assertTrue(Predicates.dWithin3D(point1, point2, 1.42));
+    assertFalse(Predicates.dWithin3D(point1, point2, 1.41));
+  }
+
+  @Test
+  public void testDWithin3DGeometryXYZ() {
+    // Pure Z offset of 3 between two points at the same XY.
+    Geometry point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 0));
+    Geometry point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 3));
+    assertTrue(Predicates.dWithin3D(point1, point2, 3.0));
+    assertFalse(Predicates.dWithin3D(point1, point2, 2.999));
+  }
+
+  @Test
+  public void testDWithin3DGeometryThresholdEdge() {
+    // 1-1-1 offset gives distance sqrt(3) ≈ 1.7320508; threshold equal to it is inclusive.
+    Geometry point1 = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0, 0));
+    Geometry point2 = GEOMETRY_FACTORY.createPoint(new Coordinate(1, 1, 1));
+    assertTrue(Predicates.dWithin3D(point1, point2, Math.sqrt(3)));
+  }
+
+  @Test
+  public void testDWithin3DGeometryXYLineToPoint() throws ParseException {
+    // XY LineString vs XY Point — the path that previously hit Distance3DOp's NaN guard
+    // and threw "Ordinates must not be NaN". After force3D folding, distance is 0.
+    Geometry line = geomFromEWKT("LINESTRING(0 0, 3 4)");
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    assertTrue(Predicates.dWithin3D(line, point, 0.0));
+    assertTrue(Predicates.dWithin3D(line, point, 1.0));
+  }
+
+  @Test
+  public void testDWithin3DGeometryXYPolygonToPoint() throws ParseException {
+    // XY Polygon vs XY Point at the centroid → distance 0 after Z fold.
+    Geometry polygon = geomFromEWKT("POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))");
+    Geometry inside = GEOMETRY_FACTORY.createPoint(new Coordinate(5, 5));
+    Geometry outside = GEOMETRY_FACTORY.createPoint(new Coordinate(12, 5));
+    assertTrue(Predicates.dWithin3D(polygon, inside, 0.0));
+    assertTrue(Predicates.dWithin3D(polygon, outside, 2.0));
+    assertFalse(Predicates.dWithin3D(polygon, outside, 1.999));
+  }
+
+  @Test
+  public void testDWithin3DGeometryMixedDimensions() throws ParseException {
+    // XYZ point vs XY line. The line's Z folds to 0; the point sits 5 units above the
+    // origin, so the 3D distance from (0,0,5) to the nearest point on z=0 line is 5.
+    Geometry pointXYZ = geomFromEWKT("POINT Z(0 0 5)");
+    Geometry lineXY = geomFromEWKT("LINESTRING(0 0, 10 0)");
+    assertTrue(Predicates.dWithin3D(pointXYZ, lineXY, 5.0));
+    assertFalse(Predicates.dWithin3D(pointXYZ, lineXY, 4.999));
+  }
+
+  @Test
+  public void testDWithin3DBoxOverlapping() {
+    Box3D a = new Box3D(0.0, 0.0, 0.0, 5.0, 5.0, 5.0);
+    Box3D b = new Box3D(4.0, 4.0, 4.0, 6.0, 6.0, 6.0);
+    // Overlap → distance 0, matches any non-negative radius.
+    assertTrue(Predicates.dWithin3D(a, b, 0.0));
+  }
+
+  @Test
+  public void testDWithin3DBoxFaceTouching() {
+    Box3D a = new Box3D(0.0, 0.0, 0.0, 5.0, 5.0, 5.0);
+    // Face touching on x = 5 → distance 0.
+    assertTrue(Predicates.dWithin3D(a, new Box3D(5.0, 0.0, 0.0, 10.0, 5.0, 5.0), 0.0));
+  }
+
+  @Test
+  public void testDWithin3DBoxSeparatedAlongZ() {
+    // Separated only on Z by 3 units (Y and X intervals overlap).
+    Box3D a = new Box3D(0.0, 0.0, 0.0, 5.0, 5.0, 5.0);
+    Box3D b = new Box3D(0.0, 0.0, 8.0, 5.0, 5.0, 10.0);
+    assertTrue(Predicates.dWithin3D(a, b, 3.0));
+    assertFalse(Predicates.dWithin3D(a, b, 2.999));
+  }
+
+  @Test
+  public void testDWithin3DBoxDiagonalThreshold() {
+    // Diagonally separated by (3, 4, 12) → distance 13 exactly.
+    Box3D a = new Box3D(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+    Box3D b = new Box3D(4.0, 5.0, 13.0, 5.0, 6.0, 14.0);
+    assertTrue(Predicates.dWithin3D(a, b, 13.0));
+    assertFalse(Predicates.dWithin3D(a, b, 12.999));
+  }
+
+  @Test
+  public void testDWithin3DBoxRejectInvertedBounds() {
+    Box3D normal = new Box3D(0.0, 0.0, 0.0, 5.0, 5.0, 5.0);
+    Box3D wrapZ = new Box3D(0.0, 0.0, 5.0, 5.0, 5.0, 0.0);
+    IllegalArgumentException ex =
+        assertThrows(
+            IllegalArgumentException.class, () -> Predicates.dWithin3D(wrapZ, normal, 1.0));
+    assertTrue(ex.getMessage().contains("inverted bounds"));
+  }
+
+  @Test
   public void testDWithinSpheroid() {
     Geometry seattlePoint = GEOMETRY_FACTORY.createPoint(new Coordinate(-122.335167, 47.608013));
     Geometry newYorkPoint = GEOMETRY_FACTORY.createPoint(new Coordinate(-73.935242, 40.730610));
