@@ -131,17 +131,17 @@ object GeoParquetSpatialFilter {
   }
   object Box2DPredicateKind {
 
-    /** `ST_BoxIntersects(box_col, lit)` — symmetric, same regardless of argument order. */
+    /** `ST_Intersects(box_col, lit)` — symmetric, same regardless of argument order. */
     case object Intersects extends Box2DPredicateKind {
       override def simpleName: String = "INTERSECTS"
     }
 
-    /** `ST_BoxContains(box_col, lit)` — the column box must contain the literal box. */
+    /** `ST_Contains(box_col, lit)` — the column box must contain the literal box. */
     case object ColumnContainsLiteral extends Box2DPredicateKind {
       override def simpleName: String = "CONTAINS"
     }
 
-    /** `ST_BoxContains(lit, box_col)` — the literal box must contain the column box. */
+    /** `ST_Contains(lit, box_col)` — the literal box must contain the column box. */
     case object LiteralContainsColumn extends Box2DPredicateKind {
       override def simpleName: String = "CONTAINED_BY"
     }
@@ -149,7 +149,7 @@ object GeoParquetSpatialFilter {
 
   /**
    * Pushdown filter for predicates that operate on a Box2D-typed column (e.g.
-   * `ST_BoxIntersects(box_col, lit_box)` or `ST_BoxContains(box_col, lit_box)`).
+   * `ST_Intersects(box_col, lit_box)` or `ST_Contains(box_col, lit_box)`).
    *
    * Pruning is performed by translating the predicate into per-leaf inequalities on the Box2D
    * column's four `Double` fields (`xmin`, `ymin`, `xmax`, `ymax`) and pushing the result down as

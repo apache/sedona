@@ -164,10 +164,6 @@ object Catalog extends AbstractCatalog with Logging {
 
   // Predicates
   val predicateExprs: Seq[FunctionDescription] = Seq(
-    function[ST_BoxContains](),
-    function[ST_BoxIntersects](),
-    function[ST_3DBoxContains](),
-    function[ST_3DBoxIntersects](),
     function[ST_Contains](),
     function[ST_CoveredBy](),
     function[ST_Covers](),

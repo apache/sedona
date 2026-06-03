@@ -26,7 +26,7 @@ from tests.test_base import TestBase
 
 class TestPredicate(TestBase):
 
-    def test_st_box_intersects_and_contains(self):
+    def test_st_intersects_and_contains_on_box2d(self):
         df = self.spark.sql("""
             WITH t AS (
               SELECT
@@ -36,11 +36,11 @@ class TestPredicate(TestBase):
                 ST_Box2D(ST_GeomFromText('POLYGON((11 11, 11 12, 12 12, 12 11, 11 11))')) AS disjoint
             )
             SELECT
-              ST_BoxIntersects(a, inside)   AS i_inside,
-              ST_BoxIntersects(a, overlap)  AS i_overlap,
-              ST_BoxIntersects(a, disjoint) AS i_disjoint,
-              ST_BoxContains(a, inside)     AS c_inside,
-              ST_BoxContains(a, overlap)    AS c_overlap
+              ST_Intersects(a, inside)   AS i_inside,
+              ST_Intersects(a, overlap)  AS i_overlap,
+              ST_Intersects(a, disjoint) AS i_disjoint,
+              ST_Contains(a, inside)     AS c_inside,
+              ST_Contains(a, overlap)    AS c_overlap
             FROM t
             """)
         row = df.first()

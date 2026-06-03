@@ -27,7 +27,7 @@ import org.apache.spark.sql.catalyst.plans.logical._
 import org.apache.spark.sql.execution.{SparkPlan, SparkStrategy}
 import org.apache.spark.sql.execution.datasources.LogicalRelation
 import org.apache.spark.sql.execution.datasources.v2.DataSourceV2ScanRelation
-import org.apache.spark.sql.sedona_sql.UDT.{GeographyUDT, RasterUDT}
+import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, Box3DUDT, GeographyUDT, RasterUDT}
 import org.apache.spark.sql.sedona_sql.expressions.{ST_KNN, _}
 import org.apache.spark.sql.sedona_sql.expressions.raster._
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
@@ -67,6 +67,24 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
   // Other ST_Predicates reject Geography inputs at analysis time, so no guard is needed there.
   private def isGeographyInput(shape: Expression): Boolean =
     shape.dataType.isInstanceOf[GeographyUDT]
+
+  /**
+   * Both shape expressions resolve to Box2DUDT. The executors materialise each Box2D as a
+   * rectangular Polygon so the existing partitioner / R-tree / refine machinery applies
+   * unchanged.
+   */
+  private def isBox2DPair(left: Expression, right: Expression): Boolean =
+    left.dataType.isInstanceOf[Box2DUDT] && right.dataType.isInstanceOf[Box2DUDT]
+
+  /**
+   * Either shape expression resolves to Box3DUDT. The join executors only know how to materialise
+   * Geometry / Geography / Box2D values; Box3D inputs would fall into the generic shape path,
+   * cast as a Geometry binary, and fail at runtime. Skip join planning so the predicate falls
+   * back to row-by-row evaluation where the scalar Box3D overload of `ST_Intersects` /
+   * `ST_Contains` handles it correctly.
+   */
+  private def hasBox3DInput(left: Expression, right: Expression): Boolean =
+    left.dataType.isInstanceOf[Box3DUDT] || right.dataType.isInstanceOf[Box3DUDT]
 
   /**
    * Build a JoinQueryDetection for an InferredExpression predicate (ST_Contains, ST_Within, ...)
@@ -237,6 +255,41 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
             // ST_Predicate) so they can't sit inside getJoinDetection; they're also the only
             // predicates currently accepting Geography inputs.
             //
+            // Box2D-on-Box2D variants of ST_Intersects / ST_Contains. Match these first so they
+            // don't fall through to the Geometry / Geography paths. ST_Contains over Box2D maps
+            // to SpatialPredicate.COVERS (closed-interval containment — JTS `contains` would
+            // reject edge-touching cases).
+            case ST_Intersects(Seq(leftShape, rightShape))
+                if isBox2DPair(leftShape, rightShape) =>
+              Some(
+                JoinQueryDetection(
+                  left,
+                  right,
+                  leftShape,
+                  rightShape,
+                  SpatialPredicate.INTERSECTS,
+                  isGeography = false,
+                  extraCondition))
+            case ST_Contains(Seq(leftShape, rightShape)) if isBox2DPair(leftShape, rightShape) =>
+              Some(
+                JoinQueryDetection(
+                  left,
+                  right,
+                  leftShape,
+                  rightShape,
+                  SpatialPredicate.COVERS,
+                  isGeography = false,
+                  extraCondition))
+            // Box3D inputs short-circuit out of join planning. The join executors only handle
+            // Geometry / Geography / Box2D; treating a Box3D shape as a Geometry binary fails at
+            // runtime. Returning None drops to row-by-row evaluation where the scalar Box3D
+            // overload of ST_Intersects / ST_Contains handles the predicate correctly.
+            case ST_Intersects(Seq(leftShape, rightShape))
+                if hasBox3DInput(leftShape, rightShape) =>
+              None
+            case ST_Contains(Seq(leftShape, rightShape))
+                if hasBox3DInput(leftShape, rightShape) =>
+              None
             // ST_Contains: when either operand is GeographyUDT we still detect the join here and
             // set `geographyShape = true`; planBroadcastJoin will route the work to the
             // Geography-aware index/refine path. Non-broadcast plans bail out in `apply` below
@@ -317,31 +370,6 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                 rightShape,
                 SpatialPredicate.EQUALS,
                 extraCondition)
-            // Box2D predicates. Both shape expressions resolve to Box2DUDT; the executors
-            // materialise each Box2D as a rectangular Polygon so the existing partitioner /
-            // R-tree / refine machinery applies unchanged. ST_BoxContains is closed-interval
-            // containment, so it maps to SpatialPredicate.COVERS (JTS `contains` would reject
-            // edge-touching cases).
-            case ST_BoxIntersects(Seq(leftShape, rightShape)) =>
-              Some(
-                JoinQueryDetection(
-                  left,
-                  right,
-                  leftShape,
-                  rightShape,
-                  SpatialPredicate.INTERSECTS,
-                  isGeography = false,
-                  extraCondition))
-            case ST_BoxContains(Seq(leftShape, rightShape)) =>
-              Some(
-                JoinQueryDetection(
-                  left,
-                  right,
-                  leftShape,
-                  rightShape,
-                  SpatialPredicate.COVERS,
-                  isGeography = false,
-                  extraCondition))
             case pred: ST_Predicate =>
               getJoinDetection(left, right, pred, extraCondition)
             case pred: RS_Predicate =>

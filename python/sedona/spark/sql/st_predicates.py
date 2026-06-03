@@ -31,82 +31,19 @@ _call_predicate_function = partial(call_sedona_function, "st_predicates")
 
 
 @validate_argument_types
-def ST_BoxContains(a: ColumnOrName, b: ColumnOrName) -> Column:
-    """Check whether Box2D a fully contains Box2D b (closed intervals).
-
-    Mirrors PostGIS ``~`` on box2d. NULL on null input.
-
-    :param a: Outer Box2D column.
-    :type a: ColumnOrName
-    :param b: Inner Box2D column.
-    :type b: ColumnOrName
-    :return: True if a contains b, false otherwise.
-    :rtype: Column
-    """
-    return _call_predicate_function("ST_BoxContains", (a, b))
-
-
-@validate_argument_types
-def ST_BoxIntersects(a: ColumnOrName, b: ColumnOrName) -> Column:
-    """Check whether Box2D a and Box2D b share any point (closed intervals).
-
-    Mirrors PostGIS ``&&`` on box2d. NULL on null input.
-
-    :param a: First Box2D column.
-    :type a: ColumnOrName
-    :param b: Second Box2D column.
-    :type b: ColumnOrName
-    :return: True if a and b overlap, false otherwise.
-    :rtype: Column
-    """
-    return _call_predicate_function("ST_BoxIntersects", (a, b))
-
-
-@validate_argument_types
-def ST_3DBoxContains(a: ColumnOrName, b: ColumnOrName) -> Column:
-    """Check whether Box3D a fully contains Box3D b (closed intervals on all three axes).
-
-    Mirrors PostGIS ``~~`` on box3d. NULL on null input. Raises
-    ``IllegalArgumentException`` if either argument has inverted bounds
-    (``xmin > xmax`` / ``ymin > ymax`` / ``zmin > zmax``).
-
-    :param a: Outer Box3D column.
-    :type a: ColumnOrName
-    :param b: Inner Box3D column.
-    :type b: ColumnOrName
-    :return: True if a contains b, false otherwise.
-    :rtype: Column
-    """
-    return _call_predicate_function("ST_3DBoxContains", (a, b))
-
-
-@validate_argument_types
-def ST_3DBoxIntersects(a: ColumnOrName, b: ColumnOrName) -> Column:
-    """Check whether Box3D a and Box3D b share any point (closed intervals on all three axes).
-
-    Mirrors PostGIS ``&&&`` on box3d. NULL on null input. Raises
-    ``IllegalArgumentException`` if either argument has inverted bounds
-    (``xmin > xmax`` / ``ymin > ymax`` / ``zmin > zmax``).
-
-    :param a: First Box3D column.
-    :type a: ColumnOrName
-    :param b: Second Box3D column.
-    :type b: ColumnOrName
-    :return: True if a and b overlap, false otherwise.
-    :rtype: Column
-    """
-    return _call_predicate_function("ST_3DBoxIntersects", (a, b))
-
-
-@validate_argument_types
 def ST_Contains(a: ColumnOrName, b: ColumnOrName) -> Column:
-    """Check whether geometry a contains geometry b.
+    """Check whether a contains b. Polymorphic over input type:
 
-    :param a: Geometry column to check containment for.
+    - Geometry / Geometry — topological containment via JTS.
+    - Geography / Geography — topological containment via S2.
+    - Box2D / Box2D — closed-interval bbox containment on both axes (PostGIS ``~`` on box2d).
+    - Box3D / Box3D — closed-interval bbox containment on all three axes.
+
+    :param a: Outer geometry or Box2D / Box3D column.
     :type a: ColumnOrName
-    :param b: Geometry column to check containment of.
+    :param b: Inner geometry or Box2D / Box3D column.
     :type b: ColumnOrName
-    :return: True if geometry a contains geometry b and False otherwise as a boolean column.
+    :return: True if a contains b, false otherwise.
     :rtype: Column
     """
     return _call_predicate_function("ST_Contains", (a, b))
@@ -156,13 +93,18 @@ def ST_Equals(a: ColumnOrName, b: ColumnOrName) -> Column:
 
 @validate_argument_types
 def ST_Intersects(a: ColumnOrName, b: ColumnOrName) -> Column:
-    """Check whether two geometries intersect.
+    """Check whether a and b intersect. Polymorphic over input type:
 
-    :param a: One geometry column to check.
+    - Geometry / Geometry — topological intersection via JTS.
+    - Geography / Geography — topological intersection via S2.
+    - Box2D / Box2D — closed-interval bbox intersection on both axes (PostGIS ``&&`` on box2d).
+    - Box3D / Box3D — closed-interval bbox intersection on all three axes (PostGIS ``&&&``).
+
+    :param a: One geometry or Box2D / Box3D column.
     :type a: ColumnOrName
-    :param b: Other geometry column to check.
+    :param b: Other geometry or Box2D / Box3D column.
     :type b: ColumnOrName
-    :return: True if a and b intersect and False otherwise, as a boolean column.
+    :return: True if a and b intersect, false otherwise.
     :rtype: Column
     """
     return _call_predicate_function("ST_Intersects", (a, b))

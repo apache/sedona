@@ -24,20 +24,6 @@ import org.apache.spark.sql.Column
 import org.apache.spark.sql.sedona_sql.DataFrameShims._
 
 object st_predicates {
-  def ST_BoxContains(a: Column, b: Column): Column = wrapExpression[ST_BoxContains](a, b)
-  def ST_BoxContains(a: String, b: String): Column = wrapExpression[ST_BoxContains](a, b)
-
-  def ST_BoxIntersects(a: Column, b: Column): Column = wrapExpression[ST_BoxIntersects](a, b)
-  def ST_BoxIntersects(a: String, b: String): Column = wrapExpression[ST_BoxIntersects](a, b)
-
-  def ST_3DBoxContains(a: Column, b: Column): Column = wrapExpression[ST_3DBoxContains](a, b)
-  def ST_3DBoxContains(a: String, b: String): Column = wrapExpression[ST_3DBoxContains](a, b)
-
-  def ST_3DBoxIntersects(a: Column, b: Column): Column =
-    wrapExpression[ST_3DBoxIntersects](a, b)
-  def ST_3DBoxIntersects(a: String, b: String): Column =
-    wrapExpression[ST_3DBoxIntersects](a, b)
-
   def ST_Contains(a: Column, b: Column): Column = wrapExpression[ST_Contains](a, b)
   def ST_Contains(a: String, b: String): Column = wrapExpression[ST_Contains](a, b)
 

@@ -35,28 +35,28 @@ public class PredicateTest extends TestBase {
   }
 
   @Test
-  public void testBoxIntersects() {
+  public void testIntersectsOnBox2D() {
     Table t =
         tableEnv.sqlQuery(
             "WITH boxes AS ("
                 + " SELECT ST_Box2D(ST_GeomFromWKT('POLYGON((0 0, 0 5, 5 5, 5 0, 0 0))')) AS a,"
                 + " ST_Box2D(ST_GeomFromWKT('POLYGON((3 3, 3 7, 7 7, 7 3, 3 3))')) AS overlap,"
                 + " ST_Box2D(ST_GeomFromWKT('POLYGON((6 6, 6 7, 7 7, 7 6, 6 6))')) AS disjoint)"
-                + " SELECT ST_BoxIntersects(a, overlap), ST_BoxIntersects(a, disjoint) FROM boxes");
+                + " SELECT ST_Intersects(a, overlap), ST_Intersects(a, disjoint) FROM boxes");
     org.apache.flink.types.Row row = first(t);
     assertEquals(true, row.getField(0));
     assertEquals(false, row.getField(1));
   }
 
   @Test
-  public void testBoxContains() {
+  public void testContainsOnBox2D() {
     Table t =
         tableEnv.sqlQuery(
             "WITH boxes AS ("
                 + " SELECT ST_Box2D(ST_GeomFromWKT('POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))')) AS outer_box,"
                 + " ST_Box2D(ST_GeomFromWKT('POLYGON((2 2, 2 5, 5 5, 5 2, 2 2))')) AS inner_box,"
                 + " ST_Box2D(ST_GeomFromWKT('POLYGON((5 5, 5 11, 11 11, 11 5, 5 5))')) AS overlap)"
-                + " SELECT ST_BoxContains(outer_box, inner_box), ST_BoxContains(outer_box, overlap) FROM boxes");
+                + " SELECT ST_Contains(outer_box, inner_box), ST_Contains(outer_box, overlap) FROM boxes");
     org.apache.flink.types.Row row = first(t);
     assertEquals(true, row.getField(0));
     assertEquals(false, row.getField(1));

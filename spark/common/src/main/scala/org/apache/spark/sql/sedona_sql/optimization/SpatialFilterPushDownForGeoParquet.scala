@@ -48,8 +48,8 @@ import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFi
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.LeafFilter
 import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFilter.OrFilter
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
-import org.apache.spark.sql.sedona_sql.expressions.{ST_AsEWKT, ST_BoxContains, ST_BoxIntersects, ST_Buffer, ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Distance, ST_DistanceSphere, ST_DistanceSpheroid, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Touches, ST_Within}
+import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, Box3DUDT, GeometryUDT}
+import org.apache.spark.sql.sedona_sql.expressions.{ST_AsEWKT, ST_Buffer, ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Distance, ST_DistanceSphere, ST_DistanceSpheroid, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Touches, ST_Within}
 import org.apache.spark.sql.sedona_sql.optimization.ExpressionUtils.splitConjunctivePredicates
 import org.apache.spark.sql.types.DoubleType
 import org.locationtech.jts.geom.Geometry
@@ -117,6 +117,36 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
 
       case Not(_) => None
 
+      // Box2D-on-Box2D variants of ST_Intersects / ST_Contains push down as Parquet row-group
+      // filters on the column's underlying (xmin, ymin, xmax, ymax) double leaves. Pruning is done
+      // by Parquet's stats-based skipping against the column's recorded min/max, which is sound
+      // regardless of how the writer chose the per-row Box2D values. Matched here before the
+      // Geometry-typed cases so the Box2D arms don't fall through to `GeometryUDT.deserialize`.
+      case ST_Intersects(Seq(pushableColumn(name), Literal(v, _: Box2DUDT))) =>
+        extractBox2DLiteral(v).map(qb =>
+          Box2DLeafFilter(unquote(name), Box2DPredicateKind.Intersects, qb))
+      case ST_Intersects(Seq(Literal(v, _: Box2DUDT), pushableColumn(name))) =>
+        extractBox2DLiteral(v).map(qb =>
+          Box2DLeafFilter(unquote(name), Box2DPredicateKind.Intersects, qb))
+
+      case ST_Contains(Seq(pushableColumn(name), Literal(v, _: Box2DUDT))) =>
+        extractBox2DLiteral(v).map(qb =>
+          Box2DLeafFilter(unquote(name), Box2DPredicateKind.ColumnContainsLiteral, qb))
+      case ST_Contains(Seq(Literal(v, _: Box2DUDT), pushableColumn(name))) =>
+        extractBox2DLiteral(v).map(qb =>
+          Box2DLeafFilter(unquote(name), Box2DPredicateKind.LiteralContainsColumn, qb))
+
+      // Box3D-on-Box3D variants are not yet pushable (Box3D row-group filters are tracked as a
+      // separate follow-up). Skip pushdown explicitly so the predicate falls through to per-row
+      // evaluation instead of misrouting into the Geometry-typed path below, where
+      // `GeometryUDT.deserialize` would be called on a Box3D struct and fail at planning.
+      case ST_Contains(Seq(_, Literal(_, _: Box3DUDT))) | ST_Contains(
+            Seq(Literal(_, _: Box3DUDT), _)) =>
+        None
+      case ST_Intersects(Seq(_, Literal(_, _: Box3DUDT))) | ST_Intersects(
+            Seq(Literal(_, _: Box3DUDT), _)) =>
+        None
+
       case ST_Contains(Seq(pushableColumn(name), Literal(v, _))) =>
         Some(LeafFilter(unquote(name), SpatialPredicate.COVERS, GeometryUDT.deserialize(v)))
       case ST_Contains(Seq(Literal(v, _), pushableColumn(name))) =>
@@ -147,24 +177,6 @@ class SpatialFilterPushDownForGeoParquet(sparkSession: SparkSession) extends Rul
             unquote(name),
             SpatialPredicate.INTERSECTS,
             GeometryUDT.deserialize(value))
-
-      // Box2D predicates push down as Parquet row-group filters on the Box2D column's underlying
-      // (xmin, ymin, xmax, ymax) double leaves. Pruning is done by Parquet's stats-based skipping
-      // against the column's recorded min/max, which is sound regardless of how the writer chose
-      // the per-row Box2D values.
-      case ST_BoxIntersects(_) =>
-        // Intersects is symmetric — both argument orders produce the same predicate.
-        for {
-          (name, value) <- resolveNameAndLiteral(predicate.children, pushableColumn)
-          queryBox <- extractBox2DLiteral(value)
-        } yield Box2DLeafFilter(unquote(name), Box2DPredicateKind.Intersects, queryBox)
-
-      case ST_BoxContains(Seq(pushableColumn(name), Literal(v, _))) =>
-        extractBox2DLiteral(v).map(qb =>
-          Box2DLeafFilter(unquote(name), Box2DPredicateKind.ColumnContainsLiteral, qb))
-      case ST_BoxContains(Seq(Literal(v, _), pushableColumn(name))) =>
-        extractBox2DLiteral(v).map(qb =>
-          Box2DLeafFilter(unquote(name), Box2DPredicateKind.LiteralContainsColumn, qb))
 
       case LessThan(ST_Distance(distArgs), Literal(d, DoubleType)) =>
         for ((name, value) <- resolveNameAndLiteral(distArgs, pushableColumn))

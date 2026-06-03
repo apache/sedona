@@ -252,8 +252,8 @@ object TraitJoinQueryBase {
    * Producing a JTS rectangle here lets the rest of the join machinery — partitioner, R-tree
    * `IndexBuilder`, refine evaluator — stay shape-agnostic. JTS already short-circuits
    * rectangle-rectangle predicates (`Polygon.isRectangle` triggers `RectangleIntersects` /
-   * `RectangleContains`), so a `ST_BoxIntersects` join naturally pays only the four-double
-   * envelope comparison at refine time.
+   * `RectangleContains`), so a Box2D-on-Box2D `ST_Intersects` join naturally pays only the
+   * four-double envelope comparison at refine time.
    *
    * Inverted Box2D bounds (`xmin > xmax` / `ymin > ymax`) are rejected with the same
    * `IllegalArgumentException` raised by `Predicates.boxIntersects` / `boxContains`. Inverted
