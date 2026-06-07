@@ -27,7 +27,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.{Expression, UnsafeRow}
 import org.apache.spark.sql.execution.SparkPlan
-import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, RasterUDT}
+import org.apache.spark.sql.sedona_sql.UDT.{Box2DUDT, Box3DUDT, RasterUDT}
 import org.locationtech.jts.geom.{Geometry, GeometryFactory}
 
 trait TraitJoinQueryBase {
@@ -246,8 +246,11 @@ object TraitJoinQueryBase {
 
   /**
    * Materialise a shape column value as a JTS [[Geometry]]. Box2D-typed columns are turned into
-   * the closed rectangular polygon implied by their `(xmin, ymin, xmax, ymax)` bounds; all other
-   * shape columns are deserialised from the Sedona geometry binary form.
+   * the closed rectangular polygon implied by their `(xmin, ymin, xmax, ymax)` bounds; Box3D
+   * columns are projected to their XY footprint (`xmin, ymin, xmax, ymax`) and the Z axis is
+   * re-checked per candidate pair by the scalar Box3D predicate that `JoinQueryDetector` folds
+   * into the join's `extraCondition`. All other shape columns are deserialised from the Sedona
+   * geometry binary form.
    *
    * Producing a JTS rectangle here lets the rest of the join machinery — partitioner, R-tree
    * `IndexBuilder`, refine evaluator — stay shape-agnostic. JTS already short-circuits
@@ -259,7 +262,8 @@ object TraitJoinQueryBase {
    * `IllegalArgumentException` raised by `Predicates.boxIntersects` / `boxContains`. Inverted
    * bounds have no defined planar meaning today (they are reserved for future
    * antimeridian-wraparound semantics on Geography bboxes) and would silently mis-prune the
-   * R-tree if accepted here.
+   * R-tree if accepted here. Box3D applies the same check on all three axes — Z has no wraparound
+   * convention.
    *
    * Returns `null` when the shape column evaluates to NULL; the caller is expected to either skip
    * the row or substitute an empty geometry.
@@ -282,6 +286,28 @@ object TraitJoinQueryBase {
                 "Planar Box2D predicates require ordered intervals; inverted bounds are " +
                 "reserved for future antimeridian wraparound semantics.")
           }
+          Constructors.polygonFromEnvelope(xmin, ymin, xmax, ymax)
+        case _: Box3DUDT =>
+          val box = evaluated.asInstanceOf[InternalRow]
+          val xmin = box.getDouble(0)
+          val ymin = box.getDouble(1)
+          val zmin = box.getDouble(2)
+          val xmax = box.getDouble(3)
+          val ymax = box.getDouble(4)
+          val zmax = box.getDouble(5)
+          // Eager validation: every row in the dataset is inspected during index build, so any
+          // inverted-bound row throws here even if it would not have matched anything. This is
+          // a slightly broader failure surface than the prior row-by-row fallback (which only
+          // threw on rows the join actually evaluated), but it matches the Box2D contract on
+          // line above and the scalar Box3D predicate contract — those reject inverted bounds
+          // outright on the grounds that Z has no wraparound convention.
+          if (xmin > xmax || ymin > ymax || zmin > zmax) {
+            throw new IllegalArgumentException(
+              "Box3D join input has inverted bounds (xmin > xmax, ymin > ymax, or " +
+                "zmin > zmax). Box3D predicates require ordered intervals on all three axes.")
+          }
+          // XY footprint only — the Z axis is rechecked per candidate by the scalar Box3D
+          // predicate folded into `extraCondition`.
           Constructors.polygonFromEnvelope(xmin, ymin, xmax, ymax)
         case _ =>
           GeometrySerializer.deserialize(evaluated.asInstanceOf[Array[Byte]])

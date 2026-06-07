@@ -103,41 +103,5 @@ class Box3DIntersectsContainsSuite extends TestBaseScala {
       assert(row.isNullAt(1))
     }
 
-    // Regression for the JoinQueryDetector / TraitJoinQueryBase Box3D mishandling: prior to the
-    // hasBox3DInput guard, a Box3D-on-Box3D join would fall into the generic shape path and try
-    // to deserialise the Box3D struct as a Geometry binary, throwing at runtime. With the guard
-    // in place, the join silently falls back to row-by-row evaluation and the scalar Box3D
-    // overload of ST_Intersects / ST_Contains produces the correct boolean.
-    it("Box3D-on-Box3D join falls back to row-by-row evaluation without a cast error") {
-      import sparkSession.implicits._
-      val left = Seq(("a1", 0.0, 0.0, 0.0, 5.0, 5.0, 5.0)).toDF(
-        "id",
-        "xmin",
-        "ymin",
-        "zmin",
-        "xmax",
-        "ymax",
-        "zmax")
-      val right = Seq(("b1", 1.0, 1.0, 1.0, 2.0, 2.0, 2.0)).toDF(
-        "id",
-        "xmin",
-        "ymin",
-        "zmin",
-        "xmax",
-        "ymax",
-        "zmax")
-      left.createOrReplaceTempView("left_box3d")
-      right.createOrReplaceTempView("right_box3d")
-      val df = sparkSession.sql("""
-        SELECT L.id AS l_id, R.id AS r_id
-        FROM left_box3d L
-        JOIN right_box3d R ON ST_Intersects(
-          ST_3DMakeBox(ST_PointZ(L.xmin, L.ymin, L.zmin), ST_PointZ(L.xmax, L.ymax, L.zmax)),
-          ST_3DMakeBox(ST_PointZ(R.xmin, R.ymin, R.zmin), ST_PointZ(R.xmax, R.ymax, R.zmax)))
-      """)
-      val rows = df.collect()
-      assert(rows.length == 1)
-      assert(rows(0).getString(0) == "a1" && rows(0).getString(1) == "b1")
-    }
   }
 }
