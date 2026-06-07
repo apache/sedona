@@ -665,22 +665,22 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actual == "BOX3D(0.0 0.0 0.0, 2.0 4.0 6.0)")
     }
 
-    it("Passed ST_3DBoxIntersects") {
+    it("Passed ST_Intersects on Box3D inputs") {
       val boxesDf = sparkSession.sql(
         "SELECT ST_3DMakeBox(ST_PointZ(0, 0, 0), ST_PointZ(5, 5, 5)) AS a, " +
           "ST_3DMakeBox(ST_PointZ(1, 1, 1), ST_PointZ(2, 2, 2)) AS b, " +
           "ST_3DMakeBox(ST_PointZ(10, 10, 10), ST_PointZ(11, 11, 11)) AS c")
-      val row = boxesDf.select(ST_3DBoxIntersects("a", "b"), ST_3DBoxIntersects("a", "c")).first()
+      val row = boxesDf.select(ST_Intersects("a", "b"), ST_Intersects("a", "c")).first()
       assert(row.getBoolean(0))
       assert(!row.getBoolean(1))
     }
 
-    it("Passed ST_3DBoxContains") {
+    it("Passed ST_Contains on Box3D inputs") {
       val boxesDf = sparkSession.sql(
         "SELECT ST_3DMakeBox(ST_PointZ(0, 0, 0), ST_PointZ(5, 5, 5)) AS a, " +
           "ST_3DMakeBox(ST_PointZ(1, 1, 1), ST_PointZ(2, 2, 2)) AS b, " +
           "ST_3DMakeBox(ST_PointZ(4, 4, 4), ST_PointZ(6, 6, 6)) AS c")
-      val row = boxesDf.select(ST_3DBoxContains("a", "b"), ST_3DBoxContains("a", "c")).first()
+      val row = boxesDf.select(ST_Contains("a", "b"), ST_Contains("a", "c")).first()
       assert(row.getBoolean(0))
       assert(!row.getBoolean(1))
     }

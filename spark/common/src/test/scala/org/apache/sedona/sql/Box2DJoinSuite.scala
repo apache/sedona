@@ -53,10 +53,10 @@ class Box2DJoinSuite extends TestBaseScala {
 
   describe("Box2D spatial join") {
 
-    it("ST_BoxIntersects: broadcast index join produces correct pairs") {
+    it("ST_Intersects: broadcast index join produces correct pairs") {
       val df = leftBoxes
         .alias("L")
-        .join(broadcast(rightBoxes.alias("R")), expr("ST_BoxIntersects(L.box, R.box)"))
+        .join(broadcast(rightBoxes.alias("R")), expr("ST_Intersects(L.box, R.box)"))
       val plan = df.queryExecution.sparkPlan
       assert(
         plan.collect { case b: BroadcastIndexJoinExec => b }.size == 1,
@@ -64,30 +64,30 @@ class Box2DJoinSuite extends TestBaseScala {
       assert(df.count() == 4)
     }
 
-    it("ST_BoxIntersects: argument order is symmetric") {
+    it("ST_Intersects: argument order is symmetric") {
       val swapped = leftBoxes
         .alias("L")
-        .join(broadcast(rightBoxes.alias("R")), expr("ST_BoxIntersects(R.box, L.box)"))
+        .join(broadcast(rightBoxes.alias("R")), expr("ST_Intersects(R.box, L.box)"))
       assert(swapped.count() == 4)
       assert(swapped.queryExecution.sparkPlan.collect { case b: BroadcastIndexJoinExec =>
         b
       }.size == 1)
     }
 
-    it("ST_BoxContains: broadcast index join uses COVERS semantics") {
+    it("ST_Contains: broadcast index join uses COVERS semantics") {
       val df = leftBoxes
         .alias("L")
-        .join(broadcast(rightBoxes.alias("R")), expr("ST_BoxContains(L.box, R.box)"))
+        .join(broadcast(rightBoxes.alias("R")), expr("ST_Contains(L.box, R.box)"))
       assert(df.queryExecution.sparkPlan.collect { case b: BroadcastIndexJoinExec =>
         b
       }.size == 1)
       assert(df.count() == 2)
     }
 
-    it("ST_BoxContains: edge-touching boxes count (closed-interval semantics)") {
-      // R contained in L sharing an edge: ST_BoxContains is closed-interval, so this matches.
+    it("ST_Contains: edge-touching boxes count (closed-interval semantics)") {
+      // R contained in L sharing an edge: ST_Contains is closed-interval, so this matches.
       // JTS Polygon.contains would reject (strict-interior), JTS Polygon.covers accepts; the
-      // detector maps ST_BoxContains → SpatialPredicate.COVERS specifically for this case.
+      // detector maps ST_Contains → SpatialPredicate.COVERS specifically for this case.
       import sparkSession.implicits._
       val outer = Seq(TestBox(1, 0, 0, 10, 10))
         .toDF("id", "xmin", "ymin", "xmax", "ymax")
@@ -98,14 +98,14 @@ class Box2DJoinSuite extends TestBaseScala {
         .selectExpr("id", "ST_MakeBox2D(ST_Point(xmin, ymin), ST_Point(xmax, ymax)) AS box")
       val df = outer
         .alias("O")
-        .join(broadcast(inner.alias("I")), expr("ST_BoxContains(O.box, I.box)"))
+        .join(broadcast(inner.alias("I")), expr("ST_Contains(O.box, I.box)"))
       assert(df.count() == 1, "Closed-interval containment must include edge-touching boxes")
     }
 
-    it("ST_BoxIntersects: non-broadcast range join produces the same count") {
+    it("ST_Intersects: non-broadcast range join produces the same count") {
       val df = leftBoxes
         .alias("L")
-        .join(rightBoxes.alias("R"), expr("ST_BoxIntersects(L.box, R.box)"))
+        .join(rightBoxes.alias("R"), expr("ST_Intersects(L.box, R.box)"))
       assert(
         df.queryExecution.sparkPlan.collect { case r: RangeJoinExec => r }.size == 1,
         "Expected RangeJoinExec in the plan")
@@ -122,12 +122,12 @@ class Box2DJoinSuite extends TestBaseScala {
           .toDF("id", "box"))
       val df = withNullLeft
         .alias("L")
-        .join(broadcast(rightBoxes.alias("R")), expr("ST_BoxIntersects(L.box, R.box)"))
+        .join(broadcast(rightBoxes.alias("R")), expr("ST_Intersects(L.box, R.box)"))
       assert(df.count() == 4) // unchanged from the non-null fixture
       // Range join path (no broadcast) also tolerates nulls.
       val rangeDf = withNullLeft
         .alias("L")
-        .join(rightBoxes.alias("R"), expr("ST_BoxIntersects(L.box, R.box)"))
+        .join(rightBoxes.alias("R"), expr("ST_Intersects(L.box, R.box)"))
       assert(rangeDf.count() == 4)
     }
 
@@ -140,7 +140,7 @@ class Box2DJoinSuite extends TestBaseScala {
           .toDF("id", "box")
       val df = invertedLeft
         .alias("L")
-        .join(broadcast(rightBoxes.alias("R")), expr("ST_BoxIntersects(L.box, R.box)"))
+        .join(broadcast(rightBoxes.alias("R")), expr("ST_Intersects(L.box, R.box)"))
       // Confirm the join is actually planned as BroadcastIndexJoinExec so the throw originates
       // from the join-side `shapeToGeometry` validation, not from a row-by-row fallback that
       // also happens to throw via `Predicates.boxIntersects`.
@@ -160,7 +160,7 @@ class Box2DJoinSuite extends TestBaseScala {
     it("Result is equivalent to ST_Intersects on the Box2D-as-polygon envelopes") {
       val viaBox = leftBoxes
         .alias("L")
-        .join(broadcast(rightBoxes.alias("R")), expr("ST_BoxIntersects(L.box, R.box)"))
+        .join(broadcast(rightBoxes.alias("R")), expr("ST_Intersects(L.box, R.box)"))
         .selectExpr("L.id AS l", "R.id AS r")
         .orderBy("l", "r")
         .collect()

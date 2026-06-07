@@ -27,42 +27,6 @@ import org.locationtech.jts.geom.Geometry;
 
 public class Predicates {
 
-  public static class ST_BoxIntersects extends ScalarFunction {
-    @DataTypeHint("Boolean")
-    public Boolean eval(
-        @DataTypeHint(
-                value = "RAW",
-                rawSerializer = Box2DTypeSerializer.class,
-                bridgedTo = Box2D.class)
-            Box2D a,
-        @DataTypeHint(
-                value = "RAW",
-                rawSerializer = Box2DTypeSerializer.class,
-                bridgedTo = Box2D.class)
-            Box2D b) {
-      if (a == null || b == null) return null;
-      return org.apache.sedona.common.Predicates.boxIntersects(a, b);
-    }
-  }
-
-  public static class ST_BoxContains extends ScalarFunction {
-    @DataTypeHint("Boolean")
-    public Boolean eval(
-        @DataTypeHint(
-                value = "RAW",
-                rawSerializer = Box2DTypeSerializer.class,
-                bridgedTo = Box2D.class)
-            Box2D a,
-        @DataTypeHint(
-                value = "RAW",
-                rawSerializer = Box2DTypeSerializer.class,
-                bridgedTo = Box2D.class)
-            Box2D b) {
-      if (a == null || b == null) return null;
-      return org.apache.sedona.common.Predicates.boxContains(a, b);
-    }
-  }
-
   public static class ST_Intersects extends ScalarFunction {
     /** Constructor for relation checking without duplicate removal */
     public ST_Intersects() {}
@@ -79,9 +43,27 @@ public class Predicates {
                 rawSerializer = GeometryTypeSerializer.class,
                 bridgedTo = Geometry.class)
             Object o2) {
+      if (o1 == null || o2 == null) return null;
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
       return org.apache.sedona.common.Predicates.intersects(geom1, geom2);
+    }
+
+    /** Box2D-on-Box2D bbox intersection (closed interval). */
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D a,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D b) {
+      if (a == null || b == null) return null;
+      return org.apache.sedona.common.Predicates.boxIntersects(a, b);
     }
   }
 
@@ -102,9 +84,27 @@ public class Predicates {
                 rawSerializer = GeometryTypeSerializer.class,
                 bridgedTo = Geometry.class)
             Object o2) {
+      if (o1 == null || o2 == null) return null;
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
       return org.apache.sedona.common.Predicates.contains(geom1, geom2);
+    }
+
+    /** Box2D-on-Box2D bbox containment (closed interval). */
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D a,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box2DTypeSerializer.class,
+                bridgedTo = Box2D.class)
+            Box2D b) {
+      if (a == null || b == null) return null;
+      return org.apache.sedona.common.Predicates.boxContains(a, b);
     }
   }
 

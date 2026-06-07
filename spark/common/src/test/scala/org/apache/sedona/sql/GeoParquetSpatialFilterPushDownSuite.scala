@@ -319,41 +319,41 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
       }
     }
 
-    it("Push down ST_BoxIntersects against a Box2D column") {
+    it("Push down ST_Intersects against a Box2D column") {
       val (box2dDf, box2dDir) = setupBox2DCoveringFixture()
       try {
         // Q1 region only (region 1, center +10/+10)
         val q1Filter =
-          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(5.0, 5.0), ST_Point(15.0, 15.0)))"
+          "ST_Intersects(geom_bbox, ST_MakeBox2D(ST_Point(5.0, 5.0), ST_Point(15.0, 15.0)))"
         verifyBox2DFilter(box2dDf, q1Filter)
 
         // Window covering Q2 and Q4 (negative X)
         val leftHalfFilter =
-          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(-20.0, -20.0), ST_Point(-1.0, 20.0)))"
+          "ST_Intersects(geom_bbox, ST_MakeBox2D(ST_Point(-20.0, -20.0), ST_Point(-1.0, 20.0)))"
         verifyBox2DFilter(box2dDf, leftHalfFilter)
 
         // Disjoint window prunes everything
         val disjointFilter =
-          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(100.0, 100.0), ST_Point(200.0, 200.0)))"
+          "ST_Intersects(geom_bbox, ST_MakeBox2D(ST_Point(100.0, 100.0), ST_Point(200.0, 200.0)))"
         verifyBox2DFilter(box2dDf, disjointFilter)
 
-        // Reverse argument order: ST_BoxIntersects(lit, col) is symmetric.
+        // Reverse argument order: ST_Intersects(lit, col) is symmetric.
         val reversedFilter =
-          "ST_BoxIntersects(ST_MakeBox2D(ST_Point(5.0, 5.0), ST_Point(15.0, 15.0)), geom_bbox)"
+          "ST_Intersects(ST_MakeBox2D(ST_Point(5.0, 5.0), ST_Point(15.0, 15.0)), geom_bbox)"
         verifyBox2DFilter(box2dDf, reversedFilter)
       } finally {
         FileUtils.deleteDirectory(new File(box2dDir).getParentFile)
       }
     }
 
-    it("ST_BoxIntersects with inverted-bound literal falls back to runtime throw") {
+    it("ST_Intersects with inverted-bound literal falls back to runtime throw") {
       val (box2dDf, box2dDir) = setupBox2DCoveringFixture()
       try {
         // xmin > xmax: must not push down — otherwise Parquet's row-group filter could prune all
         // matches and hide the expected IllegalArgumentException from the predicate's runtime
         // evaluation.
         val invertedFilter =
-          "ST_BoxIntersects(geom_bbox, ST_MakeBox2D(ST_Point(20.0, -20.0), ST_Point(-20.0, 20.0)))"
+          "ST_Intersects(geom_bbox, ST_MakeBox2D(ST_Point(20.0, -20.0), ST_Point(-20.0, 20.0)))"
         val dfFiltered = box2dDf.where(invertedFilter)
         assert(
           getPushedDownSpatialFilter(dfFiltered).isEmpty,
@@ -370,21 +370,21 @@ class GeoParquetSpatialFilterPushDownSuite extends TestBaseScala with TableDrive
       }
     }
 
-    it("Push down ST_BoxContains against a Box2D column") {
+    it("Push down ST_Contains against a Box2D column") {
       val (box2dDf, box2dDir) = setupBox2DCoveringFixture()
       try {
-        // ST_BoxContains(box_col, lit_box) — the column box must contain the literal box. A tiny
+        // ST_Contains(box_col, lit_box) — the column box must contain the literal box. A tiny
         // query inside Q1 is contained only by rows from region 1.
         val containsFilter =
-          "ST_BoxContains(geom_bbox, ST_MakeBox2D(ST_Point(9.0, 9.0), ST_Point(10.0, 10.0)))"
+          "ST_Contains(geom_bbox, ST_MakeBox2D(ST_Point(9.0, 9.0), ST_Point(10.0, 10.0)))"
         verifyBox2DFilter(box2dDf, containsFilter)
 
-        // Reverse argument order: ST_BoxContains(lit_box, col) — the literal box must contain the
+        // Reverse argument order: ST_Contains(lit_box, col) — the literal box must contain the
         // column box. The 10x10 window in Q1 contains the 2x2 polygons centered at (5,5), (5,15),
         // (15,5), (15,15) only partially; only rows whose envelopes lie entirely inside the window
         // survive.
         val reversedFilter =
-          "ST_BoxContains(ST_MakeBox2D(ST_Point(4.0, 4.0), ST_Point(16.0, 16.0)), geom_bbox)"
+          "ST_Contains(ST_MakeBox2D(ST_Point(4.0, 4.0), ST_Point(16.0, 16.0)), geom_bbox)"
         verifyBox2DFilter(box2dDf, reversedFilter)
       } finally {
         FileUtils.deleteDirectory(new File(box2dDir).getParentFile)

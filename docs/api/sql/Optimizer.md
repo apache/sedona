@@ -437,27 +437,27 @@ Spatial predicate push-down to GeoParquet is enabled by default. Users can manua
 
 ## Box2D filter pushdown
 
-When a query filters on a `Box2D`-typed column (see [Box2D Functions](box2d/Box2D-Functions.md)) using `ST_BoxIntersects` or `ST_BoxContains` against a literal `Box2D`, Sedona translates the predicate into Parquet row-group inequalities on the column's underlying `xmin` / `ymin` / `xmax` / `ymax` leaves and pushes them down via `ParquetInputFormat.setFilterPredicate`. Parquet's row-group statistics machinery then skips row groups whose recorded min/max disprove the predicate — no file metadata scan is required.
+When a query filters on a `Box2D`-typed column (see [Box2D Functions](box2d/Box2D-Functions.md)) using [ST_Intersects](Predicates/ST_Intersects.md) or [ST_Contains](Predicates/ST_Contains.md) against a literal `Box2D`, Sedona translates the predicate into Parquet row-group inequalities on the column's underlying `xmin` / `ymin` / `xmax` / `ymax` leaves and pushes them down via `ParquetInputFormat.setFilterPredicate`. Parquet's row-group statistics machinery then skips row groups whose recorded min/max disprove the predicate — no file metadata scan is required.
 
-The pushdown applies whenever the column's Spark `dataType` is `Box2DUDT`. The simplest way to get one is to materialise the column with `ST_Box2D(geom)` before writing the dataset, or to use the SQL cast `CAST(geom AS box2d)`. Sedona's auto-generated `<geom>_bbox` covering column is written as a plain `struct<xmin, ymin, xmax, ymax>` — it satisfies the GeoParquet 1.1 covering-bbox contract but is not a `Box2D`, so `ST_BoxIntersects` / `ST_BoxContains` do not target it directly. Use it through [Push spatial predicates to GeoParquet](#push-spatial-predicates-to-geoparquet) (which prunes via the file-level bbox metadata), or write the column explicitly as `ST_Box2D(geom)` if you want row-group-level pruning through Box2D predicates.
+The pushdown applies whenever both arguments resolve to Spark `Box2DUDT`. The simplest way to get a Box2D column is to materialise it with `ST_Box2D(geom)` before writing the dataset, or to use the SQL cast `CAST(geom AS box2d)`. Sedona's auto-generated `<geom>_bbox` covering column is written as a plain `struct<xmin, ymin, xmax, ymax>` — it satisfies the GeoParquet 1.1 covering-bbox contract but is not a `Box2D`, so the Box2D pushdown does not target it directly. Use it through [Push spatial predicates to GeoParquet](#push-spatial-predicates-to-geoparquet) (which prunes via the file-level bbox metadata), or write the column explicitly as `ST_Box2D(geom)` if you want row-group-level pruning.
 
 SQL Example
 
 ```sql
 SELECT *
 FROM geoparquet_dataset
-WHERE ST_BoxIntersects(
+WHERE ST_Intersects(
     geom_bbox,
     ST_MakeBox2D(ST_Point(0.0, 0.0), ST_Point(10.0, 10.0)))
 ```
 
 Predicate types and the per-row inequality system they translate to:
 
-| Predicate                            | Pushed-down conjunction (per row)                                                                                                            |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ST_BoxIntersects(box_col, lit)`     | `box.xmax >= lit.xmin AND box.xmin <= lit.xmax AND box.ymax >= lit.ymin AND box.ymin <= lit.ymax` (symmetric — reverse arg order is identical) |
-| `ST_BoxContains(box_col, lit)`       | `box.xmin <= lit.xmin AND box.xmax >= lit.xmax AND box.ymin <= lit.ymin AND box.ymax >= lit.ymax`                                            |
-| `ST_BoxContains(lit, box_col)`       | `box.xmin >= lit.xmin AND box.xmax <= lit.xmax AND box.ymin >= lit.ymin AND box.ymax <= lit.ymax`                                            |
+| Predicate (Box2D / Box2D)               | Pushed-down conjunction (per row)                                                                                                            |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ST_Intersects(box_col, lit)`           | `box.xmax >= lit.xmin AND box.xmin <= lit.xmax AND box.ymax >= lit.ymin AND box.ymin <= lit.ymax` (symmetric — reverse arg order is identical) |
+| `ST_Contains(box_col, lit)`             | `box.xmin <= lit.xmin AND box.xmax >= lit.xmax AND box.ymin <= lit.ymin AND box.ymax >= lit.ymax`                                            |
+| `ST_Contains(lit, box_col)`             | `box.xmin >= lit.xmin AND box.xmax <= lit.xmax AND box.ymin >= lit.ymin AND box.ymax <= lit.ymax`                                            |
 
 Pushdown is enabled by default and is gated by two flags. The optimizer rule that attaches the Box2D spatial filter is controlled by `spark.sedona.geoparquet.spatialFilterPushDown` (Sedona's master spatial-pushdown toggle, default `true`); the actual injection into the Parquet read path is then additionally gated by Spark's `spark.sql.parquet.filterPushdown` (default `true`). Disabling either disables Box2D pushdown.
 
@@ -465,16 +465,16 @@ Inverted-bound literals (`xmin > xmax` / `ymin > ymax`) are not pushed down — 
 
 ## Box2D spatial join
 
-`ST_BoxIntersects` and `ST_BoxContains` between two `Box2D` columns route through the same physical operators as their `Geometry` counterparts (`ST_Intersects` / `ST_Covers`). At the executor boundary, each `Box2D` row is materialised into the implied rectangular polygon, after which the partitioner, R-tree index, and refine evaluator run unchanged. JTS short-circuits axis-aligned rectangle predicates via `RectangleIntersects` / `RectangleContains`, so the refine step pays only the four-double envelope comparison.
+`ST_Intersects` and `ST_Contains` between two `Box2D` columns route through the same physical operators as their `Geometry` counterparts (`ST_Intersects` / `ST_Covers`). The planner picks the bbox path when both children resolve to `Box2DUDT`. At the executor boundary each `Box2D` row is materialised into the implied rectangular polygon, after which the partitioner, R-tree index, and refine evaluator run unchanged. JTS short-circuits axis-aligned rectangle predicates via `RectangleIntersects` / `RectangleContains`, so the refine step pays only the four-double envelope comparison.
 
-`ST_BoxContains` uses `SpatialPredicate.COVERS` semantics at the join layer — JTS `covers` matches `ST_BoxContains`'s closed-interval contract (JTS `contains`, strict-interior, would reject edge-sharing pairs).
+`ST_Contains` between two Box2D columns uses `SpatialPredicate.COVERS` semantics at the join layer — JTS `covers` matches the closed-interval contract (JTS `contains`, strict-interior, would reject edge-sharing pairs).
 
 SQL Example — range join:
 
 ```sql
 SELECT *
 FROM left_boxes L, right_boxes R
-WHERE ST_BoxIntersects(L.box, R.box)
+WHERE ST_Intersects(L.box, R.box)
 ```
 
 SQL Example — broadcast index join:
@@ -482,7 +482,7 @@ SQL Example — broadcast index join:
 ```sql
 SELECT /*+ BROADCAST(R) */ *
 FROM left_boxes L, right_boxes R
-WHERE ST_BoxIntersects(L.box, R.box)
+WHERE ST_Intersects(L.box, R.box)
 ```
 
 Inverted-bound input on either side raises `IllegalArgumentException` from the join-side validation path, matching the scalar predicate contract.

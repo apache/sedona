@@ -25,7 +25,7 @@ class predicateTestScala extends TestBaseScala {
 
   describe("Sedona-SQL Predicate Test") {
 
-    it("Passed ST_BoxIntersects and ST_BoxContains") {
+    it("Passed ST_Intersects and ST_Contains on Box2D inputs") {
       val df = sparkSession.sql("""
         WITH t AS (
           SELECT
@@ -37,15 +37,15 @@ class predicateTestScala extends TestBaseScala {
             ST_Box2D(ST_GeomFromText(NULL))                                    AS box_null
         )
         SELECT
-          ST_BoxIntersects(a, inside),
-          ST_BoxIntersects(a, overlap),
-          ST_BoxIntersects(a, edge),
-          ST_BoxIntersects(a, disjoint),
-          ST_BoxIntersects(a, box_null),
-          ST_BoxContains(a, inside),
-          ST_BoxContains(a, overlap),
-          ST_BoxContains(a, a),
-          ST_BoxContains(a, box_null)
+          ST_Intersects(a, inside),
+          ST_Intersects(a, overlap),
+          ST_Intersects(a, edge),
+          ST_Intersects(a, disjoint),
+          ST_Intersects(a, box_null),
+          ST_Contains(a, inside),
+          ST_Contains(a, overlap),
+          ST_Contains(a, a),
+          ST_Contains(a, box_null)
         FROM t
         """)
       val row = df.collect()(0)

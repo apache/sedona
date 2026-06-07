@@ -25,7 +25,7 @@ The `Box2D` type in Sedona represents a planar axis-aligned bounding box — a r
 
 ## Semantic notes
 
-- `Box2D` values use closed-interval semantics: edge-touching boxes are considered intersecting and (per [ST_BoxContains](Box2D-Predicates/ST_BoxContains.md)) contained.
+- `Box2D` values use closed-interval semantics: edge-touching boxes are considered intersecting and (per [ST_Contains](../Predicates/ST_Contains.md)) contained.
 - Absence is represented by SQL `NULL` rather than an in-band sentinel.
 - Bounds are required to be ordered (`xmin <= xmax`, `ymin <= ymax`). Inverted-bound values are reserved for a future antimeridian-wraparound semantics on geography bboxes; predicates and join planning throw `IllegalArgumentException` on inverted input today.
 - Unlike [ST_Envelope](../Bounding-Box-Functions/ST_Envelope.md), which returns the envelope as a `Geometry` (typically a polygon, but JTS may return a `Point` or `LineString` for degenerate inputs), [ST_Box2D](Box2D-Constructors/ST_Box2D.md) always returns a typed `Box2D` value. Prefer the typed form when downstream code only needs the four bounds, and prefer the geometry form when downstream code expects a `Geometry`.
@@ -51,10 +51,12 @@ The same `ST_XMin` / `ST_YMin` / `ST_XMax` / `ST_YMax` functions also accept `Ge
 
 ## Box2D Predicates
 
+`Box2D` inputs are accepted by the existing `ST_Intersects` / `ST_Contains` / `ST_DWithin` predicates as type-dispatched overloads — there are no separate `ST_Box*` functions.
+
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
-| [ST_BoxIntersects](Box2D-Predicates/ST_BoxIntersects.md) | Boolean | Closed-interval bbox intersection over two Box2D arguments. Matches PostGIS `&&` on `box2d`. | v1.9.1 |
-| [ST_BoxContains](Box2D-Predicates/ST_BoxContains.md) | Boolean | Closed-interval bbox containment over two Box2D arguments. Matches PostGIS `~` on `box2d`. | v1.9.1 |
+| [ST_Intersects](../Predicates/ST_Intersects.md) | Boolean | Closed-interval bbox intersection on both axes when both arguments are `Box2D`. Matches PostGIS `&&` on `box2d`. | v1.9.1 |
+| [ST_Contains](../Predicates/ST_Contains.md) | Boolean | Closed-interval bbox containment on both axes when both arguments are `Box2D`. Matches PostGIS `~` on `box2d`. | v1.9.1 |
 | [ST_DWithin](Box2D-Predicates/ST_DWithin.md) | Boolean | Closed-interval planar distance test between two Box2D rectangles. | v1.9.1 |
 
 ## Box2D Functions
@@ -85,5 +87,5 @@ The cast forms require the Sedona SQL parser extension (`spark.sql.extensions=or
 
 Box2D-typed columns are first-class participants in Sedona's spatial optimizer:
 
-- **Filter pushdown.** `ST_BoxIntersects` / `ST_BoxContains` predicates over a Box2D column and a literal Box2D push down to Parquet row-group statistics on the column's underlying `xmin` / `ymin` / `xmax` / `ymax` leaves. See [Query optimization → Box2D filter pushdown](../Optimizer.md#box2d-filter-pushdown).
-- **Spatial joins.** `ST_BoxIntersects` and `ST_BoxContains` route through the same physical operators (`RangeJoinExec`, `BroadcastIndexJoinExec`) used for `ST_Intersects` / `ST_Covers`. See [Query optimization → Range join](../Optimizer.md#range-join) and [Broadcast index join](../Optimizer.md#broadcast-index-join).
+- **Filter pushdown.** `ST_Intersects` / `ST_Contains` over a `Box2D` column and a literal `Box2D` push down to Parquet row-group statistics on the column's underlying `xmin` / `ymin` / `xmax` / `ymax` leaves. See [Query optimization → Box2D filter pushdown](../Optimizer.md#box2d-filter-pushdown).
+- **Spatial joins.** `ST_Intersects` and `ST_Contains` between two `Box2D` columns route through the same physical operators (`RangeJoinExec`, `BroadcastIndexJoinExec`) used for the Geometry-typed forms — the dataType-aware planner picks the bbox path when both children are `Box2DUDT`. See [Query optimization → Range join](../Optimizer.md#range-join) and [Broadcast index join](../Optimizer.md#broadcast-index-join).

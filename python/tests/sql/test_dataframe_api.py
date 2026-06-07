@@ -1211,7 +1211,7 @@ test_configurations = [
         True,
     ),
     (
-        stp.ST_3DBoxIntersects,
+        stp.ST_Intersects,
         (
             lambda: f.expr("ST_3DMakeBox(ST_PointZ(0, 0, 0), ST_PointZ(5, 5, 5))"),
             lambda: f.expr("ST_3DMakeBox(ST_PointZ(1, 1, 1), ST_PointZ(2, 2, 2))"),
@@ -1221,7 +1221,7 @@ test_configurations = [
         True,
     ),
     (
-        stp.ST_3DBoxContains,
+        stp.ST_Contains,
         (
             lambda: f.expr("ST_3DMakeBox(ST_PointZ(0, 0, 0), ST_PointZ(5, 5, 5))"),
             lambda: f.expr("ST_3DMakeBox(ST_PointZ(1, 1, 1), ST_PointZ(2, 2, 2))"),
