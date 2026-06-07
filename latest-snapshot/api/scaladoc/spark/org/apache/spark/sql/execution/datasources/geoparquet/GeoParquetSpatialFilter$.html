@@ -363,7 +363,7 @@
       </span>
       
       <p class="shortcomment cmt">Pushdown filter for predicates that operate on a Box2D-typed column (e.g.</p><div class="fullcomment"><div class="comment cmt"><p>Pushdown filter for predicates that operate on a Box2D-typed column (e.g.
-<code>ST_BoxIntersects(box_col, lit_box)</code> or <code>ST_BoxContains(box_col, lit_box)</code>).</p><p>Pruning is performed by translating the predicate into per-leaf inequalities on the Box2D
+<code>ST_Intersects(box_col, lit_box)</code> or <code>ST_Contains(box_col, lit_box)</code>).</p><p>Pruning is performed by translating the predicate into per-leaf inequalities on the Box2D
 column's four <code>Double</code> fields (<code>xmin</code>, <code>ymin</code>, <code>xmax</code>, <code>ymax</code>) and pushing the result down as
 a Parquet <span class="extype" name="FilterPredicate">FilterPredicate</span>. Parquet's row-group statistics machinery then skips row groups
 whose per-column min/max bounds disprove the predicate.</p><p>File-metadata evaluation returns <code>true</code> (i.e. don't prune at the GeoParquet metadata layer)

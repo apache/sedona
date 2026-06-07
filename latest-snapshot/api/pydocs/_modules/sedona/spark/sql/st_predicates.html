@@ -239,83 +239,20 @@
 <span class="n">_call_predicate_function</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">call_sedona_function</span><span class="p">,</span> <span class="s2">&quot;st_predicates&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="ST_BoxContains"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_predicates.ST_BoxContains">[docs]</a><span class="nd">@validate_argument_types</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">ST_BoxContains</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether Box2D a fully contains Box2D b (closed intervals).</span>
-
-<span class="sd">    Mirrors PostGIS ``~`` on box2d. NULL on null input.</span>
-
-<span class="sd">    :param a: Outer Box2D column.</span>
-<span class="sd">    :type a: ColumnOrName</span>
-<span class="sd">    :param b: Inner Box2D column.</span>
-<span class="sd">    :type b: ColumnOrName</span>
-<span class="sd">    :return: True if a contains b, false otherwise.</span>
-<span class="sd">    :rtype: Column</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_call_predicate_function</span><span class="p">(</span><span class="s2">&quot;ST_BoxContains&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span></div>
-
-
-<div class="viewcode-block" id="ST_BoxIntersects"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_predicates.ST_BoxIntersects">[docs]</a><span class="nd">@validate_argument_types</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">ST_BoxIntersects</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether Box2D a and Box2D b share any point (closed intervals).</span>
-
-<span class="sd">    Mirrors PostGIS ``&amp;&amp;`` on box2d. NULL on null input.</span>
-
-<span class="sd">    :param a: First Box2D column.</span>
-<span class="sd">    :type a: ColumnOrName</span>
-<span class="sd">    :param b: Second Box2D column.</span>
-<span class="sd">    :type b: ColumnOrName</span>
-<span class="sd">    :return: True if a and b overlap, false otherwise.</span>
-<span class="sd">    :rtype: Column</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_call_predicate_function</span><span class="p">(</span><span class="s2">&quot;ST_BoxIntersects&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span></div>
-
-
-<div class="viewcode-block" id="ST_3DBoxContains"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_predicates.ST_3DBoxContains">[docs]</a><span class="nd">@validate_argument_types</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">ST_3DBoxContains</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether Box3D a fully contains Box3D b (closed intervals on all three axes).</span>
-
-<span class="sd">    Mirrors PostGIS ``~~`` on box3d. NULL on null input. Raises</span>
-<span class="sd">    ``IllegalArgumentException`` if either argument has inverted bounds</span>
-<span class="sd">    (``xmin &gt; xmax`` / ``ymin &gt; ymax`` / ``zmin &gt; zmax``).</span>
-
-<span class="sd">    :param a: Outer Box3D column.</span>
-<span class="sd">    :type a: ColumnOrName</span>
-<span class="sd">    :param b: Inner Box3D column.</span>
-<span class="sd">    :type b: ColumnOrName</span>
-<span class="sd">    :return: True if a contains b, false otherwise.</span>
-<span class="sd">    :rtype: Column</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_call_predicate_function</span><span class="p">(</span><span class="s2">&quot;ST_3DBoxContains&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span></div>
-
-
-<div class="viewcode-block" id="ST_3DBoxIntersects"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_predicates.ST_3DBoxIntersects">[docs]</a><span class="nd">@validate_argument_types</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">ST_3DBoxIntersects</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether Box3D a and Box3D b share any point (closed intervals on all three axes).</span>
-
-<span class="sd">    Mirrors PostGIS ``&amp;&amp;&amp;`` on box3d. NULL on null input. Raises</span>
-<span class="sd">    ``IllegalArgumentException`` if either argument has inverted bounds</span>
-<span class="sd">    (``xmin &gt; xmax`` / ``ymin &gt; ymax`` / ``zmin &gt; zmax``).</span>
-
-<span class="sd">    :param a: First Box3D column.</span>
-<span class="sd">    :type a: ColumnOrName</span>
-<span class="sd">    :param b: Second Box3D column.</span>
-<span class="sd">    :type b: ColumnOrName</span>
-<span class="sd">    :return: True if a and b overlap, false otherwise.</span>
-<span class="sd">    :rtype: Column</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_call_predicate_function</span><span class="p">(</span><span class="s2">&quot;ST_3DBoxIntersects&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span></div>
-
-
 <div class="viewcode-block" id="ST_Contains"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_predicates.ST_Contains">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_Contains</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether geometry a contains geometry b.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether a contains b. Polymorphic over input type:</span>
 
-<span class="sd">    :param a: Geometry column to check containment for.</span>
+<span class="sd">    - Geometry / Geometry — topological containment via JTS.</span>
+<span class="sd">    - Geography / Geography — topological containment via S2.</span>
+<span class="sd">    - Box2D / Box2D — closed-interval bbox containment on both axes (PostGIS ``~`` on box2d).</span>
+<span class="sd">    - Box3D / Box3D — closed-interval bbox containment on all three axes.</span>
+
+<span class="sd">    :param a: Outer geometry or Box2D / Box3D column.</span>
 <span class="sd">    :type a: ColumnOrName</span>
-<span class="sd">    :param b: Geometry column to check containment of.</span>
+<span class="sd">    :param b: Inner geometry or Box2D / Box3D column.</span>
 <span class="sd">    :type b: ColumnOrName</span>
-<span class="sd">    :return: True if geometry a contains geometry b and False otherwise as a boolean column.</span>
+<span class="sd">    :return: True if a contains b, false otherwise.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_call_predicate_function</span><span class="p">(</span><span class="s2">&quot;ST_Contains&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span></div>
@@ -365,13 +302,18 @@
 
 <div class="viewcode-block" id="ST_Intersects"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_predicates.ST_Intersects">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_Intersects</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether two geometries intersect.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether a and b intersect. Polymorphic over input type:</span>
 
-<span class="sd">    :param a: One geometry column to check.</span>
+<span class="sd">    - Geometry / Geometry — topological intersection via JTS.</span>
+<span class="sd">    - Geography / Geography — topological intersection via S2.</span>
+<span class="sd">    - Box2D / Box2D — closed-interval bbox intersection on both axes (PostGIS ``&amp;&amp;`` on box2d).</span>
+<span class="sd">    - Box3D / Box3D — closed-interval bbox intersection on all three axes (PostGIS ``&amp;&amp;&amp;``).</span>
+
+<span class="sd">    :param a: One geometry or Box2D / Box3D column.</span>
 <span class="sd">    :type a: ColumnOrName</span>
-<span class="sd">    :param b: Other geometry column to check.</span>
+<span class="sd">    :param b: Other geometry or Box2D / Box3D column.</span>
 <span class="sd">    :type b: ColumnOrName</span>
-<span class="sd">    :return: True if a and b intersect and False otherwise, as a boolean column.</span>
+<span class="sd">    :return: True if a and b intersect, false otherwise.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_call_predicate_function</span><span class="p">(</span><span class="s2">&quot;ST_Intersects&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span></div>

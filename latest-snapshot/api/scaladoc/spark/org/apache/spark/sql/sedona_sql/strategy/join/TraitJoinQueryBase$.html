@@ -602,8 +602,8 @@ the closed rectangular polygon implied by their <code>(xmin, ymin, xmax, ymax)</
 shape columns are deserialised from the Sedona geometry binary form.</p><p>Producing a JTS rectangle here lets the rest of the join machinery — partitioner, R-tree
 <code>IndexBuilder</code>, refine evaluator — stay shape-agnostic. JTS already short-circuits
 rectangle-rectangle predicates (<code>Polygon.isRectangle</code> triggers <code>RectangleIntersects</code> /
-<code>RectangleContains</code>), so a <code>ST_BoxIntersects</code> join naturally pays only the four-double
-envelope comparison at refine time.</p><p>Inverted Box2D bounds (<code>xmin &gt; xmax</code> / <code>ymin &gt; ymax</code>) are rejected with the same
+<code>RectangleContains</code>), so a Box2D-on-Box2D <code>ST_Intersects</code> join naturally pays only the
+four-double envelope comparison at refine time.</p><p>Inverted Box2D bounds (<code>xmin &gt; xmax</code> / <code>ymin &gt; ymax</code>) are rejected with the same
 <code>IllegalArgumentException</code> raised by <code>Predicates.boxIntersects</code> / <code>boxContains</code>. Inverted
 bounds have no defined planar meaning today (they are reserved for future
 antimeridian-wraparound semantics on Geography bboxes) and would silently mis-prune the
