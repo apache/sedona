@@ -450,6 +450,25 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   isGeography = useSpheroidUnwrapped,
                   condition,
                   Some(distance)))
+            // ST_3DDWithin distance join. The R-tree pass expands the 2D envelope of each shape
+            // by `distance` and probes for XY-rectangle intersection, which is a valid superset
+            // filter because the XY distance between two shapes is ≤ their 3D Euclidean distance.
+            // The per-pair condition (the full original predicate) then enforces the 3D distance
+            // via `Predicates.dWithin3D` — `Distance3DOp` for the Geometry overload and
+            // the closed-form box-to-box formula for the Box3D branch. Box3D inputs land on the
+            // XY footprint courtesy of `TraitJoinQueryBase.shapeToGeometry`. ST_3DDWithin has no
+            // Geography overload, so no Geography branching here.
+            case ST_3DDWithin(Seq(leftShape, rightShape, distance)) =>
+              Some(
+                JoinQueryDetection(
+                  left,
+                  right,
+                  leftShape,
+                  rightShape,
+                  SpatialPredicate.INTERSECTS,
+                  isGeography = false,
+                  condition,
+                  Some(distance)))
 
             // For distance joins we execute the actual predicate (condition) and not only extraConditions.
             // ST_Distance
@@ -990,6 +1009,8 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
       (distance, spatialPredicate, isGeography, extraCondition, isRasterPredicate) match {
         case (Some(_), SpatialPredicate.INTERSECTS, false, Some(ST_DWithin(Seq(_*))), false) =>
           "ST_DWithin"
+        case (Some(_), SpatialPredicate.INTERSECTS, false, Some(ST_3DDWithin(Seq(_*))), false) =>
+          "ST_3DDWithin"
         case (Some(_), SpatialPredicate.INTERSECTS, false, _, false) => "ST_Distance <="
         case (Some(_), _, false, _, false) => "ST_Distance <"
         case (Some(_), SpatialPredicate.INTERSECTS, true, Some(ST_DWithin(Seq(_*))), false) =>
