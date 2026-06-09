@@ -598,8 +598,11 @@
       </span>
       
       <p class="shortcomment cmt">Materialise a shape column value as a JTS <span class="extype" name="Geometry">Geometry</span>.</p><div class="fullcomment"><div class="comment cmt"><p>Materialise a shape column value as a JTS <span class="extype" name="Geometry">Geometry</span>. Box2D-typed columns are turned into
-the closed rectangular polygon implied by their <code>(xmin, ymin, xmax, ymax)</code> bounds; all other
-shape columns are deserialised from the Sedona geometry binary form.</p><p>Producing a JTS rectangle here lets the rest of the join machinery — partitioner, R-tree
+the closed rectangular polygon implied by their <code>(xmin, ymin, xmax, ymax)</code> bounds; Box3D
+columns are projected to their XY footprint (<code>xmin, ymin, xmax, ymax</code>) and the Z axis is
+re-checked per candidate pair by the scalar Box3D predicate that <code>JoinQueryDetector</code> folds
+into the join's <code>extraCondition</code>. All other shape columns are deserialised from the Sedona
+geometry binary form.</p><p>Producing a JTS rectangle here lets the rest of the join machinery — partitioner, R-tree
 <code>IndexBuilder</code>, refine evaluator — stay shape-agnostic. JTS already short-circuits
 rectangle-rectangle predicates (<code>Polygon.isRectangle</code> triggers <code>RectangleIntersects</code> /
 <code>RectangleContains</code>), so a Box2D-on-Box2D <code>ST_Intersects</code> join naturally pays only the
@@ -607,7 +610,8 @@ four-double envelope comparison at refine time.</p><p>Inverted Box2D bounds (<co
 <code>IllegalArgumentException</code> raised by <code>Predicates.boxIntersects</code> / <code>boxContains</code>. Inverted
 bounds have no defined planar meaning today (they are reserved for future
 antimeridian-wraparound semantics on Geography bboxes) and would silently mis-prune the
-R-tree if accepted here.</p><p>Returns <code>null</code> when the shape column evaluates to NULL; the caller is expected to either skip
+R-tree if accepted here. Box3D applies the same check on all three axes — Z has no wraparound
+convention.</p><p>Returns <code>null</code> when the shape column evaluates to NULL; the caller is expected to either skip
 the row or substitute an empty geometry.
 </p></div></div>
     </li><li name="org.apache.spark.sql.sedona_sql.strategy.join.TraitJoinQueryBase#shapeToGeometryOrEmpty" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
