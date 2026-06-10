@@ -24,9 +24,11 @@ import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.enums.FileDataSplitter;
 import org.apache.sedona.common.enums.GeometryType;
 import org.apache.sedona.common.geometryObjects.Box2D;
+import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.common.utils.FormatUtils;
 import org.apache.sedona.common.utils.GeoHashDecoder;
 import org.apache.sedona.flink.Box2DTypeSerializer;
+import org.apache.sedona.flink.Box3DTypeSerializer;
 import org.apache.sedona.flink.GeometryTypeSerializer;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
@@ -329,6 +331,24 @@ public class Constructors {
                 bridgedTo = Box2D.class)
             Box2D box) {
       return org.apache.sedona.common.Constructors.geomFromBox2D(box);
+    }
+  }
+
+  public static class ST_3DMakeBox extends ScalarFunction {
+    @DataTypeHint(value = "RAW", rawSerializer = Box3DTypeSerializer.class, bridgedTo = Box3D.class)
+    public Box3D eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object lowerLeft,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object upperRight) {
+      return org.apache.sedona.common.Constructors.make3DBox(
+          (Geometry) lowerLeft, (Geometry) upperRight);
     }
   }
 

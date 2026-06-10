@@ -35,6 +35,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.types.Row;
 import org.apache.sedona.common.geometryObjects.Box2D;
+import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.common.jts2geojson.GeoJSONReader;
 import org.apache.sedona.flink.expressions.Constructors;
 import org.apache.sedona.flink.expressions.Functions;
@@ -378,6 +379,21 @@ public class ConstructorTest extends TestBase {
     assertEquals(2.0, bbox.getYMin(), 0.0);
     assertEquals(4.0, bbox.getXMax(), 0.0);
     assertEquals(5.0, bbox.getYMax(), 0.0);
+  }
+
+  @Test
+  public void testMake3DBox() {
+    Box3D bbox =
+        (Box3D)
+            last(tableEnv.sqlQuery(
+                    "SELECT ST_3DMakeBox(ST_PointZ(1.0, 2.0, 3.0), ST_PointZ(4.0, 5.0, 6.0))"))
+                .getField(0);
+    assertEquals(1.0, bbox.getXMin(), 0.0);
+    assertEquals(2.0, bbox.getYMin(), 0.0);
+    assertEquals(3.0, bbox.getZMin(), 0.0);
+    assertEquals(4.0, bbox.getXMax(), 0.0);
+    assertEquals(5.0, bbox.getYMax(), 0.0);
+    assertEquals(6.0, bbox.getZMax(), 0.0);
   }
 
   @Test
