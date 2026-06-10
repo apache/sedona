@@ -1178,7 +1178,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 raise ValueError(
                     f"origin must be 'center', 'centroid', a Point, or (x, y) tuple, got {origin!r}"
                 )
-        elif isinstance(origin, tuple) and len(origin) == 2:
+        elif isinstance(origin, (tuple, list)) and len(origin) == 2:
             spark_expr = stf.ST_Rotate(
                 self.spark.column, angle, float(origin[0]), float(origin[1])
             )
@@ -1186,7 +1186,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             spark_expr = stf.ST_Rotate(self.spark.column, angle, origin.x, origin.y)
         else:
             raise TypeError(
-                f"origin must be 'center', 'centroid', a Point, or (x, y) tuple"
+                "origin must be 'center', 'centroid', a Point, or a two-element tuple/list"
             )
         return self._query_geometry_column(spark_expr, returns_geom=True)
 
