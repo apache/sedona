@@ -73,6 +73,8 @@ case class OptimizableJoinCondition(left: LogicalPlan, right: LogicalPlan) {
       case ST_DWithin(Seq(leftShape, rightShape, distance, useSpheroid)) =>
         useSpheroid
           .isInstanceOf[Literal] && isDistanceJoinOptimizable(leftShape, rightShape, distance)
+      case ST_3DDWithin(Seq(leftShape, rightShape, distance)) =>
+        isDistanceJoinOptimizable(leftShape, rightShape, distance)
       case RS_DWithin(Seq(leftShape, rightShape, distance)) =>
         isDistanceJoinOptimizable(leftShape, rightShape, distance)
 
