@@ -984,6 +984,16 @@ public class Functions {
             Box2D box) {
       return org.apache.sedona.common.Functions.yMin(box);
     }
+
+    @DataTypeHint("Double")
+    public Double eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box3DTypeSerializer.class,
+                bridgedTo = Box3D.class)
+            Box3D box) {
+      return org.apache.sedona.common.Functions.yMin(box);
+    }
   }
 
   public static class ST_YMax extends ScalarFunction {
@@ -1007,6 +1017,16 @@ public class Functions {
             Box2D box) {
       return org.apache.sedona.common.Functions.yMax(box);
     }
+
+    @DataTypeHint("Double")
+    public Double eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box3DTypeSerializer.class,
+                bridgedTo = Box3D.class)
+            Box3D box) {
+      return org.apache.sedona.common.Functions.yMax(box);
+    }
   }
 
   public static class ST_ZMax extends ScalarFunction {
@@ -1020,6 +1040,16 @@ public class Functions {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.zMax(geom);
     }
+
+    @DataTypeHint("Double")
+    public Double eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box3DTypeSerializer.class,
+                bridgedTo = Box3D.class)
+            Box3D box) {
+      return org.apache.sedona.common.Functions.zMax(box);
+    }
   }
 
   public static class ST_ZMin extends ScalarFunction {
@@ -1032,6 +1062,16 @@ public class Functions {
             Object o) {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.zMin(geom);
+    }
+
+    @DataTypeHint("Double")
+    public Double eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box3DTypeSerializer.class,
+                bridgedTo = Box3D.class)
+            Box3D box) {
+      return org.apache.sedona.common.Functions.zMin(box);
     }
   }
 
@@ -1370,6 +1410,16 @@ public class Functions {
             Box2D box) {
       return org.apache.sedona.common.Functions.box2dAsText(box);
     }
+
+    @DataTypeHint("String")
+    public String eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box3DTypeSerializer.class,
+                bridgedTo = Box3D.class)
+            Box3D box) {
+      return org.apache.sedona.common.Functions.box3dAsText(box);
+    }
   }
 
   public static class ST_AsEWKB extends ScalarFunction {
@@ -1592,6 +1642,16 @@ public class Functions {
             Box2D box) {
       return org.apache.sedona.common.Functions.xMax(box);
     }
+
+    @DataTypeHint("Double")
+    public Double eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box3DTypeSerializer.class,
+                bridgedTo = Box3D.class)
+            Box3D box) {
+      return org.apache.sedona.common.Functions.xMax(box);
+    }
   }
 
   public static class ST_XMin extends ScalarFunction {
@@ -1613,6 +1673,16 @@ public class Functions {
                 rawSerializer = Box2DTypeSerializer.class,
                 bridgedTo = Box2D.class)
             Box2D box) {
+      return org.apache.sedona.common.Functions.xMin(box);
+    }
+
+    @DataTypeHint("Double")
+    public Double eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box3DTypeSerializer.class,
+                bridgedTo = Box3D.class)
+            Box3D box) {
       return org.apache.sedona.common.Functions.xMin(box);
     }
   }

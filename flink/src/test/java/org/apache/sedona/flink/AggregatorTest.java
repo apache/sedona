@@ -25,6 +25,7 @@ import static org.junit.Assert.assertNull;
 import org.apache.flink.table.api.*;
 import org.apache.flink.types.Row;
 import org.apache.sedona.common.geometryObjects.Box2D;
+import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.flink.expressions.Functions;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -62,6 +63,38 @@ public class AggregatorTest extends TestBase {
     assertEquals(0.0, bbox.getYMin(), 0.0);
     assertEquals(4.0, bbox.getXMax(), 0.0);
     assertEquals(5.0, bbox.getYMax(), 0.0);
+  }
+
+  @Test
+  public void test3DExtent() {
+    tableEnv.executeSql(
+        "CREATE OR REPLACE TEMPORARY VIEW extent3d_view AS "
+            + "SELECT ST_GeomFromWKT(wkt) as geom FROM ("
+            + "VALUES ('POINT Z (1 2 3)'), ('POINT Z (4 5 -1)'), ('LINESTRING (-3 0, 0 0)')"
+            + ") AS t(wkt)");
+    Table result = tableEnv.sqlQuery("SELECT ST_3DExtent(geom) FROM extent3d_view");
+    Row last = last(result);
+    Box3D bbox = (Box3D) last.getField(0);
+    assertEquals(-3.0, bbox.getXMin(), 0.0);
+    assertEquals(0.0, bbox.getYMin(), 0.0);
+    // z-min is -1.0 from POINT Z (4 5 -1); the XY-only linestring folds to z = 0, which sits
+    // between the -1 and 3 of the two POINT Z rows and so does not move either Z bound.
+    assertEquals(-1.0, bbox.getZMin(), 0.0);
+    assertEquals(4.0, bbox.getXMax(), 0.0);
+    assertEquals(5.0, bbox.getYMax(), 0.0);
+    assertEquals(3.0, bbox.getZMax(), 0.0);
+  }
+
+  @Test
+  public void test3DExtent_EmptyAndNullGeometries() {
+    tableEnv.executeSql(
+        "CREATE OR REPLACE TEMPORARY VIEW null_extent3d_view AS "
+            + "SELECT ST_GeomFromWKT(wkt) as geom FROM ("
+            + "VALUES (CAST(NULL AS STRING)), ('POINT EMPTY'), ('POLYGON EMPTY')"
+            + ") AS t(wkt)");
+    Table result = tableEnv.sqlQuery("SELECT ST_3DExtent(geom) FROM null_extent3d_view");
+    Row last = last(result);
+    assertNull(last.getField(0));
   }
 
   @Test

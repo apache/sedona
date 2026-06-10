@@ -21,7 +21,9 @@ package org.apache.sedona.flink.expressions;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.AggregateFunction;
 import org.apache.sedona.common.geometryObjects.Box2D;
+import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.flink.Box2DTypeSerializer;
+import org.apache.sedona.flink.Box3DTypeSerializer;
 import org.apache.sedona.flink.GeometryTypeSerializer;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
@@ -164,6 +166,69 @@ public class Aggregators {
     }
 
     public void resetAccumulator(Accumulators.Envelope acc) {
+      acc.reset();
+    }
+  }
+
+  // Aggregate the 3D bounding box of all input geometries as a Box3D. Mirrors PostGIS
+  // ST_3DExtent. Geometries without a Z dimension fold into z = 0 per coordinate (via
+  // Functions.box3D). Returns null when there are no rows or all inputs are null/empty.
+  @DataTypeHint(value = "RAW", rawSerializer = Box3DTypeSerializer.class, bridgedTo = Box3D.class)
+  public static class ST_3DExtent extends AggregateFunction<Box3D, Accumulators.Envelope3D> {
+
+    @Override
+    public Accumulators.Envelope3D createAccumulator() {
+      return new Accumulators.Envelope3D();
+    }
+
+    @Override
+    @DataTypeHint(value = "RAW", rawSerializer = Box3DTypeSerializer.class, bridgedTo = Box3D.class)
+    public Box3D getValue(Accumulators.Envelope3D acc) {
+      if (acc.minX > acc.maxX) return null;
+      return new Box3D(acc.minX, acc.minY, acc.minZ, acc.maxX, acc.maxY, acc.maxZ);
+    }
+
+    public void accumulate(
+        Accumulators.Envelope3D acc,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o) {
+      if (o == null) return;
+      // Functions.box3D folds missing Z to 0 and returns null for empty geometries.
+      Box3D box = org.apache.sedona.common.Functions.box3D((Geometry) o);
+      if (box == null) return;
+      acc.minX = Math.min(acc.minX, box.getXMin());
+      acc.minY = Math.min(acc.minY, box.getYMin());
+      acc.minZ = Math.min(acc.minZ, box.getZMin());
+      acc.maxX = Math.max(acc.maxX, box.getXMax());
+      acc.maxY = Math.max(acc.maxY, box.getYMax());
+      acc.maxZ = Math.max(acc.maxZ, box.getZMax());
+    }
+
+    public void retract(
+        Accumulators.Envelope3D acc,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o) {
+      assert (false);
+    }
+
+    public void merge(Accumulators.Envelope3D acc, Iterable<Accumulators.Envelope3D> it) {
+      for (Accumulators.Envelope3D a : it) {
+        acc.minX = Math.min(acc.minX, a.minX);
+        acc.minY = Math.min(acc.minY, a.minY);
+        acc.minZ = Math.min(acc.minZ, a.minZ);
+        acc.maxX = Math.max(acc.maxX, a.maxX);
+        acc.maxY = Math.max(acc.maxY, a.maxY);
+        acc.maxZ = Math.max(acc.maxZ, a.maxZ);
+      }
+    }
+
+    public void resetAccumulator(Accumulators.Envelope3D acc) {
       acc.reset();
     }
   }
