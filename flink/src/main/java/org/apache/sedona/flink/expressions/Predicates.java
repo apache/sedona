@@ -21,7 +21,9 @@ package org.apache.sedona.flink.expressions;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.sedona.common.geometryObjects.Box2D;
+import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.flink.Box2DTypeSerializer;
+import org.apache.sedona.flink.Box3DTypeSerializer;
 import org.apache.sedona.flink.GeometryTypeSerializer;
 import org.locationtech.jts.geom.Geometry;
 
@@ -65,6 +67,23 @@ public class Predicates {
       if (a == null || b == null) return null;
       return org.apache.sedona.common.Predicates.boxIntersects(a, b);
     }
+
+    /** Box3D-on-Box3D bbox intersection on all three axes (closed interval). */
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box3DTypeSerializer.class,
+                bridgedTo = Box3D.class)
+            Box3D a,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box3DTypeSerializer.class,
+                bridgedTo = Box3D.class)
+            Box3D b) {
+      if (a == null || b == null) return null;
+      return org.apache.sedona.common.Predicates.box3dIntersects(a, b);
+    }
   }
 
   public static class ST_Contains extends ScalarFunction {
@@ -105,6 +124,23 @@ public class Predicates {
             Box2D b) {
       if (a == null || b == null) return null;
       return org.apache.sedona.common.Predicates.boxContains(a, b);
+    }
+
+    /** Box3D-on-Box3D bbox containment on all three axes (closed interval). */
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box3DTypeSerializer.class,
+                bridgedTo = Box3D.class)
+            Box3D a,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box3DTypeSerializer.class,
+                bridgedTo = Box3D.class)
+            Box3D b) {
+      if (a == null || b == null) return null;
+      return org.apache.sedona.common.Predicates.box3dContains(a, b);
     }
   }
 
@@ -403,6 +439,51 @@ public class Predicates {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
       return org.apache.sedona.common.Predicates.dWithin(geom1, geom2, distance, useSphere);
+    }
+  }
+
+  public static class ST_3DDWithin extends ScalarFunction {
+
+    public ST_3DDWithin() {}
+
+    /** 3D Euclidean distance-within over two geometries (missing Z folds to 0). */
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o1,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o2,
+        @DataTypeHint("Double") Double distance) {
+      // Guard distance too: the common-layer dWithin3D takes a primitive double, so a SQL NULL
+      // distance would autounbox to an NPE rather than propagating NULL.
+      if (o1 == null || o2 == null || distance == null) return null;
+      Geometry geom1 = (Geometry) o1;
+      Geometry geom2 = (Geometry) o2;
+      return org.apache.sedona.common.Predicates.dWithin3D(geom1, geom2, distance);
+    }
+
+    /** Closed-interval 3D distance test over two Box3D values. */
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box3DTypeSerializer.class,
+                bridgedTo = Box3D.class)
+            Box3D a,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = Box3DTypeSerializer.class,
+                bridgedTo = Box3D.class)
+            Box3D b,
+        @DataTypeHint("Double") Double distance) {
+      if (a == null || b == null || distance == null) return null;
+      return org.apache.sedona.common.Predicates.dWithin3D(a, b, distance);
     }
   }
 }
