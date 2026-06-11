@@ -956,6 +956,28 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
     def test_transform(self):
         pass
 
+    @pytest.mark.parametrize("angle", [0, 45, 90, 180])
+    @pytest.mark.parametrize(
+        "origin_kwargs",
+        [
+            {},
+            {"origin": (1, 2)},
+            {"origin": [1, 2]},
+            {"origin": "centroid"},
+            {"origin": Point(2, 4)},
+        ],
+    )
+    def test_rotate(self, angle, origin_kwargs):
+        for geom in self.geoms:
+            # Filter empty geometries within each group
+            non_empty = [g for g in geom if g is not None and not g.is_empty]
+            if not non_empty:
+                continue
+
+            sgpd_result = GeoSeries(non_empty).rotate(angle, **origin_kwargs)
+            gpd_result = gpd.GeoSeries(non_empty).rotate(angle, **origin_kwargs)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_force_2d(self):
         # force_2d was added from geopandas 1.0.0
         if parse_version(gpd.__version__) < parse_version("1.0.0"):

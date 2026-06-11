@@ -1362,6 +1362,57 @@ class GeoFrame(metaclass=ABCMeta):
     # def transform(self, transformation, include_z=False):
     #     raise NotImplementedError("This method is not implemented yet.")
 
+    def rotate(self, angle, origin="center", use_radians=False):
+        """Return a ``GeoSeries`` with rotated geometries.
+
+        See http://shapely.readthedocs.io/en/latest/manual.html#shapely.affinity.rotate
+        for details.
+
+        Parameters
+        ----------
+        angle : float
+            The angle of rotation can be specified in either degrees (default)
+            or radians by setting use_radians=True. Positive angles are
+            counter-clockwise and negative are clockwise rotations.
+        origin : string, Point, or tuple (x, y)
+            The point of origin can be a keyword 'center' for the bounding box
+            center (default), 'centroid' for the geometry's centroid, a Point
+            object or a coordinate tuple (x, y).
+        use_radians : boolean
+            Whether to interpret the angle of rotation as degrees or radians
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, LineString, Polygon
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(1, 1),
+        ...         LineString([(1, -1), (1, 0)]),
+        ...         Polygon([(3, -1), (4, 0), (3, 1)]),
+        ...     ]
+        ... )
+        >>> s
+        0                         POINT (1 1)
+        1              LINESTRING (1 -1, 1 0)
+        2    POLYGON ((3 -1, 4 0, 3 1, 3 -1))
+        dtype: geometry
+
+        >>> s.rotate(90)
+        0                                          POINT (1 1)
+        1                      LINESTRING (1.5 -0.5, 0.5 -0.5)
+        2    POLYGON ((4.5 -0.5, 3.5 0.5, 2.5 -0.5, 4.5 -0.5))
+        dtype: geometry
+
+        >>> s.rotate(90, origin=(0, 0))
+        0                       POINT (-1 1)
+        1              LINESTRING (1 1, 0 1)
+        2    POLYGON ((1 3, 0 4, -1 3, 1 3))
+        dtype: geometry
+
+        """
+        return _delegate_to_geometry_column("rotate", self, angle, origin, use_radians)
+
     def force_2d(self):
         """Force the dimensionality of a geometry to 2D.
 
