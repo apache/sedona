@@ -507,6 +507,24 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testBox3DAsTextAndAccessors() {
+    Table t =
+        tableEnv.sqlQuery(
+            "WITH bx AS ("
+                + " SELECT ST_Box3D(ST_GeomFromText('LINESTRING Z(0 0 -3, 5 10 7)')) AS b)"
+                + " SELECT ST_AsText(b), ST_XMin(b), ST_YMin(b), ST_ZMin(b),"
+                + " ST_XMax(b), ST_YMax(b), ST_ZMax(b) FROM bx");
+    Row row = first(t);
+    assertEquals("BOX3D(0.0 0.0 -3.0, 5.0 10.0 7.0)", row.getField(0));
+    assertEquals(0.0, row.getField(1));
+    assertEquals(0.0, row.getField(2));
+    assertEquals(-3.0, row.getField(3));
+    assertEquals(5.0, row.getField(4));
+    assertEquals(10.0, row.getField(5));
+    assertEquals(7.0, row.getField(6));
+  }
+
+  @Test
   public void testEnvelope() {
     Table linestringTable = createLineStringTable(1);
     linestringTable =

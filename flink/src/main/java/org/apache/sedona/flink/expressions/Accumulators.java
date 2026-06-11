@@ -39,6 +39,24 @@ public class Accumulators {
     }
   }
 
+  public static class Envelope3D {
+    public double minX = Double.MAX_VALUE;
+    public double minY = Double.MAX_VALUE;
+    public double minZ = Double.MAX_VALUE;
+    public double maxX = -Double.MAX_VALUE;
+    public double maxY = -Double.MAX_VALUE;
+    public double maxZ = -Double.MAX_VALUE;
+
+    void reset() {
+      minX = Double.MAX_VALUE;
+      minY = Double.MAX_VALUE;
+      minZ = Double.MAX_VALUE;
+      maxX = -Double.MAX_VALUE;
+      maxY = -Double.MAX_VALUE;
+      maxZ = -Double.MAX_VALUE;
+    }
+  }
+
   public static class AccGeometry {
     @DataTypeHint(
         value = "RAW",
