@@ -66,6 +66,11 @@ Output:
 true
 ```
 
+For `Box3D` inputs the test covers all three axes — two boxes whose XY footprints overlap but whose Z ranges are disjoint do **not** intersect:
+
+![Box3D ST_Intersects returning true: boxes overlap on all three axes](../../../image/box3d/st_intersects_box3d_true.svg "Box3D ST_Intersects returning true")
+![Box3D ST_Intersects returning false: XY overlaps but Z is disjoint](../../../image/box3d/st_intersects_box3d_false.svg "Box3D ST_Intersects returning false")
+
 ## Box2D optimization
 
 `ST_Intersects(box_col, lit_box)` over a `Box2D` column and a literal `Box2D` is recognised by Sedona's spatial optimizer:
