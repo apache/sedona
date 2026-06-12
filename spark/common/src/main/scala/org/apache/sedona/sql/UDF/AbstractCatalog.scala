@@ -28,6 +28,7 @@ import org.apache.spark.sql.sedona_sql.expressions.{ST_Envelope_Aggr, ST_Interse
 import org.locationtech.jts.geom.Geometry
 
 import scala.reflect.ClassTag
+import scala.util.Try
 
 abstract class AbstractCatalog {
 
@@ -89,7 +90,10 @@ abstract class AbstractCatalog {
         case Some(existingInfo) =>
           // Skip if Sedona already registered this function (e.g., SedonaContext.create called
           // twice). Overwrite if it's a Spark native function (e.g., Spark 4.1's ST_GeomFromWKB).
-          !existingInfo.getClassName.startsWith("org.apache.sedona.")
+          // Sedona expression classes live under both org.apache.sedona and
+          // org.apache.spark.sql.sedona_sql.
+          !existingInfo.getClassName.startsWith("org.apache.sedona.") &&
+          !existingInfo.getClassName.startsWith("org.apache.spark.sql.sedona_sql.")
         case None => true
       }
       if (shouldRegister) {
@@ -114,8 +118,17 @@ abstract class AbstractCatalog {
       functionName: String,
       aggregator: Aggregator[Geometry, _, _]): Unit = {
     val functionIdentifier = FunctionIdentifier(functionName)
-    if (!sparkSession.sessionState.functionRegistry.functionExists(functionIdentifier)) {
+    val registry = sparkSession.sessionState.functionRegistry
+    // A new session clones FunctionRegistry.builtin, which holds Sedona's non-invocable
+    // placeholder for this aggregate (registered below), so mere existence in the session
+    // registry does not mean the real UDAF is there (GH-3044). Probe the registered builder:
+    // the placeholder throws on any invocation, a real entry builds an expression.
+    val isInvocable = registry.functionExists(functionIdentifier) &&
+      Try(registry.lookupFunction(functionIdentifier, Seq(Literal(null)))).isSuccess
+    if (!isInvocable) {
       sparkSession.udf.register(functionName, functions.udaf(aggregator))
+    }
+    if (!FunctionRegistry.builtin.functionExists(functionIdentifier)) {
       FunctionRegistry.builtin.registerFunction(
         functionIdentifier,
         new ExpressionInfo(aggregator.getClass.getCanonicalName, null, functionName),
