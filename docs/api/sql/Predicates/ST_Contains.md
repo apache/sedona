@@ -66,6 +66,11 @@ Output:
 true
 ```
 
+For `Box3D` inputs containment must hold on all three axes — a box contained within another's XY footprint but extending past it in Z is **not** contained:
+
+![Box3D ST_Contains returning true: B lies fully inside A](../../../image/box3d/st_contains_box3d_true.svg "Box3D ST_Contains returning true")
+![Box3D ST_Contains returning false: B is inside in XY but extends past A in Z](../../../image/box3d/st_contains_box3d_false.svg "Box3D ST_Contains returning false")
+
 ## Box2D optimization
 
 `ST_Contains(box_col, lit_box)` over a `Box2D` column and a literal `Box2D` (and the reversed form) is recognised by Sedona's spatial optimizer:

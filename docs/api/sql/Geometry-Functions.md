@@ -166,6 +166,7 @@ These functions test spatial relationships between geometries, returning boolean
 | [ST_Crosses](Predicates/ST_Crosses.md) | Boolean | Return true if A crosses B | v1.0.0 |
 | [ST_Disjoint](Predicates/ST_Disjoint.md) | Boolean | Return true if A and B are disjoint | v1.2.1 |
 | [ST_DWithin](Predicates/ST_DWithin.md) | Boolean | Returns true if 'leftGeometry' and 'rightGeometry' are within a specified 'distance'. | v1.5.1 |
+| [ST_3DDWithin](Predicates/ST_3DDWithin.md) | Boolean | Returns true if A and B are within a specified 3D Euclidean 'distance'. Accepts Geometry or Box3D inputs. | v1.9.1 |
 | [ST_Equals](Predicates/ST_Equals.md) | Boolean | Return true if A equals to B | v1.0.0 |
 | [ST_Intersects](Predicates/ST_Intersects.md) | Boolean | Return true if A intersects B | v1.0.0 |
 | [ST_OrderingEquals](Predicates/ST_OrderingEquals.md) | Boolean | Returns true if the geometries are equal and the coordinates are in the same order | v1.2.1 |
@@ -275,6 +276,7 @@ These functions perform aggregate operations on groups of geometries.
 | [ST_Collect_Agg](Aggregate-Functions/ST_Collect_Agg.md) | Geometry | Collects all geometries in a geometry column into a single multi-geometry (MultiPoint, MultiLineString, MultiPolygon, or GeometryCollection). Unlike `ST_Union_Agg`, this function does not dissolve ... | v1.8.1 |
 | [ST_Envelope_Agg](Aggregate-Functions/ST_Envelope_Agg.md) | Geometry | Return the entire envelope boundary of all geometries in A. Empty geometries and null values are skipped. If all inputs are empty or null, the result is null. This behavior is consistent with PostG... | v1.0.0 |
 | [ST_Extent](Aggregate-Functions/ST_Extent.md) | Box2D | Return the planar bounding box of all geometries in A as a typed Box2D. Empty geometries and NULL values are skipped. Mirrors PostGIS `ST_Extent`. | v1.9.1 |
+| [ST_3DExtent](Aggregate-Functions/ST_3DExtent.md) | Box3D | Return the 3D bounding box of all geometries in A as a typed Box3D. Empty/NULL skipped; geometries without Z fold to z=0. Mirrors PostGIS `ST_3DExtent`. | v1.9.1 |
 | [ST_Intersection_Agg](Aggregate-Functions/ST_Intersection_Agg.md) | Geometry | Return the polygon intersection of all polygons in A | v1.0.0 |
 | [ST_Union_Agg](Aggregate-Functions/ST_Union_Agg.md) | Geometry | Return the polygon union of all polygons in A | v1.0.0 |
 
