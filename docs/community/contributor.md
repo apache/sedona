@@ -35,6 +35,7 @@ Current Sedona PMC members are as follows:
 |     Adam Binford     |  Kimahriman  |  kimahriman@apache.org  |
 |  Kanchan Chowdhury   |  kanchanchy  |  kanchanchy@apache.org  |
 |  Kristin Cowalcijk   | Kontinuation | kontinuation@apache.org |
+|   Dewey Dunnington   | paleolimbot  | paleolimbot@apache.org  |
 |     Furqaan Khan     | furqaankhan  |   furqaan@apache.org    |
 |    Paweł Kociński    |   Imbruced   |   imbruced@apache.org   |
 |       Yitao Li       |   yitao-li   |   yitaoli@apache.org    |
@@ -66,13 +67,13 @@ The PMC also adds new PMC members. PMC members are expected to carry out PMC res
 
 Current Sedona Committers are as follows:
 
-|       Name       |  GitHub ID  |        Apache ID        |
-|:----------------:|:-----------:|:-----------------------:|
-|   John Bampton   |  jbampton   |   johnbam@apache.org    |
-| Dewey Dunnington | paleolimbot | paleolimbot@apache.org  |
-|  Nilesh Gajwani  |   iGN5117   |    nilesh@apache.org    |
-|   Peter Nguyen   |  petern48   |    petern@apache.org    |
-|   Pranav Toggi   |  prantogg   |   prantogg@apache.org   |
+|      Name      | GitHub ID |      Apache ID       |
+|:--------------:|:---------:|:--------------------:|
+|  John Bampton  | jbampton  |  johnbam@apache.org  |
+| Nilesh Gajwani |  iGN5117  |  nilesh@apache.org   |
+|   Liang Geng   | pwrliang  | lianggeng@apache.org |
+|  Peter Nguyen  | petern48  |  petern@apache.org   |
+|  Pranav Toggi  | prantogg  | prantogg@apache.org  |
 
 ## Nominate a committer or PMC member
 
