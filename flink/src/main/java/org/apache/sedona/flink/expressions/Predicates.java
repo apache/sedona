@@ -417,6 +417,9 @@ public class Predicates {
                 bridgedTo = Geometry.class)
             Object o2,
         @DataTypeHint("Double") Double distance) {
+      // The common-layer dWithin takes a primitive double, so a SQL NULL distance would
+      // autounbox to an NPE; any NULL argument propagates to a NULL result instead.
+      if (o1 == null || o2 == null || distance == null) return null;
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
       return org.apache.sedona.common.Predicates.dWithin(geom1, geom2, distance);
@@ -436,6 +439,8 @@ public class Predicates {
             Object o2,
         @DataTypeHint("Double") Double distance,
         @DataTypeHint("Boolean") Boolean useSphere) {
+      // distance and useSphere both autounbox to primitives in the common layer; guard all four.
+      if (o1 == null || o2 == null || distance == null || useSphere == null) return null;
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
       return org.apache.sedona.common.Predicates.dWithin(geom1, geom2, distance, useSphere);

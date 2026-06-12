@@ -284,6 +284,23 @@ public class PredicateTest extends TestBase {
   }
 
   @Test
+  public void testDWithinNullArguments() {
+    // Any NULL argument propagates to NULL rather than NPE-ing on autounbox / null geometry.
+    Table t =
+        tableEnv.sqlQuery(
+            "SELECT ST_DWithin(ST_GeomFromWKT('POINT (0 0)'), ST_GeomFromWKT('POINT (1 0)'),"
+                + " CAST(NULL AS DOUBLE)) AS null_dist,"
+                + " ST_DWithin(ST_GeomFromWKT(CAST(NULL AS STRING)),"
+                + " ST_GeomFromWKT('POINT (1 0)'), 1.0) AS null_geom,"
+                + " ST_DWithin(ST_GeomFromWKT('POINT (0 0)'), ST_GeomFromWKT('POINT (1 0)'), 1.0,"
+                + " CAST(NULL AS BOOLEAN)) AS null_sphere");
+    org.apache.flink.types.Row row = first(t);
+    assertNull(row.getField(0));
+    assertNull(row.getField(1));
+    assertNull(row.getField(2));
+  }
+
+  @Test
   public void testDWithinFailure() {
     Table table =
         tableEnv.sqlQuery(
