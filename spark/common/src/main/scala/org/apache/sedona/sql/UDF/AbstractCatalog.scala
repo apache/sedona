@@ -90,8 +90,8 @@ abstract class AbstractCatalog {
         case Some(existingInfo) =>
           // Skip if Sedona already registered this function (e.g., SedonaContext.create called
           // twice). Overwrite if it's a Spark native function (e.g., Spark 4.1's ST_GeomFromWKB).
-          // Sedona expression classes live under both org.apache.sedona and
-          // org.apache.spark.sql.sedona_sql.
+          // All expressions registered here live under org.apache.spark.sql.sedona_sql; the
+          // org.apache.sedona prefix is kept defensively for future classes.
           !existingInfo.getClassName.startsWith("org.apache.sedona.") &&
           !existingInfo.getClassName.startsWith("org.apache.spark.sql.sedona_sql.")
         case None => true
