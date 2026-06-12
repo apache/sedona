@@ -21,6 +21,7 @@ package org.apache.sedona.flink;
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.apache.flink.table.api.Table;
 import org.apache.sedona.flink.expressions.Predicates;
@@ -60,6 +61,75 @@ public class PredicateTest extends TestBase {
     org.apache.flink.types.Row row = first(t);
     assertEquals(true, row.getField(0));
     assertEquals(false, row.getField(1));
+  }
+
+  @Test
+  public void testIntersectsOnBox3D() {
+    Table t =
+        tableEnv.sqlQuery(
+            "WITH boxes AS ("
+                + " SELECT ST_3DMakeBox(ST_PointZ(0, 0, 0), ST_PointZ(5, 5, 5)) AS a,"
+                + " ST_3DMakeBox(ST_PointZ(3, 3, 3), ST_PointZ(7, 7, 7)) AS overlap,"
+                + " ST_3DMakeBox(ST_PointZ(0, 0, 10), ST_PointZ(5, 5, 11)) AS zdisjoint,"
+                + " ST_3DMakeBox(ST_PointZ(6, 6, 6), ST_PointZ(7, 7, 7)) AS disjoint)"
+                + " SELECT ST_Intersects(a, overlap), ST_Intersects(a, zdisjoint),"
+                + " ST_Intersects(a, disjoint) FROM boxes");
+    org.apache.flink.types.Row row = first(t);
+    assertEquals(true, row.getField(0));
+    // Overlaps in XY but separated in Z — Box3D intersection must reject it.
+    assertEquals(false, row.getField(1));
+    assertEquals(false, row.getField(2));
+  }
+
+  @Test
+  public void testContainsOnBox3D() {
+    Table t =
+        tableEnv.sqlQuery(
+            "WITH boxes AS ("
+                + " SELECT ST_3DMakeBox(ST_PointZ(0, 0, 0), ST_PointZ(10, 10, 10)) AS outer_box,"
+                + " ST_3DMakeBox(ST_PointZ(2, 2, 2), ST_PointZ(5, 5, 5)) AS inner_box,"
+                + " ST_3DMakeBox(ST_PointZ(2, 2, 2), ST_PointZ(5, 5, 99)) AS zout)"
+                + " SELECT ST_Contains(outer_box, inner_box), ST_Contains(outer_box, zout)"
+                + " FROM boxes");
+    org.apache.flink.types.Row row = first(t);
+    assertEquals(true, row.getField(0));
+    // Contained in XY but pokes out of the Z range — not contained in 3D.
+    assertEquals(false, row.getField(1));
+  }
+
+  @Test
+  public void test3DDWithin() {
+    // Two POINT Z 3 units apart in Z only.
+    Table within =
+        tableEnv.sqlQuery(
+            "SELECT ST_3DDWithin(ST_PointZ(0, 0, 0), ST_PointZ(0, 0, 3), 3.0),"
+                + " ST_3DDWithin(ST_PointZ(0, 0, 0), ST_PointZ(0, 0, 3), 2.9)");
+    org.apache.flink.types.Row row = first(within);
+    assertEquals(true, row.getField(0));
+    assertEquals(false, row.getField(1));
+
+    // Box3D-on-Box3D: faces 4 units apart in Z.
+    Table boxes =
+        tableEnv.sqlQuery(
+            "WITH b AS ("
+                + " SELECT ST_3DMakeBox(ST_PointZ(0, 0, 0), ST_PointZ(1, 1, 1)) AS a,"
+                + " ST_3DMakeBox(ST_PointZ(0, 0, 5), ST_PointZ(1, 1, 6)) AS far)"
+                + " SELECT ST_3DDWithin(a, far, 4.0), ST_3DDWithin(a, far, 3.9) FROM b");
+    org.apache.flink.types.Row boxRow = first(boxes);
+    assertEquals(true, boxRow.getField(0));
+    assertEquals(false, boxRow.getField(1));
+
+    // NULL distance propagates to NULL rather than throwing on autounbox.
+    Table nullDist =
+        tableEnv.sqlQuery(
+            "SELECT ST_3DDWithin(ST_PointZ(0, 0, 0), ST_PointZ(0, 0, 3),"
+                + " CAST(NULL AS DOUBLE)) AS geom_null,"
+                + " ST_3DDWithin(ST_3DMakeBox(ST_PointZ(0, 0, 0), ST_PointZ(1, 1, 1)),"
+                + " ST_3DMakeBox(ST_PointZ(0, 0, 5), ST_PointZ(1, 1, 6)),"
+                + " CAST(NULL AS DOUBLE)) AS box_null");
+    org.apache.flink.types.Row nullRow = first(nullDist);
+    assertNull(nullRow.getField(0));
+    assertNull(nullRow.getField(1));
   }
 
   @Test
