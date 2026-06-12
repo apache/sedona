@@ -23,7 +23,7 @@ import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry
 import org.apache.spark.sql.catalyst.analysis.FunctionRegistry.FunctionBuilder
 import org.apache.spark.sql.catalyst.expressions.{ExpectsInputTypes, Expression, ExpressionInfo, Literal}
-import org.apache.spark.sql.expressions.Aggregator
+import org.apache.spark.sql.expressions.{Aggregator, UserDefinedFunction}
 import org.apache.spark.sql.sedona_sql.expressions.{ST_Envelope_Aggr, ST_Intersection_Aggr, ST_Union_Aggr}
 import org.locationtech.jts.geom.Geometry
 
@@ -113,28 +113,64 @@ abstract class AbstractCatalog {
     registerAggregateFunction(sparkSession, "ST_Union_Agg", new ST_Union_Aggr())
   }
 
+  // Builds the catalyst aggregate for a UDAF so the FunctionRegistry.builtin entry can be the
+  // real implementation rather than a non-invocable placeholder. The required Spark API is
+  // package-private in Scala (public in bytecode) and moved between versions, hence reflection:
+  // Spark 3.4/3.5 expose UserDefinedAggregator.scalaAggregator(children), Spark 4.x the
+  // ScalaAggregator companion's apply(udaf, children).
+  private lazy val builtinAggregateBuilder
+      : Option[(UserDefinedFunction, Seq[Expression]) => Expression] = {
+    val spark3Builder = Try {
+      val method = Class
+        .forName("org.apache.spark.sql.expressions.UserDefinedAggregator")
+        .getMethod("scalaAggregator", classOf[Seq[Expression]])
+      (udaf: UserDefinedFunction, children: Seq[Expression]) =>
+        method.invoke(udaf, children).asInstanceOf[Expression]
+    }
+    val spark4Builder = Try {
+      val companionClass =
+        Class.forName("org.apache.spark.sql.execution.aggregate.ScalaAggregator$")
+      val companion = companionClass.getField("MODULE$").get(null)
+      val method = companionClass.getMethods
+        .find(m =>
+          m.getName == "apply" && m.getParameterCount == 2 &&
+            m.getParameterTypes()(0).getSimpleName == "UserDefinedAggregator")
+        .get
+      (udaf: UserDefinedFunction, children: Seq[Expression]) =>
+        method.invoke(companion, udaf, children).asInstanceOf[Expression]
+    }
+    spark3Builder.orElse(spark4Builder).toOption
+  }
+
   private def registerAggregateFunction(
       sparkSession: SparkSession,
       functionName: String,
       aggregator: Aggregator[Geometry, _, _]): Unit = {
     val functionIdentifier = FunctionIdentifier(functionName)
     val registry = sparkSession.sessionState.functionRegistry
-    // A new session clones FunctionRegistry.builtin, which holds Sedona's non-invocable
-    // placeholder for this aggregate (registered below), so mere existence in the session
-    // registry does not mean the real UDAF is there (GH-3044). Probe the registered builder:
-    // the placeholder throws on any invocation, a real entry builds an expression.
+    val udaf = functions.udaf(aggregator)
+    // A session created before this JVM's first SedonaContext.create cloned
+    // FunctionRegistry.builtin while it still held the non-invocable placeholder for this
+    // aggregate, so mere existence in the session registry does not mean the real UDAF is
+    // there (GH-3044). Probe the registered builder: the placeholder throws on any
+    // invocation, a real entry builds an expression.
     val isInvocable = registry.functionExists(functionIdentifier) &&
       Try(registry.lookupFunction(functionIdentifier, Seq(Literal(null)))).isSuccess
     if (!isInvocable) {
-      sparkSession.udf.register(functionName, functions.udaf(aggregator))
+      sparkSession.udf.register(functionName, udaf)
     }
     if (!FunctionRegistry.builtin.functionExists(functionIdentifier)) {
+      val builtinBuilder: FunctionBuilder = builtinAggregateBuilder match {
+        case Some(build) => children => build(udaf, children)
+        case None =>
+          _ =>
+            throw new UnsupportedOperationException(
+              s"Aggregate function $functionName cannot be used as a regular function")
+      }
       FunctionRegistry.builtin.registerFunction(
         functionIdentifier,
         new ExpressionInfo(aggregator.getClass.getCanonicalName, null, functionName),
-        (_: Seq[Expression]) =>
-          throw new UnsupportedOperationException(
-            s"Aggregate function $functionName cannot be used as a regular function"))
+        builtinBuilder)
     }
   }
 

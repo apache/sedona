@@ -523,6 +523,16 @@ class aggregateFunctionTestScala extends TestBaseScala {
         assert(result.take(1)(0).get(0) != null, s"$func returned null in a new session")
       }
     }
+
+    it("Passed aggregate functions in a new session without SedonaContext.create") {
+      // The FunctionRegistry.builtin entry registered by an earlier SedonaContext.create must
+      // be the real aggregate builder, so a session that never ran create can still resolve
+      // the aggregate from its cloned registry.
+      val newSession = sparkSession.newSession()
+      val result = newSession.sql(
+        "SELECT ST_Envelope_Aggr(geom) FROM (SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))') AS geom)")
+      assert(result.take(1)(0).get(0) != null)
+    }
   }
 
   def generateRandomPolygon(index: Int): String = {
