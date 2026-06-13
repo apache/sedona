@@ -19,6 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.sedona.common.geometryObjects.Box2D
+import org.apache.sedona.spark.SedonaContext
 import org.apache.spark.sql.DataFrame
 import org.locationtech.jts.geom.{Coordinate, Geometry, GeometryFactory, Polygon}
 
@@ -507,6 +508,30 @@ class aggregateFunctionTestScala extends TestBaseScala {
       val result = envelopeDF.take(1)(0).get(0)
 
       assert(result == null)
+    }
+
+    it("Passed aggregate functions in a new session") {
+      // GH-3044: a new session clones FunctionRegistry.builtin, which holds Sedona's
+      // non-invocable placeholder for aggregate functions. SedonaContext.create must still
+      // install the real UDAF in the new session's registry instead of skipping it because
+      // the name already exists.
+      val newSession = sparkSession.newSession()
+      SedonaContext.create(newSession)
+      Seq("ST_Envelope_Aggr", "ST_Envelope_Agg", "ST_Union_Aggr").foreach { func =>
+        val result = newSession.sql(
+          s"SELECT $func(geom) FROM (SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))') AS geom)")
+        assert(result.take(1)(0).get(0) != null, s"$func returned null in a new session")
+      }
+    }
+
+    it("Passed aggregate functions in a new session without SedonaContext.create") {
+      // The FunctionRegistry.builtin entry registered by an earlier SedonaContext.create must
+      // be the real aggregate builder, so a session that never ran create can still resolve
+      // the aggregate from its cloned registry.
+      val newSession = sparkSession.newSession()
+      val result = newSession.sql(
+        "SELECT ST_Envelope_Aggr(geom) FROM (SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))') AS geom)")
+      assert(result.take(1)(0).get(0) != null)
     }
   }
 
