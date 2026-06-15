@@ -1196,7 +1196,9 @@ class GeoSeries(GeoFrame, pspd.Series):
                 raise NotImplementedError(
                     f"Array-like values for {name} are not supported yet."
                 )
-        spark_expr = stf.ST_Translate(self.spark.column, xoff, yoff, zoff)
+        spark_expr = stf.ST_Translate(
+            self.spark.column, float(xoff), float(yoff), float(zoff)
+        )
         return self._query_geometry_column(spark_expr, returns_geom=True)
 
     def force_2d(self) -> "GeoSeries":
