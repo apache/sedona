@@ -978,6 +978,34 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(non_empty).rotate(angle, **origin_kwargs)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+    @pytest.mark.parametrize(
+        "xoff,yoff,zoff",
+        [
+            (2, 3, 0),
+            (0, 0, 0),
+            (1.5, -2, 0),
+            (0, 0, 5),
+        ],
+    )
+    def test_translate(self, xoff, yoff, zoff):
+        for geom in self.geoms:
+            non_empty = [g for g in geom if g is not None and not g.is_empty]
+            if not non_empty:
+                continue
+
+            sgpd_result = GeoSeries(non_empty).translate(xoff, yoff, zoff)
+            gpd_result = gpd.GeoSeries(non_empty).translate(xoff, yoff, zoff)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        data = [
+            Point(0, -1, 2.5),
+            LineString([(0, 0, 1), (1, 1, 2)]),
+            Point(5, 5),
+        ]
+        sgpd_result = GeoSeries(data).translate(xoff, yoff, zoff)
+        gpd_result = gpd.GeoSeries(data).translate(xoff, yoff, zoff)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_force_2d(self):
         # force_2d was added from geopandas 1.0.0
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
