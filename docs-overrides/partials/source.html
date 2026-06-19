@@ -1,0 +1,9 @@
+{% if config.repo_url %}
+<a href="{{ config.repo_url }}" title="{{ config.repo_name }}" class="md-source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+  {% set icon = config.theme.icon.repo or "fontawesome/brands/git-alt" %}
+  {% include ".icons/" ~ icon ~ ".svg" %}
+  </div>
+  <div class="md-source__repository">{{ config.repo_name }}</div>
+  </a>
+  {% endif %}
