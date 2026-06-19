@@ -1,14 +1,20 @@
-{#-
-  This file was automatically generated - do not edit
--#}
+{#- Site footer copyright and ASF-required links. -#}
 <div class="md-copyright">
   {% if config.copyright %}
-      {{ config.copyright }}
+  <div class="md-copyright__highlight">{{ config.copyright }}</div>
   {% endif %}
+  <div class="md-copyright__asf-links">
+    <a href="https://www.apache.org/">Copyright &copy; The Apache Software Foundation</a> |
+    <a href="https://www.apache.org/licenses/">License</a> |
+    <a href="https://www.apache.org/events/current-event">Events</a> |
+    <a href="https://www.apache.org/foundation/sponsorship.html">Sponsorship</a> |
+    <a href="https://www.apache.org/foundation/thanks.html">Thanks</a> |
+    <a href="https://www.apache.org/security/">Security</a> |
+    <a href="https://privacy.apache.org/policies/privacy-policy-public.html">Privacy</a> |
+    <a href="https://www.apache.org/foundation/marks/">Trademarks</a>
+  </div>
   {% if not config.extra.generator == false %}
-    Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
-    </a>
+  <div class="md-copyright__generator">Made with <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">Material for MkDocs</a>
+  </div>
   {% endif %}
 </div>
