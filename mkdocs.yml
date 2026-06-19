@@ -154,12 +154,12 @@ nav:
       - Publications: community/publication.md
   - Apache Software Foundation:
       - Foundation: asf/asf.md
-      - License: https://www.apache.org/licenses/" target="_blank
-      - Events: https://www.apache.org/events/current-event" target="_blank
-      - Sponsorship: https://www.apache.org/foundation/sponsorship.html" target="_blank
-      - Thanks: https://www.apache.org/foundation/thanks.html" target="_blank
-      - Security: https://www.apache.org/security/" target="_blank
-      - Privacy: https://privacy.apache.org/policies/privacy-policy-public.html" target="_blank
+      - License: https://www.apache.org/licenses/
+      - Events: https://www.apache.org/events/current-event
+      - Sponsorship: https://www.apache.org/foundation/sponsorship.html
+      - Thanks: https://www.apache.org/foundation/thanks.html
+      - Security: https://www.apache.org/security/
+      - Privacy: https://privacy.apache.org/policies/privacy-policy-public.html
       - Telemetry: asf/telemetry.md
 repo_url: https://github.com/apache/sedona
 repo_name: apache/sedona
