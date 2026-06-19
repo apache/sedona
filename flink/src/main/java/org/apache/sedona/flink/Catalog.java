@@ -20,6 +20,7 @@ package org.apache.sedona.flink;
 
 import org.apache.flink.table.functions.UserDefinedFunction;
 import org.apache.sedona.flink.expressions.*;
+import org.apache.sedona.flink.expressions.geography.GeographyConstructors;
 
 public class Catalog {
   public static UserDefinedFunction[] getFuncs() {
@@ -66,6 +67,16 @@ public class Catalog {
       new Constructors.ST_MPolyFromText(),
       new Constructors.ST_MLineFromText(),
       new Constructors.ST_GeomCollFromText(),
+      // Geography (ST_Geog*) constructors
+      new GeographyConstructors.ST_GeogFromWKT(),
+      new GeographyConstructors.ST_GeogFromText(),
+      new GeographyConstructors.ST_GeogFromEWKT(),
+      new GeographyConstructors.ST_GeogCollFromText(),
+      new GeographyConstructors.ST_GeogFromWKB(),
+      new GeographyConstructors.ST_GeogFromEWKB(),
+      new GeographyConstructors.ST_GeogFromGeoHash(),
+      new GeographyConstructors.ST_GeogToGeometry(),
+      new GeographyConstructors.ST_GeomToGeography(),
       new Functions.GeometryType(),
       new Functions.ST_Area(),
       new Functions.ST_AreaSpheroid(),
