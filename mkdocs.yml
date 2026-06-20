@@ -121,6 +121,7 @@ nav:
           - SQL:
               - Overview (Flink): api/flink/Overview.md
               - Geometry Functions: api/flink/Geometry-Functions.md
+              - Geography Functions: api/flink/Geography-Functions.md
       - Release notes: setup/release-notes.md
 
   - SedonaSnow:
