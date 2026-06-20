@@ -23,6 +23,7 @@ import static org.apache.flink.table.api.Expressions.call;
 import static org.apache.flink.table.api.Expressions.lit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Collections;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
@@ -178,6 +179,19 @@ public class GeographyFunctionTest extends TestBase {
   }
 
   @Test
+  public void testEnvelopeSplitAtAntiMeridian() throws Exception {
+    // An antimeridian-crossing line: with splitAtAntiMeridian=true the envelope is split into a
+    // MultiPolygon, exercising a different code path than the false branch above.
+    String wkt = "LINESTRING (170 10, -170 20)";
+    Object out = eval(wkt, call(Functions.ST_Envelope.class.getSimpleName(), $("geog"), lit(true)));
+    Geography expected =
+        org.apache.sedona.common.geography.Functions.getEnvelope(
+            Constructors.geogFromWKT(wkt, 4326), true);
+    assertEquals(expected.toEWKT(), ((Geography) out).toEWKT());
+    assertTrue(expected.toEWKT().contains("MULTIPOLYGON"));
+  }
+
+  @Test
   public void testBuffer() throws Exception {
     String wkt = "POINT (0 0)";
     Object out = eval(wkt, call(Functions.ST_Buffer.class.getSimpleName(), $("geog"), lit(1000.0)));
@@ -185,6 +199,47 @@ public class GeographyFunctionTest extends TestBase {
         org.apache.sedona.common.geography.Functions.buffer(
             Constructors.geogFromWKT(wkt, 4326), 1000.0);
     assertEquals(expected.toEWKT(), ((Geography) out).toEWKT());
+  }
+
+  @Test
+  public void testBufferWithParameters() throws Exception {
+    String wkt = "POINT (0 0)";
+    String params = "quad_segs=2";
+    Object out =
+        eval(
+            wkt,
+            call(Functions.ST_Buffer.class.getSimpleName(), $("geog"), lit(1000.0), lit(params)));
+    Geography expected =
+        org.apache.sedona.common.geography.Functions.buffer(
+            Constructors.geogFromWKT(wkt, 4326), 1000.0, params);
+    assertEquals(expected.toEWKT(), ((Geography) out).toEWKT());
+  }
+
+  @Test
+  public void testBufferUseSpheroidThrows() {
+    // The (Geography, radius, boolean) overload exists for parity with Spark and intentionally
+    // throws a clear error: Geography is always spheroidal, so useSpheroid is not accepted. This
+    // also confirms Flink resolves the boolean argument to this overload rather than coercing it to
+    // the (Geography, radius, String) parameters overload.
+    try {
+      eval(
+          "POINT (0 0)",
+          call(Functions.ST_Buffer.class.getSimpleName(), $("geog"), lit(1000.0), lit(true)));
+      fail("Expected ST_Buffer(geog, radius, useSpheroid) to throw");
+    } catch (Exception e) {
+      assertTrue(
+          "Expected a clear useSpheroid error, got: " + messageChain(e),
+          messageChain(e).contains("does not accept a useSpheroid argument"));
+    }
+  }
+
+  /** Concatenate the messages of an exception and all its causes, for robust assertion. */
+  private static String messageChain(Throwable t) {
+    StringBuilder sb = new StringBuilder();
+    for (Throwable c = t; c != null; c = c.getCause()) {
+      sb.append(c.getMessage()).append(" | ");
+    }
+    return sb.toString();
   }
 
   @Test
