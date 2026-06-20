@@ -24,6 +24,7 @@ import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.flink.Box2DTypeSerializer;
 import org.apache.sedona.flink.Box3DTypeSerializer;
+import org.apache.sedona.flink.GeographyTypeSerializer;
 import org.apache.sedona.flink.GeometryTypeSerializer;
 import org.locationtech.jts.geom.Geometry;
 
@@ -84,6 +85,22 @@ public class Predicates {
       if (a == null || b == null) return null;
       return org.apache.sedona.common.Predicates.box3dIntersects(a, b);
     }
+
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = org.apache.sedona.common.S2Geography.Geography.class)
+            org.apache.sedona.common.S2Geography.Geography g1,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = org.apache.sedona.common.S2Geography.Geography.class)
+            org.apache.sedona.common.S2Geography.Geography g2) {
+      if (g1 == null || g2 == null) return null;
+      return org.apache.sedona.common.geography.Functions.intersects(g1, g2);
+    }
   }
 
   public static class ST_Contains extends ScalarFunction {
@@ -142,6 +159,22 @@ public class Predicates {
       if (a == null || b == null) return null;
       return org.apache.sedona.common.Predicates.box3dContains(a, b);
     }
+
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = org.apache.sedona.common.S2Geography.Geography.class)
+            org.apache.sedona.common.S2Geography.Geography g1,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = org.apache.sedona.common.S2Geography.Geography.class)
+            org.apache.sedona.common.S2Geography.Geography g2) {
+      if (g1 == null || g2 == null) return null;
+      return org.apache.sedona.common.geography.Functions.contains(g1, g2);
+    }
   }
 
   public static class ST_Within extends ScalarFunction {
@@ -163,6 +196,22 @@ public class Predicates {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
       return org.apache.sedona.common.Predicates.within(geom1, geom2);
+    }
+
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = org.apache.sedona.common.S2Geography.Geography.class)
+            org.apache.sedona.common.S2Geography.Geography g1,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = org.apache.sedona.common.S2Geography.Geography.class)
+            org.apache.sedona.common.S2Geography.Geography g2) {
+      if (g1 == null || g2 == null) return null;
+      return org.apache.sedona.common.geography.Functions.within(g1, g2);
     }
   }
 
@@ -277,6 +326,22 @@ public class Predicates {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
       return org.apache.sedona.common.Predicates.equals(geom1, geom2);
+    }
+
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = org.apache.sedona.common.S2Geography.Geography.class)
+            org.apache.sedona.common.S2Geography.Geography g1,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = org.apache.sedona.common.S2Geography.Geography.class)
+            org.apache.sedona.common.S2Geography.Geography g2) {
+      if (g1 == null || g2 == null) return null;
+      return org.apache.sedona.common.geography.Functions.equals(g1, g2);
     }
   }
 
@@ -444,6 +509,23 @@ public class Predicates {
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
       return org.apache.sedona.common.Predicates.dWithin(geom1, geom2, distance, useSphere);
+    }
+
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = org.apache.sedona.common.S2Geography.Geography.class)
+            org.apache.sedona.common.S2Geography.Geography g1,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = org.apache.sedona.common.S2Geography.Geography.class)
+            org.apache.sedona.common.S2Geography.Geography g2,
+        @DataTypeHint("Double") Double distance) {
+      if (g1 == null || g2 == null || distance == null) return null;
+      return org.apache.sedona.common.geography.Functions.dWithin(g1, g2, distance);
     }
   }
 
