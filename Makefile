@@ -40,9 +40,10 @@ clean:
 
 docsbuild: docsinstall
 	@echo "Building documentation..."
-	uv run mkdocs build
+	cd docs-overrides && npm ci && npx gulp build
+	cd ..
 	uv run mike deploy --update-aliases latest-snapshot -b website -p
-	uv run mike serve
+	uv run mike serve -b website
 
 docsinstall: check-install
 	@echo "Installing documentation dependencies..."
