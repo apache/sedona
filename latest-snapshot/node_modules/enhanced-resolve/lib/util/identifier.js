@@ -5,9 +5,7 @@
 
 "use strict";
 
-const memorize = require("./memoize");
-
-const getUrl = memorize(() => require("url"));
+const { fileURLToPath } = require("url");
 
 const PATH_QUERY_FRAGMENT_REGEXP =
 	/^(#?(?:\0.|[^?#\0])*)(\?(?:\0.|[^#\0])*)?(#.*)?$/;
@@ -44,7 +42,7 @@ function parseIdentifier(identifier) {
 	}
 
 	if (FILE_REG_EXP.test(identifier)) {
-		identifier = getUrl().fileURLToPath(identifier);
+		identifier = fileURLToPath(identifier);
 	}
 
 	const firstEscape = identifier.indexOf("\0");

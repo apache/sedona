@@ -60,7 +60,10 @@ module.exports = function zipKeyed(iterables) {
 	forEach(allKeys, function (key) { // step 12
 		var desc;
 		try {
-			desc = ToPropertyDescriptor(gOPD(iterables, key)); // step 12.a
+			desc = gOPD(iterables, key); // step 12.a
+			if (typeof desc !== 'undefined') {
+				desc = ToPropertyDescriptor(desc);
+			}
 		} catch (e) {
 			return IfAbruptCloseIterators(ThrowCompletion(e), iters); // step 12.b
 		}

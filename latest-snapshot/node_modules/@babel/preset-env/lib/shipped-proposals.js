@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.proposalSyntaxPlugins = exports.proposalPlugins = exports.pluginSyntaxMap = void 0;
-const proposalPlugins = exports.proposalPlugins = new Set();
+const proposalPlugins = exports.proposalPlugins = new Set([]);
 const proposalSyntaxPlugins = exports.proposalSyntaxPlugins = ["syntax-import-assertions", "syntax-import-attributes"];
 const pluginSyntaxObject = {
   "transform-async-generator-functions": "syntax-async-generators",

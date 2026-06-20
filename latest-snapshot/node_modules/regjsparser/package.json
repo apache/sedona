@@ -1,6 +1,6 @@
 {
   "name": "regjsparser",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "author": "'Julian Viereck' <julian.viereck@gmail.com>",
   "license": "BSD-2-Clause",
   "main": "./parser",

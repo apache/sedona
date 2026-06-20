@@ -17,17 +17,22 @@ test('function properties', function (t) {
 
 test('primitives', function (t) {
 	forEach(v.primitives, function (i) {
-		t.ok(is(toPrimitive(i), i), 'toPrimitive(' + debug(i) + ') returns the same value');
-		t.ok(is(toPrimitive(i, String), i), 'toPrimitive(' + debug(i) + ', String) returns the same value');
-		t.ok(is(toPrimitive(i, Number), i), 'toPrimitive(' + debug(i) + ', Number) returns the same value');
+		if (typeof i !== 'symbol' && typeof i !== 'bigint') {
+			t.ok(is(toPrimitive(i), i), 'toPrimitive(' + debug(i) + ') returns the same value');
+			t.ok(is(toPrimitive(i, String), i), 'toPrimitive(' + debug(i) + ', String) returns the same value');
+			t.ok(is(toPrimitive(i, Number), i), 'toPrimitive(' + debug(i) + ', Number) returns the same value');
+		}
 	});
 	t.end();
 });
 
 test('Symbols', { skip: !v.hasSymbols }, function (t) {
 	forEach(v.symbols, function (sym) {
+		// @ts-expect-error no symbols in ES5
 		t.equal(toPrimitive(sym), sym, 'toPrimitive(' + debug(sym) + ') returns the same value');
+		// @ts-expect-error no symbols in ES5
 		t.equal(toPrimitive(sym, String), sym, 'toPrimitive(' + debug(sym) + ', String) returns the same value');
+		// @ts-expect-error no symbols in ES5
 		t.equal(toPrimitive(sym, Number), sym, 'toPrimitive(' + debug(sym) + ', Number) returns the same value');
 	});
 

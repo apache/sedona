@@ -1,4 +1,123 @@
-export = Watchpack;
+declare namespace _exports {
+	export {
+		WatcherManager,
+		DirectoryWatcher,
+		DirectoryWatcherEvents,
+		FileWatcherEvents,
+		EventMap,
+		Watcher,
+		IgnoredFunction,
+		Ignored,
+		WatcherOptions,
+		WatchOptions,
+		NormalizedWatchOptions,
+		EventType,
+		Entry,
+		OnlySafeTimeEntry,
+		ExistenceOnlyTimeEntry,
+		TimeInfoEntries,
+		Changes,
+		Removals,
+		Aggregated,
+		WatchMethodOptions,
+		Times,
+		WatchpackEvents,
+		WatchpackExports,
+	};
+}
+declare const _exports: WatchpackExports;
+export = _exports;
+type WatcherManager = import("./getWatcherManager").WatcherManager;
+type DirectoryWatcher = import("./DirectoryWatcher");
+type DirectoryWatcherEvents =
+	import("./DirectoryWatcher").DirectoryWatcherEvents;
+type FileWatcherEvents = import("./DirectoryWatcher").FileWatcherEvents;
+type EventMap = Record<string, (...args: any[]) => any>;
+type Watcher<T extends EventMap> = import("./DirectoryWatcher").Watcher<T>;
+type IgnoredFunction = (item: string) => boolean;
+type Ignored = string[] | RegExp | string | IgnoredFunction;
+type WatcherOptions = {
+	/**
+	 * true when need to resolve symlinks and watch symlink and real file, otherwise false
+	 */
+	followSymlinks?: boolean | undefined;
+	/**
+	 * ignore some files from watching (glob pattern or regexp)
+	 */
+	ignored?: Ignored | undefined;
+	/**
+	 * true when need to enable polling mode for watching, otherwise false
+	 */
+	poll?: (number | boolean) | undefined;
+};
+type WatchOptions = WatcherOptions & {
+	aggregateTimeout?: number;
+};
+type NormalizedWatchOptions = {
+	/**
+	 * true when need to resolve symlinks and watch symlink and real file, otherwise false
+	 */
+	followSymlinks: boolean;
+	/**
+	 * ignore some files from watching (glob pattern or regexp)
+	 */
+	ignored: IgnoredFunction;
+	/**
+	 * true when need to enable polling mode for watching, otherwise false
+	 */
+	poll?: (number | boolean) | undefined;
+};
+type EventType =
+	| `scan (${string})`
+	| "change"
+	| "rename"
+	| `watch ${string}`
+	| `directory-removed ${string}`;
+type Entry = {
+	safeTime: number;
+	timestamp: number;
+	accuracy: number;
+};
+type OnlySafeTimeEntry = {
+	safeTime: number;
+};
+type ExistenceOnlyTimeEntry = {};
+type TimeInfoEntries = Map<
+	string,
+	Entry | OnlySafeTimeEntry | ExistenceOnlyTimeEntry | null
+>;
+type Changes = Set<string>;
+type Removals = Set<string>;
+type Aggregated = {
+	changes: Changes;
+	removals: Removals;
+};
+type WatchMethodOptions = {
+	files?: Iterable<string>;
+	directories?: Iterable<string>;
+	missing?: Iterable<string>;
+	startTime?: number;
+};
+type Times = Record<string, number>;
+type WatchpackEvents = {
+	/**
+	 * change event
+	 */
+	change: (file: string, mtime: number, type: EventType) => void;
+	/**
+	 * remove event
+	 */
+	remove: (file: string, type: EventType) => void;
+	/**
+	 * aggregated event
+	 */
+	aggregated: (changes: Changes, removals: Removals) => void;
+};
+type WatchpackExports = typeof Watchpack & {
+	util: {
+		readonly globToRegExp: typeof globToRegExp;
+	};
+};
 /**
  * @typedef {object} WatchpackEvents
  * @property {(file: string, mtime: number, type: EventType) => void} change change event
@@ -102,32 +221,7 @@ declare class Watchpack extends EventEmitter<{
 	 */
 	_onRemove(item: string, file: string, type: EventType): void;
 }
-declare namespace Watchpack {
-	export {
-		WatcherManager,
-		DirectoryWatcher,
-		DirectoryWatcherEvents,
-		FileWatcherEvents,
-		EventMap,
-		Watcher,
-		IgnoredFunction,
-		Ignored,
-		WatcherOptions,
-		WatchOptions,
-		NormalizedWatchOptions,
-		EventType,
-		Entry,
-		OnlySafeTimeEntry,
-		ExistenceOnlyTimeEntry,
-		TimeInfoEntries,
-		Changes,
-		Removals,
-		Aggregated,
-		WatchMethodOptions,
-		Times,
-		WatchpackEvents,
-	};
-}
+import globToRegExp = require("./util/globToRegExp");
 import { EventEmitter } from "events";
 declare class WatchpackFileWatcher {
 	/**
@@ -173,89 +267,3 @@ declare class WatchpackDirectoryWatcher {
 	update(directories: string | string[]): void;
 	close(): void;
 }
-type WatcherManager = import("./getWatcherManager").WatcherManager;
-type DirectoryWatcher = import("./DirectoryWatcher");
-type DirectoryWatcherEvents =
-	import("./DirectoryWatcher").DirectoryWatcherEvents;
-type FileWatcherEvents = import("./DirectoryWatcher").FileWatcherEvents;
-type EventMap = Record<string, (...args: any[]) => any>;
-type Watcher<T extends EventMap> = import("./DirectoryWatcher").Watcher<T>;
-type IgnoredFunction = (item: string) => boolean;
-type Ignored = string[] | RegExp | string | IgnoredFunction;
-type WatcherOptions = {
-	/**
-	 * true when need to resolve symlinks and watch symlink and real file, otherwise false
-	 */
-	followSymlinks?: boolean | undefined;
-	/**
-	 * ignore some files from watching (glob pattern or regexp)
-	 */
-	ignored?: Ignored | undefined;
-	/**
-	 * true when need to enable polling mode for watching, otherwise false
-	 */
-	poll?: (number | boolean) | undefined;
-};
-type WatchOptions = WatcherOptions & {
-	aggregateTimeout?: number;
-};
-type NormalizedWatchOptions = {
-	/**
-	 * true when need to resolve symlinks and watch symlink and real file, otherwise false
-	 */
-	followSymlinks: boolean;
-	/**
-	 * ignore some files from watching (glob pattern or regexp)
-	 */
-	ignored: IgnoredFunction;
-	/**
-	 * true when need to enable polling mode for watching, otherwise false
-	 */
-	poll?: (number | boolean) | undefined;
-};
-type EventType =
-	| `scan (${string})`
-	| "change"
-	| "rename"
-	| `watch ${string}`
-	| `directory-removed ${string}`;
-type Entry = {
-	safeTime: number;
-	timestamp: number;
-	accuracy: number;
-};
-type OnlySafeTimeEntry = {
-	safeTime: number;
-};
-type ExistenceOnlyTimeEntry = {};
-type TimeInfoEntries = Map<
-	string,
-	Entry | OnlySafeTimeEntry | ExistenceOnlyTimeEntry | null
->;
-type Changes = Set<string>;
-type Removals = Set<string>;
-type Aggregated = {
-	changes: Changes;
-	removals: Removals;
-};
-type WatchMethodOptions = {
-	files?: Iterable<string>;
-	directories?: Iterable<string>;
-	missing?: Iterable<string>;
-	startTime?: number;
-};
-type Times = Record<string, number>;
-type WatchpackEvents = {
-	/**
-	 * change event
-	 */
-	change: (file: string, mtime: number, type: EventType) => void;
-	/**
-	 * remove event
-	 */
-	remove: (file: string, type: EventType) => void;
-	/**
-	 * aggregated event
-	 */
-	aggregated: (changes: Changes, removals: Removals) => void;
-};

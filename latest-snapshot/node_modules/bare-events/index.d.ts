@@ -36,6 +36,10 @@ interface EventEmitter<in out M extends EventMap = EventMap> {
 
   listeners<E extends keyof M, R>(name: E): EventHandler<M[E], R>
 
+  rawListeners<E extends keyof M, R>(name: E): EventHandler<M[E], R>[]
+
+  eventNames(): (keyof M)[]
+
   listenerCount<E extends keyof M>(name: E): number
 
   getMaxListeners(): number

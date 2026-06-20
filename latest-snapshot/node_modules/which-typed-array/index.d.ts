@@ -4,41 +4,32 @@
  * @param {unknown} value The potential collection
  * @returns {TypedArrayName | false | null} 'Int8Array' | 'Uint8Array' | 'Uint8ClampedArray' | 'Int16Array' | 'Uint16Array' | 'Int32Array' | 'Uint32Array' | 'Float32Array' | 'Float64Array' | 'BigInt64Array' | 'BigUint64Array' | false | null
  */
-declare function whichTypedArray(value: Int8Array): 'Int8Array';
-declare function whichTypedArray(value: Uint8Array): 'Uint8Array';
-declare function whichTypedArray(value: Uint8ClampedArray): 'Uint8ClampedArray';
-declare function whichTypedArray(value: Int16Array): 'Int16Array';
-declare function whichTypedArray(value: Uint16Array): 'Uint16Array';
-declare function whichTypedArray(value: Int32Array): 'Int32Array';
-declare function whichTypedArray(value: Uint32Array): 'Uint32Array';
-declare function whichTypedArray(value: Float16Array): 'Float16Array';
-declare function whichTypedArray(value: Float32Array): 'Float32Array';
-declare function whichTypedArray(value: Float64Array): 'Float64Array';
-declare function whichTypedArray(value: Float16Array): 'Float16Array';
-declare function whichTypedArray(value: BigInt64Array): 'BigInt64Array';
-declare function whichTypedArray(value: BigUint64Array): 'BigUint64Array';
-declare function whichTypedArray(value: whichTypedArray.TypedArray): whichTypedArray.TypedArrayName;
-declare function whichTypedArray(value: unknown): false | null;
+declare function whichTypedArray<T>(value: T): false | null | whichTypedArray.WhichTypedArray<T>;
+declare function whichTypedArray(value: unknown): false | null | whichTypedArray.TypedArrayName;
+
+import TAs from 'available-typed-arrays';
 
 declare namespace whichTypedArray {
-  export type TypedArrayName = ReturnType<typeof import('available-typed-arrays')>[number];
+	export type TypedArrayName = ReturnType<typeof TAs>[number];
 
-  export type TypedArray =
-  	| Int8Array
-    | Uint8Array
-    | Uint8ClampedArray
-    | Int16Array
-    | Uint16Array
-    | Int32Array
-    | Uint32Array
-    | Float16Array
-    | Float32Array
-    | Float64Array
-    | Float16Array
-    | BigInt64Array
-    | BigUint64Array;
+	export type TypedArrayConstructor = typeof globalThis[TypedArrayName];
 
-  export type TypedArrayConstructor = typeof globalThis[TypedArrayName];
+	export type TypedArray = TypedArrayConstructor['prototype'];
+
+	/**
+	 * Distributes over `T`, so a subset of typed arrays maps to the matching
+	 * subset of names (`Int8Array | Uint8Array` -> `'Int8Array' | 'Uint8Array'`,
+	 * never a float16 or bigint name). Any non-typed-array part adds `false | null`.
+	 *
+	 * Derived entirely from `TypedArrayName`, so a new entry in `available-typed-arrays` flows through with no other change here.
+	 */
+	export type WhichTypedArray<T> =
+		| {
+			[Name in TypedArrayName]: T extends typeof globalThis[Name]['prototype']
+				? Name
+				: never
+		}[TypedArrayName]
+		| ([T] extends [TypedArray] ? never : false | null);
 }
 
 export = whichTypedArray;

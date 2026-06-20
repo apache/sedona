@@ -280,7 +280,7 @@ class ReadableState {
   }
 
   pipe(pipeTo, cb) {
-    if (this.pipeTo !== null) throw new Error('Can only pipe to one destination')
+    if (this.pipeTo !== null) throw StreamError.BAD_ARGUMENT('Can only pipe to one destination')
     if (typeof cb !== 'function') cb = null
 
     this.stream._duplexState |= READ_PIPE_DRAINED
@@ -515,7 +515,7 @@ class Pipeline {
 
       if (this.from !== null) {
         if ((this.from._duplexState & READ_DONE) === 0 || !this.pipeToFinished) {
-          this.from.destroy(this.error || new Error('Writable stream closed prematurely'))
+          this.from.destroy(this.error || StreamError.PREMATURE_CLOSE('Writable stream closed'))
         }
         return
       }
@@ -526,7 +526,7 @@ class Pipeline {
 
       if (this.to !== null) {
         if ((stream._duplexState & READ_DONE) === 0) {
-          this.to.destroy(this.error || new Error('Readable stream closed before ending'))
+          this.to.destroy(this.error || StreamError.PREMATURE_CLOSE('Readable stream closed'))
         }
         return
       }
@@ -1161,7 +1161,7 @@ function pipeline(stream, ...streams) {
   const all = Array.isArray(stream) ? [...stream, ...streams] : [stream, ...streams]
   const done = all.length && typeof all[all.length - 1] === 'function' ? all.pop() : null
 
-  if (all.length < 2) throw new Error('Pipeline requires at least 2 streams')
+  if (all.length < 2) throw StreamError.BAD_ARGUMENT('Pipeline requires at least 2 streams')
 
   let src = all[0]
   let dest = null

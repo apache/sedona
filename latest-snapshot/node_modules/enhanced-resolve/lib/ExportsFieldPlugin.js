@@ -27,12 +27,14 @@ module.exports = class ExportsFieldPlugin {
 	 * @param {Set<string>} conditionNames condition names
 	 * @param {string | string[]} fieldNamePath name path
 	 * @param {string | ResolveStepHook} target target
+	 * @param {boolean=} restrictions whether `restrictions` are configured (enables exports-target fallback when a target is filtered out)
 	 */
-	constructor(source, conditionNames, fieldNamePath, target) {
+	constructor(source, conditionNames, fieldNamePath, target, restrictions) {
 		this.source = source;
 		this.target = target;
 		this.conditionNames = conditionNames;
 		this.fieldName = fieldNamePath;
+		this.restrictions = Boolean(restrictions);
 		// `null` is cached for description files that have no exports field,
 		// so subsequent resolves against the same package.json skip the
 		// `DescriptionFileUtils.getField` walk entirely.
@@ -136,6 +138,13 @@ module.exports = class ExportsFieldPlugin {
 					);
 				}
 
+				// When `restrictions` are configured, share a marker down the
+				// chain so RestrictionsPlugin can tell us it filtered out an
+				// otherwise-valid target — then we fall back instead of erroring.
+				const restrictionsMarker = this.restrictions
+					? { blocked: false }
+					: undefined;
+
 				forEachBail(
 					paths,
 					/**
@@ -191,6 +200,12 @@ module.exports = class ExportsFieldPlugin {
 							query,
 							fragment,
 						};
+						// Attach the marker only when restrictions are configured, so
+						// resolves without restrictions keep their request shape and
+						// never leak the property onto the result.
+						if (restrictionsMarker) {
+							obj.__restrictionsMarker = restrictionsMarker;
+						}
 
 						resolver.doResolve(
 							target,
@@ -218,12 +233,19 @@ module.exports = class ExportsFieldPlugin {
 						// is a hard error, not a signal to continue searching up the directory tree.
 						// See: https://github.com/webpack/enhanced-resolve/issues/399
 						if (!result) {
+							// Exception: the target existed but `restrictions` filtered it
+							// out — return no result so the next `modules` entry is tried.
+							if (restrictionsMarker && restrictionsMarker.blocked) {
+								return callback(null, null);
+							}
 							return callback(
 								new Error(
 									`Package path ${remainingRequest} is exported from package ${request.descriptionFileRoot}, but no valid target file was found (see exports field in ${request.descriptionFilePath})`,
 								),
 							);
 						}
+						// Drop the internal marker before it reaches the result.
+						if (restrictionsMarker) delete result.__restrictionsMarker;
 						callback(null, result);
 					},
 				);

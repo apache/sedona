@@ -1,2 +1,2 @@
-declare const _exports: typeof import("./index");
+declare const _exports: import("./index").WatchpackExports;
 export = _exports;

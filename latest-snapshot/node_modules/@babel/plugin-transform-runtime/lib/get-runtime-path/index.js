@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = _default;
 exports.resolveFSPath = resolveFSPath;
 var _path = require("path");
-var _module = require("module");
+require("module");
 function _default(moduleName, dirname, absoluteRuntime) {
   if (absoluteRuntime === false) return moduleName;
   return resolveAbsoluteRuntime(moduleName, _path.resolve(dirname, absoluteRuntime === true ? "." : absoluteRuntime));

@@ -10,6 +10,7 @@ var debug = require('object-inspect');
 var v = require('es-value-fixtures');
 var hasSymbols = require('has-symbols/shams')();
 var iterate = require('iterate-iterator');
+var MAX_SAFE_INTEGER = require('math-intrinsics/constants/maxSafeInteger');
 
 var index = require('../Iterator.prototype.includes');
 var impl = require('../Iterator.prototype.includes/implementation');
@@ -56,6 +57,14 @@ module.exports = {
 				function () { includes({ next: function () {} }, undefined, negativeInteger); },
 				RangeError,
 				debug(negativeInteger) + ' is not a positive integer number'
+			);
+		});
+
+		forEach([MAX_SAFE_INTEGER + 1, MAX_SAFE_INTEGER + 3], function (tooLarge) {
+			t['throws'](
+				function () { includes({ next: function () {} }, undefined, tooLarge); },
+				RangeError,
+				debug(tooLarge) + ' is greater than 2 ** 53 - 1'
 			);
 		});
 

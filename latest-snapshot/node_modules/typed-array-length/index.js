@@ -13,7 +13,7 @@ var gPO = require('reflect.getprototypeof/polyfill')();
 /** @typedef {{ [k in `$${import('.').TypedArrayName}` | '__proto__']: k extends '__proto__' ? null : TypedArrayLengthGetter }} Cache */
 
 /** @type {Cache} */
-// @ts-expect-error TS doesn't seem to have a "will eventually satisfy" type
+// @ts-expect-error TS `satisfies` doesn't work in jsdoc
 var getters = { __proto__: null };
 var oDP = Object.defineProperty;
 if (gOPD) {

@@ -7,7 +7,7 @@ var asyncs = require('make-async-function').list();
 var IsCallable = require('is-callable');
 var forEach = require('for-each');
 
-var foo = Object(function foo() {});
+var foo = Object(function foo() {}); // eslint-disable-line no-shadow
 var anon = Object(function () {});
 var evalled = Object(Function()); // eslint-disable-line no-new-func
 
@@ -60,7 +60,7 @@ module.exports = function (getName, t) {
 	});
 
 	t.test('DOM', function (st) {
-		/* eslint-env browser */
+		/* globals document: false */
 
 		st.test('document.all', { skip: typeof document !== 'object' }, function (s2t) {
 			s2t['throws'](

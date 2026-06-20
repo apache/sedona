@@ -6,6 +6,7 @@
 "use strict";
 
 const forEachBail = require("./forEachBail");
+const { decodeText } = require("./util/fs");
 
 /** @typedef {import("./Resolver")} Resolver */
 /** @typedef {import("./Resolver").JsonObject} JsonObject */
@@ -160,7 +161,7 @@ function loadDescriptionFile(
 
 				if (content) {
 					try {
-						json = JSON.parse(content.toString());
+						json = JSON.parse(decodeText(content));
 					} catch (/** @type {unknown} */ err_) {
 						return onJson(/** @type {Error} */ (err_));
 					}

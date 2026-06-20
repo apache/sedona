@@ -285,6 +285,77 @@ module.exports = {
 				s2t.end();
 			});
 
+			st.test('wrapped iterator inherits from Iterator.prototype', function (s2t) {
+				var plainIter = {
+					i: 0,
+					next: function () {
+						this.i += 1;
+						return this.i <= 3
+							? { done: false, value: this.i }
+							: { done: true, value: void undefined };
+					}
+				};
+
+				var wrapped = from(plainIter);
+
+				s2t.equal(typeof wrapped[Symbol.iterator], 'function', 'wrapped has @@iterator');
+				s2t.equal(wrapped[Symbol.iterator](), wrapped, '@@iterator returns itself');
+				s2t.equal(typeof wrapped.next, 'function', 'wrapped has next');
+				s2t.equal(typeof wrapped['return'], 'function', 'wrapped has return');
+
+				s2t.end();
+			});
+
+			st.test('wrapped iterator has access to helper methods via prototype', function (s2t) {
+				var plainIter = {
+					i: 0,
+					next: function () {
+						this.i += 1;
+						return this.i <= 4
+							? { done: false, value: this.i }
+							: { done: true, value: void undefined };
+					}
+				};
+
+				var wrapped = from(plainIter);
+
+				s2t.equal(typeof wrapped.map, 'function', 'wrapped has .map()');
+				s2t.equal(typeof wrapped.filter, 'function', 'wrapped has .filter()');
+				s2t.equal(typeof wrapped.take, 'function', 'wrapped has .take()');
+
+				testIterator(
+					from({
+						i: 0,
+						next: function () {
+							this.i += 1;
+							return this.i <= 4
+								? { done: false, value: this.i }
+								: { done: true, value: void undefined };
+						}
+					}).map(function (x) { return x * 2; }),
+					[2, 4, 6, 8],
+					s2t,
+					'wrapped .map() works'
+				);
+
+				testIterator(
+					from({
+						i: 0,
+						next: function () {
+							this.i += 1;
+							return this.i <= 4
+								? { done: false, value: this.i }
+								: { done: true, value: void undefined };
+						}
+					}).filter(function (x) { return x % 2 === 0; }),
+					[2, 4],
+					s2t,
+					'wrapped .filter() works'
+				);
+
+				s2t.end();
+			});
+
 			st.end();
 		});
 	},

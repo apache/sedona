@@ -1,7 +1,8 @@
 import type { Rule } from 'eslint';
 import type { Node } from 'estree';
 
-type Visitor = (source: Node, importer: unknown) => any;
+type ModuleSystem = 'import' | 'require';
+type Visitor = (source: Node, importer: unknown, moduleSystem?: ModuleSystem) => any;
 
 type Options = {
     amd?: boolean;

@@ -149,8 +149,8 @@ exports.fileExistsWithCaseSync = function fileExistsWithCaseSync(filepath, cache
 /** @type {import('./types').ESLintSettings | null} */
 let prevSettings = null;
 let memoizedHash = '';
-/** @type {(modulePath: string, sourceFile: string, settings: import('./types').ESLintSettings) => import('./resolve').ResolvedResult} */
-function fullResolve(modulePath, sourceFile, settings) {
+/** @type {(modulePath: string, sourceFile: string, settings: import('./types').ESLintSettings, moduleSystem?: 'import' | 'require') => import('./resolve').ResolvedResult} */
+function fullResolve(modulePath, sourceFile, settings, moduleSystem) {
   // check if this is a bonus core module
   const coreSet = new Set(settings['import/core-modules']);
   if (coreSet.has(modulePath)) { return { found: true, path: null }; }
@@ -162,7 +162,7 @@ function fullResolve(modulePath, sourceFile, settings) {
     prevSettings = settings;
   }
 
-  const cacheKey = sourceDir + memoizedHash + modulePath;
+  const cacheKey = sourceDir + memoizedHash + modulePath + (moduleSystem || '');
 
   const cacheSettings = ModuleCache.getSettings(settings);
 
@@ -177,7 +177,10 @@ function fullResolve(modulePath, sourceFile, settings) {
   /** @type {(resolver: import('./resolve').Resolver, config: unknown) => import('./resolve').ResolvedResult} */
   function withResolver(resolver, config) {
     if (resolver.interfaceVersion === 2) {
-      return resolver.resolve(modulePath, sourceFile, config);
+      const resolverConfig = moduleSystem
+        ? Object.assign({}, config, { moduleSystem })
+        : config;
+      return resolver.resolve(modulePath, sourceFile, resolverConfig);
     }
 
     try {
@@ -213,8 +216,8 @@ function fullResolve(modulePath, sourceFile, settings) {
 }
 
 /** @type {import('./resolve').relative} */
-function relative(modulePath, sourceFile, settings) {
-  return fullResolve(modulePath, sourceFile, settings).path;
+function relative(modulePath, sourceFile, settings, moduleSystem) {
+  return fullResolve(modulePath, sourceFile, settings, moduleSystem).path;
 }
 exports.relative = relative;
 
@@ -228,9 +231,9 @@ const erroredContexts = new Set();
  * @return - the full module filesystem path; null if package is core; undefined if not found
  * @type {import('./resolve').default}
  */
-function resolve(p, context) {
+function resolve(p, context, moduleSystem) {
   try {
-    return relative(p, getPhysicalFilename(context), context.settings);
+    return relative(p, getPhysicalFilename(context), context.settings, moduleSystem);
   } catch (err) {
     if (!erroredContexts.has(context)) {
       // The `err.stack` string starts with `err.name` followed by colon and `err.message`.

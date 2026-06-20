@@ -11,6 +11,7 @@ var SameValueZero = require('es-abstract/2025/SameValueZero');
 var ThrowCompletion = require('es-abstract/2025/ThrowCompletion');
 
 var isInteger = require('math-intrinsics/isInteger');
+var MAX_SAFE_INTEGER = require('math-intrinsics/constants/maxSafeInteger');
 
 var isFinite = require('es-abstract/helpers/isFinite');
 var isNaN = require('es-abstract/helpers/isNaN');
@@ -54,23 +55,28 @@ module.exports = function includes(searchElement) {
 		return IteratorClose(iterated, error2); // step 6.b
 	}
 
-	var skipped = 0; // step 7
+	if (isFinite(toSkip) && toSkip > MAX_SAFE_INTEGER) { // step 7
+		var error3 = ThrowCompletion(new $RangeError('`skippedElements` must be <= 2 ** 53 - 1')); // step 7.a
+		return IteratorClose(iterated, error3); // step 7.b
+	}
 
-	iterated = GetIteratorDirect(O); // step 8
+	var skipped = 0; // step 8
 
-	while (true) { // step 9
-		var value = IteratorStepValue(iterated); // step 9.a
+	iterated = GetIteratorDirect(O); // step 9
+
+	while (true) { // step 10
+		var value = IteratorStepValue(iterated); // step 10.a
 
 		if (iterated['[[Done]]']) {
-			return false; // step 9.b
+			return false; // step 10.b
 		}
-		if (skipped < toSkip) { // step 9.c
-			skipped += 1; // step 9.c.i
-		} else if (SameValueZero(value, searchElement)) { // step 9.d
+		if (skipped < toSkip) { // step 10.c
+			skipped += 1; // step 10.c.i
+		} else if (SameValueZero(value, searchElement)) { // step 10.d
 			return IteratorClose(
 				iterated,
 				NormalCompletion(true)
-			); // step 9.d.i
+			); // step 10.d.i
 		}
 	}
 };

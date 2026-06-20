@@ -153,6 +153,17 @@ module.exports = exports = class EventEmitter {
     return e === undefined ? [] : [...e.list]
   }
 
+  rawListeners(name) {
+    if (this._events === undefined) return []
+    const e = this._events[name]
+    return e === undefined ? [] : e.list.map((l) => l[0])
+  }
+
+  eventNames() {
+    if (this._events === undefined) return []
+    return Reflect.ownKeys(this._events)
+  }
+
   listenerCount(name) {
     if (this._events === undefined) return 0
     const e = this._events[name]

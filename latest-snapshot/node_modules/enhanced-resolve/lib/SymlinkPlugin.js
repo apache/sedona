@@ -112,7 +112,18 @@ module.exports = class SymlinkPlugin {
 							obj,
 							`resolved symlink to ${result}`,
 							resolveContext,
-							callback,
+							(err, innerResult) => {
+								if (err) return callback(err);
+								// The symlink-resolved (real) path is authoritative. If
+								// resolving it produced a result, use it. If it did not —
+								// e.g. a `restrictions` rule rejected the real target —
+								// stop here with no result instead of letting the next
+								// plugin report the original in-root symlink path, which
+								// would leave the symlink unresolved and bypass
+								// `restrictions`.
+								if (innerResult) return callback(null, innerResult);
+								return callback(null, null);
+							},
 						);
 					},
 				);

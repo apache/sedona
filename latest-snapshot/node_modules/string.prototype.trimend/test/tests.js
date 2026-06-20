@@ -11,6 +11,20 @@ module.exports = function (trimEnd, t) {
 		st.end();
 	});
 
+	t.test('pathological case', function (st) {
+		var manySpaces = new Array(100001).join(' ');
+		var input = 'A' + manySpaces + 'A' + manySpaces;
+
+		var start = Date.now();
+		var result = trimEnd(input);
+		var elapsed = Date.now() - start;
+
+		st.equal(result, 'A' + manySpaces + 'A', 'trailing whitespace is trimmed; internal whitespace is preserved');
+		st.ok(elapsed < 250, 'completes in linear time (took ' + elapsed + 'ms)');
+
+		st.end();
+	});
+
 	// see https://codeblog.jonskeet.uk/2014/12/01/when-is-an-identifier-not-an-identifier-attack-of-the-mongolian-vowel-separator/
 	var mongolianVowelSeparator = '\u180E';
 	var mvsIsWS = (/^\s$/).test(mongolianVowelSeparator);

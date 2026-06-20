@@ -48,6 +48,8 @@ declare class DirectoryWatcher extends EventEmitter<{
 	filesWithoutCase: Map<string, number>;
 	/** @type {Map<string, Watcher<DirectoryWatcherEvents> | boolean>} */
 	directories: Map<string, Watcher<DirectoryWatcherEvents> | boolean>;
+	/** @type {Map<string, Watcher<FileWatcherEvents>>} */
+	_symlinkTargetWatchers: Map<string, Watcher<FileWatcherEvents>>;
 	lastWatchEvent: number;
 	initialScan: boolean;
 	ignored: import("./index").IgnoredFunction;

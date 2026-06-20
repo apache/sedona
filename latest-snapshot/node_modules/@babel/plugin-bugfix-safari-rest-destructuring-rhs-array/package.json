@@ -1,0 +1,44 @@
+{
+  "name": "@babel/plugin-bugfix-safari-rest-destructuring-rhs-array",
+  "version": "7.29.7",
+  "description": "Workaround a Safari bug where rest destructuring with an array literal on the rhs can yield incorrect results",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/babel/babel.git",
+    "directory": "packages/babel-plugin-bugfix-safari-rest-destructuring-rhs-array"
+  },
+  "homepage": "https://babel.dev/docs/en/next/babel-plugin-bugfix-safari-rest-destructuring-rhs-array",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./lib/index.js",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "keywords": [
+    "babel-plugin",
+    "bugfix"
+  ],
+  "dependencies": {
+    "@babel/helper-plugin-utils": "^7.29.7",
+    "@babel/helper-skip-transparent-expression-wrappers": "^7.29.7"
+  },
+  "peerDependencies": {
+    "@babel/core": "^7.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/helper-plugin-test-runner": "^7.29.7",
+    "@babel/traverse": "^7.29.7"
+  },
+  "engines": {
+    "node": ">=6.9.0"
+  },
+  "author": "The Babel Team (https://babel.dev/team)",
+  "type": "commonjs"
+}

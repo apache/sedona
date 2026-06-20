@@ -7,6 +7,7 @@ export type ResultNotFound = { found: false, path?: undefined };
 export type ResultFound = { found: true, path: string | null };
 export type ResolvedResult = ResultNotFound | ResultFound;
 
+export type ModuleSystem = 'import' | 'require';
 export type ResolverResolve = (modulePath: string, sourceFile:string, config: unknown) => ResolvedResult;
 export type ResolverResolveImport = (modulePath: string, sourceFile:string, config: unknown) => string | undefined;
 export type Resolver = { interfaceVersion?: 1 | 2, resolve: ResolverResolve, resolveImport: ResolverResolveImport };
@@ -14,6 +15,7 @@ export type Resolver = { interfaceVersion?: 1 | 2, resolve: ResolverResolve, res
 declare function resolve(
     p: string,
     context: Rule.RuleContext,
+    moduleSystem?: ModuleSystem,
 ): ResolvedResult['path'];
 
 export default resolve;
@@ -24,7 +26,7 @@ declare function fileExistsWithCaseSync(
     strict: boolean
 ): boolean | ReturnType<typeof ModuleCache.prototype.get>;
 
-declare function relative(modulePath: string, sourceFile: string, settings: ESLintSettings): ResolvedResult['path'];
+declare function relative(modulePath: string, sourceFile: string, settings: ESLintSettings, moduleSystem?: ModuleSystem): ResolvedResult['path'];
 
 
 export { fileExistsWithCaseSync, relative };

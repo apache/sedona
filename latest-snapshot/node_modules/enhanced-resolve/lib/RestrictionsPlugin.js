@@ -51,6 +51,11 @@ module.exports = class RestrictionsPlugin {
 										`${path} is not inside of the restriction ${rule}`,
 									);
 								}
+								// Target existed (FileExistsPlugin already passed) but is
+								// outside the jail; signal ExportsFieldPlugin to fall back.
+								if (request.__restrictionsMarker) {
+									request.__restrictionsMarker.blocked = true;
+								}
 								return callback(null, null);
 							}
 						} else if (!rule.test(path)) {
@@ -58,6 +63,9 @@ module.exports = class RestrictionsPlugin {
 								resolveContext.log(
 									`${path} doesn't match the restriction ${rule}`,
 								);
+							}
+							if (request.__restrictionsMarker) {
+								request.__restrictionsMarker.blocked = true;
 							}
 							return callback(null, null);
 						}

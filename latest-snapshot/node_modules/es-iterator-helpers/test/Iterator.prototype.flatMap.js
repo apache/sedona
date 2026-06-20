@@ -250,6 +250,34 @@ module.exports = {
 			}), [0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], st, 'test262: test/built-ins/Iterator/prototype/flatMap/mapper-args');
 			st.deepEqual(counts, [0, 1, 2, 3, 4], 'count values are as expected');
 
+			st.test('inner close error overrides in closeIfAbrupt', function (s2t) {
+				// When .return() is called on a flatMap helper, closeIfAbrupt closes inner then outer.
+				// If closing inner throws, that error should be used to close outer.
+				var outerReturnCalls = 0;
+				var outerIter = {
+					next: function () { return { done: false, value: [1] }; },
+					'return': function () { outerReturnCalls += 1; return { done: true }; }
+				};
+				outerIter[Symbol.iterator] = function () { return outerIter; };
+
+				var innerIter = {
+					next: function () { return { done: false, value: 1 }; },
+					'return': function () { throw new EvalError('inner close failed'); }
+				};
+				innerIter[Symbol.iterator] = function () { return innerIter; };
+
+				var iter = flatMap(outerIter, function () { return innerIter; });
+				iter.next(); // start inner iteration
+
+				s2t['throws'](
+					function () { iter['return'](); },
+					EvalError,
+					'inner close error propagates'
+				);
+				s2t.equal(outerReturnCalls, 1, 'outer return still called');
+				s2t.end();
+			});
+
 			st.test('return protocol', function (s2t) {
 				var returnCount = 0;
 

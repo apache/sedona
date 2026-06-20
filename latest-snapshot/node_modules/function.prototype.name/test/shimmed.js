@@ -3,7 +3,7 @@
 require('../auto');
 
 var test = require('tape');
-var supportsDescriptors = require('define-properties').supportsDescriptors;
+var supportsDescriptors = require('has-property-descriptors')();
 var isEnumerable = Object.prototype.propertyIsEnumerable;
 
 var runTests = require('./tests');

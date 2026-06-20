@@ -1,5 +1,5 @@
 /**
- * Swiper 12.1.4
+ * Swiper 12.2.0
  * Most modern mobile touch slider and framework with hardware accelerated transitions
  * https://swiperjs.com
  *
@@ -7,7 +7,7 @@
  *
  * Released under the MIT License
  *
- * Released on: April 29, 2026
+ * Released on: May 27, 2026
  */
 
 var Swiper = (function () {
@@ -2646,6 +2646,7 @@ var Swiper = (function () {
   }
   function onTouchStart(event) {
     const swiper = this;
+    if (swiper.destroyed) return;
     const document = getDocument();
     let e = event;
     if (e.originalEvent) e = e.originalEvent;
@@ -2749,6 +2750,7 @@ var Swiper = (function () {
   function onTouchMove(event) {
     const document = getDocument();
     const swiper = this;
+    if (swiper.destroyed) return;
     const data = swiper.touchEventsData;
     const {
       params,
@@ -3010,6 +3012,7 @@ var Swiper = (function () {
 
   function onTouchEnd(event) {
     const swiper = this;
+    if (swiper.destroyed) return;
     const data = swiper.touchEventsData;
     let e = event;
     if (e.originalEvent) e = e.originalEvent;
@@ -3224,6 +3227,7 @@ var Swiper = (function () {
 
   function onClick(e) {
     const swiper = this;
+    if (swiper.destroyed) return;
     if (!swiper.enabled) return;
     if (!swiper.allowClick) {
       if (swiper.params.preventClicks) e.preventDefault();
@@ -3236,6 +3240,7 @@ var Swiper = (function () {
 
   function onScroll() {
     const swiper = this;
+    if (swiper.destroyed) return;
     const {
       wrapperEl,
       rtlTranslate,
@@ -3267,6 +3272,7 @@ var Swiper = (function () {
 
   function onLoad(e) {
     const swiper = this;
+    if (swiper.destroyed) return;
     processLazyPreloader(swiper, e.target);
     if (swiper.params.cssMode || swiper.params.slidesPerView !== 'auto' && !swiper.params.autoHeight) {
       return;
@@ -3276,6 +3282,7 @@ var Swiper = (function () {
 
   function onDocumentTouchStart() {
     const swiper = this;
+    if (swiper.destroyed) return;
     if (swiper.documentTouchHandlerProceeded) return;
     swiper.documentTouchHandlerProceeded = true;
     if (swiper.params.touchReleaseOnEdges) {
@@ -9786,7 +9793,7 @@ var Swiper = (function () {
   }
 
   /**
-   * Swiper 12.1.4
+   * Swiper 12.2.0
    * Most modern mobile touch slider and framework with hardware accelerated transitions
    * https://swiperjs.com
    *
@@ -9794,7 +9801,7 @@ var Swiper = (function () {
    *
    * Released under the MIT License
    *
-   * Released on: April 29, 2026
+   * Released on: May 27, 2026
    */
 
 

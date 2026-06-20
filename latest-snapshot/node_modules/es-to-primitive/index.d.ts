@@ -8,4 +8,9 @@ declare const ToPrimitive: typeof ES2015 & {
     readonly ES6: typeof ES6;
     readonly ES2015: typeof ES2015;
 };
+
+declare namespace ToPrimitive {
+    export type primitive = null | undefined | string | symbol | number | boolean | bigint;
+}
+
 export = ToPrimitive;

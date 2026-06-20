@@ -10,6 +10,7 @@ var debug = require('object-inspect');
 var v = require('es-value-fixtures');
 var hasSymbols = require('has-symbols/shams')();
 var hasPropertyDescriptors = require('has-property-descriptors')();
+var hasToStringTag = require('has-tostringtag')();
 var generators = require('make-generator-function')();
 var iterate = require('iterate-iterator');
 
@@ -457,6 +458,53 @@ module.exports = {
 
 				s2t['throws'](function () { iter.next(); }, EvalError);
 				s2t.equal(returnCalls, 1, 'underlying iterator closed on mapper throw');
+
+				s2t.end();
+			});
+
+			st.test('IteratorHelperPrototype: @@toStringTag', { skip: !hasToStringTag }, function (s2t) {
+				var iter = map([1, 2, 3][Symbol.iterator](), function (x) { return x; });
+
+				s2t.equal(
+					Object.prototype.toString.call(iter),
+					'[object Iterator Helper]',
+					'Object.prototype.toString returns "[object Iterator Helper]"'
+				);
+
+				s2t.end();
+			});
+
+			st.test('IteratorHelperPrototype: inherits from Iterator.prototype', function (s2t) {
+				var iter = map([1, 2, 3][Symbol.iterator](), function (x) { return x; });
+
+				s2t.equal(typeof iter[Symbol.iterator], 'function', 'has @@iterator method');
+				s2t.equal(iter[Symbol.iterator](), iter, '@@iterator returns itself');
+
+				s2t.end();
+			});
+
+			st.test('IteratorHelperPrototype: return() in SUSPENDED-START closes underlying', function (s2t) {
+				var returnCalls = 0;
+
+				var testIter = {
+					next: function () {
+						return { done: false, value: 1 };
+					},
+					'return': function () {
+						returnCalls += 1;
+						return { done: true, value: undefined };
+					}
+				};
+
+				var iter = map(testIter, function (x) { return x; });
+
+				// Do NOT call iter.next() - iter is in SUSPENDED-START state
+				var returnResult = iter['return']();
+				s2t.deepEqual(returnResult, { value: undefined, done: true }, 'return() in SUSPENDED-START returns done');
+				s2t.equal(returnCalls, 1, 'underlying iterator return called exactly once');
+
+				var nextResult = iter.next();
+				s2t.equal(nextResult.done, true, 'next() after return() is done');
 
 				s2t.end();
 			});

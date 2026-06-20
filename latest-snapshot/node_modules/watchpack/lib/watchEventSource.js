@@ -61,6 +61,9 @@ function createEPERMError(filePath) {
  * @returns {(type: "rename" | "change", filename: string) => void} handler of change event
  */
 function createHandleChangeEvent(watcher, filePath, handleChangeEvent) {
+	// path.basename(filePath) is invariant for the lifetime of the watcher,
+	// so compute it once rather than on every dispatched event.
+	const ownBasename = path.basename(filePath);
 	return (type, filename) => {
 		// TODO: After Node.js v22, fs.watch(dir) and deleting a dir will trigger the rename change event.
 		// Here we just ignore it and keep the same behavior as before v22
@@ -68,7 +71,7 @@ function createHandleChangeEvent(watcher, filePath, handleChangeEvent) {
 		if (
 			type === "rename" &&
 			path.isAbsolute(filename) &&
-			path.basename(filename) === path.basename(filePath)
+			path.basename(filename) === ownBasename
 		) {
 			if (!IS_OSX) {
 				// Before v22, windows will throw EPERM error
@@ -429,16 +432,21 @@ module.exports.watch = (filePath) => {
 		directWatcher.add(watcher);
 		return watcher;
 	}
-	let current = filePath;
-	for (;;) {
-		const recursiveWatcher = recursiveWatchers.get(current);
-		if (recursiveWatcher !== undefined) {
-			recursiveWatcher.add(filePath, watcher);
-			return watcher;
+	// Only platforms with recursive fs.watch ever populate recursiveWatchers,
+	// so skip the entire parent walk when the map is empty (always the case
+	// on Linux and the common case before the watcher limit is reached).
+	if (recursiveWatchers.size !== 0) {
+		let current = filePath;
+		for (;;) {
+			const recursiveWatcher = recursiveWatchers.get(current);
+			if (recursiveWatcher !== undefined) {
+				recursiveWatcher.add(filePath, watcher);
+				return watcher;
+			}
+			const parent = path.dirname(current);
+			if (parent === current) break;
+			current = parent;
 		}
-		const parent = path.dirname(current);
-		if (parent === current) break;
-		current = parent;
 	}
 	// Queue up watcher for creation
 	pendingWatchers.set(watcher, filePath);

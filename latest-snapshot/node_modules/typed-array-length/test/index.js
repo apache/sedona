@@ -60,7 +60,7 @@ test('Arrow functions', { skip: !arrowFn }, function (t) {
 
 test('Typed Arrays', function (t) {
 	forEach(typedArrayNames, function (typedArray) {
-		/** @type {Int8ArrayConstructor | Uint8ArrayConstructor | Uint8ClampedArrayConstructor | Int16ArrayConstructor | Uint16ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor | Float32ArrayConstructor | Float64ArrayConstructor | BigInt64ArrayConstructor | BigUint64ArrayConstructor} */
+		/** @type {Int8ArrayConstructor | Uint8ArrayConstructor | Uint8ClampedArrayConstructor | Int16ArrayConstructor | Uint16ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor | Float16ArrayConstructor | Float32ArrayConstructor | Float64ArrayConstructor | BigInt64ArrayConstructor | BigUint64ArrayConstructor} */
 		var TypedArray = global[typedArray];
 		if (isCallable(TypedArray)) {
 			var length = 10;

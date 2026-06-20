@@ -21,6 +21,10 @@ module.exports = class StreamError extends Error {
     return err && err.code === 'ABORTED'
   }
 
+  static isBadArgument(err) {
+    return err && err.code === 'BAD_ARGUMENT'
+  }
+
   get name() {
     return 'StreamError'
   }
@@ -29,11 +33,15 @@ module.exports = class StreamError extends Error {
     return new StreamError('Stream was destroyed', 'STREAM_DESTROYED', StreamError.STREAM_DESTROYED)
   }
 
-  static PREMATURE_CLOSE() {
-    return new StreamError('Premature close', 'PREMATURE_CLOSE', StreamError.PREMATURE_CLOSE)
+  static PREMATURE_CLOSE(msg = 'Premature close') {
+    return new StreamError(msg, 'PREMATURE_CLOSE', StreamError.PREMATURE_CLOSE)
   }
 
   static ABORTED() {
     return new StreamError('Stream aborted', 'ABORTED', StreamError.ABORTED)
+  }
+
+  static BAD_ARGUMENT(msg = 'Bad argument') {
+    return new StreamError(msg, 'BAD_ARGUMENT', StreamError.BAD_ARGUMENT)
   }
 }

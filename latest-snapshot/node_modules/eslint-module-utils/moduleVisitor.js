@@ -21,21 +21,21 @@ exports.default = function visitModules(visitor, options) {
 
   const ignoreRegExps = ignore == null ? [] : ignore.map((p) => new RegExp(p));
 
-  /** @type {(source: undefined | null | import('estree').Literal, importer: Parameters<typeof visitor>[1]) => void} */
-  function checkSourceValue(source, importer) {
+  /** @type {(source: undefined | null | import('estree').Literal, importer: Parameters<typeof visitor>[1], moduleSystem?: 'import' | 'require') => void} */
+  function checkSourceValue(source, importer, moduleSystem) {
     if (source == null) { return; } //?
 
     // handle ignore
     if (ignoreRegExps.some((re) => re.test(String(source.value)))) { return; }
 
     // fire visitor
-    visitor(source, importer);
+    visitor(source, importer, moduleSystem);
   }
 
   // for import-y declarations
   /** @type {(node: Declaration) => void} */
   function checkSource(node) {
-    checkSourceValue(node.source, node);
+    checkSourceValue(node.source, node, 'import');
   }
 
   // for esmodule dynamic `import()` calls
@@ -59,7 +59,7 @@ exports.default = function visitModules(visitor, options) {
     if (modulePath.type !== 'Literal') { return; }
     if (typeof modulePath.value !== 'string') { return; }
 
-    checkSourceValue(modulePath, node);
+    checkSourceValue(modulePath, node, 'import');
   }
 
   // for CommonJS `require` calls
@@ -74,7 +74,7 @@ exports.default = function visitModules(visitor, options) {
     if (modulePath.type !== 'Literal') { return; }
     if (typeof modulePath.value !== 'string') { return; }
 
-    checkSourceValue(modulePath, call);
+    checkSourceValue(modulePath, call, 'require');
   }
 
   /** @type {(call: Call) => void} */
@@ -98,7 +98,7 @@ exports.default = function visitModules(visitor, options) {
         continue; // magic modules: https://github.com/requirejs/requirejs/wiki/Differences-between-the-simplified-CommonJS-wrapper-and-standard-AMD-define#magic-modules
       }
 
-      checkSourceValue(element, element);
+      checkSourceValue(element, element, 'require');
     }
   }
 
