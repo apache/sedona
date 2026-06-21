@@ -1207,6 +1207,26 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         expected_z = shapely.get_coordinates(geoms, include_z=True)[:, 2]
         np.testing.assert_array_equal(actual_z, expected_z)
 
+    @pytest.mark.parametrize(
+        "xoff,yoff,zoff",
+        [
+            (2, 3, 0),
+            (0, 0, 0),
+            (1.5, -2, 0),
+            (0, 0, 5),
+        ],
+    )
+    def test_translate(self, xoff, yoff, zoff):
+        for geom in self.geoms:
+            # Filter empty geometries within each group
+            non_empty = [g for g in geom if g is not None and not g.is_empty]
+            if not non_empty:
+                continue
+
+            sgpd_result = GeoSeries(non_empty).translate(xoff, yoff, zoff)
+            gpd_result = gpd.GeoSeries(non_empty).translate(xoff, yoff, zoff)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_force_2d(self):
         # force_2d was added from geopandas 1.0.0
         if parse_version(gpd.__version__) < parse_version("1.0.0"):

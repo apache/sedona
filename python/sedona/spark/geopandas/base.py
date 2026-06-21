@@ -1571,6 +1571,44 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("skew", self, xs, ys, origin, use_radians)
 
+    def translate(self, xoff=0.0, yoff=0.0, zoff=0.0):
+        """Return a ``GeoSeries`` with translated geometries.
+
+        See http://shapely.readthedocs.io/en/latest/manual.html#shapely.affinity.translate
+        for details.
+
+        Parameters
+        ----------
+        xoff, yoff, zoff : float, float, float
+            Amount of offset along each dimension. xoff, yoff, and zoff for
+            translation along the x, y, and z dimensions respectively.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, LineString, Polygon
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(1, 1),
+        ...         LineString([(1, -1), (1, 0)]),
+        ...         Polygon([(3, -1), (4, 0), (3, 1)]),
+        ...     ]
+        ... )
+        >>> s
+        0                         POINT (1 1)
+        1              LINESTRING (1 -1, 1 0)
+        2    POLYGON ((3 -1, 4 0, 3 1, 3 -1))
+        dtype: geometry
+
+        >>> s.translate(2, 3)
+        0                       POINT (3 4)
+        1            LINESTRING (3 2, 3 3)
+        2    POLYGON ((5 2, 6 3, 5 4, 5 2))
+        dtype: geometry
+
+        """
+        return _delegate_to_geometry_column("translate", self, xoff, yoff, zoff)
+
     def force_2d(self):
         """Force the dimensionality of a geometry to 2D.
 

@@ -1389,6 +1389,17 @@ class GeoSeries(GeoFrame, pspd.Series):
         spark_expr = F.when(stf.ST_IsEmpty(geometry), geometry).otherwise(skewed)
         return self._query_geometry_column(spark_expr, returns_geom=True)
 
+    def translate(self, xoff=0.0, yoff=0.0, zoff=0.0) -> "GeoSeries":
+        for name, offset in (("xoff", xoff), ("yoff", yoff), ("zoff", zoff)):
+            if not isinstance(offset, (float, int)):
+                raise NotImplementedError(
+                    f"Array-like values for {name} are not supported yet."
+                )
+        spark_expr = stf.ST_Translate(
+            self.spark.column, float(xoff), float(yoff), float(zoff)
+        )
+        return self._query_geometry_column(spark_expr, returns_geom=True)
+
     def force_2d(self) -> "GeoSeries":
         spark_expr = stf.ST_Force_2D(self.spark.column)
         return self._query_geometry_column(spark_expr, returns_geom=True)

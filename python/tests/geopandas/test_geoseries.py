@@ -2490,6 +2490,45 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         with pytest.raises(ValueError, match="origin must be"):
             empty_source.skew(origin="invalid")
 
+    def test_translate(self):
+        geoms = [
+            Point(1, 1),
+            LineString([(1, -1), (1, 0)]),
+            Polygon([(3, -1), (4, 0), (3, 1)]),
+            None,
+        ]
+        s = GeoSeries(geoms)
+
+        # Docstring example: translate(2, 3)
+        result = s.translate(2, 3)
+        expected = gpd.GeoSeries(
+            [
+                Point(3, 4),
+                LineString([(3, 2), (3, 3)]),
+                Polygon([(5, 2), (6, 3), (5, 4), (5, 2)]),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        # Identity translation returns the input unchanged
+        result = s.translate()
+        self.check_sgpd_equals_gpd(result, gpd.GeoSeries(geoms))
+
+        # Z offset on 3D geometry; 2D geometry keeps its dimensionality
+        s3d = GeoSeries([Point(1, 1, 1), Point(0, 0)])
+        result = s3d.translate(2, 3, 5)
+        expected_3d = gpd.GeoSeries([Point(3, 4, 6), Point(2, 3)])
+        self.check_sgpd_equals_gpd(result, expected_3d)
+
+        # GeoDataFrame path
+        df_result = s.to_geoframe().translate(2, 3)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
+        # Array-like offsets are not supported
+        with pytest.raises(NotImplementedError):
+            s.translate([1, 2], 3)
+
     def test_force_2d(self):
         s = sgpd.GeoSeries(
             [
