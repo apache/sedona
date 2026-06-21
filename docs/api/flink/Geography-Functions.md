@@ -41,7 +41,7 @@ These functions create geography objects from various formats, or convert betwee
 
 ## Geography Functions
 
-These functions measure or format geography objects. Measurements are computed on a spherical model of the Earth (radius `R = 6 371 008 m`, the authalic Earth radius), not the WGS84 ellipsoid — areas in square meters and lengths/distances in meters. (`ST_Buffer` is the exception: it is computed on the WGS84 spheroid.)
+These functions measure or format geography objects. Measurements are computed on a spherical model of the Earth (radius `R = 6 371 008 m`, the mean Earth radius), not the WGS84 ellipsoid — areas in square meters and lengths/distances in meters. (`ST_Buffer` is the exception: it is computed on the WGS84 spheroid.)
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |

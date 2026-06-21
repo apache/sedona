@@ -41,7 +41,7 @@ These functions operate on geography type objects.
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
-| [ST_Area](Geography-Functions/ST_Area.md) | Double | Return the geodesic area of a geography in square meters (WGS84 spheroid). | v1.9.1 |
+| [ST_Area](Geography-Functions/ST_Area.md) | Double | Return the spherical area of a geography in square meters, computed on a sphere of mean Earth radius (`R = 6 371 008 m`), not the WGS84 ellipsoid. | v1.9.1 |
 | [ST_AsEWKT](Geography-Functions/ST_AsEWKT.md) | String | Return the Extended Well-Known Text representation of a geography. | v1.8.0 |
 | [ST_AsText](Geography-Functions/ST_AsText.md) | String | Return the Well-Known Text (WKT) representation of a geography. | v1.9.1 |
 | [ST_Centroid](Geography-Functions/ST_Centroid.md) | Geography | Return the planar centroid of a geography as a Geography point (computed in projected lon/lat space). | v1.9.1 |

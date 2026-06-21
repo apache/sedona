@@ -19,7 +19,7 @@
 
 # ST_Length
 
-Introduction: Returns the spherical length of a geography in meters, calculated on the sphere. The Earth is modeled as a sphere of radius `R = 6 371 008 m` (the authalic Earth radius). Each edge between successive vertices is interpreted as a great-circle arc; the per-edge arc-angles are summed and scaled by `R`.
+Introduction: Returns the spherical length of a geography in meters, calculated on the sphere. The Earth is modeled as a sphere of radius `R = 6 371 008 m` (the mean Earth radius). Each edge between successive vertices is interpreted as a great-circle arc; the per-edge arc-angles are summed and scaled by `R`.
 
 Multi-linestrings sum the children's lengths; geography collections recurse and add up the lengths of their linear members. Returns `0.0` for non-linear geographies (points, polygons) and for `NULL`.
 
