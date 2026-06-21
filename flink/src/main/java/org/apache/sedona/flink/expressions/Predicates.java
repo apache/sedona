@@ -193,6 +193,7 @@ public class Predicates {
                 rawSerializer = GeometryTypeSerializer.class,
                 bridgedTo = Geometry.class)
             Object o2) {
+      if (o1 == null || o2 == null) return null;
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
       return org.apache.sedona.common.Predicates.within(geom1, geom2);
@@ -323,6 +324,7 @@ public class Predicates {
                 rawSerializer = GeometryTypeSerializer.class,
                 bridgedTo = Geometry.class)
             Object o2) {
+      if (o1 == null || o2 == null) return null;
       Geometry geom1 = (Geometry) o1;
       Geometry geom2 = (Geometry) o2;
       return org.apache.sedona.common.Predicates.equals(geom1, geom2);
