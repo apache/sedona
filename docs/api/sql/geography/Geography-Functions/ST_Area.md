@@ -19,7 +19,7 @@
 
 # ST_Area
 
-Introduction: Returns the spherical area of a geography in square meters, calculated on the sphere. The Earth is modeled as a sphere of radius `R = 6 371 008 m` (the authalic Earth radius); the result is the area of the polygon's interior on that sphere. Returns `0.0` for non-areal geographies (points, linestrings) and for `NULL`.
+Introduction: Returns the spherical area of a geography in square meters, calculated on the sphere. The Earth is modeled as a sphere of radius `R = 6 371 008 m` (the mean Earth radius); the result is the area of the polygon's interior on that sphere. Returns `0.0` for non-areal geographies (points, linestrings) and for `NULL`.
 
 Multi-polygons sum the children's areas; geography collections recurse into their members.
 
