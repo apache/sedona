@@ -159,41 +159,85 @@ uv run mike deploy --update-aliases latest-snapshot -b website -p
 uv run mike serve -b website
 ```
 
-## Code Quality Checks with `prek`, `uv`, and `make`
+### Compiling via Makefile (Recommended)
 
-This guide explains how Apache Sedona manages local code quality checks, formatting, and linting. To ensure a fast and consistent developer experience, we combine **`uv`** (a lightning-fast Python package and environment manager) with **`prek`** (our internal pre-commit wrapper framework) and expose everything via a simple, unified `Makefile`.
+For a streamlined developer experience, a unified `Makefile` is provided to handle local documentation builds automatically.
+
+To build and serve the documentation locally using the automated environment pipeline, run:
+
+```bash
+make docsbuild
+```
+
+**What this command does behind the scenes:**
+
+1. **Environment Verification:** Validates that `uv` is available on your local path.
+2. **Dependency Syncing:** Runs `uv sync --all-groups` to automatically set up or synchronize an isolated virtual environment (`.venv`) containing MkDocs and compilation dependencies.
+3. **Asset Generation:** Navigates into the `docs-overrides` directory to fetch, build, and bundle required JavaScript and CSS assets via Node/NPM and Gulp workflows.
+4. **MkDocs Compilation:** Compiles the Markdown files in the `docs` directory into a fully optimized, static HTML website based on the configuration inside `mkdocs.yml`.
 
 ---
+
+## Code Quality Checks with `prek`, `uv`, and `make`
+
+This guide explains how Apache Sedona manages local code quality checks, formatting, and linting. To ensure a fast and consistent developer experience, we combine `uv` (a lightning-fast Python package and environment manager) with `prek` (our internal pre-commit wrapper framework) and expose everything via a simple, unified `Makefile`.
 
 ### Prerequisites
 
-Before running any checks, ensure you have `uv` installed on your machine. If you don't have it yet, you can install it via the official installer:
+Make sure your machine has `uv` and Python 3.8+ installed before running checks.
 
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
+### Core Workflow via Makefile
 
-> 💡 **Note:** You do not need to manually install Python virtual environments, `pre-commit`, or `prek`. The `Makefile` handles environment isolation and dependency resolution automatically using `uv`.
-
----
-
-### The Core Workflow: `uv` + `prek`
-
-Our codebase uses `prek` to orchestrate linting and formatting workflows (such as *Black*, *markdownlint*, or *oxipng*).
-
-Instead of forcing you to activate a virtual environment manually, the `Makefile` uses `uv sync` to build a perfectly isolated environment behind the scenes. When you run any `make check-*` command, it guarantees that `prek` is executed using the exact dependency versions locked in the project.
-
----
-
-### Available Make Commands
-
-For maximum convenience, you should interact with `prek` entirely through the following `make` shortcuts:
+The `Makefile` handles environment isolation and dependency resolution automatically using `uv`. For maximum convenience, you should interact with `prek` entirely through the following make shortcuts:
 
 * **`make check-stage`** *Runs checks on staged changes only (Recommended before committing).* Evaluates `prek` only against the files you have explicitly staged using `git add`. It is incredibly fast.
 * **`make check`** *Runs checks on the full codebase.* Forces `prek` to evaluate every single file in the repository, regardless of git status. **Use this before opening a Pull Request.**
-* **`make check-from-ref`** *Runs checks on your entire branch history.* Automatically identifies all files changed since you branched off of the `main` branch and runs linting rules against them.
+* **`make check-from-ref`** *Runs checks on your entire branch history.* Automatically identifies all files changed since you branched off of the `master` branch and runs linting rules against them.
 * **`make check-last`** *Runs checks on your last commit.* If you just committed code and want to double-check that everything passes post-commit.
 * **`make update-deps`** *Keeps linter hooks up to date.* Upgrades `prek` hooks to their latest respective upstream versions and updates your local locked dependencies.
+
+### Running prek Standalone (Without Makefile)
+
+For developers on execution environments where running a `Makefile` is unavailable, restrictive, or unoptimized (such as native Windows environments without an active bash/make emulation layer), you can execute code quality workflows by interacting with `prek` directly using `uv`.
+
+#### 1. Bootstrap the Environment
+
+Before invoking `prek` manually, force `uv` to resolve and install the mandatory development groups and local hook ecosystems:
+
+```bash
+uv sync --all-groups
+```
+
+#### 2. Executing Standalone Hooks
+
+Once dependencies are synced inside your virtual environment, execute `prek` tasks via `uv run`:
+
+* **Check Staged Files Only:**
+
+```bash
+uv run prek run
+```
+
+* **Check the Entire Codebase:**
+
+```bash
+uv run prek run --all-files
+```
+
+* **Run Specific Linters Standalone:**
+  If you only wish to validate explicit targets (such as Python formatting, markdown linter rules, or security auditing profiles), pass the specific hook ID directly:
+
+```bash
+uv run prek run <hook_id> --all-files
+```
+
+#### 3. Updating Hooks Manually
+
+To keep linter definitions synchronized with upstream styling configurations without a `Makefile` shortcut, trigger an explicit update through the core engine:
+
+```bash
+uv run prek autoupdate
+```
 
 ---
 
