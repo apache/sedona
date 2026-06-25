@@ -137,7 +137,7 @@ countries.select(
 
 ## R dplyr Interface
 
-Similarly, in past releases R users had to use SQL to access most features of SedonaDB. In the 0.5.0 release, you can now use the dplyr backend to transform your SedonaDB-backed lazy data frames. To make this happen we added a new pakckage, **sdplyr**, with an additional package **sedonafns** whose job it is to enumerate and document our large and growing collection of spatial functions. You can get everything you need from [the sdplyr package on R Universe](https://apache.r-universe.dev/sdplyr) to get started!
+Similarly, in past releases R users had to use SQL to access most features of SedonaDB. In the 0.4.0 release, you can now use the dplyr backend to transform your SedonaDB-backed lazy data frames. To make this happen we added a new pakckage, **sdplyr**, with an additional package **sedonafns** whose job it is to enumerate and document our large and growing collection of spatial functions. You can get everything you need from [the sdplyr package on R Universe](https://apache.r-universe.dev/sdplyr) to get started!
 
 ```r
 library(sdplyr)
@@ -317,9 +317,31 @@ Thanks to [edzer](https://github.com/edzer), [benbovy](https://github.com/benbov
 
 ## GPU-Accelerated Spatial Join
 
+SedonaDB now introduces hardware acceleration via an integrated GPU Spatial Join Library. This feature significantly boosts the performance of compute-intensive spatial joins by offloading highly parallel filtering and refinement operations to the GPU.
+
+By default, the GPU feature is disabled and is not included in the standard published python packages; however we provide an official Docker image to easily try this feature with a single command that supports [GPU models with compute capabilities 7.5, 8.6, and 8.9](https://developer.nvidia.com/cuda/gpus). For other GPU models, we encourage users to build the image or Python package directly from source.
+
 ```bash
 docker run -it --rm --gpus all -p 8888:8888 apache/sedona:sedonadb-latest
 ```
+
+Launching the container provides a [JupyterLab](https://jupyter.org/) instance. From there, you can connect to SedonaDB and enable GPU acceleration using the following configuration:
+
+```python
+import sedona.db
+
+ctx = sedona.db.connect()
+
+# Enable the GPU feature
+ctx.sql("SET gpu.enable = true")
+
+# Increase the batch size to feed sufficient data to the GPU
+ctx.sql("SET datafusion.execution.batch_size = 100000")
+```
+
+For more information, see our brand new [GPU Accelleration guide](https://sedona.apache.org/sedonadb/latest/gpu-acceleration/).
+
+Thanks to [pwrliang](https://github.com/pwrliang) for the research, bechmarking, implementation, and documentation for this feature!
 
 ## Parquet improvements
 
@@ -429,24 +451,19 @@ chunks = cube.select(geom=f.st_transform(cube.raster.rst.envelope(), "EPSG:4326"
 lonboard.viz(
     chunks,
     polygon_kwargs=dict(
-        filled=False, stroked=True,
-        get_line_color=[236, 64, 160], line_width_min_pixels=2,
+        filled=False,
+        stroked=True,
+        get_line_color=[236, 64, 160],
+        line_width_min_pixels=2,
     ),
 )
 ```
-
-
-
-
-    Map(basemap_style=<CartoBasemap.DarkMatter: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'…
-
-
 
 ![Rendered Zarr chunks](intro-sedonadb-0-4-zarr-chunks.png)
 
 For the full walkthrough (load a cube, inspect its dimensions, slice a plane, and hand it to NumPy) see [Working with Zarr and NDArray data in SedonaDB](https://sedona.apache.org/sedonadb/latest/working-with-zarr-ndarray-sedonadb/).
 
-In addition to a [redesign of our existing raster type to accomodate N-dimensional data](https://github.com/apache/sedona-db/pull/749), we added a number of `RS_` functions that mirror equivalents in Sedona Spark, with a focus on reading and extracting metadata. For example, in SedonaDB 0.4.0 it is also possible to extract the extent from a series of GeoTiffs and put them on a map.
+In addition to a [redesign of our existing raster type to accommodate N-dimensional data](https://github.com/apache/sedona-db/pull/749), we added a number of `RS_` functions that mirror equivalents in Sedona Spark, with a focus on reading and extracting metadata. For example, in SedonaDB 0.4.0 it is also possible to extract the extent from a series of GeoTiffs and put them on a map.
 
 
 ```python
@@ -471,7 +488,7 @@ Thank you to [Kontinuation](https://github.com/Kontinuation) for designing and d
 
 ## What's Next?
 
-Among other projets, in 0.5.0 we plan to [expand geography coverage to include the union of supported geography functions in PostGIS and BigQuery](https://github.com/apache/sedona-db/issues/821), [make our point cloud readers accessible to Python and R users](https://github.com/apache/sedona-db/issues/595), and realize the potential of our raster/ND-array foundation.
+Among other projects, in 0.5.0 we plan to [expand geography coverage to include the union of supported geography functions in PostGIS and BigQuery](https://github.com/apache/sedona-db/issues/821), [make our point cloud readers accessible to Python and R users](https://github.com/apache/sedona-db/issues/595), and realize the potential of our raster/ND-array foundation.
 
 We'd love to hear your feedback and use cases! Join the conversation on [GitHub Discussions](https://github.com/apache/sedona-db/discussions) or the [Apache Sedona mailing list](https://sedona.apache.org/community/).
 
