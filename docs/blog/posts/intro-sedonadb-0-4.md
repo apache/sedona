@@ -33,7 +33,6 @@ We're excited to have so many things to highlight in this release!
 - Improved spatial function coverage and documentation
 - Raster infrastructure
 
-
 ```python
 # pip install --upgrade "apache-sedona[db]"
 import sedona.db
@@ -55,7 +54,6 @@ Thank you to [p-vdp](https://github.com/p-vdp) for driving this work!
 ## Python DataFrame API
 
 While SQL is a powerful, flexible, and well-understood language for describing many of the things one might want to do with spatial data, many Python users prefer using Python functions to interact with data frames and expressions. SedonaDB 0.4.0 adds just this: a basic set of transformation on data frames and expressions drawing inspiration from [Ibis](https://ibis-project.org), [DuckDB Python's relational API](https://duckdb.org/docs/current/clients/python/relational_api), [PySpark](https://spark.apache.org/docs/latest/api/python/index.html), [DataFusion Python](https://datafusion.apache.org/python/), [Pandas](https://pandas.pydata.org), and [GeoPandas](https://geopandas.org).
-
 
 ```python
 # Load cities and countries from geoarrow-data
@@ -105,20 +103,15 @@ result.show()
     │ Vienna       ┆ Austria     ┆ Europe        │
     └──────────────┴─────────────┴───────────────┘
 
-
 Support for `.group_by()`, `.agg()`, `.distinct()`, and `.distinct_on()` were also added in 0.4.0 and more are in the works!
 
 In addition to data frame operators, we increasingly realized that our hard-won library of 170+ spatial functions was difficult to explore and use (despite improved [SQL reference documentation](https://sedona.apache.org/sedonadb/latest/reference/sql/)!). Following the pattern of [Pandas-style datatype-specific accessors](https://pandas.pydata.org/docs/reference/series.html#accessors), you can now write expressions as chains with inline documentation helping you as you go.
-
 
 ```python
 countries.select(
     countries.name, geometry=countries.geometry.geo.centroid().geo.buffer(0.1)
 ).limit(4)
 ```
-
-
-
 
     ┌─────────────────────────────┬────────────────────────────────────────────────────────────────────┐
     │             name            ┆                              geometry                              │
@@ -132,8 +125,6 @@ countries.select(
     ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
     │ Canada                      ┆ MULTIPOLYGON(((-98.24238137209699 61.46907614534894,-98.240459900… │
     └─────────────────────────────┴────────────────────────────────────────────────────────────────────┘
-
-
 
 ## R dplyr Interface
 
@@ -191,7 +182,6 @@ SedonaDB 0.4.0 introduces expanded support for the Geography data type, includin
 
 Geography shines for distance queries across large geographical areas. For example, if we wanted to find cities within 200 km of Germany, we'd have to find a local projection and do potentially expensive transformations between coordinate systems. Geography simplifies this to a simple distance-within query:
 
-
 ```python
 germany = countries.filter(countries.name == "Germany").select(
     countries.geometry.geo.to_geography()
@@ -201,9 +191,6 @@ cities.filter(
     cities.geometry.geo.to_geography().geo.d_within(germany, 100_000.0)
 ).select(cities.name)
 ```
-
-
-
 
     ┌────────────┐
     │    name    │
@@ -222,10 +209,7 @@ cities.filter(
     │ Berlin     │
     └────────────┘
 
-
-
 This works for spatial joins, too. If you'd like to analyze *all* the countries with their nearby cities, SedonaDB can now do that too.
-
 
 ```python
 cities_geog = cities.select(
@@ -248,9 +232,6 @@ cities_geog.join(
     cities_geog.name, country=countries_geog.name, continent=countries_geog.continent
 )
 ```
-
-
-
 
     ┌──────────────┬──────────────┬───────────┐
     │     name     ┆    country   ┆ continent │
@@ -277,10 +258,7 @@ cities_geog.join(
     │ Luxembourg   ┆ France       ┆ Europe    │
     └──────────────┴──────────────┴───────────┘
 
-
-
 Geography is also useful for calculating the shortest path along the surface of the earth between two points or more complex geometries. For example, if you wanted to find the theoretical path an airplane would take if it flew from Toronto to any other city in the world, you could simply create a line (using ST_MakeLine) and use ST_TessellateGeom to visualize the line on a flat lon/lat map like those provided by most interactive map providers.
-
 
 ```python
 import lonboard
@@ -300,12 +278,7 @@ result = (
 lonboard.viz(result.to_pandas())
 ```
 
-
-
-
     Map(basemap_style=<CartoBasemap.DarkMatter: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'…
-
-
 
 ![Lonboard view of geography segments](intro-sedonadb-0-4-geog-toronto.png)
 
@@ -339,14 +312,13 @@ ctx.sql("SET gpu.enable = true")
 ctx.sql("SET datafusion.execution.batch_size = 100000")
 ```
 
-For more information, see our brand new [GPU Accelleration guide](https://sedona.apache.org/sedonadb/latest/gpu-acceleration/).
+For more information, see our brand new [GPU Acceleration guide](https://sedona.apache.org/sedonadb/latest/gpu-acceleration/).
 
-Thanks to [pwrliang](https://github.com/pwrliang) for the research, bechmarking, implementation, and documentation for this feature!
+Thanks to [pwrliang](https://github.com/pwrliang) for the research, benchmarking, implementation, and documentation for this feature!
 
 ## Parquet improvements
 
 Whereas in 0.3.0 we added support for *reading* first-class Geometry and Geography types, in 0.4.0 we added write support. Thanks to first-class Geography support throughout the engine, this includes geography support with statistics (both on the read side, for pruning, and the write side, for generating them!). The [draft GeoParquet 2.0 specification](https://github.com/opengeospatial/geoparquet) is based on these types, and SedonaDB will happily write either plain Parquet files or Parquet files with GeoArrow 1.0, 1.1, or 2.0 metadata for compatibility with existing engines.
-
 
 ```python
 import sedona.db
@@ -360,15 +332,11 @@ countries.select(
 ).to_parquet("countries-geog.parquet", sort_by="geometry", max_row_group_size=10_000)
 ```
 
-
 ```python
 from pyarrow import parquet
 
 parquet.ParquetFile("countries-geog.parquet").schema
 ```
-
-
-
 
     <pyarrow._parquet.ParquetSchema object at 0x1174f3680>
     required group field_id=-1 arrow_schema {
@@ -377,11 +345,9 @@ parquet.ParquetFile("countries-geog.parquet").schema
       optional binary field_id=-1 geometry;
     }
 
-
-
 ## Improved spatial function coverage
 
-Since the 0.3.0 release we have been fortunate to work with contributors to add 26 new ST_ and RS_ functions to our growing catalogue. Users of rs_bandnodatavalue, rs_bandpixeltype, rs_bandtodim, rs_contains, rs_dimnames, rs_dimsize, rs_dimtoband, rs_ensureloaded, rs_frompath, rs_intersects, rs_isempty, rs_metadata, rs_numdimensions, rs_pixelascentroid, rs_pixelaspoint, rs_pixelaspolygon, rs_shape, rs_slice, rs_slicerange, rs_within, st_linesubstring, st_longestline, st_normalize, st_pointonsurface, st_reduceprecision, st_relate, st_segmentize, st_tessellategeog, st_tessellategeom, st_togeography, and st_togeometry. This brings the total ST_ and RS_ function count to 176, all of which are tested against PostGIS and/or BigQuery for compatibility with the full matrix of geometry types and XY, XYZ, XYM, and XYZM wherever possible. Check them out in our always improving [SQL reference documentation](https://sedona.apache.org/sedonadb/latest/reference/sql/)!
+Since the 0.3.0 release we have been fortunate to work with contributors to add 26 new ST\_ and RS\_ functions to our growing catalogue. Users of rs_bandnodatavalue, rs_bandpixeltype, rs_bandtodim, rs_contains, rs_dimnames, rs_dimsize, rs_dimtoband, rs_ensureloaded, rs_frompath, rs_intersects, rs_isempty, rs_metadata, rs_numdimensions, rs_pixelascentroid, rs_pixelaspoint, rs_pixelaspolygon, rs_shape, rs_slice, rs_slicerange, rs_within, st_linesubstring, st_longestline, st_normalize, st_pointonsurface, st_reduceprecision, st_relate, st_segmentize, st_tessellategeog, st_tessellategeom, st_togeography, and st_togeometry. This brings the total ST\_ and RS\_ function count to 176, all of which are tested against PostGIS and/or BigQuery for compatibility with the full matrix of geometry types and XY, XYZ, XYM, and XYZM wherever possible. Check them out in our always improving [SQL reference documentation](https://sedona.apache.org/sedonadb/latest/reference/sql/)!
 
 Thank you to [Kontinuation](https://github.com/Kontinuation), [james-willis](https://github.com/james-willis), [oglego](https://github.com/oglego), and [sapienza88](https://github.com/sapienza88) for these contributions!
 
@@ -391,14 +357,12 @@ Geospatial raster data is increasingly a *datacube*: climate reanalyses, satelli
 
 Point SedonaDB at a Zarr datacube and explore its shape without reading a single pixel:
 
-
 ```python
 # pip install sedonadb-zarr
 import sedonadb_zarr
 
 # Register Zarr functionality with a SedonaDB session
 sd.register(sedonadb_zarr.ZarrExtension())
-
 
 # A public ERA5 rainfall pyramid (Zarr, anonymous). Reading + inspecting
 # dimensions is a metadata-only round-trip — no pixel bytes fetched.
@@ -421,9 +385,7 @@ cube.select(
     │     3 ┆ [year, y, x] ┆ [1, 128, 128] ┆   3857 │
     └───────┴──────────────┴───────────────┴────────┘
 
-
 `sedonadb-zarr` emits one row per Zarr chunk, so the storage layout *is* the data layout. SedonaDB stays lazy about pixels: reading the group and inspecting its dimensions (`RS_DimNames`, `RS_Shape`, `RS_DimSize`, `RS_NumDimensions`) touches only the group schema, which is a small metadata round-trip, with no pixel bytes fetched. A chunk's bytes are read only when an operation actually needs them. `RS_Slice` is currently one such operation: it resolves the chunks the query touches, then slices.
-
 
 ```python
 sliced = cube.select(plane=cube.raster.rst.slice("year", 0))
@@ -440,9 +402,7 @@ sliced.select(
     │ [y, x] ┆ [128, 128] │
     └────────┴────────────┘
 
-
 Because each row is a chunk, `.show(5)` touches exactly five chunks and a `.filter(...)` trims the set further, so you only fetch the chunks your query reaches. The data stays in the cloud until then. And because each chunk is a row with a real spatial footprint, you can put a Zarr on a map without decoding a single pixel. `RS_Envelope` turns each chunk into its bounding geometry, so you can see exactly where the cube's chunks fall:
-
 
 ```python
 chunks = cube.select(geom=f.st_transform(cube.raster.rst.envelope(), "EPSG:4326"))
@@ -464,7 +424,6 @@ lonboard.viz(
 For the full walkthrough (load a cube, inspect its dimensions, slice a plane, and hand it to NumPy) see [Working with Zarr and NDArray data in SedonaDB](https://sedona.apache.org/sedonadb/latest/working-with-zarr-ndarray-sedonadb/).
 
 In addition to a [redesign of our existing raster type to accommodate N-dimensional data](https://github.com/apache/sedona-db/pull/749), we added a number of `RS_` functions that mirror equivalents in Sedona Spark, with a focus on reading and extracting metadata. For example, in SedonaDB 0.4.0 it is also possible to extract the extent from a series of GeoTiffs and put them on a map.
-
 
 ```python
 import pandas as pd
