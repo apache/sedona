@@ -16,7 +16,7 @@ title: "SedonaDB 0.4.0 Release"
 
 The Apache Sedona community is excited to announce the release of [SedonaDB](https://sedona.apache.org/sedonadb) version 0.4.0!
 
-SedonaDB is the first open-source, single-node analytical database engine that treats spatial data as a first-class citizen. It is developed as a subproject of Apache Sedona. This release consists of 187 resolved issues including XX new functions from 15 contributors.
+SedonaDB is the first open-source, single-node analytical database engine that treats spatial data as a first-class citizen. It is developed as a subproject of Apache Sedona. This release consists of 187 resolved issues including 26 new functions from 15 contributors.
 
 Apache Sedona powers large-scale geospatial processing on distributed engines like Spark (SedonaSpark), Flink (SedonaFlink), and Snowflake (SedonaSnow). SedonaDB extends the Sedona ecosystem with a single-node engine optimized for small-to-medium data analytics, delivering the simplicity and speed that distributed systems often cannot.
 
@@ -348,7 +348,7 @@ parquet.ParquetFile("countries-geog.parquet").schema
 
 
 
-    <pyarrow._parquet.ParquetSchema object at 0x11f127cc0>
+    <pyarrow._parquet.ParquetSchema object at 0x1174f3680>
     required group field_id=-1 arrow_schema {
       optional binary field_id=-1 name (String);
       optional binary field_id=-1 continent (String);
@@ -377,86 +377,74 @@ import sedonadb_zarr
 # Register Zarr functionality with a SedonaDB session
 sd.register(sedonadb_zarr.ZarrExtension())
 
-# A public ERA5 reanalysis cube around Hurricane Florence (Zarr v3, anonymous).
-# This is a metadata read only: no pixels fetched, even against a large remote cube.
-url = "https://atlantis-vis-o.s3-ext.jc.rl.ac.uk/hurricanes/era5/florence"
 
-# The group URL has no `.zarr` suffix, so name the format explicitly.
-cube = sd.read(
-    url,
-    format="zarr",
-    options={"arrays": ["velocity", "u_component_of_wind", "v_component_of_wind"]},
-)
+# A public ERA5 rainfall pyramid (Zarr, anonymous). Reading + inspecting
+# dimensions is a metadata-only round-trip — no pixel bytes fetched.
+url = "https://weathermapdata.rdrn.me/era5_2015_2020_l5.zarr/2"
+spec = sedonadb_zarr.Zarr().with_options({"arrays": ["rain_ok"]})
+cube = sd.read(url, format=spec)
 
 cube.select(
-    f.rs_dimnames(cube.raster).alias("dims"),
-    f.rs_shape(cube.raster).alias("shape"),
-).show(5)
+    cube.raster.rst.num_dimensions().alias("ndim"),
+    cube.raster.rst.dim_names().alias("dims"),
+    cube.raster.rst.shape().alias("shape"),
+    cube.raster.rst.srid().alias("srid"),
+).show(1)
 ```
 
-    ┌────────────────────────────────────┬──────────────────┐
-    │                dims                ┆       shape      │
-    │                list                ┆       list       │
-    ╞════════════════════════════════════╪══════════════════╡
-    │ [time, level, latitude, longitude] ┆ [1, 1, 121, 221] │
-    ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-    │ [time, level, latitude, longitude] ┆ [1, 1, 121, 221] │
-    ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-    │ [time, level, latitude, longitude] ┆ [1, 1, 121, 221] │
-    ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-    │ [time, level, latitude, longitude] ┆ [1, 1, 121, 221] │
-    ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-    │ [time, level, latitude, longitude] ┆ [1, 1, 121, 221] │
-    └────────────────────────────────────┴──────────────────┘
+    ┌───────┬──────────────┬───────────────┬────────┐
+    │  ndim ┆     dims     ┆     shape     ┆  srid  │
+    │ int32 ┆     list     ┆      list     ┆ uint32 │
+    ╞═══════╪══════════════╪═══════════════╪════════╡
+    │     3 ┆ [year, y, x] ┆ [1, 128, 128] ┆   3857 │
+    └───────┴──────────────┴───────────────┴────────┘
 
 
 `sedonadb-zarr` emits one row per Zarr chunk, so the storage layout *is* the data layout. SedonaDB stays lazy about pixels: reading the group and inspecting its dimensions (`RS_DimNames`, `RS_Shape`, `RS_DimSize`, `RS_NumDimensions`) touches only the group schema, which is a small metadata round-trip, with no pixel bytes fetched. A chunk's bytes are read only when an operation actually needs them. `RS_Slice` is currently one such operation: it resolves the chunks the query touches, then slices.
 
 
 ```python
-cube.select(
-    f.rs_slice(cube.raster, "time", 0).alias("step")
-).show(5)
+sliced = cube.select(plane=cube.raster.rst.slice("year", 0))
+sliced.select(
+    dims=sliced.plane.rst.dim_names(),
+    shape=sliced.plane.rst.shape(),
+).show(1)
 ```
 
-    ┌───────────────────────────────────────────────────────────┐
-    │                            step                           │
-    │                           raster                          │
-    ╞═══════════════════════════════════════════════════════════╡
-    │ [221x121/3] @ [264.875 14.875 320.125 45.125] / EPSG:4326 │
-    ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-    │ [221x121/3] @ [264.875 14.875 320.125 45.125] / EPSG:4326 │
-    ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-    │ [221x121/3] @ [264.875 14.875 320.125 45.125] / EPSG:4326 │
-    ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-    │ [221x121/3] @ [264.875 14.875 320.125 45.125] / EPSG:4326 │
-    ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-    │ [221x121/3] @ [264.875 14.875 320.125 45.125] / EPSG:4326 │
-    └───────────────────────────────────────────────────────────┘
+    ┌────────┬────────────┐
+    │  dims  ┆    shape   │
+    │  list  ┆    list    │
+    ╞════════╪════════════╡
+    │ [y, x] ┆ [128, 128] │
+    └────────┴────────────┘
 
 
 Because each row is a chunk, `.show(5)` touches exactly five chunks and a `.filter(...)` trims the set further, so you only fetch the chunks your query reaches. The data stays in the cloud until then. And because each chunk is a row with a real spatial footprint, you can put a Zarr on a map without decoding a single pixel. `RS_Envelope` turns each chunk into its bounding geometry, so you can see exactly where the cube's chunks fall:
 
 
 ```python
-chunks = cube.select(
-    f.rs_envelope(cube.raster)
-    .geo.transform(4326)
-    # Trick to normalize coordinates, which lonboard otherwise rejects
-    # as outside the lon/lat range
-    .geo.tessellate_geog(10_000)
-    .geo.tessellate_geom(10_000)
-    .alias("geom")
-)
+chunks = cube.select(geom=f.st_transform(cube.raster.rst.envelope(), "EPSG:4326"))
 
-lonboard.viz(chunks)
+# Draw outlines only, so the basemap shows through the chunk grid.
+lonboard.viz(
+    chunks,
+    polygon_kwargs=dict(
+        filled=False, stroked=True,
+        get_line_color=[236, 64, 160], line_width_min_pixels=2,
+    ),
+)
 ```
+
+
+
+
+    Map(basemap_style=<CartoBasemap.DarkMatter: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'…
+
+
 
 ![Rendered Zarr chunks](intro-sedonadb-0-4-zarr-chunks.png)
 
-For the full walkthrough (load a cube, inspect its dimensions, slice a plane, and hand it to NumPy) see [Working with Zarr and NDArray data in SedonaDB](<LINK>).
-
-TODO: Add the link when docs for 0.4.0 are published
+For the full walkthrough (load a cube, inspect its dimensions, slice a plane, and hand it to NumPy) see [Working with Zarr and NDArray data in SedonaDB](https://sedona.apache.org/sedonadb/latest/working-with-zarr-ndarray-sedonadb/).
 
 In addition to a [redesign of our existing raster type to accomodate N-dimensional data](https://github.com/apache/sedona-db/pull/749), we added a number of `RS_` functions that mirror equivalents in Sedona Spark, with a focus on reading and extracting metadata. For example, in SedonaDB 0.4.0 it is also possible to extract the extent from a series of GeoTiffs and put them on a map.
 
@@ -477,9 +465,9 @@ lonboard.viz(envelopes)
 
 ![Sample GeoTiff locations](intro-sedonadb-0-4-tiff-chunks.png)
 
-While we're not ready to announce that SedonaDB fully supports raster data, we're excited at the foundation we we able to build for the 0.4.0 release and look forward to building this feature in earnest with the community over the next few months.
+While we're not ready to announce that SedonaDB fully supports raster data, we're excited at the foundation we we able to build for the 0.4.0 release and look forward to building this feature in earnest with the community over the next few months...we'd love your input on where it goes next! If you're working with datacubes or cloud-native raster data, [open an issue](https://github.com/apache/sedona-db/issues/new/choose) and tell us what you're building and what you need.
 
-Thank you to [Kontinuation](https://github.com/Kontinuation) for designing and driving the 2D improvements, and [james-willis](https://github.com/james-willis) for designing and driving N-dimensional/Zarr support!
+Thank you to [Kontinuation](https://github.com/Kontinuation) for designing and driving this the 2D improvements, and [james-willis](https://github.com/james-willis) for designing and driving N-dimensional/Zarr support!
 
 ## What's Next?
 
