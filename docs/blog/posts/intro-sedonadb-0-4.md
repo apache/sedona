@@ -329,7 +329,12 @@ countries = sd.read(countries_url).alias("countries")
 
 countries.select(
     countries.name, countries.continent, geometry=countries.geometry.geo.to_geography()
-).to_parquet("countries-geog.parquet", sort_by="geometry", max_row_group_size=10_000)
+).to_parquet(
+    "countries-geog.parquet",
+    geoparquet_version="2.0",
+    sort_by="geometry",
+    max_row_group_size=10_000
+)
 ```
 
 ```python
@@ -342,7 +347,7 @@ parquet.ParquetFile("countries-geog.parquet").schema
     required group field_id=-1 arrow_schema {
       optional binary field_id=-1 name (String);
       optional binary field_id=-1 continent (String);
-      optional binary field_id=-1 geometry;
+      optional binary field_id=-1 geometry (Geography(crs=, algorithm=spherical));
     }
 
 ## Improved spatial function coverage
