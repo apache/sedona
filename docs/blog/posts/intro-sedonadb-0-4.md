@@ -333,7 +333,7 @@ countries.select(
     "countries-geog.parquet",
     geoparquet_version="2.0",
     sort_by="geometry",
-    max_row_group_size=10_000
+    max_row_group_size=10_000,
 )
 ```
 
