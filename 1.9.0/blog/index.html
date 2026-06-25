@@ -5413,6 +5413,447 @@
           </span>
         
           <span class="md-author">
+            <img src="../assets/authors/jia.jpeg" alt="Jia Yu">
+          </span>
+        
+          <span class="md-author">
+            <img src="../assets/authors/pranav.jpeg" alt="Pranav Toggi">
+          </span>
+        
+      </nav>
+    
+    <div class="md-post__meta md-meta">
+      <ul class="md-meta__list">
+        <li class="md-meta__item">
+          <time datetime="2026-06-19 00:00:00+00:00">Friday, June 19, 2026</time></li>
+        
+        
+          
+          <li class="md-meta__item">
+            
+              11 min read
+            
+          </li>
+        
+        
+      </ul>
+      
+    </div>
+  </header>
+  <div class="md-post__content md-typeset">
+    <h2 id="sedonadb-040-release"><a class="toclink" href="2026/06/19/sedonadb-040-release/">SedonaDB 0.4.0 Release</a></h2>
+<p>The Apache Sedona community is excited to announce the release of <a href="https://sedona.apache.org/sedonadb">SedonaDB</a> version 0.4.0!</p>
+<p>SedonaDB is the first open-source, single-node analytical database engine that treats spatial data as a first-class citizen. It is developed as a subproject of Apache Sedona. This release consists of 187 resolved issues including 26 new functions from 15 contributors.</p>
+<p>Apache Sedona powers large-scale geospatial processing on distributed engines like Spark (SedonaSpark), Flink (SedonaFlink), and Snowflake (SedonaSnow). SedonaDB extends the Sedona ecosystem with a single-node engine optimized for small-to-medium data analytics, delivering the simplicity and speed that distributed systems often cannot.</p>
+<h3 id="release-highlights"><a class="toclink" href="2026/06/19/sedonadb-040-release/#release-highlights">Release Highlights</a></h3>
+<p>We're excited to have so many things to highlight in this release!</p>
+<ul>
+<li>Packaging for conda-forge</li>
+<li>Python DataFrame API</li>
+<li>R dplyr interface</li>
+<li>Geography support</li>
+<li>GPU-accelerated spatial join</li>
+<li>Parquet improvements</li>
+<li>Improved spatial function coverage and documentation</li>
+<li>Raster infrastructure</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1"># pip install --upgrade &quot;apache-sedona[db]&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sedona.db</span>
+
+<span class="n">sd</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">interactive</span> <span class="o">=</span> <span class="kc">True</span>
+</code></pre></div>
+<h3 id="packaging-for-conda-forge"><a class="toclink" href="2026/06/19/sedonadb-040-release/#packaging-for-conda-forge">Packaging for conda-forge</a></h3>
+<p>We're excited to announce that sedonadb is now available on conda-forge! Users of the conda ecosystem can now install SedonaDB with:</p>
+<div class="highlight"><pre><span></span><code>conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>sedonadb
+</code></pre></div>
+<p>Thank you to <a href="https://github.com/p-vdp">p-vdp</a> for driving this work!</p>
+<h3 id="python-dataframe-api"><a class="toclink" href="2026/06/19/sedonadb-040-release/#python-dataframe-api">Python DataFrame API</a></h3>
+<p>While SQL is a powerful, flexible, and well-understood language for describing many of the things one might want to do with spatial data, many Python users prefer using Python functions to interact with data frames and expressions. SedonaDB 0.4.0 adds just this: a basic set of transformation on data frames and expressions drawing inspiration from <a href="https://ibis-project.org">Ibis</a>, <a href="https://duckdb.org/docs/current/clients/python/relational_api">DuckDB Python's relational API</a>, <a href="https://spark.apache.org/docs/latest/api/python/index.html">PySpark</a>, <a href="https://datafusion.apache.org/python/">DataFusion Python</a>, <a href="https://pandas.pydata.org">Pandas</a>, and <a href="https://geopandas.org">GeoPandas</a>.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Load cities and countries from geoarrow-data</span>
+<span class="n">cities_url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities.parquet&quot;</span>
+<span class="n">countries_url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.parquet&quot;</span>
+
+<span class="n">cities</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">cities_url</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;cities&quot;</span><span class="p">)</span>
+<span class="n">countries</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">countries_url</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;countries&quot;</span><span class="p">)</span>
+
+<span class="c1"># Spatial join using the DataFrame API</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">funcs</span>
+<span class="n">result</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">cities</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">countries</span><span class="p">,</span>
+        <span class="n">on</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">st_intersects</span><span class="p">(</span><span class="n">cities</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">countries</span><span class="o">.</span><span class="n">geometry</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">countries</span><span class="o">.</span><span class="n">continent</span> <span class="o">!=</span> <span class="s2">&quot;North America&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">cities</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">country</span><span class="o">=</span><span class="n">countries</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">continent</span><span class="o">=</span><span class="n">countries</span><span class="o">.</span><span class="n">continent</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s2">&quot;country&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">result</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>┌──────────────┬─────────────┬───────────────┐
+│     name     ┆   country   ┆   continent   │
+│     utf8     ┆     utf8    ┆      utf8     │
+╞══════════════╪═════════════╪═══════════════╡
+│ Kabul        ┆ Afghanistan ┆ Asia          │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Tirana       ┆ Albania     ┆ Europe        │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Algiers      ┆ Algeria     ┆ Africa        │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Luanda       ┆ Angola      ┆ Africa        │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Buenos Aires ┆ Argentina   ┆ South America │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Yerevan      ┆ Armenia     ┆ Asia          │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Melbourne    ┆ Australia   ┆ Oceania       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Canberra     ┆ Australia   ┆ Oceania       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Sydney       ┆ Australia   ┆ Oceania       │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Vienna       ┆ Austria     ┆ Europe        │
+└──────────────┴─────────────┴───────────────┘
+</code></pre></div>
+
+<p>Support for <code>.group_by()</code>, <code>.agg()</code>, <code>.distinct()</code>, and <code>.distinct_on()</code> were also added in 0.4.0 and more are in the works!</p>
+<p>In addition to data frame operators, we increasingly realized that our hard-won library of 170+ spatial functions was difficult to explore and use (despite improved <a href="https://sedona.apache.org/sedonadb/latest/reference/sql/">SQL reference documentation</a>!). Following the pattern of <a href="https://pandas.pydata.org/docs/reference/series.html#accessors">Pandas-style datatype-specific accessors</a>, you can now write expressions as chains with inline documentation helping you as you go.</p>
+<div class="highlight"><pre><span></span><code><span class="n">countries</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+    <span class="n">countries</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">countries</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">centroid</span><span class="p">()</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>┌─────────────────────────────┬────────────────────────────────────────────────────────────────────┐
+│             name            ┆                              geometry                              │
+│             utf8            ┆                              geometry                              │
+╞═════════════════════════════╪════════════════════════════════════════════════════════════════════╡
+│ Fiji                        ┆ MULTIPOLYGON(((163.7531646445823 -17.31630942638265,163.755086116… │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ United Republic of Tanzania ┆ MULTIPOLYGON(((34.652989854755944 -6.25773242850609,34.6549113267… │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Western Sahara              ┆ MULTIPOLYGON(((-12.237831111607791 24.291172960208634,-12.2359096… │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Canada                      ┆ MULTIPOLYGON(((-98.24238137209699 61.46907614534894,-98.240459900… │
+└─────────────────────────────┴────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<h3 id="r-dplyr-interface"><a class="toclink" href="2026/06/19/sedonadb-040-release/#r-dplyr-interface">R dplyr Interface</a></h3>
+<p>Similarly, in past releases R users had to use SQL to access most features of SedonaDB. In the 0.4.0 release, you can now use the dplyr backend to transform your SedonaDB-backed lazy data frames. To make this happen we added a new pakckage, <strong>sdplyr</strong>, with an additional package <strong>sedonafns</strong> whose job it is to enumerate and document our large and growing collection of spatial functions. You can get everything you need from <a href="https://apache.r-universe.dev/sdplyr">the sdplyr package on R Universe</a> to get started!</p>
+<div class="highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">sdplyr</span><span class="p">)</span>
+
+<span class="c1"># Load cities and countries from geoarrow-data</span>
+<span class="n">cities_url</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities.parquet&quot;</span>
+<span class="n">countries_url</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.parquet&quot;</span>
+
+<span class="n">cities</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">sd_read_parquet</span><span class="p">(</span><span class="n">cities_url</span><span class="p">)</span>
+<span class="n">countries</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">sd_read_parquet</span><span class="p">(</span><span class="n">countries_url</span><span class="p">)</span>
+
+<span class="c1"># Spatial join using dplyr</span>
+<span class="n">cities</span><span class="w"> </span><span class="o">|&gt;</span>
+<span class="w">  </span><span class="nf">inner_join</span><span class="p">(</span>
+<span class="w">    </span><span class="n">countries</span><span class="p">,</span>
+<span class="w">    </span><span class="n">by</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">sd_join_intersects</span><span class="p">()</span>
+<span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="o">|&gt;</span>
+<span class="w">  </span><span class="nf">filter</span><span class="p">(</span><span class="n">continent</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">&quot;North America&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">|&gt;</span>
+<span class="w">  </span><span class="nf">select</span><span class="p">(</span>
+<span class="w">    </span><span class="n">city</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">name.x</span><span class="p">,</span>
+<span class="w">    </span><span class="n">country</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">name.y</span><span class="p">,</span>
+<span class="w">    </span><span class="n">continent</span>
+<span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="o">|&gt;</span>
+<span class="w">  </span><span class="nf">arrange</span><span class="p">(</span><span class="n">country</span><span class="p">)</span><span class="w"> </span><span class="o">|&gt;</span>
+<span class="w">  </span><span class="nf">head</span><span class="p">(</span><span class="m">10</span><span class="p">)</span>
+<span class="c1">#&gt; &lt;sedonab_dataframe: NA x 3&gt;</span>
+<span class="c1">#&gt; ┌──────────────┬─────────────┬───────────────┐</span>
+<span class="c1">#&gt; │     city     ┆   country   ┆   continent   │</span>
+<span class="c1">#&gt; │     utf8     ┆     utf8    ┆      utf8     │</span>
+<span class="c1">#&gt; ╞══════════════╪═════════════╪═══════════════╡</span>
+<span class="c1">#&gt; │ Kabul        ┆ Afghanistan ┆ Asia          │</span>
+<span class="c1">#&gt; ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤</span>
+<span class="c1">#&gt; │ Tirana       ┆ Albania     ┆ Europe        │</span>
+<span class="c1">#&gt; ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤</span>
+<span class="c1">#&gt; │ Algiers      ┆ Algeria     ┆ Africa        │</span>
+<span class="c1">#&gt; ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤</span>
+<span class="c1">#&gt; │ Luanda       ┆ Angola      ┆ Africa        │</span>
+<span class="c1">#&gt; ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤</span>
+<span class="c1">#&gt; │ Buenos Aires ┆ Argentina   ┆ South America │</span>
+<span class="c1">#&gt; ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤</span>
+<span class="c1">#&gt; │ Yerevan      ┆ Armenia     ┆ Asia          │</span>
+<span class="c1">#&gt; └──────────────┴─────────────┴───────────────┘</span>
+<span class="c1">#&gt; Preview of up to 6 row(s)</span>
+</code></pre></div>
+<p>While we have some R functions translated for use in SedonaDB à la dbplyr/arrow, this is a work in progress. In the meantime, DataFusion/SedonaDB-raw SQL functions are available via <code>.fns</code> (e.g., <code>.fns$substr(some_col,1, 5)</code>) and tidy <code>!!some_r_expression</code> are supported and we would love <a href="https://github.com/apache/sedona-db/issues/new">feature requests</a> to implement frequently used functions from our users.</p>
+<h3 id="geography-support"><a class="toclink" href="2026/06/19/sedonadb-040-release/#geography-support">Geography Support</a></h3>
+<p>SedonaDB 0.4.0 introduces expanded support for the Geography data type, including a completely rewritten implementation of most operations using <a href="https://github.com/paleolimbot/s2geography">s2geography</a>, which in turn packages primitives from Google's <a href="https://github.com/google/s2geometry">s2geometry</a> as PostGIS/BigQuery-compatible SQL operators.</p>
+<p>Geography shines for distance queries across large geographical areas. For example, if we wanted to find cities within 200 km of Germany, we'd have to find a local projection and do potentially expensive transformations between coordinate systems. Geography simplifies this to a simple distance-within query:</p>
+<div class="highlight"><pre><span></span><code><span class="n">germany</span> <span class="o">=</span> <span class="n">countries</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">countries</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Germany&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+    <span class="n">countries</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">to_geography</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="n">cities</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+    <span class="n">cities</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">to_geography</span><span class="p">()</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">d_within</span><span class="p">(</span><span class="n">germany</span><span class="p">,</span> <span class="mf">100_000.0</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">cities</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>┌────────────┐
+│    name    │
+│    utf8    │
+╞════════════╡
+│ Vaduz      │
+├╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Luxembourg │
+├╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Bern       │
+├╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Prague     │
+├╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Amsterdam  │
+├╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Berlin     │
+└────────────┘
+</code></pre></div>
+
+<p>This works for spatial joins, too. If you'd like to analyze <em>all</em> the countries with their nearby cities, SedonaDB can now do that too.</p>
+<div class="highlight"><pre><span></span><code><span class="n">cities_geog</span> <span class="o">=</span> <span class="n">cities</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+    <span class="n">cities</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">cities</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">to_geography</span><span class="p">()</span>
+<span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;cities_geog&quot;</span><span class="p">)</span>
+<span class="n">countries_geog</span> <span class="o">=</span> <span class="n">countries</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+    <span class="n">countries</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+    <span class="n">countries</span><span class="o">.</span><span class="n">continent</span><span class="p">,</span>
+    <span class="n">geometry</span><span class="o">=</span><span class="n">countries</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">to_geography</span><span class="p">(),</span>
+<span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;countries_geog&quot;</span><span class="p">)</span>
+
+<span class="n">cities_geog</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">countries_geog</span><span class="p">,</span>
+    <span class="n">on</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">st_dwithin</span><span class="p">(</span>
+        <span class="n">cities_geog</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span>
+        <span class="n">countries_geog</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span>
+        <span class="mi">100_000</span><span class="p">,</span>  <span class="c1"># Distance in meters!</span>
+    <span class="p">),</span>
+<span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+    <span class="n">cities_geog</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">country</span><span class="o">=</span><span class="n">countries_geog</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">continent</span><span class="o">=</span><span class="n">countries_geog</span><span class="o">.</span><span class="n">continent</span>
+<span class="p">)</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>┌──────────────┬──────────────┬───────────┐
+│     name     ┆    country   ┆ continent │
+│     utf8     ┆     utf8     ┆    utf8   │
+╞══════════════╪══════════════╪═══════════╡
+│ Vatican City ┆ Italy        ┆ Europe    │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ San Marino   ┆ Italy        ┆ Europe    │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ Vaduz        ┆ Austria      ┆ Europe    │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ Vaduz        ┆ Germany      ┆ Europe    │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ Vaduz        ┆ Switzerland  ┆ Europe    │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ Vaduz        ┆ Italy        ┆ Europe    │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ Lobamba      ┆ South Africa ┆ Africa    │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ Lobamba      ┆ Mozambique   ┆ Africa    │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ Lobamba      ┆ eSwatini     ┆ Africa    │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┤
+│ Luxembourg   ┆ France       ┆ Europe    │
+└──────────────┴──────────────┴───────────┘
+</code></pre></div>
+
+<p>Geography is also useful for calculating the shortest path along the surface of the earth between two points or more complex geometries. For example, if you wanted to find the theoretical path an airplane would take if it flew from Toronto to any other city in the world, you could simply create a line (using ST_MakeLine) and use ST_TessellateGeom to visualize the line on a flat lon/lat map like those provided by most interactive map providers.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">lonboard</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">cities_geog</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">cities_geog</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Toronto&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">name_from</span><span class="o">=</span><span class="n">cities_geog</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pt_from</span><span class="o">=</span><span class="n">cities_geog</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">cross_join</span><span class="p">(</span><span class="n">cities_geog</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span>
+        <span class="n">name_to</span><span class="o">=</span><span class="n">sd</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
+        <span class="n">geometry</span><span class="o">=</span><span class="n">sd</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;pt_from&quot;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">make_line</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">tessellate_geom</span><span class="p">(</span><span class="mi">1_000</span><span class="p">),</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">lonboard</span><span class="o">.</span><span class="n">viz</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">())</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>Map(basemap_style=&lt;CartoBasemap.DarkMatter: &#39;https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json&#39;…
+</code></pre></div>
+
+<p><img alt="Lonboard view of geography segments" src="intro-sedonadb-0-4-geog-toronto.png" /></p>
+<p>Functions directly supported by s2geometry/s2geography include <code>s2_cellidfrompoint</code>, <code>s2_coveringcellids</code>, <code>st_area</code>, <code>st_buffer</code>, <code>st_centroid</code>, <code>st_closestpoint</code>, <code>st_contains</code>, <code>st_convexhull</code>, <code>st_difference</code>, <code>st_disjoint</code>, <code>st_distance</code>, <code>st_dwithin</code>, <code>st_equals</code>, <code>st_intersection</code>, <code>st_intersects</code>, <code>st_length</code>, <code>st_lineinterpolatepoint</code>, <code>st_linelocatepoint</code>, <code>st_longestline</code>, <code>st_maxdistance</code>, <code>st_perimeter</code>, <code>st_pointonsurface</code>, <code>st_reduceprecision</code>, <code>st_segmentize</code>, <code>st_shortestline</code>, <code>st_simplify</code>, <code>st_symdifference</code>, <code>st_tessellategeog</code>, <code>st_tessellategeom</code>, <code>st_union</code>, and <code>st_within</code>.</p>
+<p>Additionally, we've made sure that bounding box-related functions (<code>st_analyze_agg</code>, <code>st_envelope</code>, <code>st_envelope_agg</code>, <code>st_xmax</code>, <code>st_xmin</code>, <code>st_ymax</code>, <code>st_ymin</code>) are all geography aware, and that structural accessors/transformers (<code>st_asbinary</code>, <code>st_astext</code>, <code>st_boundary</code>, <code>st_dimension</code>, <code>st_flipcoordinates</code>, <code>st_force2d</code>, <code>st_force3d</code>, <code>st_force3dm</code>, <code>st_force4d</code>, <code>st_geogfromwkb</code>, <code>st_geogfromwkt</code>, <code>st_geogpoint</code>, <code>st_geometryn</code>, <code>st_geometrytype</code>, <code>st_interiorringn</code>, <code>st_isclosed</code>, <code>st_iscollection</code>, <code>st_isempty</code>, <code>st_linemerge</code>, <code>st_mmax</code>, <code>st_mmin</code>, <code>st_normalize</code>, <code>st_npoints</code>, <code>st_nrings</code>, <code>st_numgeometries</code>, <code>st_numinteriorrings</code>, <code>st_numpoints</code>, <code>st_pointn</code>, <code>st_points</code>, <code>st_reverse</code>, <code>st_setcrs</code>, <code>st_togeography</code>, <code>st_togeometry</code>, <code>st_x</code>, <code>st_y</code>, <code>st_zmax</code>, <code>st_zmin</code>) all support Geography just as they support Geometry.</p>
+<p>Thanks to <a href="https://github.com/edzer">edzer</a>, <a href="https://github.com/benbovy">benbovy</a>, <a href="https://github.com/jorisvandenbossche">jorisvandenbossche</a>, and many years of <a href="https://github.com/paleolimbot/s2geography">s2geography</a> and <a href="https://github.com/r-spatial/s2">r-spatial/s2</a> contributors that formed the basis for these implementations.</p>
+<h3 id="gpu-accelerated-spatial-join"><a class="toclink" href="2026/06/19/sedonadb-040-release/#gpu-accelerated-spatial-join">GPU-Accelerated Spatial Join</a></h3>
+<p>SedonaDB now introduces hardware acceleration via an integrated GPU Spatial Join Library. This feature significantly boosts the performance of compute-intensive spatial joins by offloading highly parallel filtering and refinement operations to the GPU.</p>
+<p>By default, the GPU feature is disabled and is not included in the standard published python packages; however we provide an official Docker image to easily try this feature with a single command that supports <a href="https://developer.nvidia.com/cuda/gpus">GPU models with compute capabilities 7.5, 8.6, and 8.9</a>. For other GPU models, we encourage users to build the image or Python package directly from source.</p>
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>--gpus<span class="w"> </span>all<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>apache/sedona:sedonadb-latest
+</code></pre></div>
+<p>Launching the container provides a <a href="https://jupyter.org/">JupyterLab</a> instance. From there, you can connect to SedonaDB and enable GPU acceleration using the following configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">sedona.db</span>
+
+<span class="n">ctx</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+
+<span class="c1"># Enable the GPU feature</span>
+<span class="n">ctx</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SET gpu.enable = true&quot;</span><span class="p">)</span>
+
+<span class="c1"># Increase the batch size to feed sufficient data to the GPU</span>
+<span class="n">ctx</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SET datafusion.execution.batch_size = 100000&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>For more information, see our brand new <a href="https://sedona.apache.org/sedonadb/latest/gpu-acceleration/">GPU Acceleration guide</a>.</p>
+<p>Thanks to <a href="https://github.com/pwrliang">pwrliang</a> for the research, benchmarking, implementation, and documentation for this feature!</p>
+<h3 id="parquet-improvements"><a class="toclink" href="2026/06/19/sedonadb-040-release/#parquet-improvements">Parquet improvements</a></h3>
+<p>Whereas in 0.3.0 we added support for <em>reading</em> first-class Geometry and Geography types, in 0.4.0 we added write support. Thanks to first-class Geography support throughout the engine, this includes geography support with statistics (both on the read side, for pruning, and the write side, for generating them!). The <a href="https://github.com/opengeospatial/geoparquet">draft GeoParquet 2.0 specification</a> is based on these types, and SedonaDB will happily write either plain Parquet files or Parquet files with GeoArrow 1.0, 1.1, or 2.0 metadata for compatibility with existing engines.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">sedona.db</span>
+
+<span class="n">sd</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="n">countries_url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.parquet&quot;</span>
+<span class="n">countries</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">countries_url</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;countries&quot;</span><span class="p">)</span>
+
+<span class="n">countries</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+    <span class="n">countries</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">countries</span><span class="o">.</span><span class="n">continent</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">countries</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">to_geography</span><span class="p">()</span>
+<span class="p">)</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span>
+    <span class="s2">&quot;countries-geog.parquet&quot;</span><span class="p">,</span>
+    <span class="n">geoparquet_version</span><span class="o">=</span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+    <span class="n">sort_by</span><span class="o">=</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span>
+    <span class="n">max_row_group_size</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="kn">import</span> <span class="n">parquet</span>
+
+<span class="n">parquet</span><span class="o">.</span><span class="n">ParquetFile</span><span class="p">(</span><span class="s2">&quot;countries-geog.parquet&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">schema</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>&lt;pyarrow._parquet.ParquetSchema object at 0x1174f3680&gt;
+required group field_id=-1 arrow_schema {
+  optional binary field_id=-1 name (String);
+  optional binary field_id=-1 continent (String);
+  optional binary field_id=-1 geometry (Geography(crs=, algorithm=spherical));
+}
+</code></pre></div>
+
+<h3 id="improved-spatial-function-coverage"><a class="toclink" href="2026/06/19/sedonadb-040-release/#improved-spatial-function-coverage">Improved spatial function coverage</a></h3>
+<p>Since the 0.3.0 release we have been fortunate to work with contributors to add 26 new ST_ and RS_ functions to our growing catalogue. Users of rs_bandnodatavalue, rs_bandpixeltype, rs_bandtodim, rs_contains, rs_dimnames, rs_dimsize, rs_dimtoband, rs_ensureloaded, rs_frompath, rs_intersects, rs_isempty, rs_metadata, rs_numdimensions, rs_pixelascentroid, rs_pixelaspoint, rs_pixelaspolygon, rs_shape, rs_slice, rs_slicerange, rs_within, st_linesubstring, st_longestline, st_normalize, st_pointonsurface, st_reduceprecision, st_relate, st_segmentize, st_tessellategeog, st_tessellategeom, st_togeography, and st_togeometry. This brings the total ST_ and RS_ function count to 176, all of which are tested against PostGIS and/or BigQuery for compatibility with the full matrix of geometry types and XY, XYZ, XYM, and XYZM wherever possible. Check them out in our always improving <a href="https://sedona.apache.org/sedonadb/latest/reference/sql/">SQL reference documentation</a>!</p>
+<p>Thank you to <a href="https://github.com/Kontinuation">Kontinuation</a>, <a href="https://github.com/james-willis">james-willis</a>, <a href="https://github.com/oglego">oglego</a>, and <a href="https://github.com/sapienza88">sapienza88</a> for these contributions!</p>
+<h3 id="n-dimensional-array-and-zarr-support"><a class="toclink" href="2026/06/19/sedonadb-040-release/#n-dimensional-array-and-zarr-support">N-dimensional array and Zarr support</a></h3>
+<p>Geospatial raster data is increasingly a <em>datacube</em>: climate reanalyses, satellite time series, and model outputs all stack extra axes (e.g., <code>time</code>, <code>level</code>, <code>band</code>) on top of the spatial grid. In 0.4.0, SedonaDB's raster type goes natively N-dimensional, and the new <code>sedonadb-zarr</code> extension reads <a href="https://zarr.dev/">Zarr</a> groups straight into a queryable raster column.</p>
+<p>Point SedonaDB at a Zarr datacube and explore its shape without reading a single pixel:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># pip install sedonadb-zarr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sedonadb_zarr</span>
+
+<span class="c1"># Register Zarr functionality with a SedonaDB session</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">sedonadb_zarr</span><span class="o">.</span><span class="n">ZarrExtension</span><span class="p">())</span>
+
+<span class="c1"># A public ERA5 rainfall pyramid (Zarr, anonymous). Reading + inspecting</span>
+<span class="c1"># dimensions is a metadata-only round-trip — no pixel bytes fetched.</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://weathermapdata.rdrn.me/era5_2015_2020_l5.zarr/2&quot;</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">sedonadb_zarr</span><span class="o">.</span><span class="n">Zarr</span><span class="p">()</span><span class="o">.</span><span class="n">with_options</span><span class="p">({</span><span class="s2">&quot;arrays&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;rain_ok&quot;</span><span class="p">]})</span>
+<span class="n">cube</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">spec</span><span class="p">)</span>
+
+<span class="n">cube</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+    <span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;ndim&quot;</span><span class="p">),</span>
+    <span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">dim_names</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;dims&quot;</span><span class="p">),</span>
+    <span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">shape</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;shape&quot;</span><span class="p">),</span>
+    <span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">srid</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;srid&quot;</span><span class="p">),</span>
+<span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>┌───────┬──────────────┬───────────────┬────────┐
+│  ndim ┆     dims     ┆     shape     ┆  srid  │
+│ int32 ┆     list     ┆      list     ┆ uint32 │
+╞═══════╪══════════════╪═══════════════╪════════╡
+│     3 ┆ [year, y, x] ┆ [1, 128, 128] ┆   3857 │
+└───────┴──────────────┴───────────────┴────────┘
+</code></pre></div>
+
+<p><code>sedonadb-zarr</code> emits one row per Zarr chunk, so the storage layout <em>is</em> the data layout. SedonaDB stays lazy about pixels: reading the group and inspecting its dimensions (<code>RS_DimNames</code>, <code>RS_Shape</code>, <code>RS_DimSize</code>, <code>RS_NumDimensions</code>) touches only the group schema, which is a small metadata round-trip, with no pixel bytes fetched. A chunk's bytes are read only when an operation actually needs them. <code>RS_Slice</code> is currently one such operation: it resolves the chunks the query touches, then slices.</p>
+<div class="highlight"><pre><span></span><code><span class="n">sliced</span> <span class="o">=</span> <span class="n">cube</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">plane</span><span class="o">=</span><span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="n">sliced</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+    <span class="n">dims</span><span class="o">=</span><span class="n">sliced</span><span class="o">.</span><span class="n">plane</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">dim_names</span><span class="p">(),</span>
+    <span class="n">shape</span><span class="o">=</span><span class="n">sliced</span><span class="o">.</span><span class="n">plane</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">shape</span><span class="p">(),</span>
+<span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>┌────────┬────────────┐
+│  dims  ┆    shape   │
+│  list  ┆    list    │
+╞════════╪════════════╡
+│ [y, x] ┆ [128, 128] │
+└────────┴────────────┘
+</code></pre></div>
+
+<p>Because each row is a chunk, <code>.show(5)</code> touches exactly five chunks and a <code>.filter(...)</code> trims the set further, so you only fetch the chunks your query reaches. The data stays in the cloud until then. And because each chunk is a row with a real spatial footprint, you can put a Zarr on a map without decoding a single pixel. <code>RS_Envelope</code> turns each chunk into its bounding geometry, so you can see exactly where the cube's chunks fall:</p>
+<div class="highlight"><pre><span></span><code><span class="n">chunks</span> <span class="o">=</span> <span class="n">cube</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">geom</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">st_transform</span><span class="p">(</span><span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">envelope</span><span class="p">(),</span> <span class="s2">&quot;EPSG:4326&quot;</span><span class="p">))</span>
+
+<span class="c1"># Draw outlines only, so the basemap shows through the chunk grid.</span>
+<span class="n">lonboard</span><span class="o">.</span><span class="n">viz</span><span class="p">(</span>
+    <span class="n">chunks</span><span class="p">,</span>
+    <span class="n">polygon_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">filled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">stroked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">get_line_color</span><span class="o">=</span><span class="p">[</span><span class="mi">236</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">160</span><span class="p">],</span>
+        <span class="n">line_width_min_pixels</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><img alt="Rendered Zarr chunks" src="intro-sedonadb-0-4-zarr-chunks.png" /></p>
+<p>For the full walkthrough (load a cube, inspect its dimensions, slice a plane, and hand it to NumPy) see <a href="https://sedona.apache.org/sedonadb/latest/working-with-zarr-ndarray-sedonadb/">Working with Zarr and NDArray data in SedonaDB</a>.</p>
+<p>In addition to a <a href="https://github.com/apache/sedona-db/pull/749">redesign of our existing raster type to accommodate N-dimensional data</a>, we added a number of <code>RS_</code> functions that mirror equivalents in Sedona Spark, with a focus on reading and extracting metadata. For example, in SedonaDB 0.4.0 it is also possible to extract the extent from a series of GeoTiffs and put them on a map.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">usgs_drg_quads</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;https://download.osgeo.org/geotiff/samples/usgs/o41078a1.tif&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://download.osgeo.org/geotiff/samples/usgs/o41078a2.tif&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://download.osgeo.org/geotiff/samples/usgs/o41078a3.tif&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">tiffs</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">create_data_frame</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">usgs_drg_quads</span><span class="p">}))</span>
+<span class="n">envelopes</span> <span class="o">=</span> <span class="n">tiffs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">rs_envelope</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">rs_frompath</span><span class="p">(</span><span class="n">tiffs</span><span class="o">.</span><span class="n">url</span><span class="p">))</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="mi">4326</span><span class="p">))</span>
+<span class="n">lonboard</span><span class="o">.</span><span class="n">viz</span><span class="p">(</span><span class="n">envelopes</span><span class="p">)</span>
+</code></pre></div>
+<p><img alt="Sample GeoTiff locations" src="intro-sedonadb-0-4-tiff-chunks.png" /></p>
+<p>While we're not ready to announce that SedonaDB fully supports raster data, we're excited at the foundation we we able to build for the 0.4.0 release and look forward to building this feature in earnest with the community over the next few months...we'd love your input on where it goes next! If you're working with datacubes or cloud-native raster data, <a href="https://github.com/apache/sedona-db/issues/new/choose">open an issue</a> and tell us what you're building and what you need.</p>
+<p>Thank you to <a href="https://github.com/Kontinuation">Kontinuation</a> for designing and driving this the 2D improvements, and <a href="https://github.com/james-willis">james-willis</a> for designing and driving N-dimensional/Zarr support!</p>
+<h3 id="whats-next"><a class="toclink" href="2026/06/19/sedonadb-040-release/#whats-next">What's Next?</a></h3>
+<p>Among other projects, in 0.5.0 we plan to <a href="https://github.com/apache/sedona-db/issues/821">expand geography coverage to include the union of supported geography functions in PostGIS and BigQuery</a>, <a href="https://github.com/apache/sedona-db/issues/595">make our point cloud readers accessible to Python and R users</a>, and realize the potential of our raster/ND-array foundation.</p>
+<p>We'd love to hear your feedback and use cases! Join the conversation on <a href="https://github.com/apache/sedona-db/discussions">GitHub Discussions</a> or the <a href="https://sedona.apache.org/community/">Apache Sedona mailing list</a>.</p>
+<h3 id="contributors"><a class="toclink" href="2026/06/19/sedonadb-040-release/#contributors">Contributors</a></h3>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>shortlog<span class="w"> </span>-sn<span class="w"> </span>apache-sedona-db-0.4.0.dev..HEAD
+<span class="w">    </span><span class="m">50</span><span class="w">  </span>Dewey<span class="w"> </span>Dunnington
+<span class="w">    </span><span class="m">31</span><span class="w">  </span>James<span class="w"> </span>Willis
+<span class="w">    </span><span class="m">20</span><span class="w">  </span>Jia<span class="w"> </span>Yu
+<span class="w">    </span><span class="m">16</span><span class="w">  </span>Kristin<span class="w"> </span>Cowalcijk
+<span class="w">    </span><span class="m">13</span><span class="w">  </span>Liang<span class="w"> </span>Geng
+<span class="w">     </span><span class="m">5</span><span class="w">  </span>Camden<span class="w"> </span>Lowrance
+<span class="w">     </span><span class="m">2</span><span class="w">  </span>Balthasar<span class="w"> </span>Teuscher
+<span class="w">     </span><span class="m">2</span><span class="w">  </span>Mehak3010
+<span class="w">     </span><span class="m">2</span><span class="w">  </span>Terry<span class="w"> </span>L.<span class="w"> </span>Blessing
+<span class="w">     </span><span class="m">2</span><span class="w">  </span>Yongting<span class="w"> </span>You
+<span class="w">     </span><span class="m">1</span><span class="w">  </span>Mayank<span class="w"> </span>Aggarwal
+<span class="w">     </span><span class="m">1</span><span class="w">  </span>Peter<span class="w"> </span>Von<span class="w"> </span>der<span class="w"> </span>Porten
+<span class="w">     </span><span class="m">1</span><span class="w">  </span>Pranav<span class="w"> </span>Toggi
+<span class="w">     </span><span class="m">1</span><span class="w">  </span>Pratheek<span class="w"> </span>Rebala
+<span class="w">     </span><span class="m">1</span><span class="w">  </span>Selim<span class="w"> </span>S.
+<span class="w">     </span><span class="m">1</span><span class="w">  </span>oglego
+</code></pre></div>
+    
+    
+  </div>
+</article>
+      
+        <article class="md-post md-post--excerpt">
+  <header class="md-post__header">
+    
+      <nav class="md-post__authors md-typeset">
+        
+          <span class="md-author">
+            <img src="../assets/authors/dewey.jpeg" alt="Dewey Dunnington">
+          </span>
+        
+          <span class="md-author">
+            <img src="../assets/authors/kristin.jpeg" alt="Kristin Cowalcijk">
+          </span>
+        
+          <span class="md-author">
+            <img src="../assets/authors/feng.jpeg" alt="Feng Zhang">
+          </span>
+        
+          <span class="md-author">
             <img src="../assets/authors/peter.jpeg" alt="Peter Nguyen">
           </span>
         
