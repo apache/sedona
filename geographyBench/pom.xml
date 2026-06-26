@@ -1,0 +1,261 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~   http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied.  See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.apache.sedona</groupId>
+        <artifactId>sedona-parent</artifactId>
+        <version>1.8.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>geographyBench</artifactId>
+
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>A benchmarking module for geography operations.</description>    <url>http://sedona.apache.org/</url>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.deploy.skip>${skip.deploy.common.modules}</maven.deploy.skip>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <jmh.version>1.37</jmh.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.sedona</groupId>
+            <artifactId>sedona-common</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>it.geosolutions.jaiext.jiffle</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.janino</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sedona</groupId>
+            <artifactId>sedona-spark-common-${spark.compat.version}_${scala.compat.version}</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- JMH -->
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>${jmh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>${jmh.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <!-- THIS IS A FIX -->
+            <scope>compile</scope>
+        </dependency>
+        <!-- THIS IS THE OTHER PART OF THE FIX -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.32</version> <!-- Or any recent version -->
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-main</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-referencing</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-epsg-hsql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-geotiff</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-arcgrid</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-process-feature</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.locationtech.jts</groupId>
+            <artifactId>jts-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wololo</groupId>
+            <artifactId>jts2geojson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.locationtech.spatial4j</groupId>
+            <artifactId>spatial4j</artifactId>
+        </dependency>
+        <!-- org.datasyslab:s2-geometry-library is a fork of com.google.geometry:s2-geometry-library-->
+        <!-- as implementation requirements of apache sedona issue link: -->
+        <!-- https://github.com/apache/sedona/issues/1996 -->
+        <dependency>
+            <groupId>org.datasyslab</groupId>
+            <artifactId>s2-geometry-library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.uber</groupId>
+            <artifactId>h3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.geographiclib</groupId>
+            <artifactId>GeographicLib-Java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.geosolutions.jaiext.jiffle</groupId>
+            <artifactId>jt-jiffle-language</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>cdm-core</artifactId>
+        </dependency>
+        <!-- For shading a janino package that works with Spark for jiffle. We don't add this to
+             dependencyManagement in parent pom.xml because we don't want to mess up with the
+             janino versions required by Spark. -->
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>${janino-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.profiler</groupId>
+            <artifactId>async-profiler</artifactId>
+            <version>4.1</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <sourceDirectory>src/jmh/java</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- Skip running resolved-pom-maven-plugin since shade will
+                     generate dependency reduced pom which substitutes property
+                     values. resolved-pom-maven-plugin will break pom
+                     installation when working with maven-shade-plugin.  -->
+                <groupId>io.paradoxical</groupId>
+                <artifactId>resolved-pom-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>resolve-my-pom</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!--
+                  We need to shade jiffle and its antlr and janino dependencies for the following reasons:
+
+                  1. Databricks runtime uses an older version of janino (3.0.16) that does not work
+                     with jiffle in Spark repl. See https://github.com/apache/sedona/discussions/1945
+
+                  2. Spark 4 uses an incompatible version of antlr at runtime.
+                -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.openjdk.jmh.Main</mainClass>
+                                </transformer>
+                            </transformers>
+                            <relocations>
+                                <relocation>
+                                    <pattern>it.geosolutions.jaiext.jiffle</pattern>
+                                    <shadedPattern>org.apache.sedona.shaded.jiffle</shadedPattern>
+                                    <excludes>
+                                        <exclude>it.geosolutions.jaiext.jiffle.runtime.*</exclude>
+                                    </excludes>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.antlr.v4.runtime</pattern>
+                                    <shadedPattern>org.apache.sedona.shaded.antlr</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.codehaus</pattern>
+                                    <shadedPattern>org.apache.sedona.shaded.codehaus</shadedPattern>
+                                </relocation>
+                            </relocations>
+                            <filters>
+                                <!--  filter to address "Invalid signature file" issue - see http://stackoverflow.com/a/6743609/589215 -->
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+

@@ -810,6 +810,7 @@
                 <module>spark</module>
                 <module>spark-shaded</module>
                 <module>shade-proto</module>
+                <module>geographyBench</module>
             </modules>
         </profile>
         <profile>
@@ -834,6 +835,7 @@
                 <module>flink-shaded</module>
                 <module>snowflake</module>
                 <module>shade-proto</module>
+                <module>geographyBench</module>
             </modules>
         </profile>
         <profile>
