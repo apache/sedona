@@ -6147,6 +6147,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2025/07/09/welcome-to-the-apache-sedona-blog/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/blog/2026/06/26/sedonadb-04-gpu-accelerated-spatial-joins/</loc>
+        <lastmod>2026-06-26</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/2026/06/26/sedonadb-04-gpu-accelerated-spatial-joins/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/06/26/sedonadb-04-gpu-accelerated-spatial-joins/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/blog/2026/01/11/apache-sedona-2025-year-in-review/</loc>
         <lastmod>2026-06-26</lastmod>
         <changefreq>daily</changefreq>
@@ -6180,6 +6187,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/archive/2025/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/archive/2025/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/blog/page/2/</loc>
+        <lastmod>2026-06-26</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/page/2/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/page/2/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/</loc>
@@ -12334,6 +12348,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2025/07/09/welcome-to-the-apache-sedona-blog/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/2026/06/26/sedonadb-04-gpu-accelerated-spatial-joins/</loc>
+        <lastmod>2026-06-26</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/2026/06/26/sedonadb-04-gpu-accelerated-spatial-joins/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/06/26/sedonadb-04-gpu-accelerated-spatial-joins/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/zh/blog/2026/01/11/apache-sedona-2025-year-in-review/</loc>
         <lastmod>2026-06-26</lastmod>
         <changefreq>daily</changefreq>
@@ -12367,5 +12388,12 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/archive/2025/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/archive/2025/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/page/2/</loc>
+        <lastmod>2026-06-26</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/page/2/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/page/2/"/>
     </url>
 </urlset>
