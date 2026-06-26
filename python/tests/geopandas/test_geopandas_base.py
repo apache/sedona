@@ -58,7 +58,10 @@ class TestGeopandasBase(TestBase):
         assert isinstance(actual, GeoSeries)
         assert isinstance(expected, gpd.GeoSeries)
         assert actual.name == expected.name, "results are of different names"
-        sgpd_result = actual.to_geopandas()
+        # Sedona's GeoPandas API does not guarantee the row ordering of results,
+        # so align both sides by index before comparing element-wise.
+        sgpd_result = actual.to_geopandas().sort_index()
+        expected = expected.sort_index()
         assert len(sgpd_result) == len(expected), "results are of different lengths"
         for a, e in zip(sgpd_result, expected):
             if a is None or e is None:
@@ -69,7 +72,7 @@ class TestGeopandasBase(TestBase):
                 continue
             cls.assert_geometry_almost_equal(a, e, tolerance)
 
-        assert_index_equal(actual.index.to_pandas(), expected.index)
+        assert_index_equal(sgpd_result.index, expected.index)
 
     @classmethod
     def check_sgpd_df_equals_gpd_df(
