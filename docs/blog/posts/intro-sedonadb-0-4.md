@@ -20,6 +20,8 @@ SedonaDB is the first open-source, single-node analytical database engine that t
 
 Apache Sedona powers large-scale geospatial processing on distributed engines like Spark (SedonaSpark), Flink (SedonaFlink), and Snowflake (SedonaSnow). SedonaDB extends the Sedona ecosystem with a single-node engine optimized for small-to-medium data analytics, delivering the simplicity and speed that distributed systems often cannot.
 
+<!-- more -->
+
 ## Release Highlights
 
 We're excited to have so many things to highlight in this release!
