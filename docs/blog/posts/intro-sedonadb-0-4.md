@@ -7,8 +7,9 @@ authors:
   - dewey
   - kristin
   - feng
-  - jia
+  - james
   - pranav
+  - jia
 title: "SedonaDB 0.4.0 Release"
 ---
 
