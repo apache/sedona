@@ -32,7 +32,7 @@ repos:
         name: run check hooks apply
         description: check that all the hooks apply to the repository
   - repo: https://github.com/thlorenz/doctoc.git
-    rev: v2.4.1
+    rev: v2.5.0
     hooks:
       - id: doctoc
         name: add TOC for Markdown files
@@ -334,7 +334,7 @@ repos:
         name: run black-jupyter
         description: format Python files and Jupyter Notebooks with black
   - repo: https://github.com/pypa/pip-audit
-    rev: v2.10.0
+    rev: v2.10.1
     hooks:
       - id: pip-audit
         name: run pip-audit
@@ -369,7 +369,7 @@ repos:
         name: run gitleaks
         description: check for secrets with gitleaks
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.25.2
+    rev: v1.26.1
     hooks:
       - id: zizmor
         name: run zizmor
@@ -502,7 +502,7 @@ repos:
         args: [--markdown-linebreak-ext=md]
         exclude: \.Rd$
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.48.0
+    rev: v0.49.0
     hooks:
       - id: markdownlint
         name: run markdownlint
@@ -512,7 +512,7 @@ repos:
         types: [markdown]
         files: \.md$
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.37.2
+    rev: 0.37.3
     hooks:
       - id: check-citation-file-format
         name: run check-citation-file-format
