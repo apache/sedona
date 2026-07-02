@@ -122,7 +122,7 @@ case class BroadcastIndexJoinExec(
     case (None, _, false) => s"ST_$spatialPredicate($windowExpression, $objectExpression)"
     case (None, _, true) => s"RS_$spatialPredicate($windowExpression, $objectExpression)"
     case (Some(r), _, true) =>
-      s"RS_Distance($windowExpression, $objectExpression) < $r"
+      s"RS_DWithin($windowExpression, $objectExpression, $r)"
   }
 
   override def simpleString(maxFields: Int): String =
