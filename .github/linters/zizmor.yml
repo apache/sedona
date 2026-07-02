@@ -15,10 +15,4 @@
 # specific language governing permissions and limitations
 # under the License.
 
-rules:
-  unpinned-uses:
-    config:
-      policies:
-        r-lib/actions/check-r-package: any
-        r-lib/actions/setup-r: any
-        r-lib/actions/setup-r-dependencies: any
+rules: {}
