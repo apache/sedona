@@ -233,7 +233,12 @@
                             </transformers>
                             <artifactSet>
                                 <excludes>
-                                    <exclude>org.scala-lang:scala-library</exclude>
+                                    <!-- Never bundle the Scala toolchain (scala-library, scala-reflect,
+                                         scala-compiler): the runtime provides its own, and an unrelocated
+                                         copy shadows it, breaking Scala-compiler users such as
+                                         almond/Ammonite kernels. The groupId match is exact, so
+                                         org.scala-lang.modules artifacts are still bundled. -->
+                                    <exclude>org.scala-lang:*</exclude>
                                     <exclude>org.apache.commons:commons-*</exclude>
                                     <exclude>commons-pool:commons-pool</exclude>
                                     <exclude>commons-io:commons-io</exclude>
