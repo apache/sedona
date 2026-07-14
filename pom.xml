@@ -85,7 +85,7 @@
         <spark.version>3.4.0</spark.version>
         <spark.compat.version>3.4</spark.compat.version>
         <spark.major.version>3</spark.major.version>
-        <log4j.version>2.25.3</log4j.version>
+        <log4j.version>2.25.4</log4j.version>
         <graphframes.version>0.11.0</graphframes.version>
         <flink.version>1.19.0</flink.version>
         <slf4j.version>1.7.36</slf4j.version>
@@ -96,7 +96,7 @@
         <scala-collection-compat.version>2.5.0</scala-collection-compat.version>
         <geoglib.version>1.52</geoglib.version>
         <caffeine.version>2.9.2</caffeine.version>
-        <proj4sedona.version>0.0.8</proj4sedona.version>
+        <proj4sedona.version>0.1.0</proj4sedona.version>
 
         <geotools.scope>provided</geotools.scope>
         <!-- Because it's not in Maven central, make it provided by default -->
