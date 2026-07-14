@@ -67,7 +67,6 @@
 - [Docker image](#docker-image)
 - [Building Sedona](#building-sedona)
 - [Documentation](#documentation)
-- [Star History](#star-history)
 - [Powered by](#powered-by)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -226,10 +225,6 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
 * [Sedona Python API Documentation](https://sedona.apache.org/latest/api/pydocs/)
 
 Please visit [Apache Sedona website](https://sedona.apache.org/) for detailed information
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=apache/sedona&type=Date)](https://www.star-history.com/#apache/sedona&Date)
 
 ## Powered by
 
