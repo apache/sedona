@@ -21,7 +21,7 @@ default_stages: [pre-commit, pre-push]
 default_language_version:
   python: python3
   node: 24.16.0
-minimum_pre_commit_version: '3.2.0'
+minimum_prek_version: '0.4.0'
 repos:
   - repo: meta
     hooks:
@@ -32,7 +32,7 @@ repos:
         name: run check hooks apply
         description: check that all the hooks apply to the repository
   - repo: https://github.com/thlorenz/doctoc.git
-    rev: v2.5.0
+    rev: 59dcae910a6ad4bbe8711275b854e3cd5c30f08b # frozen: v2.5.0
     hooks:
       - id: doctoc
         name: add TOC for Markdown files
@@ -62,7 +62,7 @@ repos:
         entry: prettier --write '**/*.js' '**/*.yaml' '**/*.yml'
         files: \.(js|ya?ml)$
         language: node
-        additional_dependencies: ['prettier@3.8.3']
+        additional_dependencies: ['prettier@3.8.4']
         pass_filenames: false
       - id: maven-spotless-apply
         name: maven spotless apply
@@ -91,7 +91,7 @@ repos:
         types: [file] # Ensure only regular files are passed, not directories
         stages: [manual]
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.5.6
+    rev: ad1b27d73581aa16cca06fc4a0761fc563ffe8e8 # frozen: v1.5.6
     hooks:
       - id: chmod
         name: set file permissions
@@ -321,27 +321,27 @@ repos:
             \.tsv
           )$
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.21.2
+    rev: 75992aaa40730136014f34227e0135f63fc951b4 # frozen: v3.21.2
     hooks:
       - id: pyupgrade
         name: run pyupgrade
         description: a tool (and pre-commit hook) to automatically upgrade syntax for newer versions of the language
         args: [--py37-plus]
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 26.5.1
+    rev: 4160603246a6b365d4a2af661c6d71b0a0f50478 # frozen: 26.5.1
     hooks:
       - id: black-jupyter
         name: run black-jupyter
         description: format Python files and Jupyter Notebooks with black
   - repo: https://github.com/pypa/pip-audit
-    rev: v2.10.1
+    rev: 8894eb8cee033531a1fbd9f2fb160892531c14e3 # frozen: v2.10.1
     hooks:
       - id: pip-audit
         name: run pip-audit
         description: audits Python environments, requirements files and dependency trees for known security vulnerabilities, and can automatically fix them
         args: ['.']
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v22.1.5
+    rev: dd18dad857d6133e90bbe478f4f2f22ec0030269 # frozen: v22.1.5
     hooks:
       - id: clang-format
         name: run clang-format
@@ -349,7 +349,7 @@ repos:
         args: ['--style=file:.github/linters/.clang-format']
         types_or: [c]
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.9.4
+    rev: 92ae8b82fb422a639f0ed8d99e96cea769594e08 # frozen: 1.9.4
     hooks:
       - id: bandit
         name: run bandit
@@ -357,19 +357,19 @@ repos:
         args: ['-c=pyproject.toml', '-r']
         additional_dependencies: ['bandit[toml]']
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.2
+    rev: 2ccb47ff45ad361a21071a7eedda4c37e6ae8c5a # frozen: v2.4.2
     hooks:
       - id: codespell
         name: run codespell
         description: check spelling with codespell
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.30.1
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e # frozen: v8.30.1
     hooks:
       - id: gitleaks
         name: run gitleaks
         description: check for secrets with gitleaks
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.26.1
+    rev: 9257c6050c0261b8c57e712f632dc4a8010109a9 # frozen: v1.25.2
     hooks:
       - id: zizmor
         name: run zizmor
@@ -378,7 +378,7 @@ repos:
         files: ^\.github/workflows/.*$
         types: [yaml]
   - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: v1.10.0
+    rev: 3a6eb0fadf60b3cccfd80bad9dbb6fae7e47b316 # frozen: v1.10.0
     hooks:
       - id: python-check-mock-methods
         name: run check for not-real mock methods
@@ -406,7 +406,7 @@ repos:
         name: run check for no unicode replacement char
         description: Forbid files which have a UTF-8 Unicode replacement character
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # frozen: v6.0.0
     hooks:
       - id: check-ast
         name: run check-ast
@@ -502,7 +502,7 @@ repos:
         args: [--markdown-linebreak-ext=md]
         exclude: \.Rd$
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.49.0
+    rev: a4d5d37e66ebcd6b3705204a1d6dbb56dea66338 # frozen: v0.49.0
     hooks:
       - id: markdownlint
         name: run markdownlint
@@ -512,7 +512,7 @@ repos:
         types: [markdown]
         files: \.md$
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.37.3
+    rev: 5030dca3047414c338091455ac41803200ec1f0f # frozen: 0.37.3
     hooks:
       - id: check-citation-file-format
         name: run check-citation-file-format
@@ -523,14 +523,14 @@ repos:
         description: ensures the dependabot config file is valid
         files: ^\.github/dependabot\.yml$
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.11.0.1
+    rev: 745eface02aef23e168a8afb6b5737818efbea95 # frozen: v0.11.0.1
     hooks:
       - id: shellcheck
         name: run shellcheck
         description: check Shell scripts with shellcheck
         args: [--rcfile=.github/linters/.shellcheckrc]
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.38.0
+    rev: cba56bcde1fdd01c1deb3f945e69764c291a6530 # frozen: v1.38.0
     hooks:
       - id: yamllint
         name: run yamllint
@@ -539,7 +539,7 @@ repos:
         types: [yaml]
         files: \.ya?ml$
   - repo: https://github.com/oxipng/oxipng
-    rev: v10.1.1
+    rev: 628e241e23f368097883807fa6e985ccf7c00357 # frozen: v10.1.1
     hooks:
       - id: oxipng
         name: run oxipng
@@ -547,14 +547,14 @@ repos:
         args: ['--fix', '-o', '4', '--strip', 'safe', '--alpha']
         stages: [manual]
   - repo: https://github.com/adamchainz/blacken-docs
-    rev: 1.20.0
+    rev: fda77690955e9b63c6687d8806bafd56a526e45f # frozen: 1.20.0
     hooks:
       - id: blacken-docs
         name: run blacken-docs
         description: run `black` on python code blocks in documentation files
         additional_dependencies: [black==26.5.1]
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-    rev: 3.6.1
+    rev: bebfac867564fbd992e5b45379b4b0568d5cb85b # frozen: 3.6.1
     hooks:
       - id: editorconfig-checker
         name: run editorconfig-checker
@@ -567,7 +567,7 @@ repos:
           )$
         alias: ec
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.12
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # frozen: v1.7.12
     hooks:
       - id: actionlint
         name: run actionlint
@@ -586,7 +586,7 @@ repos:
           - -ignore
           - 'SC2155'
   - repo: https://github.com/checkmake/checkmake.git
-    rev: v0.3.2
+    rev: 59931d556f8f5cf4fbacf2c8390a8122ef7a881d # frozen: v0.3.2
     hooks:
       - id: checkmake
         name: run checkmake (root)
