@@ -117,6 +117,29 @@ public class FunctionsProj4Test extends TestBase {
     assertTrue(result.getCoordinate().y > 4170000 && result.getCoordinate().y < 4190000);
   }
 
+  @Test
+  public void testTransformBrazilPolyconic() {
+    // Regression for apache/sedona#3088: EPSG:5880 (SIRGAS 2000 / Brazil Polyconic)
+    // is a +proj=poly CRS. Sedona 1.9.0 shipped proj4sedona without the Polyconic
+    // projection, so this transform failed unless spark.sedona.crs.geotools=all was
+    // set. proj4sedona 0.1.0 implements Polyconic; no GeoTools fallback is needed.
+    // Reference values from pyproj 3.7.2 / PROJ 9.5.1.
+    Point point = GEOMETRY_FACTORY.createPoint(new Coordinate(-47.9, -15.8)); // Brasilia
+    point.setSRID(4326);
+
+    Geometry result = FunctionsProj4.transform(point, "EPSG:4326", "EPSG:5880");
+
+    assertNotNull(result);
+    assertEquals(5880, result.getSRID());
+    assertEquals(5653463.7342, result.getCoordinate().x, 1e-3);
+    assertEquals(8243016.2220, result.getCoordinate().y, 1e-3);
+
+    // Round-trip back to WGS84.
+    Geometry back = FunctionsProj4.transform(result, "EPSG:5880", "EPSG:4326");
+    assertEquals(-47.9, back.getCoordinate().x, 1e-6);
+    assertEquals(-15.8, back.getCoordinate().y, 1e-6);
+  }
+
   // ==================== PROJ String Tests ====================
 
   @Test
