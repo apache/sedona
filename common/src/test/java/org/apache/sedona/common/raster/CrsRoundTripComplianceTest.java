@@ -24,7 +24,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -86,19 +85,11 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   }
 
   @Test
-  @Ignore(
-      "apache/sedona#3103: RS_CRS PROJ-string export is not idempotent for this CRS "
-          + "due to a raster CRS-bridge path divergence (surfaced by the proj4sedona 0.1.0 "
-          + "serialization changes; transforms are unaffected).")
   public void testProjRoundTrip_AlbersEqualArea_5070() throws FactoryException {
     assertProjRoundTrip(5070);
   }
 
   @Test
-  @Ignore(
-      "apache/sedona#3103: RS_CRS PROJ-string export is not idempotent for this CRS "
-          + "due to a raster CRS-bridge path divergence (surfaced by the proj4sedona 0.1.0 "
-          + "serialization changes; transforms are unaffected).")
   public void testProjRoundTrip_ObliqueStereographic_28992() throws FactoryException {
     assertProjRoundTrip(28992);
   }
@@ -129,28 +120,16 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   }
 
   @Test
-  @Ignore(
-      "apache/sedona#3103: RS_CRS PROJ-string export is not idempotent for this CRS "
-          + "due to a raster CRS-bridge path divergence (surfaced by the proj4sedona 0.1.0 "
-          + "serialization changes; transforms are unaffected).")
   public void testProjRoundTrip_TransverseMercator_OSGB_27700() throws FactoryException {
     assertProjRoundTrip(27700);
   }
 
   @Test
-  @Ignore(
-      "apache/sedona#3103: RS_CRS PROJ-string export is not idempotent for this CRS "
-          + "due to a raster CRS-bridge path divergence (surfaced by the proj4sedona 0.1.0 "
-          + "serialization changes; transforms are unaffected).")
   public void testProjRoundTrip_AlbersEqualArea_Australian_3577() throws FactoryException {
     assertProjRoundTrip(3577);
   }
 
   @Test
-  @Ignore(
-      "apache/sedona#3103: RS_CRS PROJ-string export is not idempotent for this CRS "
-          + "due to a raster CRS-bridge path divergence (surfaced by the proj4sedona 0.1.0 "
-          + "serialization changes; transforms are unaffected).")
   public void testProjRoundTrip_LambertConformalConic2SP_Vicgrid_3111() throws FactoryException {
     assertProjRoundTrip(3111);
   }
