@@ -17,7 +17,12 @@
  under the License.
  -->
 
-[![Apache Sedona](docs/image/sedona_logo.png)](https://sedona.apache.org/)
+<a href="https://sedona.apache.org/">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/image/sedona_logo_dark.png">
+    <img alt="Apache Sedona" src="docs/image/sedona_logo.png">
+  </picture>
+</a>
 
 [![CodeQL Workflow Status](https://github.com/apache/sedona/actions/workflows/codeql.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/codeql.yml)
 [![Docker image build](https://github.com/apache/sedona/actions/workflows/docker-build.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docker-build.yml)
