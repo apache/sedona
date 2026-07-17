@@ -20,8 +20,8 @@ import random
 import numpy as np
 import rasterio.features
 from affine import Affine
-from shapely import from_wkt
 from shapely.geometry import Polygon
+from shapely.wkt import loads as wkt_loads
 
 from tests.test_base import TestBase
 
@@ -101,7 +101,7 @@ class TestRasterizeParity(TestBase):
         for case_id, width, height, ulx, uly, sx, sy, wkt in cases:
             actual = np.array(bands[case_id], dtype=float).reshape(height, width)
             expected = rasterio.features.rasterize(
-                [(from_wkt(wkt), 1)],
+                [(wkt_loads(wkt), 1)],
                 out_shape=(height, width),
                 fill=0,
                 transform=Affine(sx, 0, ulx, 0, sy, uly),
