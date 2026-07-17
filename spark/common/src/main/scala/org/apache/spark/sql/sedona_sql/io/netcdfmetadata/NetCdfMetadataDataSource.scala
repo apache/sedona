@@ -18,10 +18,14 @@
  */
 package org.apache.spark.sql.sedona_sql.io.netcdfmetadata
 
+import org.apache.hadoop.fs.FileStatus
 import org.apache.hadoop.fs.Path
+import org.apache.hadoop.mapreduce.Job
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.catalog.Table
 import org.apache.spark.sql.connector.catalog.TableProvider
 import org.apache.spark.sql.execution.datasources.FileFormat
+import org.apache.spark.sql.execution.datasources.OutputWriterFactory
 import org.apache.spark.sql.execution.datasources.v2.FileDataSourceV2
 import org.apache.spark.sql.sources.DataSourceRegister
 import org.apache.spark.sql.types.StructType
@@ -51,31 +55,33 @@ class NetCdfMetadataDataSource
     var optionsWithoutPaths = getOptionsWithoutPaths(options)
     val tableName = getTableName(options, paths)
 
-    if (paths.size == 1) {
-      val head = paths.head
-      if (isDirectory(head, optionsWithoutPaths)) {
-        // Directory (with or without trailing slash): recurse and filter to NetCDF files
-        val newOptions =
-          new java.util.HashMap[String, String](optionsWithoutPaths.asCaseSensitiveMap())
-        newOptions.put("recursiveFileLookup", "true")
-        if (!newOptions.containsKey("pathGlobFilter")) {
-          newOptions.put("pathGlobFilter", "*.{nc,nc4,netcdf,NC,NC4,NETCDF}")
-        }
-        optionsWithoutPaths = new CaseInsensitiveStringMap(newOptions)
-      } else {
-        // Rewrite glob patterns like /path/to/some*glob*.nc into /path/to with
-        // pathGlobFilter="some*glob*.nc" to avoid listing .nc files as directories
-        head match {
-          case loadNcPattern(prefix, glob) =>
-            paths = Seq(prefix)
-            val newOptions =
-              new java.util.HashMap[String, String](optionsWithoutPaths.asCaseSensitiveMap())
+    val newOptions =
+      new java.util.HashMap[String, String](optionsWithoutPaths.asCaseSensitiveMap())
+
+    if (paths.size == 1 && !isDirectory(paths.head, optionsWithoutPaths)) {
+      // Rewrite glob patterns like /path/to/some*glob*.nc into /path/to with
+      // pathGlobFilter="some*glob*.nc" to avoid listing .nc files as directories
+      paths.head match {
+        case loadNcPattern(prefix, glob) =>
+          paths = Seq(prefix)
+          if (!newOptions.containsKey("pathGlobFilter")) {
             newOptions.put("pathGlobFilter", glob)
-            optionsWithoutPaths = new CaseInsensitiveStringMap(newOptions)
-          case _ =>
-        }
+          }
+        case _ =>
+      }
+    } else if (paths.exists(p => isDirectory(p, optionsWithoutPaths))) {
+      // Directory roots (single or multiple, with or without trailing slash): default to a
+      // recursive scan filtered to NetCDF extensions. These are defaults only — an explicit
+      // user setting always wins, so recursiveFileLookup=false keeps Hive-style partition
+      // discovery available.
+      if (!newOptions.containsKey("recursiveFileLookup")) {
+        newOptions.put("recursiveFileLookup", "true")
+      }
+      if (!newOptions.containsKey("pathGlobFilter")) {
+        newOptions.put("pathGlobFilter", "*.{nc,nc4,netcdf,NC,NC4,NETCDF}")
       }
     }
+    optionsWithoutPaths = new CaseInsensitiveStringMap(newOptions)
 
     NetCdfMetadataTable(
       tableName,
@@ -97,8 +103,11 @@ class NetCdfMetadataDataSource
   override def inferSchema(options: CaseInsensitiveStringMap): StructType =
     NetCdfMetadataTable.SCHEMA
 
-  // Read-only data source — no V1 fallback needed
-  override def fallbackFileFormat: Class[_ <: FileFormat] = null
+  // Spark maps a FileDataSourceV2 back to this V1 FileFormat for catalog paths such as
+  // CREATE TABLE ... USING; a null class would NPE there, so return a stub that raises a
+  // descriptive error instead.
+  override def fallbackFileFormat: Class[_ <: FileFormat] =
+    classOf[NetCdfMetadataUnsupportedFileFormat]
 
   /**
    * Check if a path points to a directory. A trailing `/` is treated as a directory without any
@@ -117,4 +126,29 @@ class NetCdfMetadataDataSource
       fs.getFileStatus(path).isDirectory
     }.getOrElse(false)
   }
+}
+
+/**
+ * V1 fallback used by Spark for catalog paths such as `CREATE TABLE ... USING netcdf.metadata`.
+ * The data source is read-only and path-based, so those operations are unsupported — this stub
+ * exists to surface a clear error instead of the NullPointerException a null fallback class would
+ * produce.
+ */
+class NetCdfMetadataUnsupportedFileFormat extends FileFormat {
+
+  private def unsupported(): Nothing =
+    throw new UnsupportedOperationException(
+      "netcdf.metadata does not support catalog table operations; " +
+        "read it with spark.read.format(\"netcdf.metadata\").load(path)")
+
+  override def inferSchema(
+      sparkSession: SparkSession,
+      options: Map[String, String],
+      files: Seq[FileStatus]): Option[StructType] = unsupported()
+
+  override def prepareWrite(
+      sparkSession: SparkSession,
+      job: Job,
+      options: Map[String, String],
+      dataSchema: StructType): OutputWriterFactory = unsupported()
 }

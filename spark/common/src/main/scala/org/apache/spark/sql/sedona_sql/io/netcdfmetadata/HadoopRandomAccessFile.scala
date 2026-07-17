@@ -106,7 +106,12 @@ class HadoopRandomAccessFile(
       val toRead = Math.min(chunk.length.toLong, nbytes - done).toInt
       val n = read_(offset + done, chunk, 0, toRead)
       if (n <= 0) return done
-      dest.write(ByteBuffer.wrap(chunk, 0, n))
+      // A channel may accept only part of the buffer per call; drain it fully so no bytes
+      // are silently dropped.
+      val buffer = ByteBuffer.wrap(chunk, 0, n)
+      while (buffer.hasRemaining) {
+        dest.write(buffer)
+      }
       done += n
     }
     done

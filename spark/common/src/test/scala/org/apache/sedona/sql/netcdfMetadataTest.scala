@@ -359,6 +359,202 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assertEquals(1, counts.getAs[Int]("dimCount"))
       assertEquals(1, counts.getAs[Int]("varCount"))
     }
+
+    it("should skip CF bounds variables when selecting the grid variable") {
+      // lat_bnds(lat, nv) and lon_bnds(lon, nv) are rank-2 and declared BEFORE temp(lat, lon);
+      // grid selection must skip them and anchor the grid on temp.
+      val df = sparkSession.read.format("netcdf.metadata").load(variantsDir + "test_bounds.nc")
+      val row = df.first()
+      assertEquals(4, row.getAs[Int]("width"))
+      assertEquals(3, row.getAs[Int]("height"))
+      val gt = df
+        .selectExpr(
+          "geoTransform.upperLeftX",
+          "geoTransform.upperLeftY",
+          "geoTransform.scaleX",
+          "geoTransform.scaleY")
+        .first()
+      // lat 10..12, lon 20..23, spacing 1.0
+      assertEquals(19.5, gt.getAs[Double]("upperLeftX"), 1e-6)
+      assertEquals(12.5, gt.getAs[Double]("upperLeftY"), 1e-6)
+      assertEquals(1.0, gt.getAs[Double]("scaleX"), 1e-6)
+      assertEquals(-1.0, gt.getAs[Double]("scaleY"), 1e-6)
+    }
+
+    it("should decode packed and unsigned coordinate variables") {
+      // lat: short, scale_factor=0.5, add_offset=40 -> 40, 40.5, 41
+      // lon: byte with _Unsigned="true" (raw 100, 150, 200), scale_factor=0.1 -> 10, 15, 20
+      val df = sparkSession.read.format("netcdf.metadata").load(variantsDir + "test_packed.nc")
+      val gt = df
+        .selectExpr(
+          "geoTransform.upperLeftX",
+          "geoTransform.upperLeftY",
+          "geoTransform.scaleX",
+          "geoTransform.scaleY")
+        .first()
+      assertEquals(7.5, gt.getAs[Double]("upperLeftX"), 1e-6)
+      assertEquals(41.25, gt.getAs[Double]("upperLeftY"), 1e-6)
+      assertEquals(5.0, gt.getAs[Double]("scaleX"), 1e-6)
+      assertEquals(-0.5, gt.getAs[Double]("scaleY"), 1e-6)
+      val corners = df
+        .selectExpr(
+          "cornerCoordinates.minX",
+          "cornerCoordinates.minY",
+          "cornerCoordinates.maxX",
+          "cornerCoordinates.maxY")
+        .first()
+      assertEquals(7.5, corners.getAs[Double]("minX"), 1e-6)
+      assertEquals(39.75, corners.getAs[Double]("minY"), 1e-6)
+      assertEquals(22.5, corners.getAs[Double]("maxX"), 1e-6)
+      assertEquals(41.25, corners.getAs[Double]("maxY"), 1e-6)
+    }
+
+    it("should resolve coordinates within the data variable's group, not globally") {
+      // Root group has lat(2)/lon(2); the data variable lives in /sub with lat(3)/lon(5).
+      // Group-relative resolution must bind /sub coordinates (45..47, 100..104).
+      val df = sparkSession.read.format("netcdf.metadata").load(variantsDir + "test_groups.nc4")
+      val row = df.first()
+      assertEquals(5, row.getAs[Int]("width"))
+      assertEquals(3, row.getAs[Int]("height"))
+      val gt = df
+        .selectExpr(
+          "geoTransform.upperLeftX",
+          "geoTransform.upperLeftY",
+          "geoTransform.scaleX",
+          "geoTransform.scaleY")
+        .first()
+      assertEquals(99.5, gt.getAs[Double]("upperLeftX"), 1e-6)
+      assertEquals(47.5, gt.getAs[Double]("upperLeftY"), 1e-6)
+      assertEquals(1.0, gt.getAs[Double]("scaleX"), 1e-6)
+      assertEquals(-1.0, gt.getAs[Double]("scaleY"), 1e-6)
+      // Nested-group dimensions are reported with their group prefix
+      val dimNames = df
+        .selectExpr("explode(dimensions) as d")
+        .selectExpr("d.name", "d.length")
+        .collect()
+        .map(r => (r.getAs[String]("name"), r.getAs[Int]("length")))
+      assert(dimNames.contains(("lat", 2)))
+      assert(dimNames.contains(("sub/lat", 3)))
+      assert(dimNames.contains(("sub/lon", 5)))
+    }
+
+    it("should parse the extended grid_mapping form and infer EPSG:4326 for latitude_longitude") {
+      // temp:grid_mapping = "crs: lat lon" (CF extended form); the crs variable declares
+      // grid_mapping_name = latitude_longitude with no datum parameters and no crs_wkt.
+      val row = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_gridmapping_ext.nc")
+        .select("srid", "crs")
+        .first()
+      assertEquals(4326, row.getAs[Int]("srid"))
+      // The file carries no CRS WKT, so the crs column stays null (faithful output)
+      assert(row.isNullAt(row.fieldIndex("crs")))
+    }
+
+    it("should not emit a geoTransform for locally uneven spacing near the best-fit line") {
+      // lat = 0, 1.4, 2: steps of 1.4 and 0.6 around a mean of 1.0 — within half a pixel of
+      // the best-fit line, but materially irregular, so no affine transform.
+      val df = sparkSession.read.format("netcdf.metadata").load(variantsDir + "test_uneven.nc")
+      val row = df.first()
+      assert(row.isNullAt(row.fieldIndex("geoTransform")))
+      val corners = df
+        .selectExpr("cornerCoordinates.minY", "cornerCoordinates.maxY")
+        .first()
+      // Centers-only extent for the irregular axis pair
+      assertEquals(0.0, corners.getAs[Double]("minY"), 1e-6)
+      assertEquals(2.0, corners.getAs[Double]("maxY"), 1e-6)
+    }
+
+    it("should support Hive-style partition discovery when recursiveFileLookup is disabled") {
+      val base = new File(tempDir, "partitioned")
+      val d2020 = new File(base, "year=2020")
+      val d2021 = new File(base, "year=2021")
+      d2020.mkdirs()
+      d2021.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(d2020, "a.nc"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(d2021, "b.nc"))
+
+      val df = sparkSession.read
+        .format("netcdf.metadata")
+        .option("recursiveFileLookup", "false")
+        .load(base.getAbsolutePath)
+      // Partition inference stays available because the explicit option is respected
+      assert(df.schema.fieldNames.contains("year"))
+      val rows = df.selectExpr("path", "year").collect()
+      assertEquals(2, rows.length)
+      // Every row must carry the partition value of ITS OWN file, even when both files are
+      // bin-packed into one Spark partition
+      rows.foreach { r =>
+        assert(r.getAs[String]("path").contains(s"year=${r.getAs[Int]("year")}"))
+      }
+    }
+
+    it("should filter non-NetCDF files when loading multiple directories") {
+      val dirA = new File(tempDir, "multiA")
+      val dirB = new File(tempDir, "multiB")
+      dirA.mkdirs()
+      dirB.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(dirA, "a.nc"))
+      FileUtils.writeStringToFile(new File(dirA, "junk.txt"), "not netcdf", "UTF-8")
+      FileUtils.copyFile(new File(singleFileLocation), new File(dirB, "b.nc"))
+
+      val df = sparkSession.read
+        .format("netcdf.metadata")
+        .load(dirA.getAbsolutePath, dirB.getAbsolutePath)
+      assertEquals(2L, df.count())
+      // Force a parse of every listed file — junk.txt would fail here if not filtered out
+      assertEquals(2, df.select("format").collect().length)
+    }
+
+    it("should fail catalog table creation with a clear error instead of an NPE") {
+      sparkSession.sql("DROP TABLE IF EXISTS netcdf_meta_tbl")
+      val err = intercept[Exception] {
+        sparkSession.sql(
+          s"CREATE TABLE netcdf_meta_tbl USING `netcdf.metadata` LOCATION '$singleFileLocation'")
+      }
+      try {
+        def messages(t: Throwable): Seq[String] =
+          if (t == null) Nil else Option(t.getMessage).toSeq ++ messages(t.getCause)
+        assert(
+          messages(err).exists(_.contains("does not support catalog table operations")),
+          s"unexpected error: $err")
+      } finally {
+        sparkSession.sql("DROP TABLE IF EXISTS netcdf_meta_tbl")
+      }
+    }
+
+    it("should drain channels that accept partial writes in HadoopRandomAccessFile") {
+      val file = new File(tempDir, "raf.bin")
+      val payload = Array.tabulate[Byte](100 * 1024)(i => (i % 251).toByte)
+      FileUtils.writeByteArrayToFile(file, payload)
+
+      val raf = new org.apache.spark.sql.sedona_sql.io.netcdfmetadata.HadoopRandomAccessFile(
+        new org.apache.hadoop.fs.Path(file.toURI),
+        new org.apache.hadoop.conf.Configuration(),
+        file.length(),
+        file.lastModified())
+      try {
+        val out = new java.io.ByteArrayOutputStream()
+        // A channel that accepts at most 7 bytes per write call
+        val trickle = new java.nio.channels.WritableByteChannel {
+          private var open = true
+          override def isOpen: Boolean = open
+          override def close(): Unit = { open = false }
+          override def write(src: java.nio.ByteBuffer): Int = {
+            val n = math.min(7, src.remaining())
+            val tmp = new Array[Byte](n)
+            src.get(tmp)
+            out.write(tmp)
+            n
+          }
+        }
+        val copied = raf.readToByteChannel(trickle, 0, file.length())
+        assertEquals(file.length(), copied)
+        assert(java.util.Arrays.equals(payload, out.toByteArray))
+      } finally {
+        raf.close()
+      }
+    }
   }
 
   private def metadataStructToSeq(struct: Row): Seq[Double] = {

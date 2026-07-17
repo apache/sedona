@@ -29,7 +29,9 @@ import org.apache.spark.sql.connector.read.PartitionReader
 import org.apache.spark.sql.execution.datasources.PartitionedFile
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.unsafe.types.UTF8String
+import org.datasyslab.proj4sedona.core.Proj
 import ucar.nc2.Attribute
+import ucar.nc2.Dimension
 import ucar.nc2.Group
 import ucar.nc2.NetcdfFile
 import ucar.nc2.NetcdfFiles
@@ -97,34 +99,29 @@ class NetCdfMetadataPartitionReader(
 
   private def extractInfo(ncFile: NetcdfFile, requested: Set[String]): NetCdfFileInfo = {
     val allVariables = collectVariables(ncFile.getRootGroup)
-    // Convention shared with RS_FromNetCDF: the first variable with >= 2 dimensions defines
-    // the grid, and its trailing two dimensions are (y, x).
-    val firstRecordVar = allVariables.find(_.getRank >= 2)
 
     val needGridSize = requested.contains("width") || requested.contains("height")
     val needExtent = requested.exists(COORD_FIELDS.contains)
     val needCrs = requested.contains("crs") || requested.contains("srid")
 
+    // The grid-defining variable anchors width/height, the spatial extent, and the CRS.
     // Grid size comes from dimension lengths — no data arrays are read for this.
-    val gridDims =
-      if (needGridSize || needExtent) firstRecordVar.map { v =>
-        val dims = v.getDimensions.asScala
-        (dims(v.getRank - 2), dims(v.getRank - 1))
-      }
-      else None
+    val gridVar =
+      if (needGridSize || needExtent || needCrs) selectGridVariable(allVariables) else None
+    val gridDims = gridVar.map(trailingDims)
 
     // Spatial extent needs the 1-D coordinate variable arrays — the only data read performed.
     val extent =
       if (needExtent) {
-        gridDims.flatMap { case (latDim, lonDim) =>
-          computeExtent(ncFile, latDim.getShortName, lonDim.getShortName)
+        gridVar.flatMap { v =>
+          val (latDim, lonDim) = trailingDims(v)
+          computeExtent(v, latDim, lonDim)
         }
       } else None
 
-    val crsWkt = if (needCrs) findCrsWkt(ncFile, firstRecordVar) else null
-    val srid =
-      if (requested.contains("srid") && crsWkt != null) lookupSrid(crsWkt)
-      else None
+    val (crsWkt, srid) =
+      if (needCrs) resolveCrs(ncFile, gridVar, requested.contains("srid"))
+      else (null, None)
 
     NetCdfFileInfo(
       format = if (requested.contains("format")) ncFile.getFileTypeId else null,
@@ -219,25 +216,73 @@ class NetCdfMetadataPartitionReader(
   }
 
   /**
-   * Compute the spatial extent from the 1-D coordinate variables named after the grid's (y, x)
-   * dimensions. Coordinate values are pixel centers (CF convention). For an evenly spaced grid,
-   * the GDAL-style geoTransform is emitted and the corner coordinates are extended by half a
-   * pixel on each side, matching `RS_FromNetCDF`. For an unevenly spaced (but monotonic) grid, an
-   * affine transform would misrepresent the geometry, so geoTransform is omitted and the corner
+   * Select the variable that defines the raster grid: its trailing two dimensions are interpreted
+   * as (y, x), the convention shared with `RS_FromNetCDF`. Rank >= 2 variables referenced by a CF
+   * `bounds` or `climatology` attribute are cell-boundary variables (e.g. `lat_bnds(lat, nv)`),
+   * not data, and are skipped. Among the remaining candidates, the first one whose trailing
+   * dimensions have resolvable 1-D numeric coordinate variables is preferred, so ancillary rank-2
+   * variables that precede the data in the file cannot hijack the grid.
+   */
+  private def selectGridVariable(allVariables: Seq[Variable]): Option[Variable] = {
+    val boundsNames = allVariables.flatMap { v =>
+      Seq("bounds", "climatology").flatMap(a => Option(attrString(v, a)))
+    }.toSet
+    val candidates =
+      allVariables.filter(v => v.getRank >= 2 && !boundsNames.contains(v.getShortName))
+    candidates
+      .find { v =>
+        val (latDim, lonDim) = trailingDims(v)
+        findCoordinateVariable(v, latDim).isDefined && findCoordinateVariable(v, lonDim).isDefined
+      }
+      .orElse(candidates.headOption)
+      .orElse(allVariables.find(_.getRank >= 2))
+  }
+
+  private def trailingDims(v: Variable): (Dimension, Dimension) = {
+    val dims = v.getDimensions.asScala
+    (dims(v.getRank - 2), dims(v.getRank - 1))
+  }
+
+  /**
+   * Find the 1-D numeric coordinate variable for `dim`, searching the data variable's group and
+   * then its ancestors (NUG scoping), so an identically named variable in an unrelated group is
+   * never picked up. The nearest name match wins; if that variable is not a valid coordinate
+   * (wrong rank, non-numeric — e.g. a char/String label sharing the dimension name), the
+   * reference is treated as unresolved rather than continuing past the shadowing name.
+   */
+  private def findCoordinateVariable(dataVar: Variable, dim: Dimension): Option[Variable] = {
+    val name = dim.getShortName
+    if (name == null) return None
+    var group = dataVar.getParentGroup
+    while (group != null) {
+      val v = group.findVariableLocal(name)
+      if (v != null) {
+        return if (v.getRank == 1 && v.getDataType != null && v.getDataType.isNumeric &&
+          v.getDimension(0).getShortName == name) Some(v)
+        else None
+      }
+      group = group.getParentGroup
+    }
+    None
+  }
+
+  /**
+   * Compute the spatial extent from the 1-D coordinate variables of the grid's (y, x) dimensions.
+   * Coordinate values are pixel centers (CF convention). For an evenly spaced grid, the
+   * GDAL-style geoTransform is emitted and the corner coordinates are extended by half a pixel on
+   * each side, matching `RS_FromNetCDF`. For an unevenly spaced (but monotonic) grid, an affine
+   * transform would misrepresent the geometry, so geoTransform is omitted and the corner
    * coordinates cover the coordinate centers only.
    */
   private def computeExtent(
-      ncFile: NetcdfFile,
-      latDimName: String,
-      lonDimName: String): Option[GridExtent] = {
-    val lonVar = findVariable(ncFile.getRootGroup, lonDimName)
-    val latVar = findVariable(ncFile.getRootGroup, latDimName)
-    // Require rank-1 numeric coordinate variables; a char/String label variable sharing a grid
-    // dimension name would otherwise throw ForbiddenConversionException on read.
-    if (lonVar == null || latVar == null || lonVar.getRank != 1 || latVar.getRank != 1 ||
-      !lonVar.getDataType.isNumeric || !latVar.getDataType.isNumeric) {
-      return None
-    }
+      gridVar: Variable,
+      latDim: Dimension,
+      lonDim: Dimension): Option[GridExtent] = {
+    val lonVarOpt = findCoordinateVariable(gridVar, lonDim)
+    val latVarOpt = findCoordinateVariable(gridVar, latDim)
+    if (lonVarOpt.isEmpty || latVarOpt.isEmpty) return None
+    val lonVar = lonVarOpt.get
+    val latVar = latVarOpt.get
 
     val lonValues = read1D(lonVar)
     val latValues = read1D(latVar)
@@ -246,8 +291,8 @@ class NetCdfMetadataPartitionReader(
     // and also keeps NaN/Inf out of the min/max fallback below.
     if (!lonValues.forall(isFinite) || !latValues.forall(isFinite)) return None
 
-    val lonSpacing = regularSpacing(lonValues)
-    val latSpacing = regularSpacing(latValues)
+    val lonSpacing = regularSpacing(lonValues, storedAsFloat32(lonVar))
+    val latSpacing = regularSpacing(latValues, storedAsFloat32(latVar))
 
     if (lonSpacing.isDefined && latSpacing.isDefined) {
       // Regular grid: spacing is uniform, so head/last are the extreme coordinate centers
@@ -275,74 +320,148 @@ class NetCdfMetadataPartitionReader(
 
   private def isFinite(v: Double): Boolean = !v.isNaN && !v.isInfinite
 
-  /** Read a 1-D coordinate variable into a double array. */
+  private def storedAsFloat32(v: Variable): Boolean = v.getDataType == ucar.ma2.DataType.FLOAT
+
+  /**
+   * Read a 1-D coordinate variable into decoded double values. CF packing attributes are applied:
+   * `_Unsigned` (classic-format unsigned integers stored in signed types) widens the raw value,
+   * then `scale_factor` and `add_offset` unpack it. Without this, transforms and extents would be
+   * reported in raw storage units.
+   */
   private def read1D(v: Variable): Array[Double] = {
     val data = v.read()
     val n = data.getSize.toInt
-    Array.tabulate(n)(i => data.getDouble(i))
+    val dataType = v.getDataType
+    val unsignedIntegral = dataType.isIntegral &&
+      (dataType.isUnsigned || "true".equalsIgnoreCase(attrString(v, "_Unsigned")))
+    val scale = attrDouble(v, "scale_factor").getOrElse(1.0)
+    val offset = attrDouble(v, "add_offset").getOrElse(0.0)
+    Array.tabulate(n) { i =>
+      val raw =
+        if (unsignedIntegral) {
+          val bits = dataType.getSize * 8
+          val value = data.getLong(i)
+          if (bits >= 64) value.toDouble else (value & ((1L << bits) - 1)).toDouble
+        } else {
+          data.getDouble(i)
+        }
+      raw * scale + offset
+    }
   }
 
   /**
-   * Mean spacing if `values` describes an evenly spaced grid that an affine transform can
-   * represent faithfully; None otherwise.
+   * Mean spacing if `values` describes an evenly spaced, strictly monotonic grid that an affine
+   * transform can represent faithfully; None otherwise. Three criteria are combined:
    *
-   * Each value is compared against its position on the best-fit line (`head + i * mean`) rather
-   * than against its neighbor's difference. Differencing neighbors amplifies float32 coordinate
-   * quantization (~1 ulp of the value) by `1/spacing`, which can misclassify a genuinely regular
-   * float32 grid as irregular for fine, non-dyadic spacings at large coordinate magnitudes.
-   * Absolute positions do not accumulate that error, so a per-value bound of half a pixel — the
-   * point at which an affine-mapped center would fall into the wrong cell — cleanly separates
-   * regular grids from irregular ones (Gaussian, stretched), which deviate by many pixels.
+   *   - strict monotonicity: every step has the sign of the mean spacing;
+   *   - each step within a tolerance of the mean: 0.1% relative, floored at a few ulps of the
+   *     stored coordinate magnitude — float32 storage quantizes each value to ~1 ulp of its
+   *     magnitude, and differencing neighbors amplifies that noise by 1/spacing, so a fine
+   *     non-dyadic float32 grid at large coordinates would otherwise misclassify as irregular;
+   *   - every value within half a pixel of the line `head + i * mean`, the point beyond which an
+   *     affine-mapped cell center lands in the wrong cell.
+   *
+   * The step check catches locally uneven spacing that stays within half a pixel of the line
+   * (e.g. 0, 1.4, 2); the line check catches slow drift that per-step checks miss.
    */
-  private def regularSpacing(values: Array[Double]): Option[Double] = {
+  private def regularSpacing(values: Array[Double], storedAsFloat32: Boolean): Option[Double] = {
     val n = values.length
     val mean = (values.last - values.head) / (n - 1)
     if (mean == 0 || mean.isNaN || mean.isInfinite) return None
-    val maxDeviation = math.abs(mean) * MAX_FIT_DEVIATION_PIXELS
+    var maxAbs = 0.0
     var i = 0
     while (i < n) {
-      if (math.abs(values(i) - (values.head + i * mean)) > maxDeviation) return None
+      maxAbs = math.max(maxAbs, math.abs(values(i)))
+      i += 1
+    }
+    val quantum = if (storedAsFloat32) Math.ulp(maxAbs.toFloat).toDouble else Math.ulp(maxAbs)
+    val stepTolerance = math.max(math.abs(mean) * RELATIVE_STEP_TOLERANCE, 4 * quantum)
+    val fitTolerance = math.abs(mean) * MAX_FIT_DEVIATION_PIXELS
+    i = 0
+    while (i < n - 1) {
+      val step = values(i + 1) - values(i)
+      if (step * mean <= 0) return None
+      if (math.abs(step - mean) > stepTolerance) return None
+      if (math.abs(values(i + 1) - (values.head + (i + 1) * mean)) > fitTolerance) return None
       i += 1
     }
     Some(mean)
   }
 
-  private def findVariable(group: Group, shortName: String): Variable = {
-    val v = group.findVariableLocal(shortName)
-    if (v != null) return v
-    val it = group.getGroups.asScala.iterator
-    while (it.hasNext) {
-      val found = findVariable(it.next(), shortName)
-      if (found != null) return found
+  /** Resolve a by-name reference (e.g. a grid mapping) from a variable's group upward. */
+  private def findReferencedVariable(from: Variable, shortName: String): Option[Variable] = {
+    var group = from.getParentGroup
+    while (group != null) {
+      val v = group.findVariableLocal(shortName)
+      if (v != null) return Some(v)
+      group = group.getParentGroup
     }
-    null
+    None
   }
 
   /**
-   * Find a CRS in WKT form. The CF `grid_mapping` variable of the grid-defining variable takes
-   * precedence (`crs_wkt` per CF, `spatial_ref` as written by GDAL); global attributes with the
-   * same names are the fallback.
+   * Resolve the CRS: the faithful WKT as declared by the file, plus the derived EPSG code.
+   *
+   * The CF `grid_mapping` variable of the grid-defining variable takes precedence (`crs_wkt` per
+   * CF, `spatial_ref` as written by GDAL); global attributes with the same names are the
+   * fallback. The WKT is reported verbatim — downstream conversion for GeoTools-based raster
+   * functions is `RS_SetCRS`'s job, which accepts WKT1 and WKT2. When the file carries no WKT, a
+   * `latitude_longitude` grid mapping with no explicit ellipsoid/datum parameters is assumed to
+   * be WGS 84 (EPSG:4326); parameter-defined projected mappings are not translated.
    */
-  private def findCrsWkt(ncFile: NetcdfFile, firstRecordVar: Option[Variable]): String = {
+  private def resolveCrs(
+      ncFile: NetcdfFile,
+      gridVar: Option[Variable],
+      needSrid: Boolean): (String, Option[Int]) = {
+    val gmVar = gridVar.flatMap { gv =>
+      Option(attrString(gv, "grid_mapping"))
+        .map(gridMappingVariableName)
+        .flatMap(name => findReferencedVariable(gv, name))
+    }
     val globalAttrs = ncFile.getRootGroup.attributes()
-    firstRecordVar
-      .flatMap { rv =>
-        Option(rv.attributes().findAttributeString("grid_mapping", null)).flatMap { gmName =>
-          Option(findVariable(ncFile.getRootGroup, gmName)).flatMap { gmVar =>
-            Option(gmVar.attributes().findAttributeString("crs_wkt", null))
-              .orElse(Option(gmVar.attributes().findAttributeString("spatial_ref", null)))
-          }
-        }
-      }
+    val wkt = gmVar
+      .flatMap(v => Option(attrString(v, "crs_wkt")).orElse(Option(attrString(v, "spatial_ref"))))
       .orElse(Option(globalAttrs.findAttributeString("crs_wkt", null)))
       .orElse(Option(globalAttrs.findAttributeString("spatial_ref", null)))
       .orNull
+    val srid =
+      if (!needSrid) None
+      else if (wkt != null) lookupSrid(wkt)
+      else gmVar.flatMap(latitudeLongitudeSrid)
+    (wkt, srid)
   }
 
+  /**
+   * Name of the grid mapping variable in a CF `grid_mapping` attribute. Handles the extended form
+   * `"crsVar: coord1 coord2 ..."` by taking the first mapping name.
+   */
+  private def gridMappingVariableName(attrValue: String): String =
+    attrValue.trim.split("\\s+")(0).stripSuffix(":")
+
+  /**
+   * Minimal CF grid-mapping support for files with no CRS WKT: a `latitude_longitude` mapping
+   * that carries no explicit ellipsoid/datum parameters is assumed WGS 84. Conservative on
+   * purpose — any explicit datum description disables the assumption rather than being checked
+   * for WGS 84 equivalence.
+   */
+  private def latitudeLongitudeSrid(gmVar: Variable): Option[Int] = {
+    val name = attrString(gmVar, "grid_mapping_name")
+    val hasDatumOverride =
+      DATUM_OVERRIDE_ATTRS.exists(a => gmVar.attributes().findAttribute(a) != null)
+    if (name == "latitude_longitude" && !hasDatumOverride) Some(4326) else None
+  }
+
+  /**
+   * EPSG code for a CRS WKT via proj4sedona (pure Java — keeps this data source free of the
+   * optional LGPL GeoTools runtime). Resolves the WKT's EPSG authority identifier, including
+   * structural matches for common authority-less WKT; null when no EPSG identity is found.
+   */
   private def lookupSrid(crsWkt: String): Option[Int] = {
     Try {
-      val crs = org.geotools.referencing.CRS.parseWKT(crsWkt)
-      Option(org.geotools.referencing.CRS.lookupEpsgCode(crs, true)).map(_.intValue())
+      val authority = new Proj(crsWkt).toAuthority
+      if (authority != null && authority.length == 2 && "EPSG".equalsIgnoreCase(authority(0))) {
+        Try(authority(1).trim.toInt).toOption
+      } else None
     }.toOption.flatten
   }
 
@@ -427,6 +546,25 @@ object NetCdfMetadataPartitionReader {
    * center would land in the wrong cell.
    */
   private val MAX_FIT_DEVIATION_PIXELS = 0.5
+
+  /** Maximum step-to-step deviation from the mean spacing, relative to the mean. */
+  private val RELATIVE_STEP_TOLERANCE = 1e-3
+
+  /**
+   * Attributes on a `latitude_longitude` grid mapping variable that describe a datum other than
+   * (or in addition to) the WGS 84 default, disabling the EPSG:4326 assumption.
+   */
+  private val DATUM_OVERRIDE_ATTRS = Set(
+    "semi_major_axis",
+    "semi_minor_axis",
+    "inverse_flattening",
+    "earth_radius",
+    "longitude_of_prime_meridian",
+    "towgs84",
+    "reference_ellipsoid_name",
+    "horizontal_datum_name",
+    "geographic_crs_name",
+    "prime_meridian_name")
 
   // Fields that require opening the file and parsing its header
   private val HEADER_FIELDS =

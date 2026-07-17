@@ -67,7 +67,8 @@ kilobytes of transfer for multi-gigabyte files.
     df.show()
     ```
 
-Load a directory, which is scanned recursively for all `.nc`/`.nc4`/`.netcdf` files:
+Load one or more directories, which are scanned recursively for all
+`.nc`/`.nc4`/`.netcdf` files:
 
 ```python
 df = sedona.read.format("netcdf.metadata").load("s3a://bucket/climate-data/")
@@ -79,7 +80,21 @@ Or use a glob pattern:
 df = sedona.read.format("netcdf.metadata").load("/path/to/*.nc")
 ```
 
-The data source is read-only; writing is not supported.
+For directory loads, `recursiveFileLookup=true` and a NetCDF extension
+`pathGlobFilter` are applied as defaults; an explicit option always wins. In
+particular, set `recursiveFileLookup=false` to keep Hive-style partition discovery
+(e.g. `year=2020/` subdirectories become a `year` column):
+
+```python
+df = (
+    sedona.read.format("netcdf.metadata")
+    .option("recursiveFileLookup", "false")
+    .load("/data/climate/")
+)
+```
+
+The data source is read-only; writing is not supported, and neither are catalog
+table operations (`CREATE TABLE ... USING netcdf.metadata`).
 
 ## Output schema
 
@@ -93,17 +108,62 @@ Each row describes one NetCDF file:
 | `format` | String | File type reported by the reader, e.g. `NetCDF` (classic) or `NetCDF-4` |
 | `width` | Int | Grid X size (length of the X/longitude dimension); null if the file has no gridded (rank ≥ 2) variable |
 | `height` | Int | Grid Y size (length of the Y/latitude dimension); null if the file has no gridded (rank ≥ 2) variable |
-| `srid` | Int | EPSG code resolved from the CRS WKT; null if not resolvable |
-| `crs` | String | CRS in WKT form from the CF `grid_mapping` variable (`crs_wkt`/`spatial_ref`) or the equivalent global attributes; null if absent |
+| `srid` | Int | EPSG code resolved from the CRS WKT (or inferred for a plain `latitude_longitude` grid mapping); null if not resolvable |
+| `crs` | String | CRS in WKT form (WKT1 or WKT2, verbatim as declared by the file) from the CF `grid_mapping` variable (`crs_wkt`/`spatial_ref`) or the equivalent global attributes; null if absent |
 | `geoTransform` | Struct | GDAL-style affine transform; null for irregular grids, and whenever `cornerCoordinates` is null (see below) |
 | `cornerCoordinates` | Struct | Spatial extent (minX/minY/maxX/maxY); null if the file has no gridded variable, its trailing dimensions have no 1-D coordinate variables, or a coordinate variable has fewer than two finite values |
 | `dimensions` | Array[Struct] | All dimensions in the file |
 | `variables` | Array[Struct] | All variables in the file, including coordinate variables |
 | `globalAttributes` | Map[String,String] | Global (root group) attributes |
 
-The grid-defining variable follows the same convention as `RS_FromNetCDF`: the first
-variable with at least two dimensions, whose trailing two dimensions are interpreted
-as (Y, X).
+The grid-defining variable's trailing two dimensions are interpreted as (Y, X), the
+same convention as `RS_FromNetCDF`. Among variables with at least two dimensions,
+CF cell-boundary variables (those referenced by a `bounds` or `climatology`
+attribute, such as `lat_bnds`) are skipped, and a variable whose trailing dimensions
+have matching 1-D numeric coordinate variables is preferred; coordinate and
+`grid_mapping` references are resolved in the data variable's own group and its
+ancestors, so identically named variables in unrelated groups are never picked up.
+
+Coordinate values are decoded before use: the CF packing attributes `scale_factor`
+and `add_offset` are applied, and `_Unsigned` integer coordinates are widened, so
+transforms and extents are always in real-world units rather than raw storage units.
+
+### CRS resolution
+
+The CRS is looked up in this order:
+
+1. `crs_wkt` (CF) or `spatial_ref` (GDAL) on the `grid_mapping` variable of the
+   grid-defining variable — both the simple (`"crs"`) and extended
+   (`"crs: lat lon"`) forms of the `grid_mapping` attribute are understood;
+2. the same attribute names as global attributes.
+
+The WKT is reported verbatim in `crs`, and `srid` is the EPSG identity of that WKT
+(resolved with proj4sedona, so no GeoTools runtime is required). When the file
+carries no WKT at all, a `latitude_longitude` grid mapping with no explicit
+ellipsoid or datum parameters is assumed to be WGS 84 and reported as
+`srid = 4326` with a null `crs`. Projected grid mappings defined only by CF
+parameters (e.g. `lambert_conformal_conic` without `crs_wkt`) are not translated —
+both columns stay null.
+
+### Using the CRS downstream
+
+`RS_FromNetCDF` does not georeference the rasters it loads (their SRID is 0), so
+the columns reported here are the practical way to attach a CRS:
+
+```python
+# Common case: carry the integer SRID
+meta = sedona.read.format("netcdf.metadata").load(path).select("srid").first()
+rast = file_df.selectExpr("RS_FromNetCDF(content, 'O3') as rast").selectExpr(
+    f"RS_SetSRID(rast, {meta['srid']}) as rast"
+)
+
+# Full-fidelity case (non-EPSG or custom CRS): carry the WKT.
+# RS_SetCRS accepts EPSG codes, WKT1, WKT2, PROJ strings, and PROJJSON.
+meta = sedona.read.format("netcdf.metadata").load(path).select("crs").first()
+rast = file_df.selectExpr("RS_FromNetCDF(content, 'O3') as rast").selectExpr(
+    "RS_SetCRS(rast, '" + meta["crs"] + "') as rast"
+)
+```
 
 ### geoTransform struct
 
