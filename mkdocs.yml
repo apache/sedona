@@ -57,6 +57,7 @@ nav:
               - GeoJSON: tutorial/files/geojson-sedona-spark.md
               - Shapefiles: tutorial/files/shapefiles-sedona-spark.md
               - GeoTIFF metadata: tutorial/files/geotiffmetadata-sedona-spark.md
+              - NetCDF metadata: tutorial/files/netcdfmetadata-sedona-spark.md
               - STAC catalog: tutorial/files/stac-sedona-spark.md
           - Concepts:
               - Spatial Joins: tutorial/concepts/spatial-joins.md
