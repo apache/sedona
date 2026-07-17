@@ -129,3 +129,33 @@ class TestRasterizeParity(TestBase):
         """The same corpus under allTouched=true, kept as a strict expected
         failure so the known sampling divergence stays visible."""
         self._assert_matches_gdal(all_touched=True)
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=AssertionError,
+        reason="LineString rasterization uses the same fixed-step sampler "
+        "(Rasterization.drawLineBresenham) regardless of allTouched, so a line "
+        "that grazes a pixel over a chord shorter than the 0.2-pixel step is "
+        "not burned where GDAL burns it. This strict xfail starts failing the "
+        "day the sampling is replaced with exact cell traversal.",
+    )
+    def test_as_raster_linestring_matches_gdal(self):
+        """A line crossing a 6x6 unit grid: every pixel the line touches must
+        be burned, matching GDAL. Independent of allTouched (a line has no
+        interior) and of #3111 (square unit pixels)."""
+        wkt = "LINESTRING (3.97 1.57, 0.31 3.24)"
+        band = self.spark.sql(
+            "SELECT RS_BandAsArray(RS_AsRaster(ST_GeomFromWKT('" + wkt + "'), "
+            "RS_MakeEmptyRaster(1, 'd', 6, 6, 0.0, 6.0, 1.0, -1.0, 0.0, 0.0, 0), "
+            "'d', false, 1.0, 0.0, false), 1)"
+        ).first()[0]
+        actual = np.array(band, dtype=float).reshape(6, 6)
+        expected = rasterio.features.rasterize(
+            [(wkt_loads(wkt), 1)],
+            out_shape=(6, 6),
+            fill=0,
+            transform=Affine(1, 0, 0, 0, -1, 6),
+            all_touched=True,
+            dtype="uint8",
+        )
+        assert np.array_equal(actual, expected)
