@@ -274,10 +274,9 @@ Let's look closer at how Sedona uses the GeoParquet bbox metadata to optimize qu
 There are different options to compress Parquet and GeoParquet files. Using `zstd` is a good choice if you want to distribute your GeoParquet file, see [Best Practices for Distributing GeoParquet](https://github.com/opengeospatial/geoparquet/blob/main/format-specs/distributing-geoparquet.md) and [discussion thread](https://github.com/apache/sedona/discussions/3109#discussioncomment-17666620) for details. Example:
 
 ```python
-df.write.format("geoparquet") \
-    .option("compression", "zstd") \
-    .mode("overwrite") \
-    .save("path/to/output")
+df.write.format("geoparquet").option("compression", "zstd").mode("overwrite").save(
+    "path/to/output"
+)
 ```
 
 ## How Sedona uses GeoParquet bounding box (bbox) metadata with Spark
