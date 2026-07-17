@@ -669,7 +669,11 @@ public class Rasterization {
           double xMax = (geomExtent.getMaxX() - params.upperLeftX) / params.scaleX;
 
           for (double y = yStart; y >= yEnd; y--) {
-            double xIntercept = p1X + ((p1Y - y) / slope);
+            // p1X, p1Y and y are in pixel units while slope is world-units dy
+            // over dx, so converting the pixel dy to world units (scaleY) and
+            // the resulting world dx back to pixels (scaleX) keeps the
+            // intercept in pixel space for any pixel aspect ratio.
+            double xIntercept = p1X + ((y - p1Y) * params.scaleY / slope / params.scaleX);
             if ((xIntercept < xMin) || (xIntercept >= xMax)) {
               continue; // Skip xIntercepts outside geomExtent
             }
