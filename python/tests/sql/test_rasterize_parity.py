@@ -17,6 +17,8 @@
 
 import random
 
+import pytest
+
 import numpy as np
 import rasterio.features
 from affine import Affine
@@ -76,13 +78,7 @@ def _rasterize_cases(count=100, seed=31113):
 
 
 class TestRasterizeParity(TestBase):
-    def test_as_raster_centroid_rule_matches_gdal(self):
-        """RS_AsRaster with allTouched=false must burn exactly the pixels whose
-        centers fall inside the polygon, matching GDAL
-        (rasterio.features.rasterize) on the same grid. Only the centroid rule
-        is compared: allTouched boundary selection intentionally differs from
-        GDAL's.
-        """
+    def _assert_matches_gdal(self, all_touched):
         cases = _rasterize_cases()
         df = self.spark.createDataFrame(
             cases,
@@ -93,7 +89,7 @@ class TestRasterizeParity(TestBase):
             "id",
             "RS_BandAsArray(RS_AsRaster(ST_GeomFromWKT(wkt), "
             "RS_MakeEmptyRaster(1, 'd', width, height, ulx, uly, sx, sy, 0, 0, 0), "
-            "'d', false, 1.0, 0.0, false), 1) as band",
+            f"'d', {str(all_touched).lower()}, 1.0, 0.0, false), 1) as band",
         ).collect()
         bands = {row["id"]: row["band"] for row in rows}
         assert len(bands) == len(cases)
@@ -105,10 +101,31 @@ class TestRasterizeParity(TestBase):
                 out_shape=(height, width),
                 fill=0,
                 transform=Affine(sx, 0, ulx, 0, sy, uly),
-                all_touched=False,
+                all_touched=all_touched,
                 dtype="uint8",
             )
             assert np.array_equal(actual, expected), (
                 f"case {case_id}: grid {width}x{height}, "
                 f"scale ({sx}, {sy}), origin ({ulx}, {uly}), {wkt}"
             )
+
+    def test_as_raster_centroid_rule_matches_gdal(self):
+        """RS_AsRaster with allTouched=false must burn exactly the pixels whose
+        centers fall inside the polygon, matching GDAL
+        (rasterio.features.rasterize) on the same grid.
+        """
+        self._assert_matches_gdal(all_touched=False)
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=AssertionError,
+        reason="allTouched samples ring segments at fixed 0.2-pixel steps "
+        "(Rasterization.drawLineBresenham), so pixels the boundary clips with "
+        "a chord shorter than the step fall between samples and are never "
+        "burned where GDAL burns them. This strict xfail starts failing the "
+        "day the sampling is replaced with exact cell traversal.",
+    )
+    def test_as_raster_all_touched_matches_gdal(self):
+        """The same corpus under allTouched=true, kept as a strict expected
+        failure so the known sampling divergence stays visible."""
+        self._assert_matches_gdal(all_touched=True)
