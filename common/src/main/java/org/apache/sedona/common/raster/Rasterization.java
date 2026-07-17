@@ -200,58 +200,74 @@ public class Rasterization {
         double x1 = (end.x - params.upperLeftX) / params.scaleX;
         double y1 = (end.y - params.upperLeftY) / params.scaleY;
 
-        // Apply Bresenham for this segment
-        drawLineBresenham(params, x0, y0, x1, y1, value, 0.2);
+        traverseSegment(params, x0, y0, x1, y1, value);
       }
     }
   }
 
-  // Modified Bresenham with Fractional Steps
-  private static void drawLineBresenham(
-      RasterizationParams params,
-      double x0,
-      double y0,
-      double x1,
-      double y1,
-      double value,
-      double stepSize) {
+  /**
+   * Burns every grid cell the segment passes through, in pixel space where cell (i, j) covers [i, i
+   * + 1) x [j, j + 1). Uses exact cell traversal (Amanatides-Woo): it steps from one cell-boundary
+   * crossing to the next, so a cell is burned whenever the segment enters it, however briefly. A
+   * fixed-step sampling walk instead misses cells crossed over a distance shorter than the step.
+   */
+  private static void traverseSegment(
+      RasterizationParams params, double x0, double y0, double x1, double y1, double value) {
+
+    int width = params.writableRaster.getWidth();
+    int height = params.writableRaster.getHeight();
 
     double dx = x1 - x0;
     double dy = y1 - y0;
 
-    // Compute the number of steps based on the larger of dx or dy
-    double distance = Math.sqrt(dx * dx + dy * dy);
-    int steps = (int) Math.ceil(distance / stepSize);
+    int stepX = (int) Math.signum(dx);
+    int stepY = (int) Math.signum(dy);
 
-    // Calculate the step increment for each axis
-    double stepX = dx / steps;
-    double stepY = dy / steps;
+    int x = (int) Math.floor(x0);
+    int y = (int) Math.floor(y0);
+    int endX = (int) Math.floor(x1);
+    int endY = (int) Math.floor(y1);
 
-    // Start stepping through the line
-    double x = x0;
-    double y = y0;
+    // Parametric t (point = p0 + t * (p1 - p0)) at the first grid line crossed on each axis, and
+    // the t spanned by one full cell. Infinity where the segment does not move along that axis.
+    double tDeltaX = dx != 0 ? Math.abs(1.0 / dx) : Double.POSITIVE_INFINITY;
+    double tDeltaY = dy != 0 ? Math.abs(1.0 / dy) : Double.POSITIVE_INFINITY;
+    double tMaxX = dx > 0 ? (x + 1 - x0) / dx : (dx < 0 ? (x - x0) / dx : Double.POSITIVE_INFINITY);
+    double tMaxY = dy > 0 ? (y + 1 - y0) / dy : (dy < 0 ? (y - y0) / dy : Double.POSITIVE_INFINITY);
 
-    for (int i = 0; i <= steps; i++) {
-      int rasterX = (int) (Math.floor(x));
-      int rasterY = (int) (Math.floor(y));
-
-      // Adjust for bottom-up rasters
-      // Reverse the y index
-      if (params.bottomUp) {
-        rasterY = params.writableRaster.getHeight() - 1 - rasterY;
+    // The endpoints are clipped to the geometry extent, so the walk covers at most the grid's
+    // width + height cells; the bound also guards against a floating-point overshoot never reaching
+    // the end cell.
+    int maxSteps = width + height + 2;
+    for (int i = 0; i <= maxSteps; i++) {
+      burnCell(params, x, y, value, width, height);
+      if (x == endX && y == endY) {
+        break;
       }
-
-      // Only write if within raster bounds
-      if (rasterX >= 0
-          && rasterX < params.writableRaster.getWidth()
-          && rasterY >= 0
-          && rasterY < params.writableRaster.getHeight()) {
-        params.writableRaster.setSample(rasterX, rasterY, 0, value);
+      // On an exact corner crossing (segment passes through a lattice point) step both axes at
+      // once, so only the two cells the segment actually passes through are burned rather than the
+      // off-diagonal pair as well.
+      if (tMaxX < tMaxY) {
+        tMaxX += tDeltaX;
+        x += stepX;
+      } else if (tMaxY < tMaxX) {
+        tMaxY += tDeltaY;
+        y += stepY;
+      } else {
+        tMaxX += tDeltaX;
+        x += stepX;
+        tMaxY += tDeltaY;
+        y += stepY;
       }
+    }
+  }
 
-      // Increment by fractional steps
-      x += stepX;
-      y += stepY;
+  private static void burnCell(
+      RasterizationParams params, int x, int y, double value, int width, int height) {
+    // Reverse the y index for bottom-up rasters
+    int rasterY = params.bottomUp ? height - 1 - y : y;
+    if (x >= 0 && x < width && rasterY >= 0 && rasterY < height) {
+      params.writableRaster.setSample(x, rasterY, 0, value);
     }
   }
 

@@ -330,8 +330,10 @@ public class RasterBandEditorsTest extends RasterTestBase {
     double bandNoDataValue = RasterBandAccessors.getBandNoDataValue(clippedRaster);
     double expectedBandNoDataValue = 0.0;
     double[] actualValues = MapAlgebra.bandAsArray(clippedRaster, 1);
+    // The allTouched boundary now selects pixel (row 1, col 5) -> value 56, which the geometry
+    // edge crosses; this matches GDAL/rasterio all_touched=True on this raster and geometry.
     double[] expectedValues = {
-      0.0, 42.0, 43.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 51.0, 52.0, 53.0, 54.0, 55.0, 0.0, 0.0,
+      0.0, 42.0, 43.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 51.0, 52.0, 53.0, 54.0, 55.0, 56.0, 0.0,
       0.0, 0.0, 0.0, 61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 0.0, 0.0, 71.0, 72.0, 73.0,
       74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0, 81.0, 82.0, 83.0, 84.0, 0.0, 86.0, 87.0, 88.0, 89.0,
       90.0, 91.0, 92.0, 93.0, 94.0, 0.0, 96.0, 97.0, 98.0, 99.0, 100.0
@@ -352,7 +354,7 @@ public class RasterBandEditorsTest extends RasterTestBase {
           91.0, 92.0, 93.0, 94.0, 0.0, 96.0, 97.0, 98.0, 99.0, 100.0, 81.0, 82.0, 83.0, 84.0, 0.0,
           86.0, 87.0, 88.0, 89.0, 90.0, 71.0, 72.0, 73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0,
           61.0, 62.0, 63.0, 64.0, 65.0, 66.0, 67.0, 68.0, 0.0, 0.0, 51.0, 52.0, 53.0, 54.0, 55.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 42.0, 43.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+          56.0, 0.0, 0.0, 0.0, 0.0, 0.0, 42.0, 43.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
 
     assertEquals(expectedBandNoDataValue, bandNoDataValue, FP_TOLERANCE);

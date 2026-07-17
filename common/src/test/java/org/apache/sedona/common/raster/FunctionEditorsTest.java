@@ -206,7 +206,7 @@ public class FunctionEditorsTest extends RasterTestBase {
     double[] actual = MapAlgebra.bandAsArray(raster, 1);
     double[] expected =
         new double[] {
-          4235.0, 0.0, 0.0, 0.0, 4235.0, 4235.0, 0.0, 0.0, 4235.0, 0.0, 4235.0, 0.0, 4235.0, 0.0,
+          4235.0, 4235.0, 0.0, 0.0, 4235.0, 4235.0, 0.0, 0.0, 4235.0, 0.0, 4235.0, 0.0, 4235.0, 0.0,
           0.0, 4235.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
         };
     assertArrayEquals(expected, actual, 0.1d);
