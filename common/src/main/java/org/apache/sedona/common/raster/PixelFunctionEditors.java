@@ -152,11 +152,11 @@ public class PixelFunctionEditors {
 
     if (keepNoData) {
       noDataValue = RasterBandAccessors.getBandNoDataValue(raster, band);
-      rasterizedGeom =
-          RasterConstructors.asRaster(geom, raster, bandDataType, allTouched, value, noDataValue);
-    } else {
-      rasterizedGeom = RasterConstructors.asRaster(geom, raster, bandDataType, allTouched, value);
     }
+    // The rasterized geometry is only read as a mask below, where 0 marks pixels outside the
+    // geometry, so its band must not carry a nodata value (that would fill the mask's background
+    // with it).
+    rasterizedGeom = RasterConstructors.asRaster(geom, raster, bandDataType, allTouched, value);
 
     Raster rasterizedGeomData = RasterUtils.getRaster(rasterizedGeom.getRenderedImage());
     double colX = RasterAccessors.getUpperLeftX(rasterizedGeom),

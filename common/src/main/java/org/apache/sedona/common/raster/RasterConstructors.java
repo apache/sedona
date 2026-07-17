@@ -114,7 +114,8 @@ public class RasterConstructors {
    * @param pixelType The data type of pixel/cell of resultant raster
    * @param allTouched When set to true, rasterizes all pixels touched by geom
    * @param value The value of the pixel of the resultant raster
-   * @param noDataValue The noDataValue of the resultant raster
+   * @param noDataValue The noDataValue of the resultant raster; pixels not covered by the geometry
+   *     are set to this value
    * @param useGeometryExtent The way to generate extent of the resultant raster. Use the extent of
    *     the geometry to convert if true, else use the extent of the reference raster
    * @return Rasterized Geometry
@@ -131,7 +132,8 @@ public class RasterConstructors {
       throws FactoryException {
 
     List<Object> objects =
-        Rasterization.rasterize(geom, raster, pixelType, value, useGeometryExtent, allTouched);
+        Rasterization.rasterize(
+            geom, raster, pixelType, value, useGeometryExtent, allTouched, noDataValue);
 
     WritableRaster writableRaster = (WritableRaster) objects.get(0);
     GridCoverage2D rasterized = (GridCoverage2D) objects.get(1);
