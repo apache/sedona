@@ -18,18 +18,23 @@
 # Appends a "Star us on GitHub" call-to-action to the end of every blog post.
 # Implemented as an on_page_markdown hook so it applies to all current and
 # future posts automatically, with no per-file edits.
+#
+# The CTA is emitted as Markdown (an admonition plus attr_list buttons) rather
+# than raw HTML, so it inherits the Material theme's styling and stays robust
+# across theme changes. Requires the `admonition` and `attr_list` extensions,
+# which are already enabled in mkdocs.yml.
 
 from mkdocs import plugins
 
 STAR_CTA = """
 
-<div class="sedona-star-cta" style="margin-top:3rem;padding:1.5rem 1.5rem 1.75rem;border:1px solid var(--md-default-fg-color--lightest);border-radius:.6rem;background:var(--md-default-fg-color--lightest)">
-  <p style="font-weight:700;font-size:1.1rem;margin:0 0 .25rem">&#11088; Enjoyed this? Star Apache Sedona on GitHub</p>
-  <p style="margin:0 0 1rem;color:var(--md-default-fg-color--light)">A star takes two seconds and helps others discover the projects.</p>
-  <a class="md-button md-button--primary" href="https://github.com/apache/sedona" target="_blank" rel="noopener">&#11088; apache/sedona</a>
-  <a class="md-button" href="https://github.com/apache/sedona-db" target="_blank" rel="noopener">&#11088; apache/sedona-db</a>
-  <a class="md-button" href="https://github.com/apache/sedona-spatialbench" target="_blank" rel="noopener">&#11088; apache/sedona-spatialbench</a>
-</div>
+!!! tip "Star Apache Sedona on GitHub"
+
+    A star takes two seconds and helps others discover the projects.
+
+    [apache/sedona](https://github.com/apache/sedona){ .md-button .md-button--primary target="_blank" rel="noopener" }
+    [apache/sedona-db](https://github.com/apache/sedona-db){ .md-button target="_blank" rel="noopener" }
+    [apache/sedona-spatialbench](https://github.com/apache/sedona-spatialbench){ .md-button target="_blank" rel="noopener" }
 """
 
 

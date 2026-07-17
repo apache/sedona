@@ -90,8 +90,9 @@ sf = (
 sf_scenes = (
     sedona.read.format("stac")
     .load(f"{base}/collections/sentinel-2-l2a")
-    # pushed to the STAC /search API as a bbox query
+    # spatial + temporal + cloud predicates, all pushed to the STAC /search API
     .filter(f"ST_Intersects(ST_GeomFromText('{sf}'), geometry)")
+    .filter("datetime BETWEEN '2026-05-01' AND '2026-06-30'")
     .filter("`eo:cloud_cover` < 20")
 )
 
@@ -109,7 +110,6 @@ Only tile `10SEG` — the one covering San Francisco — comes back, at sub-1% c
 |S2C_10SEG_20260513_0_L2A  |2026-05-13  |0.9   |
 |S2A_10SEG_20260515_0_L2A  |2026-05-15  |0.1   |
 |S2B_10SEG_20260518_0_L2A  |2026-05-18  |0.7   |
-|S2A_10SEG_20260604_0_L2A  |2026-06-04  |0.2   |
 +--------------------------+------------+------+
 ```
 
@@ -121,11 +121,13 @@ This is the payoff. Because `geometry` is a real geometry column, the catalog is
 
 ![Vector areas of interest joined to raster footprints with ST_Intersects, producing the overlapping region as the result](stac-catalog-reader-join.svg)
 
-Let's make it concrete and reproducible. Sedona ships a tiny sample STAC collection in its test resources, so you can run this offline, verbatim. We load those scene footprints, define three analyst-drawn AOIs as a vector layer, and ask: **which scenes cover each AOI, and how much of the AOI do they cover?**
+Let's make it concrete. The Apache Sedona source tree ships a tiny sample STAC collection under `spark/common/src/test/resources/datasource_stac/` — clone the repo and point at it, or swap in any `collection.json` of your own. We load those scene footprints, define three analyst-drawn AOIs as a vector layer, and ask: **which scenes cover each AOI, and how much of the AOI do they cover?**
 
 ```python
-# 1 — the imagery layer (Sedona's bundled sample STAC collection)
-scenes = sedona.read.format("stac").load("datasource_stac/collection.json")
+# 1 — the imagery layer (Sedona's sample STAC collection, from the source tree)
+scenes = sedona.read.format("stac").load(
+    "spark/common/src/test/resources/datasource_stac/collection.json"
+)
 scenes.createOrReplaceTempView("scenes")
 
 # 2 — the vector layer: your areas of interest (load from GeoParquet /
@@ -141,7 +143,7 @@ aoi.createOrReplaceTempView("aoi")
 
 # 3 — the spatial join + how much of each AOI is covered
 sedona.sql("""
-    SELECT a.aoi_name, s.id AS scene_id,
+    SELECT DISTINCT a.aoi_name, s.id AS scene_id,
            ROUND(ST_Area(ST_Intersection(a.geom, s.geometry))
                  / ST_Area(a.geom) * 100, 1) AS aoi_covered_pct
     FROM   aoi a
