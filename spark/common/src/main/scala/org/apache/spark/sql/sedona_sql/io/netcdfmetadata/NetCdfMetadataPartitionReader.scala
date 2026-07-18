@@ -548,15 +548,16 @@ class NetCdfMetadataPartitionReader(
 
   /**
    * Name of the grid mapping variable in a CF `grid_mapping` attribute that applies to the grid's
-   * coordinates. The simple form (`"crs"`) names one mapping. The extended form (`"crsA: coord1
-   * coord2 crsB: coord3 coord4"`) may declare several mappings, each tied to a coordinate list;
-   * each clause's coordinate references are resolved relative to the data variable and matched by
-   * identity against the grid's actual coordinate variables, so a clause referencing identically
+   * coordinates. The simple form (`"crs"`) names one mapping that applies to the whole variable.
+   * The extended form (`"crsA: coord1 coord2 ..."`) explicitly scopes each mapping to its listed
+   * coordinates, so a clause — including a single one — is selected only when its resolved
+   * coordinate set covers both of the grid's (y, x) coordinate variables. References are resolved
+   * relative to the data variable and matched by identity, so a clause referencing identically
    * named coordinates in another group (e.g. `/geo/x` vs the root `x`) is never confused with the
-   * grid's own — a projected extent is never paired with the geographic mapping's CRS. When the
-   * grid's coordinate variables cannot be resolved, clause coordinate basenames are matched
-   * against the grid dimension names instead. When several mappings exist and none matches, the
-   * association is ambiguous and no CRS is reported.
+   * grid's own, and a mapping tied only to auxiliary coordinates never labels the x/y extent.
+   * When the grid's coordinate variables cannot be resolved, clause coordinate basenames must
+   * cover the grid dimension names instead. When no clause covers both axes, the association is
+   * ambiguous and no CRS is reported.
    */
   private def selectGridMappingName(
       dataVar: Variable,
@@ -576,27 +577,36 @@ class NetCdfMetadataPartitionReader(
         clauses.last._2 += token
       }
     }
-    if (clauses.size == 1) return Some(clauses.head._1)
 
-    if (gridCoordVars.nonEmpty) {
-      // A clause coordinate reference matches when it resolves (by scope for plain names, by
-      // path otherwise) to one of the grid's coordinate variables. A plain name that is not
+    // Every expanded clause — including a single one — explicitly scopes its mapping to the
+    // listed coordinates, so a clause applies to the grid only when its resolved coordinates
+    // cover BOTH grid axes. A "geographic: lat lon" clause tied to 2-D auxiliary coordinates
+    // says nothing about the 1-D x/y coordinates the extent came from; selecting it would
+    // label a projected extent with a geographic CRS.
+    if (gridCoordVars.size == 2) {
+      // A clause coordinate reference matches a grid coordinate when it resolves (by scope
+      // for plain names, by path otherwise) to that variable. A plain name that is not
       // visible in the data variable's scope falls back to the same CF-aware lateral
       // resolution the grid coordinates themselves were found with — a sibling-group
       // coordinate (e.g. /coords/x) is legitimately referenced by its plain name.
-      def matchesGridCoordinate(reference: String): Boolean = {
+      def matches(reference: String, gridCoord: Variable): Boolean = {
         findReferencedVariable(dataVar, reference) match {
-          case Some(resolved) => gridCoordVars.exists(_ eq resolved)
-          case None =>
-            !reference.contains("/") && gridCoordVars.exists(_.getShortName == reference)
+          case Some(resolved) => resolved eq gridCoord
+          case None => !reference.contains("/") && gridCoord.getShortName == reference
         }
       }
-      clauses.find(_._2.exists(matchesGridCoordinate)).map(_._1)
-    } else {
-      // No resolvable grid coordinates (extent is null anyway): best-effort basename match
       clauses
-        .find(_._2.exists(t => gridDimNames.contains(t.substring(t.lastIndexOf('/') + 1))))
+        .find(clause => gridCoordVars.forall(gv => clause._2.exists(matches(_, gv))))
         .map(_._1)
+    } else if (gridDimNames.size == 2) {
+      // Grid coordinates unresolvable (extent is null anyway): best-effort basename coverage
+      clauses
+        .find(clause =>
+          gridDimNames.forall(n =>
+            clause._2.exists(t => t.substring(t.lastIndexOf('/') + 1) == n)))
+        .map(_._1)
+    } else {
+      None
     }
   }
 

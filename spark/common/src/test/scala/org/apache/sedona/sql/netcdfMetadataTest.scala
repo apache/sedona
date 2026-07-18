@@ -718,19 +718,94 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assertEquals(2, row.getAs[Int]("numBands"))
     }
 
-    it("should reject explicitly named coordinates on a non-spatial axis") {
-      // Naming the time coordinate as the latitude axis must fail loudly: time(time) is not
-      // attached to the record variable's Y dimension.
-      def messages(t: Throwable): Seq[String] =
-        if (t == null) Nil else Option(t.getMessage).toSeq ++ messages(t.getCause)
-      val err = intercept[Exception] {
-        sparkSession.read
-          .format("binaryFile")
-          .load(variantsDir + "test_reader_axis.nc4")
-          .selectExpr("RS_FromNetCDF(content, 'data/temp', 'lon', 'time') as r")
-          .collect()
-      }
-      assert(messages(err).exists(_.toLowerCase.contains("invalid")), s"unexpected error: $err")
+    it("should extract a permuted raster when a named coordinate serves another axis") {
+      // Naming the time coordinate as the Y axis is the documented escape hatch: the axis is
+      // derived from the coordinate's dimension (time), and the remaining lat dimension
+      // becomes the band dimension.
+      val row = sparkSession.read
+        .format("binaryFile")
+        .load(variantsDir + "test_reader_axis.nc4")
+        .selectExpr("RS_FromNetCDF(content, 'data/temp', 'lon', 'time') as raster")
+        .selectExpr(
+          "RS_Width(raster) as width",
+          "RS_Height(raster) as height",
+          "RS_NumBands(raster) as numBands")
+        .first()
+      assertEquals(4, row.getAs[Int]("width"))
+      assertEquals(2, row.getAs[Int]("height"))
+      assertEquals(3, row.getAs[Int]("numBands"))
+    }
+
+    it("should extract non-trailing spatial axes with permuted strides and correct values") {
+      // temp(lat, lon, time) with value = 100*lat_index + 10*lon_index + time_index; naming
+      // lat/lon (dims 0 and 1) leaves time as the band dimension. Values verify the plane is
+      // walked with the correct strides, not the trailing-plane arithmetic.
+      val row = sparkSession.read
+        .format("binaryFile")
+        .load(variantsDir + "test_reader_permuted.nc")
+        .selectExpr("RS_FromNetCDF(content, 'temp', 'lon', 'lat') as raster")
+        .selectExpr(
+          "RS_Width(raster) as width",
+          "RS_Height(raster) as height",
+          "RS_NumBands(raster) as numBands",
+          "RS_Value(raster, 0, 0, 1) as upperLeftBand1",
+          "RS_Value(raster, 0, 0, 2) as upperLeftBand2",
+          "RS_Value(raster, 3, 2, 1) as lowerRightBand1",
+          "RS_Metadata(raster) as metadata")
+        .first()
+      assertEquals(4, row.getAs[Int]("width"))
+      assertEquals(3, row.getAs[Int]("height"))
+      assertEquals(2, row.getAs[Int]("numBands"))
+      // Upper-left pixel = max lat (index 2), first lon (index 0)
+      assertEquals(200.0, row.getAs[Double]("upperLeftBand1"), 1e-6)
+      assertEquals(201.0, row.getAs[Double]("upperLeftBand2"), 1e-6)
+      // Bottom-right pixel = min lat (index 0), last lon (index 3)
+      assertEquals(30.0, row.getAs[Double]("lowerRightBand1"), 1e-6)
+      // Extent from lon 20..23, lat 10..12
+      assertEquals(19.5, row.getStruct(row.fieldIndex("metadata")).getDouble(0), 1e-6)
+    }
+
+    it("should resolve a repeated dimension to its trailing occurrence") {
+      // temp(n, y, n): the X coordinate x(n) is attached to a dimension that occurs twice;
+      // the trailing occurrence is the X axis and the leading one becomes the band dimension.
+      // Value = 100*band_index + 10*y_index + x_index.
+      val row = sparkSession.read
+        .format("binaryFile")
+        .load(variantsDir + "test_reader_repeated.nc")
+        .selectExpr("RS_FromNetCDF(content, 'temp', 'x', 'y') as raster")
+        .selectExpr(
+          "RS_Width(raster) as width",
+          "RS_Height(raster) as height",
+          "RS_NumBands(raster) as numBands",
+          "RS_Value(raster, 0, 0, 1) as upperLeftBand1",
+          "RS_Value(raster, 0, 0, 2) as upperLeftBand2",
+          "RS_Value(raster, 1, 2, 1) as lowerRightBand1")
+        .first()
+      assertEquals(2, row.getAs[Int]("width"))
+      assertEquals(3, row.getAs[Int]("height"))
+      assertEquals(2, row.getAs[Int]("numBands"))
+      // Upper-left = max y (index 2), first x (index 0)
+      assertEquals(20.0, row.getAs[Double]("upperLeftBand1"), 1e-6)
+      assertEquals(120.0, row.getAs[Double]("upperLeftBand2"), 1e-6)
+      // Bottom-right = min y (index 0), last x (index 1)
+      assertEquals(1.0, row.getAs[Double]("lowerRightBand1"), 1e-6)
+    }
+
+    it("should not label an x/y extent with a mapping scoped to auxiliary coordinates") {
+      // temp(y, x) has 1-D metre coordinates x/y and 2-D auxiliary lat/lon listed in
+      // `coordinates`; grid_mapping = "geographic: lat lon" applies only to the auxiliary
+      // coordinates, so no CRS may be attached to the metre extent.
+      val df = sparkSession.read.format("netcdf.metadata").load(variantsDir + "test_auxcrs.nc")
+      val row = df.select("srid", "crs").first()
+      assert(row.isNullAt(row.fieldIndex("srid")))
+      assert(row.isNullAt(row.fieldIndex("crs")))
+      // The extent itself is still reported, just unlabeled
+      val gt = df
+        .selectExpr("geoTransform.upperLeftX", "geoTransform.upperLeftY", "geoTransform.scaleX")
+        .first()
+      assertEquals(250.0, gt.getAs[Double]("upperLeftX"), 1e-6)
+      assertEquals(3500.0, gt.getAs[Double]("upperLeftY"), 1e-6)
+      assertEquals(500.0, gt.getAs[Double]("scaleX"), 1e-6)
     }
 
     it("should match expanded grid-mapping clauses to lateral sibling-group coordinates") {

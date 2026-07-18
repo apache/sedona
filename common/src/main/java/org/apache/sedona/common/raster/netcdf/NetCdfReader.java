@@ -91,12 +91,17 @@ public class NetCdfReader {
   }
 
   /**
+   * Return a raster for the record variable using explicitly named Y and X coordinate variables.
+   * Each named coordinate must be attached to one of the record variable's dimensions; the axes are
+   * derived from the coordinates' actual dimensions (preferring the trailing defaults when a name
+   * is ambiguous), the raster plane is extracted with stride-aware permuted indexing, and every
+   * remaining dimension becomes a band dimension in row-major order. A dimension repeated in the
+   * variable's shape resolves to its trailing occurrence or is rejected as ambiguous.
+   *
    * @param netcdfFile NetCDF file to read
    * @param variableShortName short name of the variable to read
-   * @param latDimShortName name of the coordinate variable serving the record variable's Y
-   *     (second-to-last) dimension; it must be attached to exactly that dimension
-   * @param lonDimShortName name of the coordinate variable serving the record variable's X (last)
-   *     dimension; it must be attached to exactly that dimension
+   * @param latDimShortName name of the coordinate variable serving the raster's Y axis
+   * @param lonDimShortName name of the coordinate variable serving the raster's X axis
    * @return GridCoverage2D object
    * @throws FactoryException
    * @throws IOException
@@ -113,22 +118,19 @@ public class NetCdfReader {
     if (numDimensions < 2) {
       throw new IllegalArgumentException(NetCdfConstants.INSUFFICIENT_DIMENSIONS_VARIABLE);
     }
-    // The named coordinate variables must serve the record variable's trailing (Y, X)
-    // dimensions — the raster layout assumes them — so each is validated against its intended
-    // axis; non-spatial, duplicate, or swapped coordinates are rejected.
+    // Prefer coordinates serving the default trailing (Y, X) axes; when a named coordinate is
+    // attached to another dimension of the record variable, the axes are derived from that
+    // coordinate's dimension and the raster is extracted with permuted strides, every
+    // remaining dimension becoming a band dimension. Coordinates over dimensions the record
+    // variable does not have are rejected.
     Dimension latDimension = variableDimensions.get(numDimensions - 2);
     Dimension lonDimension = variableDimensions.get(numDimensions - 1);
 
-    Variable[] coordVariablePair =
-        getCoordVariables(
-            netcdfFile,
-            recordVariable,
-            latDimension,
-            lonDimension,
-            latDimShortName,
-            lonDimShortName);
-    Variable latVariable = coordVariablePair[1];
-    Variable lonVariable = coordVariablePair[0];
+    Variable latVariable =
+        findCoordVariableWithFallback(netcdfFile, recordVariable, latDimension, latDimShortName);
+    Variable lonVariable =
+        findCoordVariableWithFallback(netcdfFile, recordVariable, lonDimension, lonDimShortName);
+    ensureCoordVar(lonVariable, latVariable);
     return NetCdfReader.getRasterHelper(netcdfFile, recordVariable, lonVariable, latVariable, true);
   }
 
@@ -215,13 +217,69 @@ public class NetCdfReader {
     return v.getDimension(0) == expectedDim;
   }
 
-  /** Index of the given dimension within the record variable's dimensions, by identity. */
-  private static int dimensionIndexOf(Variable recordVariable, Dimension dim) {
-    List<Dimension> dims = recordVariable.getDimensions();
-    for (int i = 0; i < dims.size(); i++) {
-      if (dims.get(i) == dim) return i;
+  /**
+   * Resolve an explicitly named coordinate: prefer a candidate serving the default trailing axis,
+   * then fall back to a candidate attached to any of the record variable's dimensions (identity),
+   * which selects a permuted axis handled by the stride-aware extraction.
+   */
+  private static Variable findCoordVariableWithFallback(
+      NetcdfFile netcdfFile, Variable recordVariable, Dimension preferredDim, String name) {
+    Variable v = findCoordVariable(netcdfFile, recordVariable, preferredDim, name);
+    if (v != null) return v;
+    return findCoordVariableAnyAxis(netcdfFile, recordVariable, name);
+  }
+
+  /** Same search order as {@link #findCoordVariable}, accepting any record dimension. */
+  private static Variable findCoordVariableAnyAxis(
+      NetcdfFile netcdfFile, Variable recordVariable, String name) {
+    if (name == null) return null;
+    if (name.contains("/")) {
+      Variable v = netcdfFile.findVariable(name);
+      return isCoordinateForAnyAxis(v, recordVariable) ? v : null;
     }
-    return -1;
+    for (Group group = recordVariable.getParentGroup();
+        group != null;
+        group = group.getParentGroup()) {
+      Variable v = group.findVariableLocal(name);
+      if (isCoordinateForAnyAxis(v, recordVariable)) return v;
+    }
+    for (Variable v : netcdfFile.getVariables()) {
+      if (name.equals(v.getShortName()) && isCoordinateForAnyAxis(v, recordVariable)) {
+        return v;
+      }
+    }
+    return null;
+  }
+
+  private static boolean isCoordinateForAnyAxis(Variable v, Variable recordVariable) {
+    if (v == null || v.getRank() != 1 || v.getDataType() == null || !v.getDataType().isNumeric()) {
+      return false;
+    }
+    Dimension dim = v.getDimension(0);
+    for (Dimension recordDim : recordVariable.getDimensions()) {
+      if (recordDim == dim) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Index of the axis served by {@code dim} within the record variable's dimensions, matched by
+   * identity. NetCDF permits a dimension to occur more than once in a variable's shape; when it
+   * does, the occurrence at {@code preferredIndex} (the default trailing axis) is used if it
+   * matches, otherwise the intended occurrence is ambiguous and -1 is returned.
+   */
+  private static int axisIndexOf(Variable recordVariable, Dimension dim, int preferredIndex) {
+    List<Dimension> dims = recordVariable.getDimensions();
+    int found = -1;
+    int occurrences = 0;
+    for (int i = 0; i < dims.size(); i++) {
+      if (dims.get(i) == dim) {
+        occurrences++;
+        if (found == -1) found = i;
+      }
+    }
+    if (occurrences <= 1) return found;
+    return dims.get(preferredIndex) == dim ? preferredIndex : -1;
   }
 
   private static ImmutableList<Variable> getRecordVariables(NetcdfFile netcdfFile) {
@@ -278,15 +336,16 @@ public class NetCdfReader {
     List<Dimension> recordDimensions = recordVariable.getDimensions();
     int numRecordDimensions = recordDimensions.size();
 
-    // ==================== Re-check existence of dimensions if necessary ====================
+    // ==================== Derive the spatial axis indices ====================
     int lonIndex = numRecordDimensions - 1;
     int latIndex = numRecordDimensions - 2;
     if (findCoordIndices) {
       // Derive the axis indices from the coordinate variables' actual dimension identities,
       // never from name matching, so a coordinate whose name differs from (or collides with)
-      // a dimension name still slices the correct axis
-      latIndex = dimensionIndexOf(recordVariable, latVariable.getDimension(0));
-      lonIndex = dimensionIndexOf(recordVariable, lonVariable.getDimension(0));
+      // a dimension name still slices the correct axis. Repeated dimensions resolve to their
+      // default trailing occurrence, or are rejected as ambiguous.
+      latIndex = axisIndexOf(recordVariable, latVariable.getDimension(0), numRecordDimensions - 2);
+      lonIndex = axisIndexOf(recordVariable, lonVariable.getDimension(0), numRecordDimensions - 1);
       if (latIndex == -1 || lonIndex == -1 || latIndex == lonIndex) {
         throw new IllegalArgumentException(NetCdfConstants.COORD_IDX_NOT_FOUND);
       }
@@ -301,19 +360,30 @@ public class NetCdfReader {
       Attribute noDataAttribute = recordVariable.findAttribute(NetCdfConstants.MISSING_VALUE);
       if (!Objects.isNull(noDataAttribute)) noDataValue = getAttrDoubleValue(noDataAttribute);
     }
-    int[] strides = recordData.getIndex().getShape();
-    int[] pointers = recordData.getIndex().getCurrentCounter();
+    int[] shape = recordData.getIndex().getShape();
+    // Row-major strides of the source layout, so the raster plane can be extracted for any
+    // spatial axis positions — not only trailing (y, x)
+    long[] sourceStrides = new long[numRecordDimensions];
+    long strideAccumulator = 1;
+    for (int i = numRecordDimensions - 1; i >= 0; i--) {
+      sourceStrides[i] = strideAccumulator;
+      strideAccumulator *= shape[i];
+    }
+    // Every non-spatial dimension is a band dimension; bands iterate over them in row-major
+    // order (last band dimension fastest), preserving the historical band order for trailing
+    // spatial axes
+    int[] bandDims = new int[numRecordDimensions - 2];
     int numBands = 1;
-    int numValuesPerBand = 1;
-    for (int i = 0; i < numRecordDimensions; i++) {
-      // Compare by axis index, not by name: a band dimension sharing a coordinate variable's
-      // name must still count toward the bands
-      if (i == latIndex || i == lonIndex) {
-        numValuesPerBand *= strides[i];
-      } else {
-        numBands *= strides[i];
+    {
+      int b = 0;
+      for (int i = 0; i < numRecordDimensions; i++) {
+        if (i != latIndex && i != lonIndex) {
+          bandDims[b++] = i;
+          numBands *= shape[i];
+        }
       }
     }
+    int numValuesPerBand = width * height;
     Array[] dimensionVars = new Array[numRecordDimensions];
     double scaleFactor = 1, offset = 0;
     for (int i = 0; i < numRecordDimensions; i++) {
@@ -347,42 +417,43 @@ public class NetCdfReader {
       }
     }
     double[][] allBandValues = new double[numBands][numValuesPerBand];
-    // check for offset in the record variable
     List<List<String>> bandMetaData = new ArrayList<>();
-    int currBandNum = 0;
-    while (currBandNum < numBands) {
-      if (dimensionVars.length > 2) {
-        // start from the bottom 3rd dimension going up to form metadata
+    int[] bandCounter = new int[bandDims.length];
+    for (int currBandNum = 0; currBandNum < numBands; currBandNum++) {
+      if (bandDims.length > 0) {
+        // Band metadata in reversed band-dimension order (preserves the historical output)
         List<String> currBandMetadata = new ArrayList<>();
-        for (int metadataDim = dimensionVars.length - 3; metadataDim >= 0; metadataDim--) {
-          double data = getElement(dimensionVars[metadataDim], pointers[metadataDim]);
-          String metadata = recordDimensions.get(metadataDim).getShortName() + " : " + data;
+        for (int m = bandDims.length - 1; m >= 0; m--) {
+          int dimIdx = bandDims[m];
+          double data = getElement(dimensionVars[dimIdx], bandCounter[m]);
+          String metadata = recordDimensions.get(dimIdx).getShortName() + " : " + data;
           currBandMetadata.add(metadata);
         }
         bandMetaData.add(currBandMetadata);
       }
-      // int dataIndex = currBandNum;
+      long bandOffset = 0;
+      for (int m = 0; m < bandDims.length; m++) {
+        bandOffset += (long) bandCounter[m] * sourceStrides[bandDims[m]];
+      }
+      // Stride-aware extraction of the (y, x) plane: for trailing spatial axes this reduces
+      // exactly to the contiguous-plane arithmetic; for permuted axes it walks the source
+      // with the axis strides. Row j of the raster is row (height-1-j) of the file.
       for (int j = height - 1; j >= 0; j--) {
         for (int i = 0; i < width; i++) {
-          int index = (j * width + i);
-          int dataIndex = currBandNum * (width * height) + ((height - 1 - j) * width + i);
-          double currRecord = scaleFactor * getElement(recordData, dataIndex) + offset;
-          allBandValues[currBandNum][index] = currRecord;
+          long sourceIndex =
+              bandOffset
+                  + (long) (height - 1 - j) * sourceStrides[latIndex]
+                  + (long) i * sourceStrides[lonIndex];
+          double currRecord = scaleFactor * getElement(recordData, (int) sourceIndex) + offset;
+          allBandValues[currBandNum][j * width + i] = currRecord;
         }
       }
-      boolean addCarry = true;
-      for (int currDim = dimensionVars.length - 3; currDim >= 0; currDim--) {
-        int maxIndex = strides[currDim];
-        if (addCarry) {
-          pointers[currDim]++;
-          addCarry = false;
-        }
-        if (pointers[currDim] == maxIndex) {
-          pointers[currDim] = 0;
-          addCarry = true;
-        }
+      // Advance the band odometer (row-major: last band dimension fastest)
+      for (int m = bandDims.length - 1; m >= 0; m--) {
+        bandCounter[m]++;
+        if (bandCounter[m] < shape[bandDims[m]]) break;
+        bandCounter[m] = 0;
       }
-      currBandNum++;
     }
     Map<String, List<String>> rasterProperties =
         getRasterProperties(globalAttributes, varMetadata, bandMetaData);
