@@ -638,6 +638,68 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assertEquals(19.5, row.getStruct(row.fieldIndex("metadata")).getDouble(0), 1e-6)
     }
 
+    it("should validate RS_FromNetCDF coordinates against the requested axis") {
+      // /data/lat(time) is a rank-1 numeric decoy over the record's time dimension, declared
+      // in the data variable's own group; the true lat(lat)/lon(lon) live laterally in
+      // /coords. Validation against the requested dimension must reject the decoy.
+      val row = sparkSession.read
+        .format("binaryFile")
+        .load(variantsDir + "test_reader_axis.nc4")
+        .selectExpr("RS_FromNetCDF(content, 'data/temp') as raster")
+        .selectExpr(
+          "RS_Width(raster) as width",
+          "RS_Height(raster) as height",
+          "RS_NumBands(raster) as numBands",
+          "RS_Metadata(raster) as metadata")
+        .first()
+      assertEquals(4, row.getAs[Int]("width"))
+      assertEquals(3, row.getAs[Int]("height"))
+      assertEquals(2, row.getAs[Int]("numBands"))
+      // Extent from /coords: lon 20..23 with spacing 1 -> upperLeftX 19.5
+      assertEquals(19.5, row.getStruct(row.fieldIndex("metadata")).getDouble(0), 1e-6)
+    }
+
+    it("should reject explicitly named coordinates over unrelated dimensions") {
+      // wrong/lat and wrong/lon are attached to /wrong's own dimensions, not the record
+      // variable's — path-resolved coordinates must be validated too, failing loudly instead
+      // of silently producing a 2x2 raster.
+      def messages(t: Throwable): Seq[String] =
+        if (t == null) Nil else Option(t.getMessage).toSeq ++ messages(t.getCause)
+      val err = intercept[Exception] {
+        sparkSession.read
+          .format("binaryFile")
+          .load(variantsDir + "test_reader_lateral.nc4")
+          .selectExpr("RS_FromNetCDF(content, 'data/temperature', 'wrong/lat', 'wrong/lon') as r")
+          .collect()
+      }
+      assert(messages(err).exists(_.toLowerCase.contains("invalid")), s"unexpected error: $err")
+    }
+
+    it("should resolve expanded grid-mapping coordinates by identity, not basename") {
+      // temp:grid_mapping = "geographic: /geo/x /geo/y projected: x y" — the geographic
+      // clause's coordinates share the basenames x/y but resolve to /geo variables, while the
+      // grid's actual coordinates are the root x/y. The projected mapping must be selected.
+      val df = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_multimapping_paths.nc4")
+      val row = df.select("srid", "crs").first()
+      assertEquals(3857, row.getAs[Int]("srid"))
+      assert(row.getAs[String]("crs").contains("Pseudo-Mercator"))
+      val gt = df.selectExpr("geoTransform.scaleX").first()
+      assertEquals(500.0, gt.getAs[Double]("scaleX"), 1e-6)
+    }
+
+    it("should recognize the WGS 84 ensemble datum name") {
+      // EPSG:6326 is officially named "World Geodetic System 1984 ensemble"
+      val row = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_gridmapping_ensemble.nc")
+        .select("srid", "crs")
+        .first()
+      assertEquals(4326, row.getAs[Int]("srid"))
+      assert(row.isNullAt(row.fieldIndex("crs")))
+    }
+
     it("should resolve RS_FromNetCDF band dimensions in the record variable's scope") {
       // Root declares time(1) with a coordinate variable; /sub/temp(time, lat, lon) uses
       // /sub/time(2). Binding the root variable would fail on the second band.

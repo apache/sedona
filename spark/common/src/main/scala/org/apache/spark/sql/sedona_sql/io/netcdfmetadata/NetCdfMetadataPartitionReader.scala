@@ -120,7 +120,7 @@ class NetCdfMetadataPartitionReader(
       } else None
 
     val (crsWkt, srid) =
-      if (needCrs) resolveCrs(ncFile, gridVar, requested.contains("srid"))
+      if (needCrs) resolveCrs(ncFile, gridVar, requested.contains("srid"), allVariables)
       else (null, None)
 
     NetCdfFileInfo(
@@ -518,12 +518,19 @@ class NetCdfMetadataPartitionReader(
   private def resolveCrs(
       ncFile: NetcdfFile,
       gridVar: Option[Variable],
-      needSrid: Boolean): (String, Option[Int]) = {
+      needSrid: Boolean,
+      allVariables: Seq[Variable]): (String, Option[Int]) = {
     val gmVar = gridVar.flatMap { gv =>
       val (latDim, lonDim) = trailingDims(gv)
-      val gridCoordNames = Set(latDim.getShortName, lonDim.getShortName).filter(_ != null)
+      // The actual coordinate variables of the grid, for identity matching of the extended
+      // grid_mapping form; the dimension names are the fallback when none resolve
+      val gridCoordVars =
+        Seq(
+          findCoordinateVariable(gv, latDim, allVariables),
+          findCoordinateVariable(gv, lonDim, allVariables)).flatten
+      val gridDimNames = Set(latDim.getShortName, lonDim.getShortName).filter(_ != null)
       Option(attrString(gv, "grid_mapping"))
-        .flatMap(selectGridMappingName(_, gridCoordNames))
+        .flatMap(selectGridMappingName(gv, _, gridCoordVars, gridDimNames))
         .flatMap(name => findReferencedVariable(gv, name))
     }
     val globalAttrs = ncFile.getRootGroup.attributes()
@@ -543,29 +550,46 @@ class NetCdfMetadataPartitionReader(
    * Name of the grid mapping variable in a CF `grid_mapping` attribute that applies to the grid's
    * coordinates. The simple form (`"crs"`) names one mapping. The extended form (`"crsA: coord1
    * coord2 crsB: coord3 coord4"`) may declare several mappings, each tied to a coordinate list;
-   * the mapping whose coordinates match the grid's (y, x) coordinate names is selected, so a
-   * projected extent is never paired with the geographic mapping's CRS. When several mappings
-   * exist and none matches, the association is ambiguous and no CRS is reported.
+   * each clause's coordinate references are resolved relative to the data variable and matched by
+   * identity against the grid's actual coordinate variables, so a clause referencing identically
+   * named coordinates in another group (e.g. `/geo/x` vs the root `x`) is never confused with the
+   * grid's own — a projected extent is never paired with the geographic mapping's CRS. When the
+   * grid's coordinate variables cannot be resolved, clause coordinate basenames are matched
+   * against the grid dimension names instead. When several mappings exist and none matches, the
+   * association is ambiguous and no CRS is reported.
    */
   private def selectGridMappingName(
+      dataVar: Variable,
       attrValue: String,
-      gridCoordNames: Set[String]): Option[String] = {
+      gridCoordVars: Seq[Variable],
+      gridDimNames: Set[String]): Option[String] = {
     val tokens = attrValue.trim.split("\\s+").toSeq.filter(_.nonEmpty)
     if (tokens.isEmpty) return None
     if (!tokens.exists(_.endsWith(":"))) return Some(tokens.head)
 
-    // Extended form: group tokens into (mappingName, coordinateNames) clauses
+    // Extended form: group tokens into (mappingName, coordinateReferences) clauses
     val clauses = mutable.ListBuffer[(String, mutable.ListBuffer[String])]()
     tokens.foreach { token =>
       if (token.endsWith(":")) {
         clauses += ((token.stripSuffix(":"), mutable.ListBuffer[String]()))
       } else if (clauses.nonEmpty) {
-        // Coordinate references may be paths; compare by basename
-        clauses.last._2 += token.substring(token.lastIndexOf('/') + 1)
+        clauses.last._2 += token
       }
     }
-    if (clauses.size == 1) Some(clauses.head._1)
-    else clauses.find(_._2.exists(gridCoordNames.contains)).map(_._1)
+    if (clauses.size == 1) return Some(clauses.head._1)
+
+    if (gridCoordVars.nonEmpty) {
+      clauses
+        .find(_._2.exists(reference =>
+          findReferencedVariable(dataVar, reference).exists(resolved =>
+            gridCoordVars.exists(_ eq resolved))))
+        .map(_._1)
+    } else {
+      // No resolvable grid coordinates (extent is null anyway): best-effort basename match
+      clauses
+        .find(_._2.exists(t => gridDimNames.contains(t.substring(t.lastIndexOf('/') + 1))))
+        .map(_._1)
+    }
   }
 
   /**
@@ -716,8 +740,12 @@ object NetCdfMetadataPartitionReader {
     "formula_terms",
     "grid_mapping")
 
-  /** Normalized datum/CRS name values that identify WGS 84. */
-  private val WGS84_DATUM_NAMES = Set("wgs84", "wgs1984", "worldgeodeticsystem1984")
+  /**
+   * Normalized datum/CRS name values that identify WGS 84, including the EPSG:6326 ensemble name
+   * ("World Geodetic System 1984 ensemble").
+   */
+  private val WGS84_DATUM_NAMES =
+    Set("wgs84", "wgs1984", "worldgeodeticsystem1984", "worldgeodeticsystem1984ensemble")
 
   // Fields that require opening the file and parsing its header
   private val HEADER_FIELDS =

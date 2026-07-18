@@ -73,11 +73,17 @@ public class NetCdfReader {
       throw new IllegalArgumentException(NetCdfConstants.INSUFFICIENT_DIMENSIONS_VARIABLE);
     }
     // Assume ... Y, X dimension list in the variable
-    String latDimensionShortName = variableDimensions.get(numDimensions - 2).getShortName();
-    String lonDimensionShortName = variableDimensions.get(numDimensions - 1).getShortName();
+    Dimension latDimension = variableDimensions.get(numDimensions - 2);
+    Dimension lonDimension = variableDimensions.get(numDimensions - 1);
 
     Variable[] coordVariablePair =
-        getCoordVariables(netcdfFile, recordVariable, latDimensionShortName, lonDimensionShortName);
+        getCoordVariables(
+            netcdfFile,
+            recordVariable,
+            latDimension,
+            lonDimension,
+            latDimension.getShortName(),
+            lonDimension.getShortName());
     Variable latVariable = coordVariablePair[1];
     Variable lonVariable = coordVariablePair[0];
     return NetCdfReader.getRasterHelper(
@@ -103,8 +109,10 @@ public class NetCdfReader {
       throws FactoryException, IOException {
     Variable recordVariable = getRecordVariableFromShortName(netcdfFile, variableShortName);
 
+    // The user names the coordinate variables directly; the axis each one maps to is derived
+    // from the variable's own dimension, so no specific dimension is expected here
     Variable[] coordVariablePair =
-        getCoordVariables(netcdfFile, recordVariable, latDimShortName, lonDimShortName);
+        getCoordVariables(netcdfFile, recordVariable, null, null, latDimShortName, lonDimShortName);
     Variable latVariable = coordVariablePair[1];
     Variable lonVariable = coordVariablePair[0];
     return NetCdfReader.getRasterHelper(netcdfFile, recordVariable, lonVariable, latVariable, true);
@@ -141,10 +149,14 @@ public class NetCdfReader {
   private static Variable[] getCoordVariables(
       NetcdfFile netcdfFile,
       Variable recordVariable,
+      Dimension latDim,
+      Dimension lonDim,
       String latVariableShortName,
       String lonVariableShortName) {
-    Variable lonVariable = findCoordVariable(netcdfFile, recordVariable, lonVariableShortName);
-    Variable latVariable = findCoordVariable(netcdfFile, recordVariable, latVariableShortName);
+    Variable lonVariable =
+        findCoordVariable(netcdfFile, recordVariable, lonDim, lonVariableShortName);
+    Variable latVariable =
+        findCoordVariable(netcdfFile, recordVariable, latDim, latVariableShortName);
     ensureCoordVar(lonVariable, latVariable);
     return new Variable[] {lonVariable, latVariable};
   }
@@ -152,38 +164,48 @@ public class NetCdfReader {
   /**
    * Resolve the coordinate variable for a dimension of the record variable. Full-path names
    * ("sub/lat") resolve directly. Plain names search the record variable's group and its ancestors
-   * first, then laterally across the whole file; in both cases a candidate must be a rank-1 numeric
-   * variable whose sole dimension is one of the record variable's actual dimensions (matched by
-   * identity), so an identically named variable declared over an unrelated dimension is never
-   * selected.
+   * first, then laterally across the whole file. In every case — including path-resolved candidates
+   * — the variable must be rank-1, numeric, and attached to the expected dimension (matched by
+   * identity), so a same-named variable over a different axis (e.g. a local {@code lat(time)} next
+   * to the true {@code lat(lat)}) or an unrelated group's dimension is never selected. When {@code
+   * expectedDim} is null (user-named coordinates in the long form of {@code getRaster}), any of the
+   * record variable's dimensions is accepted.
    */
   private static Variable findCoordVariable(
-      NetcdfFile netcdfFile, Variable recordVariable, String name) {
+      NetcdfFile netcdfFile, Variable recordVariable, Dimension expectedDim, String name) {
     if (name == null) return null;
     if (name.contains("/")) {
-      return netcdfFile.findVariable(name);
+      Variable v = netcdfFile.findVariable(name);
+      return isCoordinateForRecord(v, recordVariable, expectedDim) ? v : null;
     }
     for (Group group = recordVariable.getParentGroup();
         group != null;
         group = group.getParentGroup()) {
       Variable v = group.findVariableLocal(name);
-      if (isCoordinateForRecord(v, recordVariable)) return v;
+      if (isCoordinateForRecord(v, recordVariable, expectedDim)) return v;
     }
     for (Variable v : netcdfFile.getVariables()) {
-      if (name.equals(v.getShortName()) && isCoordinateForRecord(v, recordVariable)) return v;
+      if (name.equals(v.getShortName()) && isCoordinateForRecord(v, recordVariable, expectedDim)) {
+        return v;
+      }
     }
     return null;
   }
 
   /**
-   * Whether a variable can serve as a coordinate variable for the record variable: rank-1, numeric,
-   * and its sole dimension is one of the record variable's dimensions (identity).
+   * Whether a variable can serve as a coordinate variable: rank-1, numeric, and its sole dimension
+   * is the expected dimension (identity) — or, when no specific dimension is expected, any of the
+   * record variable's dimensions.
    */
-  private static boolean isCoordinateForRecord(Variable v, Variable recordVariable) {
+  private static boolean isCoordinateForRecord(
+      Variable v, Variable recordVariable, Dimension expectedDim) {
     if (v == null || v.getRank() != 1 || v.getDataType() == null || !v.getDataType().isNumeric()) {
       return false;
     }
     Dimension dim = v.getDimension(0);
+    if (expectedDim != null) {
+      return dim == expectedDim;
+    }
     for (Dimension recordDim : recordVariable.getDimensions()) {
       if (recordDim == dim) return true;
     }
@@ -291,9 +313,11 @@ public class NetCdfReader {
       else {
         Dimension recordDimension = recordDimensions.get(i);
         String dimensionShortName = recordDimension.getShortName();
-        // Resolve within the record variable's scope with dimension-identity validation, so a
-        // same-named variable elsewhere (e.g. a root `time` next to /sub/time) is never bound
-        Variable recordDimVar = findCoordVariable(netcdfFile, recordVariable, dimensionShortName);
+        // Resolve within the record variable's scope, validated against this exact dimension,
+        // so a same-named variable elsewhere (e.g. a root `time` next to /sub/time) or over a
+        // different axis is never bound
+        Variable recordDimVar =
+            findCoordVariable(netcdfFile, recordVariable, recordDimension, dimensionShortName);
         if (Objects.isNull(recordDimVar))
           throw new IllegalArgumentException(
               String.format(NetCdfConstants.COORD_VARIABLE_NOT_FOUND, dimensionShortName));
