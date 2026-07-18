@@ -93,10 +93,10 @@ public class NetCdfReader {
   /**
    * @param netcdfFile NetCDF file to read
    * @param variableShortName short name of the variable to read
-   * @param latDimShortName short name of the variable that serves as the lat dimension of the
-   *     record variable
-   * @param lonDimShortName short name of the variable that serves as the lon dimension of the
-   *     record variable
+   * @param latDimShortName name of the coordinate variable serving the record variable's Y
+   *     (second-to-last) dimension; it must be attached to exactly that dimension
+   * @param lonDimShortName name of the coordinate variable serving the record variable's X (last)
+   *     dimension; it must be attached to exactly that dimension
    * @return GridCoverage2D object
    * @throws FactoryException
    * @throws IOException
@@ -108,11 +108,25 @@ public class NetCdfReader {
       String lonDimShortName)
       throws FactoryException, IOException {
     Variable recordVariable = getRecordVariableFromShortName(netcdfFile, variableShortName);
+    ImmutableList<Dimension> variableDimensions = recordVariable.getDimensions();
+    int numDimensions = variableDimensions.size();
+    if (numDimensions < 2) {
+      throw new IllegalArgumentException(NetCdfConstants.INSUFFICIENT_DIMENSIONS_VARIABLE);
+    }
+    // The named coordinate variables must serve the record variable's trailing (Y, X)
+    // dimensions — the raster layout assumes them — so each is validated against its intended
+    // axis; non-spatial, duplicate, or swapped coordinates are rejected.
+    Dimension latDimension = variableDimensions.get(numDimensions - 2);
+    Dimension lonDimension = variableDimensions.get(numDimensions - 1);
 
-    // The user names the coordinate variables directly; the axis each one maps to is derived
-    // from the variable's own dimension, so no specific dimension is expected here
     Variable[] coordVariablePair =
-        getCoordVariables(netcdfFile, recordVariable, null, null, latDimShortName, lonDimShortName);
+        getCoordVariables(
+            netcdfFile,
+            recordVariable,
+            latDimension,
+            lonDimension,
+            latDimShortName,
+            lonDimShortName);
     Variable latVariable = coordVariablePair[1];
     Variable lonVariable = coordVariablePair[0];
     return NetCdfReader.getRasterHelper(netcdfFile, recordVariable, lonVariable, latVariable, true);
@@ -167,25 +181,23 @@ public class NetCdfReader {
    * first, then laterally across the whole file. In every case — including path-resolved candidates
    * — the variable must be rank-1, numeric, and attached to the expected dimension (matched by
    * identity), so a same-named variable over a different axis (e.g. a local {@code lat(time)} next
-   * to the true {@code lat(lat)}) or an unrelated group's dimension is never selected. When {@code
-   * expectedDim} is null (user-named coordinates in the long form of {@code getRaster}), any of the
-   * record variable's dimensions is accepted.
+   * to the true {@code lat(lat)}) or an unrelated group's dimension is never selected.
    */
   private static Variable findCoordVariable(
       NetcdfFile netcdfFile, Variable recordVariable, Dimension expectedDim, String name) {
     if (name == null) return null;
     if (name.contains("/")) {
       Variable v = netcdfFile.findVariable(name);
-      return isCoordinateForRecord(v, recordVariable, expectedDim) ? v : null;
+      return isCoordinateFor(v, expectedDim) ? v : null;
     }
     for (Group group = recordVariable.getParentGroup();
         group != null;
         group = group.getParentGroup()) {
       Variable v = group.findVariableLocal(name);
-      if (isCoordinateForRecord(v, recordVariable, expectedDim)) return v;
+      if (isCoordinateFor(v, expectedDim)) return v;
     }
     for (Variable v : netcdfFile.getVariables()) {
-      if (name.equals(v.getShortName()) && isCoordinateForRecord(v, recordVariable, expectedDim)) {
+      if (name.equals(v.getShortName()) && isCoordinateFor(v, expectedDim)) {
         return v;
       }
     }
@@ -193,23 +205,23 @@ public class NetCdfReader {
   }
 
   /**
-   * Whether a variable can serve as a coordinate variable: rank-1, numeric, and its sole dimension
-   * is the expected dimension (identity) — or, when no specific dimension is expected, any of the
-   * record variable's dimensions.
+   * Whether a variable can serve as the coordinate variable for the expected dimension: rank-1,
+   * numeric, and its sole dimension is that exact dimension (identity).
    */
-  private static boolean isCoordinateForRecord(
-      Variable v, Variable recordVariable, Dimension expectedDim) {
+  private static boolean isCoordinateFor(Variable v, Dimension expectedDim) {
     if (v == null || v.getRank() != 1 || v.getDataType() == null || !v.getDataType().isNumeric()) {
       return false;
     }
-    Dimension dim = v.getDimension(0);
-    if (expectedDim != null) {
-      return dim == expectedDim;
+    return v.getDimension(0) == expectedDim;
+  }
+
+  /** Index of the given dimension within the record variable's dimensions, by identity. */
+  private static int dimensionIndexOf(Variable recordVariable, Dimension dim) {
+    List<Dimension> dims = recordVariable.getDimensions();
+    for (int i = 0; i < dims.size(); i++) {
+      if (dims.get(i) == dim) return i;
     }
-    for (Dimension recordDim : recordVariable.getDimensions()) {
-      if (recordDim == dim) return true;
-    }
-    return false;
+    return -1;
   }
 
   private static ImmutableList<Variable> getRecordVariables(NetcdfFile netcdfFile) {
@@ -263,9 +275,6 @@ public class NetCdfReader {
     translateY = Math.abs(lastVal - firstVal) / (height - 1);
     // ======================================================================================================
 
-    String lonVariableName = lonVariable.getShortName();
-    String latVariableName = latVariable.getShortName();
-
     List<Dimension> recordDimensions = recordVariable.getDimensions();
     int numRecordDimensions = recordDimensions.size();
 
@@ -273,9 +282,12 @@ public class NetCdfReader {
     int lonIndex = numRecordDimensions - 1;
     int latIndex = numRecordDimensions - 2;
     if (findCoordIndices) {
-      lonIndex = recordVariable.findDimensionIndex(lonVariableName);
-      latIndex = recordVariable.findDimensionIndex(latVariableName);
-      if (latIndex == -1 || lonIndex == -1) {
+      // Derive the axis indices from the coordinate variables' actual dimension identities,
+      // never from name matching, so a coordinate whose name differs from (or collides with)
+      // a dimension name still slices the correct axis
+      latIndex = dimensionIndexOf(recordVariable, latVariable.getDimension(0));
+      lonIndex = dimensionIndexOf(recordVariable, lonVariable.getDimension(0));
+      if (latIndex == -1 || lonIndex == -1 || latIndex == lonIndex) {
         throw new IllegalArgumentException(NetCdfConstants.COORD_IDX_NOT_FOUND);
       }
     }
@@ -294,12 +306,9 @@ public class NetCdfReader {
     int numBands = 1;
     int numValuesPerBand = 1;
     for (int i = 0; i < numRecordDimensions; i++) {
-      Dimension recordDimension = recordDimensions.get(i);
-      String dimensionShortName = recordDimension.getShortName();
-      // TODO: Maybe replace this string comparison with index comparison since we already have lon
-      // and lat dimension indices stored?
-      if (dimensionShortName.equalsIgnoreCase(latVariableName)
-          || dimensionShortName.equalsIgnoreCase(lonVariableName)) {
+      // Compare by axis index, not by name: a band dimension sharing a coordinate variable's
+      // name must still count toward the bands
+      if (i == latIndex || i == lonIndex) {
         numValuesPerBand *= strides[i];
       } else {
         numBands *= strides[i];

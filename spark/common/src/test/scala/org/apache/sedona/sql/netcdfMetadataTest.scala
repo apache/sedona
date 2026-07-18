@@ -700,6 +700,73 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assert(row.isNullAt(row.fieldIndex("crs")))
     }
 
+    it("should validate explicitly named RS_FromNetCDF coordinates against their axes") {
+      // Long form: the named lat coordinate must be attached to the record variable's Y
+      // dimension. The decoy /data/lat(time) is rejected and the lateral /coords/lat(lat)
+      // is bound instead, exactly as in the short form.
+      val row = sparkSession.read
+        .format("binaryFile")
+        .load(variantsDir + "test_reader_axis.nc4")
+        .selectExpr("RS_FromNetCDF(content, 'data/temp', 'lon', 'lat') as raster")
+        .selectExpr(
+          "RS_Width(raster) as width",
+          "RS_Height(raster) as height",
+          "RS_NumBands(raster) as numBands")
+        .first()
+      assertEquals(4, row.getAs[Int]("width"))
+      assertEquals(3, row.getAs[Int]("height"))
+      assertEquals(2, row.getAs[Int]("numBands"))
+    }
+
+    it("should reject explicitly named coordinates on a non-spatial axis") {
+      // Naming the time coordinate as the latitude axis must fail loudly: time(time) is not
+      // attached to the record variable's Y dimension.
+      def messages(t: Throwable): Seq[String] =
+        if (t == null) Nil else Option(t.getMessage).toSeq ++ messages(t.getCause)
+      val err = intercept[Exception] {
+        sparkSession.read
+          .format("binaryFile")
+          .load(variantsDir + "test_reader_axis.nc4")
+          .selectExpr("RS_FromNetCDF(content, 'data/temp', 'lon', 'time') as r")
+          .collect()
+      }
+      assert(messages(err).exists(_.toLowerCase.contains("invalid")), s"unexpected error: $err")
+    }
+
+    it("should match expanded grid-mapping clauses to lateral sibling-group coordinates") {
+      // The grid coordinates /coords/x,/coords/y are found laterally by dimension identity;
+      // the clause references "x y" (plain names, not visible in the data variable's scope)
+      // must match them through the same CF-aware resolution.
+      val df = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_multimapping_lateral.nc4")
+      val row = df.select("srid", "crs").first()
+      assertEquals(3857, row.getAs[Int]("srid"))
+      assert(row.getAs[String]("crs").contains("Pseudo-Mercator"))
+      val gt = df.selectExpr("geoTransform.scaleX").first()
+      assertEquals(500.0, gt.getAs[Double]("scaleX"), 1e-6)
+    }
+
+    it("should veto WGS 84 inference on a contradicting ellipsoid name") {
+      // horizontal_datum_name = WGS84 but reference_ellipsoid_name = GRS_1980
+      val row = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_gm_badellipsoid.nc")
+        .select("srid")
+        .first()
+      assert(row.isNullAt(row.fieldIndex("srid")))
+    }
+
+    it("should veto WGS 84 inference on a non-Greenwich prime meridian name") {
+      // geographic_crs_name = WGS 84 but prime_meridian_name = Paris
+      val row = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_gm_badpm.nc")
+        .select("srid")
+        .first()
+      assert(row.isNullAt(row.fieldIndex("srid")))
+    }
+
     it("should resolve RS_FromNetCDF band dimensions in the record variable's scope") {
       // Root declares time(1) with a coordinate variable; /sub/temp(time, lat, lon) uses
       // /sub/time(2). Binding the root variable would fail on the second band.

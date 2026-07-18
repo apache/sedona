@@ -579,11 +579,19 @@ class NetCdfMetadataPartitionReader(
     if (clauses.size == 1) return Some(clauses.head._1)
 
     if (gridCoordVars.nonEmpty) {
-      clauses
-        .find(_._2.exists(reference =>
-          findReferencedVariable(dataVar, reference).exists(resolved =>
-            gridCoordVars.exists(_ eq resolved))))
-        .map(_._1)
+      // A clause coordinate reference matches when it resolves (by scope for plain names, by
+      // path otherwise) to one of the grid's coordinate variables. A plain name that is not
+      // visible in the data variable's scope falls back to the same CF-aware lateral
+      // resolution the grid coordinates themselves were found with — a sibling-group
+      // coordinate (e.g. /coords/x) is legitimately referenced by its plain name.
+      def matchesGridCoordinate(reference: String): Boolean = {
+        findReferencedVariable(dataVar, reference) match {
+          case Some(resolved) => gridCoordVars.exists(_ eq resolved)
+          case None =>
+            !reference.contains("/") && gridCoordVars.exists(_.getShortName == reference)
+        }
+      }
+      clauses.find(_._2.exists(matchesGridCoordinate)).map(_._1)
     } else {
       // No resolvable grid coordinates (extent is null anyway): best-effort basename match
       clauses
@@ -612,7 +620,9 @@ class NetCdfMetadataPartitionReader(
       datumName.exists(WGS84_DATUM_NAMES.contains) || crsName.exists(WGS84_DATUM_NAMES.contains)
     val nameContradicts =
       datumName.exists(!WGS84_DATUM_NAMES.contains(_)) ||
-        crsName.exists(!WGS84_DATUM_NAMES.contains(_))
+        crsName.exists(!WGS84_DATUM_NAMES.contains(_)) ||
+        normalized("reference_ellipsoid_name").exists(!WGS84_ELLIPSOID_NAMES.contains(_)) ||
+        normalized("prime_meridian_name").exists(_ != "greenwich")
 
     // Ellipsoid parameters, when present, must be consistent with the WGS 84 ellipsoid
     val paramsContradict =
@@ -746,6 +756,9 @@ object NetCdfMetadataPartitionReader {
    */
   private val WGS84_DATUM_NAMES =
     Set("wgs84", "wgs1984", "worldgeodeticsystem1984", "worldgeodeticsystem1984ensemble")
+
+  /** Normalized `reference_ellipsoid_name` values consistent with the WGS 84 ellipsoid. */
+  private val WGS84_ELLIPSOID_NAMES = Set("wgs84", "wgs1984", "worldgeodeticsystem1984")
 
   // Fields that require opening the file and parsing its header
   private val HEADER_FIELDS =
