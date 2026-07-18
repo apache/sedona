@@ -407,6 +407,15 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assertEquals(39.75, corners.getAs[Double]("minY"), 1e-6)
       assertEquals(22.5, corners.getAs[Double]("maxX"), 1e-6)
       assertEquals(41.25, corners.getAs[Double]("maxY"), 1e-6)
+
+      // The lon variable declares _FillValue = -1 (byte) with _Unsigned = "true":
+      // the reported no-data value must be the unsigned reinterpretation, 255
+      val lon = df
+        .selectExpr("explode(variables) as v")
+        .where("v.name = 'lon'")
+        .selectExpr("v.noDataValue")
+        .first()
+      assertEquals(255.0, lon.getAs[Double]("noDataValue"), 1e-6)
     }
 
     it("should resolve coordinates within the data variable's group, not globally") {
@@ -416,6 +425,10 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       val row = df.first()
       assertEquals(5, row.getAs[Int]("width"))
       assertEquals(3, row.getAs[Int]("height"))
+      // The grid mapping is referenced with an absolute path (temp:grid_mapping = "/crs"),
+      // which must resolve to the root crs variable
+      assertEquals(4326, row.getAs[Int]("srid"))
+      assert(row.getAs[String]("crs").contains("WGS 84"))
       val gt = df
         .selectExpr(
           "geoTransform.upperLeftX",
@@ -438,9 +451,54 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assert(dimNames.contains(("sub/lon", 5)))
     }
 
-    it("should parse the extended grid_mapping form and infer EPSG:4326 for latitude_longitude") {
+    it("should find coordinate variables laterally by dimension identity") {
+      // Dimensions are declared at the root; the coordinate variables live in /coords and the
+      // data variable in the sibling group /data. The lateral lookup must bind them because
+      // they reference the very same root dimensions.
+      val df = sparkSession.read.format("netcdf.metadata").load(variantsDir + "test_lateral.nc4")
+      val row = df.first()
+      assertEquals(4, row.getAs[Int]("width"))
+      assertEquals(3, row.getAs[Int]("height"))
+      val gt = df
+        .selectExpr("geoTransform.upperLeftX", "geoTransform.upperLeftY")
+        .first()
+      // lat 10..12, lon 20..23, spacing 1.0
+      assertEquals(19.5, gt.getAs[Double]("upperLeftX"), 1e-6)
+      assertEquals(12.5, gt.getAs[Double]("upperLeftY"), 1e-6)
+    }
+
+    it("should skip declared ancillary variables when selecting the grid variable") {
+      // quality(lat, lon) is declared BEFORE temperature(lat, lon), but temperature declares
+      // ancillary_variables = "quality", so temperature must be selected and its grid_mapping
+      // (with crs_wkt) must drive the CRS.
+      val row = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_ancillary.nc")
+        .select("width", "height", "srid", "crs")
+        .first()
+      assertEquals(4, row.getAs[Int]("width"))
+      assertEquals(3, row.getAs[Int]("height"))
+      assertEquals(4326, row.getAs[Int]("srid"))
+      assert(row.getAs[String]("crs").contains("WGS 84"))
+    }
+
+    it("should load a nested variable through RS_FromNetCDF using the discovered full name") {
+      // The documented workflow: discover the variable name with netcdf.metadata, pass it to
+      // RS_FromNetCDF — including full names of variables in nested groups.
+      val rasterRow = sparkSession.read
+        .format("binaryFile")
+        .load(variantsDir + "test_groups.nc4")
+        .selectExpr("RS_FromNetCDF(content, 'sub/temp') as raster")
+        .selectExpr("RS_Width(raster) as width", "RS_Height(raster) as height")
+        .first()
+      assertEquals(5, rasterRow.getAs[Int]("width"))
+      assertEquals(3, rasterRow.getAs[Int]("height"))
+    }
+
+    it("should parse the extended grid_mapping form and identify WGS 84 by datum name") {
       // temp:grid_mapping = "crs: lat lon" (CF extended form); the crs variable declares
-      // grid_mapping_name = latitude_longitude with no datum parameters and no crs_wkt.
+      // grid_mapping_name = latitude_longitude and horizontal_datum_name = "WGS84" (positive
+      // identification), but no crs_wkt.
       val row = sparkSession.read
         .format("netcdf.metadata")
         .load(variantsDir + "test_gridmapping_ext.nc")
@@ -448,6 +506,18 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
         .first()
       assertEquals(4326, row.getAs[Int]("srid"))
       // The file carries no CRS WKT, so the crs column stays null (faithful output)
+      assert(row.isNullAt(row.fieldIndex("crs")))
+    }
+
+    it("should not infer an SRID from the latitude_longitude mapping name alone") {
+      // The mapping name does not fix the datum: without a positive WGS 84 identification
+      // (datum/CRS name or ellipsoid parameters), srid must stay null.
+      val row = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_gridmapping_plain.nc")
+        .select("srid", "crs")
+        .first()
+      assert(row.isNullAt(row.fieldIndex("srid")))
       assert(row.isNullAt(row.fieldIndex("crs")))
     }
 
@@ -474,9 +544,11 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       FileUtils.copyFile(new File(singleFileLocation), new File(d2020, "a.nc"))
       FileUtils.copyFile(new File(singleFileLocation), new File(d2021, "b.nc"))
 
+      // Mixed-case option spelling: data source options are case-insensitive, so this must
+      // suppress the lowercase recursiveFileLookup default just the same
       val df = sparkSession.read
         .format("netcdf.metadata")
-        .option("recursiveFileLookup", "false")
+        .option("RecursiveFileLookup", "false")
         .load(base.getAbsolutePath)
       // Partition inference stays available because the explicit option is respected
       assert(df.schema.fieldNames.contains("year"))
@@ -487,6 +559,26 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       rows.foreach { r =>
         assert(r.getAs[String]("path").contains(s"year=${r.getAs[Int]("year")}"))
       }
+    }
+
+    it("should apply both a glob path and an explicit pathGlobFilter") {
+      // Native Spark semantics: both constraints apply, so a*.nc restricted to b*.nc is empty.
+      // The internal glob-to-filter rewrite must not discard either constraint.
+      val dir = new File(tempDir, "globAndFilter")
+      dir.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(dir, "a.nc"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(dir, "b.nc"))
+
+      val both = sparkSession.read
+        .format("netcdf.metadata")
+        .option("pathGlobFilter", "b*.nc")
+        .load(dir.getAbsolutePath + "/a*.nc")
+      assertEquals(0L, both.count())
+
+      // Sanity: without the explicit filter, the glob path alone matches a.nc
+      val globOnly =
+        sparkSession.read.format("netcdf.metadata").load(dir.getAbsolutePath + "/a*.nc")
+      assertEquals(1L, globOnly.count())
     }
 
     it("should filter non-NetCDF files when loading multiple directories") {
@@ -520,6 +612,63 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
           s"unexpected error: $err")
       } finally {
         sparkSession.sql("DROP TABLE IF EXISTS netcdf_meta_tbl")
+      }
+    }
+
+    it("should reject catalog table creation with an explicit schema") {
+      // With a user-supplied schema Spark skips FileFormat.inferSchema, so rejection relies on
+      // the stub fallback format failing on instantiation. Depending on the Spark version the
+      // error surfaces at CREATE or at first SELECT — either way it must be the clear message,
+      // never an NPE or a silently unusable table.
+      def messages(t: Throwable): Seq[String] =
+        if (t == null) Nil else Option(t.getMessage).toSeq ++ messages(t.getCause)
+
+      sparkSession.sql("DROP TABLE IF EXISTS netcdf_meta_schema_tbl")
+      try {
+        val err = intercept[Exception] {
+          sparkSession.sql(
+            "CREATE TABLE netcdf_meta_schema_tbl (path STRING) " +
+              s"USING `netcdf.metadata` LOCATION '$singleFileLocation'")
+          sparkSession.sql("SELECT * FROM netcdf_meta_schema_tbl").collect()
+        }
+        assert(
+          messages(err).exists(_.contains("does not support catalog table operations")),
+          s"unexpected error: $err")
+      } finally {
+        sparkSession.sql("DROP TABLE IF EXISTS netcdf_meta_schema_tbl")
+      }
+    }
+
+    it("should stop on zero-progress channel writes instead of spinning") {
+      val file = new File(tempDir, "raf_zero.bin")
+      val payload = Array.tabulate[Byte](64 * 1024)(i => (i % 127).toByte)
+      FileUtils.writeByteArrayToFile(file, payload)
+
+      val raf = new org.apache.spark.sql.sedona_sql.io.netcdfmetadata.HadoopRandomAccessFile(
+        new org.apache.hadoop.fs.Path(file.toURI),
+        new org.apache.hadoop.conf.Configuration(),
+        file.length(),
+        file.lastModified())
+      try {
+        // Accepts 7 bytes for the first 3 calls, then permanently reports zero progress
+        val stalling = new java.nio.channels.WritableByteChannel {
+          private var calls = 0
+          private var open = true
+          override def isOpen: Boolean = open
+          override def close(): Unit = { open = false }
+          override def write(src: java.nio.ByteBuffer): Int = {
+            calls += 1
+            if (calls > 3) return 0
+            val n = math.min(7, src.remaining())
+            src.position(src.position() + n)
+            n
+          }
+        }
+        val copied = raf.readToByteChannel(stalling, 0, file.length())
+        // Must report exactly the bytes the channel accepted, and must not hang
+        assertEquals(21L, copied)
+      } finally {
+        raf.close()
       }
     }
 

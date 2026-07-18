@@ -76,7 +76,7 @@ public class NetCdfReader {
     String lonDimensionShortName = variableDimensions.get(numDimensions - 1).getShortName();
 
     Variable[] coordVariablePair =
-        getCoordVariables(netcdfFile, latDimensionShortName, lonDimensionShortName);
+        getCoordVariables(netcdfFile, recordVariable, latDimensionShortName, lonDimensionShortName);
     Variable latVariable = coordVariablePair[1];
     Variable lonVariable = coordVariablePair[0];
     return NetCdfReader.getRasterHelper(
@@ -102,7 +102,8 @@ public class NetCdfReader {
       throws FactoryException, IOException {
     Variable recordVariable = getRecordVariableFromShortName(netcdfFile, variableShortName);
 
-    Variable[] coordVariablePair = getCoordVariables(netcdfFile, latDimShortName, lonDimShortName);
+    Variable[] coordVariablePair =
+        getCoordVariables(netcdfFile, recordVariable, latDimShortName, lonDimShortName);
     Variable latVariable = coordVariablePair[1];
     Variable lonVariable = coordVariablePair[0];
     return NetCdfReader.getRasterHelper(netcdfFile, recordVariable, lonVariable, latVariable, true);
@@ -124,20 +125,47 @@ public class NetCdfReader {
 
   private static Variable getRecordVariableFromShortName(
       NetcdfFile netcdfFile, String variableShortName) {
-    Variable recordVariable = findVariableRecursive(variableShortName, netcdfFile.getRootGroup());
+    Variable recordVariable;
+    if (variableShortName != null && variableShortName.contains("/")) {
+      // Full-path names such as "sub/temp" (as reported by the netcdf.metadata data source
+      // for variables in nested groups) resolve through the file's full-name lookup.
+      recordVariable = netcdfFile.findVariable(variableShortName);
+    } else {
+      recordVariable = findVariableRecursive(variableShortName, netcdfFile.getRootGroup());
+    }
     ensureRecordVar(recordVariable);
     return recordVariable;
   }
 
   private static Variable[] getCoordVariables(
-      NetcdfFile netcdfFile, String latVariableShortName, String lonVariableShortName) {
-    Group rootGroup = netcdfFile.getRootGroup();
-
-    // TODO: optimize to get all variables in 1 tree traversal?
-    Variable lonVariable = findVariableRecursive(lonVariableShortName, rootGroup);
-    Variable latVariable = findVariableRecursive(latVariableShortName, rootGroup);
+      NetcdfFile netcdfFile,
+      Variable recordVariable,
+      String latVariableShortName,
+      String lonVariableShortName) {
+    Variable lonVariable = findCoordVariable(netcdfFile, recordVariable, lonVariableShortName);
+    Variable latVariable = findCoordVariable(netcdfFile, recordVariable, latVariableShortName);
     ensureCoordVar(lonVariable, latVariable);
     return new Variable[] {lonVariable, latVariable};
+  }
+
+  /**
+   * Resolve a coordinate variable name. Full-path names ("sub/lat") resolve directly; plain names
+   * search the record variable's group and its ancestors first (so a nested variable binds the
+   * coordinates of its own group, not an identically named variable elsewhere), then fall back to
+   * the recursive whole-file search for backward compatibility.
+   */
+  private static Variable findCoordVariable(
+      NetcdfFile netcdfFile, Variable recordVariable, String name) {
+    if (name != null && name.contains("/")) {
+      return netcdfFile.findVariable(name);
+    }
+    for (Group group = recordVariable.getParentGroup();
+        group != null;
+        group = group.getParentGroup()) {
+      Variable v = group.findVariableLocal(name);
+      if (v != null) return v;
+    }
+    return findVariableRecursive(name, netcdfFile.getRootGroup());
   }
 
   private static ImmutableList<Variable> getRecordVariables(NetcdfFile netcdfFile) {

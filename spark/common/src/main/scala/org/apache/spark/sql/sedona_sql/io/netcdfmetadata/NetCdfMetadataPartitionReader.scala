@@ -115,7 +115,7 @@ class NetCdfMetadataPartitionReader(
       if (needExtent) {
         gridVar.flatMap { v =>
           val (latDim, lonDim) = trailingDims(v)
-          computeExtent(v, latDim, lonDim)
+          computeExtent(v, latDim, lonDim, allVariables)
         }
       } else None
 
@@ -165,10 +165,33 @@ class NetCdfMetadataPartitionReader(
       units = attrString(v, "units"),
       longName = attrString(v, "long_name"),
       standardName = attrString(v, "standard_name"),
-      // CF convention: _FillValue takes precedence over missing_value
-      noDataValue = attrDouble(v, "_FillValue").orElse(attrDouble(v, "missing_value")),
+      // CF convention: _FillValue takes precedence over missing_value; the owning variable's
+      // _Unsigned semantics apply to the stored value (e.g. byte -1 with _Unsigned means 255)
+      noDataValue = attrDouble(v, "_FillValue")
+        .orElse(attrDouble(v, "missing_value"))
+        .map(widenIfUnsignedVariable(v, _)),
       isCoordinate = v.isCoordinateVariable,
       attributes = attributesToMap(v.attributes()))
+  }
+
+  /** Whether the variable stores unsigned integers (unsigned type, or classic `_Unsigned`). */
+  private def isUnsignedIntegral(v: Variable): Boolean = {
+    val dataType = v.getDataType
+    dataType != null && dataType.isIntegral &&
+    (dataType.isUnsigned || "true".equalsIgnoreCase(attrString(v, "_Unsigned")))
+  }
+
+  /**
+   * Reinterpret a signed stored value as unsigned when the owning variable declares unsigned
+   * semantics; attribute values (`_FillValue`, `missing_value`) are stored in the variable's
+   * type, so they widen the same way as data.
+   */
+  private def widenIfUnsignedVariable(v: Variable, value: Double): Double = {
+    if (value < 0 && isUnsignedIntegral(v)) {
+      value + math.pow(2, v.getDataType.getSize * 8)
+    } else {
+      value
+    }
   }
 
   private def attrString(v: Variable, name: String): String =
@@ -217,25 +240,41 @@ class NetCdfMetadataPartitionReader(
 
   /**
    * Select the variable that defines the raster grid: its trailing two dimensions are interpreted
-   * as (y, x), the convention shared with `RS_FromNetCDF`. Rank >= 2 variables referenced by a CF
-   * `bounds` or `climatology` attribute are cell-boundary variables (e.g. `lat_bnds(lat, nv)`),
-   * not data, and are skipped. Among the remaining candidates, the first one whose trailing
-   * dimensions have resolvable 1-D numeric coordinate variables is preferred, so ancillary rank-2
-   * variables that precede the data in the file cannot hijack the grid.
+   * as (y, x), the convention shared with `RS_FromNetCDF`. Rank >= 2 variables referenced by CF
+   * metadata attributes — cell boundaries (`bounds`, `climatology`), auxiliary coordinates
+   * (`coordinates`), ancillary/quality variables (`ancillary_variables`), cell measures
+   * (`cell_measures`), and formula terms (`formula_terms`) — describe other variables, not data,
+   * and are skipped. Among the remaining candidates, the first one whose trailing dimensions have
+   * resolvable 1-D numeric coordinate variables is preferred, so ancillary rank-2 variables that
+   * precede the data in the file cannot hijack the grid.
    */
   private def selectGridVariable(allVariables: Seq[Variable]): Option[Variable] = {
-    val boundsNames = allVariables.flatMap { v =>
-      Seq("bounds", "climatology").flatMap(a => Option(attrString(v, a)))
+    val referencedNames = allVariables.flatMap { v =>
+      METADATA_REFERENCE_ATTRS.flatMap(a => Option(attrString(v, a))).flatMap(referencedTokens)
     }.toSet
     val candidates =
-      allVariables.filter(v => v.getRank >= 2 && !boundsNames.contains(v.getShortName))
+      allVariables.filter(v => v.getRank >= 2 && !referencedNames.contains(v.getShortName))
     candidates
       .find { v =>
         val (latDim, lonDim) = trailingDims(v)
-        findCoordinateVariable(v, latDim).isDefined && findCoordinateVariable(v, lonDim).isDefined
+        findCoordinateVariable(v, latDim, allVariables).isDefined &&
+        findCoordinateVariable(v, lonDim, allVariables).isDefined
       }
       .orElse(candidates.headOption)
       .orElse(allVariables.find(_.getRank >= 2))
+  }
+
+  /**
+   * Variable names referenced by a CF attribute value. Handles blank-separated lists
+   * (`ancillary_variables`), keyed forms like `"area: cell_area"` (keys end with `:` and are
+   * dropped), and group paths (both the full path and its last segment are returned).
+   */
+  private def referencedTokens(attrValue: String): Seq[String] = {
+    attrValue.trim
+      .split("\\s+")
+      .toSeq
+      .filter(t => t.nonEmpty && !t.endsWith(":"))
+      .flatMap(t => Seq(t, t.substring(t.lastIndexOf('/') + 1)))
   }
 
   private def trailingDims(v: Variable): (Dimension, Dimension) = {
@@ -244,26 +283,33 @@ class NetCdfMetadataPartitionReader(
   }
 
   /**
-   * Find the 1-D numeric coordinate variable for `dim`, searching the data variable's group and
-   * then its ancestors (NUG scoping), so an identically named variable in an unrelated group is
-   * never picked up. The nearest name match wins; if that variable is not a valid coordinate
-   * (wrong rank, non-numeric — e.g. a char/String label sharing the dimension name), the
-   * reference is treated as unresolved rather than continuing past the shadowing name.
+   * Find the 1-D numeric coordinate variable for `dim`. Search order follows CF/NUG scoping:
+   * first the data variable's group and its ancestors by name (proximity), then a lateral search
+   * anywhere in the file matched strictly by dimension identity — a NUG coordinate variable may
+   * legally live outside the data variable's lineage (e.g. a sibling group) as long as it
+   * references the very same dimension. Identity matching (`eq`) guarantees an identically named
+   * dimension declared in an unrelated group is never picked up.
    */
-  private def findCoordinateVariable(dataVar: Variable, dim: Dimension): Option[Variable] = {
+  private def findCoordinateVariable(
+      dataVar: Variable,
+      dim: Dimension,
+      allVariables: Seq[Variable]): Option[Variable] = {
     val name = dim.getShortName
     if (name == null) return None
+
+    def isCoordinateFor(v: Variable): Boolean =
+      v.getRank == 1 && v.getDataType != null && v.getDataType.isNumeric &&
+        v.getShortName == name && (v.getDimension(0) eq dim)
+
+    // Proximity: the data variable's group, then its ancestors
     var group = dataVar.getParentGroup
     while (group != null) {
       val v = group.findVariableLocal(name)
-      if (v != null) {
-        return if (v.getRank == 1 && v.getDataType != null && v.getDataType.isNumeric &&
-          v.getDimension(0).getShortName == name) Some(v)
-        else None
-      }
+      if (v != null && isCoordinateFor(v)) return Some(v)
       group = group.getParentGroup
     }
-    None
+    // Lateral: anywhere in the file, by dimension identity
+    allVariables.find(isCoordinateFor)
   }
 
   /**
@@ -277,9 +323,10 @@ class NetCdfMetadataPartitionReader(
   private def computeExtent(
       gridVar: Variable,
       latDim: Dimension,
-      lonDim: Dimension): Option[GridExtent] = {
-    val lonVarOpt = findCoordinateVariable(gridVar, lonDim)
-    val latVarOpt = findCoordinateVariable(gridVar, latDim)
+      lonDim: Dimension,
+      allVariables: Seq[Variable]): Option[GridExtent] = {
+    val lonVarOpt = findCoordinateVariable(gridVar, lonDim, allVariables)
+    val latVarOpt = findCoordinateVariable(gridVar, latDim, allVariables)
     if (lonVarOpt.isEmpty || latVarOpt.isEmpty) return None
     val lonVar = lonVarOpt.get
     val latVar = latVarOpt.get
@@ -331,15 +378,13 @@ class NetCdfMetadataPartitionReader(
   private def read1D(v: Variable): Array[Double] = {
     val data = v.read()
     val n = data.getSize.toInt
-    val dataType = v.getDataType
-    val unsignedIntegral = dataType.isIntegral &&
-      (dataType.isUnsigned || "true".equalsIgnoreCase(attrString(v, "_Unsigned")))
+    val unsignedIntegral = isUnsignedIntegral(v)
+    val bits = v.getDataType.getSize * 8
     val scale = attrDouble(v, "scale_factor").getOrElse(1.0)
     val offset = attrDouble(v, "add_offset").getOrElse(0.0)
     Array.tabulate(n) { i =>
       val raw =
         if (unsignedIntegral) {
-          val bits = dataType.getSize * 8
           val value = data.getLong(i)
           if (bits >= 64) value.toDouble else (value & ((1L << bits) - 1)).toDouble
         } else {
@@ -388,15 +433,50 @@ class NetCdfMetadataPartitionReader(
     Some(mean)
   }
 
-  /** Resolve a by-name reference (e.g. a grid mapping) from a variable's group upward. */
-  private def findReferencedVariable(from: Variable, shortName: String): Option[Variable] = {
-    var group = from.getParentGroup
-    while (group != null) {
-      val v = group.findVariableLocal(shortName)
-      if (v != null) return Some(v)
+  /**
+   * Resolve a variable reference (e.g. a grid mapping). CF allows plain names (resolved by
+   * proximity: the referencing variable's group, then its ancestors), absolute paths (`/crs`),
+   * and relative paths (`sub/crs`, `../crs`).
+   */
+  private def findReferencedVariable(from: Variable, reference: String): Option[Variable] = {
+    if (reference.contains("/")) {
+      val startGroup =
+        if (reference.startsWith("/")) rootGroupOf(from) else from.getParentGroup
+      resolvePath(startGroup, reference.split("/").filter(_.nonEmpty))
+    } else {
+      var group = from.getParentGroup
+      while (group != null) {
+        val v = group.findVariableLocal(reference)
+        if (v != null) return Some(v)
+        group = group.getParentGroup
+      }
+      None
+    }
+  }
+
+  private def rootGroupOf(v: Variable): Group = {
+    var group = v.getParentGroup
+    while (group.getParentGroup != null) {
       group = group.getParentGroup
     }
-    None
+    group
+  }
+
+  /** Walk `segments` from `start`: all but the last are group names (`..` steps up). */
+  private def resolvePath(start: Group, segments: Array[String]): Option[Variable] = {
+    if (start == null || segments.isEmpty) return None
+    var group = start
+    var i = 0
+    while (i < segments.length - 1) {
+      group = segments(i) match {
+        case "." => group
+        case ".." => group.getParentGroup
+        case name => group.getGroups.asScala.find(_.getShortName == name).orNull
+      }
+      if (group == null) return None
+      i += 1
+    }
+    Option(group.findVariableLocal(segments.last))
   }
 
   /**
@@ -439,16 +519,33 @@ class NetCdfMetadataPartitionReader(
     attrValue.trim.split("\\s+")(0).stripSuffix(":")
 
   /**
-   * Minimal CF grid-mapping support for files with no CRS WKT: a `latitude_longitude` mapping
-   * that carries no explicit ellipsoid/datum parameters is assumed WGS 84. Conservative on
-   * purpose — any explicit datum description disables the assumption rather than being checked
-   * for WGS 84 equivalence.
+   * Minimal CF grid-mapping support for files with no CRS WKT: EPSG:4326 is reported only when a
+   * `latitude_longitude` grid mapping positively identifies WGS 84 — through
+   * `horizontal_datum_name`/`geographic_crs_name`, or through ellipsoid parameters matching the
+   * WGS 84 ellipsoid — with a Greenwich prime meridian. The mapping name alone does not fix the
+   * datum (the Earth figure can be specified separately), so nothing is inferred from it.
    */
   private def latitudeLongitudeSrid(gmVar: Variable): Option[Int] = {
-    val name = attrString(gmVar, "grid_mapping_name")
-    val hasDatumOverride =
-      DATUM_OVERRIDE_ATTRS.exists(a => gmVar.attributes().findAttribute(a) != null)
-    if (name == "latitude_longitude" && !hasDatumOverride) Some(4326) else None
+    if (attrString(gmVar, "grid_mapping_name") != "latitude_longitude") return None
+
+    def normalized(attr: String): Option[String] =
+      Option(attrString(gmVar, attr)).map(_.toLowerCase.replaceAll("[^a-z0-9]", ""))
+
+    val nameIdentifiesWgs84 =
+      normalized("horizontal_datum_name").exists(WGS84_DATUM_NAMES.contains) ||
+        normalized("geographic_crs_name").contains("wgs84")
+
+    val semiMajor = attrDouble(gmVar, "semi_major_axis")
+    val inverseFlattening = attrDouble(gmVar, "inverse_flattening")
+    val semiMinor = attrDouble(gmVar, "semi_minor_axis")
+    val paramsIdentifyWgs84 =
+      semiMajor.exists(a => math.abs(a - 6378137.0) < 1e-3) &&
+        (inverseFlattening.exists(f => math.abs(f - 298.257223563) < 1e-6) ||
+          semiMinor.exists(b => math.abs(b - 6356752.314245) < 1e-3))
+
+    val greenwich = attrDouble(gmVar, "longitude_of_prime_meridian").forall(_ == 0.0)
+
+    if ((nameIdentifiesWgs84 || paramsIdentifyWgs84) && greenwich) Some(4326) else None
   }
 
   /**
@@ -551,20 +648,21 @@ object NetCdfMetadataPartitionReader {
   private val RELATIVE_STEP_TOLERANCE = 1e-3
 
   /**
-   * Attributes on a `latitude_longitude` grid mapping variable that describe a datum other than
-   * (or in addition to) the WGS 84 default, disabling the EPSG:4326 assumption.
+   * CF attributes whose values reference other variables (cell boundaries, auxiliary coordinates,
+   * ancillary data, cell measures, formula terms); referenced variables describe metadata, not
+   * raster data, and are excluded from grid selection.
    */
-  private val DATUM_OVERRIDE_ATTRS = Set(
-    "semi_major_axis",
-    "semi_minor_axis",
-    "inverse_flattening",
-    "earth_radius",
-    "longitude_of_prime_meridian",
-    "towgs84",
-    "reference_ellipsoid_name",
-    "horizontal_datum_name",
-    "geographic_crs_name",
-    "prime_meridian_name")
+  private val METADATA_REFERENCE_ATTRS = Seq(
+    "bounds",
+    "climatology",
+    "coordinates",
+    "ancillary_variables",
+    "cell_measures",
+    "formula_terms",
+    "grid_mapping")
+
+  /** Normalized `horizontal_datum_name` values that identify WGS 84. */
+  private val WGS84_DATUM_NAMES = Set("wgs84", "worldgeodeticsystem1984")
 
   // Fields that require opening the file and parsing its header
   private val HEADER_FIELDS =

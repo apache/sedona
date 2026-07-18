@@ -55,29 +55,33 @@ class NetCdfMetadataDataSource
     var optionsWithoutPaths = getOptionsWithoutPaths(options)
     val tableName = getTableName(options, paths)
 
+    // Explicit user options always win over the defaults below; presence checks go through the
+    // CaseInsensitiveStringMap because Spark data source options are case-insensitive, so e.g.
+    // an explicit `RecursiveFileLookup` must suppress the lowercase default.
     val newOptions =
       new java.util.HashMap[String, String](optionsWithoutPaths.asCaseSensitiveMap())
+    val hasUserGlobFilter = optionsWithoutPaths.containsKey("pathGlobFilter")
+    val hasUserRecursive = optionsWithoutPaths.containsKey("recursiveFileLookup")
 
     if (paths.size == 1 && !isDirectory(paths.head, optionsWithoutPaths)) {
       // Rewrite glob patterns like /path/to/some*glob*.nc into /path/to with
-      // pathGlobFilter="some*glob*.nc" to avoid listing .nc files as directories
+      // pathGlobFilter="some*glob*.nc" to avoid listing .nc files as directories. When the
+      // user supplied their own pathGlobFilter, keep the glob path untouched so Spark applies
+      // both constraints natively (the rewrite could only keep one of them).
       paths.head match {
-        case loadNcPattern(prefix, glob) =>
+        case loadNcPattern(prefix, glob) if !hasUserGlobFilter =>
           paths = Seq(prefix)
-          if (!newOptions.containsKey("pathGlobFilter")) {
-            newOptions.put("pathGlobFilter", glob)
-          }
+          newOptions.put("pathGlobFilter", glob)
         case _ =>
       }
     } else if (paths.exists(p => isDirectory(p, optionsWithoutPaths))) {
       // Directory roots (single or multiple, with or without trailing slash): default to a
       // recursive scan filtered to NetCDF extensions. These are defaults only — an explicit
-      // user setting always wins, so recursiveFileLookup=false keeps Hive-style partition
-      // discovery available.
-      if (!newOptions.containsKey("recursiveFileLookup")) {
+      // recursiveFileLookup=false keeps Hive-style partition discovery available.
+      if (!hasUserRecursive) {
         newOptions.put("recursiveFileLookup", "true")
       }
-      if (!newOptions.containsKey("pathGlobFilter")) {
+      if (!hasUserGlobFilter) {
         newOptions.put("pathGlobFilter", "*.{nc,nc4,netcdf,NC,NC4,NETCDF}")
       }
     }
@@ -133,22 +137,33 @@ class NetCdfMetadataDataSource
  * The data source is read-only and path-based, so those operations are unsupported — this stub
  * exists to surface a clear error instead of the NullPointerException a null fallback class would
  * produce.
+ *
+ * The constructor itself throws: Spark instantiates the fallback format whenever a catalog
+ * operation resolves the relation — including `CREATE TABLE` with an explicit schema, which skips
+ * `inferSchema` — so failing on instantiation rejects every V1 usage up front. Reads are
+ * unaffected because the V2 path only ever references the class, never constructs it.
  */
 class NetCdfMetadataUnsupportedFileFormat extends FileFormat {
 
-  private def unsupported(): Nothing =
-    throw new UnsupportedOperationException(
-      "netcdf.metadata does not support catalog table operations; " +
-        "read it with spark.read.format(\"netcdf.metadata\").load(path)")
+  throw NetCdfMetadataUnsupportedFileFormat.unsupported()
 
   override def inferSchema(
       sparkSession: SparkSession,
       options: Map[String, String],
-      files: Seq[FileStatus]): Option[StructType] = unsupported()
+      files: Seq[FileStatus]): Option[StructType] =
+    throw NetCdfMetadataUnsupportedFileFormat.unsupported()
 
   override def prepareWrite(
       sparkSession: SparkSession,
       job: Job,
       options: Map[String, String],
-      dataSchema: StructType): OutputWriterFactory = unsupported()
+      dataSchema: StructType): OutputWriterFactory =
+    throw NetCdfMetadataUnsupportedFileFormat.unsupported()
+}
+
+object NetCdfMetadataUnsupportedFileFormat {
+  private def unsupported(): UnsupportedOperationException =
+    new UnsupportedOperationException(
+      "netcdf.metadata does not support catalog table operations; " +
+        "read it with spark.read.format(\"netcdf.metadata\").load(path)")
 }

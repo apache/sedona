@@ -118,11 +118,15 @@ Each row describes one NetCDF file:
 
 The grid-defining variable's trailing two dimensions are interpreted as (Y, X), the
 same convention as `RS_FromNetCDF`. Among variables with at least two dimensions,
-CF cell-boundary variables (those referenced by a `bounds` or `climatology`
-attribute, such as `lat_bnds`) are skipped, and a variable whose trailing dimensions
-have matching 1-D numeric coordinate variables is preferred; coordinate and
-`grid_mapping` references are resolved in the data variable's own group and its
-ancestors, so identically named variables in unrelated groups are never picked up.
+variables referenced by CF metadata attributes (`bounds`, `climatology`,
+`coordinates`, `ancillary_variables`, `cell_measures`, `formula_terms`) describe
+other variables — cell boundaries like `lat_bnds`, quality flags, cell areas — and
+are skipped; a variable whose trailing dimensions have matching 1-D numeric
+coordinate variables is preferred. Coordinate variables are resolved in the data
+variable's own group and its ancestors first, then anywhere in the file matched
+strictly by dimension identity, so identically named dimensions declared in
+unrelated groups are never confused. `grid_mapping` references may be plain names
+(resolved by proximity) or absolute/relative group paths (`/crs`, `../crs`).
 
 Coordinate values are decoded before use: the CF packing attributes `scale_factor`
 and `add_offset` are applied, and `_Unsigned` integer coordinates are widened, so
@@ -139,11 +143,13 @@ The CRS is looked up in this order:
 
 The WKT is reported verbatim in `crs`, and `srid` is the EPSG identity of that WKT
 (resolved with proj4sedona, so no GeoTools runtime is required). When the file
-carries no WKT at all, a `latitude_longitude` grid mapping with no explicit
-ellipsoid or datum parameters is assumed to be WGS 84 and reported as
-`srid = 4326` with a null `crs`. Projected grid mappings defined only by CF
-parameters (e.g. `lambert_conformal_conic` without `crs_wkt`) are not translated —
-both columns stay null.
+carries no WKT at all, `srid = 4326` (with a null `crs`) is reported only for a
+`latitude_longitude` grid mapping that positively identifies WGS 84 — through
+`horizontal_datum_name`/`geographic_crs_name`, or ellipsoid parameters matching the
+WGS 84 ellipsoid, with a Greenwich prime meridian. The mapping name alone does not
+fix the datum, so nothing is inferred from it. Projected grid mappings defined only
+by CF parameters (e.g. `lambert_conformal_conic` without `crs_wkt`) are not
+translated — both columns stay null.
 
 ### Using the CRS downstream
 
