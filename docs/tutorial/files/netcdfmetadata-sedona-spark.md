@@ -138,18 +138,22 @@ The CRS is looked up in this order:
 
 1. `crs_wkt` (CF) or `spatial_ref` (GDAL) on the `grid_mapping` variable of the
    grid-defining variable — both the simple (`"crs"`) and extended
-   (`"crs: lat lon"`) forms of the `grid_mapping` attribute are understood;
+   (`"crs: lat lon"`) forms of the `grid_mapping` attribute are understood. When
+   the extended form declares several mappings (e.g.
+   `"geographic: lat lon projected: x y"`), the mapping whose coordinate list
+   matches the grid's (Y, X) coordinates is selected, so the reported CRS always
+   corresponds to the coordinates used for the extent;
 2. the same attribute names as global attributes.
 
 The WKT is reported verbatim in `crs`, and `srid` is the EPSG identity of that WKT
 (resolved with proj4sedona, so no GeoTools runtime is required). When the file
 carries no WKT at all, `srid = 4326` (with a null `crs`) is reported only for a
-`latitude_longitude` grid mapping that positively identifies WGS 84 — through
-`horizontal_datum_name`/`geographic_crs_name`, or ellipsoid parameters matching the
-WGS 84 ellipsoid, with a Greenwich prime meridian. The mapping name alone does not
-fix the datum, so nothing is inferred from it. Projected grid mappings defined only
-by CF parameters (e.g. `lambert_conformal_conic` without `crs_wkt`) are not
-translated — both columns stay null.
+`latitude_longitude` grid mapping that positively identifies the WGS 84 datum by
+name (`horizontal_datum_name` or `geographic_crs_name`) with a Greenwich prime
+meridian; ellipsoid parameters never qualify on their own (many datums share the
+WGS 84 ellipsoid) and disable the inference when they contradict it. Projected grid
+mappings defined only by CF parameters (e.g. `lambert_conformal_conic` without
+`crs_wkt`) are not translated — both columns stay null.
 
 ### Using the CRS downstream
 
@@ -211,7 +215,7 @@ transform would misrepresent the geometry, so `geoTransform` is null and
 |-------|------|-------------|
 | `name` | String | Variable name (full path for variables in nested groups) |
 | `dataType` | String | NetCDF data type, e.g. `float`, `double`, `int` |
-| `dimensions` | Array[String] | Names of the variable's dimensions, in order |
+| `dimensions` | Array[String] | Names of the variable's dimensions, in order, qualified with the declaring group's path (e.g. `sub/lat`) so they join to the `dimensions` column |
 | `shape` | Array[Int] | Length of each dimension, in order |
 | `units` | String | CF `units` attribute; null if absent |
 | `longName` | String | CF `long_name` attribute; null if absent |

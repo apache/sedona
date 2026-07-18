@@ -26,6 +26,7 @@ import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.datum.PixelInCell;
 import org.geotools.coverage.grid.GridCoverage2D;
 import ucar.ma2.Array;
+import ucar.ma2.DataType;
 import ucar.nc2.*;
 
 public class NetCdfReader {
@@ -149,23 +150,44 @@ public class NetCdfReader {
   }
 
   /**
-   * Resolve a coordinate variable name. Full-path names ("sub/lat") resolve directly; plain names
-   * search the record variable's group and its ancestors first (so a nested variable binds the
-   * coordinates of its own group, not an identically named variable elsewhere), then fall back to
-   * the recursive whole-file search for backward compatibility.
+   * Resolve the coordinate variable for a dimension of the record variable. Full-path names
+   * ("sub/lat") resolve directly. Plain names search the record variable's group and its ancestors
+   * first, then laterally across the whole file; in both cases a candidate must be a rank-1 numeric
+   * variable whose sole dimension is one of the record variable's actual dimensions (matched by
+   * identity), so an identically named variable declared over an unrelated dimension is never
+   * selected.
    */
   private static Variable findCoordVariable(
       NetcdfFile netcdfFile, Variable recordVariable, String name) {
-    if (name != null && name.contains("/")) {
+    if (name == null) return null;
+    if (name.contains("/")) {
       return netcdfFile.findVariable(name);
     }
     for (Group group = recordVariable.getParentGroup();
         group != null;
         group = group.getParentGroup()) {
       Variable v = group.findVariableLocal(name);
-      if (v != null) return v;
+      if (isCoordinateForRecord(v, recordVariable)) return v;
     }
-    return findVariableRecursive(name, netcdfFile.getRootGroup());
+    for (Variable v : netcdfFile.getVariables()) {
+      if (name.equals(v.getShortName()) && isCoordinateForRecord(v, recordVariable)) return v;
+    }
+    return null;
+  }
+
+  /**
+   * Whether a variable can serve as a coordinate variable for the record variable: rank-1, numeric,
+   * and its sole dimension is one of the record variable's dimensions (identity).
+   */
+  private static boolean isCoordinateForRecord(Variable v, Variable recordVariable) {
+    if (v == null || v.getRank() != 1 || v.getDataType() == null || !v.getDataType().isNumeric()) {
+      return false;
+    }
+    Dimension dim = v.getDimension(0);
+    for (Dimension recordDim : recordVariable.getDimensions()) {
+      if (recordDim == dim) return true;
+    }
+    return false;
   }
 
   private static ImmutableList<Variable> getRecordVariables(NetcdfFile netcdfFile) {
@@ -192,7 +214,6 @@ public class NetCdfReader {
       throws IOException, FactoryException {
     // assert(netcdfFile.getFileTypeVersion().equalsIgnoreCase("1")); //CDF - 1
     ImmutableList<Attribute> globalAttributes = netcdfFile.getGlobalAttributes();
-    Group rootGroup = netcdfFile.getRootGroup();
 
     Array lonData, latData;
     double minX = 0, maxY = 0, translateX, translateY, skewX = 0, skewY = 0;
@@ -205,16 +226,16 @@ public class NetCdfReader {
     lonData = lonVariable.read();
     width = lonData.getShape()[0];
     double firstVal, lastVal;
-    firstVal = getElement(lonData, 0);
-    lastVal = getElement(lonData, width - 1);
+    firstVal = getDecodedElement(lonVariable, lonData, 0);
+    lastVal = getDecodedElement(lonVariable, lonData, width - 1);
     isIncreasing = firstVal < lastVal;
     minX = isIncreasing ? firstVal : lastVal;
     translateX = Math.abs(lastVal - firstVal) / (width - 1);
 
     latData = latVariable.read();
     height = latData.getShape()[0];
-    firstVal = getElement(latData, 0);
-    lastVal = getElement(latData, height - 1);
+    firstVal = getDecodedElement(latVariable, latData, 0);
+    lastVal = getDecodedElement(latVariable, latData, height - 1);
     isIncreasing = firstVal < lastVal;
     maxY = isIncreasing ? lastVal : firstVal;
     translateY = Math.abs(lastVal - firstVal) / (height - 1);
@@ -270,10 +291,9 @@ public class NetCdfReader {
       else {
         Dimension recordDimension = recordDimensions.get(i);
         String dimensionShortName = recordDimension.getShortName();
-        // TODO: This leads to tree traversal for dimensions, can we do this in one go?
-        Variable recordDimVar =
-            findVariableRecursive(
-                dimensionShortName, rootGroup); // rootGroup.findVariableLocal(dimensionShortName);
+        // Resolve within the record variable's scope with dimension-identity validation, so a
+        // same-named variable elsewhere (e.g. a root `time` next to /sub/time) is never bound
+        Variable recordDimVar = findCoordVariable(netcdfFile, recordVariable, dimensionShortName);
         if (Objects.isNull(recordDimVar))
           throw new IllegalArgumentException(
               String.format(NetCdfConstants.COORD_VARIABLE_NOT_FOUND, dimensionShortName));
@@ -385,9 +405,11 @@ public class NetCdfReader {
     double res;
     switch (array.getDataType()) {
       case INT:
+      case UINT:
         res = array.getInt(index);
         break;
       case LONG:
+      case ULONG:
         res = array.getLong(index);
         break;
       case FLOAT:
@@ -397,6 +419,7 @@ public class NetCdfReader {
         res = array.getDouble(index);
         break;
       case BYTE:
+      case UBYTE:
         res = array.getByte(index);
         break;
       case SHORT:
@@ -407,6 +430,35 @@ public class NetCdfReader {
         throw new IllegalArgumentException("Error casting dimension data to double");
     }
     return res;
+  }
+
+  /**
+   * Read a coordinate element decoded per CF packing conventions: unsigned integer storage
+   * (unsigned data types, or classic {@code _Unsigned="true"}) is widened, then {@code
+   * scale_factor} and {@code add_offset} are applied. Without this, packed coordinate variables
+   * would georeference the raster in raw storage units.
+   */
+  private static double getDecodedElement(Variable var, Array data, int index) {
+    double raw = getElement(data, index);
+    DataType dataType = var.getDataType();
+    boolean unsigned =
+        dataType.isIntegral()
+            && (dataType.isUnsigned()
+                || "true"
+                    .equalsIgnoreCase(var.attributes().findAttributeString("_Unsigned", null)));
+    if (unsigned && raw < 0) {
+      raw += Math.pow(2, dataType.getSize() * 8);
+    }
+    double scale = getNumericAttr(var, NetCdfConstants.SCALE_FACTOR, 1.0);
+    double offset = getNumericAttr(var, NetCdfConstants.ADD_OFFSET, 0.0);
+    return raw * scale + offset;
+  }
+
+  private static double getNumericAttr(Variable var, String name, double defaultValue) {
+    Attribute attr = var.attributes().findAttribute(name);
+    if (attr == null) return defaultValue;
+    Number numericValue = attr.getNumericValue();
+    return numericValue == null ? defaultValue : numericValue.doubleValue();
   }
 
   private static Double getAttrDoubleValue(Attribute attr) {

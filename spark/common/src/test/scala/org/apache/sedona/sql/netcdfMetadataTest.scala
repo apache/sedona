@@ -449,6 +449,14 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assert(dimNames.contains(("lat", 2)))
       assert(dimNames.contains(("sub/lat", 3)))
       assert(dimNames.contains(("sub/lon", 5)))
+      // A nested variable's dimension list uses the same qualified names as the inventory,
+      // so the two columns can be joined reliably
+      val subTemp = df
+        .selectExpr("explode(variables) as v")
+        .where("v.name = 'sub/temp'")
+        .selectExpr("v.dimensions")
+        .first()
+      assertEquals(Seq("sub/lat", "sub/lon"), subTemp.getAs[Seq[String]]("dimensions"))
     }
 
     it("should find coordinate variables laterally by dimension identity") {
@@ -511,7 +519,7 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
 
     it("should not infer an SRID from the latitude_longitude mapping name alone") {
       // The mapping name does not fix the datum: without a positive WGS 84 identification
-      // (datum/CRS name or ellipsoid parameters), srid must stay null.
+      // by name, srid must stay null.
       val row = sparkSession.read
         .format("netcdf.metadata")
         .load(variantsDir + "test_gridmapping_plain.nc")
@@ -519,6 +527,127 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
         .first()
       assert(row.isNullAt(row.fieldIndex("srid")))
       assert(row.isNullAt(row.fieldIndex("crs")))
+    }
+
+    it("should not report EPSG:4326 for a non-WGS datum on the WGS 84 ellipsoid") {
+      // The crs variable declares horizontal_datum_name = "Costa_Rica_2005" with WGS 84
+      // ellipsoid parameters. The ellipsoid defines the Earth figure, not the datum, so the
+      // explicit non-WGS datum must disable the inference.
+      val row = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_gridmapping_nonwgs.nc")
+        .select("srid", "crs")
+        .first()
+      assert(row.isNullAt(row.fieldIndex("srid")))
+      assert(row.isNullAt(row.fieldIndex("crs")))
+    }
+
+    it("should select the grid mapping matching the grid coordinates in the expanded form") {
+      // temp:grid_mapping = "geographic: lat lon projected: x y" and temp's trailing dims are
+      // (y, x) — the projected mapping (EPSG:3857) must be reported, never the geographic one.
+      val df = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_multimapping.nc")
+      val row = df.select("srid", "crs").first()
+      assertEquals(3857, row.getAs[Int]("srid"))
+      assert(row.getAs[String]("crs").contains("Pseudo-Mercator"))
+      // The extent is computed from the projected metre coordinates
+      val gt = df
+        .selectExpr("geoTransform.upperLeftX", "geoTransform.upperLeftY", "geoTransform.scaleX")
+        .first()
+      assertEquals(250.0, gt.getAs[Double]("upperLeftX"), 1e-6)
+      assertEquals(3500.0, gt.getAs[Double]("upperLeftY"), 1e-6)
+      assertEquals(500.0, gt.getAs[Double]("scaleX"), 1e-6)
+    }
+
+    it("should not exclude a root variable shadowed by a path reference's basename") {
+      // temperature:ancillary_variables = "/aux/temperature" references a rank-1 variable in
+      // /aux; the root grid variable "temperature" shares only the basename and must remain
+      // the selected grid (excluding by name would leave the unreferenced 2x2 /aux/grid).
+      val row = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_pathref.nc4")
+        .select("width", "height", "srid")
+        .first()
+      assertEquals(4, row.getAs[Int]("width"))
+      assertEquals(3, row.getAs[Int]("height"))
+      assertEquals(4326, row.getAs[Int]("srid"))
+    }
+
+    it("should decode unsigned 64-bit coordinates above 2^63 as positive values") {
+      val df = sparkSession.read.format("netcdf.metadata").load(variantsDir + "test_uint64.nc4")
+      val gt = df
+        .selectExpr("geoTransform.upperLeftX", "geoTransform.scaleX", "geoTransform.scaleY")
+        .first()
+      // lon = 2^63 + {0, 4096, 8192, 12288}: spacing 4096, all positive
+      assertEquals(4096.0, gt.getAs[Double]("scaleX"), 1e-6)
+      assertEquals(-2048.0, gt.getAs[Double]("scaleY"), 1e-6)
+      assertEquals(9.223372036854774e18, gt.getAs[Double]("upperLeftX"), 4096.0)
+      assert(gt.getAs[Double]("upperLeftX") > 0)
+      val corners = df
+        .selectExpr("cornerCoordinates.minX", "cornerCoordinates.maxY")
+        .first()
+      assert(corners.getAs[Double]("minX") > 9.0e18)
+      assert(corners.getAs[Double]("maxY") > 9.0e18)
+    }
+
+    it("should agree with RS_FromNetCDF on packed coordinate georeferencing") {
+      // The loader must decode _Unsigned/scale_factor/add_offset the same way the metadata
+      // reader does, or rasters would be silently mis-georeferenced.
+      val metaGt = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_packed.nc")
+        .selectExpr(
+          "geoTransform.upperLeftX",
+          "geoTransform.upperLeftY",
+          "geoTransform.scaleX",
+          "geoTransform.scaleY")
+        .first()
+
+      val rasterMeta = sparkSession.read
+        .format("binaryFile")
+        .load(variantsDir + "test_packed.nc")
+        .selectExpr("RS_FromNetCDF(content, 'temp') as raster")
+        .selectExpr("RS_Metadata(raster) as metadata")
+        .first()
+        .getStruct(0)
+      val rasterMetaSeq = metadataStructToSeq(rasterMeta)
+
+      assertEquals(rasterMetaSeq(0), metaGt.getAs[Double]("upperLeftX"), 1e-6)
+      assertEquals(rasterMetaSeq(1), metaGt.getAs[Double]("upperLeftY"), 1e-6)
+      assertEquals(rasterMetaSeq(4), metaGt.getAs[Double]("scaleX"), 1e-6)
+      assertEquals(rasterMetaSeq(5), metaGt.getAs[Double]("scaleY"), 1e-6)
+    }
+
+    it("should bind RS_FromNetCDF coordinates by dimension identity, not declaration order") {
+      // /wrong/lat,lon (2x2, over /wrong's own dims) are declared before /coords/lat,lon
+      // (which reference the root dims used by /data/temperature). The loader must bind the
+      // /coords variables and produce a 4x3 raster, not a 2x2 one.
+      val row = sparkSession.read
+        .format("binaryFile")
+        .load(variantsDir + "test_reader_lateral.nc4")
+        .selectExpr("RS_FromNetCDF(content, 'data/temperature') as raster")
+        .selectExpr(
+          "RS_Width(raster) as width",
+          "RS_Height(raster) as height",
+          "RS_Metadata(raster) as metadata")
+        .first()
+      assertEquals(4, row.getAs[Int]("width"))
+      assertEquals(3, row.getAs[Int]("height"))
+      // Extent from /coords: lon 20..23, lat 10..12
+      assertEquals(19.5, row.getStruct(row.fieldIndex("metadata")).getDouble(0), 1e-6)
+    }
+
+    it("should resolve RS_FromNetCDF band dimensions in the record variable's scope") {
+      // Root declares time(1) with a coordinate variable; /sub/temp(time, lat, lon) uses
+      // /sub/time(2). Binding the root variable would fail on the second band.
+      val row = sparkSession.read
+        .format("binaryFile")
+        .load(variantsDir + "test_reader_bands.nc4")
+        .selectExpr("RS_FromNetCDF(content, 'sub/temp') as raster")
+        .selectExpr("RS_NumBands(raster) as numBands")
+        .first()
+      assertEquals(2, row.getAs[Int]("numBands"))
     }
 
     it("should not emit a geoTransform for locally uneven spacing near the best-fit line") {

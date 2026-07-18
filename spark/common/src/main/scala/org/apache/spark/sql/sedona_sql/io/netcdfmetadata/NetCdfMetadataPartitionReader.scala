@@ -157,10 +157,9 @@ class NetCdfMetadataPartitionReader(
     VariableInfo(
       name = v.getFullName,
       dataType = Option(v.getDataType).map(_.toString).orNull,
-      // Anonymous dimensions (HDF5 datasets without dimension scales) have a null short name;
-      // fall back to the length, matching the CDL convention, so the array stays non-null.
-      dimensions = v.getDimensions.asScala.toList.map(d =>
-        Option(d.getShortName).getOrElse(d.getLength.toString)),
+      // Dimension names are qualified with their declaring group's path so they join back to
+      // the `dimensions` inventory (e.g. sub/temp reports [sub/lat, sub/lon], not [lat, lon])
+      dimensions = v.getDimensions.asScala.toList.map(qualifiedDimensionName(v, _)),
       shape = v.getShape.toList,
       units = attrString(v, "units"),
       longName = attrString(v, "long_name"),
@@ -172,6 +171,25 @@ class NetCdfMetadataPartitionReader(
         .map(widenIfUnsignedVariable(v, _)),
       isCoordinate = v.isCoordinateVariable,
       attributes = attributesToMap(v.attributes()))
+  }
+
+  /**
+   * Dimension name qualified with the path of its declaring group, matching the naming used by
+   * the `dimensions` inventory. The declaring group is found by walking the variable's group
+   * chain upward and matching the dimension by identity. Anonymous dimensions (null short name,
+   * e.g. HDF5 datasets without dimension scales) fall back to the length, matching the CDL
+   * convention, so the array stays non-null.
+   */
+  private def qualifiedDimensionName(v: Variable, d: Dimension): String = {
+    val base = Option(d.getShortName).getOrElse(d.getLength.toString)
+    var group = v.getParentGroup
+    while (group != null) {
+      if (group.getDimensions.asScala.exists(_ eq d)) {
+        return if (group.isRoot) base else group.getFullName + "/" + base
+      }
+      group = group.getParentGroup
+    }
+    base
   }
 
   /** Whether the variable stores unsigned integers (unsigned type, or classic `_Unsigned`). */
@@ -249,11 +267,18 @@ class NetCdfMetadataPartitionReader(
    * precede the data in the file cannot hijack the grid.
    */
   private def selectGridVariable(allVariables: Seq[Variable]): Option[Variable] = {
-    val referencedNames = allVariables.flatMap { v =>
-      METADATA_REFERENCE_ATTRS.flatMap(a => Option(attrString(v, a))).flatMap(referencedTokens)
-    }.toSet
+    // Resolve every CF metadata reference from its owning variable and exclude the referenced
+    // variables by identity. Excluding by bare name would let a path reference such as
+    // "/aux/temperature" shadow an unrelated root variable that shares its basename.
+    val referenced = for {
+      owner <- allVariables
+      attr <- METADATA_REFERENCE_ATTRS
+      value <- Option(attrString(owner, attr)).toList
+      token <- referencedTokens(value)
+      target <- findReferencedVariable(owner, token).toList
+    } yield target
     val candidates =
-      allVariables.filter(v => v.getRank >= 2 && !referencedNames.contains(v.getShortName))
+      allVariables.filter(v => v.getRank >= 2 && !referenced.exists(_ eq v))
     candidates
       .find { v =>
         val (latDim, lonDim) = trailingDims(v)
@@ -265,17 +290,13 @@ class NetCdfMetadataPartitionReader(
   }
 
   /**
-   * Variable names referenced by a CF attribute value. Handles blank-separated lists
-   * (`ancillary_variables`), keyed forms like `"area: cell_area"` (keys end with `:` and are
-   * dropped), and group paths (both the full path and its last segment are returned).
+   * Variable-name tokens in a CF reference attribute value. Handles blank-separated lists
+   * (`ancillary_variables`) and keyed forms like `"area: cell_area"` (keys end with `:` and are
+   * dropped). Tokens may be plain names or group paths; both resolve via
+   * [[findReferencedVariable]].
    */
-  private def referencedTokens(attrValue: String): Seq[String] = {
-    attrValue.trim
-      .split("\\s+")
-      .toSeq
-      .filter(t => t.nonEmpty && !t.endsWith(":"))
-      .flatMap(t => Seq(t, t.substring(t.lastIndexOf('/') + 1)))
-  }
+  private def referencedTokens(attrValue: String): Seq[String] =
+    attrValue.trim.split("\\s+").toSeq.filter(t => t.nonEmpty && !t.endsWith(":"))
 
   private def trailingDims(v: Variable): (Dimension, Dimension) = {
     val dims = v.getDimensions.asScala
@@ -386,7 +407,12 @@ class NetCdfMetadataPartitionReader(
       val raw =
         if (unsignedIntegral) {
           val value = data.getLong(i)
-          if (bits >= 64) value.toDouble else (value & ((1L << bits) - 1)).toDouble
+          if (bits >= 64) {
+            // 64-bit unsigned: reinterpret the raw signed long (values >= 2^63 are negative)
+            if (value >= 0) value.toDouble else value.toDouble + math.pow(2, 64)
+          } else {
+            (value & ((1L << bits) - 1)).toDouble
+          }
         } else {
           data.getDouble(i)
         }
@@ -494,8 +520,10 @@ class NetCdfMetadataPartitionReader(
       gridVar: Option[Variable],
       needSrid: Boolean): (String, Option[Int]) = {
     val gmVar = gridVar.flatMap { gv =>
+      val (latDim, lonDim) = trailingDims(gv)
+      val gridCoordNames = Set(latDim.getShortName, lonDim.getShortName).filter(_ != null)
       Option(attrString(gv, "grid_mapping"))
-        .map(gridMappingVariableName)
+        .flatMap(selectGridMappingName(_, gridCoordNames))
         .flatMap(name => findReferencedVariable(gv, name))
     }
     val globalAttrs = ncFile.getRootGroup.attributes()
@@ -512,18 +540,41 @@ class NetCdfMetadataPartitionReader(
   }
 
   /**
-   * Name of the grid mapping variable in a CF `grid_mapping` attribute. Handles the extended form
-   * `"crsVar: coord1 coord2 ..."` by taking the first mapping name.
+   * Name of the grid mapping variable in a CF `grid_mapping` attribute that applies to the grid's
+   * coordinates. The simple form (`"crs"`) names one mapping. The extended form (`"crsA: coord1
+   * coord2 crsB: coord3 coord4"`) may declare several mappings, each tied to a coordinate list;
+   * the mapping whose coordinates match the grid's (y, x) coordinate names is selected, so a
+   * projected extent is never paired with the geographic mapping's CRS. When several mappings
+   * exist and none matches, the association is ambiguous and no CRS is reported.
    */
-  private def gridMappingVariableName(attrValue: String): String =
-    attrValue.trim.split("\\s+")(0).stripSuffix(":")
+  private def selectGridMappingName(
+      attrValue: String,
+      gridCoordNames: Set[String]): Option[String] = {
+    val tokens = attrValue.trim.split("\\s+").toSeq.filter(_.nonEmpty)
+    if (tokens.isEmpty) return None
+    if (!tokens.exists(_.endsWith(":"))) return Some(tokens.head)
+
+    // Extended form: group tokens into (mappingName, coordinateNames) clauses
+    val clauses = mutable.ListBuffer[(String, mutable.ListBuffer[String])]()
+    tokens.foreach { token =>
+      if (token.endsWith(":")) {
+        clauses += ((token.stripSuffix(":"), mutable.ListBuffer[String]()))
+      } else if (clauses.nonEmpty) {
+        // Coordinate references may be paths; compare by basename
+        clauses.last._2 += token.substring(token.lastIndexOf('/') + 1)
+      }
+    }
+    if (clauses.size == 1) Some(clauses.head._1)
+    else clauses.find(_._2.exists(gridCoordNames.contains)).map(_._1)
+  }
 
   /**
    * Minimal CF grid-mapping support for files with no CRS WKT: EPSG:4326 is reported only when a
-   * `latitude_longitude` grid mapping positively identifies WGS 84 — through
-   * `horizontal_datum_name`/`geographic_crs_name`, or through ellipsoid parameters matching the
-   * WGS 84 ellipsoid — with a Greenwich prime meridian. The mapping name alone does not fix the
-   * datum (the Earth figure can be specified separately), so nothing is inferred from it.
+   * `latitude_longitude` grid mapping positively identifies the WGS 84 datum by *name*
+   * (`horizontal_datum_name` or `geographic_crs_name`) with a Greenwich prime meridian. Ellipsoid
+   * parameters can only veto, never qualify: many datums (e.g. CR05) use the WGS 84 ellipsoid, so
+   * the Earth figure does not identify the datum. Any present identifier that disagrees with WGS
+   * 84 disables the inference.
    */
   private def latitudeLongitudeSrid(gmVar: Variable): Option[Int] = {
     if (attrString(gmVar, "grid_mapping_name") != "latitude_longitude") return None
@@ -531,21 +582,25 @@ class NetCdfMetadataPartitionReader(
     def normalized(attr: String): Option[String] =
       Option(attrString(gmVar, attr)).map(_.toLowerCase.replaceAll("[^a-z0-9]", ""))
 
+    val datumName = normalized("horizontal_datum_name")
+    val crsName = normalized("geographic_crs_name")
     val nameIdentifiesWgs84 =
-      normalized("horizontal_datum_name").exists(WGS84_DATUM_NAMES.contains) ||
-        normalized("geographic_crs_name").contains("wgs84")
+      datumName.exists(WGS84_DATUM_NAMES.contains) || crsName.exists(WGS84_DATUM_NAMES.contains)
+    val nameContradicts =
+      datumName.exists(!WGS84_DATUM_NAMES.contains(_)) ||
+        crsName.exists(!WGS84_DATUM_NAMES.contains(_))
 
-    val semiMajor = attrDouble(gmVar, "semi_major_axis")
-    val inverseFlattening = attrDouble(gmVar, "inverse_flattening")
-    val semiMinor = attrDouble(gmVar, "semi_minor_axis")
-    val paramsIdentifyWgs84 =
-      semiMajor.exists(a => math.abs(a - 6378137.0) < 1e-3) &&
-        (inverseFlattening.exists(f => math.abs(f - 298.257223563) < 1e-6) ||
-          semiMinor.exists(b => math.abs(b - 6356752.314245) < 1e-3))
+    // Ellipsoid parameters, when present, must be consistent with the WGS 84 ellipsoid
+    val paramsContradict =
+      attrDouble(gmVar, "semi_major_axis").exists(a => math.abs(a - 6378137.0) >= 1e-3) ||
+        attrDouble(gmVar, "inverse_flattening").exists(f =>
+          math.abs(f - 298.257223563) >= 1e-6) ||
+        attrDouble(gmVar, "semi_minor_axis").exists(b => math.abs(b - 6356752.314245) >= 1e-3)
 
     val greenwich = attrDouble(gmVar, "longitude_of_prime_meridian").forall(_ == 0.0)
 
-    if ((nameIdentifiesWgs84 || paramsIdentifyWgs84) && greenwich) Some(4326) else None
+    if (nameIdentifiesWgs84 && !nameContradicts && !paramsContradict && greenwich) Some(4326)
+    else None
   }
 
   /**
@@ -661,8 +716,8 @@ object NetCdfMetadataPartitionReader {
     "formula_terms",
     "grid_mapping")
 
-  /** Normalized `horizontal_datum_name` values that identify WGS 84. */
-  private val WGS84_DATUM_NAMES = Set("wgs84", "worldgeodeticsystem1984")
+  /** Normalized datum/CRS name values that identify WGS 84. */
+  private val WGS84_DATUM_NAMES = Set("wgs84", "wgs1984", "worldgeodeticsystem1984")
 
   // Fields that require opening the file and parsing its header
   private val HEADER_FIELDS =
