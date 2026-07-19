@@ -15,13 +15,13 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import calendar
 import logging
 from typing import Iterator, Union, List
 from typing import Optional
 
 import datetime as python_datetime
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql.types import dt
 from shapely.geometry.base import BaseGeometry
 
 
@@ -293,6 +293,13 @@ class CollectionClient:
 
         It then expands the date string to cover the entire time period for that date.
 
+        The end of an expanded period uses ``23:59:59.999999Z`` rather than a
+        whole second. Sedona stores STAC datetimes as timestamps and filters
+        them with an inclusive upper bound (``datetime <= end``), so a rounded
+        ``23:59:59Z`` bound would drop items that fall in the final fractional
+        second (e.g. ``23:59:59.5Z``). ``.999999`` matches Spark's microsecond
+        timestamp precision, keeping whole-period searches inclusive.
+
         Args:
             date_str (str): The date string to expand.
 
@@ -303,19 +310,25 @@ class CollectionClient:
             ValueError: If the date string format is invalid.
 
         Examples:
-        - "2017" expands to ["2017-01-01T00:00:00Z", "2017-12-31T23:59:59Z"]
-        - "2017-06" expands to ["2017-06-01T00:00:00Z", "2017-06-30T23:59:59Z"]
-        - "2017-06-10" expands to ["2017-06-10T00:00:00Z", "2017-06-10T23:59:59Z"]
+        - "2017" expands to ["2017-01-01T00:00:00Z", "2017-12-31T23:59:59.999999Z"]
+        - "2017-06" expands to ["2017-06-01T00:00:00Z", "2017-06-30T23:59:59.999999Z"]
+        - "2017-06-10" expands to ["2017-06-10T00:00:00Z", "2017-06-10T23:59:59.999999Z"]
         - "2017-06-01T00:00:00Z" remains as ["2017-06-01T00:00:00Z", "2017-06-01T00:00:00Z"]
         """
         if len(date_str) == 4:  # YYYY
-            return [f"{date_str}-01-01T00:00:00Z", f"{date_str}-12-31T23:59:59Z"]
+            return [
+                f"{date_str}-01-01T00:00:00Z",
+                f"{date_str}-12-31T23:59:59.999999Z",
+            ]
         elif len(date_str) == 7:  # YYYY-mm
-            year, month = date_str.split("-")
-            last_day = (dt(int(year), int(month) + 1, 1) - dt.timedelta(days=1)).day
-            return [f"{date_str}-01T00:00:00Z", f"{date_str}-{last_day}T23:59:59Z"]
+            year, month = (int(x) for x in date_str.split("-"))
+            last_day = calendar.monthrange(year, month)[1]
+            return [
+                f"{date_str}-01T00:00:00Z",
+                f"{date_str}-{last_day:02d}T23:59:59.999999Z",
+            ]
         elif len(date_str) == 10:  # YYYY-mm-dd
-            return [f"{date_str}T00:00:00Z", f"{date_str}T23:59:59Z"]
+            return [f"{date_str}T00:00:00Z", f"{date_str}T23:59:59.999999Z"]
         elif len(date_str) == 19:  # YYYY-mm-ddTHH:MM:SS
             return [date_str, date_str]
         elif len(date_str) == 20:  # YYYY-mm-ddTHH:MM:SSZ
