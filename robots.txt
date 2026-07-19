@@ -1,0 +1,12 @@
+# robots.txt for https://sedona.apache.org/
+#
+# Only the current stable documentation, served under /latest/, is indexed.
+# Archived versions and the development snapshot instead carry a crawlable
+# <meta name="robots" content="noindex"> tag (added by
+# tools/noindex_archived_docs.py) so search engines can visit them and drop the
+# stale pages. They are intentionally NOT disallowed here, because a disallowed
+# page cannot be crawled and its noindex would never be seen.
+User-agent: *
+Disallow:
+
+Sitemap: https://sedona.apache.org/latest/sitemap.xml
