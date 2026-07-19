@@ -475,6 +475,30 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assertEquals(12.5, gt.getAs[Double]("upperLeftY"), 1e-6)
     }
 
+    it("should search lateral coordinate variables width-wise from the local apex") {
+      // The first branch contains coordinates two levels below /domain, while the later branch
+      // contains coordinates only one level below it. CF lateral search is breadth-first, so the
+      // shallower coordinates must win even though their group occurs later in file order.
+      val df = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_lateral_width.nc4")
+      val row = df.select("width", "height").first()
+      assertEquals(3, row.getAs[Int]("width"))
+      assertEquals(2, row.getAs[Int]("height"))
+      val gt = df
+        .selectExpr(
+          "geoTransform.upperLeftX",
+          "geoTransform.upperLeftY",
+          "geoTransform.scaleX",
+          "geoTransform.scaleY")
+        .first()
+      // Shallow x = 1,2,3 and y = 10,20. The deeper decoys are x = 1000..3000, y = 100,200.
+      assertEquals(0.5, gt.getAs[Double]("upperLeftX"), 1e-6)
+      assertEquals(25.0, gt.getAs[Double]("upperLeftY"), 1e-6)
+      assertEquals(1.0, gt.getAs[Double]("scaleX"), 1e-6)
+      assertEquals(-10.0, gt.getAs[Double]("scaleY"), 1e-6)
+    }
+
     it("should skip declared ancillary variables when selecting the grid variable") {
       // quality(lat, lon) is declared BEFORE temperature(lat, lon), but temperature declares
       // ancillary_variables = "quality", so temperature must be selected and its grid_mapping
@@ -604,19 +628,44 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
           "geoTransform.scaleY")
         .first()
 
-      val rasterMeta = sparkSession.read
+      val rasterRow = sparkSession.read
         .format("binaryFile")
         .load(variantsDir + "test_packed.nc")
         .selectExpr("RS_FromNetCDF(content, 'temp') as raster")
-        .selectExpr("RS_Metadata(raster) as metadata")
+        .selectExpr(
+          "RS_Metadata(raster) as metadata",
+          "RS_Value(raster, 0, 0, 1) as upperLeft",
+          "RS_Value(raster, 2, 0, 1) as upperRight",
+          "RS_Value(raster, 0, 2, 1) as lowerLeft",
+          "RS_Value(raster, 2, 2, 1) as lowerRight",
+          "RS_Value(raster, 1, 0, 1) as distinctMissing",
+          "RS_Value(raster, 1, 1, 1) as centerNoData",
+          "RS_Value(raster, 1, 2, 1) as validCollision",
+          "RS_Count(raster, 1) as validCount",
+          "RS_BandNoDataValue(raster, 1) as noData")
         .first()
-        .getStruct(0)
+      val rasterMeta = rasterRow.getStruct(rasterRow.fieldIndex("metadata"))
       val rasterMetaSeq = metadataStructToSeq(rasterMeta)
 
       assertEquals(rasterMetaSeq(0), metaGt.getAs[Double]("upperLeftX"), 1e-6)
       assertEquals(rasterMetaSeq(1), metaGt.getAs[Double]("upperLeftY"), 1e-6)
       assertEquals(rasterMetaSeq(4), metaGt.getAs[Double]("scaleX"), 1e-6)
       assertEquals(rasterMetaSeq(5), metaGt.getAs[Double]("scaleY"), 1e-6)
+      // Latitude is stored in descending order while the raster transform is north-up. The
+      // record values are packed independently of the coordinates and must be decoded with
+      // temp's own scale/offset.
+      assertEquals(10.5, rasterRow.getAs[Double]("upperLeft"), 1e-6)
+      assertEquals(11.5, rasterRow.getAs[Double]("upperRight"), 1e-6)
+      assertEquals(13.5, rasterRow.getAs[Double]("lowerLeft"), 1e-6)
+      assertEquals(14.5, rasterRow.getAs[Double]("lowerRight"), 1e-6)
+      // Both missing-value attributes are checked in packed storage units. A finite sentinel absent
+      // from the decoded samples keeps a valid decoded value equal to a raw sentinel valid.
+      assert(rasterRow.isNullAt(rasterRow.fieldIndex("distinctMissing")))
+      assert(rasterRow.isNullAt(rasterRow.fieldIndex("centerNoData")))
+      assertEquals(-999.0, rasterRow.getAs[Double]("validCollision"), 1e-6)
+      assertEquals(7L, rasterRow.getAs[Long]("validCount"))
+      // The synthetic finite sentinel remains observable to downstream no-data consumers.
+      assert(java.lang.Double.isFinite(rasterRow.getAs[Double]("noData")))
     }
 
     it("should bind RS_FromNetCDF coordinates by dimension identity, not declaration order") {
@@ -750,17 +799,21 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
           "RS_NumBands(raster) as numBands",
           "RS_Value(raster, 0, 0, 1) as upperLeftBand1",
           "RS_Value(raster, 0, 0, 2) as upperLeftBand2",
+          "RS_Value(raster, 3, 0, 1) as upperRightBand1",
+          "RS_Value(raster, 0, 2, 1) as lowerLeftBand1",
           "RS_Value(raster, 3, 2, 1) as lowerRightBand1",
           "RS_Metadata(raster) as metadata")
         .first()
       assertEquals(4, row.getAs[Int]("width"))
       assertEquals(3, row.getAs[Int]("height"))
       assertEquals(2, row.getAs[Int]("numBands"))
-      // Upper-left pixel = max lat (index 2), first lon (index 0)
-      assertEquals(200.0, row.getAs[Double]("upperLeftBand1"), 1e-6)
-      assertEquals(201.0, row.getAs[Double]("upperLeftBand2"), 1e-6)
-      // Bottom-right pixel = min lat (index 0), last lon (index 3)
-      assertEquals(30.0, row.getAs[Double]("lowerRightBand1"), 1e-6)
+      // Latitude increases while longitude decreases in the file. The raster is normalized to
+      // north-up, west-to-east order, and packed time coordinates must not scale the samples.
+      assertEquals(230.0, row.getAs[Double]("upperLeftBand1"), 1e-6)
+      assertEquals(231.0, row.getAs[Double]("upperLeftBand2"), 1e-6)
+      assertEquals(200.0, row.getAs[Double]("upperRightBand1"), 1e-6)
+      assertEquals(30.0, row.getAs[Double]("lowerLeftBand1"), 1e-6)
+      assertEquals(0.0, row.getAs[Double]("lowerRightBand1"), 1e-6)
       // Extent from lon 20..23, lat 10..12
       assertEquals(19.5, row.getStruct(row.fieldIndex("metadata")).getDouble(0), 1e-6)
     }
@@ -819,6 +872,21 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assertEquals(3857, row.getAs[Int]("srid"))
       assert(row.getAs[String]("crs").contains("Pseudo-Mercator"))
       val gt = df.selectExpr("geoTransform.scaleX").first()
+      assertEquals(500.0, gt.getAs[Double]("scaleX"), 1e-6)
+    }
+
+    it("should stop expanded grid-mapping coordinate lookup at the local apex") {
+      // /domain declares the grid's x/y dimensions and /domain/coords contains their NUG
+      // coordinate variables. Unrelated root x/y coordinates are above the local apex and must
+      // not shadow the lateral coordinates referenced by the plain "projected: x y" clause.
+      val df = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_multimapping_apex.nc4")
+      val row = df.select("srid", "crs").first()
+      assertEquals(3857, row.getAs[Int]("srid"))
+      assert(row.getAs[String]("crs").contains("Pseudo-Mercator"))
+      val gt = df.selectExpr("geoTransform.upperLeftX", "geoTransform.scaleX").first()
+      assertEquals(250.0, gt.getAs[Double]("upperLeftX"), 1e-6)
       assertEquals(500.0, gt.getAs[Double]("scaleX"), 1e-6)
     }
 

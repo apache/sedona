@@ -115,12 +115,12 @@ class NetCdfMetadataPartitionReader(
       if (needExtent) {
         gridVar.flatMap { v =>
           val (latDim, lonDim) = trailingDims(v)
-          computeExtent(v, latDim, lonDim, allVariables)
+          computeExtent(v, latDim, lonDim)
         }
       } else None
 
     val (crsWkt, srid) =
-      if (needCrs) resolveCrs(ncFile, gridVar, requested.contains("srid"), allVariables)
+      if (needCrs) resolveCrs(ncFile, gridVar, requested.contains("srid"))
       else (null, None)
 
     NetCdfFileInfo(
@@ -282,8 +282,8 @@ class NetCdfMetadataPartitionReader(
     candidates
       .find { v =>
         val (latDim, lonDim) = trailingDims(v)
-        findCoordinateVariable(v, latDim, allVariables).isDefined &&
-        findCoordinateVariable(v, lonDim, allVariables).isDefined
+        findCoordinateVariable(v, latDim).isDefined &&
+        findCoordinateVariable(v, lonDim).isDefined
       }
       .orElse(candidates.headOption)
       .orElse(allVariables.find(_.getRank >= 2))
@@ -305,16 +305,13 @@ class NetCdfMetadataPartitionReader(
 
   /**
    * Find the 1-D numeric coordinate variable for `dim`. Search order follows CF/NUG scoping:
-   * first the data variable's group and its ancestors by name (proximity), then a lateral search
-   * anywhere in the file matched strictly by dimension identity — a NUG coordinate variable may
-   * legally live outside the data variable's lineage (e.g. a sibling group) as long as it
-   * references the very same dimension. Identity matching (`eq`) guarantees an identically named
-   * dimension declared in an unrelated group is never picked up.
+   * first the data variable's group and its ancestors by name through the dimension's local apex,
+   * then a breadth-first lateral search below that apex. A NUG coordinate variable may legally
+   * live outside the data variable's lineage (e.g. a sibling group) as long as it references the
+   * very same dimension. Identity matching (`eq`) guarantees an identically named dimension
+   * declared in an unrelated group is never picked up.
    */
-  private def findCoordinateVariable(
-      dataVar: Variable,
-      dim: Dimension,
-      allVariables: Seq[Variable]): Option[Variable] = {
+  private def findCoordinateVariable(dataVar: Variable, dim: Dimension): Option[Variable] = {
     val name = dim.getShortName
     if (name == null) return None
 
@@ -322,15 +319,64 @@ class NetCdfMetadataPartitionReader(
       v.getRank == 1 && v.getDataType != null && v.getDataType.isNumeric &&
         v.getShortName == name && (v.getDimension(0) eq dim)
 
-    // Proximity: the data variable's group, then its ancestors
+    val apex = localApex(dataVar, dim).orNull
+    if (apex == null) return None
+
+    // Proximity: the data variable's group, then its ancestors through the local apex.
     var group = dataVar.getParentGroup
     while (group != null) {
       val v = group.findVariableLocal(name)
       if (v != null && isCoordinateFor(v)) return Some(v)
+      if (group eq apex) group = null
+      else group = group.getParentGroup
+    }
+
+    // Lateral: descend from the local apex width-wise, preserving file/group order.
+    val groups = mutable.Queue.empty[Group]
+    groups ++= apex.getGroups.asScala
+    while (groups.nonEmpty) {
+      group = groups.dequeue()
+      val v = group.findVariableLocal(name)
+      if (v != null && isCoordinateFor(v)) return Some(v)
+      groups ++= group.getGroups.asScala
+    }
+    None
+  }
+
+  /** The nearest ancestor group that declares `dim` by identity. */
+  private def localApex(dataVar: Variable, dim: Dimension): Option[Group] = {
+    var group = dataVar.getParentGroup
+    while (group != null && !group.getDimensions.asScala.exists(_ eq dim)) {
       group = group.getParentGroup
     }
-    // Lateral: anywhere in the file, by dimension identity
-    allVariables.find(isCoordinateFor)
+    Option(group)
+  }
+
+  /** Match a grid coordinate reference using CF's special coordinate-variable scoping rules. */
+  private def matchesGridCoordinateReference(
+      dataVar: Variable,
+      reference: String,
+      gridCoord: Variable): Boolean = {
+    if (reference.contains("/")) {
+      return findReferencedVariable(dataVar, reference).exists(_ eq gridCoord)
+    }
+    if (gridCoord.getRank != 1 || gridCoord.getShortName != reference) return false
+
+    val dim = gridCoord.getDimension(0)
+    val apex = localApex(dataVar, dim).orNull
+    if (apex == null) return false
+
+    // A visible same-named variable shadows lateral lookup even when it is not gridCoord. If no
+    // variable is found through the local apex, gridCoord is already the identity-validated result
+    // of findCoordinateVariable's lateral phase.
+    var group = dataVar.getParentGroup
+    while (group != null) {
+      val visible = group.findVariableLocal(reference)
+      if (visible != null) return visible eq gridCoord
+      if (group eq apex) return true
+      group = group.getParentGroup
+    }
+    false
   }
 
   /**
@@ -344,10 +390,9 @@ class NetCdfMetadataPartitionReader(
   private def computeExtent(
       gridVar: Variable,
       latDim: Dimension,
-      lonDim: Dimension,
-      allVariables: Seq[Variable]): Option[GridExtent] = {
-    val lonVarOpt = findCoordinateVariable(gridVar, lonDim, allVariables)
-    val latVarOpt = findCoordinateVariable(gridVar, latDim, allVariables)
+      lonDim: Dimension): Option[GridExtent] = {
+    val lonVarOpt = findCoordinateVariable(gridVar, lonDim)
+    val latVarOpt = findCoordinateVariable(gridVar, latDim)
     if (lonVarOpt.isEmpty || latVarOpt.isEmpty) return None
     val lonVar = lonVarOpt.get
     val latVar = latVarOpt.get
@@ -518,16 +563,13 @@ class NetCdfMetadataPartitionReader(
   private def resolveCrs(
       ncFile: NetcdfFile,
       gridVar: Option[Variable],
-      needSrid: Boolean,
-      allVariables: Seq[Variable]): (String, Option[Int]) = {
+      needSrid: Boolean): (String, Option[Int]) = {
     val gmVar = gridVar.flatMap { gv =>
       val (latDim, lonDim) = trailingDims(gv)
       // The actual coordinate variables of the grid, for identity matching of the extended
       // grid_mapping form; the dimension names are the fallback when none resolve
       val gridCoordVars =
-        Seq(
-          findCoordinateVariable(gv, latDim, allVariables),
-          findCoordinateVariable(gv, lonDim, allVariables)).flatten
+        Seq(findCoordinateVariable(gv, latDim), findCoordinateVariable(gv, lonDim)).flatten
       val gridDimNames = Set(latDim.getShortName, lonDim.getShortName).filter(_ != null)
       Option(attrString(gv, "grid_mapping"))
         .flatMap(selectGridMappingName(gv, _, gridCoordVars, gridDimNames))
@@ -590,10 +632,7 @@ class NetCdfMetadataPartitionReader(
       // resolution the grid coordinates themselves were found with — a sibling-group
       // coordinate (e.g. /coords/x) is legitimately referenced by its plain name.
       def matches(reference: String, gridCoord: Variable): Boolean = {
-        findReferencedVariable(dataVar, reference) match {
-          case Some(resolved) => resolved eq gridCoord
-          case None => !reference.contains("/") && gridCoord.getShortName == reference
-        }
+        matchesGridCoordinateReference(dataVar, reference, gridCoord)
       }
       clauses
         .find(clause => gridCoordVars.forall(gv => clause._2.exists(matches(_, gv))))

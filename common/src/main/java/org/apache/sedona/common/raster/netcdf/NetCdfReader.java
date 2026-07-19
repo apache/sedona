@@ -310,26 +310,29 @@ public class NetCdfReader {
     Array lonData, latData;
     double minX = 0, maxY = 0, translateX, translateY, skewX = 0, skewY = 0;
     int width, height;
-    boolean isIncreasing = false;
+    boolean lonIncreasing;
+    boolean latIncreasing;
     HashMap<String, List<String>> varMetadata = new HashMap<>();
 
     // ========================= Set Raster geo-reference (width, height, scaleX, scaleY
     // =========================
     lonData = lonVariable.read();
+    ValueDecoder lonDecoder = new ValueDecoder(lonVariable);
     width = lonData.getShape()[0];
     double firstVal, lastVal;
-    firstVal = getDecodedElement(lonVariable, lonData, 0);
-    lastVal = getDecodedElement(lonVariable, lonData, width - 1);
-    isIncreasing = firstVal < lastVal;
-    minX = isIncreasing ? firstVal : lastVal;
+    firstVal = lonDecoder.get(lonData, 0);
+    lastVal = lonDecoder.get(lonData, width - 1);
+    lonIncreasing = firstVal < lastVal;
+    minX = lonIncreasing ? firstVal : lastVal;
     translateX = Math.abs(lastVal - firstVal) / (width - 1);
 
     latData = latVariable.read();
+    ValueDecoder latDecoder = new ValueDecoder(latVariable);
     height = latData.getShape()[0];
-    firstVal = getDecodedElement(latVariable, latData, 0);
-    lastVal = getDecodedElement(latVariable, latData, height - 1);
-    isIncreasing = firstVal < lastVal;
-    maxY = isIncreasing ? lastVal : firstVal;
+    firstVal = latDecoder.get(latData, 0);
+    lastVal = latDecoder.get(latData, height - 1);
+    latIncreasing = firstVal < lastVal;
+    maxY = latIncreasing ? lastVal : firstVal;
     translateY = Math.abs(lastVal - firstVal) / (height - 1);
     // ======================================================================================================
 
@@ -353,13 +356,9 @@ public class NetCdfReader {
 
     // read recordVariable data
     Array recordData = recordVariable.read();
-
-    // Set noDataValue if available, null otherwise
-    Double noDataValue = null;
-    if (recordVariable.attributes().hasAttribute(NetCdfConstants.MISSING_VALUE)) {
-      Attribute noDataAttribute = recordVariable.findAttribute(NetCdfConstants.MISSING_VALUE);
-      if (!Objects.isNull(noDataAttribute)) noDataValue = getAttrDoubleValue(noDataAttribute);
-    }
+    ValueDecoder recordDecoder = new ValueDecoder(recordVariable);
+    RawValueValidity recordValidity = new RawValueValidity(recordVariable, recordDecoder);
+    Double noDataValue = recordValidity.outputNoData(recordData);
     int[] shape = recordData.getIndex().getShape();
     // Row-major strides of the source layout, so the raster plane can be extracted for any
     // spatial axis positions — not only trailing (y, x)
@@ -384,12 +383,16 @@ public class NetCdfReader {
       }
     }
     int numValuesPerBand = width * height;
-    Array[] dimensionVars = new Array[numRecordDimensions];
-    double scaleFactor = 1, offset = 0;
+    ValueDecoder[] dimensionDecoders = new ValueDecoder[numRecordDimensions];
+    Array[] dimensionData = new Array[numRecordDimensions];
     for (int i = 0; i < numRecordDimensions; i++) {
-      if (i == lonIndex) dimensionVars[i] = lonData;
-      else if (i == latIndex) dimensionVars[i] = latData;
-      else {
+      if (i == lonIndex) {
+        dimensionDecoders[i] = lonDecoder;
+        dimensionData[i] = lonData;
+      } else if (i == latIndex) {
+        dimensionDecoders[i] = latDecoder;
+        dimensionData[i] = latData;
+      } else {
         Dimension recordDimension = recordDimensions.get(i);
         String dimensionShortName = recordDimension.getShortName();
         // Resolve within the record variable's scope, validated against this exact dimension,
@@ -404,16 +407,9 @@ public class NetCdfReader {
         varMetadata.computeIfAbsent(dimensionShortName, k -> new ArrayList<>());
         for (Attribute attr : recordDimAttrs) {
           varMetadata.get(dimensionShortName).add(attr.getStringValue());
-          if (attr.getShortName().equalsIgnoreCase(NetCdfConstants.SCALE_FACTOR)) {
-            Array values = attr.getValues();
-            if (!Objects.isNull(values)) scaleFactor = getElement(attr.getValues(), 0);
-          }
-          if (attr.getShortName().equalsIgnoreCase(NetCdfConstants.ADD_OFFSET)) {
-            Array values = attr.getValues();
-            if (!Objects.isNull(values)) offset = getElement(attr.getValues(), 0);
-          }
         }
-        dimensionVars[i] = recordDimVar.read();
+        dimensionDecoders[i] = new ValueDecoder(recordDimVar);
+        dimensionData[i] = recordDimVar.read();
       }
     }
     double[][] allBandValues = new double[numBands][numValuesPerBand];
@@ -425,7 +421,7 @@ public class NetCdfReader {
         List<String> currBandMetadata = new ArrayList<>();
         for (int m = bandDims.length - 1; m >= 0; m--) {
           int dimIdx = bandDims[m];
-          double data = getElement(dimensionVars[dimIdx], bandCounter[m]);
+          double data = dimensionDecoders[dimIdx].get(dimensionData[dimIdx], bandCounter[m]);
           String metadata = recordDimensions.get(dimIdx).getShortName() + " : " + data;
           currBandMetadata.add(metadata);
         }
@@ -437,14 +433,20 @@ public class NetCdfReader {
       }
       // Stride-aware extraction of the (y, x) plane: for trailing spatial axes this reduces
       // exactly to the contiguous-plane arithmetic; for permuted axes it walks the source
-      // with the axis strides. Row j of the raster is row (height-1-j) of the file.
+      // with the axis strides. The transform is normalized to west-to-east, north-up order, so
+      // preserve each coordinate variable's direction when selecting the source element.
       for (int j = height - 1; j >= 0; j--) {
         for (int i = 0; i < width; i++) {
+          int sourceY = latIncreasing ? height - 1 - j : j;
+          int sourceX = lonIncreasing ? i : width - 1 - i;
           long sourceIndex =
               bandOffset
-                  + (long) (height - 1 - j) * sourceStrides[latIndex]
-                  + (long) i * sourceStrides[lonIndex];
-          double currRecord = scaleFactor * getElement(recordData, (int) sourceIndex) + offset;
+                  + (long) sourceY * sourceStrides[latIndex]
+                  + (long) sourceX * sourceStrides[lonIndex];
+          double currRecord =
+              recordValidity.isInvalid(recordData, (int) sourceIndex)
+                  ? noDataValue
+                  : recordDecoder.get(recordData, (int) sourceIndex);
           allBandValues[currBandNum][j * width + i] = currRecord;
         }
       }
@@ -536,26 +538,229 @@ public class NetCdfReader {
     return res;
   }
 
-  /**
-   * Read a coordinate element decoded per CF packing conventions: unsigned integer storage
-   * (unsigned data types, or classic {@code _Unsigned="true"}) is widened, then {@code
-   * scale_factor} and {@code add_offset} are applied. Without this, packed coordinate variables
-   * would georeference the raster in raw storage units.
-   */
-  private static double getDecodedElement(Variable var, Array data, int index) {
-    double raw = getElement(data, index);
-    DataType dataType = var.getDataType();
-    boolean unsigned =
-        dataType.isIntegral()
-            && (dataType.isUnsigned()
-                || "true"
-                    .equalsIgnoreCase(var.attributes().findAttributeString("_Unsigned", null)));
-    if (unsigned && raw < 0) {
-      raw += Math.pow(2, dataType.getSize() * 8);
+  /** Decode values with the unsigned and CF packing attributes of their owning variable. */
+  private static final class ValueDecoder {
+    private final DataType dataType;
+    private final boolean unsigned;
+    private final int bitWidth;
+    private final double unsignedRange;
+    private final double scale;
+    private final double offset;
+
+    private ValueDecoder(Variable var) {
+      dataType = var.getDataType();
+      unsigned =
+          dataType.isIntegral()
+              && (dataType.isUnsigned()
+                  || "true"
+                      .equalsIgnoreCase(var.attributes().findAttributeString("_Unsigned", null)));
+      bitWidth = dataType.getSize() * 8;
+      unsignedRange = unsigned ? Math.pow(2, bitWidth) : 0;
+      scale = getNumericAttr(var, NetCdfConstants.SCALE_FACTOR, 1.0);
+      offset = getNumericAttr(var, NetCdfConstants.ADD_OFFSET, 0.0);
     }
-    double scale = getNumericAttr(var, NetCdfConstants.SCALE_FACTOR, 1.0);
-    double offset = getNumericAttr(var, NetCdfConstants.ADD_OFFSET, 0.0);
-    return raw * scale + offset;
+
+    private double get(Array data, int index) {
+      return decodeWidened(getWidened(data, index));
+    }
+
+    private double getWidened(Array data, int index) {
+      if (!isIntegral()) return getElement(data, index);
+      long value = getIntegral(data, index);
+      double widened = value;
+      if (unsigned && bitWidth == Long.SIZE && value < 0) widened += unsignedRange;
+      return widened;
+    }
+
+    private long getIntegral(Array data, int index) {
+      return normalizeIntegral(data.getLong(index));
+    }
+
+    private long normalizeIntegral(long value) {
+      if (!unsigned || bitWidth == Long.SIZE) return value;
+      return value & ((1L << bitWidth) - 1);
+    }
+
+    private int compareIntegral(long left, long right) {
+      return unsigned ? Long.compareUnsigned(left, right) : Long.compare(left, right);
+    }
+
+    private double decodeWidened(double value) {
+      return value * scale + offset;
+    }
+
+    private boolean isPacked() {
+      return scale != 1.0 || offset != 0.0;
+    }
+
+    private boolean isIntegral() {
+      return dataType.isIntegral();
+    }
+
+    private boolean is64BitIntegral() {
+      return isIntegral() && bitWidth == Long.SIZE;
+    }
+  }
+
+  /** Evaluate CF missing-value and validity attributes in the packed/raw value domain. */
+  private static final class RawValueValidity {
+    private final ValueDecoder decoder;
+    private final List<Long> integralMissingValues = new ArrayList<>();
+    private final List<Double> floatingMissingValues = new ArrayList<>();
+    private final Long integralValidMin;
+    private final Long integralValidMax;
+    private final Double floatingValidMin;
+    private final Double floatingValidMax;
+
+    private RawValueValidity(Variable var, ValueDecoder decoder) {
+      this.decoder = decoder;
+      Attribute fillValue = var.findAttribute("_FillValue");
+      Attribute missingValue = var.findAttribute(NetCdfConstants.MISSING_VALUE);
+      Attribute validRange = var.findAttribute(NetCdfConstants.VALID_RANGE);
+      Attribute validMin = var.findAttribute(NetCdfConstants.VALID_MIN);
+      Attribute validMax = var.findAttribute(NetCdfConstants.VALID_MAX);
+
+      if (decoder.isIntegral()) {
+        addIntegralValues(fillValue, decoder, integralMissingValues);
+        addIntegralValues(missingValue, decoder, integralMissingValues);
+        Long min = null;
+        Long max = null;
+        if (validRange != null && validRange.getLength() >= 2) {
+          Long first = integralValue(validRange, 0, decoder);
+          Long second = integralValue(validRange, 1, decoder);
+          if (first != null && second != null) {
+            min = decoder.compareIntegral(first, second) <= 0 ? first : second;
+            max = decoder.compareIntegral(first, second) <= 0 ? second : first;
+          }
+        } else {
+          min = integralValue(validMin, 0, decoder);
+          max = integralValue(validMax, 0, decoder);
+        }
+        integralValidMin = min;
+        integralValidMax = max;
+        floatingValidMin = null;
+        floatingValidMax = null;
+      } else {
+        addFloatingValues(fillValue, floatingMissingValues);
+        addFloatingValues(missingValue, floatingMissingValues);
+        Double min = null;
+        Double max = null;
+        if (validRange != null && validRange.getLength() >= 2) {
+          Double first = floatingValue(validRange, 0);
+          Double second = floatingValue(validRange, 1);
+          if (first != null && second != null) {
+            min = Math.min(first, second);
+            max = Math.max(first, second);
+          }
+        } else {
+          min = floatingValue(validMin, 0);
+          max = floatingValue(validMax, 0);
+        }
+        integralValidMin = null;
+        integralValidMax = null;
+        floatingValidMin = min;
+        floatingValidMax = max;
+      }
+    }
+
+    private boolean isInvalid(Array data, int index) {
+      if (decoder.isIntegral()) {
+        long value = decoder.getIntegral(data, index);
+        for (long missing : integralMissingValues) {
+          if (value == missing) return true;
+        }
+        if (integralValidMin != null && decoder.compareIntegral(value, integralValidMin) < 0)
+          return true;
+        return integralValidMax != null && decoder.compareIntegral(value, integralValidMax) > 0;
+      }
+
+      double value = getElement(data, index);
+      for (double missing : floatingMissingValues) {
+        if (sameValue(value, missing)) return true;
+      }
+      if (floatingValidMin != null && !(value >= floatingValidMin)) return true;
+      return floatingValidMax != null && !(value <= floatingValidMax);
+    }
+
+    private Double outputNoData(Array data) {
+      if (!hasValidityRules()) return null;
+      if (!requiresSyntheticNoData()) return firstMissingValue();
+
+      // Pick a finite double absent from every valid decoded sample. The N+1 candidate values and
+      // at most N input samples guarantee a free slot without retaining every decoded value.
+      long sizeLong = data.getSize();
+      if (sizeLong > Integer.MAX_VALUE) {
+        throw new IllegalArgumentException("NetCDF variable contains too many values");
+      }
+      int size = (int) sizeLong;
+      BitSet occupiedCandidates = new BitSet();
+      for (int i = 0; i < size; i++) {
+        if (isInvalid(data, i)) continue;
+        double value = decoder.get(data, i);
+        if (value >= 0 && value <= size) {
+          int candidate = (int) value;
+          if (value == candidate) occupiedCandidates.set(candidate);
+        }
+      }
+      int freeCandidate = occupiedCandidates.nextClearBit(0);
+      return (double) freeCandidate;
+    }
+
+    private boolean hasValidityRules() {
+      if (decoder.isIntegral()) {
+        return !integralMissingValues.isEmpty()
+            || integralValidMin != null
+            || integralValidMax != null;
+      }
+      return !floatingMissingValues.isEmpty()
+          || floatingValidMin != null
+          || floatingValidMax != null;
+    }
+
+    private boolean requiresSyntheticNoData() {
+      if (decoder.isPacked() || decoder.is64BitIntegral()) return true;
+      if (decoder.isIntegral()) return integralMissingValues.isEmpty();
+      return floatingMissingValues.isEmpty() || !Double.isFinite(floatingMissingValues.get(0));
+    }
+
+    private double firstMissingValue() {
+      return decoder.isIntegral()
+          ? integralMissingValues.get(0).doubleValue()
+          : floatingMissingValues.get(0);
+    }
+
+    private static void addIntegralValues(
+        Attribute attr, ValueDecoder decoder, List<Long> destination) {
+      if (attr == null) return;
+      for (int i = 0; i < attr.getLength(); i++) {
+        Long value = integralValue(attr, i, decoder);
+        if (value != null) destination.add(value);
+      }
+    }
+
+    private static Long integralValue(Attribute attr, int index, ValueDecoder decoder) {
+      if (attr == null || index >= attr.getLength()) return null;
+      Number value = attr.getNumericValue(index);
+      return value == null ? null : decoder.normalizeIntegral(value.longValue());
+    }
+
+    private static void addFloatingValues(Attribute attr, List<Double> destination) {
+      if (attr == null) return;
+      for (int i = 0; i < attr.getLength(); i++) {
+        Double value = floatingValue(attr, i);
+        if (value != null) destination.add(value);
+      }
+    }
+
+    private static Double floatingValue(Attribute attr, int index) {
+      if (attr == null || index >= attr.getLength()) return null;
+      Number value = attr.getNumericValue(index);
+      return value == null ? null : value.doubleValue();
+    }
+
+    private static boolean sameValue(double left, double right) {
+      return left == right || (Double.isNaN(left) && Double.isNaN(right));
+    }
   }
 
   private static double getNumericAttr(Variable var, String name, double defaultValue) {
@@ -563,15 +768,6 @@ public class NetCdfReader {
     if (attr == null) return defaultValue;
     Number numericValue = attr.getNumericValue();
     return numericValue == null ? defaultValue : numericValue.doubleValue();
-  }
-
-  private static Double getAttrDoubleValue(Attribute attr) {
-    Number numericValue = attr.getNumericValue();
-    if (!Objects.isNull(numericValue)) {
-      return numericValue.doubleValue();
-    } else {
-      throw new IllegalArgumentException(NetCdfConstants.NON_NUMERIC_VALUE);
-    }
   }
 
   private static void ensureCoordVar(Variable lonVar, Variable latVar)
