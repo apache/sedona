@@ -1,0 +1,32 @@
+# robots.txt for https://sedona.apache.org/
+#
+# Goal: keep only the current stable documentation (served under /latest/) in
+# search engine indexes. Archived, numbered releases and the development
+# snapshot are stale or duplicate content and should not surface in search
+# results (e.g. an outdated /1.4.1/ page ranking above the current docs).
+#
+# This file is maintained by hand on the `website` branch. `mike` preserves
+# root-level files it does not manage (like .asf.yaml and .nojekyll) when it
+# deploys new versions, so this file persists across doc deployments.
+
+User-agent: *
+# Current stable docs (the "latest" alias) — the only versioned docs to index.
+Allow: /latest/
+# Development snapshot — unreleased, do not index.
+Disallow: /latest-snapshot/
+# Archived, numbered release docs. Every archived version lives in a top-level
+# directory that begins with a digit (e.g. /1.4.1/, /1.9.0/), so blocking the
+# digit prefixes covers all past and future numbered versions without needing
+# an update on each release. The current release is still indexable via /latest/.
+Disallow: /0
+Disallow: /1
+Disallow: /2
+Disallow: /3
+Disallow: /4
+Disallow: /5
+Disallow: /6
+Disallow: /7
+Disallow: /8
+Disallow: /9
+
+Sitemap: https://sedona.apache.org/latest/sitemap.xml
