@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -324,9 +323,9 @@ Example: Polygon(…) or “POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))” or [Polygon(�
 <li><p><strong>datetime</strong> – <p>A single datetime, RFC 3339-compliant timestamp,
 or a list of date-time ranges for filtering the items. The datetime can be specified in various formats:</p>
 <ul>
-<li><p>”YYYY” expands to [“YYYY-01-01T00:00:00Z”, “YYYY-12-31T23:59:59Z”]</p></li>
-<li><p>”YYYY-mm” expands to [“YYYY-mm-01T00:00:00Z”, “YYYY-mm-&lt;last_day&gt;T23:59:59Z”]</p></li>
-<li><p>”YYYY-mm-dd” expands to [“YYYY-mm-ddT00:00:00Z”, “YYYY-mm-ddT23:59:59Z”]</p></li>
+<li><p>”YYYY” expands to [“YYYY-01-01T00:00:00Z”, “YYYY-12-31T23:59:59.999999Z”]</p></li>
+<li><p>”YYYY-mm” expands to [“YYYY-mm-01T00:00:00Z”, “YYYY-mm-&lt;last_day&gt;T23:59:59.999999Z”]</p></li>
+<li><p>”YYYY-mm-dd” expands to [“YYYY-mm-ddT00:00:00Z”, “YYYY-mm-ddT23:59:59.999999Z”]</p></li>
 <li><p>”YYYY-mm-ddTHH:MM:SSZ” remains as [“YYYY-mm-ddTHH:MM:SSZ”, “YYYY-mm-ddTHH:MM:SSZ”]</p></li>
 <li><p>A list of date-time ranges can be provided for multiple intervals.</p></li>
 </ul>

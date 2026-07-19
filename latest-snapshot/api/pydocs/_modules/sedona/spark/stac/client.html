@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stac.client &mdash; Apache Sedona Python Documentation</title>
@@ -378,9 +377,9 @@
 <span class="sd">        :param datetime: A single datetime, RFC 3339-compliant timestamp,</span>
 <span class="sd">            or a list of date-time ranges for filtering the items. The datetime can be specified in various formats:</span>
 
-<span class="sd">            - &quot;YYYY&quot; expands to [&quot;YYYY-01-01T00:00:00Z&quot;, &quot;YYYY-12-31T23:59:59Z&quot;]</span>
-<span class="sd">            - &quot;YYYY-mm&quot; expands to [&quot;YYYY-mm-01T00:00:00Z&quot;, &quot;YYYY-mm-&lt;last_day&gt;T23:59:59Z&quot;]</span>
-<span class="sd">            - &quot;YYYY-mm-dd&quot; expands to [&quot;YYYY-mm-ddT00:00:00Z&quot;, &quot;YYYY-mm-ddT23:59:59Z&quot;]</span>
+<span class="sd">            - &quot;YYYY&quot; expands to [&quot;YYYY-01-01T00:00:00Z&quot;, &quot;YYYY-12-31T23:59:59.999999Z&quot;]</span>
+<span class="sd">            - &quot;YYYY-mm&quot; expands to [&quot;YYYY-mm-01T00:00:00Z&quot;, &quot;YYYY-mm-&lt;last_day&gt;T23:59:59.999999Z&quot;]</span>
+<span class="sd">            - &quot;YYYY-mm-dd&quot; expands to [&quot;YYYY-mm-ddT00:00:00Z&quot;, &quot;YYYY-mm-ddT23:59:59.999999Z&quot;]</span>
 <span class="sd">            - &quot;YYYY-mm-ddTHH:MM:SSZ&quot; remains as [&quot;YYYY-mm-ddTHH:MM:SSZ&quot;, &quot;YYYY-mm-ddTHH:MM:SSZ&quot;]</span>
 <span class="sd">            - A list of date-time ranges can be provided for multiple intervals.</span>
 

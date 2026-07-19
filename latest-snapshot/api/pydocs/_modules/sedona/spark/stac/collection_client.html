@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stac.collection_client &mdash; Apache Sedona Python Documentation</title>
@@ -225,13 +224,13 @@
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">calendar</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">python_datetime</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">SparkSession</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">dt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseGeometry</span>
 
 
@@ -503,6 +502,13 @@
 
 <span class="sd">        It then expands the date string to cover the entire time period for that date.</span>
 
+<span class="sd">        The end of an expanded period uses ``23:59:59.999999Z`` rather than a</span>
+<span class="sd">        whole second. Sedona stores STAC datetimes as timestamps and filters</span>
+<span class="sd">        them with an inclusive upper bound (``datetime &lt;= end``), so a rounded</span>
+<span class="sd">        ``23:59:59Z`` bound would drop items that fall in the final fractional</span>
+<span class="sd">        second (e.g. ``23:59:59.5Z``). ``.999999`` matches Spark&#39;s microsecond</span>
+<span class="sd">        timestamp precision, keeping whole-period searches inclusive.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            date_str (str): The date string to expand.</span>
 
@@ -513,19 +519,25 @@
 <span class="sd">            ValueError: If the date string format is invalid.</span>
 
 <span class="sd">        Examples:</span>
-<span class="sd">        - &quot;2017&quot; expands to [&quot;2017-01-01T00:00:00Z&quot;, &quot;2017-12-31T23:59:59Z&quot;]</span>
-<span class="sd">        - &quot;2017-06&quot; expands to [&quot;2017-06-01T00:00:00Z&quot;, &quot;2017-06-30T23:59:59Z&quot;]</span>
-<span class="sd">        - &quot;2017-06-10&quot; expands to [&quot;2017-06-10T00:00:00Z&quot;, &quot;2017-06-10T23:59:59Z&quot;]</span>
+<span class="sd">        - &quot;2017&quot; expands to [&quot;2017-01-01T00:00:00Z&quot;, &quot;2017-12-31T23:59:59.999999Z&quot;]</span>
+<span class="sd">        - &quot;2017-06&quot; expands to [&quot;2017-06-01T00:00:00Z&quot;, &quot;2017-06-30T23:59:59.999999Z&quot;]</span>
+<span class="sd">        - &quot;2017-06-10&quot; expands to [&quot;2017-06-10T00:00:00Z&quot;, &quot;2017-06-10T23:59:59.999999Z&quot;]</span>
 <span class="sd">        - &quot;2017-06-01T00:00:00Z&quot; remains as [&quot;2017-06-01T00:00:00Z&quot;, &quot;2017-06-01T00:00:00Z&quot;]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">date_str</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>  <span class="c1"># YYYY</span>
-            <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">-01-01T00:00:00Z&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">-12-31T23:59:59Z&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">-01-01T00:00:00Z&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">-12-31T23:59:59.999999Z&quot;</span><span class="p">,</span>
+            <span class="p">]</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">date_str</span><span class="p">)</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>  <span class="c1"># YYYY-mm</span>
-            <span class="n">year</span><span class="p">,</span> <span class="n">month</span> <span class="o">=</span> <span class="n">date_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
-            <span class="n">last_day</span> <span class="o">=</span> <span class="p">(</span><span class="n">dt</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">year</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">month</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">day</span>
-            <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">-01T00:00:00Z&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">last_day</span><span class="si">}</span><span class="s2">T23:59:59Z&quot;</span><span class="p">]</span>
+            <span class="n">year</span><span class="p">,</span> <span class="n">month</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">date_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">))</span>
+            <span class="n">last_day</span> <span class="o">=</span> <span class="n">calendar</span><span class="o">.</span><span class="n">monthrange</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">-01T00:00:00Z&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">last_day</span><span class="si">:</span><span class="s2">02d</span><span class="si">}</span><span class="s2">T23:59:59.999999Z&quot;</span><span class="p">,</span>
+            <span class="p">]</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">date_str</span><span class="p">)</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>  <span class="c1"># YYYY-mm-dd</span>
-            <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">T00:00:00Z&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">T23:59:59Z&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">T00:00:00Z&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">date_str</span><span class="si">}</span><span class="s2">T23:59:59.999999Z&quot;</span><span class="p">]</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">date_str</span><span class="p">)</span> <span class="o">==</span> <span class="mi">19</span><span class="p">:</span>  <span class="c1"># YYYY-mm-ddTHH:MM:SS</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">date_str</span><span class="p">,</span> <span class="n">date_str</span><span class="p">]</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">date_str</span><span class="p">)</span> <span class="o">==</span> <span class="mi">20</span><span class="p">:</span>  <span class="c1"># YYYY-mm-ddTHH:MM:SSZ</span>
