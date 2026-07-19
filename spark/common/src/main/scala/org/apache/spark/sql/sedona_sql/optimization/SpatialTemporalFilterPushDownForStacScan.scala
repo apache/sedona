@@ -131,45 +131,44 @@ class SpatialTemporalFilterPushDownForStacScan(sparkSession: SparkSession)
       case LessThan(pushableColumn(name), Literal(v, TimestampType)) =>
         Some(
           TemporalFilter
-            .LessThanFilter(
-              unquote(name),
-              LocalDateTime
-                .ofInstant(Instant.ofEpochMilli(v.asInstanceOf[Long] / 1000), ZoneOffset.UTC)))
+            .LessThanFilter(unquote(name), microsToLocalDateTime(v.asInstanceOf[Long])))
 
       case LessThanOrEqual(pushableColumn(name), Literal(v, TimestampType)) =>
         Some(
           TemporalFilter
-            .LessThanFilter(
-              unquote(name),
-              LocalDateTime
-                .ofInstant(Instant.ofEpochMilli(v.asInstanceOf[Long] / 1000), ZoneOffset.UTC)))
+            .LessThanFilter(unquote(name), microsToLocalDateTime(v.asInstanceOf[Long])))
 
       case GreaterThan(pushableColumn(name), Literal(v, TimestampType)) =>
         Some(
           TemporalFilter
-            .GreaterThanFilter(
-              unquote(name),
-              LocalDateTime
-                .ofInstant(Instant.ofEpochMilli(v.asInstanceOf[Long] / 1000), ZoneOffset.UTC)))
+            .GreaterThanFilter(unquote(name), microsToLocalDateTime(v.asInstanceOf[Long])))
 
       case GreaterThanOrEqual(pushableColumn(name), Literal(v, TimestampType)) =>
         Some(
           TemporalFilter
-            .GreaterThanFilter(
-              unquote(name),
-              LocalDateTime
-                .ofInstant(Instant.ofEpochMilli(v.asInstanceOf[Long] / 1000), ZoneOffset.UTC)))
+            .GreaterThanFilter(unquote(name), microsToLocalDateTime(v.asInstanceOf[Long])))
 
       case EqualTo(pushableColumn(name), Literal(v, TimestampType)) =>
         Some(
           TemporalFilter
-            .EqualFilter(
-              unquote(name),
-              LocalDateTime
-                .ofInstant(Instant.ofEpochMilli(v.asInstanceOf[Long] / 1000), ZoneOffset.UTC)))
+            .EqualFilter(unquote(name), microsToLocalDateTime(v.asInstanceOf[Long])))
 
       case _ => None
     }
+  }
+
+  /**
+   * Converts a Spark TimestampType literal (microseconds since the Unix epoch) to a
+   * [[LocalDateTime]] in UTC without losing sub-millisecond precision. The previous
+   * implementation divided by 1000 to obtain milliseconds, which truncated the pushed-down
+   * temporal bound to millisecond resolution and could drop items in the final fraction of a
+   * second before Spark's residual filter ran. `floorDiv`/`floorMod` keep the conversion correct
+   * for pre-epoch timestamps as well.
+   */
+  private def microsToLocalDateTime(micros: Long): LocalDateTime = {
+    val seconds = Math.floorDiv(micros, 1000000L)
+    val nanoOfSecond = Math.floorMod(micros, 1000000L) * 1000L
+    LocalDateTime.ofInstant(Instant.ofEpochSecond(seconds, nanoOfSecond), ZoneOffset.UTC)
   }
 
   private def unquote(name: String): String = {

@@ -369,7 +369,10 @@ object StacUtils {
 
   /** Returns the temporal filter string based on the temporal filter. */
   def getFilterTemporal(filter: TemporalFilter): String = {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    // Six fractional digits (microseconds) match Spark's TimestampType precision. A coarser
+    // pattern would round the pushed-down bound and could exclude items in the final fraction of
+    // a second (e.g. an item at 23:59:59.999500Z under an inclusive 23:59:59.999999Z upper bound).
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
 
     def formatDateTime(dateTime: LocalDateTime): String = {
       if (dateTime == null) ".." else dateTime.format(formatter)
