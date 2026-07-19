@@ -180,10 +180,11 @@ public class NetCdfReader {
   /**
    * Resolve the coordinate variable for a dimension of the record variable. Full-path names
    * ("sub/lat") resolve directly. Plain names search the record variable's group and its ancestors
-   * first, then laterally across the whole file. In every case — including path-resolved candidates
-   * — the variable must be rank-1, numeric, and attached to the expected dimension (matched by
-   * identity), so a same-named variable over a different axis (e.g. a local {@code lat(time)} next
-   * to the true {@code lat(lat)}) or an unrelated group's dimension is never selected.
+   * through the dimension's local apex first, then downward from that apex width-wise, level by
+   * level. In every case — including path-resolved candidates — the variable must be rank-1,
+   * numeric, and attached to the expected dimension (matched by identity), so a same-named variable
+   * over a different axis (e.g. a local {@code lat(time)} next to the true {@code lat(lat)}) or an
+   * unrelated group's dimension is never selected.
    */
   private static Variable findCoordVariable(
       NetcdfFile netcdfFile, Variable recordVariable, Dimension expectedDim, String name) {
@@ -192,15 +193,37 @@ public class NetCdfReader {
       Variable v = netcdfFile.findVariable(name);
       return isCoordinateFor(v, expectedDim) ? v : null;
     }
+
+    Group apex = localApex(recordVariable, expectedDim);
+    if (apex == null) return null;
+
+    // Proximity: the record variable's group, then its ancestors through the local apex.
+    Group group = recordVariable.getParentGroup();
+    while (group != null) {
+      Variable v = group.findVariableLocal(name);
+      if (isCoordinateFor(v, expectedDim)) return v;
+      if (group == apex) break;
+      group = group.getParentGroup();
+    }
+
+    // Lateral: descend from the local apex width-wise, preserving file/group order.
+    Deque<Group> groups = new ArrayDeque<>(apex.getGroups());
+    while (!groups.isEmpty()) {
+      group = groups.removeFirst();
+      Variable v = group.findVariableLocal(name);
+      if (isCoordinateFor(v, expectedDim)) return v;
+      groups.addAll(group.getGroups());
+    }
+    return null;
+  }
+
+  /** The nearest ancestor group that declares {@code dim} by identity. */
+  private static Group localApex(Variable recordVariable, Dimension dim) {
     for (Group group = recordVariable.getParentGroup();
         group != null;
         group = group.getParentGroup()) {
-      Variable v = group.findVariableLocal(name);
-      if (isCoordinateFor(v, expectedDim)) return v;
-    }
-    for (Variable v : netcdfFile.getVariables()) {
-      if (name.equals(v.getShortName()) && isCoordinateFor(v, expectedDim)) {
-        return v;
+      for (Dimension declared : group.getDimensions()) {
+        if (declared == dim) return group;
       }
     }
     return null;
@@ -237,16 +260,14 @@ public class NetCdfReader {
       Variable v = netcdfFile.findVariable(name);
       return isCoordinateForAnyAxis(v, recordVariable) ? v : null;
     }
-    for (Group group = recordVariable.getParentGroup();
-        group != null;
-        group = group.getParentGroup()) {
-      Variable v = group.findVariableLocal(name);
-      if (isCoordinateForAnyAxis(v, recordVariable)) return v;
-    }
-    for (Variable v : netcdfFile.getVariables()) {
-      if (name.equals(v.getShortName()) && isCoordinateForAnyAxis(v, recordVariable)) {
-        return v;
-      }
+
+    // Each candidate axis has its own local apex. Reuse the exact-dimension resolver so the
+    // fallback cannot escape one dimension's scope through another dimension's ancestry.
+    Set<Dimension> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+    for (Dimension dim : recordVariable.getDimensions()) {
+      if (!seen.add(dim)) continue;
+      Variable v = findCoordVariable(netcdfFile, recordVariable, dim, name);
+      if (v != null) return v;
     }
     return null;
   }

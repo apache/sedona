@@ -123,7 +123,8 @@ variables referenced by CF metadata attributes (`bounds`, `climatology`,
 other variables — cell boundaries like `lat_bnds`, quality flags, cell areas — and
 are skipped; a variable whose trailing dimensions have matching 1-D numeric
 coordinate variables is preferred. Coordinate variables are resolved in the data
-variable's own group and its ancestors first, then anywhere in the file matched
+variable's own group and its ancestors through the dimension's local apex first,
+then downward from that apex width-wise, level by level. Candidates are matched
 strictly by dimension identity, so identically named dimensions declared in
 unrelated groups are never confused. `grid_mapping` references may be plain names
 (resolved by proximity) or absolute/relative group paths (`/crs`, `../crs`).
@@ -220,9 +221,15 @@ transform would misrepresent the geometry, so `geoTransform` is null and
 | `units` | String | CF `units` attribute; null if absent |
 | `longName` | String | CF `long_name` attribute; null if absent |
 | `standardName` | String | CF `standard_name` attribute; null if absent |
-| `noDataValue` | Double | CF `_FillValue`, falling back to `missing_value`; null if absent |
+| `noDataValue` | Double | First CF `_FillValue`, falling back to the first `missing_value`, in storage units after unsigned widening but without scale/offset; null if absent |
 | `isCoordinate` | Boolean | Whether this is a coordinate variable (1-D, named after its dimension) |
 | `attributes` | Map[String,String] | All attributes of the variable, verbatim |
+
+The metadata source reports the no-data attribute declared by the file. The raster
+loader evaluates all missing and validity attributes in storage units and may choose a
+finite, collision-free decoded-domain sentinel for the loaded band. Therefore this
+`noDataValue` can intentionally differ from `RS_BandNoDataValue` after
+`RS_FromNetCDF`.
 
 ## Examples
 

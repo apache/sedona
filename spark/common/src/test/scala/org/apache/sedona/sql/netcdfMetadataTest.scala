@@ -20,11 +20,15 @@ package org.apache.sedona.sql
 
 import org.apache.commons.io.FileUtils
 import org.apache.spark.sql.Row
+import org.apache.spark.sql.execution.datasources.v2.BatchScanExec
+import org.apache.spark.sql.sedona_sql.io.netcdfmetadata.NetCdfMetadataScan
+import org.apache.spark.sql.util.CaseInsensitiveStringMap
 import org.junit.Assert.assertEquals
 import org.scalatest.BeforeAndAfterAll
 
 import java.io.File
 import java.nio.file.Files
+import java.util.Collections
 
 class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
 
@@ -228,6 +232,30 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       val df =
         sparkSession.read.format("netcdf.metadata").load(multiDir.getAbsolutePath).limit(2)
       assertEquals(2L, df.count())
+    }
+
+    it("should hash scans from every field used by equality") {
+      val scan = sparkSession.read
+        .format("netcdf.metadata")
+        .load(singleFileLocation)
+        .queryExecution
+        .executedPlan
+        .collectFirst { case exec: BatchScanExec =>
+          exec.scan.asInstanceOf[NetCdfMetadataScan]
+        }
+        .getOrElse(fail("NetCDF metadata query did not contain a BatchScanExec"))
+
+      val equalScan = scan.copy()
+      val limitedScan = scan.copy(pushedLimit = Some(1))
+      val differentOptionsScan = scan.copy(options =
+        new CaseInsensitiveStringMap(Collections.singletonMap("hash-test", "different")))
+
+      assert(scan == equalScan)
+      assertEquals(scan.hashCode(), equalScan.hashCode())
+      assert(scan != limitedScan)
+      assert(scan.hashCode() != limitedScan.hashCode())
+      assert(scan != differentOptionsScan)
+      assert(scan.hashCode() != differentOptionsScan.hashCode())
     }
 
     it("should support column pruning") {
@@ -477,8 +505,8 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
 
     it("should search lateral coordinate variables width-wise from the local apex") {
       // The first branch contains coordinates two levels below /domain, while the later branch
-      // contains coordinates only one level below it. CF lateral search is breadth-first, so the
-      // shallower coordinates must win even though their group occurs later in file order.
+      // contains coordinates only one level below it. The lateral lookup proceeds width-wise,
+      // level by level, so the shallower coordinates win despite occurring later in file order.
       val df = sparkSession.read
         .format("netcdf.metadata")
         .load(variantsDir + "test_lateral_width.nc4")
@@ -497,6 +525,21 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assertEquals(25.0, gt.getAs[Double]("upperLeftY"), 1e-6)
       assertEquals(1.0, gt.getAs[Double]("scaleX"), 1e-6)
       assertEquals(-10.0, gt.getAs[Double]("scaleY"), 1e-6)
+
+      // The raster loader must use the same apex-bounded, width-wise coordinate lookup as the
+      // metadata reader. A depth-first file scan would bind the deep decoys instead.
+      val rasterMetadata = sparkSession.read
+        .format("binaryFile")
+        .load(variantsDir + "test_lateral_width.nc4")
+        .selectExpr("RS_FromNetCDF(content, 'domain/data/temp') as raster")
+        .selectExpr("RS_Metadata(raster) as metadata")
+        .first()
+        .getStruct(0)
+      val rasterGt = metadataStructToSeq(rasterMetadata)
+      assertEquals(0.5, rasterGt(0), 1e-6)
+      assertEquals(25.0, rasterGt(1), 1e-6)
+      assertEquals(1.0, rasterGt(4), 1e-6)
+      assertEquals(-10.0, rasterGt(5), 1e-6)
     }
 
     it("should skip declared ancillary variables when selecting the grid variable") {
@@ -873,6 +916,20 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assert(row.getAs[String]("crs").contains("Pseudo-Mercator"))
       val gt = df.selectExpr("geoTransform.scaleX").first()
       assertEquals(500.0, gt.getAs[Double]("scaleX"), 1e-6)
+    }
+
+    it("should skip incompatible shadows when matching expanded grid-mapping coordinates") {
+      // /data/y(time) has the same name as the grid's Y dimension but cannot serve that axis.
+      // Both extent and clause matching must skip it and bind the lateral /coords/y(y).
+      val df = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_multimapping_shadow.nc4")
+      val row = df
+        .selectExpr("srid", "geoTransform.upperLeftX", "geoTransform.upperLeftY")
+        .first()
+      assertEquals(4326, row.getAs[Int]("srid"))
+      assertEquals(19.5, row.getAs[Double]("upperLeftX"), 1e-6)
+      assertEquals(11.5, row.getAs[Double]("upperLeftY"), 1e-6)
     }
 
     it("should stop expanded grid-mapping coordinate lookup at the local apex") {

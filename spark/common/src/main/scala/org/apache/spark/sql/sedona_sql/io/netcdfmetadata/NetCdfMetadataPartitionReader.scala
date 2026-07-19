@@ -304,11 +304,11 @@ class NetCdfMetadataPartitionReader(
   }
 
   /**
-   * Find the 1-D numeric coordinate variable for `dim`. Search order follows CF/NUG scoping:
-   * first the data variable's group and its ancestors by name through the dimension's local apex,
-   * then a breadth-first lateral search below that apex. A NUG coordinate variable may legally
-   * live outside the data variable's lineage (e.g. a sibling group) as long as it references the
-   * very same dimension. Identity matching (`eq`) guarantees an identically named dimension
+   * Find the 1-D numeric coordinate variable for `dim`. Plain-name lookup first searches the data
+   * variable's group and its ancestors through the dimension's local apex, then searches
+   * laterally below that apex, proceeding width-wise through each level. A coordinate variable
+   * may live outside the data variable's lineage (e.g. a sibling group) as long as it references
+   * the very same dimension. Identity matching (`eq`) guarantees an identically named dimension
    * declared in an unrelated group is never picked up.
    */
   private def findCoordinateVariable(dataVar: Variable, dim: Dimension): Option[Variable] = {
@@ -352,7 +352,7 @@ class NetCdfMetadataPartitionReader(
     Option(group)
   }
 
-  /** Match a grid coordinate reference using CF's special coordinate-variable scoping rules. */
+  /** Match a grid-coordinate reference with the scoped lookup used for coordinate discovery. */
   private def matchesGridCoordinateReference(
       dataVar: Variable,
       reference: String,
@@ -362,21 +362,9 @@ class NetCdfMetadataPartitionReader(
     }
     if (gridCoord.getRank != 1 || gridCoord.getShortName != reference) return false
 
-    val dim = gridCoord.getDimension(0)
-    val apex = localApex(dataVar, dim).orNull
-    if (apex == null) return false
-
-    // A visible same-named variable shadows lateral lookup even when it is not gridCoord. If no
-    // variable is found through the local apex, gridCoord is already the identity-validated result
-    // of findCoordinateVariable's lateral phase.
-    var group = dataVar.getParentGroup
-    while (group != null) {
-      val visible = group.findVariableLocal(reference)
-      if (visible != null) return visible eq gridCoord
-      if (group eq apex) return true
-      group = group.getParentGroup
-    }
-    false
+    // Resolve plain references with the same validity and shadowing rules used to select the grid
+    // coordinate itself. Incompatible same-named variables are skipped in both paths.
+    findCoordinateVariable(dataVar, gridCoord.getDimension(0)).exists(_ eq gridCoord)
   }
 
   /**

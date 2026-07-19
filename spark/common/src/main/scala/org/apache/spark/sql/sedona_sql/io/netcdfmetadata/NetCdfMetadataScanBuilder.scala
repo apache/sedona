@@ -97,7 +97,12 @@ case class NetCdfMetadataScan(
     case _ => false
   }
 
-  override def hashCode(): Int = getClass.hashCode()
+  override def hashCode(): Int = {
+    var result = super.hashCode()
+    result = 31 * result + options.hashCode()
+    result = 31 * result + pushedLimit.hashCode()
+    result
+  }
 
   override def isSplitable(path: org.apache.hadoop.fs.Path): Boolean = false
 
