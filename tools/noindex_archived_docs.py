@@ -55,8 +55,12 @@ ROBOTS_META = '<meta name="robots" content="noindex, follow">'
 
 # Opening <head> tag, allowing attributes (e.g. <head class="...">).
 HEAD_RE = re.compile(r"(<head\b[^>]*>)", re.IGNORECASE)
-# Any existing robots meta tag, so the script is idempotent.
-HAS_ROBOTS_RE = re.compile(r"""<meta[^>]+name=["']robots["']""", re.IGNORECASE)
+# A complete existing robots meta tag (name= and content= in any order).
+ROBOTS_META_RE = re.compile(
+    r"""<meta\b[^>]*\bname=["']robots["'][^>]*>""", re.IGNORECASE
+)
+# The content="..." value of a meta tag.
+ROBOTS_CONTENT_RE = re.compile(r"""content=["']([^"']*)["']""", re.IGNORECASE)
 # Archived version directories all begin with a digit (e.g. 1.4.1).
 VERSION_DIR_RE = re.compile(r"^\d")
 
@@ -83,17 +87,49 @@ def is_archived_dir(name, current):
     return name == "latest-snapshot" or bool(VERSION_DIR_RE.match(name))
 
 
+def _directives(tag):
+    """Return the directive list from a robots meta tag's content attribute."""
+    match = ROBOTS_CONTENT_RE.search(tag)
+    if not match:
+        return []
+    return [d.strip() for d in match.group(1).split(",") if d.strip()]
+
+
+def _add_noindex(tag):
+    """Rewrite a robots meta tag so it forbids indexing, keeping other rules.
+
+    Returns the tag unchanged if it already contains ``noindex``. Otherwise
+    drops a conflicting ``index`` directive, prepends ``noindex``, and preserves
+    the rest (e.g. ``noarchive``). A robots tag with no content attribute is
+    replaced outright.
+    """
+    directives = _directives(tag)
+    if any(d.lower() == "noindex" for d in directives):
+        return tag
+    if not ROBOTS_CONTENT_RE.search(tag):
+        return ROBOTS_META
+    kept = ["noindex"] + [d for d in directives if d.lower() != "index"]
+    return ROBOTS_CONTENT_RE.sub(f'content="{", ".join(kept)}"', tag, count=1)
+
+
 def inject(path):
-    """Add the noindex meta tag to one HTML file. Return True if it changed."""
+    """Add a noindex directive to one HTML file. Return True if it changed."""
     with open(path, encoding="utf-8", errors="surrogatepass") as handle:
         html = handle.read()
-    if HAS_ROBOTS_RE.search(html):
-        return False
-    new_html, replaced = HEAD_RE.subn(r"\1\n    " + ROBOTS_META, html, count=1)
-    if replaced == 0:
-        # No <head> (e.g. a raw HTML fragment such as an embedded form page).
-        # Prepend the tag: an HTML parser places a leading <meta> into the head.
-        new_html = ROBOTS_META + "\n" + html
+
+    existing = ROBOTS_META_RE.search(html)
+    if existing:
+        replacement = _add_noindex(existing.group(0))
+        if replacement == existing.group(0):
+            return False  # already noindex; leave it untouched
+        new_html = html[: existing.start()] + replacement + html[existing.end() :]
+    else:
+        new_html, replaced = HEAD_RE.subn(r"\1\n    " + ROBOTS_META, html, count=1)
+        if replaced == 0:
+            # No <head> (e.g. a raw HTML fragment such as an embedded form page).
+            # Prepend the tag: an HTML parser hoists a leading <meta> into <head>.
+            new_html = ROBOTS_META + "\n" + html
+
     with open(path, "w", encoding="utf-8", errors="surrogatepass") as handle:
         handle.write(new_html)
     return True
@@ -112,13 +148,26 @@ def write_robots(root):
 
 
 def main(root):
+    # The current stable version is whatever `latest` points at; it must be
+    # identified so it is never tagged (tagging it would de-index the live docs,
+    # since /latest/ is a symlink to it). If `latest` is missing, is not a
+    # symlink, or points nowhere, fail loudly rather than tag every version.
     latest = os.path.join(root, "latest")
-    current = os.path.basename(os.readlink(latest)) if os.path.islink(latest) else None
-    if current is None:
+    if not os.path.islink(latest):
         print(
-            "warning: no 'latest' symlink found; not skipping any version",
+            f"error: '{latest}' is missing or is not a symlink; "
+            "cannot identify the current stable version",
             file=sys.stderr,
         )
+        return 1
+    current = os.path.basename(os.path.realpath(latest))
+    if not os.path.isdir(os.path.join(root, current)):
+        print(
+            f"error: 'latest' resolves to '{current}', "
+            f"which is not a directory under '{root}'",
+            file=sys.stderr,
+        )
+        return 1
 
     targets = sorted(
         name
