@@ -105,8 +105,11 @@ jobs:
           uv run bash -c 'cd python/sedona/doc && make clean && make html'
           mkdir -p docs/api/pydocs
           cp -r python/sedona/doc/_build/html/* docs/api/pydocs/
-      - run: git config --global user.name = "GitHub Action"
-      - run: git config --global user.email = "test@abc.com"
+      # Commit as the GitHub Actions bot so website-branch commits are
+      # attributed to the Actions bot account rather than to whichever GitHub
+      # user happens to own a placeholder email address.
+      - run: git config --global user.name "github-actions[bot]"
+      - run: git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - run: uv run mkdocs build
       - name: Deploy the doc to the website branch
         if: ${{ github.event_name != 'pull_request' && github.repository == 'apache/sedona' }}
@@ -130,8 +133,8 @@ jobs:
           git fetch origin website --depth=1
           git worktree add website-branch FETCH_HEAD
           python3 tools/noindex_archived_docs.py website-branch
-          git -C website-branch config user.name "GitHub Action"
-          git -C website-branch config user.email "test@abc.com"
+          git -C website-branch config user.name "github-actions[bot]"
+          git -C website-branch config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [[ -n "$(git -C website-branch status --porcelain)" ]]; then
             git -C website-branch add -A
             git -C website-branch commit -m "Mark archived documentation versions noindex"
