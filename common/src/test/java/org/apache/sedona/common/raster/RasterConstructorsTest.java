@@ -389,6 +389,87 @@ public class RasterConstructorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testAsRasterWithNonSquarePixels() throws FactoryException, ParseException {
+    // Pixels are 2 world units wide and 3 tall, so the x-intercept math cannot
+    // silently conflate pixel-space and world-space slopes the way square
+    // pixels allow. Expected matrices are produced by GDAL
+    // (rasterio.features.rasterize) on the same grid; pixels whose centers are
+    // inside the geometry must be burned.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -3, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((102.7 497.4, 112.4 496.9, 104.2 483.7, 102.7 497.4))", 0);
+
+    GridCoverage2D rasterized =
+        RasterConstructors.asRaster(geom, raster, "d", false, 1d, 0d, false);
+    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+    double[] expected =
+        new double[] {
+          0, 0, 0, 0, 0, 0, 0,
+          0, 1, 1, 1, 1, 1, 0,
+          0, 0, 1, 1, 1, 0, 0,
+          0, 0, 1, 1, 0, 0, 0,
+          0, 0, 1, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // allTouched adds every boundary-touched pixel on the same grid
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", true, 1d, 0d, false);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0, 1, 1, 1, 1, 1, 0,
+          0, 1, 1, 1, 1, 1, 1,
+          0, 1, 1, 1, 1, 1, 0,
+          0, 1, 1, 1, 1, 0, 0,
+          0, 1, 1, 1, 0, 0, 0,
+          0, 0, 1, 0, 0, 0, 0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // An interior ring with diagonal edges exercises hole intercepts too
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((101.1 498.9, 113.5 497.8, 112.9 483.2, 102.3 484.6, 101.1 498.9), "
+                + "(104.1 496.9, 110.2 496.9, 106.3 487.8, 104.1 496.9))",
+            0);
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 1d, 0d, false);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0, 1, 1, 0, 0, 0, 0,
+          0, 1, 0, 0, 0, 1, 1,
+          0, 1, 1, 0, 1, 1, 1,
+          0, 1, 1, 0, 1, 1, 1,
+          0, 1, 1, 1, 1, 1, 1,
+          0, 0, 0, 0, 0, 1, 0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // Bottom-up variant of the same grid: the same triangle, vertically
+    // flipped in pixel space
+    GridCoverage2D rasterBottomUp =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 482, 2, 3, 0, 0, 0);
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((102.7 497.4, 112.4 496.9, 104.2 483.7, 102.7 497.4))", 0);
+    rasterized = RasterConstructors.asRaster(geom, rasterBottomUp, "d", false, 1d, 0d, false);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0, 0, 0, 0, 0, 0, 0,
+          0, 0, 1, 0, 0, 0, 0,
+          0, 0, 1, 1, 0, 0, 0,
+          0, 0, 1, 1, 1, 0, 0,
+          0, 1, 1, 1, 1, 1, 0,
+          0, 0, 0, 0, 0, 0, 0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+  }
+
+  @Test
   public void testAsRasterLingString() throws FactoryException, ParseException {
     // Horizontal LineString
     GridCoverage2D raster =
