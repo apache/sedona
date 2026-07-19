@@ -369,10 +369,12 @@ object StacUtils {
 
   /** Returns the temporal filter string based on the temporal filter. */
   def getFilterTemporal(filter: TemporalFilter): String = {
-    // Six fractional digits (microseconds) match Spark's TimestampType precision. A coarser
-    // pattern would round the pushed-down bound and could exclude items in the final fraction of
-    // a second (e.g. an item at 23:59:59.999500Z under an inclusive 23:59:59.999999Z upper bound).
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'")
+    // Nine fractional digits (nanoseconds) match the finest precision STAC permits. Spark only
+    // keeps microseconds, so it truncates a legal item timestamp such as ...999999500Z down to
+    // ...999999 before the residual `datetime <= end` filter runs. A coarser pattern (or a bound
+    // pinned to microseconds) would let the remote catalog drop that item even though the residual
+    // filter would keep it; see the upper-bound widening below.
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'")
 
     def formatDateTime(dateTime: LocalDateTime): String = {
       if (dateTime == null) ".." else dateTime.format(formatter)
@@ -412,8 +414,16 @@ object StacUtils {
     }
 
     val (start, end) = calculateUnionTemporal(filter)
-    if (end == null) s"datetime=${formatDateTime(start)}/.."
-    else s"datetime=${formatDateTime(start)}/${formatDateTime(end)}"
+    // The pushed-down bounds come from Spark TimestampType literals, so `end` is aligned to a whole
+    // microsecond. Spark truncates every item timestamp to microseconds, so the residual `<= end`
+    // filter keeps any item whose true (up to nanosecond) value lands anywhere in that final
+    // microsecond. Widen the inclusive upper bound to its last nanosecond (+999 ns) so the remote
+    // catalog returns a superset of the residual result instead of dropping, e.g., an item at
+    // ...999999500Z. The lower bound is left exact; a slightly wider window is always safe because
+    // the residual filter re-checks each row at microsecond precision.
+    val inclusiveEnd = if (end == null) null else end.plusNanos(999L)
+    if (inclusiveEnd == null) s"datetime=${formatDateTime(start)}/.."
+    else s"datetime=${formatDateTime(start)}/${formatDateTime(inclusiveEnd)}"
   }
 
   /** Adds the spatial and temporal filters to the base URL. */

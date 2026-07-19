@@ -639,34 +639,40 @@ class StacUtilsTest extends AnyFunSuite {
   }
 
   test("getFilterTemporal with LessThanFilter") {
+    // The inclusive upper bound is widened to the last nanosecond of its microsecond so items
+    // Spark would truncate into range are not dropped remotely (see getFilterTemporal).
     val dateTime = LocalDateTime.parse("2025-03-07T00:00:00")
     val filter = TemporalFilter.LessThanFilter("timestamp", dateTime)
     val result = getFilterTemporal(filter)
-    assert(result == "datetime=../2025-03-07T00:00:00.000000Z")
+    assert(result == "datetime=../2025-03-07T00:00:00.000000999Z")
   }
 
   test("getFilterTemporal with GreaterThanFilter") {
+    // The lower bound is left exact (only the upper bound is widened).
     val dateTime = LocalDateTime.parse("2025-03-06T00:00:00")
     val filter = TemporalFilter.GreaterThanFilter("timestamp", dateTime)
     val result = getFilterTemporal(filter)
-    assert(result == "datetime=2025-03-06T00:00:00.000000Z/..")
+    assert(result == "datetime=2025-03-06T00:00:00.000000000Z/..")
   }
 
   test("getFilterTemporal with EqualFilter") {
+    // Equality becomes the closed micro-bucket [value, value + 999 ns]: exact lower bound,
+    // widened upper bound.
     val dateTime = LocalDateTime.parse("2025-03-06T00:00:00")
     val filter = TemporalFilter.EqualFilter("timestamp", dateTime)
     val result = getFilterTemporal(filter)
-    assert(result == "datetime=2025-03-06T00:00:00.000000Z/2025-03-06T00:00:00.000000Z")
+    assert(result == "datetime=2025-03-06T00:00:00.000000000Z/2025-03-06T00:00:00.000000999Z")
   }
 
-  test("getFilterTemporal preserves microseconds in the serialized bound") {
-    // A whole-period upper bound expands to 23:59:59.999999Z. Serializing with only
-    // millisecond precision would emit 23:59:59.999Z and drop items in the final fraction
-    // of a second before Spark's residual filter runs (issue #3110).
+  test("getFilterTemporal widens the inclusive upper bound to nanosecond precision") {
+    // A whole-period upper bound expands to 23:59:59.999999Z (Spark microsecond precision).
+    // The remote bound is widened to 23:59:59.999999999Z so a legal STAC item at
+    // 23:59:59.999999500Z -- which Spark truncates to .999999 and the residual filter keeps --
+    // is not excluded remotely (issue #3110).
     val dateTime = LocalDateTime.parse("2020-05-31T23:59:59.999999")
     val filter = TemporalFilter.LessThanFilter("timestamp", dateTime)
     val result = getFilterTemporal(filter)
-    assert(result == "datetime=../2020-05-31T23:59:59.999999Z")
+    assert(result == "datetime=../2020-05-31T23:59:59.999999999Z")
   }
 
   test("getFilterTemporal with AndFilter") {
@@ -676,7 +682,7 @@ class StacUtilsTest extends AnyFunSuite {
     val filter2 = TemporalFilter.LessThanFilter("timestamp", dateTime2)
     val andFilter = TemporalFilter.AndFilter(filter1, filter2)
     val result = getFilterTemporal(andFilter)
-    assert(result == "datetime=2025-03-06T00:00:00.000000Z/2025-03-07T00:00:00.000000Z")
+    assert(result == "datetime=2025-03-06T00:00:00.000000000Z/2025-03-07T00:00:00.000000999Z")
   }
 
   test("getFilterTemporal with OrFilter") {
@@ -686,7 +692,7 @@ class StacUtilsTest extends AnyFunSuite {
     val filter2 = TemporalFilter.LessThanFilter("timestamp", dateTime2)
     val orFilter = TemporalFilter.OrFilter(filter1, filter2)
     val result = getFilterTemporal(orFilter)
-    assert(result == "datetime=2025-03-06T00:00:00.000000Z/2025-03-07T00:00:00.000000Z")
+    assert(result == "datetime=2025-03-06T00:00:00.000000000Z/2025-03-07T00:00:00.000000999Z")
   }
 
   test("addFiltersToUrl with no filters") {
@@ -711,7 +717,7 @@ class StacUtilsTest extends AnyFunSuite {
     val temporalFilter = Some(
       TemporalFilter.GreaterThanFilter("timestamp", LocalDateTime.parse("2025-03-06T00:00:00")))
     val result = StacUtils.addFiltersToUrl(baseUrl, None, temporalFilter)
-    val expectedUrl = s"$baseUrl&datetime=2025-03-06T00:00:00.000000Z/.."
+    val expectedUrl = s"$baseUrl&datetime=2025-03-06T00:00:00.000000000Z/.."
     assert(result == expectedUrl)
   }
 
@@ -725,7 +731,7 @@ class StacUtilsTest extends AnyFunSuite {
       TemporalFilter.GreaterThanFilter("timestamp", LocalDateTime.parse("2025-03-06T00:00:00")))
     val result = StacUtils.addFiltersToUrl(baseUrl, spatialFilter, temporalFilter)
     val expectedUrl =
-      s"$baseUrl&bbox=1.0%2C3.0%2C2.0%2C4.0&datetime=2025-03-06T00:00:00.000000Z/.."
+      s"$baseUrl&bbox=1.0%2C3.0%2C2.0%2C4.0&datetime=2025-03-06T00:00:00.000000000Z/.."
     assert(result == expectedUrl)
   }
 

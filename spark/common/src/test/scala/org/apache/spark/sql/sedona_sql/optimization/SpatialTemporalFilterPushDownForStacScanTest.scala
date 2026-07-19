@@ -46,27 +46,27 @@ class SpatialTemporalFilterPushDownForStacScanTest extends AnyFunSuite {
 
   private val datetime = AttributeReference("datetime", TimestampType)()
 
-  // Pushdown must not truncate the microsecond bound to milliseconds. Before the fix, the
-  // upper bound was divided by 1000 (micros -> millis), so 23:59:59.999999Z was pushed to the
-  // remote catalog as 23:59:59.999Z and an item at 23:59:59.999500Z was dropped before Spark's
-  // residual filter could keep it (issue #3110).
-  test("push-down preserves microseconds on an inclusive upper bound") {
+  // The push-down must not truncate the microsecond bound to milliseconds (it once divided by
+  // 1000, pushing 23:59:59.999999Z as 23:59:59.999Z), and the serialized inclusive upper bound is
+  // widened to the last nanosecond of its microsecond so an item Spark would truncate into range
+  // (e.g. 23:59:59.999999500Z) is not dropped by the remote catalog (issue #3110).
+  test("push-down widens an inclusive upper bound to nanosecond precision") {
     val predicate =
       LessThanOrEqual(datetime, Literal(toMicros("2020-05-31T23:59:59.999999"), TimestampType))
     val filters = pushDown.translateToTemporalFilters(Seq(predicate))
     assert(filters.size == 1)
-    assert(getFilterTemporal(filters.head) == "datetime=../2020-05-31T23:59:59.999999Z")
+    assert(getFilterTemporal(filters.head) == "datetime=../2020-05-31T23:59:59.999999999Z")
   }
 
-  test("push-down preserves microseconds on a lower bound") {
+  test("push-down keeps a lower bound exact") {
     val predicate =
       GreaterThanOrEqual(datetime, Literal(toMicros("2020-05-01T00:00:00.000001"), TimestampType))
     val filters = pushDown.translateToTemporalFilters(Seq(predicate))
     assert(filters.size == 1)
-    assert(getFilterTemporal(filters.head) == "datetime=2020-05-01T00:00:00.000001Z/..")
+    assert(getFilterTemporal(filters.head) == "datetime=2020-05-01T00:00:00.000001000Z/..")
   }
 
-  test("push-down combines both bounds without losing precision") {
+  test("push-down combines an exact lower bound with a widened upper bound") {
     val lower =
       GreaterThanOrEqual(datetime, Literal(toMicros("2020-05-01T00:00:00.000000"), TimestampType))
     val upper =
@@ -75,6 +75,28 @@ class SpatialTemporalFilterPushDownForStacScanTest extends AnyFunSuite {
     val combined = filters.reduce(TemporalFilter.AndFilter)
     assert(
       getFilterTemporal(combined) ==
-        "datetime=2020-05-01T00:00:00.000000Z/2020-05-31T23:59:59.999999Z")
+        "datetime=2020-05-01T00:00:00.000000000Z/2020-05-31T23:59:59.999999999Z")
+  }
+
+  test("push-down upper bound covers 7-to-9 digit sub-microsecond timestamps") {
+    // STAC permits up to nine fractional digits. Spark truncates any such item to microseconds,
+    // so every item in the bound's final microsecond survives the residual `<= .999999` filter and
+    // must therefore also fall within the pushed remote bound. Assert that legal 7-, 8- and 9-digit
+    // timestamps in that microsecond are not after the widened remote upper bound.
+    val predicate =
+      LessThanOrEqual(datetime, Literal(toMicros("2020-05-31T23:59:59.999999"), TimestampType))
+    val url = getFilterTemporal(pushDown.translateToTemporalFilters(Seq(predicate)).head)
+    assert(url == "datetime=../2020-05-31T23:59:59.999999999Z")
+
+    val remoteEnd = LocalDateTime.parse(url.stripPrefix("datetime=../").stripSuffix("Z"))
+    Seq(
+      "2020-05-31T23:59:59.9999995", // 7 digits
+      "2020-05-31T23:59:59.99999999", // 8 digits
+      "2020-05-31T23:59:59.999999999" // 9 digits
+    ).foreach { ts =>
+      assert(
+        !LocalDateTime.parse(ts).isAfter(remoteEnd),
+        s"$ts must fall within the pushed remote bound $remoteEnd")
+    }
   }
 }
