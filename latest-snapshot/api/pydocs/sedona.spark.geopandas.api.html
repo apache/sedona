@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -609,17 +608,22 @@ empty:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.concave_hull">
-<span class="sig-name descname"><span class="pre">concave_hull</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_holes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.concave_hull"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.concave_hull" title="Permalink to this definition"></a></dt>
-<dd><p>Return the concave hull of each geometry.</p>
-<p>The concave hull of a geometry is a possibly concave geometry that
-encloses the input geometry.</p>
+<span class="sig-name descname"><span class="pre">concave_hull</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_holes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.concave_hull"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.concave_hull" title="Permalink to this definition"></a></dt>
+<dd><p>Return a <code class="docutils literal notranslate"><span class="pre">GeoSeries</span></code> of geometries representing the concave hull
+of vertices of each geometry.</p>
+<p>A concave hull is a concave or convex <cite>Polygon</cite> containing all the
+vertices in each geometry. For two vertices, the hull collapses to a
+<cite>LineString</cite>; for one vertex, it collapses to a <cite>Point</cite>.</p>
+<p>The hull is constructed by removing border triangles of the Delaunay
+triangulation. The ratio determines the maximum edge-length threshold
+by interpolating between the shortest and longest edges in the
+triangulation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ratio</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default 0.0</em>) – A value between 0 and 1 controlling the concaveness of the hull.
-1 produces the convex hull; 0 produces a hull with maximum
-concaveness.</p></li>
-<li><p><strong>allow_holes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default False</em>) – If True, the concave hull may contain holes.</p></li>
+<li><p><strong>ratio</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default 0.0</em>) – Number in the range [0, 1]. Higher numbers will include fewer vertices
+in the hull.</p></li>
+<li><p><strong>allow_holes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default False</em>) – If set to True, the concave hull may have holes.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -644,6 +648,13 @@ concaveness.</p></li>
 </dd>
 </dl>
 </div>
+<p class="rubric">Notes</p>
+<p>The algorithm considers only the vertices of each geometry. As a result,
+the hull may not fully enclose the edges of the input geometry. Increasing
+<code class="docutils literal notranslate"><span class="pre">ratio</span></code> should resolve that case.</p>
+<p>Sedona and GeoPandas use the JTS and GEOS implementations, respectively.
+When candidate border triangles have the same edge length and area, the
+implementations may choose different, equally valid concave hulls.</p>
 </dd></dl>
 
 <dl class="py method">
