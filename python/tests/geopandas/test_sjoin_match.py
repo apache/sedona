@@ -65,7 +65,9 @@ class TestSJoinDWithinMatch(TestGeopandasBase):
         rows = []
         for row in joined[["id_left", "id_right", "geometry"]].itertuples(index=False):
             right_id = None if pd.isna(row.id_right) else row.id_right
-            geometry = None if row.geometry is None else row.geometry.wkb_hex
+            geometry = (
+                None if row.geometry is None else shapely.to_wkb(row.geometry, hex=True)
+            )
             rows.append((row.id_left, right_id, geometry))
 
         return sorted(
