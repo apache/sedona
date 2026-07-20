@@ -25,8 +25,10 @@ import static org.junit.Assert.assertEquals;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -938,6 +940,55 @@ public class RasterConstructorsTest extends RasterTestBase {
     double actualFirstGridVal = PixelFunctions.value(testRaster, 0, 0, 1);
     double expectedFirstGridVal = 60.95357131958008;
     assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
+  }
+
+  @Test
+  public void testNetCdfPackedBandMetadata() throws FactoryException, IOException {
+    byte[] bytes =
+        Files.readAllBytes(
+            new File(resourceFolder + "raster/netcdf_variants/test_reader_permuted.nc").toPath());
+    GridCoverage2D raster = RasterConstructors.fromNetCDF(bytes, "temp", "lon", "lat");
+
+    assertEquals(Arrays.asList("time : 100.0"), raster.getProperties().get("BAND_1"));
+    assertEquals(Arrays.asList("time : 160.0"), raster.getProperties().get("BAND_2"));
+  }
+
+  @Test
+  public void testNetCdfPackedMissingValues() throws FactoryException, IOException {
+    byte[] bytes =
+        Files.readAllBytes(
+            new File(resourceFolder + "raster/netcdf_variants/test_packed.nc").toPath());
+    GridCoverage2D raster = RasterConstructors.fromNetCDF(bytes, "temp", "lon", "lat");
+    double[] values = MapAlgebra.bandAsArray(raster, 1);
+
+    Double noDataValue = RasterBandAccessors.getBandNoDataValue(raster, 1);
+    Assert.assertNotNull(noDataValue);
+    Assert.assertTrue(Double.isFinite(noDataValue));
+    assertEquals(noDataValue, values[1], 0.0);
+    assertEquals(noDataValue, values[4], 0.0);
+    assertEquals(-999.0, values[7], 1e-6);
+    assertEquals(7, RasterBandAccessors.getCount(raster, 1, true));
+  }
+
+  @Test
+  public void testNetCdfInt64ValidityIsComparedExactly() throws FactoryException, IOException {
+    byte[] bytes =
+        Files.readAllBytes(
+            new File(resourceFolder + "raster/netcdf_variants/test_int64_validity.nc4").toPath());
+
+    for (String variable : Arrays.asList("signed_temp", "unsigned_temp")) {
+      GridCoverage2D raster = RasterConstructors.fromNetCDF(bytes, variable, "lon", "lat");
+      Double noDataValue = RasterBandAccessors.getBandNoDataValue(raster, 1);
+      Assert.assertNotNull(noDataValue);
+      Assert.assertTrue(Double.isFinite(noDataValue));
+      assertEquals(3, RasterBandAccessors.getCount(raster, 1, true));
+
+      double[] values = MapAlgebra.bandAsArray(raster, 1);
+      assertEquals(noDataValue, values[2], 0.0);
+      Assert.assertNotEquals(noDataValue, values[0]);
+      Assert.assertNotEquals(noDataValue, values[1]);
+      Assert.assertNotEquals(noDataValue, values[3]);
+    }
   }
 
   @Test

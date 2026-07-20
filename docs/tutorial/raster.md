@@ -198,11 +198,14 @@ The 256 × 256 scene fits in a single tile here, so you get one row. A multi-gig
 
 ![Tiling flow](../image/raster-tutorial/tiling-flow.svg)
 
-See [Loading options](#loading-options) below for tile-size overrides, recursive directory globs, and non-GeoTIFF formats such as NetCDF and Arc Grid.
+Before loading a collection, use the [file metadata readers](#inspect-and-filter-files-before-loading)
+to inspect and filter GeoTIFF or NetCDF files without decoding their raster data.
+The remaining [loading options](#loading-options) cover tile-size overrides, recursive
+directory globs, and non-GeoTIFF formats such as NetCDF and Arc Grid.
 
-### 3. Inspect metadata
+### 3. Inspect loaded raster metadata
 
-Confirm pixel dimensions, georeference, and CRS before processing:
+After loading, confirm pixel dimensions, georeference, and CRS before processing:
 
 ```python
 sedona.sql("""
@@ -400,6 +403,48 @@ See [Writing rasters](#writing-rasters-reference) for the full set of writer opt
 The rest of this page is reference material: additional load patterns, every raster operator grouped by purpose, and Python-side workflows for collected `SedonaRaster` objects.
 
 ## Loading options
+
+### Inspect and filter files before loading
+
+Loading raster cells is usually more expensive than reading file metadata. The
+[`geotiff.metadata` data source](files/geotiffmetadata-sedona-spark.md) and
+[`netcdf.metadata` data source](files/netcdfmetadata-sedona-spark.md) return one row
+per file without loading its raster data arrays. Use them to quickly inspect raw
+files, filter a collection by properties such as spatial extent, CRS, dimensions,
+bands, or variables, and then load only the selected paths.
+
+=== "GeoTIFF"
+	```python
+	metadata = sedona.read.format("geotiff.metadata").load("/data/imagery/")
+	metadata.select(
+	    "path", "width", "height", "numBands", "srid", "compression"
+	).show(truncate=False)
+
+	selected = metadata.where("srid = 4326 AND numBands >= 3").select("path")
+	selected_paths = [row.path for row in selected.collect()]
+	rasterDf = sedona.read.format("raster").load(selected_paths)
+	```
+
+=== "NetCDF"
+	```python
+	metadata = sedona.read.format("netcdf.metadata").load("/data/climate/")
+	metadata.select(
+	    "path", "format", "width", "height", "srid", "variables"
+	).show(truncate=False)
+
+	# Select only files that contain the record variable needed downstream.
+	selected = metadata.where(
+	    "exists(variables, v -> v.name = 'O3')"
+	).select("path")
+	selected_paths = [row.path for row in selected.collect()]
+	rawDf = sedona.read.format("binaryFile").load(selected_paths)
+	rasterDf = rawDf.selectExpr("path", "RS_FromNetCDF(content, 'O3') AS rast")
+	```
+
+The examples collect only the filtered path strings on the driver; the raster cells
+remain unread until the final `raster` or `binaryFile` scan. For very large selections,
+organize source files into partitions or path patterns so the selected inputs can be
+expressed without collecting a large path list.
 
 ### Tile-size overrides
 
