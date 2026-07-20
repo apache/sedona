@@ -712,19 +712,25 @@ class GeoFrame(metaclass=ABCMeta):
         return _delegate_to_geometry_column("centroid", self)
 
     def concave_hull(self, ratio=0.0, allow_holes=False):
-        """Return the concave hull of each geometry.
+        """Return a ``GeoSeries`` of geometries representing the concave hull
+        of vertices of each geometry.
 
-        The concave hull of a geometry is a possibly concave geometry that
-        encloses the input geometry.
+        A concave hull is a concave or convex `Polygon` containing all the
+        vertices in each geometry. For two vertices, the hull collapses to a
+        `LineString`; for one vertex, it collapses to a `Point`.
+
+        The hull is constructed by removing border triangles of the Delaunay
+        triangulation while their size is larger than the maximum edge length
+        ratio. The ratio is a fraction of the difference between the longest
+        and shortest edges in the triangulation.
 
         Parameters
         ----------
         ratio : float, default 0.0
-            A value between 0 and 1 controlling the concaveness of the hull.
-            1 produces the convex hull; 0 produces a hull with maximum
-            concaveness.
+            Number in the range [0, 1]. Higher numbers will include fewer vertices
+            in the hull.
         allow_holes : bool, default False
-            If True, the concave hull may contain holes.
+            If set to True, the concave hull may have holes.
 
         Returns
         -------
@@ -744,6 +750,16 @@ class GeoFrame(metaclass=ABCMeta):
         See Also
         --------
         GeoSeries.convex_hull : convex hull geometry
+
+        Notes
+        -----
+        The algorithm considers only the vertices of each geometry. As a result,
+        the hull may not fully enclose the edges of the input geometry. Increasing
+        ``ratio`` should resolve that case.
+
+        Sedona and GeoPandas use the JTS and GEOS implementations, respectively.
+        When candidate border triangles have the same edge length and area, the
+        implementations may choose different, equally valid concave hulls.
         """
         return _delegate_to_geometry_column("concave_hull", self, ratio, allow_holes)
 
