@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1499,10 +1498,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-inspect-metadata" class="md-nav__link">
+  <a href="#3-inspect-loaded-raster-metadata" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Inspect metadata
+        3. Inspect loaded raster metadata
       
     </span>
   </a>
@@ -1580,6 +1579,17 @@
   
     <nav class="md-nav" aria-label="Loading options">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inspect-and-filter-files-before-loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inspect and filter files before loading
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#tile-size-overrides" class="md-nav__link">
@@ -2189,6 +2199,34 @@
     
   
     GeoTIFF metadata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../files/netcdfmetadata-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NetCDF metadata
   
 
     
@@ -5973,10 +6011,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-inspect-metadata" class="md-nav__link">
+  <a href="#3-inspect-loaded-raster-metadata" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Inspect metadata
+        3. Inspect loaded raster metadata
       
     </span>
   </a>
@@ -6054,6 +6092,17 @@
   
     <nav class="md-nav" aria-label="Loading options">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inspect-and-filter-files-before-loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inspect and filter files before loading
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#tile-size-overrides" class="md-nav__link">
@@ -6533,9 +6582,12 @@ Replace <code>3.3</code> with the major.minor version of your Spark install (for
 </ul>
 <p>The 256 × 256 scene fits in a single tile here, so you get one row. A multi-gigabyte GeoTIFF would yield many rows — the same downstream SQL works in both cases.</p>
 <p><img alt="Tiling flow" src="../../image/raster-tutorial/tiling-flow.svg" /></p>
-<p>See <a href="#loading-options">Loading options</a> below for tile-size overrides, recursive directory globs, and non-GeoTIFF formats such as NetCDF and Arc Grid.</p>
-<h3 id="3-inspect-metadata">3. Inspect metadata<a class="headerlink" href="#3-inspect-metadata" title="Permanent link">&para;</a></h3>
-<p>Confirm pixel dimensions, georeference, and CRS before processing:</p>
+<p>Before loading a collection, use the <a href="#inspect-and-filter-files-before-loading">file metadata readers</a>
+to inspect and filter GeoTIFF or NetCDF files without decoding their raster data.
+The remaining <a href="#loading-options">loading options</a> cover tile-size overrides, recursive
+directory globs, and non-GeoTIFF formats such as NetCDF and Arc Grid.</p>
+<h3 id="3-inspect-loaded-raster-metadata">3. Inspect loaded raster metadata<a class="headerlink" href="#3-inspect-loaded-raster-metadata" title="Permanent link">&para;</a></h3>
+<p>After loading, confirm pixel dimensions, georeference, and CRS before processing:</p>
 <div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">    SELECT RS_Width(rast)       AS width,</span>
 <span class="s2">           RS_Height(rast)      AS height,</span>
@@ -6697,6 +6749,47 @@ Replace <code>3.3</code> with the major.minor version of your Spark install (for
 <hr />
 <p>The rest of this page is reference material: additional load patterns, every raster operator grouped by purpose, and Python-side workflows for collected <code>SedonaRaster</code> objects.</p>
 <h2 id="loading-options">Loading options<a class="headerlink" href="#loading-options" title="Permanent link">&para;</a></h2>
+<h3 id="inspect-and-filter-files-before-loading">Inspect and filter files before loading<a class="headerlink" href="#inspect-and-filter-files-before-loading" title="Permanent link">&para;</a></h3>
+<p>Loading raster cells is usually more expensive than reading file metadata. The
+<a href="../files/geotiffmetadata-sedona-spark/"><code>geotiff.metadata</code> data source</a> and
+<a href="../files/netcdfmetadata-sedona-spark/"><code>netcdf.metadata</code> data source</a> return one row
+per file without loading its raster data arrays. Use them to quickly inspect raw
+files, filter a collection by properties such as spatial extent, CRS, dimensions,
+bands, or variables, and then load only the selected paths.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">GeoTIFF</label><label for="__tabbed_5_2">NetCDF</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">metadata</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geotiff.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/data/imagery/&quot;</span><span class="p">)</span>
+<span class="n">metadata</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+    <span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;numBands&quot;</span><span class="p">,</span> <span class="s2">&quot;srid&quot;</span><span class="p">,</span> <span class="s2">&quot;compression&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">selected</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;srid = 4326 AND numBands &gt;= 3&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)</span>
+<span class="n">selected_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">path</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">selected</span><span class="o">.</span><span class="n">collect</span><span class="p">()]</span>
+<span class="n">rasterDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">selected_paths</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">metadata</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;netcdf.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/data/climate/&quot;</span><span class="p">)</span>
+<span class="n">metadata</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+    <span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;format&quot;</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">,</span> <span class="s2">&quot;srid&quot;</span><span class="p">,</span> <span class="s2">&quot;variables&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Select only files that contain the record variable needed downstream.</span>
+<span class="n">selected</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+    <span class="s2">&quot;exists(variables, v -&gt; v.name = &#39;O3&#39;)&quot;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)</span>
+<span class="n">selected_paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">path</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">selected</span><span class="o">.</span><span class="n">collect</span><span class="p">()]</span>
+<span class="n">rawDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;binaryFile&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">selected_paths</span><span class="p">)</span>
+<span class="n">rasterDf</span> <span class="o">=</span> <span class="n">rawDf</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;RS_FromNetCDF(content, &#39;O3&#39;) AS rast&quot;</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>The examples collect only the filtered path strings on the driver; the raster cells
+remain unread until the final <code>raster</code> or <code>binaryFile</code> scan. For very large selections,
+organize source files into partitions or path patterns so the selected inputs can be
+expressed without collecting a large path list.</p>
 <h3 id="tile-size-overrides">Tile-size overrides<a class="headerlink" href="#tile-size-overrides" title="Permanent link">&para;</a></h3>
 <p>By default the <code>raster</code> data source uses the GeoTIFF's internal tile scheme. <a href="https://www.cogeo.org/">Cloud Optimized GeoTIFFs</a> (COGs) are the recommended source format because they already organize pixels in square tiles. To override tiling explicitly:</p>
 <table>
@@ -6730,7 +6823,7 @@ Replace <code>3.3</code> with the major.minor version of your Spark install (for
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:1"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:1"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">rasterDf</span> <span class="o">=</span> <span class="p">(</span>
@@ -6749,7 +6842,7 @@ Replace <code>3.3</code> with the major.minor version of your Spark install (for
 </div>
 <h3 id="loading-directories-and-globs">Loading directories and globs<a class="headerlink" href="#loading-directories-and-globs" title="Permanent link">&para;</a></h3>
 <p>The <code>raster</code> data source accepts Spark's generic file-source options:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:1"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:1"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">rasterDf</span> <span class="o">=</span> <span class="p">(</span>
@@ -6768,7 +6861,7 @@ Replace <code>3.3</code> with the major.minor version of your Spark install (for
 </div>
 <h3 id="non-geotiff-formats-netcdf-arc-grid">Non-GeoTIFF formats (NetCDF, Arc Grid)<a class="headerlink" href="#non-geotiff-formats-netcdf-arc-grid" title="Permanent link">&para;</a></h3>
 <p>For formats outside GeoTIFF, use Spark's <code>binaryFile</code> source plus a Sedona raster constructor.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:1"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:1"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">rawDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;binaryFile&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/file.asc&quot;</span><span class="p">)</span>
@@ -6975,7 +7068,7 @@ Replace <code>3.3</code> with the major.minor version of your Spark install (for
 </tbody>
 </table>
 <p>Example using every option:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Scala</label><label for="__tabbed_8_2">Python</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Scala</label><label for="__tabbed_9_2">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">spark</span><span class="p">.</span><span class="nn">sql</span><span class="p">.</span><span class="nn">functions</span><span class="p">.</span><span class="n">expr</span>
@@ -7109,7 +7202,7 @@ Replace <code>3.3</code> with the major.minor version of your Spark install (for
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 18, 2026 18:14:37 UTC">May 18, 2026 18:14:37</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 20, 2026 03:43:24 UTC">July 20, 2026 03:43:24</span>
   </span>
 
     
