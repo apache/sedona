@@ -73,10 +73,13 @@ class GeoTiffMetadataDataSource
           newOptions.put("pathGlobFilter", glob)
         case _ =>
       }
-    } else if (paths.exists(p => isDirectory(p, optionsWithoutPaths))) {
+    } else if (paths.nonEmpty && paths.forall(p => isDirectory(p, optionsWithoutPaths))) {
       // Directory roots (single or multiple, with or without trailing slash): default to a
       // recursive scan filtered to GeoTIFF extensions. These are defaults only — an explicit
-      // recursiveFileLookup=false keeps Hive-style partition discovery available.
+      // recursiveFileLookup=false keeps Hive-style partition discovery available. They apply
+      // only when EVERY root is a directory: Spark applies pathGlobFilter to all roots, so a
+      // mixed load(dir, explicitFile) must not silently drop an explicitly named file whose
+      // name does not match the extension filter.
       if (!hasUserRecursive) {
         newOptions.put("recursiveFileLookup", "true")
       }

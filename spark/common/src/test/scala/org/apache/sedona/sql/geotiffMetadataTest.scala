@@ -41,6 +41,18 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
     super.afterAll()
   }
 
+  private def withSqlConf(pairs: (String, String)*)(f: => Unit): Unit = {
+    val conf = sparkSession.conf
+    val originals = pairs.map { case (k, _) => k -> conf.getOption(k) }
+    pairs.foreach { case (k, v) => conf.set(k, v) }
+    try f
+    finally
+      originals.foreach {
+        case (k, Some(v)) => conf.set(k, v)
+        case (k, None) => conf.unset(k)
+      }
+  }
+
   describe("GeoTiffMetadata data source") {
 
     it("should read test1.tiff with exact metadata values") {
@@ -247,21 +259,47 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       FileUtils.copyFile(new File(singleFileLocation), new File(d2020, "a.tiff"))
       FileUtils.copyFile(new File(singleFileLocation), new File(d2021, "b.tiff"))
 
-      // Mixed-case option spelling: data source options are case-insensitive, so this must
-      // suppress the lowercase recursiveFileLookup default just the same
+      // Force both files into a single bin-packed Spark partition; otherwise each file gets
+      // its own partition and the per-file partition-value handling is never exercised
+      withSqlConf(
+        "spark.sql.files.openCostInBytes" -> "0",
+        "spark.sql.files.minPartitionNum" -> "1",
+        "spark.sql.files.maxPartitionBytes" -> "1073741824") {
+        // Mixed-case option spelling: data source options are case-insensitive, so this must
+        // suppress the lowercase recursiveFileLookup default just the same
+        val df = sparkSession.read
+          .format("geotiff.metadata")
+          .option("RecursiveFileLookup", "false")
+          .load(base.getAbsolutePath)
+        // Partition inference stays available because the explicit option is respected
+        assert(df.schema.fieldNames.contains("year"))
+        assertEquals(1, df.rdd.getNumPartitions)
+        val rows = df.selectExpr("path", "year").collect()
+        assertEquals(2, rows.length)
+        // Every row must carry the partition value of ITS OWN file, even though both files
+        // are bin-packed into one Spark partition
+        rows.foreach { r =>
+          assert(r.getAs[String]("path").contains(s"year=${r.getAs[Int]("year")}"))
+        }
+      }
+    }
+
+    it("should not filter explicitly named files in a mixed directory-and-file load") {
+      // The extension filter is a directory-scan default; Spark applies pathGlobFilter to
+      // every root, so it must not be installed when an explicitly named file (here without
+      // an extension) is loaded alongside a directory.
+      val dir = new File(tempDir, "mixedRoots")
+      dir.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(dir, "a.tiff"))
+      val explicitFile = new File(tempDir, "explicit_geotiff_no_extension")
+      FileUtils.copyFile(new File(singleFileLocation), explicitFile)
+
       val df = sparkSession.read
         .format("geotiff.metadata")
-        .option("RecursiveFileLookup", "false")
-        .load(base.getAbsolutePath)
-      // Partition inference stays available because the explicit option is respected
-      assert(df.schema.fieldNames.contains("year"))
-      val rows = df.selectExpr("path", "year").collect()
-      assertEquals(2, rows.length)
-      // Every row must carry the partition value of ITS OWN file, even when both files are
-      // bin-packed into one Spark partition
-      rows.foreach { r =>
-        assert(r.getAs[String]("path").contains(s"year=${r.getAs[Int]("year")}"))
-      }
+        .load(dir.getAbsolutePath, explicitFile.getAbsolutePath)
+      assertEquals(2L, df.count())
+      // Both files must parse, including the extensionless explicit one
+      assertEquals(2, df.select("width").collect().length)
     }
 
     it("should hash scans from every field used by equality") {
