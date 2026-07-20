@@ -600,7 +600,9 @@ class NetCdfMetadataPartitionReader(
           !CfGridMapping.identifiesEarthShape(attrs)) {
           null
         } else {
-          CfGridMapping.toProj(attrs, gridVar.flatMap(projectionCoordinateUnits).orNull)
+          val (xUnits, yUnits) =
+            gridVar.map(projectionCoordinateUnits).getOrElse((null, null))
+          CfGridMapping.toProj(attrs, xUnits, yUnits)
         }
       }.toOption.flatMap(Option(_))
     }
@@ -609,19 +611,19 @@ class NetCdfMetadataPartitionReader(
   /**
    * The grid mapping variable's attributes as the value shapes proj4sedona coerces: strings stay
    * strings, single numerics become `Number`, and multi-valued numerics (e.g. the two standard
-   * parallels) become `double[]`. Unsigned and non-numeric array attributes are skipped rather
-   * than misread.
+   * parallels) become `double[]`. Unsigned values are widened to their positive representation;
+   * non-numeric array attributes are skipped rather than misread.
    */
   private def cfAttributeMap(gmVar: Variable): java.util.Map[String, Object] = {
     val map = new java.util.HashMap[String, Object]()
     gmVar.attributes().asScala.foreach { attr =>
       val value: Object =
         if (attr.isString) attr.getStringValue
-        else if (attr.getLength == 1) attr.getNumericValue
+        else if (attr.getLength == 1) numericAttrValue(attr, 0)
         else {
           val values = new Array[Double](attr.getLength)
           val numeric = (0 until attr.getLength).forall { i =>
-            val n = attr.getNumericValue(i)
+            val n = numericAttrValue(attr, i)
             if (n != null) values(i) = n.doubleValue()
             n != null
           }
@@ -633,14 +635,15 @@ class NetCdfMetadataPartitionReader(
   }
 
   /**
-   * The `units` attribute of the grid's projection coordinate variables (x first, then y as a
-   * fallback): the unit CF declares `false_easting`/`false_northing` in.
+   * The `units` attributes of the grid's x and y projection coordinate variables. CF declares
+   * `false_easting` in the x unit and `false_northing` in the y unit; proj4sedona accepts
+   * equivalent spellings and rejects incompatible axes rather than misscaling either offset.
    */
-  private def projectionCoordinateUnits(gridVar: Variable): Option[String] = {
+  private def projectionCoordinateUnits(gridVar: Variable): (String, String) = {
     val (latDim, lonDim) = trailingDims(gridVar)
-    def unitsOf(dim: Dimension): Option[String] =
-      findCoordinateVariable(gridVar, dim).flatMap(v => Option(attrString(v, "units")))
-    unitsOf(lonDim).orElse(unitsOf(latDim))
+    def unitsOf(dim: Dimension): String =
+      findCoordinateVariable(gridVar, dim).map(v => attrString(v, "units")).orNull
+    (unitsOf(lonDim), unitsOf(latDim))
   }
 
   /**
