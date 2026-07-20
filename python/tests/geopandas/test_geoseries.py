@@ -1370,6 +1370,49 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().concave_hull(ratio=0.5)
         self.check_sgpd_equals_gpd(df_result, expected)
 
+        # Use an asymmetric point set so that the Delaunay triangulation has no
+        # ambiguous ties, and verify that allow_holes=True can produce a hole.
+        points_around_hole = MultiPoint(
+            [
+                (11.1, 0.1),
+                (6.2, 8.1),
+                (0.1, 10.3),
+                (-8.2, 7.1),
+                (-10.1, -0.2),
+                (-7.2, -8.3),
+                (0.2, -11.1),
+                (7.3, -7.2),
+                (5.1, 0.2),
+                (-0.1, 5.2),
+                (-4.2, -0.9),
+                (0.1, -4.1),
+            ]
+        )
+        result_with_holes = GeoSeries([points_around_hole], crs=3857).concave_hull(
+            ratio=0.9, allow_holes=True
+        )
+        expected_with_holes = gpd.GeoSeries(
+            [
+                Polygon(
+                    [
+                        (-8.2, 7.1),
+                        (0.1, 10.3),
+                        (6.2, 8.1),
+                        (5.1, 0.2),
+                        (11.1, 0.1),
+                        (7.3, -7.2),
+                        (0.2, -11.1),
+                        (-7.2, -8.3),
+                        (-10.1, -0.2),
+                    ],
+                    [[(-4.2, -0.9), (0.1, -4.1), (-0.1, 5.2)]],
+                )
+            ],
+            crs=3857,
+        )
+        self.check_sgpd_equals_gpd(result_with_holes, expected_with_holes)
+        assert result_with_holes.crs == expected_with_holes.crs
+
     def test_convex_hull(self):
         s = GeoSeries(
             [
