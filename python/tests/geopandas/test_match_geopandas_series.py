@@ -758,11 +758,50 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(geom).centroid
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+    @pytest.mark.skipif(
+        parse_version(gpd.__version__) < parse_version("0.14.0"),
+        reason="geopandas concave_hull requires version 0.14.0 or higher",
+    )
     def test_concave_hull(self):
-        for geom in self.geoms:
-            sgpd_result = GeoSeries(geom).concave_hull(ratio=0.5)
-            gpd_result = gpd.GeoSeries(geom).concave_hull(ratio=0.5)
-            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+        # Cover the valid ratio range without tripling this already broad set
+        # of geometry-type fixtures.
+        ratio_groups = (
+            (0.0, self.geoms[:3]),
+            (0.5, self.geoms[3:6]),
+            (1.0, self.geoms[6:]),
+        )
+        for ratio, geometry_groups in ratio_groups:
+            for geometries in geometry_groups:
+                sgpd_result = GeoSeries(geometries).concave_hull(ratio=ratio)
+                gpd_result = gpd.GeoSeries(geometries).concave_hull(ratio=ratio)
+                self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # Avoid symmetric fixtures here: equal-priority Delaunay triangles can
+        # be resolved differently by JTS and GEOS while producing valid hulls.
+        points_around_hole = MultiPoint(
+            [
+                (11.1, 0.1),
+                (6.2, 8.1),
+                (0.1, 10.3),
+                (-8.2, 7.1),
+                (-10.1, -0.2),
+                (-7.2, -8.3),
+                (0.2, -11.1),
+                (7.3, -7.2),
+                (5.1, 0.2),
+                (-0.1, 5.2),
+                (-4.2, -0.9),
+                (0.1, -4.1),
+            ]
+        )
+        sgpd_result = GeoSeries([points_around_hole]).concave_hull(
+            ratio=0.9, allow_holes=True
+        )
+        gpd_result = gpd.GeoSeries([points_around_hole]).concave_hull(
+            ratio=0.9, allow_holes=True
+        )
+        assert len(gpd_result.iloc[0].interiors) == 1
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_convex_hull(self):
         for geom in self.geoms:

@@ -639,24 +639,40 @@ class StacUtilsTest extends AnyFunSuite {
   }
 
   test("getFilterTemporal with LessThanFilter") {
+    // The inclusive upper bound is widened to the last nanosecond of its microsecond so items
+    // Spark would truncate into range are not dropped remotely (see getFilterTemporal).
     val dateTime = LocalDateTime.parse("2025-03-07T00:00:00")
     val filter = TemporalFilter.LessThanFilter("timestamp", dateTime)
     val result = getFilterTemporal(filter)
-    assert(result == "datetime=../2025-03-07T00:00:00.000Z")
+    assert(result == "datetime=../2025-03-07T00:00:00.000000999Z")
   }
 
   test("getFilterTemporal with GreaterThanFilter") {
+    // The lower bound is left exact (only the upper bound is widened).
     val dateTime = LocalDateTime.parse("2025-03-06T00:00:00")
     val filter = TemporalFilter.GreaterThanFilter("timestamp", dateTime)
     val result = getFilterTemporal(filter)
-    assert(result == "datetime=2025-03-06T00:00:00.000Z/..")
+    assert(result == "datetime=2025-03-06T00:00:00.000000000Z/..")
   }
 
   test("getFilterTemporal with EqualFilter") {
+    // Equality becomes the closed micro-bucket [value, value + 999 ns]: exact lower bound,
+    // widened upper bound.
     val dateTime = LocalDateTime.parse("2025-03-06T00:00:00")
     val filter = TemporalFilter.EqualFilter("timestamp", dateTime)
     val result = getFilterTemporal(filter)
-    assert(result == "datetime=2025-03-06T00:00:00.000Z/2025-03-06T00:00:00.000Z")
+    assert(result == "datetime=2025-03-06T00:00:00.000000000Z/2025-03-06T00:00:00.000000999Z")
+  }
+
+  test("getFilterTemporal widens the inclusive upper bound to nanosecond precision") {
+    // A whole-period upper bound expands to 23:59:59.999999Z (Spark microsecond precision).
+    // The remote bound is widened to 23:59:59.999999999Z so a legal STAC item at
+    // 23:59:59.999999500Z -- which Spark truncates to .999999 and the residual filter keeps --
+    // is not excluded remotely (issue #3110).
+    val dateTime = LocalDateTime.parse("2020-05-31T23:59:59.999999")
+    val filter = TemporalFilter.LessThanFilter("timestamp", dateTime)
+    val result = getFilterTemporal(filter)
+    assert(result == "datetime=../2020-05-31T23:59:59.999999999Z")
   }
 
   test("getFilterTemporal with AndFilter") {
@@ -666,17 +682,79 @@ class StacUtilsTest extends AnyFunSuite {
     val filter2 = TemporalFilter.LessThanFilter("timestamp", dateTime2)
     val andFilter = TemporalFilter.AndFilter(filter1, filter2)
     val result = getFilterTemporal(andFilter)
-    assert(result == "datetime=2025-03-06T00:00:00.000Z/2025-03-07T00:00:00.000Z")
+    assert(result == "datetime=2025-03-06T00:00:00.000000000Z/2025-03-07T00:00:00.000000999Z")
   }
 
-  test("getFilterTemporal with OrFilter") {
+  test("getFilterTemporal omits a fully unbounded OrFilter") {
     val dateTime1 = LocalDateTime.parse("2025-03-06T00:00:00")
     val dateTime2 = LocalDateTime.parse("2025-03-07T00:00:00")
     val filter1 = TemporalFilter.GreaterThanFilter("timestamp", dateTime1)
     val filter2 = TemporalFilter.LessThanFilter("timestamp", dateTime2)
     val orFilter = TemporalFilter.OrFilter(filter1, filter2)
-    val result = getFilterTemporal(orFilter)
-    assert(result == "datetime=2025-03-06T00:00:00.000Z/2025-03-07T00:00:00.000Z")
+    assert(getFilterTemporal(orFilter).isEmpty)
+    assert(getFilterTemporal(TemporalFilter.OrFilter(filter2, filter1)).isEmpty)
+  }
+
+  test("getFilterTemporal preserves an open side of an OrFilter") {
+    val equality =
+      TemporalFilter.EqualFilter("timestamp", LocalDateTime.parse("2025-03-05T00:00:00"))
+    val lowerBound =
+      TemporalFilter.GreaterThanFilter("timestamp", LocalDateTime.parse("2025-03-06T00:00:00"))
+    val upperBound =
+      TemporalFilter.LessThanFilter("timestamp", LocalDateTime.parse("2025-03-04T00:00:00"))
+
+    val openUpper = TemporalFilter.OrFilter(equality, lowerBound)
+    assert(
+      getFilterTemporal(openUpper) ==
+        "datetime=2025-03-05T00:00:00.000000000Z/..")
+    assert(
+      getFilterTemporal(TemporalFilter.OrFilter(lowerBound, equality)) ==
+        getFilterTemporal(openUpper))
+
+    val openLower = TemporalFilter.OrFilter(equality, upperBound)
+    assert(
+      getFilterTemporal(openLower) ==
+        "datetime=../2025-03-05T00:00:00.000000999Z")
+    assert(
+      getFilterTemporal(TemporalFilter.OrFilter(upperBound, equality)) ==
+        getFilterTemporal(openLower))
+  }
+
+  test("getFilterTemporal takes the convex hull of disjoint bounded OrFilter ranges") {
+    val firstRange = TemporalFilter.AndFilter(
+      TemporalFilter.GreaterThanFilter("timestamp", LocalDateTime.parse("2025-03-01T00:00:00")),
+      TemporalFilter.LessThanFilter("timestamp", LocalDateTime.parse("2025-03-02T00:00:00")))
+    val secondRange = TemporalFilter.AndFilter(
+      TemporalFilter.GreaterThanFilter("timestamp", LocalDateTime.parse("2025-03-04T00:00:00")),
+      TemporalFilter.LessThanFilter("timestamp", LocalDateTime.parse("2025-03-05T00:00:00")))
+
+    assert(
+      getFilterTemporal(TemporalFilter.OrFilter(firstRange, secondRange)) ==
+        "datetime=2025-03-01T00:00:00.000000000Z/2025-03-05T00:00:00.000000999Z")
+  }
+
+  test("getFilterTemporal intersects nested AndFilter ranges") {
+    val outerRange = TemporalFilter.AndFilter(
+      TemporalFilter.GreaterThanFilter("timestamp", LocalDateTime.parse("2025-03-01T00:00:00")),
+      TemporalFilter.LessThanFilter("timestamp", LocalDateTime.parse("2025-03-10T00:00:00")))
+    val innerRange = TemporalFilter.AndFilter(
+      TemporalFilter.GreaterThanFilter("timestamp", LocalDateTime.parse("2025-03-03T00:00:00")),
+      TemporalFilter.LessThanFilter("timestamp", LocalDateTime.parse("2025-03-07T00:00:00")))
+
+    assert(
+      getFilterTemporal(TemporalFilter.AndFilter(outerRange, innerRange)) ==
+        "datetime=2025-03-03T00:00:00.000000000Z/2025-03-07T00:00:00.000000999Z")
+  }
+
+  test("getFilterTemporal omits a contradictory AndFilter") {
+    val filter = TemporalFilter.AndFilter(
+      TemporalFilter.GreaterThanFilter("timestamp", LocalDateTime.parse("2025-03-07T00:00:00")),
+      TemporalFilter.LessThanFilter("timestamp", LocalDateTime.parse("2025-03-06T00:00:00")))
+
+    assert(getFilterTemporal(filter).isEmpty)
+    assert(
+      StacUtils.addFiltersToUrl("http://example.com/stac", None, Some(filter)) ==
+        "http://example.com/stac")
   }
 
   test("addFiltersToUrl with no filters") {
@@ -701,7 +779,7 @@ class StacUtilsTest extends AnyFunSuite {
     val temporalFilter = Some(
       TemporalFilter.GreaterThanFilter("timestamp", LocalDateTime.parse("2025-03-06T00:00:00")))
     val result = StacUtils.addFiltersToUrl(baseUrl, None, temporalFilter)
-    val expectedUrl = s"$baseUrl&datetime=2025-03-06T00:00:00.000Z/.."
+    val expectedUrl = s"$baseUrl&datetime=2025-03-06T00:00:00.000000000Z/.."
     assert(result == expectedUrl)
   }
 
@@ -714,7 +792,8 @@ class StacUtilsTest extends AnyFunSuite {
     val temporalFilter = Some(
       TemporalFilter.GreaterThanFilter("timestamp", LocalDateTime.parse("2025-03-06T00:00:00")))
     val result = StacUtils.addFiltersToUrl(baseUrl, spatialFilter, temporalFilter)
-    val expectedUrl = s"$baseUrl&bbox=1.0%2C3.0%2C2.0%2C4.0&datetime=2025-03-06T00:00:00.000Z/.."
+    val expectedUrl =
+      s"$baseUrl&bbox=1.0%2C3.0%2C2.0%2C4.0&datetime=2025-03-06T00:00:00.000000000Z/.."
     assert(result == expectedUrl)
   }
 

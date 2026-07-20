@@ -168,9 +168,9 @@ class Client:
         :param datetime: A single datetime, RFC 3339-compliant timestamp,
             or a list of date-time ranges for filtering the items. The datetime can be specified in various formats:
 
-            - "YYYY" expands to ["YYYY-01-01T00:00:00Z", "YYYY-12-31T23:59:59Z"]
-            - "YYYY-mm" expands to ["YYYY-mm-01T00:00:00Z", "YYYY-mm-<last_day>T23:59:59Z"]
-            - "YYYY-mm-dd" expands to ["YYYY-mm-ddT00:00:00Z", "YYYY-mm-ddT23:59:59Z"]
+            - "YYYY" expands to ["YYYY-01-01T00:00:00Z", "YYYY-12-31T23:59:59.999999Z"]
+            - "YYYY-mm" expands to ["YYYY-mm-01T00:00:00Z", "YYYY-mm-<last_day>T23:59:59.999999Z"]
+            - "YYYY-mm-dd" expands to ["YYYY-mm-ddT00:00:00Z", "YYYY-mm-ddT23:59:59.999999Z"]
             - "YYYY-mm-ddTHH:MM:SSZ" remains as ["YYYY-mm-ddTHH:MM:SSZ", "YYYY-mm-ddTHH:MM:SSZ"]
             - A list of date-time ranges can be provided for multiple intervals.
 
