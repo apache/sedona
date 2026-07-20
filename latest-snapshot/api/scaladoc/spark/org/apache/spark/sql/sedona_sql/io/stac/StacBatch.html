@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.4_2.12 1.9.1-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.io.stac.StacBatch</title>
@@ -433,9 +432,9 @@ which are necessary for batch data processing.
               
         </dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacBatch#collectItemLinks" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="collectItemLinks(collectionBasePath:String,collectionJson:String,itemLinks:scala.collection.mutable.ArrayBuffer[String],needCountNextItems:Boolean):Unit"></a><a id="collectItemLinks(String,String,ArrayBuffer[String],Boolean):Unit"></a>
+      <a id="collectItemLinks(collectionUrl:String,collectionJson:String,itemLinks:scala.collection.mutable.ArrayBuffer[String],needCountNextItems:Boolean):Unit"></a><a id="collectItemLinks(String,String,ArrayBuffer[String],Boolean):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacBatch.html#collectItemLinks(collectionBasePath:String,collectionJson:String,itemLinks:scala.collection.mutable.ArrayBuffer[String],needCountNextItems:Boolean):Unit" title="Permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/stac/StacBatch.html#collectItemLinks(collectionUrl:String,collectionJson:String,itemLinks:scala.collection.mutable.ArrayBuffer[String],needCountNextItems:Boolean):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -444,12 +443,12 @@ which are necessary for batch data processing.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">collectItemLinks</span><span class="params">(<span name="collectionBasePath">collectionBasePath: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="collectionJson">collectionJson: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="itemLinks">itemLinks: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="needCountNextItems">needCountNextItems: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">collectItemLinks</span><span class="params">(<span name="collectionUrl">collectionUrl: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="collectionJson">collectionJson: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="itemLinks">itemLinks: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="needCountNextItems">needCountNextItems: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
       <p class="shortcomment cmt">Recursively processes collections and collects item links.</p><div class="fullcomment"><div class="comment cmt"><p>Recursively processes collections and collects item links.
-</p></div><dl class="paramcmts block"><dt class="param">collectionBasePath</dt><dd class="cmt"><p>
-  The base path of the STAC collection.</p></dd><dt class="param">collectionJson</dt><dd class="cmt"><p>
+</p></div><dl class="paramcmts block"><dt class="param">collectionUrl</dt><dd class="cmt"><p>
+  The URL of the current STAC collection document.</p></dd><dt class="param">collectionJson</dt><dd class="cmt"><p>
   The JSON string representation of the STAC collection.</p></dd><dt class="param">itemLinks</dt><dd class="cmt"><p>
   The list of item links to populate.</p></dd></dl></div>
     </li><li name="org.apache.spark.sql.sedona_sql.io.stac.StacBatch#createReaderFactory" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
