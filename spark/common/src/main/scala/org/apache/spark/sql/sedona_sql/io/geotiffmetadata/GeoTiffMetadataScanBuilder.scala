@@ -84,6 +84,26 @@ case class GeoTiffMetadataScan(
     extends FileScan
     with Batch {
 
+  // FileScan defines concrete equals/hashCode (comparing only fileIndex, read schema, and
+  // normalized filters), which suppresses the case-class-synthesized versions — so `pushedLimit`
+  // and `options` would not participate in equality. Since the pushed limit is enforced by the
+  // scan alone (the Limit operator is removed when isPartiallyPushed = false), two scans that
+  // differ only by limit must not compare equal, or exchange/subquery reuse could serve a
+  // limited scan's result for an unlimited one. Mirror how Spark's own pushdown-carrying scans
+  // (e.g. CSVScan) override equality.
+  override def equals(obj: Any): Boolean = obj match {
+    case o: GeoTiffMetadataScan =>
+      super.equals(o) && options == o.options && pushedLimit == o.pushedLimit
+    case _ => false
+  }
+
+  override def hashCode(): Int = {
+    var result = super.hashCode()
+    result = 31 * result + options.hashCode()
+    result = 31 * result + pushedLimit.hashCode()
+    result
+  }
+
   override def isSplitable(path: org.apache.hadoop.fs.Path): Boolean = false
 
   private lazy val inputPartitions = {

@@ -19,11 +19,15 @@
 package org.apache.sedona.sql
 
 import org.apache.commons.io.FileUtils
+import org.apache.spark.sql.execution.datasources.v2.BatchScanExec
+import org.apache.spark.sql.sedona_sql.io.geotiffmetadata.GeoTiffMetadataScan
+import org.apache.spark.sql.util.CaseInsensitiveStringMap
 import org.junit.Assert.assertEquals
 import org.scalatest.BeforeAndAfterAll
 
 import java.io.File
 import java.nio.file.Files
+import java.util.Collections
 
 class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
 
@@ -232,6 +236,135 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
         .first()
       assertEquals(256, bandRow.getAs[Int]("blockWidth"))
       assertEquals(256, bandRow.getAs[Int]("blockHeight"))
+    }
+
+    it("should support Hive-style partition discovery when recursiveFileLookup is disabled") {
+      val base = new File(tempDir, "partitioned")
+      val d2020 = new File(base, "year=2020")
+      val d2021 = new File(base, "year=2021")
+      d2020.mkdirs()
+      d2021.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(d2020, "a.tiff"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(d2021, "b.tiff"))
+
+      // Mixed-case option spelling: data source options are case-insensitive, so this must
+      // suppress the lowercase recursiveFileLookup default just the same
+      val df = sparkSession.read
+        .format("geotiff.metadata")
+        .option("RecursiveFileLookup", "false")
+        .load(base.getAbsolutePath)
+      // Partition inference stays available because the explicit option is respected
+      assert(df.schema.fieldNames.contains("year"))
+      val rows = df.selectExpr("path", "year").collect()
+      assertEquals(2, rows.length)
+      // Every row must carry the partition value of ITS OWN file, even when both files are
+      // bin-packed into one Spark partition
+      rows.foreach { r =>
+        assert(r.getAs[String]("path").contains(s"year=${r.getAs[Int]("year")}"))
+      }
+    }
+
+    it("should hash scans from every field used by equality") {
+      val scan = sparkSession.read
+        .format("geotiff.metadata")
+        .load(singleFileLocation)
+        .queryExecution
+        .executedPlan
+        .collectFirst { case exec: BatchScanExec =>
+          exec.scan.asInstanceOf[GeoTiffMetadataScan]
+        }
+        .getOrElse(fail("GeoTIFF metadata query did not contain a BatchScanExec"))
+
+      val equalScan = scan.copy()
+      val limitedScan = scan.copy(pushedLimit = Some(1))
+      val differentOptionsScan = scan.copy(options =
+        new CaseInsensitiveStringMap(Collections.singletonMap("hash-test", "different")))
+
+      assert(scan == equalScan)
+      assertEquals(scan.hashCode(), equalScan.hashCode())
+      assert(scan != limitedScan)
+      assert(scan.hashCode() != limitedScan.hashCode())
+      assert(scan != differentOptionsScan)
+      assert(scan.hashCode() != differentOptionsScan.hashCode())
+    }
+
+    it("should apply both a glob path and an explicit pathGlobFilter") {
+      // Native Spark semantics: both constraints apply, so a*.tiff restricted to b*.tiff is
+      // empty. The internal glob-to-filter rewrite must not discard either constraint.
+      val dir = new File(tempDir, "globAndFilter")
+      dir.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(dir, "a.tiff"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(dir, "b.tiff"))
+
+      val both = sparkSession.read
+        .format("geotiff.metadata")
+        .option("pathGlobFilter", "b*.tiff")
+        .load(dir.getAbsolutePath + "/a*.tiff")
+      assertEquals(0L, both.count())
+
+      // Sanity: without the explicit filter, the glob path alone matches a.tiff
+      val globOnly =
+        sparkSession.read.format("geotiff.metadata").load(dir.getAbsolutePath + "/a*.tiff")
+      assertEquals(1L, globOnly.count())
+    }
+
+    it("should filter non-GeoTIFF files when loading multiple directories") {
+      val dirA = new File(tempDir, "multiA")
+      val dirB = new File(tempDir, "multiB")
+      dirA.mkdirs()
+      dirB.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(dirA, "a.tiff"))
+      FileUtils.writeStringToFile(new File(dirA, "junk.txt"), "not a geotiff", "UTF-8")
+      FileUtils.copyFile(new File(singleFileLocation), new File(dirB, "b.tiff"))
+
+      val df = sparkSession.read
+        .format("geotiff.metadata")
+        .load(dirA.getAbsolutePath, dirB.getAbsolutePath)
+      assertEquals(2L, df.count())
+      // Force a parse of every listed file — junk.txt would fail here if not filtered out
+      assertEquals(2, df.select("width").collect().length)
+    }
+
+    it("should fail catalog table creation with a clear error instead of an NPE") {
+      def messages(t: Throwable): Seq[String] =
+        if (t == null) Nil else Option(t.getMessage).toSeq ++ messages(t.getCause)
+
+      sparkSession.sql("DROP TABLE IF EXISTS geotiff_meta_tbl")
+      try {
+        val err = intercept[Exception] {
+          sparkSession.sql(
+            s"CREATE TABLE geotiff_meta_tbl USING `geotiff.metadata` LOCATION '$singleFileLocation'")
+        }
+        assert(
+          messages(err).exists(_.contains("does not support catalog table operations")),
+          s"unexpected error: $err")
+      } finally {
+        sparkSession.sql("DROP TABLE IF EXISTS geotiff_meta_tbl")
+      }
+    }
+
+    it("should reject catalog table creation with an explicit schema") {
+      // With a user-supplied schema Spark skips FileFormat.inferSchema, so rejection relies on
+      // the stub fallback format failing on instantiation. Depending on the Spark version the
+      // error surfaces at CREATE or at first SELECT — either way it must be the clear message,
+      // never an NPE or a silently unusable table.
+      def messages(t: Throwable): Seq[String] =
+        if (t == null) Nil else Option(t.getMessage).toSeq ++ messages(t.getCause)
+
+      sparkSession.sql("DROP TABLE IF EXISTS geotiff_meta_schema_tbl")
+      try {
+        val err = intercept[Exception] {
+          sparkSession.sql(
+            "CREATE TABLE geotiff_meta_schema_tbl (path STRING) " +
+              s"USING `geotiff.metadata` LOCATION '$singleFileLocation'")
+          sparkSession.sql("SELECT * FROM geotiff_meta_schema_tbl").collect()
+        }
+        assert(
+          messages(err).exists(_.contains("does not support catalog table operations")),
+          s"unexpected error: $err")
+      } finally {
+        sparkSession.sql("DROP TABLE IF EXISTS geotiff_meta_schema_tbl")
+      }
     }
   }
 }

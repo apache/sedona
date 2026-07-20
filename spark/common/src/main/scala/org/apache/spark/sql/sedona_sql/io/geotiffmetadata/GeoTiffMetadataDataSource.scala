@@ -18,10 +18,14 @@
  */
 package org.apache.spark.sql.sedona_sql.io.geotiffmetadata
 
+import org.apache.hadoop.fs.FileStatus
 import org.apache.hadoop.fs.Path
+import org.apache.hadoop.mapreduce.Job
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.catalog.Table
 import org.apache.spark.sql.connector.catalog.TableProvider
 import org.apache.spark.sql.execution.datasources.FileFormat
+import org.apache.spark.sql.execution.datasources.OutputWriterFactory
 import org.apache.spark.sql.execution.datasources.v2.FileDataSourceV2
 import org.apache.spark.sql.sources.DataSourceRegister
 import org.apache.spark.sql.types.StructType
@@ -50,31 +54,37 @@ class GeoTiffMetadataDataSource
     var optionsWithoutPaths = getOptionsWithoutPaths(options)
     val tableName = getTableName(options, paths)
 
-    if (paths.size == 1) {
-      val head = paths.head
-      if (isDirectory(head, optionsWithoutPaths)) {
-        // Directory (with or without trailing slash): recurse and filter to GeoTIFF files
-        val newOptions =
-          new java.util.HashMap[String, String](optionsWithoutPaths.asCaseSensitiveMap())
+    // Explicit user options always win over the defaults below; presence checks go through the
+    // CaseInsensitiveStringMap because Spark data source options are case-insensitive, so e.g.
+    // an explicit `RecursiveFileLookup` must suppress the lowercase default.
+    val newOptions =
+      new java.util.HashMap[String, String](optionsWithoutPaths.asCaseSensitiveMap())
+    val hasUserGlobFilter = optionsWithoutPaths.containsKey("pathGlobFilter")
+    val hasUserRecursive = optionsWithoutPaths.containsKey("recursiveFileLookup")
+
+    if (paths.size == 1 && !isDirectory(paths.head, optionsWithoutPaths)) {
+      // Rewrite glob patterns like /path/to/some*glob*.tif into /path/to with
+      // pathGlobFilter="some*glob*.tif" to avoid listing .tif files as directories. When the
+      // user supplied their own pathGlobFilter, keep the glob path untouched so Spark applies
+      // both constraints natively (the rewrite could only keep one of them).
+      paths.head match {
+        case loadTifPattern(prefix, glob) if !hasUserGlobFilter =>
+          paths = Seq(prefix)
+          newOptions.put("pathGlobFilter", glob)
+        case _ =>
+      }
+    } else if (paths.exists(p => isDirectory(p, optionsWithoutPaths))) {
+      // Directory roots (single or multiple, with or without trailing slash): default to a
+      // recursive scan filtered to GeoTIFF extensions. These are defaults only — an explicit
+      // recursiveFileLookup=false keeps Hive-style partition discovery available.
+      if (!hasUserRecursive) {
         newOptions.put("recursiveFileLookup", "true")
-        if (!newOptions.containsKey("pathGlobFilter")) {
-          newOptions.put("pathGlobFilter", "*.{tif,tiff,TIF,TIFF}")
-        }
-        optionsWithoutPaths = new CaseInsensitiveStringMap(newOptions)
-      } else {
-        // Rewrite glob patterns like /path/to/some*glob*.tif into /path/to with
-        // pathGlobFilter="some*glob*.tif" to avoid listing .tif files as directories
-        head match {
-          case loadTifPattern(prefix, glob) =>
-            paths = Seq(prefix)
-            val newOptions =
-              new java.util.HashMap[String, String](optionsWithoutPaths.asCaseSensitiveMap())
-            newOptions.put("pathGlobFilter", glob)
-            optionsWithoutPaths = new CaseInsensitiveStringMap(newOptions)
-          case _ =>
-        }
+      }
+      if (!hasUserGlobFilter) {
+        newOptions.put("pathGlobFilter", "*.{tif,tiff,TIF,TIFF}")
       }
     }
+    optionsWithoutPaths = new CaseInsensitiveStringMap(newOptions)
 
     new GeoTiffMetadataTable(
       tableName,
@@ -96,8 +106,11 @@ class GeoTiffMetadataDataSource
   override def inferSchema(options: CaseInsensitiveStringMap): StructType =
     GeoTiffMetadataTable.SCHEMA
 
-  // Read-only data source — no V1 fallback needed
-  override def fallbackFileFormat: Class[_ <: FileFormat] = null
+  // Spark maps a FileDataSourceV2 back to this V1 FileFormat for catalog paths such as
+  // CREATE TABLE ... USING; a null class would NPE there, so return a stub that raises a
+  // descriptive error instead.
+  override def fallbackFileFormat: Class[_ <: FileFormat] =
+    classOf[GeoTiffMetadataUnsupportedFileFormat]
 
   /**
    * Check if a path points to a directory. A trailing `/` is treated as a directory without any
@@ -116,4 +129,40 @@ class GeoTiffMetadataDataSource
       fs.getFileStatus(path).isDirectory
     }.getOrElse(false)
   }
+}
+
+/**
+ * V1 fallback used by Spark for catalog paths such as `CREATE TABLE ... USING geotiff.metadata`.
+ * The data source is read-only and path-based, so those operations are unsupported — this stub
+ * exists to surface a clear error instead of the NullPointerException a null fallback class would
+ * produce.
+ *
+ * The constructor itself throws: Spark instantiates the fallback format whenever a catalog
+ * operation resolves the relation — including `CREATE TABLE` with an explicit schema, which skips
+ * `inferSchema` — so failing on instantiation rejects every V1 usage up front. Reads are
+ * unaffected because the V2 path only ever references the class, never constructs it.
+ */
+class GeoTiffMetadataUnsupportedFileFormat extends FileFormat {
+
+  throw GeoTiffMetadataUnsupportedFileFormat.unsupported()
+
+  override def inferSchema(
+      sparkSession: SparkSession,
+      options: Map[String, String],
+      files: Seq[FileStatus]): Option[StructType] =
+    throw GeoTiffMetadataUnsupportedFileFormat.unsupported()
+
+  override def prepareWrite(
+      sparkSession: SparkSession,
+      job: Job,
+      options: Map[String, String],
+      dataSchema: StructType): OutputWriterFactory =
+    throw GeoTiffMetadataUnsupportedFileFormat.unsupported()
+}
+
+object GeoTiffMetadataUnsupportedFileFormat {
+  private def unsupported(): UnsupportedOperationException =
+    new UnsupportedOperationException(
+      "geotiff.metadata does not support catalog table operations; " +
+        "read it with spark.read.format(\"geotiff.metadata\").load(path)")
 }
