@@ -720,9 +720,9 @@ class GeoFrame(metaclass=ABCMeta):
         `LineString`; for one vertex, it collapses to a `Point`.
 
         The hull is constructed by removing border triangles of the Delaunay
-        triangulation while their size is larger than the maximum edge length
-        ratio. The ratio is a fraction of the difference between the longest
-        and shortest edges in the triangulation.
+        triangulation. The ratio determines the maximum edge-length threshold
+        by interpolating between the shortest and longest edges in the
+        triangulation.
 
         Parameters
         ----------
