@@ -367,63 +367,110 @@ object StacUtils {
     s"bbox=${unionEnvelope.getMinX}%2C${unionEnvelope.getMinY}%2C${unionEnvelope.getMaxX}%2C${unionEnvelope.getMaxY}"
   }
 
+  /**
+   * A conservative closed interval containing every timestamp accepted by a temporal filter.
+   * Missing bounds represent negative or positive infinity. An outer `None` from
+   * [[calculateTemporalBounds]] represents a filter that is proven empty.
+   */
+  private[stac] final case class TemporalBounds(
+      lower: Option[LocalDateTime],
+      upper: Option[LocalDateTime]) {
+
+    def isUnbounded: Boolean = lower.isEmpty && upper.isEmpty
+
+    /** Returns whether this interval overlaps another interval with optional open endpoints. */
+    def overlaps(
+        otherLower: Option[LocalDateTime],
+        otherUpper: Option[LocalDateTime]): Boolean = {
+      val endsBeforeOther = upper.exists(end => otherLower.exists(_.isAfter(end)))
+      val startsAfterOther = lower.exists(start => otherUpper.exists(_.isBefore(start)))
+      !endsBeforeOther && !startsAfterOther
+    }
+  }
+
+  private def intersectTemporalBounds(
+      left: TemporalBounds,
+      right: TemporalBounds): Option[TemporalBounds] = {
+    val lower = (left.lower, right.lower) match {
+      case (Some(leftValue), Some(rightValue)) =>
+        Some(if (leftValue.isAfter(rightValue)) leftValue else rightValue)
+      case (leftValue @ Some(_), None) => leftValue
+      case (None, rightValue @ Some(_)) => rightValue
+      case _ => None
+    }
+    val upper = (left.upper, right.upper) match {
+      case (Some(leftValue), Some(rightValue)) =>
+        Some(if (leftValue.isBefore(rightValue)) leftValue else rightValue)
+      case (leftValue @ Some(_), None) => leftValue
+      case (None, rightValue @ Some(_)) => rightValue
+      case _ => None
+    }
+
+    if (lower.exists(start => upper.exists(end => start.isAfter(end)))) None
+    else Some(TemporalBounds(lower, upper))
+  }
+
+  private def unionTemporalBounds(left: TemporalBounds, right: TemporalBounds): TemporalBounds = {
+    val lower = for {
+      leftValue <- left.lower
+      rightValue <- right.lower
+    } yield if (leftValue.isBefore(rightValue)) leftValue else rightValue
+    val upper = for {
+      leftValue <- left.upper
+      rightValue <- right.upper
+    } yield if (leftValue.isAfter(rightValue)) leftValue else rightValue
+    TemporalBounds(lower, upper)
+  }
+
+  /**
+   * Calculates a safe interval envelope for a temporal filter. `AND` intersects child envelopes;
+   * `OR` takes their convex hull, preserving an unbounded side if either child is unbounded
+   * there. Upper leaf bounds are widened to cover the full nanosecond range that Spark truncates
+   * into the same microsecond. This may fetch extra rows, which the retained Spark filter
+   * removes.
+   */
+  private[stac] def calculateTemporalBounds(filter: TemporalFilter): Option[TemporalBounds] = {
+    filter match {
+      case TemporalFilter.AndFilter(left, right) =>
+        for {
+          leftBounds <- calculateTemporalBounds(left)
+          rightBounds <- calculateTemporalBounds(right)
+          intersection <- intersectTemporalBounds(leftBounds, rightBounds)
+        } yield intersection
+      case TemporalFilter.OrFilter(left, right) =>
+        (calculateTemporalBounds(left), calculateTemporalBounds(right)) match {
+          case (Some(leftBounds), Some(rightBounds)) =>
+            Some(unionTemporalBounds(leftBounds, rightBounds))
+          case (leftBounds @ Some(_), None) => leftBounds
+          case (None, rightBounds @ Some(_)) => rightBounds
+          case _ => None
+        }
+      case TemporalFilter.LessThanFilter(_, value) =>
+        Some(TemporalBounds(None, Some(value.plusNanos(999L))))
+      case TemporalFilter.GreaterThanFilter(_, value) =>
+        Some(TemporalBounds(Some(value), None))
+      case TemporalFilter.EqualFilter(_, value) =>
+        Some(TemporalBounds(Some(value), Some(value.plusNanos(999L))))
+    }
+  }
+
   /** Returns the temporal filter string based on the temporal filter. */
   def getFilterTemporal(filter: TemporalFilter): String = {
     // Nine fractional digits (nanoseconds) match the finest precision STAC permits. Spark only
-    // keeps microseconds, so it truncates a legal item timestamp such as ...999999500Z down to
-    // ...999999 before the residual `datetime <= end` filter runs. A coarser pattern (or a bound
-    // pinned to microseconds) would let the remote catalog drop that item even though the residual
-    // filter would keep it; see the upper-bound widening below.
+    // keeps microseconds, so calculateTemporalBounds widens every finite upper leaf bound through
+    // the final nanosecond that Spark truncates into the same microsecond.
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'")
 
-    def formatDateTime(dateTime: LocalDateTime): String = {
-      if (dateTime == null) ".." else dateTime.format(formatter)
-    }
+    def formatDateTime(dateTime: Option[LocalDateTime]): String =
+      dateTime.map(_.format(formatter)).getOrElse("..")
 
-    def calculateUnionTemporal(filter: TemporalFilter): (LocalDateTime, LocalDateTime) = {
-      filter match {
-        case TemporalFilter.AndFilter(left, right) =>
-          val (leftStart, leftEnd) = calculateUnionTemporal(left)
-          val (rightStart, rightEnd) = calculateUnionTemporal(right)
-          val start =
-            if (leftStart == null || (rightStart != null && rightStart.isBefore(leftStart)))
-              rightStart
-            else leftStart
-          val end =
-            if (leftEnd == null || (rightEnd != null && rightEnd.isAfter(leftEnd))) rightEnd
-            else leftEnd
-          (start, end)
-        case TemporalFilter.OrFilter(left, right) =>
-          val (leftStart, leftEnd) = calculateUnionTemporal(left)
-          val (rightStart, rightEnd) = calculateUnionTemporal(right)
-          val start =
-            if (leftStart == null || (rightStart != null && rightStart.isBefore(leftStart)))
-              rightStart
-            else leftStart
-          val end =
-            if (leftEnd == null || (rightEnd != null && rightEnd.isAfter(leftEnd))) rightEnd
-            else leftEnd
-          (start, end)
-        case TemporalFilter.LessThanFilter(_, value) =>
-          (null, value)
-        case TemporalFilter.GreaterThanFilter(_, value) =>
-          (value, null)
-        case TemporalFilter.EqualFilter(_, value) =>
-          (value, value)
-      }
+    calculateTemporalBounds(filter) match {
+      // STAC intervals may have one open endpoint, but not two. An empty string also lets
+      // addFiltersToUrl omit a proven-empty interval and leave the residual Spark filter in charge.
+      case Some(bounds) if !bounds.isUnbounded =>
+        s"datetime=${formatDateTime(bounds.lower)}/${formatDateTime(bounds.upper)}"
+      case _ => ""
     }
-
-    val (start, end) = calculateUnionTemporal(filter)
-    // The pushed-down bounds come from Spark TimestampType literals, so `end` is aligned to a whole
-    // microsecond. Spark truncates every item timestamp to microseconds, so the residual `<= end`
-    // filter keeps any item whose true (up to nanosecond) value lands anywhere in that final
-    // microsecond. Widen the inclusive upper bound to its last nanosecond (+999 ns) so the remote
-    // catalog returns a superset of the residual result instead of dropping, e.g., an item at
-    // ...999999500Z. The lower bound is left exact; a slightly wider window is always safe because
-    // the residual filter re-checks each row at microsecond precision.
-    val inclusiveEnd = if (end == null) null else end.plusNanos(999L)
-    if (inclusiveEnd == null) s"datetime=${formatDateTime(start)}/.."
-    else s"datetime=${formatDateTime(start)}/${formatDateTime(inclusiveEnd)}"
   }
 
   /** Adds the spatial and temporal filters to the base URL. */

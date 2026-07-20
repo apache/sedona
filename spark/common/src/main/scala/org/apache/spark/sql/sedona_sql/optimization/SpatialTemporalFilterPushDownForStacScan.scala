@@ -81,20 +81,33 @@ class SpatialTemporalFilterPushDownForStacScan(sparkSession: SparkSession)
           filter.copy()
         case lr: DataSourceV2ScanRelation if isStacScanRelation(lr) =>
           val scan = lr.scan.asInstanceOf[StacScan]
-          val limit = extractLimit(plan)
-          limit match {
-            case Some(n) => scan.setLimit(n)
-            case None =>
-          }
+          // A limit is safe only when it is applied directly to this scan. Filters, sorts,
+          // aggregates, joins, and other intervening operators can reject or reorder rows.
+          scan.limit = extractDirectLimit(plan, lr)
           lr
       }
     }
   }
 
-  def extractLimit(plan: LogicalPlan): Option[Int] = {
-    plan.collectFirst {
-      case GlobalLimit(Literal(limit: Int, _), _) => limit
-      case LocalLimit(Literal(limit: Int, _), _) => limit
+  private[optimization] def extractDirectLimit(
+      plan: LogicalPlan,
+      target: LogicalPlan): Option[Int] = {
+    def literalLimit(expression: Expression): Option[Int] = expression match {
+      case Literal(limit: Int, _) => Some(limit)
+      case _ => None
+    }
+
+    plan match {
+      case GlobalLimit(globalExpression, LocalLimit(localExpression, child))
+          if child.eq(target) =>
+        for {
+          globalLimit <- literalLimit(globalExpression)
+          localLimit <- literalLimit(localExpression)
+          if localLimit >= globalLimit
+        } yield globalLimit
+      case GlobalLimit(expression, child) if child.eq(target) =>
+        literalLimit(expression)
+      case _ => None
     }
   }
 
@@ -128,27 +141,32 @@ class SpatialTemporalFilterPushDownForStacScan(sparkSession: SparkSession)
           temporalFilterRight <- translateToTemporalFilter(right, pushableColumn)
         } yield TemporalFilter.OrFilter(temporalFilterLeft, temporalFilterRight)
 
-      case LessThan(pushableColumn(name), Literal(v, TimestampType)) =>
+      case LessThan(pushableColumn(name), Literal(v, TimestampType))
+          if isPushableTemporalColumn(name) =>
         Some(
           TemporalFilter
             .LessThanFilter(unquote(name), microsToLocalDateTime(v.asInstanceOf[Long])))
 
-      case LessThanOrEqual(pushableColumn(name), Literal(v, TimestampType)) =>
+      case LessThanOrEqual(pushableColumn(name), Literal(v, TimestampType))
+          if isPushableTemporalColumn(name) =>
         Some(
           TemporalFilter
             .LessThanFilter(unquote(name), microsToLocalDateTime(v.asInstanceOf[Long])))
 
-      case GreaterThan(pushableColumn(name), Literal(v, TimestampType)) =>
+      case GreaterThan(pushableColumn(name), Literal(v, TimestampType))
+          if isPushableTemporalColumn(name) =>
         Some(
           TemporalFilter
             .GreaterThanFilter(unquote(name), microsToLocalDateTime(v.asInstanceOf[Long])))
 
-      case GreaterThanOrEqual(pushableColumn(name), Literal(v, TimestampType)) =>
+      case GreaterThanOrEqual(pushableColumn(name), Literal(v, TimestampType))
+          if isPushableTemporalColumn(name) =>
         Some(
           TemporalFilter
             .GreaterThanFilter(unquote(name), microsToLocalDateTime(v.asInstanceOf[Long])))
 
-      case EqualTo(pushableColumn(name), Literal(v, TimestampType)) =>
+      case EqualTo(pushableColumn(name), Literal(v, TimestampType))
+          if isPushableTemporalColumn(name) =>
         Some(
           TemporalFilter
             .EqualFilter(unquote(name), microsToLocalDateTime(v.asInstanceOf[Long])))
@@ -174,4 +192,6 @@ class SpatialTemporalFilterPushDownForStacScan(sparkSession: SparkSession)
   private def unquote(name: String): String = {
     parseColumnPath(name).mkString(".")
   }
+
+  private def isPushableTemporalColumn(name: String): Boolean = unquote(name) == "datetime"
 }

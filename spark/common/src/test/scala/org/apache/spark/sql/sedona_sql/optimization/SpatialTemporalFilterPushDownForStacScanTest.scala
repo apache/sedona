@@ -19,7 +19,8 @@
 package org.apache.spark.sql.sedona_sql.optimization
 
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.catalyst.expressions.{AttributeReference, GreaterThanOrEqual, LessThanOrEqual, Literal}
+import org.apache.spark.sql.catalyst.expressions.{AttributeReference, GreaterThan, GreaterThanOrEqual, LessThan, LessThanOrEqual, Literal, Or}
+import org.apache.spark.sql.catalyst.plans.logical.{GlobalLimit, LocalLimit, LogicalPlan}
 import org.apache.spark.sql.execution.datasource.stac.TemporalFilter
 import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.getFilterTemporal
 import org.apache.spark.sql.types.TimestampType
@@ -45,6 +46,9 @@ class SpatialTemporalFilterPushDownForStacScanTest extends AnyFunSuite {
   }
 
   private val datetime = AttributeReference("datetime", TimestampType)()
+
+  private def firstLeaf(plan: LogicalPlan): LogicalPlan =
+    plan.collectFirst { case node if node.children.isEmpty => node }.get
 
   // The push-down must not truncate the microsecond bound to milliseconds (it once divided by
   // 1000, pushing 23:59:59.999999Z as 23:59:59.999Z), and the serialized inclusive upper bound is
@@ -99,4 +103,67 @@ class SpatialTemporalFilterPushDownForStacScanTest extends AnyFunSuite {
         s"$ts must fall within the pushed remote bound $remoteEnd")
     }
   }
+
+  test("push-down omits a fully unbounded OR envelope") {
+    val lowerTail =
+      GreaterThan(datetime, Literal(toMicros("2025-03-06T00:00:00"), TimestampType))
+    val upperTail =
+      LessThan(datetime, Literal(toMicros("2025-03-07T00:00:00"), TimestampType))
+    val filters = pushDown.translateToTemporalFilters(Seq(Or(lowerTail, upperTail)))
+
+    assert(filters.size == 1)
+    assert(getFilterTemporal(filters.head).isEmpty)
+  }
+
+  test("push-down ignores timestamp columns not represented by the STAC datetime parameter") {
+    val created = AttributeReference("created", TimestampType)()
+    val predicate =
+      GreaterThanOrEqual(created, Literal(toMicros("2025-03-06T00:00:00"), TimestampType))
+
+    assert(pushDown.translateToTemporalFilters(Seq(predicate)).isEmpty)
+  }
+
+  test("limit push-down only accepts a limit directly above one scan") {
+    val directPlan = spark.range(10).limit(3).queryExecution.optimizedPlan
+    assert(pushDown.extractDirectLimit(directPlan, firstLeaf(directPlan)).contains(3))
+
+    val localOnlyPlan = LocalLimit(Literal(2), firstLeaf(directPlan))
+    assert(pushDown.extractDirectLimit(localOnlyPlan, firstLeaf(localOnlyPlan)).isEmpty)
+
+    val mismatchedLimitsPlan =
+      GlobalLimit(Literal(10), LocalLimit(Literal(2), firstLeaf(directPlan)))
+    assert(
+      pushDown
+        .extractDirectLimit(mismatchedLimitsPlan, firstLeaf(mismatchedLimitsPlan))
+        .isEmpty)
+
+    val filteredPlan = spark.range(10).filter("id > 5").limit(1).queryExecution.optimizedPlan
+    assert(pushDown.extractDirectLimit(filteredPlan, firstLeaf(filteredPlan)).isEmpty)
+
+    val sortedPlan = spark
+      .range(10)
+      .orderBy(org.apache.spark.sql.functions.desc("id"))
+      .limit(1)
+      .queryExecution
+      .optimizedPlan
+    assert(pushDown.extractDirectLimit(sortedPlan, firstLeaf(sortedPlan)).isEmpty)
+
+    val aggregatePlan = spark
+      .range(10)
+      .agg(org.apache.spark.sql.functions.count("*").as("count"))
+      .limit(1)
+      .queryExecution
+      .optimizedPlan
+    assert(pushDown.extractDirectLimit(aggregatePlan, firstLeaf(aggregatePlan)).isEmpty)
+
+    val left = spark.range(10).withColumnRenamed("id", "left_id")
+    val right = spark.range(10).withColumnRenamed("id", "right_id")
+    val joinPlan = left
+      .join(right, left("left_id") === right("right_id"))
+      .limit(1)
+      .queryExecution
+      .optimizedPlan
+    assert(pushDown.extractDirectLimit(joinPlan, firstLeaf(joinPlan)).isEmpty)
+  }
+
 }
