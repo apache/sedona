@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.4_2.12 1.9.1-SNAPSHOT API  - org.apache.spark.sql.sedona_sql.io.geotiffmetadata</title>
@@ -222,6 +221,10 @@
                         <a class="object" href="GeoTiffMetadataTable$.html" title=""></a>
                         <a class="class" href="GeoTiffMetadataTable.html" title=""></a>
                         <a href="GeoTiffMetadataTable.html" title="">GeoTiffMetadataTable</a>
+                      </li><li class="current-entities indented7">
+                        <a class="object" href="GeoTiffMetadataUnsupportedFileFormat$.html" title=""></a>
+                        <a class="class" href="GeoTiffMetadataUnsupportedFileFormat.html" title="V1 fallback used by Spark for catalog paths such as CREATE TABLE ... USING geotiff.metadata."></a>
+                        <a href="GeoTiffMetadataUnsupportedFileFormat.html" title="V1 fallback used by Spark for catalog paths such as CREATE TABLE ... USING geotiff.metadata.">GeoTiffMetadataUnsupportedFileFormat</a>
                       </li><li name="org.apache.spark.sql.sedona_sql.io.netcdfmetadata" visbl="pub" class="indented7 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="netcdfmetadata"></a><a id="netcdfmetadata:netcdfmetadata"></a>
       <span class="permalink">
@@ -430,6 +433,29 @@ overviews, compression, etc.) without loading raster pixel data into memory.</p>
       </span>
       
       
+    </li><li name="org.apache.spark.sql.sedona_sql.io.geotiffmetadata.GeoTiffMetadataUnsupportedFileFormat" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="GeoTiffMetadataUnsupportedFileFormatextendsFileFormat"></a><a id="GeoTiffMetadataUnsupportedFileFormat:GeoTiffMetadataUnsupportedFileFormat"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/geotiffmetadata/GeoTiffMetadataUnsupportedFileFormat.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="V1 fallback used by Spark for catalog paths such as CREATE TABLE ... USING geotiff.metadata." href="GeoTiffMetadataUnsupportedFileFormat.html"><span class="name">GeoTiffMetadataUnsupportedFileFormat</span></a><span class="result"> extends <span class="extype" name="org.apache.spark.sql.execution.datasources.FileFormat">FileFormat</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">V1 fallback used by Spark for catalog paths such as <code>CREATE TABLE ... USING geotiff.metadata</code>.</p><div class="fullcomment"><div class="comment cmt"><p>V1 fallback used by Spark for catalog paths such as <code>CREATE TABLE ... USING geotiff.metadata</code>.
+The data source is read-only and path-based, so those operations are unsupported — this stub
+exists to surface a clear error instead of the NullPointerException a null fallback class would
+produce.</p><p>The constructor itself throws: Spark instantiates the fallback format whenever a catalog
+operation resolves the relation — including <code>CREATE TABLE</code> with an explicit schema, which skips
+<code>inferSchema</code> — so failing on instantiation rejects every V1 usage up front. Reads are
+unaffected because the V2 path only ever references the class, never constructs it.
+</p></div></div>
     </li></ol>
             </div>
 
@@ -467,6 +493,22 @@ overviews, compression, etc.) without loading raster pixel data into memory.</p>
       </span>
       <span class="symbol">
         <a title="" href="GeoTiffMetadataTable$.html"><span class="name">GeoTiffMetadataTable</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="org.apache.spark.sql.sedona_sql.io.geotiffmetadata.GeoTiffMetadataUnsupportedFileFormat" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GeoTiffMetadataUnsupportedFileFormat"></a><a id="GeoTiffMetadataUnsupportedFileFormat:GeoTiffMetadataUnsupportedFileFormat"></a>
+      <span class="permalink">
+      <a href="../../../../../../../org/apache/spark/sql/sedona_sql/io/geotiffmetadata/GeoTiffMetadataUnsupportedFileFormat$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="GeoTiffMetadataUnsupportedFileFormat$.html"><span class="name">GeoTiffMetadataUnsupportedFileFormat</span></a>
       </span>
       
       
