@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6041,12 +6040,12 @@ table operations (<code>CREATE TABLE ... USING netcdf.metadata</code>).</p>
 <tr>
 <td><code>srid</code></td>
 <td>Int</td>
-<td>EPSG code resolved from the CRS WKT (or inferred for a plain <code>latitude_longitude</code> grid mapping); null if not resolvable</td>
+<td>EPSG code resolved from the CRS; null if not resolvable</td>
 </tr>
 <tr>
 <td><code>crs</code></td>
 <td>String</td>
-<td>CRS in WKT form (WKT1 or WKT2, verbatim as declared by the file) from the CF <code>grid_mapping</code> variable (<code>crs_wkt</code>/<code>spatial_ref</code>) or the equivalent global attributes; null if absent</td>
+<td>CRS in WKT form: verbatim (WKT1 or WKT2) when the file declares <code>crs_wkt</code>/<code>spatial_ref</code>, otherwise WKT2 derived from the CF <code>grid_mapping</code> parameters; null when the file defines no CRS</td>
 </tr>
 <tr>
 <td><code>geoTransform</code></td>
@@ -6100,17 +6099,28 @@ transforms and extents are always in real-world units rather than raw storage un
    <code>"geographic: lat lon projected: x y"</code>), the mapping whose coordinate list
    matches the grid's (Y, X) coordinates is selected, so the reported CRS always
    corresponds to the coordinates used for the extent;</li>
-<li>the same attribute names as global attributes.</li>
+<li>the same attribute names as global attributes;</li>
+<li>the CF grid mapping parameters themselves (<code>grid_mapping_name</code> plus projection
+   and ellipsoid attributes, per CF conventions Appendix F), translated with
+   proj4sedona into a WKT2 <code>crs</code>.</li>
 </ol>
-<p>The WKT is reported verbatim in <code>crs</code>, and <code>srid</code> is the EPSG identity of that WKT
-(resolved with proj4sedona, so no GeoTools runtime is required). When the file
-carries no WKT at all, <code>srid = 4326</code> (with a null <code>crs</code>) is reported only for a
-<code>latitude_longitude</code> grid mapping that positively identifies the WGS 84 datum by
-name (<code>horizontal_datum_name</code> or <code>geographic_crs_name</code>) with a Greenwich prime
-meridian; ellipsoid parameters never qualify on their own (many datums share the
-WGS 84 ellipsoid) and disable the inference when they contradict it. Projected grid
-mappings defined only by CF parameters (e.g. <code>lambert_conformal_conic</code> without
-<code>crs_wkt</code>) are not translated — both columns stay null.</p>
+<p>Declared WKT is reported verbatim in <code>crs</code>, and <code>srid</code> is the EPSG identity of the
+CRS (resolved with proj4sedona, so no GeoTools runtime is required — e.g. a
+<code>universal_transverse_mercator</code> mapping with <code>utm_zone_number = 33</code> yields
+<code>srid = 32633</code>). The parameter translation covers <code>latitude_longitude</code>,
+<code>albers_conical_equal_area</code>, <code>azimuthal_equidistant</code>, <code>geostationary</code>,
+<code>lambert_azimuthal_equal_area</code>, <code>lambert_conformal_conic</code> (1SP/2SP),
+<code>lambert_cylindrical_equal_area</code>, <code>mercator</code>, <code>orthographic</code>,
+<code>polar_stereographic</code>, <code>sinusoidal</code>, <code>stereographic</code>, <code>transverse_mercator</code>, and
+netCDF-Java's <code>universal_transverse_mercator</code>, including ellipsoid/datum names and
+parameters, prime meridians, <code>towgs84</code>, and non-metre projection coordinate units
+(<code>false_easting</code>/<code>false_northing</code> are read in the x/y <code>units</code>, per CF). One
+conservative deviation from GDAL: a <code>latitude_longitude</code> mapping is translated only
+when its attributes positively identify the Earth figure (a resolvable datum or
+ellipsoid name, explicit figure parameters, or <code>towgs84</code>) — the WGS 84 assumption
+GDAL applies to a bare geographic mapping is never reported as if the file declared
+it, so both columns stay null in that case, as they do for grid mappings the
+translation does not cover (e.g. <code>rotated_latitude_longitude</code>).</p>
 <h3 id="using-the-crs-downstream">Using the CRS downstream<a class="headerlink" href="#using-the-crs-downstream" title="Permanent link">&para;</a></h3>
 <p><code>RS_FromNetCDF</code> does not georeference the rasters it loads (their SRID is 0), so
 the columns reported here are the practical way to attach a CRS:</p>
@@ -6361,7 +6371,7 @@ listing without opening the file at all, and the coordinate arrays are only read
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 20, 2026 03:43:24 UTC">July 20, 2026 03:43:24</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 21, 2026 07:34:18 UTC">July 21, 2026 07:34:18</span>
   </span>
 
     
