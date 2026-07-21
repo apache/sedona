@@ -72,6 +72,9 @@ execution. We'll demonstrate both approaches to implementing commonly used map a
 
     This allows controlling the output pixel data type. Users should consider potential precision impacts when coercing to a smaller type.
 
+!!!Note
+    Jiffle limits scripts to 200 loop iterations per pixel by default, so a runaway `while` loop fails fast instead of hanging the executor. If a script legitimately needs more iterations per pixel, raise (or disable) the limit with the JVM system property `it.geosolutions.jaiext.jiffle.maxIterations` (a negative value disables the limit), e.g. `--conf "spark.executor.extraJavaOptions=-Dit.geosolutions.jaiext.jiffle.maxIterations=10000"`.
+
 ### NDVI
 
 The Normalized Difference Vegetation Index (NDVI) is a simple graphical indicator that can be used to analyze remote sensing measurements, typically, but not necessarily, from a space platform, and assess whether the target being observed contains live green vegetation or not. NDVI has become a de facto standard index used to determine whether a given area contains live green vegetation or not. The NDVI is calculated from these individual measurements as follows:
