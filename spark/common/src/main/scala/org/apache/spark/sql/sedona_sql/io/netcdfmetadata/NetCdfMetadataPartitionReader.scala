@@ -576,7 +576,7 @@ class NetCdfMetadataPartitionReader(
     } else {
       gmVar.flatMap(v => translateGridMapping(v, gridVar)) match {
         case Some(proj) =>
-          (Try(proj.toWkt2).getOrElse(null), if (needSrid) projSrid(proj) else None)
+          derivedCrs(proj.toWkt2, if (needSrid) projSrid(proj) else None)
         case None => (null, None)
       }
     }
@@ -640,10 +640,10 @@ class NetCdfMetadataPartitionReader(
    * equivalent spellings and rejects incompatible axes rather than misscaling either offset.
    */
   private def projectionCoordinateUnits(gridVar: Variable): (String, String) = {
-    val (latDim, lonDim) = trailingDims(gridVar)
+    val (yDim, xDim) = trailingDims(gridVar)
     def unitsOf(dim: Dimension): String =
       findCoordinateVariable(gridVar, dim).map(v => attrString(v, "units")).orNull
-    (unitsOf(lonDim), unitsOf(latDim))
+    (unitsOf(xDim), unitsOf(yDim))
   }
 
   /**
@@ -799,6 +799,17 @@ class NetCdfMetadataPartitionReader(
 }
 
 object NetCdfMetadataPartitionReader {
+
+  /**
+   * Build an atomic derived-CRS result. An SRID is meaningful only alongside the WKT from which
+   * it was derived, so a null or failed serialization returns neither. Both arguments are lazy so
+   * SRID lookup is skipped when WKT serialization fails.
+   */
+  private[apache] def derivedCrs(wkt: => String, srid: => Option[Int]): (String, Option[Int]) =
+    Try(wkt).toOption.filter(_ != null) match {
+      case Some(value) => (value, srid)
+      case None => (null, None)
+    }
 
   /**
    * Maximum allowed deviation of any coordinate from the best-fit affine line, in pixels, for the

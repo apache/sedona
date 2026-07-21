@@ -21,7 +21,7 @@ package org.apache.sedona.sql
 import org.apache.commons.io.FileUtils
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.execution.datasources.v2.BatchScanExec
-import org.apache.spark.sql.sedona_sql.io.netcdfmetadata.NetCdfMetadataScan
+import org.apache.spark.sql.sedona_sql.io.netcdfmetadata.{NetCdfMetadataPartitionReader, NetCdfMetadataScan}
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 import org.junit.Assert.assertEquals
 import org.scalatest.BeforeAndAfterAll
@@ -1003,6 +1003,19 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assert(crs.contains("Polar Stereographic"))
       assert(crs.contains("\"False easting\",2000.0,LENGTHUNIT[\"kilometre\",1000.0]"))
       assert(row.isNullAt(row.fieldIndex("srid")))
+    }
+
+    it("should return neither derived CRS nor SRID when WKT serialization fails") {
+      var sridEvaluated = false
+      val (crs, srid) = NetCdfMetadataPartitionReader.derivedCrs(
+        throw new IllegalArgumentException("WKT serialization failed"), {
+          sridEvaluated = true
+          Some(4326)
+        })
+
+      assert(crs == null)
+      assert(srid.isEmpty)
+      assert(!sridEvaluated)
     }
 
     it("should veto WGS 84 inference on a contradicting ellipsoid name") {
