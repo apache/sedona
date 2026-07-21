@@ -108,8 +108,8 @@ Each row describes one NetCDF file:
 | `format` | String | File type reported by the reader, e.g. `NetCDF` (classic) or `NetCDF-4` |
 | `width` | Int | Grid X size (length of the X/longitude dimension); null if the file has no gridded (rank ≥ 2) variable |
 | `height` | Int | Grid Y size (length of the Y/latitude dimension); null if the file has no gridded (rank ≥ 2) variable |
-| `srid` | Int | EPSG code resolved from the CRS WKT (or inferred for a plain `latitude_longitude` grid mapping); null if not resolvable |
-| `crs` | String | CRS in WKT form (WKT1 or WKT2, verbatim as declared by the file) from the CF `grid_mapping` variable (`crs_wkt`/`spatial_ref`) or the equivalent global attributes; null if absent |
+| `srid` | Int | EPSG code resolved from the CRS; null if not resolvable |
+| `crs` | String | CRS in WKT form: verbatim (WKT1 or WKT2) when the file declares `crs_wkt`/`spatial_ref`, otherwise WKT2 derived from the CF `grid_mapping` parameters; null when the file defines no CRS |
 | `geoTransform` | Struct | GDAL-style affine transform; null for irregular grids, and whenever `cornerCoordinates` is null (see below) |
 | `cornerCoordinates` | Struct | Spatial extent (minX/minY/maxX/maxY); null if the file has no gridded variable, its trailing dimensions have no 1-D coordinate variables, or a coordinate variable has fewer than two finite values |
 | `dimensions` | Array[Struct] | All dimensions in the file |
@@ -144,17 +144,28 @@ The CRS is looked up in this order:
    `"geographic: lat lon projected: x y"`), the mapping whose coordinate list
    matches the grid's (Y, X) coordinates is selected, so the reported CRS always
    corresponds to the coordinates used for the extent;
-2. the same attribute names as global attributes.
+2. the same attribute names as global attributes;
+3. the CF grid mapping parameters themselves (`grid_mapping_name` plus projection
+   and ellipsoid attributes, per CF conventions Appendix F), translated with
+   proj4sedona into a WKT2 `crs`.
 
-The WKT is reported verbatim in `crs`, and `srid` is the EPSG identity of that WKT
-(resolved with proj4sedona, so no GeoTools runtime is required). When the file
-carries no WKT at all, `srid = 4326` (with a null `crs`) is reported only for a
-`latitude_longitude` grid mapping that positively identifies the WGS 84 datum by
-name (`horizontal_datum_name` or `geographic_crs_name`) with a Greenwich prime
-meridian; ellipsoid parameters never qualify on their own (many datums share the
-WGS 84 ellipsoid) and disable the inference when they contradict it. Projected grid
-mappings defined only by CF parameters (e.g. `lambert_conformal_conic` without
-`crs_wkt`) are not translated — both columns stay null.
+Declared WKT is reported verbatim in `crs`, and `srid` is the EPSG identity of the
+CRS (resolved with proj4sedona, so no GeoTools runtime is required — e.g. a
+`universal_transverse_mercator` mapping with `utm_zone_number = 33` yields
+`srid = 32633`). The parameter translation covers `latitude_longitude`,
+`albers_conical_equal_area`, `azimuthal_equidistant`, `geostationary`,
+`lambert_azimuthal_equal_area`, `lambert_conformal_conic` (1SP/2SP),
+`lambert_cylindrical_equal_area`, `mercator`, `orthographic`,
+`polar_stereographic`, `sinusoidal`, `stereographic`, `transverse_mercator`, and
+netCDF-Java's `universal_transverse_mercator`, including ellipsoid/datum names and
+parameters, prime meridians, `towgs84`, and non-metre projection coordinate units
+(`false_easting`/`false_northing` are read in the x/y `units`, per CF). One
+conservative deviation from GDAL: a `latitude_longitude` mapping is translated only
+when its attributes positively identify the Earth figure (a resolvable datum or
+ellipsoid name, explicit figure parameters, or `towgs84`) — the WGS 84 assumption
+GDAL applies to a bare geographic mapping is never reported as if the file declared
+it, so both columns stay null in that case, as they do for grid mappings the
+translation does not cover (e.g. `rotated_latitude_longitude`).
 
 ### Using the CRS downstream
 

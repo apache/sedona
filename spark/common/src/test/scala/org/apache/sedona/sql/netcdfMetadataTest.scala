@@ -21,7 +21,7 @@ package org.apache.sedona.sql
 import org.apache.commons.io.FileUtils
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.execution.datasources.v2.BatchScanExec
-import org.apache.spark.sql.sedona_sql.io.netcdfmetadata.NetCdfMetadataScan
+import org.apache.spark.sql.sedona_sql.io.netcdfmetadata.{NetCdfMetadataPartitionReader, NetCdfMetadataScan}
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 import org.junit.Assert.assertEquals
 import org.scalatest.BeforeAndAfterAll
@@ -592,8 +592,9 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
         .select("srid", "crs")
         .first()
       assertEquals(4326, row.getAs[Int]("srid"))
-      // The file carries no CRS WKT, so the crs column stays null (faithful output)
-      assert(row.isNullAt(row.fieldIndex("crs")))
+      // The file carries no CRS WKT; crs carries the WKT derived from the grid mapping
+      // parameters (GH-3121)
+      assert(row.getAs[String]("crs").startsWith("GEOGCRS["))
     }
 
     it("should not infer an SRID from the latitude_longitude mapping name alone") {
@@ -610,15 +611,18 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
 
     it("should not report EPSG:4326 for a non-WGS datum on the WGS 84 ellipsoid") {
       // The crs variable declares horizontal_datum_name = "Costa_Rica_2005" with WGS 84
-      // ellipsoid parameters. The ellipsoid defines the Earth figure, not the datum, so the
-      // explicit non-WGS datum must disable the inference.
+      // ellipsoid parameters. The ellipsoid defines the Earth figure, not the datum, so
+      // srid must stay null; crs reports the parameter-defined figure with its datum
+      // unresolved, never an EPSG:4326 identity.
       val row = sparkSession.read
         .format("netcdf.metadata")
         .load(variantsDir + "test_gridmapping_nonwgs.nc")
         .select("srid", "crs")
         .first()
       assert(row.isNullAt(row.fieldIndex("srid")))
-      assert(row.isNullAt(row.fieldIndex("crs")))
+      val crs = row.getAs[String]("crs")
+      assert(crs.startsWith("GEOGCRS["))
+      assert(!crs.contains("4326"))
     }
 
     it("should select the grid mapping matching the grid coordinates in the expanded form") {
@@ -801,7 +805,7 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
         .select("srid", "crs")
         .first()
       assertEquals(4326, row.getAs[Int]("srid"))
-      assert(row.isNullAt(row.fieldIndex("crs")))
+      assert(row.getAs[String]("crs").startsWith("GEOGCRS["))
     }
 
     it("should validate explicitly named RS_FromNetCDF coordinates against their axes") {
@@ -957,6 +961,61 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       val gt = df.selectExpr("geoTransform.upperLeftX", "geoTransform.scaleX").first()
       assertEquals(250.0, gt.getAs[Double]("upperLeftX"), 1e-6)
       assertEquals(500.0, gt.getAs[Double]("scaleX"), 1e-6)
+    }
+
+    it("should translate CF grid mapping parameters to a CRS (GH-3121)") {
+      // The crs variable defines the CRS in the canonical CF form: grid_mapping_name =
+      // lambert_conformal_conic plus projection parameters, no crs_wkt.
+      val row = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_cf_lcc.nc")
+        .select("srid", "crs")
+        .first()
+      val crs = row.getAs[String]("crs")
+      assert(crs.startsWith("PROJCRS["))
+      assert(crs.contains("Lambert Conformal Conic"))
+      assert(crs.contains("\"Latitude of 1st standard parallel\",33"))
+      assert(crs.contains("\"Latitude of 2nd standard parallel\",45"))
+      // A parameter-defined LCC has no EPSG identity to derive
+      assert(row.isNullAt(row.fieldIndex("srid")))
+    }
+
+    it("should derive the EPSG code for a CDM universal_transverse_mercator mapping") {
+      // netCDF-Java convention: utm_zone_number = 33 (positive = northern hemisphere)
+      val row = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_cf_utm.nc")
+        .select("srid", "crs")
+        .first()
+      assertEquals(32633, row.getAs[Int]("srid"))
+      assert(row.getAs[String]("crs").contains("Transverse Mercator"))
+    }
+
+    it("should convert kilometre false origins when translating a CF grid mapping") {
+      // x/y units are km, so CF's false_easting/false_northing (2000) are kilometres;
+      // the derived CRS must carry them in its declared unit, not misread them as metres.
+      val row = sparkSession.read
+        .format("netcdf.metadata")
+        .load(variantsDir + "test_cf_ps_km.nc")
+        .select("srid", "crs")
+        .first()
+      val crs = row.getAs[String]("crs")
+      assert(crs.contains("Polar Stereographic"))
+      assert(crs.contains("\"False easting\",2000.0,LENGTHUNIT[\"kilometre\",1000.0]"))
+      assert(row.isNullAt(row.fieldIndex("srid")))
+    }
+
+    it("should return neither derived CRS nor SRID when WKT serialization fails") {
+      var sridEvaluated = false
+      val (crs, srid) = NetCdfMetadataPartitionReader.derivedCrs(
+        throw new IllegalArgumentException("WKT serialization failed"), {
+          sridEvaluated = true
+          Some(4326)
+        })
+
+      assert(crs == null)
+      assert(srid.isEmpty)
+      assert(!sridEvaluated)
     }
 
     it("should veto WGS 84 inference on a contradicting ellipsoid name") {
