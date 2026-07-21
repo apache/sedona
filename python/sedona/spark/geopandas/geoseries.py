@@ -1156,6 +1156,73 @@ class GeoSeries(GeoFrame, pspd.Series):
             returns_geom=True,
         )
 
+    def affine_transform(self, matrix) -> "GeoSeries":
+        invalid_matrix_types = (
+            str,
+            bytes,
+            bytearray,
+            dict,
+            set,
+            frozenset,
+            PandasOnSparkSeries,
+            PandasOnSparkDataFrame,
+            pspd.Index,
+        )
+        if (
+            isinstance(matrix, invalid_matrix_types)
+            or not hasattr(matrix, "__len__")
+            or not hasattr(matrix, "__iter__")
+        ):
+            raise TypeError("'matrix' must be a local ordered sequence")
+
+        try:
+            matrix = tuple(matrix)
+        except (TypeError, ValueError) as exc:
+            raise TypeError("'matrix' must be a local ordered sequence") from exc
+
+        if len(matrix) not in (6, 12):
+            raise ValueError("'matrix' expects either 6 or 12 coefficients")
+
+        coefficients = []
+        for coefficient in matrix:
+            if (
+                coefficient is None
+                or isinstance(coefficient, (str, bytes, bytearray))
+                or not np.isscalar(coefficient)
+            ):
+                raise TypeError("'matrix' must contain only numeric coefficients")
+            try:
+                coefficients.append(float(coefficient))
+            except (TypeError, ValueError, OverflowError) as exc:
+                raise TypeError(
+                    "'matrix' must contain only numeric coefficients"
+                ) from exc
+
+        if len(coefficients) == 6:
+            a, b, d, e, xoff, yoff = coefficients
+            spark_expr = stf.ST_Affine(self.spark.column, a, b, d, e, xoff, yoff)
+        else:
+            a, b, c, d, e, f, g, h, i, xoff, yoff, zoff = coefficients
+            # ST_Affine's Python wrapper lists the 2D coefficients first, so
+            # reorder the GeoPandas matrix before selecting its 3D overload.
+            spark_expr = stf.ST_Affine(
+                self.spark.column,
+                a,
+                b,
+                d,
+                e,
+                xoff,
+                yoff,
+                c,
+                f,
+                g,
+                h,
+                i,
+                zoff,
+            )
+
+        return self._query_geometry_column(spark_expr, returns_geom=True)
+
     def transform(self, transformation, include_z=False):
         # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
