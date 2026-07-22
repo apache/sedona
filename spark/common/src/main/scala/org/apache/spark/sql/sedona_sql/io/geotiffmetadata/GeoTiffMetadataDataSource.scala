@@ -24,12 +24,14 @@ import org.apache.hadoop.mapreduce.Job
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.catalog.Table
 import org.apache.spark.sql.connector.catalog.TableProvider
+import org.apache.spark.sql.execution.datasources.DataSource
 import org.apache.spark.sql.execution.datasources.FileFormat
 import org.apache.spark.sql.execution.datasources.OutputWriterFactory
 import org.apache.spark.sql.execution.datasources.v2.FileDataSourceV2
 import org.apache.spark.sql.sources.DataSourceRegister
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
+import org.apache.spark.util.HadoopFSUtils
 
 import scala.collection.JavaConverters._
 import scala.util.Try
@@ -107,12 +109,15 @@ class GeoTiffMetadataDataSource
 
   /**
    * Whether a load path stands for directories. A trailing `/` is treated as a directory
-   * assertion without any FS call; otherwise the path is expanded with Hadoop
-   * `FileSystem.globStatus` — which resolves plain paths and glob patterns alike — and must match
-   * at least one status, all of them directories. Returns `false` when the expansion fails or
-   * matches nothing (Spark reports the missing path itself during listing). Uses the same
-   * per-read options (e.g., `fs.s3a.*`) as the scan so detection works on the configured
-   * filesystem.
+   * assertion without any FS call. A glob pattern (unless `__globPaths__` disables expansion,
+   * exactly as `FileTable` honors it) is expanded with Hadoop `FileSystem.globStatus` and must
+   * match at least one status, all of them directories — ignoring entries Spark's own listing
+   * discards (`_SUCCESS`, dotfiles, `*._COPYING_`), so a marker file next to the matched
+   * directories does not sway the classification. Anything else is probed literally with
+   * `getFileStatus`; the hidden-name rule never applies here, because Spark exempts explicitly
+   * given roots from it. Returns `false` when the probe fails or a glob matches nothing (Spark
+   * reports the missing path itself during listing). Uses the same per-read options (e.g.,
+   * `fs.s3a.*`) as the scan so detection works on the configured filesystem.
    */
   private def isDirectoryRoot(pathStr: String, options: CaseInsensitiveStringMap): Boolean = {
     if (pathStr.endsWith("/")) return true
@@ -121,10 +126,24 @@ class GeoTiffMetadataDataSource
         sparkSession.sessionState.newHadoopConfWithOptions(options.asScala.toMap)
       val path = new Path(pathStr)
       val fs = path.getFileSystem(hadoopConf)
-      val matches = fs.globStatus(path)
-      matches != null && matches.nonEmpty && matches.forall(_.isDirectory)
+      if (globbingEnabled(options) && isGlobPath(path)) {
+        val matches = Option(fs.globStatus(path))
+          .getOrElse(Array.empty[FileStatus])
+          .filterNot(m => HadoopFSUtils.shouldFilterOutPathName(m.getPath.getName))
+        matches.nonEmpty && matches.forall(_.isDirectory)
+      } else {
+        fs.getFileStatus(path).isDirectory
+      }
     }.getOrElse(false)
   }
+
+  /** Mirrors `FileTable.globPaths`: expansion is on unless `__globPaths__` is set to non-true. */
+  private def globbingEnabled(options: CaseInsensitiveStringMap): Boolean =
+    Option(options.get(DataSource.GLOB_PATHS_KEY)).forall(_ == "true")
+
+  /** The wildcard set of `SparkHadoopUtil.isGlobPath`, which governs Spark's own expansion. */
+  private def isGlobPath(path: Path): Boolean =
+    path.toString.exists("{}[]*?\\".contains(_))
 }
 
 /**
