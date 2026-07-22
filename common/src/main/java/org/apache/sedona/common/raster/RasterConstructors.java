@@ -131,6 +131,15 @@ public class RasterConstructors {
       boolean useGeometryExtent)
       throws FactoryException {
 
+    // Reject a noDataValue that cannot be represented in the target pixel type rather than
+    // silently coercing it: writing an out-of-range or fractional value into an integer sample
+    // stores a different number than the value recorded as the band's nodata metadata, so the
+    // background would read back as data. Validating once here keeps the background fill and the
+    // nodata metadata below using the same value.
+    if (noDataValue != null) {
+      noDataValue = RasterUtils.assertNoDataValueRepresentable(noDataValue, pixelType);
+    }
+
     List<Object> objects =
         Rasterization.rasterize(
             geom, raster, pixelType, value, useGeometryExtent, allTouched, noDataValue);

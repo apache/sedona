@@ -465,6 +465,71 @@ public class RasterConstructorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testAsRasterRejectsNonRepresentableNoDataValue()
+      throws FactoryException, ParseException {
+    // An unsigned 8-bit band ('B') cannot store a negative or >255 nodata. Silently coercing
+    // -1.0 -> 255 or 300.0 -> 44 would leave the background reading back as data while the
+    // recorded nodata metadata disagreed, so RS_AsRaster rejects such a value up front.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    IllegalArgumentException negative =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, "B", false, 1d, -1d, false));
+    Assert.assertTrue(negative.getMessage(), negative.getMessage().contains("-1.0"));
+    Assert.assertTrue(negative.getMessage(), negative.getMessage().contains("'B'"));
+
+    IllegalArgumentException tooLarge =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, "B", false, 1d, 300d, false));
+    Assert.assertTrue(tooLarge.getMessage(), tooLarge.getMessage().contains("300.0"));
+    Assert.assertTrue(tooLarge.getMessage(), tooLarge.getMessage().contains("'B'"));
+
+    // A fractional nodata cannot be stored in a signed 32-bit integer band either.
+    IllegalArgumentException fractional =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, "I", false, 1d, 1.5d, false));
+    Assert.assertTrue(fractional.getMessage(), fractional.getMessage().contains("1.5"));
+    Assert.assertTrue(fractional.getMessage(), fractional.getMessage().contains("'I'"));
+  }
+
+  @Test
+  public void testAsRasterRepresentableNoDataValueOnIntegerBand()
+      throws FactoryException, ParseException {
+    // A representable nodata (9 fits an unsigned 8-bit band) still fills the uncovered pixels and
+    // is recorded as the band's nodata, mirroring testAsRasterBackgroundIsNoDataValue on a double
+    // band. The exact-equality reads confirm no coercion happened on the integer band.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5), "
+                + "(104.5 497.5, 109.5 497.5, 109.5 491.5, 104.5 491.5, 104.5 497.5))",
+            0);
+
+    GridCoverage2D rasterized =
+        RasterConstructors.asRaster(geom, raster, "B", false, 1d, 9d, false);
+    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+    double[] expected =
+        new double[] {
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1, 1, 1, 1, 1
+        };
+    assertArrayEquals(expected, actual, 0.0d);
+    assertEquals(9d, RasterUtils.getNoDataValue(rasterized.getSampleDimension(0)), 0.0d);
+  }
+
+  @Test
   public void testAsRasterWithNonSquarePixels() throws FactoryException, ParseException {
     // Pixels are 2 world units wide and 3 tall, so the x-intercept math cannot
     // silently conflate pixel-space and world-space slopes the way square

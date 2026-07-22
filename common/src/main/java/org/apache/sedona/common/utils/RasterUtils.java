@@ -648,6 +648,75 @@ public class RasterUtils {
   }
 
   /**
+   * Verifies that {@code noDataValue} can be stored in the pixel type named by {@code pixelType}
+   * without silent coercion, returning it unchanged when it can. Writing a value that is out of the
+   * pixel type's range, or fractional for an integer pixel type, coerces the stored sample to a
+   * different number than the value recorded as the band's nodata metadata (for example -1.0 or
+   * 300.0 wraps to 255 or 44 in an unsigned 8-bit band), so the background would then read back as
+   * data rather than nodata. Such a value is a correctness violation, not a per-row data condition,
+   * so this rejects it with an {@link IllegalArgumentException} instead of coercing.
+   *
+   * @param noDataValue the candidate nodata / background value
+   * @param pixelType a Sedona pixel type string accepted by {@link #getDataTypeCode(String)} (for
+   *     example {@code "B"}, {@code "I"}, {@code "D"})
+   * @return {@code noDataValue}, unchanged, when it is representable in the pixel type
+   * @throws IllegalArgumentException when {@code noDataValue} cannot be represented in the pixel
+   *     type
+   */
+  public static double assertNoDataValueRepresentable(double noDataValue, String pixelType) {
+    int dataTypeCode = getDataTypeCode(pixelType);
+    long min;
+    long max;
+    String description;
+    switch (dataTypeCode) {
+      case DataBuffer.TYPE_BYTE:
+        min = 0;
+        max = 255;
+        description = "unsigned 8-bit";
+        break;
+      case DataBuffer.TYPE_USHORT:
+        min = 0;
+        max = 65535;
+        description = "unsigned 16-bit";
+        break;
+      case DataBuffer.TYPE_SHORT:
+        min = Short.MIN_VALUE;
+        max = Short.MAX_VALUE;
+        description = "signed 16-bit";
+        break;
+      case DataBuffer.TYPE_INT:
+        min = Integer.MIN_VALUE;
+        max = Integer.MAX_VALUE;
+        description = "signed 32-bit";
+        break;
+      case DataBuffer.TYPE_FLOAT:
+        // 32-bit float represents NaN and the infinities; reject only a finite value whose
+        // magnitude overflows the float range (it would silently become an infinity). Rounding a
+        // value to the nearest float is the inherent, expected behavior of a float band.
+        if (Double.isFinite(noDataValue) && Math.abs(noDataValue) > Float.MAX_VALUE) {
+          throw new IllegalArgumentException(
+              String.format(
+                  "noDataValue %s is not representable in pixel type '%s' (32-bit float, valid range %s..%s)",
+                  noDataValue, pixelType, -Float.MAX_VALUE, Float.MAX_VALUE));
+        }
+        return noDataValue;
+      case DataBuffer.TYPE_DOUBLE:
+      default:
+        // 64-bit float represents every double value; nothing to reject.
+        return noDataValue;
+    }
+
+    // Integer pixel types: reject out-of-range and fractional values (Math.rint also rejects NaN).
+    if (noDataValue < min || noDataValue > max || noDataValue != Math.rint(noDataValue)) {
+      throw new IllegalArgumentException(
+          String.format(
+              "noDataValue %s is not representable in pixel type '%s' (%s integer, valid range %d..%d)",
+              noDataValue, pixelType, description, min, max));
+    }
+    return noDataValue;
+  }
+
+  /**
    * This is an experimental method as it does not copy the original raster properties (e.g. color
    * model, sample model, etc.) moved from MapAlgebra.java TODO: Copy the original raster properties
    *
