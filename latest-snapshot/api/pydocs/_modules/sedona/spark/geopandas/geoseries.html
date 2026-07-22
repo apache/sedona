@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -1473,6 +1472,103 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                 <span class="s2">&quot;origin must be &#39;center&#39;, &#39;centroid&#39;, a Point, or a two-element tuple/list&quot;</span>
             <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span><span class="n">spark_expr</span><span class="p">,</span> <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeoSeries.scale"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.scale">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xfact</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">yfact</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">zfact</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">normalize_factor</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span>
+                <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">))</span>
+                <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; must be a numeric scalar&quot;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">OverflowError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; must be a numeric scalar&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+        <span class="n">xfact</span> <span class="o">=</span> <span class="n">normalize_factor</span><span class="p">(</span><span class="n">xfact</span><span class="p">,</span> <span class="s2">&quot;xfact&quot;</span><span class="p">)</span>
+        <span class="n">yfact</span> <span class="o">=</span> <span class="n">normalize_factor</span><span class="p">(</span><span class="n">yfact</span><span class="p">,</span> <span class="s2">&quot;yfact&quot;</span><span class="p">)</span>
+        <span class="n">zfact</span> <span class="o">=</span> <span class="n">normalize_factor</span><span class="p">(</span><span class="n">zfact</span><span class="p">,</span> <span class="s2">&quot;zfact&quot;</span><span class="p">)</span>
+
+        <span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">origin</span> <span class="o">==</span> <span class="s2">&quot;center&quot;</span><span class="p">:</span>
+                <span class="n">origin_geometry</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Centroid</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_Envelope</span><span class="p">(</span><span class="n">geometry</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">origin</span> <span class="o">==</span> <span class="s2">&quot;centroid&quot;</span><span class="p">:</span>
+                <span class="n">origin_geometry</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Centroid</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;origin must be &#39;center&#39;, &#39;centroid&#39;, a Point, or a &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;two- or three-element tuple, got </span><span class="si">{</span><span class="n">origin</span><span class="si">!r}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="n">origin_x</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_X</span><span class="p">(</span><span class="n">origin_geometry</span><span class="p">)</span>
+            <span class="n">origin_y</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Y</span><span class="p">(</span><span class="n">origin_geometry</span><span class="p">)</span>
+            <span class="n">origin_z</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">origin</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;origin&#39; tuple must contain two or three coordinates&quot;</span><span class="p">)</span>
+            <span class="n">coordinates</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">coordinate</span> <span class="ow">in</span> <span class="n">origin</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">coordinate</span> <span class="ow">is</span> <span class="kc">None</span>
+                    <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coordinate</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">))</span>
+                    <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                        <span class="s2">&quot;&#39;origin&#39; tuple must contain only numeric coordinates&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">coordinates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">coordinate</span><span class="p">))</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">OverflowError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                        <span class="s2">&quot;&#39;origin&#39; tuple must contain only numeric coordinates&quot;</span>
+                    <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">coordinates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+            <span class="n">origin_x</span><span class="p">,</span> <span class="n">origin_y</span><span class="p">,</span> <span class="n">origin_z</span> <span class="o">=</span> <span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">coordinates</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="n">shapely</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">Point</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">origin</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;origin&#39; Point must be a non-empty 2D or 3D Point&quot;</span><span class="p">)</span>
+            <span class="n">coordinates</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">origin</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">origin</span><span class="o">.</span><span class="n">has_z</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;origin&#39; Point must be a non-empty 2D or 3D Point&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">coordinates</span> <span class="o">+=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,)</span>
+            <span class="n">origin_x</span><span class="p">,</span> <span class="n">origin_y</span><span class="p">,</span> <span class="n">origin_z</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">coordinates</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;origin must be &#39;center&#39;, &#39;centroid&#39;, a Point, or a &quot;</span>
+                <span class="s2">&quot;two- or three-element tuple&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">xoff</span> <span class="o">=</span> <span class="n">origin_x</span> <span class="o">-</span> <span class="n">origin_x</span> <span class="o">*</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">xfact</span><span class="p">)</span>
+        <span class="n">yoff</span> <span class="o">=</span> <span class="n">origin_y</span> <span class="o">-</span> <span class="n">origin_y</span> <span class="o">*</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">yfact</span><span class="p">)</span>
+        <span class="n">zoff</span> <span class="o">=</span> <span class="n">origin_z</span> <span class="o">-</span> <span class="n">origin_z</span> <span class="o">*</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">zfact</span><span class="p">)</span>
+
+        <span class="c1"># ST_Affine&#39;s Python wrapper order is geometry, a, b, d, e, xoff,</span>
+        <span class="c1"># yoff, c, f, g, h, i, zoff. Use its 3D overload for zfact while</span>
+        <span class="c1"># keeping 2D input geometries 2D.</span>
+        <span class="n">scaled</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Affine</span><span class="p">(</span>
+            <span class="n">geometry</span><span class="p">,</span>
+            <span class="n">xfact</span><span class="p">,</span>
+            <span class="mf">0.0</span><span class="p">,</span>
+            <span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">yfact</span><span class="p">,</span>
+            <span class="n">xoff</span><span class="p">,</span>
+            <span class="n">yoff</span><span class="p">,</span>
+            <span class="mf">0.0</span><span class="p">,</span>
+            <span class="mf">0.0</span><span class="p">,</span>
+            <span class="mf">0.0</span><span class="p">,</span>
+            <span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">zfact</span><span class="p">,</span>
+            <span class="n">zoff</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_IsEmpty</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span> <span class="n">geometry</span><span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">scaled</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span><span class="n">spark_expr</span><span class="p">,</span> <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.force_2d"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.force_2d">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">force_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
