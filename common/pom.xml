@@ -186,12 +186,27 @@
                                     <include>org.codehaus.janino:*</include>
                                 </includes>
                             </artifactSet>
+                            <transformers>
+                                <!-- Rewrite META-INF/services descriptors (e.g. the Janino
+                                     org.codehaus.commons.compiler.ICompilerFactory provider) to the
+                                     relocated class names so the shaded compiler is discoverable via
+                                     SPI. Without this, CompilerFactoryFactory.getDefaultCompilerFactory()
+                                     throws ServiceConfigurationError against the shaded artifact. -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                            </transformers>
                             <relocations>
                                 <relocation>
                                     <pattern>it.geosolutions.jaiext.jiffle</pattern>
                                     <shadedPattern>org.apache.sedona.shaded.jiffle</shadedPattern>
                                     <excludes>
                                         <exclude>it.geosolutions.jaiext.jiffle.runtime.*</exclude>
+                                        <!-- Keep the maxIterations JVM system-property key at its
+                                             upstream name so it matches the documented value on the
+                                             shaded artifact. Shade otherwise rewrites this string
+                                             literal (it has no trailing package segment excluded by
+                                             the pattern above) to the shaded prefix, silently
+                                             disabling the documented property. -->
+                                        <exclude>it.geosolutions.jaiext.jiffle.maxIterations</exclude>
                                     </excludes>
                                 </relocation>
                                 <relocation>
