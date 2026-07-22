@@ -399,6 +399,40 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       assertEquals(2L, df.count())
     }
 
+    it("should keep the defaults when a glob matches a hidden-named directory") {
+      // Spark's listing drops hidden-named files but traverses a directory root regardless
+      // of its name (only children are name-checked), so /root/_* matching _staging/ must
+      // still receive the directory-scan defaults.
+      val root = new File(tempDir, "hiddenDirGlob")
+      val staging = new File(root, "_staging")
+      val sub = new File(staging, "sub")
+      sub.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(staging, "x.tiff"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(sub, "y.tiff"))
+
+      val df = sparkSession.read.format("geotiff.metadata").load(root.getAbsolutePath + "/_*")
+      assertEquals(2L, df.count())
+    }
+
+    it("should not let a glob matching only ignored files veto another root's defaults") {
+      // The first glob matches only a _SUCCESS marker, which Spark's listing discards —
+      // its visible contribution is empty, so it must not flip the all-directories
+      // classification that gives the second root its recursive scan.
+      val root = new File(tempDir, "ignoredOnlyGlob")
+      val markerDir = new File(root, "markers")
+      val dataSub = new File(root, "data/sub")
+      markerDir.mkdirs()
+      dataSub.mkdirs()
+      FileUtils.writeStringToFile(new File(markerDir, "_SUCCESS"), "", "UTF-8")
+      FileUtils.copyFile(new File(singleFileLocation), new File(root, "data/x.tiff"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(dataSub, "y.tiff"))
+
+      val df = sparkSession.read
+        .format("geotiff.metadata")
+        .load(markerDir.getAbsolutePath + "/*", new File(root, "data").getAbsolutePath)
+      assertEquals(2L, df.count())
+    }
+
     it("should apply the directory defaults to an explicitly loaded underscore directory") {
       // Spark's hidden-name rule applies to listing entries, never to explicitly given
       // roots — so probing a literal _staging root must not filter it either.

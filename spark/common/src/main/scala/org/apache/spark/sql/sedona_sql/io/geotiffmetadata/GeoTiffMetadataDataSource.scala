@@ -111,13 +111,16 @@ class GeoTiffMetadataDataSource
    * Whether a load path stands for directories. A trailing `/` is treated as a directory
    * assertion without any FS call. A glob pattern (unless `__globPaths__` disables expansion,
    * exactly as `FileTable` honors it) is expanded with Hadoop `FileSystem.globStatus` and must
-   * match at least one status, all of them directories — ignoring entries Spark's own listing
-   * discards (`_SUCCESS`, dotfiles, `*._COPYING_`), so a marker file next to the matched
-   * directories does not sway the classification. Anything else is probed literally with
-   * `getFileStatus`; the hidden-name rule never applies here, because Spark exempts explicitly
-   * given roots from it. Returns `false` when the probe fails or a glob matches nothing (Spark
-   * reports the missing path itself during listing). Uses the same per-read options (e.g.,
-   * `fs.s3a.*`) as the scan so detection works on the configured filesystem.
+   * match at least one status, with every match visible to Spark's scan being a directory.
+   * Hidden-named file matches (`_SUCCESS`, dotfiles, `*._COPYING_`) are invisible — Spark's
+   * listing discards them — so they neither sway the classification nor, when a glob matches
+   * nothing else, veto the defaults earned by the remaining roots; hidden-named DIRECTORY matches
+   * count normally, because Spark traverses a directory root regardless of its name. Anything
+   * else is probed literally with `getFileStatus`; the hidden-name rule never applies here,
+   * because Spark exempts explicitly given roots from it. Returns `false` when the probe fails or
+   * a glob matches nothing (Spark reports the missing path itself during listing). Uses the same
+   * per-read options (e.g., `fs.s3a.*`) as the scan so detection works on the configured
+   * filesystem.
    */
   private def isDirectoryRoot(pathStr: String, options: CaseInsensitiveStringMap): Boolean = {
     if (pathStr.endsWith("/")) return true
@@ -127,10 +130,18 @@ class GeoTiffMetadataDataSource
       val path = new Path(pathStr)
       val fs = path.getFileSystem(hadoopConf)
       if (globbingEnabled(options) && isGlobPath(path)) {
-        val matches = Option(fs.globStatus(path))
-          .getOrElse(Array.empty[FileStatus])
-          .filterNot(m => HadoopFSUtils.shouldFilterOutPathName(m.getPath.getName))
-        matches.nonEmpty && matches.forall(_.isDirectory)
+        val matches = Option(fs.globStatus(path)).getOrElse(Array.empty[FileStatus])
+        // An unmatched glob is not a directory root (Spark itself reports the missing
+        // path). Otherwise classify by what Spark's listing will actually read: it drops
+        // hidden-named FILE matches (their own name comes back from listStatus and is
+        // name-checked) but traverses a directory root regardless of its name — only the
+        // children are name-checked. Hidden files are therefore invisible to the scan,
+        // and a glob whose visible contribution is empty (e.g. matching only a _SUCCESS
+        // marker) must not veto the defaults earned by the other roots.
+        matches.nonEmpty && matches
+          .filterNot(m =>
+            !m.isDirectory && HadoopFSUtils.shouldFilterOutPathName(m.getPath.getName))
+          .forall(_.isDirectory)
       } else {
         fs.getFileStatus(path).isDirectory
       }
