@@ -1479,6 +1479,52 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("rotate", self, angle, origin, use_radians)
 
+    def scale(self, xfact=1.0, yfact=1.0, zfact=1.0, origin="center"):
+        """Return a ``GeoSeries`` with scaled geometries.
+
+        Each geometry is scaled independently around its origin. The default
+        origin is the center of the geometry's bounding box.
+
+        Parameters
+        ----------
+        xfact : float, default 1.0
+            Scaling factor for the x dimension.
+        yfact : float, default 1.0
+            Scaling factor for the y dimension.
+        zfact : float, default 1.0
+            Scaling factor for the z dimension.
+        origin : {"center", "centroid"}, Point, or tuple, default "center"
+            The scaling origin. ``"center"`` uses each geometry's bounding-box
+            center and ``"centroid"`` uses each geometry's centroid. A 2D or
+            3D Shapely Point or coordinate tuple may also be supplied. The z
+            origin is 0 for keyword and 2D origins.
+
+        Returns
+        -------
+        GeoSeries
+            The scaled geometries.
+
+        Notes
+        -----
+        Results for mixed 2D/3D ``GeometryCollection`` objects, M or ZM
+        ordinates, NaN Z coordinates, non-finite factors, and non-finite
+        origin coordinates may differ from GeoPandas because Sedona uses JTS
+        while GeoPandas uses Shapely. This method applies Sedona's distributed
+        semantics and does not materialize geometries locally to emulate
+        Shapely.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries([Point(1, 2), Point(-1, -2)])
+        >>> s.scale(xfact=2, yfact=3, origin=(0, 0))
+        0      POINT (2 6)
+        1    POINT (-2 -6)
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column("scale", self, xfact, yfact, zfact, origin)
+
     def force_2d(self):
         """Force the dimensionality of a geometry to 2D.
 
