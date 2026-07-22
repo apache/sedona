@@ -1850,8 +1850,11 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(3229013.0, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'count', true, true)").first().get(0)
-      // allTouched now selects one boundary pixel the old sampler missed
-      assertEquals(14649.0, actual)
+      // Every polygon vertex lands exactly on a grid lattice point and three edges run along grid
+      // lines, so the direction-independent corner-crossing traversal now burns those corner-touched
+      // boundary pixels deterministically (a documented superset for all-touched). This adds 11
+      // valid pixels over the pre-fix count of 14649.
+      assertEquals(14660.0, actual)
 
       actual =
         df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', false, false)").first().get(0)
