@@ -1071,6 +1071,61 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(non_empty).rotate(angle, **origin_kwargs)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+    @pytest.mark.parametrize(
+        "xfact,yfact",
+        [
+            (2.0, 0.5),
+            (-1.5, -0.5),
+            (0.0, 1.0),
+        ],
+        ids=["positive", "negative", "zero"],
+    )
+    @pytest.mark.parametrize(
+        "origin",
+        ["center", "centroid", (2.0, -1.0)],
+        ids=["center", "centroid", "explicit"],
+    )
+    def test_scale_2d(self, xfact, yfact, origin):
+        geoms = [
+            self.points[2],
+            self.linestrings[2],
+            self.polygons[2],
+            self.multipoints[2],
+            self.multilinestrings[2],
+            self.multipolygons[1],
+            self.geomcollection[1],
+        ]
+
+        sgpd_result = GeoSeries(geoms).scale(xfact=xfact, yfact=yfact, origin=origin)
+        gpd_result = gpd.GeoSeries(geoms).scale(xfact=xfact, yfact=yfact, origin=origin)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_scale_3d(self):
+        polygon = Polygon([(0, 0, 1), (2, 0, 2), (1, 2, 4), (0, 0, 1)])
+        geoms = [
+            Point(1, 2, 3),
+            LineString([(0, 0, 1), (2, 1, 4)]),
+            polygon,
+            MultiPoint([(0, 0, 1), (1, 2, 3)]),
+            MultiLineString([[(0, 0, 1), (2, 1, 3)], [(1, -1, 2), (3, 2, 4)]]),
+            MultiPolygon([polygon]),
+            GeometryCollection(
+                [Point(1, 2, 3), LineString([(0, 0, 1), (2, 1, 4)]), polygon]
+            ),
+        ]
+        scale_kwargs = {
+            "xfact": 2.0,
+            "yfact": -1.0,
+            "zfact": 0.0,
+            "origin": (1.0, -2.0, 3.0),
+        }
+
+        sgpd_result = GeoSeries(geoms).scale(**scale_kwargs)
+        gpd_result = gpd.GeoSeries(geoms).scale(**scale_kwargs)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_force_2d(self):
         # force_2d was added from geopandas 1.0.0
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
