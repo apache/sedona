@@ -1176,6 +1176,14 @@ class GeoSeries(GeoFrame, pspd.Series):
             raise TypeError("'matrix' must be a local ordered sequence")
 
         try:
+            matrix_length = len(matrix)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise TypeError("'matrix' must be a local ordered sequence") from exc
+
+        if matrix_length not in (6, 12):
+            raise ValueError("'matrix' expects either 6 or 12 coefficients")
+
+        try:
             matrix = tuple(matrix)
         except (TypeError, ValueError) as exc:
             raise TypeError("'matrix' must be a local ordered sequence") from exc

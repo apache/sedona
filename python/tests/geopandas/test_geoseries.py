@@ -1991,6 +1991,26 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
     def test_affine_transform_validates_matrix(self):
         source = GeoSeries([Point(1, 2)])
 
+        class OversizedSequence:
+            def __len__(self):
+                return 10**9
+
+            def __iter__(self):
+                raise AssertionError("invalid-length matrices must not be iterated")
+
+        with pytest.raises(ValueError, match="either 6 or 12 coefficients"):
+            source.affine_transform(OversizedSequence())
+
+        class InconsistentSequence:
+            def __len__(self):
+                return 6
+
+            def __iter__(self):
+                return iter([1] * 7)
+
+        with pytest.raises(ValueError, match="either 6 or 12 coefficients"):
+            source.affine_transform(InconsistentSequence())
+
         for matrix in ([1] * 5, [1] * 7, [1] * 11, [1] * 13):
             with pytest.raises(ValueError):
                 source.affine_transform(matrix)
