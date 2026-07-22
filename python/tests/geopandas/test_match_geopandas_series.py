@@ -992,6 +992,60 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         gpd_result = gpd.GeoSeries(geoms).segmentize(psser.to_pandas())
         self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+    @pytest.mark.parametrize(
+        "matrix",
+        [
+            (1.0, 0.0, 0.0, 1.0, 0.0, 0.0),
+            (1, 0, 0, 1, 3, -2),
+            (2.0, 0.0, 0.0, 0.5, 0.0, 0.0),
+            (0.0, -1.0, 1.0, 0.0, 0.0, 0.0),
+            (1.0, 0.5, -0.25, 1.0, 0.0, 0.0),
+        ],
+        ids=["identity", "translation", "scale", "rotation", "shear"],
+    )
+    def test_affine_transform_2d(self, matrix):
+        geoms = [
+            self.points[2],
+            self.linestrings[2],
+            self.polygons[2],
+            self.multipoints[2],
+            self.multilinestrings[2],
+            self.multipolygons[1],
+            self.geomcollection[1],
+        ]
+
+        sgpd_result = GeoSeries(geoms).affine_transform(matrix)
+        gpd_result = gpd.GeoSeries(geoms).affine_transform(matrix)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_affine_transform_3d(self):
+        geoms = [
+            Point(1, 2, 3),
+            LineString([(0, 0, 1), (2, 1, 4)]),
+            Polygon([(0, 0, 1), (2, 0, 2), (1, 1, 3), (0, 0, 1)]),
+            MultiPoint([(0, 0, 1), (1, 2, 3)]),
+        ]
+        matrix = [
+            1.0,
+            0.5,
+            0.25,
+            -0.5,
+            2.0,
+            0.75,
+            0.1,
+            -0.2,
+            1.5,
+            3.0,
+            -4.0,
+            5.0,
+        ]
+
+        sgpd_result = GeoSeries(geoms).affine_transform(matrix)
+        gpd_result = gpd.GeoSeries(geoms).affine_transform(matrix)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_transform(self):
         pass
 

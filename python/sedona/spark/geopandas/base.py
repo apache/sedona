@@ -1375,6 +1375,56 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("segmentize", self, max_segment_length)
 
+    def affine_transform(self, matrix):
+        """Return a ``GeoSeries`` with transformed geometries.
+
+        The coefficient matrix is provided as an ordered sequence with 6 or
+        12 items for 2D or 3D transformations, respectively.
+
+        For a 2D affine transformation, ``matrix`` is
+        ``[a, b, d, e, xoff, yoff]`` and the transformed coordinates are::
+
+            x' = a * x + b * y + xoff
+            y' = d * x + e * y + yoff
+
+        For a 3D affine transformation, ``matrix`` is
+        ``[a, b, c, d, e, f, g, h, i, xoff, yoff, zoff]`` and the transformed
+        coordinates are::
+
+            x' = a * x + b * y + c * z + xoff
+            y' = d * x + e * y + f * z + yoff
+            z' = g * x + h * y + i * z + zoff
+
+        Parameters
+        ----------
+        matrix : sequence of float
+            Six or twelve coefficients for a 2D or 3D affine transformation.
+
+        Returns
+        -------
+        GeoSeries
+            The transformed geometries.
+
+        Notes
+        -----
+        Results for mixed 2D/3D ``GeometryCollection`` objects, M or ZM
+        ordinates, and NaN Z coordinates may differ from GeoPandas because
+        Sedona uses JTS while GeoPandas uses Shapely. This method applies
+        Sedona's distributed semantics and does not materialize geometries
+        locally to emulate Shapely.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, LineString
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries([Point(1, 1), LineString([(1, -1), (1, 0)])])
+        >>> s.affine_transform([0, 1, 1, 0, 0, 0])
+        0                   POINT (1 1)
+        1    LINESTRING (-1 1, 0 1)
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column("affine_transform", self, matrix)
+
     # def transform(self, transformation, include_z=False):
     #     raise NotImplementedError("This method is not implemented yet.")
 

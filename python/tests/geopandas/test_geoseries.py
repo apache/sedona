@@ -23,6 +23,7 @@ import geopandas as gpd
 import pyspark.pandas as ps
 import sedona.spark.geopandas as sgpd
 from sedona.spark.geopandas import GeoSeries, GeoDataFrame
+from sedona.spark.sql import st_functions as stf
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from shapely import wkt
 from shapely.geometry import (
@@ -1886,6 +1887,145 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ],
         )
         self.check_sgpd_equals_gpd(result, expected)
+
+    def test_affine_transform_preserves_metadata_and_delegates(self):
+        geoms = [
+            Point(1, 2),
+            LineString([(0, 0), (2, 1)]),
+            Polygon([(0, 0), (2, 0), (1, 1), (0, 0)]),
+            MultiPoint([(0, 0), (1, 2)]),
+            Polygon(),
+            None,
+        ]
+        index = pd.Index(
+            ["point", "line", "polygon", "multipoint", "empty", "null"],
+            name="feature_id",
+        )
+        matrix = [2, 1, -1, 3, 4, -5]
+        source = GeoSeries(geoms, index=index, crs="EPSG:3857")
+        expected = gpd.GeoSeries(geoms, index=index, crs="EPSG:3857").affine_transform(
+            matrix
+        )
+
+        result = source.affine_transform(matrix)
+
+        self.check_sgpd_equals_gpd(result, expected)
+        assert result.crs == source.crs == expected.crs
+        actual = result.to_geopandas()
+        assert actual.loc["empty"].is_empty
+        assert actual.loc["empty"].geom_type == "Polygon"
+        assert actual.loc["null"] is None
+
+        srids = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid")
+        ).collect()
+        assert {row.srid for row in srids if row.srid is not None} == {3857}
+
+        # GeoDataFrame inherits the base geometry-column delegation.
+        frame_result = source.to_geoframe().affine_transform(matrix)
+        assert isinstance(frame_result, GeoSeries)
+        self.check_sgpd_equals_gpd(frame_result, expected)
+        assert frame_result.crs == source.crs
+
+    def test_affine_transform_3d_coefficient_order(self):
+        source = GeoSeries([wkt.loads("POINT Z (1 2 3)")], crs="EPSG:4326")
+        result = source.affine_transform(range(1, 13))
+
+        point = result.to_geopandas().iloc[0]
+        assert tuple(point.coords[0]) == pytest.approx((24.0, 43.0, 62.0))
+        srid = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid")
+        ).first()
+        assert srid.srid == 4326
+        assert result.crs == source.crs
+
+    def test_affine_transform_dimension_handling(self):
+        z_geoms = [
+            Point(1, 2, 3),
+            LineString([(0, 0, 4), (2, 1, 5)]),
+            Polygon([(0, 0, 1), (2, 0, 2), (1, 1, 3), (0, 0, 1)]),
+        ]
+        matrix_2d = [2, 0, 0, 3, 4, -5]
+        result_2d_on_z = GeoSeries(z_geoms).affine_transform(matrix_2d)
+        expected_2d_on_z = gpd.GeoSeries(z_geoms).affine_transform(matrix_2d)
+        self.check_sgpd_equals_gpd(result_2d_on_z, expected_2d_on_z)
+
+        actual_2d_on_z = result_2d_on_z.to_geopandas()
+        assert all(geom.has_z for geom in actual_2d_on_z)
+        assert actual_2d_on_z.iloc[0].z == pytest.approx(3.0)
+        assert [coord[2] for coord in actual_2d_on_z.iloc[1].coords] == [4.0, 5.0]
+
+        xy_geoms = [
+            Point(1, 2),
+            LineString([(0, 0), (2, 1)]),
+            Polygon([(0, 0), (2, 0), (1, 1), (0, 0)]),
+        ]
+        matrix_3d = [
+            1.0,
+            0.5,
+            0.25,
+            -0.5,
+            2.0,
+            0.75,
+            0.1,
+            -0.2,
+            1.5,
+            3.0,
+            -4.0,
+            5.0,
+        ]
+        result_3d_on_2d = GeoSeries(xy_geoms).affine_transform(matrix_3d)
+        expected_3d_on_2d = gpd.GeoSeries(xy_geoms).affine_transform(matrix_3d)
+        self.check_sgpd_equals_gpd(result_3d_on_2d, expected_3d_on_2d)
+        assert not any(geom.has_z for geom in result_3d_on_2d.to_geopandas())
+
+        special_geoms = [Polygon(), None]
+        result_3d_special = GeoSeries(special_geoms).affine_transform(matrix_3d)
+        expected_3d_special = gpd.GeoSeries(special_geoms).affine_transform(matrix_3d)
+        self.check_sgpd_equals_gpd(result_3d_special, expected_3d_special)
+        actual_3d_special = result_3d_special.to_geopandas()
+        assert actual_3d_special.iloc[0].is_empty
+        assert actual_3d_special.iloc[0].geom_type == "Polygon"
+        assert actual_3d_special.iloc[1] is None
+
+    def test_affine_transform_validates_matrix(self):
+        source = GeoSeries([Point(1, 2)])
+
+        class OversizedSequence:
+            def __len__(self):
+                return 10**9
+
+            def __iter__(self):
+                raise AssertionError("invalid-length matrices must not be iterated")
+
+        with pytest.raises(ValueError, match="either 6 or 12 coefficients"):
+            source.affine_transform(OversizedSequence())
+
+        class InconsistentSequence:
+            def __len__(self):
+                return 6
+
+            def __iter__(self):
+                return iter([1] * 7)
+
+        with pytest.raises(ValueError, match="either 6 or 12 coefficients"):
+            source.affine_transform(InconsistentSequence())
+
+        for matrix in ([1] * 5, [1] * 7, [1] * 11, [1] * 13):
+            with pytest.raises(ValueError):
+                source.affine_transform(matrix)
+
+        for coefficient in ("not-numeric", "1", None, np.array([1])):
+            matrix = [1, 0, 0, 1, 0, coefficient]
+            with pytest.raises(TypeError, match="only numeric coefficients"):
+                source.affine_transform(matrix)
+
+        for matrix in ("123456", 123456, {1, 2, 3, 4, 5, 6}):
+            with pytest.raises(TypeError, match="local ordered sequence"):
+                source.affine_transform(matrix)
+
+        with pytest.raises(TypeError, match="local ordered sequence"):
+            source.affine_transform(ps.Series([1, 0, 0, 1, 0, 0]))
 
     def test_transform(self):
         pass
