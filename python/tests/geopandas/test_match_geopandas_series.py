@@ -1126,6 +1126,87 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
         self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+    @pytest.mark.parametrize(
+        "xs,ys",
+        [
+            (35.0, 0.0),
+            (0.0, -25.0),
+            (-15.0, 30.0),
+        ],
+        ids=["x-only-positive", "y-only-negative", "unequal-both"],
+    )
+    @pytest.mark.parametrize(
+        "origin",
+        ["center", "centroid", (2.5, -1.5)],
+        ids=["center", "centroid", "explicit"],
+    )
+    def test_skew_2d(self, xs, ys, origin):
+        geoms = [
+            self.points[2],
+            self.linestrings[2],
+            self.t1,
+            self.multipoints[2],
+            self.multilinestrings[2],
+            self.multipolygons[1],
+            self.geomcollection[1],
+        ]
+
+        sgpd_result = GeoSeries(geoms).skew(xs=xs, ys=ys, origin=origin)
+        gpd_result = gpd.GeoSeries(geoms).skew(xs=xs, ys=ys, origin=origin)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_skew_radians(self):
+        geoms = [
+            self.points[2],
+            self.linestrings[2],
+            self.t1,
+            self.multipoints[2],
+            self.multilinestrings[2],
+            self.multipolygons[1],
+            self.geomcollection[1],
+        ]
+        skew_kwargs = {
+            "xs": np.pi / 7,
+            "ys": -np.pi / 9,
+            "origin": (1.25, -2.5),
+            "use_radians": True,
+        }
+
+        sgpd_result = GeoSeries(geoms).skew(**skew_kwargs)
+        gpd_result = gpd.GeoSeries(geoms).skew(**skew_kwargs)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_skew_3d_preserves_z(self):
+        polygon = Polygon([(0, 0, 1), (3, 0, 2), (1, 2, 4), (0, 0, 1)])
+        geoms = [
+            Point(1, 2, 3),
+            LineString([(0, 0, 1), (2, 1, 4)]),
+            polygon,
+            MultiPoint([(0, 0, 1), (1, 2, 3)]),
+            MultiLineString([[(0, 0, 1), (2, 1, 3)], [(1, -1, 2), (3, 2, 4)]]),
+            MultiPolygon([polygon]),
+            GeometryCollection(
+                [Point(1, 2, 3), LineString([(0, 0, 1), (2, 1, 4)]), polygon]
+            ),
+        ]
+        skew_kwargs = {
+            "xs": 25.0,
+            "ys": -10.0,
+            "origin": (1.0, -2.0, 7.0),
+        }
+
+        sgpd_result = GeoSeries(geoms).skew(**skew_kwargs)
+        gpd_result = gpd.GeoSeries(geoms).skew(**skew_kwargs)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+        actual_z = shapely.get_coordinates(
+            sgpd_result.to_geopandas().array, include_z=True
+        )[:, 2]
+        expected_z = shapely.get_coordinates(geoms, include_z=True)[:, 2]
+        np.testing.assert_array_equal(actual_z, expected_z)
+
     def test_force_2d(self):
         # force_2d was added from geopandas 1.0.0
         if parse_version(gpd.__version__) < parse_version("1.0.0"):

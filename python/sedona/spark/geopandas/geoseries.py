@@ -99,6 +99,20 @@ IMPLEMENTATION_PRIORITY = {
 }
 
 
+def _normalize_affine_scalar(value, error_message: str) -> float:
+    """Normalize an operation-wide affine parameter to a Python float."""
+    if (
+        value is None
+        or isinstance(value, (str, bytes, bytearray))
+        or not np.isscalar(value)
+    ):
+        raise TypeError(error_message)
+    try:
+        return float(value)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise TypeError(error_message) from exc
+
+
 def _not_implemented_error(method_name: str, additional_info: str = "") -> str:
     """
     Generate a standardized NotImplementedError message.
@@ -1191,20 +1205,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         if len(matrix) not in (6, 12):
             raise ValueError("'matrix' expects either 6 or 12 coefficients")
 
-        coefficients = []
-        for coefficient in matrix:
-            if (
-                coefficient is None
-                or isinstance(coefficient, (str, bytes, bytearray))
-                or not np.isscalar(coefficient)
-            ):
-                raise TypeError("'matrix' must contain only numeric coefficients")
-            try:
-                coefficients.append(float(coefficient))
-            except (TypeError, ValueError, OverflowError) as exc:
-                raise TypeError(
-                    "'matrix' must contain only numeric coefficients"
-                ) from exc
+        coefficients = [
+            _normalize_affine_scalar(
+                coefficient, "'matrix' must contain only numeric coefficients"
+            )
+            for coefficient in matrix
+        ]
 
         if len(coefficients) == 6:
             a, b, d, e, xoff, yoff = coefficients
@@ -1266,21 +1272,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         return self._query_geometry_column(spark_expr, returns_geom=True)
 
     def scale(self, xfact=1.0, yfact=1.0, zfact=1.0, origin="center") -> "GeoSeries":
-        def normalize_factor(value, name):
-            if (
-                value is None
-                or isinstance(value, (str, bytes, bytearray))
-                or not np.isscalar(value)
-            ):
-                raise TypeError(f"'{name}' must be a numeric scalar")
-            try:
-                return float(value)
-            except (TypeError, ValueError, OverflowError) as exc:
-                raise TypeError(f"'{name}' must be a numeric scalar") from exc
-
-        xfact = normalize_factor(xfact, "xfact")
-        yfact = normalize_factor(yfact, "yfact")
-        zfact = normalize_factor(zfact, "zfact")
+        xfact = _normalize_affine_scalar(xfact, "'xfact' must be a numeric scalar")
+        yfact = _normalize_affine_scalar(yfact, "'yfact' must be a numeric scalar")
+        zfact = _normalize_affine_scalar(zfact, "'zfact' must be a numeric scalar")
 
         geometry = self.spark.column
         if isinstance(origin, str):
@@ -1299,22 +1293,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         elif isinstance(origin, tuple):
             if len(origin) not in (2, 3):
                 raise ValueError("'origin' tuple must contain two or three coordinates")
-            coordinates = []
-            for coordinate in origin:
-                if (
-                    coordinate is None
-                    or isinstance(coordinate, (str, bytes, bytearray))
-                    or not np.isscalar(coordinate)
-                ):
-                    raise TypeError(
-                        "'origin' tuple must contain only numeric coordinates"
-                    )
-                try:
-                    coordinates.append(float(coordinate))
-                except (TypeError, ValueError, OverflowError) as exc:
-                    raise TypeError(
-                        "'origin' tuple must contain only numeric coordinates"
-                    ) from exc
+            coordinates = [
+                _normalize_affine_scalar(
+                    coordinate,
+                    "'origin' tuple must contain only numeric coordinates",
+                )
+                for coordinate in origin
+            ]
             if len(coordinates) == 2:
                 coordinates.append(0.0)
             origin_x, origin_y, origin_z = (F.lit(value) for value in coordinates)
@@ -1360,6 +1345,79 @@ class GeoSeries(GeoFrame, pspd.Series):
             zoff,
         )
         spark_expr = F.when(stf.ST_IsEmpty(geometry), geometry).otherwise(scaled)
+        return self._query_geometry_column(spark_expr, returns_geom=True)
+
+    def skew(self, xs=0.0, ys=0.0, origin="center", use_radians=False) -> "GeoSeries":
+        import math
+
+        xs = _normalize_affine_scalar(xs, "'xs' must be a numeric scalar")
+        ys = _normalize_affine_scalar(ys, "'ys' must be a numeric scalar")
+        if not isinstance(use_radians, (bool, np.bool_)):
+            raise TypeError("'use_radians' must be a boolean")
+
+        if not use_radians:
+            xs = xs * math.pi / 180.0
+            ys = ys * math.pi / 180.0
+        tan_x = math.tan(xs)
+        tan_y = math.tan(ys)
+        if abs(tan_x) < 2.5e-16:
+            tan_x = 0.0
+        if abs(tan_y) < 2.5e-16:
+            tan_y = 0.0
+
+        geometry = self.spark.column
+        if isinstance(origin, str):
+            if origin == "center":
+                origin_geometry = stf.ST_Centroid(stf.ST_Envelope(geometry))
+            elif origin == "centroid":
+                origin_geometry = stf.ST_Centroid(geometry)
+            else:
+                raise ValueError(
+                    "origin must be 'center', 'centroid', a Point, or a "
+                    f"two- or three-element tuple, got {origin!r}"
+                )
+            origin_x = stf.ST_X(origin_geometry)
+            origin_y = stf.ST_Y(origin_geometry)
+        elif isinstance(origin, tuple):
+            if len(origin) not in (2, 3):
+                raise ValueError("'origin' tuple must contain two or three coordinates")
+            coordinates = [
+                _normalize_affine_scalar(
+                    coordinate,
+                    "'origin' tuple must contain only numeric coordinates",
+                )
+                for coordinate in origin
+            ]
+            origin_x = F.lit(coordinates[0])
+            origin_y = F.lit(coordinates[1])
+        elif isinstance(origin, shapely.geometry.Point):
+            if origin.is_empty:
+                raise ValueError("'origin' Point must be a non-empty 2D or 3D Point")
+            coordinates = tuple(origin.coords[0])
+            if len(coordinates) not in (2, 3) or (
+                len(coordinates) == 3 and not origin.has_z
+            ):
+                raise ValueError("'origin' Point must be a non-empty 2D or 3D Point")
+            origin_x = F.lit(float(coordinates[0]))
+            origin_y = F.lit(float(coordinates[1]))
+        else:
+            raise TypeError(
+                "origin must be 'center', 'centroid', a Point, or a "
+                "two- or three-element tuple"
+            )
+
+        xoff = -origin_y * F.lit(tan_x)
+        yoff = -origin_x * F.lit(tan_y)
+        skewed = stf.ST_Affine(
+            geometry,
+            1.0,
+            tan_x,
+            tan_y,
+            1.0,
+            xoff,
+            yoff,
+        )
+        spark_expr = F.when(stf.ST_IsEmpty(geometry), geometry).otherwise(skewed)
         return self._query_geometry_column(spark_expr, returns_geom=True)
 
     def force_2d(self) -> "GeoSeries":
