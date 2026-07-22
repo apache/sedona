@@ -189,7 +189,8 @@ public class RasterConstructors {
 
   /**
    * Returns a raster that is converted from the geometry provided. A convenience function for
-   * asRaster.
+   * asRaster. Because this overload takes no noDataValue argument, the noDataValue is inherited
+   * from the reference raster band (see {@link #inheritReferenceNoDataValue}).
    *
    * @param geom The geometry to convert
    * @param raster The reference raster
@@ -199,12 +200,13 @@ public class RasterConstructors {
    */
   public static GridCoverage2D asRaster(Geometry geom, GridCoverage2D raster, String pixelType)
       throws FactoryException {
-    return asRaster(geom, raster, pixelType, false, 1, null);
+    return asRaster(geom, raster, pixelType, false, 1, inheritReferenceNoDataValue(raster));
   }
 
   /**
    * Returns a raster that is converted from the geometry provided. A convenience function for
-   * asRaster.
+   * asRaster. Because this overload takes no noDataValue argument, the noDataValue is inherited
+   * from the reference raster band (see {@link #inheritReferenceNoDataValue}).
    *
    * @param geom The geometry to convert
    * @param raster The reference raster
@@ -216,12 +218,13 @@ public class RasterConstructors {
   public static GridCoverage2D asRaster(
       Geometry geom, GridCoverage2D raster, String pixelType, boolean allTouched)
       throws FactoryException {
-    return asRaster(geom, raster, pixelType, allTouched, 1, null);
+    return asRaster(geom, raster, pixelType, allTouched, 1, inheritReferenceNoDataValue(raster));
   }
 
   /**
    * Returns a raster that is converted from the geometry provided. A convenience function for
-   * asRaster.
+   * asRaster. Because this overload takes no noDataValue argument, the noDataValue is inherited
+   * from the reference raster band (see {@link #inheritReferenceNoDataValue}).
    *
    * @param geom The geometry to convert
    * @param raster The reference raster
@@ -234,7 +237,31 @@ public class RasterConstructors {
   public static GridCoverage2D asRaster(
       Geometry geom, GridCoverage2D raster, String pixelType, boolean allTouched, double value)
       throws FactoryException {
-    return asRaster(geom, raster, pixelType, allTouched, value, null);
+    return asRaster(
+        geom, raster, pixelType, allTouched, value, inheritReferenceNoDataValue(raster));
+  }
+
+  /**
+   * Resolves the noDataValue that the overloads without a noDataValue argument inherit from the
+   * reference raster. Those overloads fill every pixel the geometry does not cover with, and record
+   * as the output band's nodata metadata, the reference raster's first band nodata value. A
+   * reference band that carries no nodata value leaves nothing to inherit, so this rejects the call
+   * rather than silently producing a raster with no nodata value and a zero background; the caller
+   * then either passes an explicit noDataValue, or passes a null noDataValue through the widest
+   * overload to opt out of a nodata value entirely.
+   *
+   * @param raster the reference raster whose first band nodata value is inherited
+   * @return the reference band's nodata value
+   * @throws IllegalArgumentException when the reference band has no nodata value to inherit
+   */
+  private static double inheritReferenceNoDataValue(GridCoverage2D raster) {
+    Double referenceNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, 1);
+    if (referenceNoDataValue == null) {
+      throw new IllegalArgumentException(
+          "RS_AsRaster: noDataValue omitted but reference raster band 1 has no nodata value to "
+              + "inherit; pass an explicit noDataValue, or pass NULL for no nodata");
+    }
+    return referenceNoDataValue;
   }
 
   /**

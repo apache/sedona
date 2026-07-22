@@ -100,6 +100,10 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
     }
 
     it("Passed RS_AsRaster with empty raster") {
+      // This reference raster carries no nodata value. Omitting the noDataValue now inherits the
+      // reference band's nodata value (erroring when there is none), so the cases that expect a
+      // zero background pass an explicit noDataValue of 0 instead of relying on the old omitted
+      // default of no nodata value.
       val df = sparkSession.sql(
         "SELECT RS_MakeEmptyRaster(2, 255, 255, 3, 215, 2, -2, 0, 0, 4326) as raster, ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))') as geom")
       var rasterized =
@@ -113,7 +117,8 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
         "Array(255.0, 255.0, 255.0, 255.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)"
       assertEquals(expected, actual)
 
-      rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', false, 3093151) as rasterized")
+      rasterized =
+        df.selectExpr("RS_AsRaster(geom, raster, 'd', false, 3093151, 0d) as rasterized")
       actual = rasterized
         .selectExpr("RS_BandAsArray(rasterized, 1)")
         .first()
@@ -123,7 +128,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
         "Array(3093151.0, 3093151.0, 3093151.0, 3093151.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)"
       assertEquals(expected, actual)
 
-      rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd') as rasterized")
+      rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', false, 1, 0d) as rasterized")
       actual = rasterized
         .selectExpr("RS_BandAsArray(rasterized, 1)")
         .first()
@@ -132,6 +137,28 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       expected =
         "Array(1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)"
       assertEquals(expected, actual)
+    }
+
+    it("Passed RS_AsRaster inherits reference band noData when noDataValue omitted") {
+      // Omitting the noDataValue makes RS_AsRaster inherit the reference band's nodata value, using
+      // it both as the output band's nodata metadata and as the fill for every pixel the geometry
+      // does not cover. This reference carries a nodata value of 2, so every uncovered pixel reads
+      // back as 2 while the covered pixels burn the default value of 1.
+      val df = sparkSession.sql(
+        "SELECT RS_SetBandNoDataValue(RS_MakeEmptyRaster(2, 255, 255, 3, 215, 2, -2, 0, 0, 4326), 1, 2) as raster, ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))') as geom")
+      val rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd') as rasterized")
+      val actual = rasterized
+        .selectExpr("RS_BandAsArray(rasterized, 1)")
+        .first()
+        .getSeq(0)
+        .mkString("Array(", ", ", ")")
+      val expected =
+        "Array(1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 1.0, 1.0, 2.0, 2.0, 2.0, 1.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0)"
+      assertEquals(expected, actual)
+
+      val noData =
+        rasterized.selectExpr("RS_BandNoDataValue(rasterized, 1)").first().getDouble(0)
+      assertEquals(2.0, noData, 1e-9)
     }
 
     it("Passed RS_AsRaster LineString") {
@@ -159,6 +186,9 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
     }
 
     it("Passed RS_AsRaster with raster") {
+      // test1.tiff carries no nodata value, so the cases below that expect a zero background pass
+      // an explicit noDataValue of 0; omitting it would now inherit the reference band's nodata
+      // value and error because this band has none.
       var df = sparkSession.read.format("binaryFile").load(resourceFolder + "raster/test1.tiff")
       df = df.selectExpr(
         "ST_GeomFromText('POINT (-13085817.809482181 3993868.8560156375)', 3857) as geom",
@@ -173,7 +203,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       var expected = "Array(61784.0)"
       assertEquals(expected, actual)
 
-      rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', false, 255) as rasterized")
+      rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', false, 255, 0d) as rasterized")
       actual = rasterized
         .selectExpr("RS_BandAsArray(rasterized, 1)")
         .first()
@@ -182,7 +212,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       expected = "Array(255.0)"
       assertEquals(expected, actual)
 
-      rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd') as rasterized")
+      rasterized = df.selectExpr("RS_AsRaster(geom, raster, 'd', false, 1, 0d) as rasterized")
       actual = rasterized
         .selectExpr("RS_BandAsArray(rasterized, 1)")
         .first()

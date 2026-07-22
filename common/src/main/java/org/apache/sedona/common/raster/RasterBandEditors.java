@@ -365,9 +365,13 @@ public class RasterBandEditors {
       writableRaster.setSamples(0, 0, rasterWidth, rasterHeight, 0, array);
     }
 
-    // rasterize the geometry to iterate over the clipped raster
+    // rasterize the geometry to iterate over the clipped raster. The mask is read as a
+    // 0-background mask below (a pixel value of 0 marks "outside the geometry"), so pass an
+    // explicit null noDataValue to keep that zero background. The noDataValue-less overloads would
+    // instead inherit the reference band's nodata value and fill the background with it, which the
+    // mask logic would then misread as covered pixels.
     GridCoverage2D maskRaster =
-        RasterConstructors.asRaster(geometry, raster, bandType, allTouched, 150);
+        RasterConstructors.asRaster(geometry, raster, bandType, allTouched, 150, null);
     Raster maskData = RasterUtils.getRaster(maskRaster.getRenderedImage());
     double[] maskMetadata = RasterAccessors.metadata(maskRaster);
     int maskWidth = (int) maskMetadata[2], maskHeight = (int) maskMetadata[3];
