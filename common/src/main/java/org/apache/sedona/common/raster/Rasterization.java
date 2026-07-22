@@ -228,13 +228,6 @@ public class Rasterization {
     int endX = (int) Math.floor(x1);
     int endY = (int) Math.floor(y1);
 
-    // Parametric t (point = p0 + t * (p1 - p0)) at the first grid line crossed on each axis, and
-    // the t spanned by one full cell. Infinity where the segment does not move along that axis.
-    double tDeltaX = dx != 0 ? Math.abs(1.0 / dx) : Double.POSITIVE_INFINITY;
-    double tDeltaY = dy != 0 ? Math.abs(1.0 / dy) : Double.POSITIVE_INFINITY;
-    double tMaxX = dx > 0 ? (x + 1 - x0) / dx : (dx < 0 ? (x - x0) / dx : Double.POSITIVE_INFINITY);
-    double tMaxY = dy > 0 ? (y + 1 - y0) / dy : (dy < 0 ? (y - y0) / dy : Double.POSITIVE_INFINITY);
-
     // The endpoints are clipped to the geometry extent, so the walk covers at most the grid's
     // width + height cells; the bound also guards against a floating-point overshoot never reaching
     // the end cell.
@@ -244,19 +237,25 @@ public class Rasterization {
       if (x == endX && y == endY) {
         break;
       }
+      // Parametric t (point = p0 + t * (p1 - p0)) of the next grid-line crossing on each axis,
+      // recomputed from the original endpoints every step. Accumulating these instead lets the two
+      // values drift a few ULPs apart, so the exact-corner tie below stops firing and the walk
+      // burns a direction-dependent off-diagonal cell. Because IEEE division is correctly rounded,
+      // (gridX - x0) / dx and (gridY - y0) / dy yield the same double at a true lattice crossing.
+      // Infinity where the segment does not move along that axis.
+      double tMaxX =
+          dx > 0 ? (x + 1 - x0) / dx : (dx < 0 ? (x - x0) / dx : Double.POSITIVE_INFINITY);
+      double tMaxY =
+          dy > 0 ? (y + 1 - y0) / dy : (dy < 0 ? (y - y0) / dy : Double.POSITIVE_INFINITY);
       // On an exact corner crossing (segment passes through a lattice point) step both axes at
       // once, so only the two cells the segment actually passes through are burned rather than the
       // off-diagonal pair as well.
       if (tMaxX < tMaxY) {
-        tMaxX += tDeltaX;
         x += stepX;
       } else if (tMaxY < tMaxX) {
-        tMaxY += tDeltaY;
         y += stepY;
       } else {
-        tMaxX += tDeltaX;
         x += stepX;
-        tMaxY += tDeltaY;
         y += stepY;
       }
     }
