@@ -1850,11 +1850,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(3229013.0, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'count', true, true)").first().get(0)
-      // Every polygon vertex lands exactly on a grid lattice point and three edges run along grid
-      // lines, so the direction-independent corner-crossing traversal now burns those corner-touched
-      // boundary pixels deterministically (a documented superset for all-touched). This adds 11
-      // valid pixels over the pre-fix count of 14649.
-      assertEquals(14660.0, actual)
+      // The left polygon edge is a steep diagonal (slope -3.8) whose grid-line crossings fall very
+      // close to lattice corners. The robust orientation predicate resolves each crossing exactly, so
+      // the traversal burns every boundary cell the edge truly touches; the earlier floating-point
+      // step comparison rounded past seven of those near-corner cells and dropped them. All seven are
+      // valid (non-nodata) pixels, raising the all-touched count from 14660 to 14667. The count is
+      // direction-independent: rasterizing the ring in reverse order yields the same 14667.
+      assertEquals(14667.0, actual)
 
       actual =
         df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', false, false)").first().get(0)

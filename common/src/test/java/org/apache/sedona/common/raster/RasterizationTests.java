@@ -346,6 +346,20 @@ public class RasterizationTests extends RasterTestBase {
     assertLineRasterizationSymmetric(raster, "LINESTRING (1.3 2.7, 8.6 11.4)");
   }
 
+  @Test
+  public void testLineTraversalNearCornerSymmetry() throws ParseException, FactoryException {
+    // A segment whose grid-line crossings fall so close to a lattice corner that the parametric
+    // tMax comparison rounds asymmetrically between the two directions, flipping which off-diagonal
+    // cell is burned. The robust orientation predicate resolves the crossing order identically in
+    // both directions.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 50, 50, 0, 0, 1, -1, 0, 0, 0);
+    assertLineRasterizationSymmetric(
+        raster,
+        "LINESTRING (13.157894736842104 -20.385964912280702, "
+            + "23.157894736842106 -11.052631578947368)");
+  }
+
   private void assertLineRasterizationSymmetric(GridCoverage2D raster, String wkt)
       throws ParseException, FactoryException {
     Geometry forward = Constructors.geomFromWKT(wkt, 0);

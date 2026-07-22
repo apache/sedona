@@ -34,6 +34,7 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.algorithm.CGAlgorithmsDD;
 import org.locationtech.jts.geom.*;
 
 public class Rasterization {
@@ -237,22 +238,29 @@ public class Rasterization {
       if (x == endX && y == endY) {
         break;
       }
-      // Parametric t (point = p0 + t * (p1 - p0)) of the next grid-line crossing on each axis,
-      // recomputed from the original endpoints every step. Accumulating these instead lets the two
-      // values drift a few ULPs apart, so the exact-corner tie below stops firing and the walk
-      // burns a direction-dependent off-diagonal cell. Because IEEE division is correctly rounded,
-      // (gridX - x0) / dx and (gridY - y0) / dy yield the same double at a true lattice crossing.
-      // Infinity where the segment does not move along that axis.
-      double tMaxX =
-          dx > 0 ? (x + 1 - x0) / dx : (dx < 0 ? (x - x0) / dx : Double.POSITIVE_INFINITY);
-      double tMaxY =
-          dy > 0 ? (y + 1 - y0) / dy : (dy < 0 ? (y - y0) / dy : Double.POSITIVE_INFINITY);
-      // On an exact corner crossing (segment passes through a lattice point) step both axes at
-      // once, so only the two cells the segment actually passes through are burned rather than the
-      // off-diagonal pair as well.
-      if (tMaxX < tMaxY) {
+      // Decide which axis to advance from the side of the segment on which the next cell corner in
+      // the direction of travel lies. The robust double-double orientation predicate resolves that
+      // side exactly, so the crossing order is computed identically regardless of endpoint order. A
+      // corner off the segment steps the single axis that keeps the walk on the segment's side; a
+      // corner the segment passes exactly through steps both axes at once, burning only the two
+      // cells the segment truly crosses rather than the off-diagonal pair. This supersedes the
+      // parametric tMax comparison, whose floating-point tie was fragile: recomputed from opposite
+      // endpoints in the two directions it could round asymmetrically and flip the step near a
+      // corner, burning a direction-dependent off-diagonal cell.
+      int crossingOrder;
+      if (stepX == 0) {
+        crossingOrder = 1;
+      } else if (stepY == 0) {
+        crossingOrder = -1;
+      } else {
+        double gridX = stepX > 0 ? x + 1.0 : x;
+        double gridY = stepY > 0 ? y + 1.0 : y;
+        int orientation = CGAlgorithmsDD.orientationIndex(x0, y0, x1, y1, gridX, gridY);
+        crossingOrder = -orientation * stepX * stepY;
+      }
+      if (crossingOrder < 0) {
         x += stepX;
-      } else if (tMaxY < tMaxX) {
+      } else if (crossingOrder > 0) {
         y += stepY;
       } else {
         x += stepX;
