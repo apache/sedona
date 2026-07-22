@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -329,6 +328,55 @@ dtype: geometry</p>
 0    POINT (1 1)
 1    POINT (2 2)
 dtype: geometry</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.affine_transform">
+<span class="sig-name descname"><span class="pre">affine_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.affine_transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.affine_transform" title="Permalink to this definition"></a></dt>
+<dd><p>Return a <code class="docutils literal notranslate"><span class="pre">GeoSeries</span></code> with transformed geometries.</p>
+<p>The coefficient matrix is provided as an ordered sequence with 6 or
+12 items for 2D or 3D transformations, respectively.</p>
+<p>For a 2D affine transformation, <code class="docutils literal notranslate"><span class="pre">matrix</span></code> is
+<code class="docutils literal notranslate"><span class="pre">[a,</span> <span class="pre">b,</span> <span class="pre">d,</span> <span class="pre">e,</span> <span class="pre">xoff,</span> <span class="pre">yoff]</span></code> and the transformed coordinates are:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="s1">&#39; = a * x + b * y + xoff</span>
+<span class="n">y</span><span class="s1">&#39; = d * x + e * y + yoff</span>
+</pre></div>
+</div>
+<p>For a 3D affine transformation, <code class="docutils literal notranslate"><span class="pre">matrix</span></code> is
+<code class="docutils literal notranslate"><span class="pre">[a,</span> <span class="pre">b,</span> <span class="pre">c,</span> <span class="pre">d,</span> <span class="pre">e,</span> <span class="pre">f,</span> <span class="pre">g,</span> <span class="pre">h,</span> <span class="pre">i,</span> <span class="pre">xoff,</span> <span class="pre">yoff,</span> <span class="pre">zoff]</span></code> and the transformed
+coordinates are:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="s1">&#39; = a * x + b * y + c * z + xoff</span>
+<span class="n">y</span><span class="s1">&#39; = d * x + e * y + f * z + yoff</span>
+<span class="n">z</span><span class="s1">&#39; = g * x + h * y + i * z + zoff</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>matrix</strong> (<em>sequence</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Six or twelve coefficients for a 2D or 3D affine transformation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The transformed geometries.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Results for mixed 2D/3D <code class="docutils literal notranslate"><span class="pre">GeometryCollection</span></code> objects, M or ZM
+ordinates, and NaN Z coordinates may differ from GeoPandas because
+Sedona uses JTS while GeoPandas uses Shapely. This method applies
+Sedona’s distributed semantics and does not materialize geometries
+locally to emulate Shapely.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">LineString</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">([</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">LineString</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">affine_transform</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">0                   POINT (1 1)</span>
+<span class="go">1    LINESTRING (-1 1, 0 1)</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py property">
