@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5755,6 +5754,10 @@ execution. We'll demonstrate both approaches to implementing commonly used map a
 </ul>
 <p>This allows controlling the output pixel data type. Users should consider potential precision impacts when coercing to a smaller type.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Jiffle limits scripts to 200 loop iterations per pixel by default, so a runaway <code>while</code> loop fails fast instead of hanging the executor. If a script legitimately needs more iterations per pixel, raise (or disable) the limit with the JVM system property <code>it.geosolutions.jaiext.jiffle.maxIterations</code> (a negative value disables the limit), e.g. <code>--conf "spark.executor.extraJavaOptions=-Dit.geosolutions.jaiext.jiffle.maxIterations=10000"</code>.</p>
+</div>
 <h3 id="ndvi">NDVI<a class="headerlink" href="#ndvi" title="Permanent link">&para;</a></h3>
 <p>The Normalized Difference Vegetation Index (NDVI) is a simple graphical indicator that can be used to analyze remote sensing measurements, typically, but not necessarily, from a space platform, and assess whether the target being observed contains live green vegetation or not. NDVI has become a de facto standard index used to determine whether a given area contains live green vegetation or not. The NDVI is calculated from these individual measurements as follows:</p>
 <div class="highlight"><pre><span></span><code>NDVI = (NIR - Red) / (NIR + Red)
@@ -5820,7 +5823,7 @@ refers to the current pixel values of the near-infrared and red bands, respectiv
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="February 27, 2026 06:37:29 UTC">February 27, 2026 06:37:29</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 22, 2026 18:48:38 UTC">July 22, 2026 18:48:38</span>
   </span>
 
     
