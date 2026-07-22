@@ -1118,7 +1118,6 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
 
     it("should apply both a glob path and an explicit pathGlobFilter") {
       // Native Spark semantics: both constraints apply, so a*.nc restricted to b*.nc is empty.
-      // The internal glob-to-filter rewrite must not discard either constraint.
       val dir = new File(tempDir, "globAndFilter")
       dir.mkdirs()
       FileUtils.copyFile(new File(singleFileLocation), new File(dir, "a.nc"))
@@ -1134,6 +1133,139 @@ class netcdfMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       val globOnly =
         sparkSession.read.format("netcdf.metadata").load(dir.getAbsolutePath + "/a*.nc")
       assertEquals(1L, globOnly.count())
+    }
+
+    it("should not widen a file glob into nested files under explicit recursion") {
+      // GH-3131: the glob used to be rewritten to path=dir + pathGlobFilter, and
+      // pathGlobFilter matches leaf names at any depth, so recursiveFileLookup=true pulled
+      // nested a2.nc into a load of dir/a*.nc. The glob path now reaches Spark natively and
+      // matches direct children of the directory only.
+      val dir = new File(tempDir, "globRecursive")
+      val sub = new File(dir, "sub")
+      sub.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(dir, "a1.nc"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(sub, "a2.nc"))
+
+      val df = sparkSession.read
+        .format("netcdf.metadata")
+        .option("recursiveFileLookup", "true")
+        .load(dir.getAbsolutePath + "/a*.nc")
+      assertEquals(1L, df.count())
+      assert(df.select("path").first().getString(0).endsWith("a1.nc"))
+    }
+
+    it("should apply the directory-scan defaults to a glob that matches directories") {
+      // GH-3131: region* expands to directories, which must get the same defaults as loading
+      // them by explicit path — recursive lookup plus the extension filter.
+      val root = new File(tempDir, "dirGlob")
+      val region1 = new File(root, "region1")
+      val region2Sub = new File(root, "region2/sub")
+      region1.mkdirs()
+      region2Sub.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(region1, "x.nc"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(region2Sub, "y.nc"))
+      // The extension filter must exclude this; without it the reader would surface a row
+      FileUtils.writeStringToFile(new File(region1, "readme.txt"), "not netcdf", "UTF-8")
+
+      val df = sparkSession.read
+        .format("netcdf.metadata")
+        .load(root.getAbsolutePath + "/region*")
+      assertEquals(2L, df.count())
+    }
+
+    it("should keep the directory defaults when a glob also matches a _SUCCESS marker") {
+      // Entries Spark's own listing discards (_SUCCESS, dotfiles, *._COPYING_) must not
+      // sway the all-directories classification: root/* still stands for directories, so
+      // the recursive-scan and extension-filter defaults apply and the nested file is found.
+      val root = new File(tempDir, "markerGlob")
+      val region1Sub = new File(root, "region1/sub")
+      region1Sub.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(root, "region1/x.nc"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(region1Sub, "y.nc"))
+      FileUtils.writeStringToFile(new File(root, "_SUCCESS"), "", "UTF-8")
+
+      val df = sparkSession.read.format("netcdf.metadata").load(root.getAbsolutePath + "/*")
+      assertEquals(2L, df.count())
+    }
+
+    it("should keep the defaults when a glob matches a hidden-named directory") {
+      // Spark's listing drops hidden-named files but traverses a directory root regardless
+      // of its name (only children are name-checked), so /root/_* matching _staging/ must
+      // still receive the directory-scan defaults.
+      val root = new File(tempDir, "hiddenDirGlob")
+      val staging = new File(root, "_staging")
+      val sub = new File(staging, "sub")
+      sub.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(staging, "x.nc"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(sub, "y.nc"))
+
+      val df = sparkSession.read.format("netcdf.metadata").load(root.getAbsolutePath + "/_*")
+      assertEquals(2L, df.count())
+    }
+
+    it("should not let a glob matching only ignored files veto another root's defaults") {
+      // The first glob matches only a _SUCCESS marker, which Spark's listing discards —
+      // its visible contribution is empty, so it must not flip the all-directories
+      // classification that gives the second root its recursive scan.
+      val root = new File(tempDir, "ignoredOnlyGlob")
+      val markerDir = new File(root, "markers")
+      val dataSub = new File(root, "data/sub")
+      markerDir.mkdirs()
+      dataSub.mkdirs()
+      FileUtils.writeStringToFile(new File(markerDir, "_SUCCESS"), "", "UTF-8")
+      FileUtils.copyFile(new File(singleFileLocation), new File(root, "data/x.nc"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(dataSub, "y.nc"))
+
+      val df = sparkSession.read
+        .format("netcdf.metadata")
+        .load(markerDir.getAbsolutePath + "/*", new File(root, "data").getAbsolutePath)
+      assertEquals(2L, df.count())
+    }
+
+    it("should apply the directory defaults to an explicitly loaded underscore directory") {
+      // Spark's hidden-name rule applies to listing entries, never to explicitly given
+      // roots — so probing a literal _staging root must not filter it either.
+      val root = new File(tempDir, "underscoreDir")
+      val staging = new File(root, "_staging")
+      val sub = new File(staging, "sub")
+      sub.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(staging, "x.nc"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(sub, "y.nc"))
+
+      val df = sparkSession.read.format("netcdf.metadata").load(staging.getAbsolutePath)
+      assertEquals(2L, df.count())
+    }
+
+    it("should probe the path literally when glob expansion is disabled") {
+      // With __globPaths__=false Spark treats the path literally, so a directory whose
+      // name contains glob metacharacters must be probed with getFileStatus, not expanded
+      // as a pattern — otherwise it loses the directory-scan defaults.
+      val root = new File(tempDir, "literalGlobChars")
+      val dir = new File(root, "[region]")
+      val sub = new File(dir, "sub")
+      sub.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(dir, "x.nc"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(sub, "y.nc"))
+
+      val df = sparkSession.read
+        .format("netcdf.metadata")
+        .option("__globPaths__", "false")
+        .load(dir.getAbsolutePath)
+      assertEquals(2L, df.count())
+    }
+
+    it("should report a file glob that matches nothing as a missing path") {
+      // Native Spark glob semantics, aligned with every other file source: an empty glob is
+      // an error, not a silently empty result (the pre-GH-3131 rewrite returned no rows).
+      val dir = new File(tempDir, "emptyGlob")
+      dir.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(dir, "a.nc"))
+      intercept[org.apache.spark.sql.AnalysisException] {
+        sparkSession.read
+          .format("netcdf.metadata")
+          .load(dir.getAbsolutePath + "/nomatch*.nc")
+          .count()
+      }
     }
 
     it("should filter non-NetCDF files when loading multiple directories") {
