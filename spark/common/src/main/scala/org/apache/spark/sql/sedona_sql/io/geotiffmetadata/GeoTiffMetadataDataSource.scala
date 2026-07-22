@@ -45,12 +45,10 @@ class GeoTiffMetadataDataSource
 
   override def shortName(): String = "geotiff.metadata"
 
-  private val loadTifPattern = "(.*)/([^/]*\\*[^/]*\\.(?i:tif|tiff))$".r
-
   private def createTable(
       options: CaseInsensitiveStringMap,
       userSchema: Option[StructType] = None): Table = {
-    var paths = getPaths(options)
+    val paths = getPaths(options)
     var optionsWithoutPaths = getOptionsWithoutPaths(options)
     val tableName = getTableName(options, paths)
 
@@ -62,24 +60,16 @@ class GeoTiffMetadataDataSource
     val hasUserGlobFilter = optionsWithoutPaths.containsKey("pathGlobFilter")
     val hasUserRecursive = optionsWithoutPaths.containsKey("recursiveFileLookup")
 
-    if (paths.size == 1 && !isDirectory(paths.head, optionsWithoutPaths)) {
-      // Rewrite glob patterns like /path/to/some*glob*.tif into /path/to with
-      // pathGlobFilter="some*glob*.tif" to avoid listing .tif files as directories. When the
-      // user supplied their own pathGlobFilter, keep the glob path untouched so Spark applies
-      // both constraints natively (the rewrite could only keep one of them).
-      paths.head match {
-        case loadTifPattern(prefix, glob) if !hasUserGlobFilter =>
-          paths = Seq(prefix)
-          newOptions.put("pathGlobFilter", glob)
-        case _ =>
-      }
-    } else if (paths.nonEmpty && paths.forall(p => isDirectory(p, optionsWithoutPaths))) {
-      // Directory roots (single or multiple, with or without trailing slash): default to a
-      // recursive scan filtered to GeoTIFF extensions. These are defaults only — an explicit
-      // recursiveFileLookup=false keeps Hive-style partition discovery available. They apply
-      // only when EVERY root is a directory: Spark applies pathGlobFilter to all roots, so a
-      // mixed load(dir, explicitFile) must not silently drop an explicitly named file whose
-      // name does not match the extension filter.
+    // File paths and file globs are passed to Spark untouched, keeping native listing
+    // semantics: a glob such as /dir/a*.tif matches direct children of /dir only, with or
+    // without recursiveFileLookup. Directory roots (single or multiple; plain, with a
+    // trailing slash, or produced by a glob such as /data/region*) default to a recursive
+    // scan filtered to GeoTIFF extensions. These are defaults only — an explicit
+    // recursiveFileLookup=false keeps Hive-style partition discovery available. They apply
+    // only when EVERY root stands for directories: Spark applies pathGlobFilter to all
+    // roots, so a mixed load(dir, explicitFile) must not silently drop an explicitly named
+    // file whose name does not match the extension filter.
+    if (paths.nonEmpty && paths.forall(p => isDirectoryRoot(p, optionsWithoutPaths))) {
       if (!hasUserRecursive) {
         newOptions.put("recursiveFileLookup", "true")
       }
@@ -116,20 +106,23 @@ class GeoTiffMetadataDataSource
     classOf[GeoTiffMetadataUnsupportedFileFormat]
 
   /**
-   * Check if a path points to a directory. A trailing `/` is treated as a directory without any
-   * FS call; otherwise, Hadoop `FileSystem.getFileStatus(path).isDirectory` is consulted. Returns
-   * `false` if the FS call fails (e.g., path does not exist or is a glob pattern). Uses the same
-   * per-read options (e.g., `fs.s3a.*`) as the scan so directory detection works on the
-   * configured filesystem.
+   * Whether a load path stands for directories. A trailing `/` is treated as a directory
+   * assertion without any FS call; otherwise the path is expanded with Hadoop
+   * `FileSystem.globStatus` — which resolves plain paths and glob patterns alike — and must match
+   * at least one status, all of them directories. Returns `false` when the expansion fails or
+   * matches nothing (Spark reports the missing path itself during listing). Uses the same
+   * per-read options (e.g., `fs.s3a.*`) as the scan so detection works on the configured
+   * filesystem.
    */
-  private def isDirectory(pathStr: String, options: CaseInsensitiveStringMap): Boolean = {
+  private def isDirectoryRoot(pathStr: String, options: CaseInsensitiveStringMap): Boolean = {
     if (pathStr.endsWith("/")) return true
     Try {
       val hadoopConf =
         sparkSession.sessionState.newHadoopConfWithOptions(options.asScala.toMap)
       val path = new Path(pathStr)
       val fs = path.getFileSystem(hadoopConf)
-      fs.getFileStatus(path).isDirectory
+      val matches = fs.globStatus(path)
+      matches != null && matches.nonEmpty && matches.forall(_.isDirectory)
     }.getOrElse(false)
   }
 }

@@ -80,7 +80,12 @@ Or use a glob pattern:
 df = sedona.read.format("netcdf.metadata").load("/path/to/*.nc")
 ```
 
-For directory loads, `recursiveFileLookup=true` and a NetCDF extension
+Glob paths keep native Spark semantics: a file glob such as `/dir/a*.nc` matches
+direct children of `/dir` only, and a glob that matches nothing is an error, as in
+every other Spark file source.
+
+For directory loads — including globs that expand to directories, such as
+`/data/region*` — `recursiveFileLookup=true` and a NetCDF extension
 `pathGlobFilter` are applied as defaults; an explicit option always wins. In
 particular, set `recursiveFileLookup=false` to keep Hive-style partition discovery
 (e.g. `year=2020/` subdirectories become a `year` column):
