@@ -80,9 +80,9 @@ class ComponentSampleModel(SampleModel):
         if self.scanline_stride == self.width and self.pixel_stride == 1:
             # Fast path: no gaps between pixels
             band_arrs = []
-            for bank_index in self.bank_indices:
+            for k, bank_index in enumerate(self.bank_indices):
                 bank_data = data_buffer.bank_data[bank_index]
-                offset = self.band_offsets[bank_index]
+                offset = self.band_offsets[k]
                 if offset != 0:
                     bank_data = bank_data[offset : (offset + self.width * self.height)]
                 band_arr = bank_data.reshape(self.height, self.width)
