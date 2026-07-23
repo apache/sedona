@@ -1,7 +1,6 @@
 <!DOCTYPE html >
 <html>
         <head>
-    <meta name="robots" content="noindex, follow">
           <meta http-equiv="X-UA-Compatible" content="IE=edge" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           <title>org.apache.sedona:sedona-spark-common-3.4_2.12 1.9.1-SNAPSHOT API  - org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetMetaData</title>
@@ -629,8 +628,8 @@ is applied to all geometry columns in the file.
         <span class="name">extractSridFromCrs</span><span class="params">(<span name="crs">crs: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.json4s.JValue">JValue</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      <p class="shortcomment cmt">Extract SRID from a GeoParquet CRS metadata value.</p><div class="fullcomment"><div class="comment cmt"><p>Extract SRID from a GeoParquet CRS metadata value.</p><p>Per the GeoParquet specification:</p><ul><li>If the CRS field is absent (None), the CRS is OGC:CRS84 (EPSG:4326).</li><li>If the CRS field is explicitly null, the CRS is unknown (SRID 0).</li><li>If the CRS field is a PROJJSON object with an &quot;id&quot; containing &quot;authority&quot; and &quot;code&quot;, the
-    EPSG code is used as the SRID.
+      <p class="shortcomment cmt">Extract SRID from a GeoParquet CRS metadata value.</p><div class="fullcomment"><div class="comment cmt"><p>Extract SRID from a GeoParquet CRS metadata value.</p><p>Per the GeoParquet specification:</p><ul><li>If the CRS field is absent (None), the CRS is OGC:CRS84 (EPSG:4326).</li><li>If the CRS field is explicitly null, the CRS is unknown (SRID 0).</li><li>If the CRS field is a PROJJSON object with an &quot;id&quot; or &quot;ids&quot; containing &quot;authority&quot; and
+    &quot;code&quot;, the first recognized identifier is used as the SRID.
 </li></ul></div><dl class="paramcmts block"><dt class="param">crs</dt><dd class="cmt"><p>
   The CRS field from GeoParquet column metadata.</p></dd><dt>returns</dt><dd class="cmt"><p>
   The SRID corresponding to the CRS. Returns 4326 for omitted CRS, 0 for null or unrecognized
