@@ -27,7 +27,7 @@ import org.apache.spark.SparkException
 import org.apache.spark.scheduler.{SparkListener, SparkListenerTaskEnd}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.SaveMode
-import org.apache.spark.sql.execution.datasources.geoparquet.{Covering, GeoParquetMetaData}
+import org.apache.spark.sql.execution.datasources.geoparquet.{Covering, GeoParquetMetaData, GeometryFieldMetaData}
 import org.apache.spark.sql.execution.datasources.geoparquet.internal.ParquetReadSupport
 import org.apache.spark.sql.functions.{col, expr}
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
@@ -1439,6 +1439,35 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
     }
   }
 
+  describe("GeoParquetMetaData serialization") {
+    it("should preserve PROJJSON keys when metadata is parsed") {
+      val crs = parseJson(
+        """{"type":"ProjectedCRS","name":"WGS 84 / UTM zone 32N",""" +
+          """"base_crs":{"datum":{"ellipsoid":{"semi_major_axis":6378137,""" +
+          """"inverse_flattening":298.257223563}}},""" +
+          """"conversion":{"parameters":[{"name":"Longitude of natural origin","value":9,""" +
+          """"unit":{"conversion_factor":0.017453292519943295}}]},""" +
+          """"coordinate_system":{"subtype":"Cartesian"},""" +
+          """"id":{"authority":"EPSG","code":32632}}""")
+      val metadata = GeoParquetMetaData(
+        Some(GeoParquetMetaData.VERSION),
+        "geometry",
+        Map(
+          "geometry" -> GeometryFieldMetaData(
+            encoding = "WKB",
+            geometryTypes = Seq("Point"),
+            bbox = None,
+            crs = Some(crs))))
+
+      val parsed = GeoParquetMetaData
+        .parseKeyValueMetaData(
+          Collections.singletonMap("geo", GeoParquetMetaData.toJson(metadata)))
+        .get
+
+      assert(parsed.columns("geometry").crs.contains(crs))
+    }
+  }
+
   describe("GeoParquetMetaData.extractSridFromCrs") {
     it("should return 4326 when CRS is omitted (None)") {
       assert(GeoParquetMetaData.extractSridFromCrs(None) == 4326)
@@ -1454,24 +1483,24 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 4326)
     }
 
-    it("should extract non-4326 EPSG code") {
-      // Use a complete ProjectedCRS PROJJSON so proj4sedona can parse it
-      val projjson = parseJson(
-        """{"type":"ProjectedCRS","name":"WGS 84 / UTM zone 32N",""" +
-          """"base_crs":{"name":"WGS 84","datum":{"type":"GeodeticReferenceFrame",""" +
-          """"name":"World Geodetic System 1984",""" +
-          """"ellipsoid":{"name":"WGS 84","semi_major_axis":6378137,"inverse_flattening":298.257223563}}},""" +
-          """"conversion":{"name":"UTM zone 32N","method":{"name":"Transverse Mercator"},""" +
-          """"parameters":[{"name":"Latitude of natural origin","value":0},""" +
-          """{"name":"Longitude of natural origin","value":9},""" +
-          """{"name":"Scale factor at natural origin","value":0.9996},""" +
-          """{"name":"False easting","value":500000},""" +
-          """{"name":"False northing","value":0}]},""" +
-          """"coordinate_system":{"subtype":"Cartesian","axis":[""" +
-          """{"name":"Easting","direction":"east","unit":"metre"},""" +
-          """{"name":"Northing","direction":"north","unit":"metre"}]},""" +
-          """"id":{"authority":"EPSG","code":32632}}""")
+    it("should extract a declared EPSG code without requiring a complete CRS definition") {
+      val projjson =
+        parseJson("""{"type":"ProjectedCRS","id":{"authority":"EPSG","code":32632}}""")
       assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 32632)
+    }
+
+    it("should accept a positive EPSG code represented as a string") {
+      val projjson =
+        parseJson("""{"type":"ProjectedCRS","id":{"authority":"epsg","code":"32632"}}""")
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 32632)
+    }
+
+    it("should return 0 for an invalid EPSG code") {
+      Seq("0", "-1", "not-a-code").foreach { code =>
+        val projjson =
+          parseJson(s"""{"type":"ProjectedCRS","id":{"authority":"EPSG","code":"$code"}}""")
+        assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 0)
+      }
     }
 
     it("should return 4326 for OGC:CRS84") {

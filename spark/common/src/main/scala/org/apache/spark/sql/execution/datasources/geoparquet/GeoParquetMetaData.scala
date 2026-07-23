@@ -26,7 +26,7 @@ import org.datasyslab.proj4sedona.core.Proj
 import org.datasyslab.proj4sedona.parser.CRSSerializer
 import org.json4s.jackson.JsonMethods.parse
 import org.json4s.jackson.compactJson
-import org.json4s.{DefaultFormats, Extraction, JField, JNothing, JNull, JObject, JValue}
+import org.json4s.{DefaultFormats, Extraction, JField, JInt, JNothing, JNull, JObject, JString, JValue}
 
 /**
  * A case class that holds the metadata of geometry column in GeoParquet metadata
@@ -124,7 +124,7 @@ object GeoParquetMetaData {
           columnObject \ "crs" match {
             case JNothing => name -> fieldMetadata.copy(crs = None)
             case JNull => name -> fieldMetadata.copy(crs = Some(JNull))
-            case _ => name -> fieldMetadata
+            case crs => name -> fieldMetadata.copy(crs = Some(crs))
           }
         }
       metadata.copy(columns = columns)
@@ -184,24 +184,31 @@ object GeoParquetMetaData {
         // CRS explicitly null: unknown CRS
         0
       case Some(projjson) =>
-        // Use proj4sedona to extract authority and code from PROJJSON
-        try {
-          val jsonStr = compactJson(projjson)
-          val result = new Proj(jsonStr).toAuthority()
-          if (result != null && result.length == 2) {
-            result(0) match {
-              case "EPSG" =>
-                try { result(1).toInt }
-                catch { case _: NumberFormatException => 0 }
-              case "OGC" if result(1) == "CRS84" => DEFAULT_SRID
-              case _ => 0
-            }
-          } else {
-            0
-          }
-        } catch {
-          case NonFatal(_) => 0
+        // GeoParquet uses the declared top-level PROJJSON identifier as the SRID.
+        // Reading the identifier directly also supports CRS objects that omit the
+        // optional definition fields that a projection engine would need.
+        val authority = projjson \ "id" \ "authority"
+        val code = projjson \ "id" \ "code"
+        authority match {
+          case JString(value) if value.equalsIgnoreCase("EPSG") => positiveInt(code)
+          case JString(value) if value.equalsIgnoreCase("OGC") && code == JString("CRS84") =>
+            DEFAULT_SRID
+          case _ => 0
         }
+    }
+  }
+
+  private def positiveInt(value: JValue): Int = {
+    value match {
+      case JInt(code) if code.isValidInt && code > 0 => code.toInt
+      case JString(code) =>
+        try {
+          val parsed = code.trim.toInt
+          if (parsed > 0) parsed else 0
+        } catch {
+          case _: NumberFormatException => 0
+        }
+      case _ => 0
     }
   }
 
