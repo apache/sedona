@@ -1390,14 +1390,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         return self._query_geometry_column(spark_expr, returns_geom=True)
 
     def translate(self, xoff=0.0, yoff=0.0, zoff=0.0) -> "GeoSeries":
-        for name, offset in (("xoff", xoff), ("yoff", yoff), ("zoff", zoff)):
-            if not isinstance(offset, (float, int)):
-                raise NotImplementedError(
-                    f"Array-like values for {name} are not supported yet."
-                )
-        spark_expr = stf.ST_Translate(
-            self.spark.column, float(xoff), float(yoff), float(zoff)
-        )
+        xoff = _normalize_affine_scalar(xoff, "'xoff' must be a numeric scalar")
+        yoff = _normalize_affine_scalar(yoff, "'yoff' must be a numeric scalar")
+        zoff = _normalize_affine_scalar(zoff, "'zoff' must be a numeric scalar")
+        spark_expr = stf.ST_Translate(self.spark.column, xoff, yoff, zoff)
         return self._query_geometry_column(spark_expr, returns_geom=True)
 
     def force_2d(self) -> "GeoSeries":

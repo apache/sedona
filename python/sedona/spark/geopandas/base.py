@@ -1574,14 +1574,32 @@ class GeoFrame(metaclass=ABCMeta):
     def translate(self, xoff=0.0, yoff=0.0, zoff=0.0):
         """Return a ``GeoSeries`` with translated geometries.
 
-        See http://shapely.readthedocs.io/en/latest/manual.html#shapely.affinity.translate
-        for details.
+        Each geometry is shifted by constant offsets along its coordinate
+        dimensions.
 
         Parameters
         ----------
-        xoff, yoff, zoff : float, float, float
-            Amount of offset along each dimension. xoff, yoff, and zoff for
-            translation along the x, y, and z dimensions respectively.
+        xoff : float, default 0.0
+            Offset along the x dimension.
+        yoff : float, default 0.0
+            Offset along the y dimension.
+        zoff : float, default 0.0
+            Offset along the z dimension for geometries that have z
+            coordinates.
+
+        Returns
+        -------
+        GeoSeries
+            The translated geometries.
+
+        Notes
+        -----
+        Two-dimensional geometries remain two-dimensional. Results for mixed
+        2D/3D ``GeometryCollection`` objects, M or ZM ordinates, NaN z
+        coordinates, and non-finite offsets may differ from GeoPandas because
+        Sedona uses JTS while GeoPandas uses Shapely. This method applies
+        Sedona's distributed semantics and does not materialize geometries
+        locally to emulate Shapely.
 
         Examples
         --------

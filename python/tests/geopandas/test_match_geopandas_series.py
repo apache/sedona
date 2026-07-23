@@ -1215,8 +1215,9 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             (1.5, -2, 0),
             (0, 0, 5),
         ],
+        ids=["positive", "identity", "mixed", "z-only"],
     )
-    def test_translate(self, xoff, yoff, zoff):
+    def test_translate_2d(self, xoff, yoff, zoff):
         for geom in self.geoms:
             # Filter empty geometries within each group
             non_empty = [g for g in geom if g is not None and not g.is_empty]
@@ -1226,6 +1227,31 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             sgpd_result = GeoSeries(non_empty).translate(xoff, yoff, zoff)
             gpd_result = gpd.GeoSeries(non_empty).translate(xoff, yoff, zoff)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_translate_3d(self):
+        polygon = Polygon([(0, 0, 1), (3, 0, 2), (1, 2, 4), (0, 0, 1)])
+        geoms = [
+            Point(1, 2, 3),
+            LineString([(0, 0, 1), (2, 1, 4)]),
+            polygon,
+            MultiPoint([(0, 0, 1), (1, 2, 3)]),
+            MultiLineString([[(0, 0, 1), (2, 1, 3)], [(1, -1, 2), (3, 2, 4)]]),
+            MultiPolygon([polygon]),
+            GeometryCollection(
+                [Point(1, 2, 3), LineString([(0, 0, 1), (2, 1, 4)]), polygon]
+            ),
+        ]
+        translate_kwargs = {"xoff": -2.5, "yoff": 3.25, "zoff": 5.0}
+
+        sgpd_result = GeoSeries(geoms).translate(**translate_kwargs)
+        gpd_result = gpd.GeoSeries(geoms).translate(**translate_kwargs)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+        actual_z = shapely.get_coordinates(
+            sgpd_result.to_geopandas().sort_index().array, include_z=True
+        )[:, 2]
+        source_z = shapely.get_coordinates(geoms, include_z=True)[:, 2]
+        np.testing.assert_allclose(actual_z, source_z + translate_kwargs["zoff"])
 
     def test_force_2d(self):
         # force_2d was added from geopandas 1.0.0
