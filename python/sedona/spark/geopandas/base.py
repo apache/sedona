@@ -1525,6 +1525,52 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("scale", self, xfact, yfact, zfact, origin)
 
+    def skew(self, xs=0.0, ys=0.0, origin="center", use_radians=False):
+        """Return a ``GeoSeries`` with skewed geometries.
+
+        Each geometry is sheared independently along its x and y dimensions.
+        Negative angles shear in the opposite direction.
+
+        Parameters
+        ----------
+        xs : float, default 0.0
+            Shear angle for the x dimension, in degrees by default.
+        ys : float, default 0.0
+            Shear angle for the y dimension, in degrees by default.
+        origin : {"center", "centroid"}, Point, or tuple, default "center"
+            The skew origin. ``"center"`` uses each geometry's bounding-box
+            center and ``"centroid"`` uses each geometry's centroid. A 2D or
+            3D Shapely Point or coordinate tuple may also be supplied. Skew is
+            a 2D operation, so an explicit origin's z coordinate is ignored.
+        use_radians : bool, default False
+            If True, interpret ``xs`` and ``ys`` as radians instead of degrees.
+
+        Returns
+        -------
+        GeoSeries
+            The skewed geometries.
+
+        Notes
+        -----
+        Existing z coordinates are preserved. Results for mixed 2D/3D
+        ``GeometryCollection`` objects, M or ZM ordinates, NaN z coordinates,
+        non-finite angles or origin coordinates, and angles near 90 degrees
+        may differ from GeoPandas because Sedona uses JTS while GeoPandas uses
+        Shapely. This method applies Sedona's distributed semantics and does
+        not materialize geometries locally to emulate Shapely.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries([Point(1, 2), Point(-1, -2)])
+        >>> s.skew(xs=45, origin=(0, 0))
+        0      POINT (3 2)
+        1    POINT (-3 -2)
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column("skew", self, xs, ys, origin, use_radians)
+
     def force_2d(self):
         """Force the dimensionality of a geometry to 2D.
 

@@ -2252,7 +2252,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ):
                 source.scale(origin=origin)
 
-        for origin in ((1, "2"), (1, None)):
+        for origin in ((1, "2"), (1, None), (1, 2, "invalid-z")):
             with pytest.raises(TypeError, match="only numeric coordinates"):
                 source.scale(origin=origin)
 
@@ -2270,6 +2270,225 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             empty_source.scale(xfact=None)
         with pytest.raises(ValueError, match="origin must be"):
             empty_source.scale(origin="invalid")
+
+    def test_skew_documented_examples(self):
+        geoms = [
+            Point(1, 1),
+            LineString([(1, -1), (1, 0)]),
+            Polygon([(3, -1), (4, 0), (3, 1), (3, -1)]),
+        ]
+        source = GeoSeries(geoms)
+
+        for kwargs in (
+            {"xs": 45, "ys": 30},
+            {"xs": 45, "ys": 30, "origin": (0, 0)},
+        ):
+            result = source.skew(**kwargs)
+            expected = gpd.GeoSeries(geoms).skew(**kwargs)
+            self.check_sgpd_equals_gpd(result, expected)
+
+    @pytest.mark.parametrize(
+        "xs,ys",
+        [
+            pytest.param(45, 0, id="x-only"),
+            pytest.param(0, 30, id="y-only"),
+            pytest.param(45, 30, id="both"),
+            pytest.param(-45, -30, id="negative"),
+            pytest.param(0, 0, id="zero"),
+        ],
+    )
+    def test_skew_angle_combinations(self, xs, ys):
+        geoms = [
+            Point(1, 2),
+            LineString([(0, 0), (2, 4)]),
+            Polygon([(0, 0), (4, 0), (0, 2), (0, 0)]),
+        ]
+        source = GeoSeries(geoms)
+        expected = gpd.GeoSeries(geoms).skew(xs, ys, origin=(0, 0))
+
+        result = source.skew(xs, ys, origin=(0, 0))
+
+        self.check_sgpd_equals_gpd(result, expected)
+
+    def test_skew_degrees_radians_and_180_degree_clamp(self):
+        import math
+
+        source = GeoSeries([LineString([(0, 0), (2, 4)])])
+
+        degrees = source.skew(45, 30, origin=(0, 0)).to_geopandas().iloc[0]
+        radians = (
+            source.skew(
+                math.pi / 4,
+                math.pi / 6,
+                origin=(0, 0),
+                use_radians=True,
+            )
+            .to_geopandas()
+            .iloc[0]
+        )
+        numpy_bool_radians = (
+            source.skew(
+                math.pi / 4,
+                math.pi / 6,
+                origin=(0, 0),
+                use_radians=np.bool_(True),
+            )
+            .to_geopandas()
+            .iloc[0]
+        )
+        clamped = source.skew(180, 180, origin=(0, 0)).to_geopandas().iloc[0]
+
+        expected = [(0.0, 0.0), (6.0, 5.1547005383792515)]
+        assert list(degrees.coords) == pytest.approx(expected)
+        assert list(radians.coords) == pytest.approx(expected)
+        assert list(numpy_bool_radians.coords) == pytest.approx(expected)
+        assert list(clamped.coords) == [(0.0, 0.0), (2.0, 4.0)]
+
+    def test_skew_center_and_centroid_origins(self):
+        source = GeoSeries([Polygon([(0, 0), (4, 0), (0, 2), (0, 0)])])
+
+        centered = source.skew(45, 30, origin="center").to_geopandas().iloc[0]
+        centroid = source.skew(45, 30, origin="centroid").to_geopandas().iloc[0]
+
+        assert centered.exterior.coords[0] == pytest.approx((-1.0, -1.1547005383792512))
+        assert centroid.exterior.coords[0] == pytest.approx(
+            (-2.0 / 3.0, -0.7698003589195008)
+        )
+
+    @pytest.mark.parametrize(
+        "origin",
+        [
+            pytest.param((1, 1), id="two-coordinate-tuple"),
+            pytest.param((1, 1, 999), id="three-coordinate-tuple"),
+            pytest.param(Point(1, 1), id="2d-point"),
+            pytest.param(Point(1, 1, 999), id="3d-point"),
+        ],
+    )
+    def test_skew_explicit_origins_ignore_z(self, origin):
+        source = GeoSeries([LineString([(1, 2, 3), (4, 6, 9)])])
+
+        result = source.skew(45, 45, origin=origin)
+
+        line = result.to_geopandas().iloc[0]
+        assert line.has_z
+        assert list(line.coords) == pytest.approx([(2, 2, 3), (9, 9, 9)])
+        assert [coordinate[2] for coordinate in line.coords] == [3.0, 9.0]
+
+    def test_skew_2d_stays_2d_with_3d_origin(self):
+        geoms = [
+            Point(1, 2),
+            LineString([(0, 0), (2, 1)]),
+            Polygon([(0, 0), (2, 0), (1, 1), (0, 0)]),
+        ]
+        source = GeoSeries(geoms)
+        expected = gpd.GeoSeries(geoms).skew(45, 30, origin=(1, 1, 999))
+
+        result = source.skew(45, 30, origin=(1, 1, 999))
+
+        self.check_sgpd_equals_gpd(result, expected)
+        assert not any(geom.has_z for geom in result.to_geopandas())
+
+    @pytest.mark.parametrize("origin", ["center", "centroid"])
+    def test_skew_preserves_metadata_empty_null_and_delegates(self, origin):
+        geoms = [
+            Point(1, 2),
+            LineString([(0, 0), (2, 1)]),
+            Point(),
+            LineString(),
+            Polygon(),
+            None,
+        ]
+        index = pd.Index(
+            ["point", "line", "empty-point", "empty-line", "empty-polygon", "null"],
+            name="feature_id",
+        )
+        source = GeoSeries(geoms, index=index, crs="EPSG:3857", name="geometry")
+        expected = gpd.GeoSeries(
+            geoms, index=index, crs="EPSG:3857", name="geometry"
+        ).skew(45, 30, origin=origin)
+
+        result = source.skew(45, 30, origin=origin)
+
+        self.check_sgpd_equals_gpd(result, expected)
+        assert result.name is None
+        assert result.crs == source.crs == expected.crs
+        actual = result.to_geopandas()
+        assert actual.loc["empty-point"].is_empty
+        assert actual.loc["empty-point"].geom_type == "Point"
+        assert actual.loc["empty-line"].is_empty
+        assert actual.loc["empty-line"].geom_type == "LineString"
+        assert actual.loc["empty-polygon"].is_empty
+        assert actual.loc["empty-polygon"].geom_type == "Polygon"
+        assert actual.loc["null"] is None
+
+        srids = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid")
+        ).collect()
+        assert {row.srid for row in srids if row.srid is not None} == {3857}
+
+        frame_result = source.to_geoframe().skew(45, 30, origin=origin)
+        assert isinstance(frame_result, GeoSeries)
+        self.check_sgpd_equals_gpd(frame_result, expected)
+        assert frame_result.crs == source.crs
+
+    def test_skew_validates_angles_units_and_origin(self):
+        source = GeoSeries([Point(1, 2)])
+
+        invalid_angles = [
+            ("xs", None),
+            ("ys", "30"),
+            ("xs", np.array([45])),
+            ("ys", [30]),
+            ("xs", 45 + 1j),
+        ]
+        for name, value in invalid_angles:
+            with pytest.raises(TypeError, match=rf"'{name}' must be a numeric scalar"):
+                source.skew(**{name: value})
+
+        for name in ("xs", "ys"):
+            with pytest.raises(TypeError, match=rf"'{name}' must be a numeric scalar"):
+                source.skew(**{name: ps.Series([45.0])})
+
+        for use_radians in (None, 0, 1, "true", [True], np.array(True)):
+            with pytest.raises(TypeError, match="'use_radians' must be a boolean"):
+                source.skew(use_radians=use_radians)
+
+        for origin in ("invalid", "CENTER"):
+            with pytest.raises(ValueError, match="origin must be"):
+                source.skew(origin=origin)
+
+        for origin in ((1,), (1, 2, 3, 4)):
+            with pytest.raises(
+                ValueError, match="tuple must contain two or three coordinates"
+            ):
+                source.skew(origin=origin)
+
+        for origin in ((1, "2"), (1, None), (1, 2, "ignored-by-skew")):
+            with pytest.raises(TypeError, match="only numeric coordinates"):
+                source.skew(origin=origin)
+
+        for origin in (
+            None,
+            [0, 0],
+            Polygon([(0, 0), (1, 0), (0, 1)]),
+            ps.Series([0.0, 0.0]),
+        ):
+            with pytest.raises(TypeError, match="origin must be"):
+                source.skew(origin=origin)
+
+        with pytest.raises(ValueError, match="Point must be a non-empty 2D or 3D"):
+            source.skew(origin=Point())
+
+        # Operation-wide arguments are validated even when there is no
+        # non-empty geometry on which to apply the transformation.
+        empty_source = GeoSeries([Polygon(), None])
+        for name in ("xs", "ys"):
+            with pytest.raises(TypeError, match=rf"'{name}' must be a numeric scalar"):
+                empty_source.skew(**{name: None})
+        with pytest.raises(TypeError, match="'use_radians' must be a boolean"):
+            empty_source.skew(use_radians=1)
+        with pytest.raises(ValueError, match="origin must be"):
+            empty_source.skew(origin="invalid")
 
     def test_force_2d(self):
         s = sgpd.GeoSeries(
