@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -4381,6 +4380,50 @@ and calling this method.</p>
 <span class="go">[Point(1, 1), Point(2, 2), Point(3, 3)]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">has_sindex</span>
 <span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.skew">
+<span class="sig-name descname"><span class="pre">skew</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'center'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_radians</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.skew"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.skew" title="Permalink to this definition"></a></dt>
+<dd><p>Return a <code class="docutils literal notranslate"><span class="pre">GeoSeries</span></code> with skewed geometries.</p>
+<p>Each geometry is sheared independently along its x and y dimensions.
+Negative angles shear in the opposite direction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default 0.0</em>) – Shear angle for the x dimension, in degrees by default.</p></li>
+<li><p><strong>ys</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default 0.0</em>) – Shear angle for the y dimension, in degrees by default.</p></li>
+<li><p><strong>origin</strong> (<em>{&quot;center&quot;</em><em>, </em><em>&quot;centroid&quot;}</em><em>, </em><a class="reference external" href="https://shapely.readthedocs.io/en/stable/manual.html#Point" title="(in Shapely)"><em>Point</em></a><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>, </em><em>default &quot;center&quot;</em>) – The skew origin. <code class="docutils literal notranslate"><span class="pre">&quot;center&quot;</span></code> uses each geometry’s bounding-box
+center and <code class="docutils literal notranslate"><span class="pre">&quot;centroid&quot;</span></code> uses each geometry’s centroid. A 2D or
+3D Shapely Point or coordinate tuple may also be supplied. Skew is
+a 2D operation, so an explicit origin’s z coordinate is ignored.</p></li>
+<li><p><strong>use_radians</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default False</em>) – If True, interpret <code class="docutils literal notranslate"><span class="pre">xs</span></code> and <code class="docutils literal notranslate"><span class="pre">ys</span></code> as radians instead of degrees.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The skewed geometries.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Existing z coordinates are preserved. Results for mixed 2D/3D
+<code class="docutils literal notranslate"><span class="pre">GeometryCollection</span></code> objects, M or ZM ordinates, NaN z coordinates,
+non-finite angles or origin coordinates, and angles near 90 degrees
+may differ from GeoPandas because Sedona uses JTS while GeoPandas uses
+Shapely. This method applies Sedona’s distributed semantics and does
+not materialize geometries locally to emulate Shapely.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">([</span><span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">skew</span><span class="p">(</span><span class="n">xs</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="go">0      POINT (3 2)</span>
+<span class="go">1    POINT (-3 -2)</span>
+<span class="go">dtype: geometry</span>
 </pre></div>
 </div>
 </dd></dl>
