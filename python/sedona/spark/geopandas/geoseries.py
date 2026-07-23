@@ -113,6 +113,56 @@ def _normalize_affine_scalar(value, error_message: str) -> float:
         raise TypeError(error_message) from exc
 
 
+def _interpret_origin(geometry: PySparkColumn, origin, with_z: bool):
+    """Resolve a local affinity origin to distributed coordinate columns."""
+    if isinstance(origin, str):
+        if origin == "center":
+            origin_geometry = stf.ST_Centroid(stf.ST_Envelope(geometry))
+        elif origin == "centroid":
+            origin_geometry = stf.ST_Centroid(geometry)
+        else:
+            raise ValueError(
+                "origin must be 'center', 'centroid', a Point, or a "
+                f"two- or three-element tuple, got {origin!r}"
+            )
+        origin_columns = (
+            stf.ST_X(origin_geometry),
+            stf.ST_Y(origin_geometry),
+            F.lit(0.0),
+        )
+    elif isinstance(origin, tuple):
+        if len(origin) not in (2, 3):
+            raise ValueError("'origin' tuple must contain two or three coordinates")
+        coordinates = [
+            _normalize_affine_scalar(
+                coordinate,
+                "'origin' tuple must contain only numeric coordinates",
+            )
+            for coordinate in origin
+        ]
+        if len(coordinates) == 2:
+            coordinates.append(0.0)
+        origin_columns = tuple(F.lit(value) for value in coordinates)
+    elif isinstance(origin, shapely.geometry.Point):
+        if origin.is_empty:
+            raise ValueError("'origin' Point must be a non-empty 2D or 3D Point")
+        coordinates = tuple(origin.coords[0])
+        if len(coordinates) not in (2, 3) or (
+            len(coordinates) == 3 and not origin.has_z
+        ):
+            raise ValueError("'origin' Point must be a non-empty 2D or 3D Point")
+        if len(coordinates) == 2:
+            coordinates += (0.0,)
+        origin_columns = tuple(F.lit(float(value)) for value in coordinates)
+    else:
+        raise TypeError(
+            "origin must be 'center', 'centroid', a Point, or a "
+            "two- or three-element tuple"
+        )
+
+    return origin_columns if with_z else origin_columns[:2]
+
+
 def _not_implemented_error(method_name: str, additional_info: str = "") -> str:
     """
     Generate a standardized NotImplementedError message.
@@ -1277,50 +1327,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         zfact = _normalize_affine_scalar(zfact, "'zfact' must be a numeric scalar")
 
         geometry = self.spark.column
-        if isinstance(origin, str):
-            if origin == "center":
-                origin_geometry = stf.ST_Centroid(stf.ST_Envelope(geometry))
-            elif origin == "centroid":
-                origin_geometry = stf.ST_Centroid(geometry)
-            else:
-                raise ValueError(
-                    "origin must be 'center', 'centroid', a Point, or a "
-                    f"two- or three-element tuple, got {origin!r}"
-                )
-            origin_x = stf.ST_X(origin_geometry)
-            origin_y = stf.ST_Y(origin_geometry)
-            origin_z = F.lit(0.0)
-        elif isinstance(origin, tuple):
-            if len(origin) not in (2, 3):
-                raise ValueError("'origin' tuple must contain two or three coordinates")
-            coordinates = [
-                _normalize_affine_scalar(
-                    coordinate,
-                    "'origin' tuple must contain only numeric coordinates",
-                )
-                for coordinate in origin
-            ]
-            if len(coordinates) == 2:
-                coordinates.append(0.0)
-            origin_x, origin_y, origin_z = (F.lit(value) for value in coordinates)
-        elif isinstance(origin, shapely.geometry.Point):
-            if origin.is_empty:
-                raise ValueError("'origin' Point must be a non-empty 2D or 3D Point")
-            coordinates = tuple(origin.coords[0])
-            if len(coordinates) not in (2, 3) or (
-                len(coordinates) == 3 and not origin.has_z
-            ):
-                raise ValueError("'origin' Point must be a non-empty 2D or 3D Point")
-            if len(coordinates) == 2:
-                coordinates += (0.0,)
-            origin_x, origin_y, origin_z = (
-                F.lit(float(value)) for value in coordinates
-            )
-        else:
-            raise TypeError(
-                "origin must be 'center', 'centroid', a Point, or a "
-                "two- or three-element tuple"
-            )
+        origin_x, origin_y, origin_z = _interpret_origin(geometry, origin, with_z=True)
 
         xoff = origin_x - origin_x * F.lit(xfact)
         yoff = origin_y - origin_y * F.lit(yfact)
@@ -1366,45 +1373,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             tan_y = 0.0
 
         geometry = self.spark.column
-        if isinstance(origin, str):
-            if origin == "center":
-                origin_geometry = stf.ST_Centroid(stf.ST_Envelope(geometry))
-            elif origin == "centroid":
-                origin_geometry = stf.ST_Centroid(geometry)
-            else:
-                raise ValueError(
-                    "origin must be 'center', 'centroid', a Point, or a "
-                    f"two- or three-element tuple, got {origin!r}"
-                )
-            origin_x = stf.ST_X(origin_geometry)
-            origin_y = stf.ST_Y(origin_geometry)
-        elif isinstance(origin, tuple):
-            if len(origin) not in (2, 3):
-                raise ValueError("'origin' tuple must contain two or three coordinates")
-            coordinates = [
-                _normalize_affine_scalar(
-                    coordinate,
-                    "'origin' tuple must contain only numeric coordinates",
-                )
-                for coordinate in origin
-            ]
-            origin_x = F.lit(coordinates[0])
-            origin_y = F.lit(coordinates[1])
-        elif isinstance(origin, shapely.geometry.Point):
-            if origin.is_empty:
-                raise ValueError("'origin' Point must be a non-empty 2D or 3D Point")
-            coordinates = tuple(origin.coords[0])
-            if len(coordinates) not in (2, 3) or (
-                len(coordinates) == 3 and not origin.has_z
-            ):
-                raise ValueError("'origin' Point must be a non-empty 2D or 3D Point")
-            origin_x = F.lit(float(coordinates[0]))
-            origin_y = F.lit(float(coordinates[1]))
-        else:
-            raise TypeError(
-                "origin must be 'center', 'centroid', a Point, or a "
-                "two- or three-element tuple"
-            )
+        origin_x, origin_y = _interpret_origin(geometry, origin, with_z=False)
 
         xoff = -origin_y * F.lit(tan_x)
         yoff = -origin_x * F.lit(tan_y)

@@ -2252,7 +2252,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ):
                 source.scale(origin=origin)
 
-        for origin in ((1, "2"), (1, None)):
+        for origin in ((1, "2"), (1, None), (1, 2, "invalid-z")):
             with pytest.raises(TypeError, match="only numeric coordinates"):
                 source.scale(origin=origin)
 
@@ -2463,7 +2463,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             ):
                 source.skew(origin=origin)
 
-        for origin in ((1, "2"), (1, None)):
+        for origin in ((1, "2"), (1, None), (1, 2, "ignored-by-skew")):
             with pytest.raises(TypeError, match="only numeric coordinates"):
                 source.skew(origin=origin)
 
