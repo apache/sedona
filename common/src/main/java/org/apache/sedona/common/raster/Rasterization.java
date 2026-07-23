@@ -34,6 +34,7 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.algorithm.CGAlgorithmsDD;
 import org.locationtech.jts.geom.*;
 
 public class Rasterization {
@@ -200,58 +201,80 @@ public class Rasterization {
         double x1 = (end.x - params.upperLeftX) / params.scaleX;
         double y1 = (end.y - params.upperLeftY) / params.scaleY;
 
-        // Apply Bresenham for this segment
-        drawLineBresenham(params, x0, y0, x1, y1, value, 0.2);
+        traverseSegment(params, x0, y0, x1, y1, value);
       }
     }
   }
 
-  // Modified Bresenham with Fractional Steps
-  private static void drawLineBresenham(
-      RasterizationParams params,
-      double x0,
-      double y0,
-      double x1,
-      double y1,
-      double value,
-      double stepSize) {
+  /**
+   * Burns every grid cell the segment passes through, in pixel space where cell (i, j) covers [i, i
+   * + 1) x [j, j + 1). Uses exact cell traversal (Amanatides-Woo): it steps from one cell-boundary
+   * crossing to the next, so a cell is burned whenever the segment enters it, however briefly. A
+   * fixed-step sampling walk instead misses cells crossed over a distance shorter than the step.
+   */
+  private static void traverseSegment(
+      RasterizationParams params, double x0, double y0, double x1, double y1, double value) {
+
+    int width = params.writableRaster.getWidth();
+    int height = params.writableRaster.getHeight();
 
     double dx = x1 - x0;
     double dy = y1 - y0;
 
-    // Compute the number of steps based on the larger of dx or dy
-    double distance = Math.sqrt(dx * dx + dy * dy);
-    int steps = (int) Math.ceil(distance / stepSize);
+    int stepX = (int) Math.signum(dx);
+    int stepY = (int) Math.signum(dy);
 
-    // Calculate the step increment for each axis
-    double stepX = dx / steps;
-    double stepY = dy / steps;
+    int x = (int) Math.floor(x0);
+    int y = (int) Math.floor(y0);
+    int endX = (int) Math.floor(x1);
+    int endY = (int) Math.floor(y1);
 
-    // Start stepping through the line
-    double x = x0;
-    double y = y0;
-
-    for (int i = 0; i <= steps; i++) {
-      int rasterX = (int) (Math.floor(x));
-      int rasterY = (int) (Math.floor(y));
-
-      // Adjust for bottom-up rasters
-      // Reverse the y index
-      if (params.bottomUp) {
-        rasterY = params.writableRaster.getHeight() - 1 - rasterY;
+    // The endpoints are clipped to the geometry extent, so the walk covers at most the grid's
+    // width + height cells; the bound also guards against a floating-point overshoot never reaching
+    // the end cell.
+    int maxSteps = width + height + 2;
+    for (int i = 0; i <= maxSteps; i++) {
+      burnCell(params, x, y, value, width, height);
+      if (x == endX && y == endY) {
+        break;
       }
-
-      // Only write if within raster bounds
-      if (rasterX >= 0
-          && rasterX < params.writableRaster.getWidth()
-          && rasterY >= 0
-          && rasterY < params.writableRaster.getHeight()) {
-        params.writableRaster.setSample(rasterX, rasterY, 0, value);
+      // Decide which axis to advance from the side of the segment on which the next cell corner in
+      // the direction of travel lies. The robust double-double orientation predicate resolves that
+      // side exactly, so the crossing order is computed identically regardless of endpoint order. A
+      // corner off the segment steps the single axis that keeps the walk on the segment's side; a
+      // corner the segment passes exactly through steps both axes at once, burning only the two
+      // cells the segment truly crosses rather than the off-diagonal pair. This supersedes the
+      // parametric tMax comparison, whose floating-point tie was fragile: recomputed from opposite
+      // endpoints in the two directions it could round asymmetrically and flip the step near a
+      // corner, burning a direction-dependent off-diagonal cell.
+      int crossingOrder;
+      if (stepX == 0) {
+        crossingOrder = 1;
+      } else if (stepY == 0) {
+        crossingOrder = -1;
+      } else {
+        double gridX = stepX > 0 ? x + 1.0 : x;
+        double gridY = stepY > 0 ? y + 1.0 : y;
+        int orientation = CGAlgorithmsDD.orientationIndex(x0, y0, x1, y1, gridX, gridY);
+        crossingOrder = -orientation * stepX * stepY;
       }
+      if (crossingOrder < 0) {
+        x += stepX;
+      } else if (crossingOrder > 0) {
+        y += stepY;
+      } else {
+        x += stepX;
+        y += stepY;
+      }
+    }
+  }
 
-      // Increment by fractional steps
-      x += stepX;
-      y += stepY;
+  private static void burnCell(
+      RasterizationParams params, int x, int y, double value, int width, int height) {
+    // Reverse the y index for bottom-up rasters
+    int rasterY = params.bottomUp ? height - 1 - y : y;
+    if (x >= 0 && x < width && rasterY >= 0 && rasterY < height) {
+      params.writableRaster.setSample(x, rasterY, 0, value);
     }
   }
 
