@@ -26,7 +26,7 @@ import org.datasyslab.proj4sedona.core.Proj
 import org.datasyslab.proj4sedona.parser.CRSSerializer
 import org.json4s.jackson.JsonMethods.parse
 import org.json4s.jackson.compactJson
-import org.json4s.{DefaultFormats, Extraction, JField, JInt, JNothing, JNull, JObject, JString, JValue}
+import org.json4s.{DefaultFormats, Extraction, JArray, JField, JInt, JNothing, JNull, JObject, JString, JValue}
 
 /**
  * A case class that holds the metadata of geometry column in GeoParquet metadata
@@ -136,10 +136,13 @@ object GeoParquetMetaData {
     val geoObject = Extraction.decompose(geoParquetMetadata)
 
     // Make sure that the keys of columns are not transformed to camel case, so we use the columns map with
-    // original keys to replace the transformed columns map.
+    // original keys to replace the transformed columns map. Preserve the raw CRS value separately because
+    // PROJJSON keys are independent of the GeoParquet metadata case classes.
     val columnsMap =
       (geoObject \ "columns").extract[Map[String, JValue]].map { case (name, columnObject) =>
-        name -> columnObject.underscoreKeys
+        val serializedColumn = columnObject.underscoreKeys
+        val rawCrs = geoParquetMetadata.columns(name).crs
+        name -> preserveRawCrs(serializedColumn, rawCrs)
       }
 
     // We are not using transformField here for binary compatibility with various json4s versions shipped with
@@ -154,6 +157,16 @@ object GeoParquetMetaData {
     compactJson(serializedGeoObject)
   }
 
+  private def preserveRawCrs(columnObject: JValue, rawCrs: Option[JValue]): JValue = {
+    (columnObject, rawCrs) match {
+      case (JObject(fields), Some(crs)) =>
+        JObject(fields.map { field =>
+          if (field._1 == "crs") JField("crs", crs) else field
+        })
+      case _ => columnObject
+    }
+  }
+
   /**
    * Default SRID for GeoParquet files where the CRS field is omitted. Per the GeoParquet spec,
    * omitting the CRS implies OGC:CRS84, which is equivalent to EPSG:4326.
@@ -166,8 +179,8 @@ object GeoParquetMetaData {
    * Per the GeoParquet specification:
    *   - If the CRS field is absent (None), the CRS is OGC:CRS84 (EPSG:4326).
    *   - If the CRS field is explicitly null, the CRS is unknown (SRID 0).
-   *   - If the CRS field is a PROJJSON object with an "id" containing "authority" and "code", the
-   *     EPSG code is used as the SRID.
+   *   - If the CRS field is a PROJJSON object with an "id" or "ids" containing "authority" and
+   *     "code", the first recognized identifier is used as the SRID.
    *
    * @param crs
    *   The CRS field from GeoParquet column metadata.
@@ -184,17 +197,32 @@ object GeoParquetMetaData {
         // CRS explicitly null: unknown CRS
         0
       case Some(projjson) =>
-        // GeoParquet uses the declared top-level PROJJSON identifier as the SRID.
+        // GeoParquet uses a declared top-level PROJJSON identifier as the SRID.
         // Reading the identifier directly also supports CRS objects that omit the
         // optional definition fields that a projection engine would need.
-        val authority = projjson \ "id" \ "authority"
-        val code = projjson \ "id" \ "code"
-        authority match {
-          case JString(value) if value.equalsIgnoreCase("EPSG") => positiveInt(code)
-          case JString(value) if value.equalsIgnoreCase("OGC") && code == JString("CRS84") =>
-            DEFAULT_SRID
+        val idSrid = identifierSrid(projjson \ "id")
+        if (idSrid != 0) {
+          idSrid
+        } else {
+          projjson \ "ids" match {
+            case JArray(ids) => ids.iterator.map(identifierSrid).find(_ != 0).getOrElse(0)
+            case _ => 0
+          }
+        }
+    }
+  }
+
+  private def identifierSrid(identifier: JValue): Int = {
+    val authority = identifier \ "authority"
+    val code = identifier \ "code"
+    authority match {
+      case JString(value) if value.equalsIgnoreCase("EPSG") => positiveInt(code)
+      case JString(value) if value.equalsIgnoreCase("OGC") =>
+        code match {
+          case JString(codeValue) if codeValue.equalsIgnoreCase("CRS84") => DEFAULT_SRID
           case _ => 0
         }
+      case _ => 0
     }
   }
 

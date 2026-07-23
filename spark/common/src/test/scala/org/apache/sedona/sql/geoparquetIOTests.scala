@@ -1440,7 +1440,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
   }
 
   describe("GeoParquetMetaData serialization") {
-    it("should preserve PROJJSON keys when metadata is parsed") {
+    it("should preserve PROJJSON keys when metadata is serialized and parsed") {
       val crs = parseJson(
         """{"type":"ProjectedCRS","name":"WGS 84 / UTM zone 32N",""" +
           """"base_crs":{"datum":{"ellipsoid":{"semi_major_axis":6378137,""" +
@@ -1448,6 +1448,7 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
           """"conversion":{"parameters":[{"name":"Longitude of natural origin","value":9,""" +
           """"unit":{"conversion_factor":0.017453292519943295}}]},""" +
           """"coordinate_system":{"subtype":"Cartesian"},""" +
+          """"vendorExtension":{"nestedProperty":"preserveMe"},""" +
           """"id":{"authority":"EPSG","code":32632}}""")
       val metadata = GeoParquetMetaData(
         Some(GeoParquetMetaData.VERSION),
@@ -1459,9 +1460,11 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
             bbox = None,
             crs = Some(crs))))
 
+      val serialized = GeoParquetMetaData.toJson(metadata)
+      assert((parseJson(serialized) \ "columns" \ "geometry" \ "crs") == crs)
+
       val parsed = GeoParquetMetaData
-        .parseKeyValueMetaData(
-          Collections.singletonMap("geo", GeoParquetMetaData.toJson(metadata)))
+        .parseKeyValueMetaData(Collections.singletonMap("geo", serialized))
         .get
 
       assert(parsed.columns("geometry").crs.contains(crs))
@@ -1503,10 +1506,17 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
       }
     }
 
-    it("should return 4326 for OGC:CRS84") {
+    it("should return 4326 for OGC:CRS84 regardless of case") {
       val projjson =
-        parseJson("""{"type":"GeographicCRS","id":{"authority":"OGC","code":"CRS84"}}""")
+        parseJson("""{"type":"GeographicCRS","id":{"authority":"ogc","code":"crs84"}}""")
       assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 4326)
+    }
+
+    it("should extract the first recognized identifier from a PROJJSON ids array") {
+      val projjson = parseJson(
+        """{"type":"ProjectedCRS","ids":[{"authority":"IAU","code":49900},""" +
+          """{"authority":"epsg","code":"32632"}]}""")
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(projjson)) == 32632)
     }
 
     it("should return 0 for CRS without id field") {
