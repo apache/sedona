@@ -667,12 +667,26 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         index_spark_columns = []
         index_fields = []
+        index_names = []
         if not is_aggr:
-            # Preserve every index level and the natural order in the result.
-            index_spark_columns = [
-                scol_for(df, name) for name in self._internal.index_spark_column_names
+            # Preserve every index level available in the projected frame.
+            # Some binary-operation helpers intentionally project only the
+            # first level until they support full MultiIndex alignment.
+            available_columns = set(df.columns)
+            index_metadata = [
+                (column_name, field, index_name)
+                for column_name, field, index_name in zip(
+                    self._internal.index_spark_column_names,
+                    self._internal.index_fields,
+                    self._internal.index_names,
+                )
+                if column_name in available_columns
             ]
-            index_fields = self._internal.index_fields
+            index_spark_columns = [
+                scol_for(df, column_name) for column_name, _, _ in index_metadata
+            ]
+            index_fields = [field for _, field, _ in index_metadata]
+            index_names = [index_name for _, _, index_name in index_metadata]
             sdf = df.select(
                 col_expr,
                 *index_spark_columns,
@@ -686,7 +700,8 @@ class GeoSeries(GeoFrame, pspd.Series):
             spark_frame=sdf,
             index_fields=index_fields,
             index_spark_columns=index_spark_columns,
-            index_names=[None] if is_aggr else self._internal.index_names,
+            index_names=index_names if index_spark_columns else [None],
+            column_labels=([(rename,)] if is_aggr else self._internal.column_labels),
             data_spark_columns=[scol_for(sdf, rename)],
             data_fields=[self._internal.data_fields[0].copy(name=rename)],
             column_label_names=[(rename,)],
@@ -3398,7 +3413,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         >>> from shapely.geometry import MultiPoint
         >>> s = GeoSeries(
         ...     [MultiPoint([(0, 0), (1, 1)]), MultiPoint([(2, 2), (3, 3)])]
-        )
+        ... )
         >>> s.explode(index_parts=True)
         0  0    POINT (0 0)
            1    POINT (1 1)
@@ -3406,8 +3421,6 @@ class GeoSeries(GeoFrame, pspd.Series):
            1    POINT (3 3)
         dtype: geometry
         """
-        from pyspark.pandas.internal import InternalField
-
         (
             internal,
             expanded_sdf,
@@ -3421,10 +3434,9 @@ class GeoSeries(GeoFrame, pspd.Series):
             index_parts=index_parts,
             temp_prefix="explode",
         )
-        data_col = internal.data_spark_column_names[0]
         output_sdf = expanded_sdf.select(
             *[scol_for(expanded_sdf, name) for name in output_index_cols],
-            scol_for(expanded_sdf, geometry_col).alias(data_col),
+            scol_for(expanded_sdf, geometry_col),
             scol_for(expanded_sdf, NATURAL_ORDER_COLUMN_NAME),
         )
 
@@ -3435,9 +3447,9 @@ class GeoSeries(GeoFrame, pspd.Series):
             ],
             index_names=index_names,
             index_fields=index_fields,
-            data_spark_columns=[scol_for(output_sdf, data_col)],
+            data_spark_columns=[scol_for(output_sdf, geometry_col)],
             data_fields=[
-                InternalField(np.dtype("object"), output_sdf.schema[data_col])
+                InternalField(np.dtype("object"), output_sdf.schema[geometry_col])
             ],
         )
         result = GeoSeries(first_series(PandasOnSparkDataFrame(result_internal)))

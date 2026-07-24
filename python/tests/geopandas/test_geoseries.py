@@ -461,6 +461,24 @@ class TestGeoSeries(TestGeopandasBase):
         assert all_empty.crs is not None
         assert all_empty.crs.to_epsg() == 4326
 
+    def test_explode_docstring_examples_are_syntactically_valid(self):
+        import doctest
+
+        examples = doctest.DocTestParser().get_examples(GeoSeries.explode.__doc__)
+        for example in examples:
+            compile(example.source, "<GeoSeries.explode>", "single")
+
+    @pytest.mark.parametrize("name", ["__index_level_1__", "__INDEX_LEVEL_1__"])
+    def test_explode_internal_name_collision(self, name):
+        from geopandas.testing import assert_geoseries_equal
+
+        geometries = [MultiPoint([(0, 0), (1, 1)])]
+        series = GeoSeries(geometries)
+        series.name = name
+        result = series.explode(index_parts=True).to_geopandas()
+        expected = gpd.GeoSeries(geometries, name=name).explode(index_parts=True)
+        assert_geoseries_equal(result, expected, check_index_type=False)
+
     def test_to_crs(self):
         from pyproj import CRS
 
@@ -3784,6 +3802,14 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s1.to_geoframe().geom_equals(s2, align=False)
         expected = pd.Series([True, False, True])
         self.check_pd_series_equal(df_result, expected)
+
+    def test_binary_operation_with_projected_multiindex(self):
+        index = pd.MultiIndex.from_tuples([("a", 1), ("b", 2)], names=["group", "row"])
+        result = GeoSeries([Point(0, 0), Point(1, 1)], index=index).geom_equals(
+            Point(0, 0)
+        )
+        expected = pd.Series([True, False], index=pd.Index(["a", "b"], name="group"))
+        self.check_pd_series_equal(result, expected)
 
     def test_geom_equals_exact(self):
         s = GeoSeries([Point(0, 1.1), Point(0, 1.0), Point(0, 1.2)])
