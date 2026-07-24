@@ -85,7 +85,8 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
         self.polygons = [
             Polygon(),
-            Polygon([(0, 0), (1, 0), (2, 1), (0, 1)]),
+            # Keep an invalid polygon to exercise invalid-geometry paths.
+            Polygon([(0, 0), (1, 0), (2, 1), (3, 1)]),
             Polygon([(1, 1), (2, 1), (2, 2), (1, 2)]),
         ]
 
@@ -446,11 +447,14 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         result = GeoSeries(geometries, index=index, name="geometry").explode(**kwargs)
         actual = result.to_geopandas()
 
+        # The fixture intentionally includes an invalid polygon. Coordinate-wise
+        # equality is reliable here while topological equality is not.
         assert_geoseries_equal(
             actual,
             expected,
             check_index_type=False,
             check_geom_type=True,
+            check_less_precise=True,
         )
         pd.testing.assert_index_equal(actual.index, expected.index, exact=False)
 
