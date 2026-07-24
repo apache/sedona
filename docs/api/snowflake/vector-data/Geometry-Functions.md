@@ -158,6 +158,7 @@ These functions test spatial relationships between geometries, returning boolean
 | [ST_Disjoint](Predicates/ST_Disjoint.md) | Return true if A and B are disjoint |
 | [ST_DWithin](Predicates/ST_DWithin.md) | Returns true if 'leftGeometry' and 'rightGeometry' are within a specified 'distance'. This function essentially checks if the shortest distance between the envelope of the two geometries is <= the ... |
 | [ST_Equals](Predicates/ST_Equals.md) | Return true if A equals to B |
+| [ST_EqualsExact](Predicates/ST_EqualsExact.md) | Return true if A and B have matching structures and corresponding coordinates within a tolerance |
 | [ST_Intersects](Predicates/ST_Intersects.md) | Return true if A intersects B |
 | [ST_OrderingEquals](Predicates/ST_OrderingEquals.md) | Returns true if the geometries are equal and the coordinates are in the same order |
 | [ST_Overlaps](Predicates/ST_Overlaps.md) | Return true if A overlaps B |
