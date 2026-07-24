@@ -105,27 +105,24 @@ roads = sedona.sql("""
         FROM osm WHERE kind = 'node'
     ),
     way_pts AS (                               -- one row per (way, vertex), ordered
-        SELECT w.id AS way_id, w.tags AS tags, w.pos AS seq, n.lon, n.lat
-        FROM (SELECT id, tags, posexplode(refs) AS (pos, ref)
-              FROM osm WHERE kind = 'way') w
+        SELECT w.id AS way_id, w.highway, w.pos AS seq, n.lon, n.lat
+        FROM (SELECT id, tags['highway'] AS highway, posexplode(refs) AS (pos, ref)
+              FROM osm WHERE kind = 'way' AND tags['highway'] IS NOT NULL) w
         JOIN nodes n ON n.id = w.ref
     )
-    SELECT way_id,
-           any_value(tags)['highway'] AS highway,
-           ST_GeomFromText(concat('LINESTRING(',
-               array_join(
-                   transform(array_sort(collect_list(struct(seq, lon, lat))),
-                             x -> concat(x.lon, ' ', x.lat)),
-                   ', '),
-           ')')) AS geom
+    SELECT way_id, highway,
+           ST_MakeLine(
+               transform(array_sort(collect_list(struct(seq, lon, lat))),
+                         x -> ST_Point(x.lon, x.lat))
+           ) AS geom
     FROM   way_pts
-    GROUP BY way_id
-    HAVING count(*) >= 2 AND any_value(tags)['highway'] IS NOT NULL
+    GROUP BY way_id, highway
+    HAVING count(*) >= 2
 """)
 roads.createOrReplaceTempView("roads")
 ```
 
-`array_sort` on `(seq, …)` guarantees the vertices are connected in the way's declared order. Now the ways are real `LineString`s — so the full Spatial SQL toolkit applies. How much road is in Monaco?
+`array_sort` on `(seq, …)` guarantees the vertices land in the way's declared order, and `ST_MakeLine` connects the sorted points into the geometry — no string assembly. Note the tag filter sits *before* the join, so only road vertices are ever shuffled. Now the ways are real `LineString`s and the full Spatial SQL toolkit applies. How much road is in Monaco?
 
 ```python
 sedona.sql("""
