@@ -9,7 +9,7 @@
 <!-- ===== TOP BAND: title, no visuals ===== -->
 <text x="72" y="86" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="19" font-weight="700" letter-spacing="5" fill="#f0a94e">APACHE SEDONA · OSM PBF READER</text>
 <text x="70" y="158" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="58" font-weight="800" fill="#f7efe7">OpenStreetMap, meet <tspan fill="#ff7a45">Sedona</tspan>.</text>
-<text x="72" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="500" fill="#b6acc9">Read raw <tspan font-family="ui-monospace, Menlo, monospace" font-size="19">.osm.pbf</tspan> into a Sedona DataFrame — nodes, ways &amp; relations, no conversion step.</text>
+<text x="72" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="500" fill="#b6acc9">Read raw <tspan font-family="ui-monospace, Menlo, monospace" font-size="19">.osm.pbf</tspan> into a Sedona DataFrame — distributed across your whole cluster, no conversion step.</text>
 
 <rect x="72" y="238" width="452" height="48" rx="10" fill="#140f28" stroke="#3c3268" stroke-width="1.5"/>
 <text x="94" y="269" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="17" fill="#8fe6d0">sedona.read.<tspan fill="#f7efe7">format</tspan>(<tspan fill="#f5c542">"osmpbf"</tspan>).<tspan fill="#f7efe7">load</tspan>(path)</text>
@@ -18,6 +18,7 @@
 <rect x="548" y="245" width="132" height="34" rx="17" fill="none" stroke="#f5c542" stroke-opacity="0.6" stroke-width="1.3"/><text x="614" y="267" text-anchor="middle" fill="#f0d08a">nodes &#8594; points</text>
 <rect x="694" y="245" width="126" height="34" rx="17" fill="none" stroke="#35c9d8" stroke-opacity="0.6" stroke-width="1.3"/><text x="757" y="267" text-anchor="middle" fill="#5fd8e0">ways &#8594; lines</text>
 <rect x="834" y="245" width="128" height="34" rx="17" fill="none" stroke="#8a6ff0" stroke-opacity="0.6" stroke-width="1.3"/><text x="898" y="267" text-anchor="middle" fill="#ab97f5">tags &#8594; layers</text>
+<rect x="976" y="245" width="160" height="34" rx="17" fill="none" stroke="#7ed957" stroke-opacity="0.6" stroke-width="1.3"/><text x="1056" y="267" text-anchor="middle" fill="#98e07a">1 file &#8594; N workers</text>
 </g>
 
 <!-- ===== BOTTOM: full-width map panorama (no text overlay) ===== -->

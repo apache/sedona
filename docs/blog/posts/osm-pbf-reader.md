@@ -204,6 +204,8 @@ sedona.sql("""
 
 Monaco is a teaching extract — the full OpenStreetMap planet is a *single* `.osm.pbf` of roughly 80 GB holding billions of elements. Three properties of the reader make that size a non-event on a Sedona cluster:
 
+![A single planet-scale .osm.pbf is split into byte-range blocks, decoded in parallel by many workers, and lands as one Sedona DataFrame](osm-pbf-reader-scale.svg)
+
 - **One file, many workers.** PBF is a sequence of independently decodable blocks, and the reader declares the format *splittable* — Sedona carves even a single planet file into byte-range partitions and decodes them in parallel across the cluster. No pre-chopping into per-region files.
 - **Object storage native.** The same `load()` reads from S3 or HDFS as happily as from a local disk, so the planet file never has to leave your bucket.
 - **Assembly is a join, not a script.** The refs → coordinates rebuild above is an ordinary distributed join between two slices of the same table. Where a single-machine tool streams the planet through one process, Sedona shuffles the work across however many machines you give it — the classic way OSM processing becomes horizontal instead of overnight.
