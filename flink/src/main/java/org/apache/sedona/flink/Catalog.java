@@ -269,6 +269,7 @@ public class Catalog {
       new Predicates.ST_CoveredBy(),
       new Predicates.ST_Disjoint(),
       new Predicates.ST_Equals(),
+      new Predicates.ST_EqualsExact(),
       new Predicates.ST_OrderingEquals(),
       new Predicates.ST_Overlaps(),
       new Predicates.ST_Touches(),
