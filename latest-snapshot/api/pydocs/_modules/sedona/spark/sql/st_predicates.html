@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_predicates &mdash; Apache Sedona Python Documentation</title>
@@ -299,6 +298,29 @@
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_call_predicate_function</span><span class="p">(</span><span class="s2">&quot;ST_Equals&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ST_EqualsExact"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_predicates.ST_EqualsExact">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_EqualsExact</span><span class="p">(</span>
+    <span class="n">a</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span>
+    <span class="n">b</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether two geometries have the same structure and coordinate ordering</span>
+<span class="sd">    within a tolerance.</span>
+
+<span class="sd">    The comparison uses x and y coordinates. Z and M coordinates are ignored.</span>
+
+<span class="sd">    :param a: One geometry column to check.</span>
+<span class="sd">    :type a: ColumnOrName</span>
+<span class="sd">    :param b: Other geometry column to check.</span>
+<span class="sd">    :type b: ColumnOrName</span>
+<span class="sd">    :param tolerance: Maximum distance allowed between corresponding coordinates.</span>
+<span class="sd">    :type tolerance: ColumnOrName or float or int</span>
+<span class="sd">    :return: True if a and b are exactly equal within tolerance, otherwise False.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_predicate_function</span><span class="p">(</span><span class="s2">&quot;ST_EqualsExact&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="ST_Intersects"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_predicates.ST_Intersects">[docs]</a><span class="nd">@validate_argument_types</span>

@@ -1618,6 +1618,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/flink/Predicates/ST_Equals/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_EqualsExact/</loc>
+        <lastmod>2026-07-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/flink/Predicates/ST_EqualsExact/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/flink/Predicates/ST_EqualsExact/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/api/flink/Predicates/ST_Intersects/</loc>
         <lastmod>2026-07-24</lastmod>
         <changefreq>daily</changefreq>
@@ -3149,6 +3156,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_Equals/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/snowflake/vector-data/Predicates/ST_Equals/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_EqualsExact/</loc>
+        <lastmod>2026-07-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_EqualsExact/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/snowflake/vector-data/Predicates/ST_EqualsExact/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Predicates/ST_Intersects/</loc>
@@ -5060,6 +5074,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/Predicates/ST_Equals/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Predicates/ST_Equals/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_EqualsExact/</loc>
+        <lastmod>2026-07-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/Predicates/ST_EqualsExact/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Predicates/ST_EqualsExact/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/api/sql/Predicates/ST_Intersects/</loc>
@@ -8324,6 +8345,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/flink/Predicates/ST_Equals/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/zh/api/flink/Predicates/ST_EqualsExact/</loc>
+        <lastmod>2026-07-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/flink/Predicates/ST_EqualsExact/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/flink/Predicates/ST_EqualsExact/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/zh/api/flink/Predicates/ST_Intersects/</loc>
         <lastmod>2026-07-24</lastmod>
         <changefreq>daily</changefreq>
@@ -9855,6 +9883,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/snowflake/vector-data/Predicates/ST_Equals/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/snowflake/vector-data/Predicates/ST_Equals/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/snowflake/vector-data/Predicates/ST_EqualsExact/</loc>
+        <lastmod>2026-07-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/snowflake/vector-data/Predicates/ST_EqualsExact/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/snowflake/vector-data/Predicates/ST_EqualsExact/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/api/snowflake/vector-data/Predicates/ST_Intersects/</loc>
@@ -11766,6 +11801,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/Predicates/ST_Equals/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Predicates/ST_Equals/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/Predicates/ST_EqualsExact/</loc>
+        <lastmod>2026-07-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/Predicates/ST_EqualsExact/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Predicates/ST_EqualsExact/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/api/sql/Predicates/ST_Intersects/</loc>
