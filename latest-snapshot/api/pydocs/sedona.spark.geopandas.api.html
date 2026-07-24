@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -5120,6 +5119,61 @@ of one GeoSeries <code class="docutils literal notranslate"><span class="pre">to
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.transform">
 <span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transformation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.transform" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.translate">
+<span class="sig-name descname"><span class="pre">translate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.translate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.translate" title="Permalink to this definition"></a></dt>
+<dd><p>Return a <code class="docutils literal notranslate"><span class="pre">GeoSeries</span></code> with translated geometries.</p>
+<p>Each geometry is shifted by constant offsets along its coordinate
+dimensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xoff</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default 0.0</em>) – Offset along the x dimension.</p></li>
+<li><p><strong>yoff</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default 0.0</em>) – Offset along the y dimension.</p></li>
+<li><p><strong>zoff</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default 0.0</em>) – Offset along the z dimension for geometries that have z
+coordinates.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The translated geometries.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Two-dimensional geometries remain two-dimensional. Results for mixed
+2D/3D <code class="docutils literal notranslate"><span class="pre">GeometryCollection</span></code> objects, M or ZM ordinates, NaN z
+coordinates, and non-finite offsets may differ from GeoPandas because
+Sedona uses JTS while GeoPandas uses Shapely. This method applies
+Sedona’s distributed semantics and does not materialize geometries
+locally to emulate Shapely.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">LineString</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span>
+<span class="go">0                         POINT (1 1)</span>
+<span class="go">1              LINESTRING (1 -1, 1 0)</span>
+<span class="go">2    POLYGON ((3 -1, 4 0, 3 1, 3 -1))</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">0                       POINT (3 4)</span>
+<span class="go">1            LINESTRING (3 2, 3 3)</span>
+<span class="go">2    POLYGON ((5 2, 6 3, 5 4, 5 2))</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.type">

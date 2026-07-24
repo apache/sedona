@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -1597,6 +1596,13 @@
             <span class="n">yoff</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_IsEmpty</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span> <span class="n">geometry</span><span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">skewed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span><span class="n">spark_expr</span><span class="p">,</span> <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeoSeries.translate"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.translate">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xoff</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yoff</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">zoff</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
+        <span class="n">xoff</span> <span class="o">=</span> <span class="n">_normalize_affine_scalar</span><span class="p">(</span><span class="n">xoff</span><span class="p">,</span> <span class="s2">&quot;&#39;xoff&#39; must be a numeric scalar&quot;</span><span class="p">)</span>
+        <span class="n">yoff</span> <span class="o">=</span> <span class="n">_normalize_affine_scalar</span><span class="p">(</span><span class="n">yoff</span><span class="p">,</span> <span class="s2">&quot;&#39;yoff&#39; must be a numeric scalar&quot;</span><span class="p">)</span>
+        <span class="n">zoff</span> <span class="o">=</span> <span class="n">_normalize_affine_scalar</span><span class="p">(</span><span class="n">zoff</span><span class="p">,</span> <span class="s2">&quot;&#39;zoff&#39; must be a numeric scalar&quot;</span><span class="p">)</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Translate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">xoff</span><span class="p">,</span> <span class="n">yoff</span><span class="p">,</span> <span class="n">zoff</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span><span class="n">spark_expr</span><span class="p">,</span> <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.force_2d"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.force_2d">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">force_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
