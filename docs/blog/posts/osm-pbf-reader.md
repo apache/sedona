@@ -18,7 +18,7 @@ OpenStreetMap is the world's map — every road, café, and coastline, edited by
 
 <!-- more -->
 
-SedonaSpark reads `.osm.pbf` natively. Point the `osmpbf` format at a file and you get a Sedona DataFrame of raw OSM elements — no conversion step. From there it's ordinary Spatial SQL: assemble geometries, filter by tag, measure, join. Every snippet below runs against the small **Monaco** extract that ships in Sedona's test resources, so you can reproduce it verbatim.
+SedonaSpark reads `.osm.pbf` natively. Point the `osmpbf` format at a file and you get a Sedona DataFrame of raw OSM elements — no conversion step. And because Sedona is a distributed engine, that one-line read fans out across a cluster: a planet-scale file is just more partitions. From there it's ordinary Spatial SQL: assemble geometries, filter by tag, measure, join. Every snippet below runs against the small **Monaco** extract that ships in Sedona's test resources, so you can reproduce it verbatim — and scale it up unchanged.
 
 ## One line to raw OSM
 
@@ -200,8 +200,18 @@ sedona.sql("""
 !!! note "A note on the metadata fields"
     The reader also exposes `user`, `uid`, and `changeset`. Public Geofabrik extracts **strip these for privacy**, so they arrive empty — as they do here. To analyze contributors by name you need a full-history or internal planet file; `timestamp` and `version` are always present.
 
+## Built for the planet, not the demo
+
+Monaco is a teaching extract — the full OpenStreetMap planet is a *single* `.osm.pbf` of roughly 80 GB holding billions of elements. Three properties of the reader make that size a non-event on a Sedona cluster:
+
+- **One file, many workers.** PBF is a sequence of independently decodable blocks, and the reader declares the format *splittable* — Sedona carves even a single planet file into byte-range partitions and decodes them in parallel across the cluster. No pre-chopping into per-region files.
+- **Object storage native.** The same `load()` reads from S3 or HDFS as happily as from a local disk, so the planet file never has to leave your bucket.
+- **Assembly is a join, not a script.** The refs → coordinates rebuild above is an ordinary distributed join between two slices of the same table. Where a single-machine tool streams the planet through one process, Sedona shuffles the work across however many machines you give it — the classic way OSM processing becomes horizontal instead of overnight.
+
+The result: the four queries in this post run against `planet-latest.osm.pbf` exactly as written — just with more partitions underneath.
+
 ## The point
 
-`.osm.pbf` stops being a format problem. One `osmpbf` read turns the planet's map into a Sedona DataFrame; `posexplode` + a join reconstitutes geometries from raw references; and from there OpenStreetMap is just another spatial table — one you can filter, measure, and join at cluster scale.
+`.osm.pbf` stops being a format problem. One `osmpbf` read turns the planet's map into a Sedona DataFrame; `posexplode` + a join reconstitutes geometries from raw references; and from there OpenStreetMap is just another spatial table — one you can filter, measure, and join at whatever scale your cluster allows.
 
-*Grab any regional extract from [Geofabrik](https://download.geofabrik.de/) and point the reader at it — the queries above scale from Monaco to a continent unchanged.*
+*Grab any regional extract from [Geofabrik](https://download.geofabrik.de/) — or the planet itself — and point the reader at it: the queries above scale from Monaco to the whole world unchanged.*
