@@ -46,6 +46,18 @@ public class Rasterization {
       boolean useGeometryExtent,
       boolean allTouched)
       throws FactoryException {
+    return rasterize(geom, raster, pixelType, value, useGeometryExtent, allTouched, null);
+  }
+
+  protected static List<Object> rasterize(
+      Geometry geom,
+      GridCoverage2D raster,
+      String pixelType,
+      double value,
+      boolean useGeometryExtent,
+      boolean allTouched,
+      Double backgroundValue)
+      throws FactoryException {
 
     // Validate the input geometry and raster metadata
     double[] metadata = RasterAccessors.metadata(raster);
@@ -60,6 +72,8 @@ public class Rasterization {
 
     RasterizationParams params =
         calculateRasterizationParams(raster, useGeometryExtent, metadata, geomExtent, pixelType);
+
+    fillBackground(params.writableRaster, backgroundValue);
 
     rasterizeGeometry(raster, metadata, geom, params, geomExtent, value, allTouched);
 
@@ -84,6 +98,31 @@ public class Rasterization {
     objects.add(rasterized);
 
     return objects;
+  }
+
+  /**
+   * Fills every pixel of the freshly-allocated raster with the background value, so pixels never
+   * covered by the geometry read back as that value instead of the allocation default of 0.
+   *
+   * <p>A null background, or a background of positive zero, keeps the zero-initialized allocation
+   * as-is. Negative zero, however, must still be filled: it is a legitimate noDataValue that is
+   * distinct from the allocation's {@code +0.0}. RS_Count (and other nodata-aware readers) compare
+   * pixels against the band's nodata metadata with {@link Double#compare}, which orders {@code
+   * -0.0} before {@code +0.0}, so a {@code -0.0} nodata left unfilled would leave the untouched
+   * pixels as {@code +0.0} and be miscounted as data. Filling makes the pixel value and the nodata
+   * metadata agree on the sign of zero.
+   */
+  private static void fillBackground(WritableRaster writableRaster, Double backgroundValue) {
+    // Double.compare(x, 0.0) == 0 is true only for +0.0; -0.0 compares as -1 and is filled.
+    if (backgroundValue == null || Double.compare(backgroundValue, 0.0) == 0) {
+      return;
+    }
+    int width = writableRaster.getWidth();
+    double[] row = new double[width];
+    Arrays.fill(row, backgroundValue);
+    for (int y = 0; y < writableRaster.getHeight(); y++) {
+      writableRaster.setSamples(0, y, width, 1, 0, row);
+    }
   }
 
   private static void rasterizeGeometry(
