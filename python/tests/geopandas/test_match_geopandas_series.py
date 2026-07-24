@@ -401,8 +401,58 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(data).fillna(fill_val)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
-    def test_explode(self):
-        pass
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {},
+            {"index_parts": True},
+            {"ignore_index": True},
+            {"ignore_index": True, "index_parts": True},
+        ],
+    )
+    def test_explode(self, kwargs):
+        from geopandas.testing import assert_geoseries_equal
+
+        family_names = [
+            "point",
+            "line",
+            "polygon",
+            "multipoint",
+            "multiline",
+            "multipolygon",
+            "collection",
+        ]
+        families = [
+            self.points,
+            self.linestrings,
+            self.polygons,
+            self.multipoints,
+            self.multilinestrings,
+            self.multipolygons,
+            self.geomcollection,
+        ]
+        geometries = []
+        index_values = []
+        for family_name, family in zip(family_names, families):
+            geometries.extend(family)
+            index_values.extend(
+                (family_name, row_number) for row_number in range(len(family))
+            )
+
+        index = pd.MultiIndex.from_tuples(index_values, names=["family", "row_number"])
+        expected = gpd.GeoSeries(geometries, index=index, name="geometry").explode(
+            **kwargs
+        )
+        result = GeoSeries(geometries, index=index, name="geometry").explode(**kwargs)
+        actual = result.to_geopandas()
+
+        assert_geoseries_equal(
+            actual,
+            expected,
+            check_index_type=False,
+            check_geom_type=True,
+        )
+        pd.testing.assert_index_equal(actual.index, expected.index, exact=False)
 
     def test_to_crs(self):
         for geom in self.geoms:

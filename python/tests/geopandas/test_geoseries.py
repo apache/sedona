@@ -404,8 +404,52 @@ class TestGeoSeries(TestGeopandasBase):
         expected = gpd.GeoSeries([Point(0, 0), GeometryCollection()], name="geometry")
         self.check_sgpd_equals_gpd(result, expected)
 
-    def test_explode(self):
-        pass
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {},
+            {"index_parts": True},
+            {"ignore_index": True},
+            {"ignore_index": True, "index_parts": True},
+        ],
+    )
+    def test_explode(self, kwargs):
+        from geopandas.testing import assert_geoseries_equal
+
+        geometries = [
+            MultiPoint([(0, 0), (1, 1)]),
+            Point(9, 9),
+            GeometryCollection([Point(2, 2), MultiPoint([(3, 3), (4, 4)])]),
+            Point(),
+            Polygon(),
+            MultiPoint(),
+            GeometryCollection(),
+            None,
+        ]
+        index = pd.Index(range(10, 18), name="feature_id")
+        expected = gpd.GeoSeries(
+            geometries,
+            index=index,
+            name="geometry",
+            crs="EPSG:4326",
+        ).explode(**kwargs)
+
+        result = GeoSeries(
+            geometries,
+            index=index,
+            name="geometry",
+            crs="EPSG:4326",
+        ).explode(**kwargs)
+        actual = result.to_geopandas()
+
+        assert_geoseries_equal(
+            actual,
+            expected,
+            check_index_type=False,
+            check_geom_type=True,
+            check_crs=True,
+        )
+        pd.testing.assert_index_equal(actual.index, expected.index, exact=False)
 
     def test_to_crs(self):
         from pyproj import CRS

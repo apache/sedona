@@ -658,17 +658,14 @@ class GeoSeries(GeoFrame, pspd.Series):
         index_spark_columns = []
         index_fields = []
         if not is_aggr:
-            # We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result.
-            # We always select SPARK_DEFAULT_INDEX_NAME, to retain series index info.
-
-            exprs.append(scol_for(df, SPARK_DEFAULT_INDEX_NAME))
-            exprs.append(scol_for(df, NATURAL_ORDER_COLUMN_NAME))
-
-            index_spark_columns = [scol_for(df, SPARK_DEFAULT_INDEX_NAME)]
-            index_fields = [self._internal.index_fields[0]]
+            # Preserve every index level and the natural order in the result.
+            index_spark_columns = [
+                scol_for(df, name) for name in self._internal.index_spark_column_names
+            ]
+            index_fields = self._internal.index_fields
             sdf = df.select(
                 col_expr,
-                scol_for(df, SPARK_DEFAULT_INDEX_NAME),
+                *index_spark_columns,
                 scol_for(df, NATURAL_ORDER_COLUMN_NAME),
             )
         # Otherwise, if is_aggr, we don't select the index columns.
@@ -679,6 +676,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             spark_frame=sdf,
             index_fields=index_fields,
             index_spark_columns=index_spark_columns,
+            index_names=[None] if is_aggr else self._internal.index_names,
             data_spark_columns=[scol_for(sdf, rename)],
             data_fields=[self._internal.data_fields[0].copy(name=rename)],
             column_label_names=[(rename,)],
@@ -2791,12 +2789,130 @@ class GeoSeries(GeoFrame, pspd.Series):
         return result
 
     def explode(self, ignore_index=False, index_parts=False) -> "GeoSeries":
-        raise NotImplementedError(
-            _not_implemented_error(
-                "explode",
-                "Explodes multi-part geometries into separate single-part geometries.",
-            )
+        """
+        Explode multi-part geometries into multiple single geometries.
+
+        Single rows can become multiple rows. This is analogous to PostGIS
+        ``ST_Dump``. Geometry collections are expanded by one level, so a
+        multi-part geometry nested in a collection remains multi-part.
+
+        Parameters
+        ----------
+        ignore_index : bool, default False
+            If True, the resulting index is labelled 0, 1, ..., n - 1 and
+            ``index_parts`` is ignored.
+        index_parts : bool, default False
+            If True, append a zero-based index level identifying each geometry
+            produced from an input row.
+
+        Returns
+        -------
+        GeoSeries
+            Exploded geometries. The original index is repeated by default.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import MultiPoint
+        >>> s = GeoSeries(
+        ...     [MultiPoint([(0, 0), (1, 1)]), MultiPoint([(2, 2), (3, 3)])]
         )
+        >>> s.explode(index_parts=True)
+        0  0    POINT (0 0)
+           1    POINT (1 1)
+        1  0    POINT (2 2)
+           1    POINT (3 3)
+        dtype: geometry
+        """
+        from pyspark.pandas.internal import InternalField
+        from pyspark.pandas.utils import verify_temp_column_name
+
+        internal = self._internal.resolved_copy
+        source_sdf = internal.spark_frame
+
+        def temp_column_name(base: str) -> str:
+            suffix = 0
+            candidate = f"__explode_{base}__"
+            while candidate in source_sdf.columns:
+                suffix += 1
+                candidate = f"__explode_{base}_{suffix}__"
+            return typing.cast(str, verify_temp_column_name(source_sdf, candidate))
+
+        parent_order_col = temp_column_name("parent_order")
+        part_index_col = temp_column_name("part_index")
+        geometry_col = temp_column_name("geometry")
+        sequence_col = temp_column_name("sequence")
+
+        exploded_sdf = source_sdf.select(
+            *internal.index_spark_columns,
+            scol_for(source_sdf, NATURAL_ORDER_COLUMN_NAME).alias(parent_order_col),
+            F.posexplode(stf.ST_Dump(internal.data_spark_columns[0])).alias(
+                part_index_col, geometry_col
+            ),
+        ).orderBy(parent_order_col, part_index_col)
+
+        # Use pandas-on-Spark's distributed sequence implementation instead of
+        # a global row-number window. Besides serving as the ignored index, this
+        # provides a natural-order column for subsequent operations.
+        exploded_sdf = InternalFrame.attach_distributed_sequence_column(
+            exploded_sdf, sequence_col
+        )
+
+        data_col = internal.data_spark_column_names[0]
+        if ignore_index:
+            output_index_cols = [SPARK_DEFAULT_INDEX_NAME]
+            index_names = [None]
+            output_sdf = exploded_sdf.select(
+                scol_for(exploded_sdf, sequence_col).alias(SPARK_DEFAULT_INDEX_NAME),
+                scol_for(exploded_sdf, geometry_col).alias(data_col),
+                scol_for(exploded_sdf, sequence_col).alias(NATURAL_ORDER_COLUMN_NAME),
+            )
+            index_fields = [
+                InternalField.from_struct_field(
+                    output_sdf.schema[SPARK_DEFAULT_INDEX_NAME]
+                )
+            ]
+        else:
+            output_index_cols = list(internal.index_spark_column_names)
+            index_names = list(internal.index_names)
+            index_fields = list(internal.index_fields)
+            index_expressions = [
+                scol_for(exploded_sdf, name) for name in output_index_cols
+            ]
+
+            if index_parts:
+                output_index_cols.append(part_index_col)
+                index_names.append(None)
+                index_expressions.append(
+                    scol_for(exploded_sdf, part_index_col)
+                    .cast("long")
+                    .alias(part_index_col)
+                )
+
+            output_sdf = exploded_sdf.select(
+                *index_expressions,
+                scol_for(exploded_sdf, geometry_col).alias(data_col),
+                scol_for(exploded_sdf, sequence_col).alias(NATURAL_ORDER_COLUMN_NAME),
+            )
+
+            if index_parts:
+                index_fields.append(
+                    InternalField.from_struct_field(output_sdf.schema[part_index_col])
+                )
+
+        result_internal = internal.copy(
+            spark_frame=output_sdf,
+            index_spark_columns=[
+                scol_for(output_sdf, name) for name in output_index_cols
+            ],
+            index_names=index_names,
+            index_fields=index_fields,
+            data_spark_columns=[scol_for(output_sdf, data_col)],
+            data_fields=[
+                InternalField(np.dtype("object"), output_sdf.schema[data_col])
+            ],
+        )
+        return GeoSeries(first_series(PandasOnSparkDataFrame(result_internal)))
 
     def to_crs(
         self, crs: Union[Any, None] = None, epsg: Union[int, None] = None
