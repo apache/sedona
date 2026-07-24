@@ -454,6 +454,13 @@ class TestGeoSeries(TestGeopandasBase):
             result.is_empty.to_pandas(), expected.is_empty, check_index_type=False
         )
 
+        all_empty = GeoSeries(
+            [MultiPoint(), GeometryCollection(), None],
+            crs="EPSG:4326",
+        ).explode(**kwargs)
+        assert all_empty.crs is not None
+        assert all_empty.crs.to_epsg() == 4326
+
     def test_to_crs(self):
         from pyproj import CRS
 

@@ -336,6 +336,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         self._anchor: GeoDataFrame
         self._col_label: Label
         self._sindex: SpatialIndex = None
+        self._empty_crs_source: typing.Optional["GeoSeries"] = None
 
         if isinstance(
             data, (GeoDataFrame, GeoSeries, PandasOnSparkSeries, PandasOnSparkDataFrame)
@@ -454,6 +455,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         from pyproj import CRS
 
         if self._is_empty():
+            if self._empty_crs_source is not None:
+                return self._empty_crs_source.crs
             return None
 
         # F.first is non-deterministic, but it doesn't matter because all non-null values should be the same.
@@ -3010,7 +3013,12 @@ class GeoSeries(GeoFrame, pspd.Series):
                 InternalField(np.dtype("object"), output_sdf.schema[data_col])
             ],
         )
-        return GeoSeries(first_series(PandasOnSparkDataFrame(result_internal)))
+        result = GeoSeries(first_series(PandasOnSparkDataFrame(result_internal)))
+        # An explode can remove every row even though its input carries an
+        # SRID. Keep a lazy reference to the input so CRS remains available
+        # without eagerly evaluating or collecting the result.
+        result._empty_crs_source = self
+        return result
 
     def to_crs(
         self, crs: Union[Any, None] = None, epsg: Union[int, None] = None
