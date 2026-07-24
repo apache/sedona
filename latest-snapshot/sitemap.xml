@@ -6637,6 +6637,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2025/07/09/welcome-to-the-apache-sedona-blog/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/blog/2026/07/24/openstreetmap-meet-sedona-raw-osmpbf-to-spatial-sql/</loc>
+        <lastmod>2026-07-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/2026/07/24/openstreetmap-meet-sedona-raw-osmpbf-to-spatial-sql/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/07/24/openstreetmap-meet-sedona-raw-osmpbf-to-spatial-sql/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/blog/2026/07/10/open-huge-geotiffs-without-the-2-gb-wall/</loc>
         <lastmod>2026-07-24</lastmod>
         <changefreq>daily</changefreq>
@@ -13334,6 +13341,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/2025/07/09/welcome-to-the-apache-sedona-blog/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2025/07/09/welcome-to-the-apache-sedona-blog/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/2026/07/24/openstreetmap-meet-sedona-raw-osmpbf-to-spatial-sql/</loc>
+        <lastmod>2026-07-24</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/2026/07/24/openstreetmap-meet-sedona-raw-osmpbf-to-spatial-sql/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/07/24/openstreetmap-meet-sedona-raw-osmpbf-to-spatial-sql/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/blog/2026/07/10/open-huge-geotiffs-without-the-2-gb-wall/</loc>
