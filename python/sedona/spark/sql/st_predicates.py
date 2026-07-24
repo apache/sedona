@@ -92,6 +92,29 @@ def ST_Equals(a: ColumnOrName, b: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_EqualsExact(
+    a: ColumnOrName,
+    b: ColumnOrName,
+    tolerance: Union[ColumnOrName, float, int],
+) -> Column:
+    """Check whether two geometries have the same structure and coordinate ordering
+    within a tolerance.
+
+    The comparison uses x and y coordinates. Z and M coordinates are ignored.
+
+    :param a: One geometry column to check.
+    :type a: ColumnOrName
+    :param b: Other geometry column to check.
+    :type b: ColumnOrName
+    :param tolerance: Maximum distance allowed between corresponding coordinates.
+    :type tolerance: ColumnOrName or float
+    :return: True if a and b are exactly equal within tolerance, otherwise False.
+    :rtype: Column
+    """
+    return _call_predicate_function("ST_EqualsExact", (a, b, tolerance))
+
+
+@validate_argument_types
 def ST_Intersects(a: ColumnOrName, b: ColumnOrName) -> Column:
     """Check whether a and b intersect. Polymorphic over input type:
 

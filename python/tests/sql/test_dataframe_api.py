@@ -1251,6 +1251,17 @@ test_configurations = [
         "",
         True,
     ),
+    (
+        stp.ST_EqualsExact,
+        (
+            lambda: f.expr("ST_Point(0.0, 0.0)"),
+            lambda: f.expr("ST_Point(0.03, 0.04)"),
+            0.051,
+        ),
+        "triangle_geom",
+        "",
+        True,
+    ),
     (stp.ST_Intersects, ("a", "b"), "overlapping_polys", "", True),
     (
         stp.ST_OrderingEquals,
@@ -1636,6 +1647,9 @@ wrong_type_configurations = [
     (stp.ST_Intersects, ("", None)),
     (stp.ST_OrderingEquals, (None, "")),
     (stp.ST_OrderingEquals, ("", None)),
+    (stp.ST_EqualsExact, (None, "", 0.0)),
+    (stp.ST_EqualsExact, ("", None, 0.0)),
+    (stp.ST_EqualsExact, ("", "", None)),
     (stp.ST_Overlaps, (None, "")),
     (stp.ST_Overlaps, ("", None)),
     (stp.ST_Touches, (None, "")),

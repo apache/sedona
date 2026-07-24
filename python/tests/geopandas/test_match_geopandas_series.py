@@ -1760,6 +1760,19 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
 
+    @pytest.mark.parametrize("tolerance", [0.0, 0.25])
+    def test_geom_equals_exact(self, tolerance):
+        geometries = [
+            geometry for geometry_family in self.geoms for geometry in geometry_family
+        ]
+        sgpd_result = GeoSeries(geometries).geom_equals_exact(
+            GeoSeries(geometries), tolerance=tolerance, align=False
+        )
+        gpd_result = gpd.GeoSeries(geometries).geom_equals_exact(
+            gpd.GeoSeries(geometries), tolerance=tolerance, align=False
+        )
+        self.check_pd_series_equal(sgpd_result, gpd_result)
+
     def test_interpolate(self):
         for geom in [self.linestrings, self.linearrings]:
             sgpd_result = GeoSeries(geom).interpolate(1.0)

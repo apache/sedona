@@ -17,6 +17,7 @@
 
 import sys
 import typing
+import warnings
 from typing import Any, Union, Literal, List
 
 import numpy as np
@@ -27,7 +28,7 @@ import pyspark.pandas as pspd
 import pyspark
 from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
-from pyspark.pandas.internal import InternalFrame
+from pyspark.pandas.internal import InternalField, InternalFrame
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for, verify_temp_column_name
 from pyspark.sql.types import NullType
@@ -100,8 +101,8 @@ IMPLEMENTATION_PRIORITY = {
 }
 
 
-def _normalize_affine_scalar(value, error_message: str) -> float:
-    """Normalize an operation-wide affine parameter to a Python float."""
+def _normalize_numeric_scalar(value, error_message: str) -> float:
+    """Normalize an operation-wide numeric parameter to a Python float."""
     if (
         value is None
         or isinstance(value, (str, bytes, bytearray))
@@ -112,6 +113,11 @@ def _normalize_affine_scalar(value, error_message: str) -> float:
         return float(value)
     except (TypeError, ValueError, OverflowError) as exc:
         raise TypeError(error_message) from exc
+
+
+def _normalize_affine_scalar(value, error_message: str) -> float:
+    """Normalize an operation-wide affine parameter to a Python float."""
+    return _normalize_numeric_scalar(value, error_message)
 
 
 def _interpret_origin(geometry: PySparkColumn, origin, with_z: bool):
@@ -1866,6 +1872,40 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         return _to_bool(result)
 
+    def geom_equals_exact(self, other, tolerance, align=None) -> pspd.Series:
+        tolerance = _normalize_numeric_scalar(
+            tolerance, "'tolerance' must be a numeric scalar"
+        )
+
+        if isinstance(other, BaseGeometry):
+            other_geometry = stc.ST_GeomFromWKB(F.lit(other.wkb))
+            spark_expr = stp.ST_EqualsExact(
+                self.spark.column, other_geometry, tolerance
+            )
+            result = self._boolean_result_preserving_index(
+                F.coalesce(spark_expr, F.lit(False)),
+                self._internal.spark_frame,
+                self._internal.index_spark_columns,
+                self._internal.index_fields,
+                self._internal.index_names,
+            )
+            return _to_bool(result)
+
+        if not isinstance(other, (GeoSeries, GeoDataFrame, PandasOnSparkSeries)):
+            raise TypeError(
+                "'other' must be a GeoSeries, GeoDataFrame, "
+                "pandas-on-Spark Series, or geometry"
+            )
+
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+
+        return self._geom_equals_exact_series(
+            other_series,
+            tolerance,
+            align,
+        )
+
     def interpolate(self, distance, normalized=False) -> "GeoSeries":
         other_series, extended = self._make_series_of_val(distance)
         align = not extended
@@ -1952,6 +1992,393 @@ class GeoSeries(GeoFrame, pspd.Series):
             returns_geom=True,
         )
         return result
+
+    def _boolean_result_preserving_index(
+        self,
+        spark_col: PySparkColumn,
+        df: pyspark.sql.DataFrame,
+        index_spark_columns: List[PySparkColumn],
+        index_fields: List,
+        index_names: List,
+    ) -> pspd.Series:
+        """Build a boolean Series while retaining every source index level."""
+        result_index_names = [
+            f"__index_level_{level}__" for level in range(len(index_spark_columns))
+        ]
+        result_name = SPARK_DEFAULT_SERIES_NAME
+        sdf = df.select(
+            spark_col.alias(result_name),
+            *[
+                index_col.alias(result_index_name)
+                for index_col, result_index_name in zip(
+                    index_spark_columns, result_index_names
+                )
+            ],
+            scol_for(df, NATURAL_ORDER_COLUMN_NAME),
+        )
+
+        schema_fields = {field.name: field for field in sdf.schema.fields}
+        result_index_fields = [
+            source_field.copy(
+                name=result_index_name,
+                spark_type=schema_fields[result_index_name].dataType,
+                nullable=schema_fields[result_index_name].nullable,
+                metadata=schema_fields[result_index_name].metadata,
+            )
+            for source_field, result_index_name in zip(index_fields, result_index_names)
+        ]
+        result_data_field = InternalField.from_struct_field(schema_fields[result_name])
+        internal = InternalFrame(
+            spark_frame=sdf,
+            index_spark_columns=[
+                scol_for(sdf, result_index_name)
+                for result_index_name in result_index_names
+            ],
+            index_names=index_names,
+            index_fields=result_index_fields,
+            column_labels=[(result_name,)],
+            data_spark_columns=[scol_for(sdf, result_name)],
+            data_fields=[result_data_field],
+            column_label_names=[None],
+        )
+        return first_series(PandasOnSparkDataFrame(internal)).rename(None)
+
+    def _geom_equals_exact_series(
+        self,
+        other: pspd.Series,
+        tolerance: float,
+        align: Union[bool, None],
+    ) -> pspd.Series:
+        """Execute exact equality with GeoPandas-compatible row alignment."""
+        position_col = "__geom_equals_exact_position__"
+        left_present_col = "__geom_equals_exact_left_present__"
+        right_present_col = "__geom_equals_exact_right_present__"
+        left_order_col = "__geom_equals_exact_left_order__"
+        right_order_col = "__geom_equals_exact_right_order__"
+
+        left_index_aliases = [
+            f"__geom_equals_exact_left_index_{level}__"
+            for level in range(len(self._internal.index_spark_columns))
+        ]
+        right_index_aliases = [
+            f"__geom_equals_exact_right_index_{level}__"
+            for level in range(len(other._internal.index_spark_columns))
+        ]
+
+        left_frame = self._internal.spark_frame.select(
+            self.spark.column.alias("L"),
+            *[
+                index_col.alias(alias)
+                for index_col, alias in zip(
+                    self._internal.index_spark_columns, left_index_aliases
+                )
+            ],
+            scol_for(self._internal.spark_frame, NATURAL_ORDER_COLUMN_NAME).alias(
+                left_order_col
+            ),
+            F.lit(True).alias(left_present_col),
+        )
+        right_frame = other._internal.spark_frame.select(
+            other.spark.column.alias("R"),
+            *[
+                index_col.alias(alias)
+                for index_col, alias in zip(
+                    other._internal.index_spark_columns, right_index_aliases
+                )
+            ],
+            scol_for(other._internal.spark_frame, NATURAL_ORDER_COLUMN_NAME).alias(
+                right_order_col
+            ),
+            F.lit(True).alias(right_present_col),
+        )
+        left_frame = left_frame.orderBy(left_order_col)
+        right_frame = right_frame.orderBy(right_order_col)
+        left_frame = InternalFrame.attach_distributed_sequence_column(
+            left_frame, position_col
+        )
+        right_frame = InternalFrame.attach_distributed_sequence_column(
+            right_frame, position_col
+        )
+        positional_join = left_frame.join(right_frame, on=position_col, how="outer")
+
+        missing_side = (
+            F.col(left_present_col).isNull() | F.col(right_present_col).isNull()
+        )
+        same_index_structure = len(left_index_aliases) == len(right_index_aliases)
+        if same_index_structure:
+            index_mismatch = missing_side
+            for left_index, right_index in zip(left_index_aliases, right_index_aliases):
+                index_mismatch = index_mismatch | ~F.col(left_index).eqNullSafe(
+                    F.col(right_index)
+                )
+        else:
+            index_mismatch = F.lit(True)
+
+        status = (
+            positional_join.select(
+                F.col(left_present_col),
+                F.col(right_present_col),
+                index_mismatch.alias("__index_mismatch__"),
+            )
+            .agg(
+                F.count(F.col(left_present_col)).alias("left_count"),
+                F.count(F.col(right_present_col)).alias("right_count"),
+                F.max(F.col("__index_mismatch__").cast("int")).alias("index_mismatch"),
+            )
+            .first()
+        )
+        left_count = status["left_count"]
+        right_count = status["right_count"]
+        lengths_match = left_count == right_count
+        indices_match = (
+            same_index_structure
+            and lengths_match
+            and not bool(status["index_mismatch"] or False)
+        )
+
+        if align is False and not lengths_match:
+            raise ValueError(
+                "Lengths of inputs do not match. "
+                f"Left: {left_count}, Right: {right_count}"
+            )
+
+        if align is None and not indices_match:
+            warnings.warn(
+                "The indices of the left and right GeoSeries' are not equal, "
+                "and therefore they will be aligned (reordering and/or "
+                "introducing missing values) before executing the operation. "
+                "If this alignment is the desired behaviour, you can silence "
+                "this warning by passing 'align=True'. If you don't want "
+                "alignment and protect yourself of accidentally aligning, "
+                "you can pass 'align=False'.",
+                stacklevel=3,
+            )
+
+        if align is False or indices_match:
+            result_index_columns = [
+                f"__index_level_{level}__" for level in range(len(left_index_aliases))
+            ]
+            aligned_frame = positional_join.select(
+                F.col("L"),
+                F.col("R"),
+                *[
+                    F.col(left_index).alias(result_index)
+                    for left_index, result_index in zip(
+                        left_index_aliases, result_index_columns
+                    )
+                ],
+                F.col(position_col).alias(NATURAL_ORDER_COLUMN_NAME),
+            )
+            result_index_fields = self._internal.index_fields
+            result_index_names = self._internal.index_names
+        else:
+            left_index_names = self._internal.index_names
+            right_index_names = other._internal.index_names
+            left_level_count = len(left_index_aliases)
+            right_level_count = len(right_index_aliases)
+
+            if left_level_count == right_level_count == 1:
+                join_pairs = [(0, 0)]
+                output_levels = [(0, 0)]
+                result_index_names = [
+                    (
+                        left_index_names[0]
+                        if left_index_names[0] == right_index_names[0]
+                        else None
+                    )
+                ]
+                join_how = "outer"
+                preserve_multiindex_order = False
+            elif (
+                left_level_count == right_level_count
+                and left_index_names == right_index_names
+            ):
+                join_pairs = [(level, level) for level in range(left_level_count)]
+                output_levels = join_pairs
+                result_index_names = left_index_names
+                join_how = "outer"
+                preserve_multiindex_order = False
+            else:
+                left_name_positions = {}
+                right_name_positions = {}
+                for level, name in enumerate(left_index_names):
+                    if name is not None:
+                        left_name_positions.setdefault(name, []).append(level)
+                for level, name in enumerate(right_index_names):
+                    if name is not None:
+                        right_name_positions.setdefault(name, []).append(level)
+
+                shared_names = []
+                for name in left_index_names:
+                    if (
+                        name is not None
+                        and name in right_name_positions
+                        and name not in shared_names
+                    ):
+                        shared_names.append(name)
+                if not shared_names:
+                    raise ValueError("cannot join with no overlapping index names")
+
+                for name in shared_names:
+                    if (
+                        len(left_name_positions[name]) != 1
+                        or len(right_name_positions[name]) != 1
+                    ):
+                        display_name = name[0] if len(name) == 1 else name
+                        raise ValueError(
+                            f"The name {display_name} occurs multiple times, "
+                            "use a level number"
+                        )
+
+                join_pairs = [
+                    (
+                        left_name_positions[name][0],
+                        right_name_positions[name][0],
+                    )
+                    for name in shared_names
+                ]
+                shared_right_levels = {right_level for _, right_level in join_pairs}
+
+                if left_level_count == 1 or right_level_count == 1:
+                    left_is_multiindex = left_level_count > 1
+                    multiindex_names = (
+                        left_index_names if left_is_multiindex else right_index_names
+                    )
+                    output_levels = []
+                    for level in range(len(multiindex_names)):
+                        if left_is_multiindex:
+                            matching_right = next(
+                                (
+                                    right_level
+                                    for left_level, right_level in join_pairs
+                                    if left_level == level
+                                ),
+                                None,
+                            )
+                            output_levels.append((level, matching_right))
+                        else:
+                            matching_left = next(
+                                (
+                                    left_level
+                                    for left_level, right_level in join_pairs
+                                    if right_level == level
+                                ),
+                                None,
+                            )
+                            output_levels.append((matching_left, level))
+                    result_index_names = multiindex_names
+                    join_how = "left" if left_is_multiindex else "right"
+                    preserve_multiindex_order = True
+                else:
+                    right_for_left = {
+                        left_level: right_level
+                        for left_level, right_level in join_pairs
+                    }
+                    output_levels = [
+                        (left_level, right_for_left.get(left_level))
+                        for left_level in range(left_level_count)
+                    ]
+                    output_levels.extend(
+                        (None, right_level)
+                        for right_level in range(right_level_count)
+                        if right_level not in shared_right_levels
+                    )
+                    result_index_names = list(left_index_names)
+                    result_index_names.extend(
+                        right_index_names[right_level]
+                        for right_level in range(right_level_count)
+                        if right_level not in shared_right_levels
+                    )
+                    join_how = "outer"
+                    preserve_multiindex_order = False
+
+            result_index_columns = [
+                f"__index_level_{level}__" for level in range(len(output_levels))
+            ]
+
+            left_alias = left_frame.alias("left")
+            right_alias = right_frame.alias("right")
+            first_left_level, first_right_level = join_pairs[0]
+            join_condition = left_alias[
+                left_index_aliases[first_left_level]
+            ].eqNullSafe(right_alias[right_index_aliases[first_right_level]])
+            for left_level, right_level in join_pairs[1:]:
+                join_condition = join_condition & left_alias[
+                    left_index_aliases[left_level]
+                ].eqNullSafe(right_alias[right_index_aliases[right_level]])
+
+            joined_by_index = left_alias.join(
+                right_alias, on=join_condition, how=join_how
+            )
+            result_index_expressions = []
+            for (left_level, right_level), result_index in zip(
+                output_levels, result_index_columns
+            ):
+                if left_level is None:
+                    index_expression = right_alias[right_index_aliases[right_level]]
+                elif right_level is None:
+                    index_expression = left_alias[left_index_aliases[left_level]]
+                else:
+                    index_expression = F.coalesce(
+                        left_alias[left_index_aliases[left_level]],
+                        right_alias[right_index_aliases[right_level]],
+                    )
+                result_index_expressions.append(index_expression.alias(result_index))
+
+            selected_frame = joined_by_index.select(
+                left_alias["L"].alias("L"),
+                right_alias["R"].alias("R"),
+                *result_index_expressions,
+                left_alias[position_col].alias(left_order_col),
+                right_alias[position_col].alias(right_order_col),
+            )
+            if preserve_multiindex_order:
+                order_columns = (
+                    [F.col(left_order_col), F.col(right_order_col)]
+                    if left_level_count > 1
+                    else [F.col(right_order_col), F.col(left_order_col)]
+                )
+            else:
+                shared_result_levels = [
+                    output_levels.index(join_pair) for join_pair in join_pairs
+                ]
+                remaining_result_levels = [
+                    level
+                    for level in range(len(result_index_columns))
+                    if level not in shared_result_levels
+                ]
+                order_columns = [
+                    F.col(result_index_columns[level]).asc_nulls_last()
+                    for level in shared_result_levels + remaining_result_levels
+                ]
+                order_columns.extend(
+                    [
+                        F.col(left_order_col).asc_nulls_last(),
+                        F.col(right_order_col).asc_nulls_last(),
+                    ]
+                )
+            ordered_frame = selected_frame.orderBy(*order_columns)
+            aligned_frame = InternalFrame.attach_distributed_sequence_column(
+                ordered_frame.drop(left_order_col, right_order_col),
+                NATURAL_ORDER_COLUMN_NAME,
+            )
+            aligned_schema = {
+                field.name: field for field in aligned_frame.schema.fields
+            }
+            result_index_fields = [
+                InternalField.from_struct_field(aligned_schema[result_index])
+                for result_index in result_index_columns
+            ]
+
+        spark_expr = stp.ST_EqualsExact(F.col("L"), F.col("R"), tolerance)
+        result = self._boolean_result_preserving_index(
+            F.coalesce(spark_expr, F.lit(False)),
+            aligned_frame,
+            [scol_for(aligned_frame, name) for name in result_index_columns],
+            result_index_fields,
+            result_index_names,
+        )
+        return _to_bool(result)
 
     def _row_wise_operation(
         self,
