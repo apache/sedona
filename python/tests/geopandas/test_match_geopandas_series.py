@@ -631,6 +631,16 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(geom).count_coordinates()
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
+    @pytest.mark.skipif(
+        parse_version(gpd.__version__) < parse_version("0.13.0"),
+        reason="geopandas get_coordinates requires version 0.13.0 or higher",
+    )
+    def test_get_coordinates(self):
+        for geometries in self.geoms:
+            sgpd_result = GeoSeries(geometries).get_coordinates()
+            gpd_result = gpd.GeoSeries(geometries).get_coordinates()
+            pd.testing.assert_frame_equal(sgpd_result.to_pandas(), gpd_result)
+
     def test_count_geometries(self):
         for geom in self.geoms:
             sgpd_result = GeoSeries(geom).count_geometries()

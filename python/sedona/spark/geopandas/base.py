@@ -363,6 +363,78 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("count_coordinates", self)
 
+    def get_coordinates(
+        self,
+        include_z=False,
+        ignore_index=False,
+        index_parts=False,
+        *,
+        include_m=False,
+    ):
+        """Get coordinates as a distributed pandas-on-Spark ``DataFrame``.
+
+        The returned frame has ``x`` and ``y`` columns. With
+        ``include_z=True`` or ``include_m=True``, it also has ``z`` or ``m``
+        columns, respectively. Missing optional ordinates are represented by
+        ``NaN``.
+
+        Parameters
+        ----------
+        include_z : bool, default False
+            Include Z coordinates.
+        ignore_index : bool, default False
+            If True, label the result with a new zero-based sequential index,
+            ignoring ``index_parts``.
+        index_parts : bool, default False
+            If True, append a zero-based coordinate-position level to the
+            original index.
+        include_m : bool, default False
+            Include M coordinates.
+
+        Returns
+        -------
+        pyspark.pandas.DataFrame
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point, LineString, Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(1, 1),
+        ...         LineString([(1, -1), (1, 0)]),
+        ...         Polygon([(3, -1), (4, 0), (3, 1)]),
+        ...     ]
+        ... )
+        >>> s.get_coordinates()
+             x    y
+        0  1.0  1.0
+        1  1.0 -1.0
+        1  1.0  0.0
+        2  3.0 -1.0
+        2  4.0  0.0
+        2  3.0  1.0
+        2  3.0 -1.0
+
+        >>> s.get_coordinates(index_parts=True)
+               x    y
+        0 0  1.0  1.0
+        1 0  1.0 -1.0
+          1  1.0  0.0
+        2 0  3.0 -1.0
+          1  4.0  0.0
+          2  3.0  1.0
+          3  3.0 -1.0
+        """
+        return _delegate_to_geometry_column(
+            "get_coordinates",
+            self,
+            include_z,
+            ignore_index,
+            index_parts,
+            include_m=include_m,
+        )
+
     def count_geometries(self):
         """Return a ``Series`` of ``dtype('int')`` with the number of
         geometries in each multi-geometry or geometry collection.

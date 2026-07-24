@@ -29,7 +29,7 @@ from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalFrame
 from pyspark.pandas.series import first_series
-from pyspark.pandas.utils import scol_for
+from pyspark.pandas.utils import scol_for, verify_temp_column_name
 from pyspark.sql.types import NullType
 from sedona.spark.sql.types import GeometryType
 
@@ -52,6 +52,7 @@ from packaging.version import parse as parse_version
 
 from pyspark.pandas.internal import (
     SPARK_DEFAULT_INDEX_NAME,  # __index_level_0__
+    SPARK_INDEX_NAME_FORMAT,
     NATURAL_ORDER_COLUMN_NAME,
     SPARK_DEFAULT_SERIES_NAME,  # '0'
 )
@@ -862,6 +863,111 @@ class GeoSeries(GeoFrame, pspd.Series):
             spark_expr,
             returns_geom=False,
         )
+
+    def get_coordinates(
+        self,
+        include_z=False,
+        ignore_index=False,
+        index_parts=False,
+        *,
+        include_m=False,
+    ) -> pspd.DataFrame:
+        source_frame = self._internal.spark_frame
+        source_order_name = verify_temp_column_name(
+            source_frame, "__coordinate_source_order__"
+        )
+        position_name = verify_temp_column_name(source_frame, "__coordinate_position__")
+        point_name = verify_temp_column_name(source_frame, "__coordinate_point__")
+
+        index_column_names = [
+            SPARK_INDEX_NAME_FORMAT(i)
+            for i in range(len(self._internal.index_spark_columns))
+        ]
+        index_columns = [
+            column.alias(name)
+            for column, name in zip(
+                self._internal.index_spark_columns, index_column_names
+            )
+        ]
+
+        exploded_frame = source_frame.select(
+            *index_columns,
+            scol_for(source_frame, NATURAL_ORDER_COLUMN_NAME).alias(source_order_name),
+            F.posexplode(stf.ST_DumpPoints(self.spark.column)).alias(
+                position_name, point_name
+            ),
+        ).orderBy(source_order_name, position_name)
+
+        sequence_name = verify_temp_column_name(exploded_frame, "__coordinate_order__")
+        sequenced_frame = InternalFrame.attach_distributed_sequence_column(
+            exploded_frame, sequence_name
+        )
+
+        coordinate_names = ["x", "y"]
+        coordinate_columns = [
+            stf.ST_X(scol_for(sequenced_frame, point_name)).alias("x"),
+            stf.ST_Y(scol_for(sequenced_frame, point_name)).alias("y"),
+        ]
+        if include_z:
+            coordinate_names.append("z")
+            coordinate_columns.append(
+                stf.ST_Z(scol_for(sequenced_frame, point_name)).alias("z")
+            )
+        if include_m:
+            coordinate_names.append("m")
+            coordinate_columns.append(
+                stf.ST_M(scol_for(sequenced_frame, point_name)).alias("m")
+            )
+
+        if ignore_index:
+            result_index_names = [SPARK_DEFAULT_INDEX_NAME]
+            result_index_labels = [None]
+            result_index_fields = None
+            result_index_columns = [
+                scol_for(sequenced_frame, sequence_name).alias(SPARK_DEFAULT_INDEX_NAME)
+            ]
+        else:
+            result_index_names = index_column_names
+            result_index_labels = list(self._internal.index_names)
+            result_index_fields = [
+                field.copy(name=name)
+                for field, name in zip(self._internal.index_fields, index_column_names)
+            ]
+            result_index_columns = [
+                scol_for(sequenced_frame, name) for name in index_column_names
+            ]
+
+            if index_parts:
+                part_index_name = SPARK_INDEX_NAME_FORMAT(len(result_index_names))
+                result_index_names.append(part_index_name)
+                result_index_labels.append(None)
+                result_index_fields.append(None)
+                result_index_columns.append(
+                    scol_for(sequenced_frame, position_name)
+                    .cast("long")
+                    .alias(part_index_name)
+                )
+
+        result_frame = sequenced_frame.select(
+            *result_index_columns,
+            *coordinate_columns,
+            scol_for(sequenced_frame, sequence_name).alias(NATURAL_ORDER_COLUMN_NAME),
+        )
+
+        internal = InternalFrame(
+            spark_frame=result_frame,
+            index_spark_columns=[
+                scol_for(result_frame, name) for name in result_index_names
+            ],
+            index_names=result_index_labels,
+            index_fields=result_index_fields,
+            column_labels=[(name,) for name in coordinate_names],
+            data_spark_columns=[
+                scol_for(result_frame, name) for name in coordinate_names
+            ],
+            column_label_names=[None],
+        )
+        return pspd.DataFrame(internal)
 
     def count_geometries(self):
         spark_expr = stf.ST_NumGeometries(self.spark.column)

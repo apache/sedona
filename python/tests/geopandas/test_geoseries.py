@@ -876,6 +876,100 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().count_coordinates()
         self.check_pd_series_equal(df_result, expected)
 
+    def test_get_coordinates(self):
+        geometries = [
+            Point(1, 1),
+            LineString([(1, -1), (1, 0)]),
+            Polygon(
+                [(3, -1), (4, 0), (3, 1)],
+                [[(3.2, -0.5), (3.5, 0), (3.2, 0.5)]],
+            ),
+            MultiPoint([(5, 5), (6, 6)]),
+            MultiLineString([[(7, 7), (8, 8)], [(9, 9), (10, 10)]]),
+            MultiPolygon(
+                [
+                    Polygon([(11, 11), (12, 11), (11, 12)]),
+                    Polygon([(13, 13), (14, 13), (13, 14)]),
+                ]
+            ),
+            GeometryCollection([Point(15, 15), LineString([(16, 16), (17, 17)])]),
+            Point(),
+            None,
+        ]
+        index = pd.Index([90, 80, 70, 60, 50, 40, 30, 20, 10], name="feature_id")
+        expected_series = gpd.GeoSeries(geometries, index=index)
+        actual_series = GeoSeries(expected_series)
+
+        options = [
+            {},
+            {"index_parts": True},
+            {"ignore_index": True},
+            {"ignore_index": True, "index_parts": True},
+        ]
+        for kwargs in options:
+            actual = actual_series.get_coordinates(**kwargs)
+            expected = expected_series.get_coordinates(**kwargs)
+            assert isinstance(actual, ps.DataFrame)
+            pd.testing.assert_frame_equal(actual.to_pandas(), expected)
+
+        dataframe_result = actual_series.to_geoframe().get_coordinates()
+        pd.testing.assert_frame_equal(
+            dataframe_result.to_pandas(), expected_series.get_coordinates()
+        )
+
+        empty_series = gpd.GeoSeries(
+            [Point(), GeometryCollection(), None],
+            index=pd.Index([3, 2, 1], name="feature_id"),
+        )
+        actual_empty = GeoSeries(empty_series).get_coordinates(index_parts=True)
+        expected_empty = empty_series.get_coordinates(index_parts=True)
+        # Spark keeps a fixed integer schema for the coordinate-position level,
+        # including when no rows are produced. GeoPandas infers object only for
+        # that all-empty level.
+        pd.testing.assert_frame_equal(
+            actual_empty.to_pandas(), expected_empty, check_index_type=False
+        )
+
+    def test_get_coordinates_multi_index(self):
+        index = pd.MultiIndex.from_tuples(
+            [("b", 2), ("a", 1), ("b", 1)], names=["group", "feature_id"]
+        )
+        geometries = [
+            LineString([(0, 0), (1, 1)]),
+            Point(2, 2),
+            Polygon([(3, 3), (4, 3), (3, 4)]),
+        ]
+        expected_series = gpd.GeoSeries(geometries, index=index)
+        actual_series = GeoSeries(expected_series)
+
+        for kwargs in ({}, {"index_parts": True}, {"ignore_index": True}):
+            actual = actual_series.get_coordinates(**kwargs).to_pandas()
+            expected = expected_series.get_coordinates(**kwargs)
+            pd.testing.assert_frame_equal(actual, expected)
+
+    @pytest.mark.skipif(
+        parse_version(shapely.__version__) < parse_version("2.1.0"),
+        reason="M coordinates require shapely>=2.1.0",
+    )
+    def test_get_coordinates_zm(self):
+        geometries_wkt = [
+            "POINT (0 1)",
+            "POINT Z (2 3 4)",
+            "POINT M (5 6 7)",
+            "POINT ZM (8 9 10 11)",
+        ]
+        expected_series = gpd.GeoSeries.from_wkt(geometries_wkt)
+        actual_series = GeoSeries.from_wkt(geometries_wkt)
+
+        for kwargs in (
+            {"include_z": True},
+            {"include_m": True},
+            {"include_z": True, "include_m": True},
+        ):
+            actual = actual_series.get_coordinates(**kwargs).to_pandas()
+            expected = expected_series.get_coordinates(**kwargs)
+            pd.testing.assert_frame_equal(actual, expected)
+
     def test_count_geometries(self):
         s = GeoSeries(
             [
