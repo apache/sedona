@@ -102,11 +102,19 @@ public class Rasterization {
 
   /**
    * Fills every pixel of the freshly-allocated raster with the background value, so pixels never
-   * covered by the geometry read back as that value instead of the allocation default of 0. A null
-   * or zero background keeps the zero-initialized allocation as-is.
+   * covered by the geometry read back as that value instead of the allocation default of 0.
+   *
+   * <p>A null background, or a background of positive zero, keeps the zero-initialized allocation
+   * as-is. Negative zero, however, must still be filled: it is a legitimate noDataValue that is
+   * distinct from the allocation's {@code +0.0}. RS_Count (and other nodata-aware readers) compare
+   * pixels against the band's nodata metadata with {@link Double#compare}, which orders {@code
+   * -0.0} before {@code +0.0}, so a {@code -0.0} nodata left unfilled would leave the untouched
+   * pixels as {@code +0.0} and be miscounted as data. Filling makes the pixel value and the nodata
+   * metadata agree on the sign of zero.
    */
   private static void fillBackground(WritableRaster writableRaster, Double backgroundValue) {
-    if (backgroundValue == null || backgroundValue == 0) {
+    // Double.compare(x, 0.0) == 0 is true only for +0.0; -0.0 compares as -1 and is filled.
+    if (backgroundValue == null || Double.compare(backgroundValue, 0.0) == 0) {
       return;
     }
     int width = writableRaster.getWidth();

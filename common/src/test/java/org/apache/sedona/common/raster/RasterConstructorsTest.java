@@ -469,6 +469,40 @@ public class RasterConstructorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testAsRasterNegativeZeroNoDataValueIsFilled()
+      throws FactoryException, ParseException {
+    // -0.0 is a legitimate noDataValue distinct from the allocation's +0.0. A 3x3 grid fully
+    // covered except for the centre pixel (a one-pixel hole) must burn 8 pixels and leave the
+    // centre as the -0.0 background. RS_Count(band, excludeNoData=true) compares each pixel to
+    // the nodata metadata with Double.compare, which distinguishes +0.0 from -0.0: if the hole
+    // were left as the zero-initialized +0.0 it would be miscounted as data (9 instead of 8).
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "D", 3, 3, 0, 3, 1, -1, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((0 0, 3 0, 3 3, 0 3, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))", 0);
+
+    GridCoverage2D rasterized =
+        RasterConstructors.asRaster(geom, raster, "D", false, 1d, -0.0d, false);
+    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+    double[] expected =
+        new double[] {
+          1, 1, 1,
+          1, -0.0, 1,
+          1, 1, 1
+        };
+    assertArrayEquals(expected, actual, 0.0d);
+
+    // The hole pixel must be exactly -0.0 (not +0.0), matching the band's nodata metadata.
+    // Double.compare is sign-of-zero sensitive; assertArrayEquals with a delta is not.
+    assertEquals(0, Double.compare(-0.0d, actual[4]));
+    assertEquals(
+        0, Double.compare(-0.0d, RasterUtils.getNoDataValue(rasterized.getSampleDimension(0))));
+
+    // 8 data pixels, not 9: the -0.0 hole is excluded as nodata.
+    assertEquals(8L, RasterBandAccessors.getCount(rasterized, 1, true));
+  }
+
+  @Test
   public void testAsRasterRejectsNonRepresentableNoDataValue()
       throws FactoryException, ParseException {
     // An unsigned 8-bit band ('B') cannot store a negative or >255 nodata. Silently coercing
