@@ -85,6 +85,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
         self.polygons = [
             Polygon(),
+            # Keep an invalid polygon to exercise invalid-geometry paths.
             Polygon([(0, 0), (1, 0), (2, 1), (3, 1)]),
             Polygon([(1, 1), (2, 1), (2, 2), (1, 2)]),
         ]
@@ -401,8 +402,61 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(data).fillna(fill_val)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
-    def test_explode(self):
-        pass
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {},
+            {"index_parts": True},
+            {"ignore_index": True},
+            {"ignore_index": True, "index_parts": True},
+        ],
+    )
+    def test_explode(self, kwargs):
+        from geopandas.testing import assert_geoseries_equal
+
+        family_names = [
+            "point",
+            "line",
+            "polygon",
+            "multipoint",
+            "multiline",
+            "multipolygon",
+            "collection",
+        ]
+        families = [
+            self.points,
+            self.linestrings,
+            self.polygons,
+            self.multipoints,
+            self.multilinestrings,
+            self.multipolygons,
+            self.geomcollection,
+        ]
+        geometries = []
+        index_values = []
+        for family_name, family in zip(family_names, families):
+            geometries.extend(family)
+            index_values.extend(
+                (family_name, row_number) for row_number in range(len(family))
+            )
+
+        index = pd.MultiIndex.from_tuples(index_values, names=["family", "row_number"])
+        expected = gpd.GeoSeries(geometries, index=index, name="geometry").explode(
+            **kwargs
+        )
+        result = GeoSeries(geometries, index=index, name="geometry").explode(**kwargs)
+        actual = result.to_geopandas()
+
+        # The fixture intentionally includes an invalid polygon. Coordinate-wise
+        # equality is reliable here while topological equality is not.
+        assert_geoseries_equal(
+            actual,
+            expected,
+            check_index_type=False,
+            check_geom_type=True,
+            check_less_precise=True,
+        )
+        pd.testing.assert_index_equal(actual.index, expected.index, exact=False)
 
     def test_to_crs(self):
         for geom in self.geoms:
@@ -580,6 +634,16 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             sgpd_result = GeoSeries(geom).count_coordinates()
             gpd_result = gpd.GeoSeries(geom).count_coordinates()
             self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    @pytest.mark.skipif(
+        parse_version(gpd.__version__) < parse_version("0.13.0"),
+        reason="geopandas get_coordinates requires version 0.13.0 or higher",
+    )
+    def test_get_coordinates(self):
+        for geometries in self.geoms:
+            sgpd_result = GeoSeries(geometries).get_coordinates()
+            gpd_result = gpd.GeoSeries(geometries).get_coordinates()
+            pd.testing.assert_frame_equal(sgpd_result.to_pandas(), gpd_result)
 
     def test_count_geometries(self):
         for geom in self.geoms:
@@ -1745,6 +1809,19 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                     gpd.GeoSeries(geom2), align=False
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    @pytest.mark.parametrize("tolerance", [0.0, 0.25])
+    def test_geom_equals_exact(self, tolerance):
+        geometries = [
+            geometry for geometry_family in self.geoms for geometry in geometry_family
+        ]
+        sgpd_result = GeoSeries(geometries).geom_equals_exact(
+            GeoSeries(geometries), tolerance=tolerance, align=False
+        )
+        gpd_result = gpd.GeoSeries(geometries).geom_equals_exact(
+            gpd.GeoSeries(geometries), tolerance=tolerance, align=False
+        )
+        self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_interpolate(self):
         for geom in [self.linestrings, self.linearrings]:

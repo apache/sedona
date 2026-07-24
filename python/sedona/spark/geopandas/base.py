@@ -363,6 +363,78 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("count_coordinates", self)
 
+    def get_coordinates(
+        self,
+        include_z=False,
+        ignore_index=False,
+        index_parts=False,
+        *,
+        include_m=False,
+    ):
+        """Get coordinates as a distributed pandas-on-Spark ``DataFrame``.
+
+        The returned frame has ``x`` and ``y`` columns. With
+        ``include_z=True`` or ``include_m=True``, it also has ``z`` or ``m``
+        columns, respectively. Missing optional ordinates are represented by
+        ``NaN``.
+
+        Parameters
+        ----------
+        include_z : bool, default False
+            Include Z coordinates.
+        ignore_index : bool, default False
+            If True, label the result with a new zero-based sequential index,
+            ignoring ``index_parts``.
+        index_parts : bool, default False
+            If True, append a zero-based coordinate-position level to the
+            original index.
+        include_m : bool, default False
+            Include M coordinates.
+
+        Returns
+        -------
+        pyspark.pandas.DataFrame
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point, LineString, Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(1, 1),
+        ...         LineString([(1, -1), (1, 0)]),
+        ...         Polygon([(3, -1), (4, 0), (3, 1)]),
+        ...     ]
+        ... )
+        >>> s.get_coordinates()
+             x    y
+        0  1.0  1.0
+        1  1.0 -1.0
+        1  1.0  0.0
+        2  3.0 -1.0
+        2  4.0  0.0
+        2  3.0  1.0
+        2  3.0 -1.0
+
+        >>> s.get_coordinates(index_parts=True)
+               x    y
+        0 0  1.0  1.0
+        1 0  1.0 -1.0
+          1  1.0  0.0
+        2 0  3.0 -1.0
+          1  4.0  0.0
+          2  3.0  1.0
+          3  3.0 -1.0
+        """
+        return _delegate_to_geometry_column(
+            "get_coordinates",
+            self,
+            include_z,
+            ignore_index,
+            index_parts,
+            include_m=include_m,
+        )
+
     def count_geometries(self):
         """Return a ``Series`` of ``dtype('int')`` with the number of
         geometries in each multi-geometry or geometry collection.
@@ -2931,6 +3003,73 @@ class GeoFrame(metaclass=ABCMeta):
         GeoSeries.geom_equals_exact
         """
         return _delegate_to_geometry_column("geom_equals", self, other, align)
+
+    def geom_equals_exact(self, other, tolerance, align=None):
+        """Return ``True`` for geometries that equal aligned `other` to a
+        given tolerance, otherwise ``False``.
+
+        Equality is structural: geometry types, component ordering, ring
+        ordering, and vertex ordering must match. Corresponding x and y
+        coordinates may differ by at most ``tolerance``. Z and M coordinates
+        are ignored.
+
+        The operation works in a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to compare to.
+        tolerance : float
+            Maximum distance allowed between corresponding coordinates.
+        align : bool | None (default None)
+            If True, automatically align GeoSeries based on their indices.
+            If False, compare values in their existing order. None defaults
+            to True.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(0, 1.1),
+        ...         Point(0, 1.0),
+        ...         Point(0, 1.2),
+        ...     ]
+        ... )
+        >>> s.geom_equals_exact(Point(0, 1), tolerance=0.1)
+        0    False
+        1     True
+        2    False
+        dtype: bool
+
+        >>> s.geom_equals_exact(Point(0, 1), tolerance=0.15)
+        0     True
+        1     True
+        2    False
+        dtype: bool
+
+        Notes
+        -----
+        This method checks geometries row by row; it does not compare each
+        geometry with every value in `other`.
+
+        As elsewhere in Sedona's GeoPandas compatibility layer, standalone
+        ``LinearRing`` geometries are serialized as ``LineString`` geometries.
+        Consequently, this method cannot distinguish those two standalone
+        input types when their coordinates match.
+
+        See also
+        --------
+        GeoSeries.geom_equals
+        """
+        return _delegate_to_geometry_column(
+            "geom_equals_exact", self, other, tolerance, align
+        )
 
     def interpolate(self, distance, normalized=False):
         """Return a point at the specified distance along each geometry.

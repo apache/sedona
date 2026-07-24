@@ -1891,6 +1891,17 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(!actualResult)
     }
 
+    it("Passed ST_EqualsExact") {
+      val baseDf = sparkSession.sql("SELECT ST_Point(0.0, 0.0) AS a, ST_Point(0.03, 0.04) AS b")
+      val result = baseDf
+        .select(
+          ST_EqualsExact("a", "b", 0.051).alias("within"),
+          ST_EqualsExact("a", "b", 0.049).alias("outside"))
+        .first()
+      assert(result.getBoolean(0))
+      assert(!result.getBoolean(1))
+    }
+
     it("Passed ST_Covers") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS a, ST_Point(1.0, 0.0) AS b, ST_Point(0.0, 1.0) AS c")

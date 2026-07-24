@@ -263,6 +263,19 @@ private[apache] case class ST_Equals(inputExpressions: Seq[Expression])
 }
 
 /**
+ * Test if two geometries have the same structure and coordinate ordering within a tolerance.
+ *
+ * @param inputExpressions
+ */
+private[apache] case class ST_EqualsExact(inputExpressions: Seq[Expression])
+    extends InferredExpression(inferrableFunction3(Predicates.equalsExact)) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
  * Test if leftGeometry is disjoint from rightGeometry
  *
  * @param inputExpressions

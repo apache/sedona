@@ -158,6 +158,11 @@ public class Predicates {
     return leftGeometry.equalsTopo(rightGeometry);
   }
 
+  public static boolean equalsExact(
+      Geometry leftGeometry, Geometry rightGeometry, double tolerance) {
+    return leftGeometry.equalsExact(rightGeometry, tolerance);
+  }
+
   public static boolean disjoint(Geometry leftGeometry, Geometry rightGeometry) {
     return leftGeometry.disjoint(rightGeometry);
   }
