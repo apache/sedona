@@ -538,6 +538,34 @@ public class RasterConstructorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testAsRasterRejectsFloatNoDataValueNotExactlyRepresentable()
+      throws FactoryException, ParseException {
+    // A nodata sentinel must round-trip exactly through a 32-bit float band. 0.1 has no exact
+    // float32 representation (it would store as 0.10000000149...), so RS_AsRaster on an 'F' band
+    // rejects it up front rather than recording a sentinel no pixel could equal. Previously this
+    // value crashed deep in GeoTools. Values that ARE exactly representable in float32 -- and NaN
+    // -- must still construct without throwing.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    IllegalArgumentException inexact =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, "F", false, 1d, 0.1d, false));
+    Assert.assertTrue(inexact.getMessage(), inexact.getMessage().contains("0.1"));
+    Assert.assertTrue(inexact.getMessage(), inexact.getMessage().contains("'F'"));
+
+    // Exactly representable in float32 (0.5 = 2^-1, -9999 and 2^24 are integers below 2^24) plus
+    // NaN construct without throwing.
+    for (double exact : new double[] {0.5d, -9999.0d, 16777216.0d, Double.NaN}) {
+      Assert.assertNotNull(RasterConstructors.asRaster(geom, raster, "F", false, 1d, exact, false));
+    }
+  }
+
+  @Test
   public void testAsRasterRepresentableNoDataValueOnIntegerBand()
       throws FactoryException, ParseException {
     // A representable nodata (9 fits an unsigned 8-bit band) still fills the uncovered pixels and

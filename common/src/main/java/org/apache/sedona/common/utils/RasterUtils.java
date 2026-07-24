@@ -690,14 +690,16 @@ public class RasterUtils {
         description = "signed 32-bit";
         break;
       case DataBuffer.TYPE_FLOAT:
-        // 32-bit float represents NaN and the infinities; reject only a finite value whose
-        // magnitude overflows the float range (it would silently become an infinity). Rounding a
-        // value to the nearest float is the inherent, expected behavior of a float band.
-        if (Double.isFinite(noDataValue) && Math.abs(noDataValue) > Float.MAX_VALUE) {
+        // A nodata value is a sentinel, so it must round-trip exactly through the band's
+        // 32-bit float storage — otherwise the stored sentinel differs from the value the
+        // caller set (e.g. 0.1 would be stored as 0.10000000149...), and comparisons against
+        // the caller's value would miss it. Overflow to +/-Infinity is caught by the same
+        // test. NaN and +/-Infinity are exactly representable and allowed.
+        if (Double.isFinite(noDataValue) && (double) (float) noDataValue != noDataValue) {
           throw new IllegalArgumentException(
               String.format(
-                  "noDataValue %s is not representable in pixel type '%s' (32-bit float, valid range %s..%s)",
-                  noDataValue, pixelType, -Float.MAX_VALUE, Float.MAX_VALUE));
+                  "noDataValue %s is not exactly representable in pixel type '%s' (32-bit float)",
+                  noDataValue, pixelType));
         }
         return noDataValue;
       case DataBuffer.TYPE_DOUBLE:
