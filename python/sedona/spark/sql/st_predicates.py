@@ -107,7 +107,7 @@ def ST_EqualsExact(
     :param b: Other geometry column to check.
     :type b: ColumnOrName
     :param tolerance: Maximum distance allowed between corresponding coordinates.
-    :type tolerance: ColumnOrName or float
+    :type tolerance: ColumnOrName or float or int
     :return: True if a and b are exactly equal within tolerance, otherwise False.
     :rtype: Column
     """

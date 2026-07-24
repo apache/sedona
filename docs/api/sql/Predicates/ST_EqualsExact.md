@@ -19,9 +19,9 @@
 
 # ST_EqualsExact
 
-Introduction: Return true if A and B have the same structure and their corresponding coordinates are equal within a tolerance.
+Introduction: Returns true if A and B have the same structure and their corresponding coordinates are equal within a tolerance.
 
-Unlike `ST_Equals`, this predicate requires geometry types, component order, ring order, and vertex order to match. The tolerance is the maximum distance allowed between each pair of corresponding coordinates. The comparison uses x and y coordinates and ignores z and m coordinates.
+Unlike `ST_Equals`, this predicate requires geometry types, component order, ring order, and vertex order to match. The tolerance is the maximum distance allowed between each pair of corresponding coordinates. The comparison uses x and y coordinates and ignores Z and M coordinates.
 
 Format: `ST_EqualsExact (A: Geometry, B: Geometry, tolerance: Double)`
 
