@@ -450,6 +450,9 @@ class TestGeoSeries(TestGeopandasBase):
             check_crs=True,
         )
         pd.testing.assert_index_equal(actual.index, expected.index, exact=False)
+        pd.testing.assert_series_equal(
+            result.is_empty.to_pandas(), expected.is_empty, check_index_type=False
+        )
 
     def test_to_crs(self):
         from pyproj import CRS
@@ -917,6 +920,15 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             dataframe_result.to_pandas(), expected_series.get_coordinates()
         )
 
+        coordinate_named_index = gpd.GeoSeries(
+            [Point(1, 2), Point(3, 4)],
+            index=pd.Index([10, 20], name="x"),
+        )
+        pd.testing.assert_frame_equal(
+            GeoSeries(coordinate_named_index).get_coordinates().to_pandas(),
+            coordinate_named_index.get_coordinates(),
+        )
+
         empty_series = gpd.GeoSeries(
             [Point(), GeometryCollection(), None],
             index=pd.Index([3, 2, 1], name="feature_id"),
@@ -947,11 +959,23 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             expected = expected_series.get_coordinates(**kwargs)
             pd.testing.assert_frame_equal(actual, expected)
 
+    def test_get_coordinates_z(self):
+        geometries_wkt = [
+            "POINT (0 1)",
+            "POINT Z (2 3 4)",
+        ]
+        expected_series = gpd.GeoSeries.from_wkt(geometries_wkt)
+        actual_series = GeoSeries.from_wkt(geometries_wkt)
+
+        actual = actual_series.get_coordinates(include_z=True).to_pandas()
+        expected = expected_series.get_coordinates(include_z=True)
+        pd.testing.assert_frame_equal(actual, expected)
+
     @pytest.mark.skipif(
         parse_version(shapely.__version__) < parse_version("2.1.0"),
         reason="M coordinates require shapely>=2.1.0",
     )
-    def test_get_coordinates_zm(self):
+    def test_get_coordinates_m(self):
         geometries_wkt = [
             "POINT (0 1)",
             "POINT Z (2 3 4)",
@@ -962,7 +986,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         actual_series = GeoSeries.from_wkt(geometries_wkt)
 
         for kwargs in (
-            {"include_z": True},
             {"include_m": True},
             {"include_z": True, "include_m": True},
         ):

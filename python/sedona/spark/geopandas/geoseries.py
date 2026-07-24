@@ -691,6 +691,98 @@ class GeoSeries(GeoFrame, pspd.Series):
         result = GeoSeries(ps_series) if returns_geom else ps_series
         return result
 
+    def _expand_geometry_array(
+        self,
+        array_builder,
+        ignore_index: bool,
+        index_parts: bool,
+        temp_prefix: str,
+    ):
+        """Expand a geometry-array expression while preserving index metadata."""
+        internal = self._internal.resolved_copy
+        source_sdf = internal.spark_frame
+        reserved_names = set(source_sdf.columns)
+
+        def temp_column_name(base: str) -> str:
+            suffix = 0
+            candidate = f"__{temp_prefix}_{base}__"
+            while candidate in reserved_names:
+                suffix += 1
+                candidate = f"__{temp_prefix}_{base}_{suffix}__"
+            reserved_names.add(candidate)
+            return typing.cast(str, verify_temp_column_name(source_sdf, candidate))
+
+        index_column_names = [
+            temp_column_name(f"index_{level}")
+            for level in range(len(internal.index_spark_columns))
+        ]
+        parent_order_col = temp_column_name("parent_order")
+        position_col = temp_column_name("position")
+        value_col = temp_column_name("value")
+        sequence_col = temp_column_name("sequence")
+
+        expanded_sdf = source_sdf.select(
+            *[
+                column.alias(name)
+                for column, name in zip(
+                    internal.index_spark_columns, index_column_names
+                )
+            ],
+            scol_for(source_sdf, NATURAL_ORDER_COLUMN_NAME).alias(parent_order_col),
+            F.posexplode(array_builder(internal.data_spark_columns[0])).alias(
+                position_col, value_col
+            ),
+        ).orderBy(parent_order_col, position_col)
+
+        # The distributed sequence supplies both ignore_index and a stable
+        # natural-order column without a single-partition row-number window.
+        expanded_sdf = InternalFrame.attach_distributed_sequence_column(
+            expanded_sdf, sequence_col
+        )
+
+        if ignore_index:
+            output_index_cols = [SPARK_DEFAULT_INDEX_NAME]
+            index_names = [None]
+            index_fields = None
+            index_expressions = [
+                scol_for(expanded_sdf, sequence_col).alias(SPARK_DEFAULT_INDEX_NAME)
+            ]
+        else:
+            output_index_cols = list(index_column_names)
+            index_names = list(internal.index_names)
+            index_fields = [
+                field.copy(name=name)
+                for field, name in zip(internal.index_fields, output_index_cols)
+            ]
+            index_expressions = [
+                scol_for(expanded_sdf, name) for name in output_index_cols
+            ]
+
+            if index_parts:
+                part_index_col = SPARK_INDEX_NAME_FORMAT(len(output_index_cols))
+                output_index_cols.append(part_index_col)
+                index_names.append(None)
+                index_fields.append(None)
+                index_expressions.append(
+                    scol_for(expanded_sdf, position_col)
+                    .cast("long")
+                    .alias(part_index_col)
+                )
+
+        output_sdf = expanded_sdf.select(
+            *index_expressions,
+            scol_for(expanded_sdf, value_col),
+            scol_for(expanded_sdf, sequence_col).alias(NATURAL_ORDER_COLUMN_NAME),
+        )
+        return (
+            internal,
+            output_sdf,
+            output_index_cols,
+            index_names,
+            index_fields,
+            value_col,
+        )
+
     # ============================================================================
     # CONVERSION AND SERIALIZATION METHODS
     # ============================================================================
@@ -872,95 +964,49 @@ class GeoSeries(GeoFrame, pspd.Series):
         *,
         include_m=False,
     ) -> pspd.DataFrame:
-        source_frame = self._internal.spark_frame
-        source_order_name = verify_temp_column_name(
-            source_frame, "__coordinate_source_order__"
-        )
-        position_name = verify_temp_column_name(source_frame, "__coordinate_position__")
-        point_name = verify_temp_column_name(source_frame, "__coordinate_point__")
-
-        index_column_names = [
-            SPARK_INDEX_NAME_FORMAT(i)
-            for i in range(len(self._internal.index_spark_columns))
-        ]
-        index_columns = [
-            column.alias(name)
-            for column, name in zip(
-                self._internal.index_spark_columns, index_column_names
-            )
-        ]
-
-        exploded_frame = source_frame.select(
-            *index_columns,
-            scol_for(source_frame, NATURAL_ORDER_COLUMN_NAME).alias(source_order_name),
-            F.posexplode(stf.ST_DumpPoints(self.spark.column)).alias(
-                position_name, point_name
-            ),
-        ).orderBy(source_order_name, position_name)
-
-        sequence_name = verify_temp_column_name(exploded_frame, "__coordinate_order__")
-        sequenced_frame = InternalFrame.attach_distributed_sequence_column(
-            exploded_frame, sequence_name
+        (
+            _,
+            expanded_frame,
+            index_column_names,
+            index_names,
+            index_fields,
+            point_name,
+        ) = self._expand_geometry_array(
+            stf.ST_DumpPoints,
+            ignore_index=ignore_index,
+            index_parts=index_parts,
+            temp_prefix="coordinates",
         )
 
         coordinate_names = ["x", "y"]
         coordinate_columns = [
-            stf.ST_X(scol_for(sequenced_frame, point_name)).alias("x"),
-            stf.ST_Y(scol_for(sequenced_frame, point_name)).alias("y"),
+            stf.ST_X(scol_for(expanded_frame, point_name)).alias("x"),
+            stf.ST_Y(scol_for(expanded_frame, point_name)).alias("y"),
         ]
         if include_z:
             coordinate_names.append("z")
             coordinate_columns.append(
-                stf.ST_Z(scol_for(sequenced_frame, point_name)).alias("z")
+                stf.ST_Z(scol_for(expanded_frame, point_name)).alias("z")
             )
         if include_m:
             coordinate_names.append("m")
             coordinate_columns.append(
-                stf.ST_M(scol_for(sequenced_frame, point_name)).alias("m")
+                stf.ST_M(scol_for(expanded_frame, point_name)).alias("m")
             )
 
-        if ignore_index:
-            result_index_names = [SPARK_DEFAULT_INDEX_NAME]
-            result_index_labels = [None]
-            result_index_fields = None
-            result_index_columns = [
-                scol_for(sequenced_frame, sequence_name).alias(SPARK_DEFAULT_INDEX_NAME)
-            ]
-        else:
-            result_index_names = index_column_names
-            result_index_labels = list(self._internal.index_names)
-            result_index_fields = [
-                field.copy(name=name)
-                for field, name in zip(self._internal.index_fields, index_column_names)
-            ]
-            result_index_columns = [
-                scol_for(sequenced_frame, name) for name in index_column_names
-            ]
-
-            if index_parts:
-                part_index_name = SPARK_INDEX_NAME_FORMAT(len(result_index_names))
-                result_index_names.append(part_index_name)
-                result_index_labels.append(None)
-                result_index_fields.append(None)
-                result_index_columns.append(
-                    scol_for(sequenced_frame, position_name)
-                    .cast("long")
-                    .alias(part_index_name)
-                )
-
-        result_frame = sequenced_frame.select(
-            *result_index_columns,
+        result_frame = expanded_frame.select(
+            *[scol_for(expanded_frame, name) for name in index_column_names],
             *coordinate_columns,
-            scol_for(sequenced_frame, sequence_name).alias(NATURAL_ORDER_COLUMN_NAME),
+            scol_for(expanded_frame, NATURAL_ORDER_COLUMN_NAME),
         )
 
         internal = InternalFrame(
             spark_frame=result_frame,
             index_spark_columns=[
-                scol_for(result_frame, name) for name in result_index_names
+                scol_for(result_frame, name) for name in index_column_names
             ],
-            index_names=result_index_labels,
-            index_fields=result_index_fields,
+            index_names=index_names,
+            index_fields=index_fields,
             column_labels=[(name,) for name in coordinate_names],
             data_spark_columns=[
                 scol_for(result_frame, name) for name in coordinate_names
@@ -2931,80 +2977,26 @@ class GeoSeries(GeoFrame, pspd.Series):
         dtype: geometry
         """
         from pyspark.pandas.internal import InternalField
-        from pyspark.pandas.utils import verify_temp_column_name
 
-        internal = self._internal.resolved_copy
-        source_sdf = internal.spark_frame
-
-        def temp_column_name(base: str) -> str:
-            suffix = 0
-            candidate = f"__explode_{base}__"
-            while candidate in source_sdf.columns:
-                suffix += 1
-                candidate = f"__explode_{base}_{suffix}__"
-            return typing.cast(str, verify_temp_column_name(source_sdf, candidate))
-
-        parent_order_col = temp_column_name("parent_order")
-        part_index_col = temp_column_name("part_index")
-        geometry_col = temp_column_name("geometry")
-        sequence_col = temp_column_name("sequence")
-
-        exploded_sdf = source_sdf.select(
-            *internal.index_spark_columns,
-            scol_for(source_sdf, NATURAL_ORDER_COLUMN_NAME).alias(parent_order_col),
-            F.posexplode(stf.ST_Dump(internal.data_spark_columns[0])).alias(
-                part_index_col, geometry_col
-            ),
-        ).orderBy(parent_order_col, part_index_col)
-
-        # Use pandas-on-Spark's distributed sequence implementation instead of
-        # a global row-number window. Besides serving as the ignored index, this
-        # provides a natural-order column for subsequent operations.
-        exploded_sdf = InternalFrame.attach_distributed_sequence_column(
-            exploded_sdf, sequence_col
+        (
+            internal,
+            expanded_sdf,
+            output_index_cols,
+            index_names,
+            index_fields,
+            geometry_col,
+        ) = self._expand_geometry_array(
+            stf.ST_Dump,
+            ignore_index=ignore_index,
+            index_parts=index_parts,
+            temp_prefix="explode",
         )
-
         data_col = internal.data_spark_column_names[0]
-        if ignore_index:
-            output_index_cols = [SPARK_DEFAULT_INDEX_NAME]
-            index_names = [None]
-            output_sdf = exploded_sdf.select(
-                scol_for(exploded_sdf, sequence_col).alias(SPARK_DEFAULT_INDEX_NAME),
-                scol_for(exploded_sdf, geometry_col).alias(data_col),
-                scol_for(exploded_sdf, sequence_col).alias(NATURAL_ORDER_COLUMN_NAME),
-            )
-            index_fields = [
-                InternalField.from_struct_field(
-                    output_sdf.schema[SPARK_DEFAULT_INDEX_NAME]
-                )
-            ]
-        else:
-            output_index_cols = list(internal.index_spark_column_names)
-            index_names = list(internal.index_names)
-            index_fields = list(internal.index_fields)
-            index_expressions = [
-                scol_for(exploded_sdf, name) for name in output_index_cols
-            ]
-
-            if index_parts:
-                output_index_cols.append(part_index_col)
-                index_names.append(None)
-                index_expressions.append(
-                    scol_for(exploded_sdf, part_index_col)
-                    .cast("long")
-                    .alias(part_index_col)
-                )
-
-            output_sdf = exploded_sdf.select(
-                *index_expressions,
-                scol_for(exploded_sdf, geometry_col).alias(data_col),
-                scol_for(exploded_sdf, sequence_col).alias(NATURAL_ORDER_COLUMN_NAME),
-            )
-
-            if index_parts:
-                index_fields.append(
-                    InternalField.from_struct_field(output_sdf.schema[part_index_col])
-                )
+        output_sdf = expanded_sdf.select(
+            *[scol_for(expanded_sdf, name) for name in output_index_cols],
+            scol_for(expanded_sdf, geometry_col).alias(data_col),
+            scol_for(expanded_sdf, NATURAL_ORDER_COLUMN_NAME),
+        )
 
         result_internal = internal.copy(
             spark_frame=output_sdf,
