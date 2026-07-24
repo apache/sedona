@@ -1177,6 +1177,23 @@ class GeoSeries(GeoFrame, pspd.Series):
             returns_geom=False,
         )
 
+    @property
+    def has_m(self) -> pspd.Series:
+        # ST_HasM checks the first coordinate. GeoPandas checks every component
+        # of a mixed-dimensional GeometryCollection.
+        spark_expr = F.when(
+            stf.ST_GeometryType(self.spark.column) == "ST_GeometryCollection",
+            F.exists(
+                stf.ST_DumpPoints(self.spark.column),
+                lambda point: stf.ST_HasM(point),
+            ),
+        ).otherwise(stf.ST_HasM(self.spark.column))
+        result = self._query_geometry_column(
+            spark_expr,
+            returns_geom=False,
+        )
+        return _to_bool(result)
+
     def get_precision(self):
         # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
@@ -1245,6 +1262,22 @@ class GeoSeries(GeoFrame, pspd.Series):
         spark_expr = stf.ST_DelaunayTriangles(
             self.spark.column, tolerance, int(only_edges)
         )
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
+
+    def constrained_delaunay_triangles(self) -> "GeoSeries":
+        empty_collection = stc.ST_GeomFromWKT(
+            F.lit("GEOMETRYCOLLECTION EMPTY"),
+            stf.ST_SRID(self.spark.column),
+        )
+        # JTS cannot triangulate an empty polygon, while GeoPandas returns an
+        # empty GeometryCollection.
+        spark_expr = F.when(
+            stf.ST_IsEmpty(self.spark.column),
+            empty_collection,
+        ).otherwise(stf.ST_TriangulatePolygon(self.spark.column))
         return self._query_geometry_column(
             spark_expr,
             returns_geom=True,
@@ -1355,6 +1388,16 @@ class GeoSeries(GeoFrame, pspd.Series):
             spark_col >= sys.float_info.max, F.lit(float("inf"))
         ).otherwise(spark_col)
         return self._query_geometry_column(spark_expr, returns_geom=False)
+
+    def minimum_clearance_line(self) -> "GeoSeries":
+        spark_expr = stf.ST_SetSRID(
+            stf.ST_MinimumClearanceLine(self.spark.column),
+            stf.ST_SRID(self.spark.column),
+        )
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
 
     def normalize(self):
         spark_expr = stf.ST_Normalize(self.spark.column)

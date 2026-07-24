@@ -1425,6 +1425,37 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().has_z
         self.check_pd_series_equal(df_result, expected)
 
+    def test_has_m(self):
+        s = GeoSeries.from_wkt(
+            [
+                "POINT (0 1)",
+                "POINT Z (0 1 2)",
+                "POINT M (0 1 2)",
+                "POINT ZM (0 1 2 3)",
+                "GEOMETRYCOLLECTION (POINT (0 0), POINT M (1 1 2))",
+                "POINT EMPTY",
+                None,
+            ]
+        )
+        expected = pd.Series([False, False, True, True, True, False, False])
+
+        result = s.has_m
+        self.check_pd_series_equal(result, expected)
+
+        # Check that GeoDataFrame works too.
+        df_result = s.to_geoframe().has_m
+        self.check_pd_series_equal(df_result, expected)
+
+        indexed = GeoSeries(
+            [Point(0, 0), None],
+            index=pd.Index(["point", "null"], name="feature_id"),
+        )
+        indexed_expected = pd.Series(
+            [False, False],
+            index=pd.Index(["point", "null"], name="feature_id"),
+        )
+        self.check_pd_series_equal(indexed.has_m, indexed_expected)
+
     def test_get_precision(self):
         pass
 
@@ -1649,6 +1680,62 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().delaunay_triangles()
         df_result_gpd = df_result.to_geopandas()
         assert len(df_result_gpd) == 2
+
+    def test_constrained_delaunay_triangles(self):
+        triangle = Polygon([(0, 0), (2, 0), (0, 2), (0, 0)])
+        polygon_with_hole = Polygon(
+            [(0, 0), (4, 0), (4, 4), (0, 4), (0, 0)],
+            [[(1, 1), (3, 1), (3, 3), (1, 3), (1, 1)]],
+        )
+        multipolygon = MultiPolygon(
+            [
+                Polygon([(0, 0), (1, 0), (0, 1), (0, 0)]),
+                Polygon([(3, 0), (4, 0), (3, 1), (3, 0)]),
+            ]
+        )
+        geoms = [
+            triangle,
+            polygon_with_hole,
+            multipolygon,
+            Point(0, 0),
+            Polygon(),
+            None,
+        ]
+        index = pd.Index(
+            ["triangle", "hole", "multi", "point", "empty", "null"],
+            name="feature_id",
+        )
+        source = GeoSeries(geoms, index=index, crs="EPSG:3857")
+
+        result = source.constrained_delaunay_triangles()
+
+        actual = result.to_geopandas()
+        assert actual.index.equals(index)
+        for label, original in [
+            ("triangle", triangle),
+            ("hole", polygon_with_hole),
+            ("multi", multipolygon),
+        ]:
+            triangles = actual.loc[label]
+            assert triangles.geom_type == "GeometryCollection"
+            assert shapely.union_all(list(triangles.geoms)).equals(original)
+
+        assert actual.loc["point"].geom_type == "GeometryCollection"
+        assert actual.loc["point"].is_empty
+        assert actual.loc["empty"].geom_type == "GeometryCollection"
+        assert actual.loc["empty"].is_empty
+        assert actual.loc["null"] is None
+        assert result.crs == source.crs
+
+        srids = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid")
+        ).collect()
+        assert {row.srid for row in srids if row.srid is not None} == {3857}
+
+        # Check that GeoDataFrame works too.
+        frame_result = source.to_geoframe().constrained_delaunay_triangles()
+        self.check_sgpd_equals_gpd(frame_result, actual)
+        assert frame_result.crs == source.crs
 
     def test_voronoi_polygons(self):
         s = GeoSeries(
@@ -1922,6 +2009,75 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         gdf = s.to_geoframe()
         df_result = gdf.minimum_clearance()
         self.check_pd_series_equal(df_result, expected)
+
+    def test_minimum_clearance_line(self):
+        geoms = [
+            Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+            LineString([(0, 0), (1, 1), (3, 2)]),
+            MultiPoint([(0, 0), (3, 4)]),
+            MultiPoint([(1, 1), (1, 1)]),
+            Point(0, 0),
+            Point(),
+            LineString(),
+            Polygon(),
+            None,
+        ]
+        index = pd.Index(
+            [
+                "polygon",
+                "line",
+                "multipoint",
+                "duplicate",
+                "point",
+                "empty-point",
+                "empty-line",
+                "empty-polygon",
+                "null",
+            ],
+            name="feature_id",
+        )
+        source = GeoSeries(geoms, index=index, crs="EPSG:3857")
+        expected = gpd.GeoSeries(
+            [
+                LineString([(0, 1), (0.5, 0.5)]),
+                LineString([(0, 0), (1, 1)]),
+                LineString([(3, 4), (0, 0)]),
+                LineString(),
+                LineString(),
+                LineString(),
+                LineString(),
+                LineString(),
+                None,
+            ],
+            index=index,
+            crs="EPSG:3857",
+        )
+
+        result = source.minimum_clearance_line()
+
+        self.check_sgpd_equals_gpd(result, expected)
+        assert result.crs == source.crs
+        actual = result.to_geopandas()
+        for label in [
+            "duplicate",
+            "point",
+            "empty-point",
+            "empty-line",
+            "empty-polygon",
+        ]:
+            assert actual.loc[label].geom_type == "LineString"
+            assert actual.loc[label].is_empty
+        assert actual.loc["null"] is None
+
+        srids = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid")
+        ).collect()
+        assert {row.srid for row in srids if row.srid is not None} == {3857}
+
+        # Check that GeoDataFrame works too.
+        frame_result = source.to_geoframe().minimum_clearance_line()
+        self.check_sgpd_equals_gpd(frame_result, expected)
+        assert frame_result.crs == source.crs
 
     def test_normalize(self):
         s = GeoSeries(

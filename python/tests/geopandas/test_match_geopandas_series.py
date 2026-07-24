@@ -784,6 +784,27 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(geom).has_z
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
+    def test_has_m(self):
+        if parse_version(gpd.__version__) < parse_version("1.1.0"):
+            pytest.skip("geopandas has_m requires version 1.1.0 or higher")
+        if parse_version(shapely.__version__) < parse_version("2.1.0"):
+            pytest.skip("geopandas has_m requires shapely 2.1.0 or higher")
+        if parse_version(shapely.geos_version_string) < parse_version("3.12.0"):
+            pytest.skip("has_m requires GEOS 3.12.0 or higher")
+
+        wkts = [
+            "POINT (0 1)",
+            "POINT Z (0 1 2)",
+            "POINT M (0 1 2)",
+            "POINT ZM (0 1 2 3)",
+            "GEOMETRYCOLLECTION (POINT (0 0), POINT M (1 1 2))",
+            "POINT EMPTY",
+            None,
+        ]
+        sgpd_result = GeoSeries.from_wkt(wkts).has_m
+        gpd_result = gpd.GeoSeries.from_wkt(wkts).has_m
+        self.check_pd_series_equal(sgpd_result, gpd_result)
+
     def test_get_precision(self):
         pass
 
@@ -886,6 +907,39 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             result = GeoSeries(geom).delaunay_triangles()
             assert len(result) == len(geom)
 
+    def test_constrained_delaunay_triangles(self):
+        if parse_version(gpd.__version__) < parse_version("1.1.0"):
+            pytest.skip(
+                "geopandas constrained_delaunay_triangles requires version 1.1.0 or higher"
+            )
+        if parse_version(shapely.__version__) < parse_version("2.1.0"):
+            pytest.skip(
+                "geopandas constrained_delaunay_triangles requires shapely 2.1.0 or higher"
+            )
+        if parse_version(shapely.geos_version_string) < parse_version("3.10.0"):
+            pytest.skip("constrained_delaunay_triangles requires GEOS 3.10.0 or higher")
+
+        geoms = [
+            Polygon([(0, 0), (2, 0), (0, 2), (0, 0)]),
+            Polygon(
+                [(0, 0), (4, 0), (4, 4), (0, 4), (0, 0)],
+                [[(1, 1), (3, 1), (3, 3), (1, 3), (1, 1)]],
+            ),
+            MultiPolygon(
+                [
+                    Polygon([(0, 0), (1, 0), (0, 1), (0, 0)]),
+                    Polygon([(3, 0), (4, 0), (3, 1), (3, 0)]),
+                ]
+            ),
+            GeometryCollection([Polygon([(0, 0), (1, 0), (0, 1), (0, 0)])]),
+            Point(0, 0),
+            Polygon(),
+            None,
+        ]
+        sgpd_result = GeoSeries(geoms).constrained_delaunay_triangles()
+        gpd_result = gpd.GeoSeries(geoms).constrained_delaunay_triangles()
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_voronoi_polygons(self):
         # Sedona ST_VoronoiPolygons is element-wise, while geopandas operates on
         # all points across the GeoSeries as a single set. Cannot compare directly.
@@ -986,6 +1040,32 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             sgpd_result = GeoSeries(geom).minimum_clearance()
             gpd_result = gpd.GeoSeries(geom).minimum_clearance()
             self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    def test_minimum_clearance_line(self):
+        if parse_version(gpd.__version__) < parse_version("1.1.0"):
+            pytest.skip(
+                "geopandas minimum_clearance_line requires version 1.1.0 or higher"
+            )
+        if parse_version(shapely.__version__) < parse_version("2.1.0"):
+            pytest.skip(
+                "geopandas minimum_clearance_line requires shapely 2.1.0 or higher"
+            )
+
+        geoms = [
+            Point(0, 0),
+            LineString([(0, 0), (1, 1), (3, 2)]),
+            MultiPoint([(0, 0), (3, 4)]),
+            MultiPoint([(1, 1), (1, 1)]),
+            Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+            GeometryCollection([Polygon([(0, 0), (1, 0), (0, 1), (0, 0)])]),
+            Point(),
+            LineString(),
+            Polygon(),
+            None,
+        ]
+        sgpd_result = GeoSeries(geoms).minimum_clearance_line()
+        gpd_result = gpd.GeoSeries(geoms).minimum_clearance_line()
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_normalize(self):
         for geom in self.geoms:

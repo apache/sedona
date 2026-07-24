@@ -632,6 +632,29 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("has_z", self)
 
+    @property
+    def has_m(self):
+        """Return a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        features that have an m-component.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries.from_wkt(
+        ...     [
+        ...         "POINT M (2 3 5)",
+        ...         "POINT Z (1 2 3)",
+        ...         "POINT (0 0)",
+        ...     ]
+        ... )
+        >>> s.has_m
+        0     True
+        1    False
+        2    False
+        dtype: bool
+        """
+        return _delegate_to_geometry_column("has_m", self)
+
     # def get_precision(self):
     #     raise NotImplementedError("This method is not implemented yet.")
 
@@ -918,6 +941,31 @@ class GeoFrame(metaclass=ABCMeta):
         return _delegate_to_geometry_column(
             "delaunay_triangles", self, tolerance, only_edges
         )
+
+    def constrained_delaunay_triangles(self):
+        """Return the constrained Delaunay triangulation of each polygon.
+
+        The edges of each input polygon are included in the resulting triangle
+        edges. The result for each row is a ``GeometryCollection`` of polygons.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries([Polygon([(0, 0), (1, 1), (0, 1)])])
+        >>> s.constrained_delaunay_triangles()
+        0    GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 0...
+        dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.delaunay_triangles : unconstrained Delaunay triangulation
+        """
+        return _delegate_to_geometry_column("constrained_delaunay_triangles", self)
 
     def voronoi_polygons(self, tolerance=0.0, extend_to=None, only_edges=False):
         """Return Voronoi diagram of the vertices of each geometry.
@@ -1285,6 +1333,40 @@ class GeoFrame(metaclass=ABCMeta):
         dtype: float64
         """
         return _delegate_to_geometry_column("minimum_clearance", self)
+
+    def minimum_clearance_line(self):
+        """Return linestrings whose endpoints define the minimum clearance.
+
+        A geometry's minimum clearance is the smallest distance by which a
+        vertex could be moved to produce an invalid geometry. If a geometry has
+        no minimum clearance, an empty LineString is returned.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+        ...         LineString([(0, 0), (1, 1), (3, 2)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s.minimum_clearance_line()
+        0    LINESTRING (0 1, 0.5 0.5)
+        1        LINESTRING (0 0, 1 1)
+        2             LINESTRING EMPTY
+        dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.minimum_clearance : minimum clearance distance
+        """
+        return _delegate_to_geometry_column("minimum_clearance_line", self)
 
     def normalize(self):
         """Return a ``GeoSeries`` of normalized geometries.
