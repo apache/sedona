@@ -2490,6 +2490,132 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         with pytest.raises(ValueError, match="origin must be"):
             empty_source.skew(origin="invalid")
 
+    def test_translate_documented_example_and_delegation(self):
+        geoms = [
+            Point(1, 1),
+            LineString([(1, -1), (1, 0)]),
+            Polygon([(3, -1), (4, 0), (3, 1)]),
+            None,
+        ]
+        s = GeoSeries(geoms)
+
+        # Docstring example: translate(2, 3)
+        result = s.translate(2, 3)
+        expected = gpd.GeoSeries(
+            [
+                Point(3, 4),
+                LineString([(3, 2), (3, 3)]),
+                Polygon([(5, 2), (6, 3), (5, 4), (5, 2)]),
+                None,
+            ]
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        df_result = s.to_geoframe().translate(2, 3)
+        assert isinstance(df_result, GeoSeries)
+        self.check_sgpd_equals_gpd(df_result, expected)
+
+    @pytest.mark.parametrize(
+        "offsets",
+        [
+            pytest.param((), id="defaults"),
+            pytest.param((2, -3, 0), id="integer-xy"),
+            pytest.param((-1.5, 0.25, -2.0), id="negative-fractional"),
+            pytest.param(
+                (np.float64(2), np.int64(3), np.float32(5)),
+                id="numpy-scalars",
+            ),
+        ],
+    )
+    def test_translate_offsets_and_dimensions(self, offsets):
+        geoms = [
+            Point(1, 2),
+            LineString([(0, 0), (2, 4)]),
+            Point(1, 2, 3),
+            LineString([(0, 0, 1), (2, 4, 7)]),
+        ]
+        source = GeoSeries(geoms)
+        expected = gpd.GeoSeries(geoms).translate(*offsets)
+
+        result = source.translate(*offsets)
+
+        self.check_sgpd_equals_gpd(result, expected)
+        actual = result.to_geopandas().sort_index()
+        assert not actual.iloc[0].has_z
+        assert not actual.iloc[1].has_z
+        assert actual.iloc[2].has_z
+        assert actual.iloc[3].has_z
+
+    def test_translate_preserves_metadata_empty_and_null(self):
+        geoms = [
+            Point(1, 2),
+            Point(),
+            LineString(),
+            Polygon(),
+            None,
+        ]
+        index = pd.Index(
+            ["point", "empty-point", "empty-line", "empty-polygon", "null"],
+            name="feature_id",
+        )
+        source = GeoSeries(geoms, index=index, crs="EPSG:3857", name="geometry")
+        expected = gpd.GeoSeries(
+            geoms, index=index, crs="EPSG:3857", name="geometry"
+        ).translate(2, -3, 5)
+
+        result = source.translate(2, -3, 5)
+
+        self.check_sgpd_equals_gpd(result, expected)
+        assert result.name is None
+        assert result.crs == source.crs == expected.crs
+        actual = result.to_geopandas()
+        assert actual.loc["empty-point"].is_empty
+        assert actual.loc["empty-point"].geom_type == "Point"
+        assert actual.loc["empty-line"].is_empty
+        assert actual.loc["empty-line"].geom_type == "LineString"
+        assert actual.loc["empty-polygon"].is_empty
+        assert actual.loc["empty-polygon"].geom_type == "Polygon"
+        assert actual.loc["null"] is None
+
+        srids = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid")
+        ).collect()
+        assert {row.srid for row in srids if row.srid is not None} == {3857}
+
+        frame_result = source.to_geoframe().translate(2, -3, 5)
+        assert isinstance(frame_result, GeoSeries)
+        self.check_sgpd_equals_gpd(frame_result, expected)
+        assert frame_result.crs == source.crs
+
+    def test_translate_validates_offsets(self):
+        source = GeoSeries([Point(1, 2)])
+        invalid_offsets = [
+            ("xoff", None),
+            ("yoff", "2"),
+            ("zoff", np.array([2])),
+            ("xoff", np.array(2.0)),
+            ("yoff", [2]),
+            ("zoff", 2 + 1j),
+            ("xoff", pd.Series([2.0])),
+        ]
+        for name, value in invalid_offsets:
+            with pytest.raises(TypeError, match=rf"'{name}' must be a numeric scalar"):
+                source.translate(**{name: value})
+
+        for value in (ps.Series([2.0]), source.spark.column):
+            for name in ("xoff", "yoff", "zoff"):
+                with pytest.raises(
+                    TypeError, match=rf"'{name}' must be a numeric scalar"
+                ):
+                    source.translate(**{name: value})
+
+        # Operation-wide arguments are validated even when there is no
+        # non-empty geometry on which to apply the transformation.
+        empty_source = GeoSeries([Point(), LineString(), Polygon(), None])
+        for name in ("xoff", "yoff", "zoff"):
+            with pytest.raises(TypeError, match=rf"'{name}' must be a numeric scalar"):
+                empty_source.translate(**{name: None})
+
     def test_force_2d(self):
         s = sgpd.GeoSeries(
             [

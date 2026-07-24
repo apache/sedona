@@ -1389,6 +1389,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         spark_expr = F.when(stf.ST_IsEmpty(geometry), geometry).otherwise(skewed)
         return self._query_geometry_column(spark_expr, returns_geom=True)
 
+    def translate(self, xoff=0.0, yoff=0.0, zoff=0.0) -> "GeoSeries":
+        xoff = _normalize_affine_scalar(xoff, "'xoff' must be a numeric scalar")
+        yoff = _normalize_affine_scalar(yoff, "'yoff' must be a numeric scalar")
+        zoff = _normalize_affine_scalar(zoff, "'zoff' must be a numeric scalar")
+        spark_expr = stf.ST_Translate(self.spark.column, xoff, yoff, zoff)
+        return self._query_geometry_column(spark_expr, returns_geom=True)
+
     def force_2d(self) -> "GeoSeries":
         spark_expr = stf.ST_Force_2D(self.spark.column)
         return self._query_geometry_column(spark_expr, returns_geom=True)

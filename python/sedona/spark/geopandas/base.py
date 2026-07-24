@@ -1571,6 +1571,62 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("skew", self, xs, ys, origin, use_radians)
 
+    def translate(self, xoff=0.0, yoff=0.0, zoff=0.0):
+        """Return a ``GeoSeries`` with translated geometries.
+
+        Each geometry is shifted by constant offsets along its coordinate
+        dimensions.
+
+        Parameters
+        ----------
+        xoff : float, default 0.0
+            Offset along the x dimension.
+        yoff : float, default 0.0
+            Offset along the y dimension.
+        zoff : float, default 0.0
+            Offset along the z dimension for geometries that have z
+            coordinates.
+
+        Returns
+        -------
+        GeoSeries
+            The translated geometries.
+
+        Notes
+        -----
+        Two-dimensional geometries remain two-dimensional. Results for mixed
+        2D/3D ``GeometryCollection`` objects, M or ZM ordinates, NaN z
+        coordinates, and non-finite offsets may differ from GeoPandas because
+        Sedona uses JTS while GeoPandas uses Shapely. This method applies
+        Sedona's distributed semantics and does not materialize geometries
+        locally to emulate Shapely.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, LineString, Polygon
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(1, 1),
+        ...         LineString([(1, -1), (1, 0)]),
+        ...         Polygon([(3, -1), (4, 0), (3, 1)]),
+        ...     ]
+        ... )
+        >>> s
+        0                         POINT (1 1)
+        1              LINESTRING (1 -1, 1 0)
+        2    POLYGON ((3 -1, 4 0, 3 1, 3 -1))
+        dtype: geometry
+
+        >>> s.translate(2, 3)
+        0                       POINT (3 4)
+        1            LINESTRING (3 2, 3 3)
+        2    POLYGON ((5 2, 6 3, 5 4, 5 2))
+        dtype: geometry
+
+        """
+        return _delegate_to_geometry_column("translate", self, xoff, yoff, zoff)
+
     def force_2d(self):
         """Force the dimensionality of a geometry to 2D.
 
