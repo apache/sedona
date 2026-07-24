@@ -328,7 +328,7 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
 
     it("should apply both a glob path and an explicit pathGlobFilter") {
       // Native Spark semantics: both constraints apply, so a*.tiff restricted to b*.tiff is
-      // empty. The internal glob-to-filter rewrite must not discard either constraint.
+      // empty.
       val dir = new File(tempDir, "globAndFilter")
       dir.mkdirs()
       FileUtils.copyFile(new File(singleFileLocation), new File(dir, "a.tiff"))
@@ -344,6 +344,139 @@ class geotiffMetadataTest extends TestBaseScala with BeforeAndAfterAll {
       val globOnly =
         sparkSession.read.format("geotiff.metadata").load(dir.getAbsolutePath + "/a*.tiff")
       assertEquals(1L, globOnly.count())
+    }
+
+    it("should not widen a file glob into nested files under explicit recursion") {
+      // GH-3131: the glob used to be rewritten to path=dir + pathGlobFilter, and
+      // pathGlobFilter matches leaf names at any depth, so recursiveFileLookup=true pulled
+      // nested a2.tiff into a load of dir/a*.tiff. The glob path now reaches Spark natively
+      // and matches direct children of the directory only.
+      val dir = new File(tempDir, "globRecursive")
+      val sub = new File(dir, "sub")
+      sub.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(dir, "a1.tiff"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(sub, "a2.tiff"))
+
+      val df = sparkSession.read
+        .format("geotiff.metadata")
+        .option("recursiveFileLookup", "true")
+        .load(dir.getAbsolutePath + "/a*.tiff")
+      assertEquals(1L, df.count())
+      assert(df.select("path").first().getString(0).endsWith("a1.tiff"))
+    }
+
+    it("should apply the directory-scan defaults to a glob that matches directories") {
+      // GH-3131: region* expands to directories, which must get the same defaults as loading
+      // them by explicit path — recursive lookup plus the extension filter.
+      val root = new File(tempDir, "dirGlob")
+      val region1 = new File(root, "region1")
+      val region2Sub = new File(root, "region2/sub")
+      region1.mkdirs()
+      region2Sub.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(region1, "x.tiff"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(region2Sub, "y.tiff"))
+      // The extension filter must exclude this; without it the reader would surface a row
+      FileUtils.writeStringToFile(new File(region1, "readme.txt"), "not a geotiff", "UTF-8")
+
+      val df = sparkSession.read
+        .format("geotiff.metadata")
+        .load(root.getAbsolutePath + "/region*")
+      assertEquals(2L, df.count())
+    }
+
+    it("should keep the directory defaults when a glob also matches a _SUCCESS marker") {
+      // Entries Spark's own listing discards (_SUCCESS, dotfiles, *._COPYING_) must not
+      // sway the all-directories classification: root/* still stands for directories, so
+      // the recursive-scan and extension-filter defaults apply and the nested file is found.
+      val root = new File(tempDir, "markerGlob")
+      val region1Sub = new File(root, "region1/sub")
+      region1Sub.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(root, "region1/x.tiff"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(region1Sub, "y.tiff"))
+      FileUtils.writeStringToFile(new File(root, "_SUCCESS"), "", "UTF-8")
+
+      val df = sparkSession.read.format("geotiff.metadata").load(root.getAbsolutePath + "/*")
+      assertEquals(2L, df.count())
+    }
+
+    it("should keep the defaults when a glob matches a hidden-named directory") {
+      // Spark's listing drops hidden-named files but traverses a directory root regardless
+      // of its name (only children are name-checked), so /root/_* matching _staging/ must
+      // still receive the directory-scan defaults.
+      val root = new File(tempDir, "hiddenDirGlob")
+      val staging = new File(root, "_staging")
+      val sub = new File(staging, "sub")
+      sub.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(staging, "x.tiff"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(sub, "y.tiff"))
+
+      val df = sparkSession.read.format("geotiff.metadata").load(root.getAbsolutePath + "/_*")
+      assertEquals(2L, df.count())
+    }
+
+    it("should not let a glob matching only ignored files veto another root's defaults") {
+      // The first glob matches only a _SUCCESS marker, which Spark's listing discards —
+      // its visible contribution is empty, so it must not flip the all-directories
+      // classification that gives the second root its recursive scan.
+      val root = new File(tempDir, "ignoredOnlyGlob")
+      val markerDir = new File(root, "markers")
+      val dataSub = new File(root, "data/sub")
+      markerDir.mkdirs()
+      dataSub.mkdirs()
+      FileUtils.writeStringToFile(new File(markerDir, "_SUCCESS"), "", "UTF-8")
+      FileUtils.copyFile(new File(singleFileLocation), new File(root, "data/x.tiff"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(dataSub, "y.tiff"))
+
+      val df = sparkSession.read
+        .format("geotiff.metadata")
+        .load(markerDir.getAbsolutePath + "/*", new File(root, "data").getAbsolutePath)
+      assertEquals(2L, df.count())
+    }
+
+    it("should apply the directory defaults to an explicitly loaded underscore directory") {
+      // Spark's hidden-name rule applies to listing entries, never to explicitly given
+      // roots — so probing a literal _staging root must not filter it either.
+      val root = new File(tempDir, "underscoreDir")
+      val staging = new File(root, "_staging")
+      val sub = new File(staging, "sub")
+      sub.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(staging, "x.tiff"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(sub, "y.tiff"))
+
+      val df = sparkSession.read.format("geotiff.metadata").load(staging.getAbsolutePath)
+      assertEquals(2L, df.count())
+    }
+
+    it("should probe the path literally when glob expansion is disabled") {
+      // With __globPaths__=false Spark treats the path literally, so a directory whose
+      // name contains glob metacharacters must be probed with getFileStatus, not expanded
+      // as a pattern — otherwise it loses the directory-scan defaults.
+      val root = new File(tempDir, "literalGlobChars")
+      val dir = new File(root, "[region]")
+      val sub = new File(dir, "sub")
+      sub.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(dir, "x.tiff"))
+      FileUtils.copyFile(new File(singleFileLocation), new File(sub, "y.tiff"))
+
+      val df = sparkSession.read
+        .format("geotiff.metadata")
+        .option("__globPaths__", "false")
+        .load(dir.getAbsolutePath)
+      assertEquals(2L, df.count())
+    }
+
+    it("should report a file glob that matches nothing as a missing path") {
+      // Native Spark glob semantics, aligned with every other file source: an empty glob is
+      // an error, not a silently empty result (the pre-GH-3131 rewrite returned no rows).
+      val dir = new File(tempDir, "emptyGlob")
+      dir.mkdirs()
+      FileUtils.copyFile(new File(singleFileLocation), new File(dir, "a.tiff"))
+      intercept[org.apache.spark.sql.AnalysisException] {
+        sparkSession.read
+          .format("geotiff.metadata")
+          .load(dir.getAbsolutePath + "/nomatch*.tiff")
+          .count()
+      }
     }
 
     it("should filter non-GeoTIFF files when loading multiple directories") {

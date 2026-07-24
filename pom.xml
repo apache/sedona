@@ -76,8 +76,8 @@
         <jts2geojson.version>0.16.1</jts2geojson.version>
         <spatial4j.version>0.8</spatial4j.version>
 
-        <jt-jiffle.version>1.1.24</jt-jiffle.version>
-        <janino-version>3.1.9</janino-version>
+        <jt-jiffle.version>1.1.31</jt-jiffle.version>
+        <janino-version>3.1.12</janino-version>
 
         <!-- Actual scala, spark and log4j version will be set by activated profiles.
              Setting a default value helps IDE:s that can't make sense of profiles. -->
@@ -96,7 +96,7 @@
         <scala-collection-compat.version>2.5.0</scala-collection-compat.version>
         <geoglib.version>1.52</geoglib.version>
         <caffeine.version>2.9.2</caffeine.version>
-        <proj4sedona.version>0.1.1</proj4sedona.version>
+        <proj4sedona.version>0.1.2</proj4sedona.version>
 
         <geotools.scope>provided</geotools.scope>
         <!-- Because it's not in Maven central, make it provided by default -->

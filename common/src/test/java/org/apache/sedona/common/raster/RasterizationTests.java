@@ -20,6 +20,7 @@ package org.apache.sedona.common.raster;
 
 import static org.apache.sedona.common.raster.RasterAccessors.metadata;
 
+import org.apache.sedona.common.Constructors;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -292,6 +293,84 @@ public class RasterizationTests extends RasterTestBase {
     wktPoint = "POINT (5.25 2.25)";
     validateRasterizeGeomExtent(
         wktPoint, new double[] {5.0, 6.0, 2.0, 3.0}, testRaster, metadata, false);
+  }
+
+  @Test
+  public void testLineTraversalDirectionIndependence() throws ParseException, FactoryException {
+    // Rasterizing a segment must not depend on which endpoint comes first. This segment has slope
+    // -5 and passes exactly through the lattice points (2, 15) and (3, 10); at those corners the
+    // traversal must burn only the two cells the segment crosses, identically in both directions.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 20, 20, 0, 20, 1, -1, 0, 0, 0);
+    Geometry forward = Constructors.geomFromWKT("LINESTRING (1.25 18.75, 3.75 6.25)", 0);
+    Geometry reverse = Constructors.geomFromWKT("LINESTRING (3.75 6.25, 1.25 18.75)", 0);
+    double[] a =
+        MapAlgebra.bandAsArray(
+            RasterConstructors.asRaster(forward, raster, "d", false, 1d, 0d, false), 1);
+    double[] b =
+        MapAlgebra.bandAsArray(
+            RasterConstructors.asRaster(reverse, raster, "d", false, 1d, 0d, false), 1);
+    Assert.assertArrayEquals(a, b, 0d);
+  }
+
+  @Test
+  public void testLineTraversalCornerCrossingSymmetry() throws ParseException, FactoryException {
+    // North-up raster with unit pixels, so integer world coordinates land on grid corners.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 20, 20, 0, 20, 1, -1, 0, 0, 0);
+
+    // Shallow slope (1/2) through the corners (2,3), (4,4), (6,5), (8,6), (10,7).
+    assertLineRasterizationSymmetric(raster, "LINESTRING (1.5 2.75, 10.5 7.25)");
+    // Steep slope (3) through the corners (1,2), (2,5), (3,8), (4,11).
+    assertLineRasterizationSymmetric(raster, "LINESTRING (0.75 1.25, 4.25 11.75)");
+    // Steep negative slope (-2) through the corners (2,16), (3,14), (4,12), (5,10).
+    assertLineRasterizationSymmetric(raster, "LINESTRING (1.25 17.5, 5.25 9.5)");
+    // Slope 1 diagonal through a run of corners (3,3), (4,4), ..., (9,9).
+    assertLineRasterizationSymmetric(raster, "LINESTRING (2.5 2.5, 9.5 9.5)");
+  }
+
+  @Test
+  public void testLineTraversalBottomUpSymmetry() throws ParseException, FactoryException {
+    // Bottom-up raster (positive scaleY exercises the row-flip branch in burnCell).
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 20, 20, 0, 0, 1, 1, 0, 0, 0);
+    // Slope 2 through the corners (2,4), (3,6), (4,8).
+    assertLineRasterizationSymmetric(raster, "LINESTRING (1.25 2.5, 4.75 9.5)");
+  }
+
+  @Test
+  public void testLineTraversalNonCornerSymmetry() throws ParseException, FactoryException {
+    // A segment that never passes through a lattice point is unaffected by the corner-tie fix and
+    // was already direction-independent; this guards against a regression in ordinary traversal.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 20, 20, 0, 20, 1, -1, 0, 0, 0);
+    assertLineRasterizationSymmetric(raster, "LINESTRING (1.3 2.7, 8.6 11.4)");
+  }
+
+  @Test
+  public void testLineTraversalNearCornerSymmetry() throws ParseException, FactoryException {
+    // A segment whose grid-line crossings fall so close to a lattice corner that the parametric
+    // tMax comparison rounds asymmetrically between the two directions, flipping which off-diagonal
+    // cell is burned. The robust orientation predicate resolves the crossing order identically in
+    // both directions.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 50, 50, 0, 0, 1, -1, 0, 0, 0);
+    assertLineRasterizationSymmetric(
+        raster,
+        "LINESTRING (13.157894736842104 -20.385964912280702, "
+            + "23.157894736842106 -11.052631578947368)");
+  }
+
+  private void assertLineRasterizationSymmetric(GridCoverage2D raster, String wkt)
+      throws ParseException, FactoryException {
+    Geometry forward = Constructors.geomFromWKT(wkt, 0);
+    Geometry reverse = forward.reverse();
+    double[] forwardBand =
+        MapAlgebra.bandAsArray(
+            RasterConstructors.asRaster(forward, raster, "d", false, 1d, 0d, false), 1);
+    double[] reverseBand =
+        MapAlgebra.bandAsArray(
+            RasterConstructors.asRaster(reverse, raster, "d", false, 1d, 0d, false), 1);
+    Assert.assertArrayEquals(forwardBand, reverseBand, 0d);
   }
 
   private void validateRasterizeGeomExtent(

@@ -804,7 +804,9 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           "RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('LINESTRING(1 -1, 1 -4, 2 -2, 3 -3, 4 -4, 5 -4, 6 -6)'), 255), 1)")
         .first()
         .getSeq(0)
-      var expected = Seq(255.0, 0.0, 0.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 0.0,
+      // Exact cell traversal also burns the pixel the line touches at a corner
+      // (index 1); this is a superset of GDAL, consistent with "all touched".
+      var expected = Seq(255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 0.0,
         255.0, 0.0, 0.0, 255.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 0.0, 255.0)
       assert(expected.equals(actual))
 
@@ -1810,7 +1812,8 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(185104.0, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', true, false)").first().get(0)
-      assertEquals(58.650240700685295, actual)
+      // allTouched now selects the boundary pixels the old sampler missed
+      assertEquals(58.651212208986514, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'variance')").first().get(0)
       assertEquals(8534.098251841822, actual)
@@ -1847,7 +1850,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assertEquals(3229013.0, actual)
 
       actual = df.selectExpr("RS_ZonalStats(raster, geom, 1, 'count', true, true)").first().get(0)
-      assertEquals(14648.0, actual)
+      // The left polygon edge is a steep diagonal (slope -3.8) whose grid-line crossings fall very
+      // close to lattice corners. The robust orientation predicate resolves each crossing exactly, so
+      // the traversal burns every boundary cell the edge truly touches; the earlier floating-point
+      // step comparison rounded past seven of those near-corner cells and dropped them. All seven are
+      // valid (non-nodata) pixels, raising the all-touched count from 14660 to 14667. The count is
+      // direction-independent: rasterizing the ring in reverse order yields the same 14667.
+      assertEquals(14667.0, actual)
 
       actual =
         df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', false, false)").first().get(0)

@@ -992,6 +992,60 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         gpd_result = gpd.GeoSeries(geoms).segmentize(psser.to_pandas())
         self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+    @pytest.mark.parametrize(
+        "matrix",
+        [
+            (1.0, 0.0, 0.0, 1.0, 0.0, 0.0),
+            (1, 0, 0, 1, 3, -2),
+            (2.0, 0.0, 0.0, 0.5, 0.0, 0.0),
+            (0.0, -1.0, 1.0, 0.0, 0.0, 0.0),
+            (1.0, 0.5, -0.25, 1.0, 0.0, 0.0),
+        ],
+        ids=["identity", "translation", "scale", "rotation", "shear"],
+    )
+    def test_affine_transform_2d(self, matrix):
+        geoms = [
+            self.points[2],
+            self.linestrings[2],
+            self.polygons[2],
+            self.multipoints[2],
+            self.multilinestrings[2],
+            self.multipolygons[1],
+            self.geomcollection[1],
+        ]
+
+        sgpd_result = GeoSeries(geoms).affine_transform(matrix)
+        gpd_result = gpd.GeoSeries(geoms).affine_transform(matrix)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_affine_transform_3d(self):
+        geoms = [
+            Point(1, 2, 3),
+            LineString([(0, 0, 1), (2, 1, 4)]),
+            Polygon([(0, 0, 1), (2, 0, 2), (1, 1, 3), (0, 0, 1)]),
+            MultiPoint([(0, 0, 1), (1, 2, 3)]),
+        ]
+        matrix = [
+            1.0,
+            0.5,
+            0.25,
+            -0.5,
+            2.0,
+            0.75,
+            0.1,
+            -0.2,
+            1.5,
+            3.0,
+            -4.0,
+            5.0,
+        ]
+
+        sgpd_result = GeoSeries(geoms).affine_transform(matrix)
+        gpd_result = gpd.GeoSeries(geoms).affine_transform(matrix)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_transform(self):
         pass
 
@@ -1016,6 +1070,188 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             sgpd_result = GeoSeries(non_empty).rotate(angle, **origin_kwargs)
             gpd_result = gpd.GeoSeries(non_empty).rotate(angle, **origin_kwargs)
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    @pytest.mark.parametrize(
+        "xfact,yfact",
+        [
+            (2.0, 0.5),
+            (-1.5, -0.5),
+            (0.0, 1.0),
+        ],
+        ids=["positive", "negative", "zero"],
+    )
+    @pytest.mark.parametrize(
+        "origin",
+        ["center", "centroid", (2.0, -1.0)],
+        ids=["center", "centroid", "explicit"],
+    )
+    def test_scale_2d(self, xfact, yfact, origin):
+        geoms = [
+            self.points[2],
+            self.linestrings[2],
+            self.polygons[2],
+            self.multipoints[2],
+            self.multilinestrings[2],
+            self.multipolygons[1],
+            self.geomcollection[1],
+        ]
+
+        sgpd_result = GeoSeries(geoms).scale(xfact=xfact, yfact=yfact, origin=origin)
+        gpd_result = gpd.GeoSeries(geoms).scale(xfact=xfact, yfact=yfact, origin=origin)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_scale_3d(self):
+        polygon = Polygon([(0, 0, 1), (2, 0, 2), (1, 2, 4), (0, 0, 1)])
+        geoms = [
+            Point(1, 2, 3),
+            LineString([(0, 0, 1), (2, 1, 4)]),
+            polygon,
+            MultiPoint([(0, 0, 1), (1, 2, 3)]),
+            MultiLineString([[(0, 0, 1), (2, 1, 3)], [(1, -1, 2), (3, 2, 4)]]),
+            MultiPolygon([polygon]),
+            GeometryCollection(
+                [Point(1, 2, 3), LineString([(0, 0, 1), (2, 1, 4)]), polygon]
+            ),
+        ]
+        scale_kwargs = {
+            "xfact": 2.0,
+            "yfact": -1.0,
+            "zfact": 0.0,
+            "origin": (1.0, -2.0, 3.0),
+        }
+
+        sgpd_result = GeoSeries(geoms).scale(**scale_kwargs)
+        gpd_result = gpd.GeoSeries(geoms).scale(**scale_kwargs)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    @pytest.mark.parametrize(
+        "xs,ys",
+        [
+            (35.0, 0.0),
+            (0.0, -25.0),
+            (-15.0, 30.0),
+        ],
+        ids=["x-only-positive", "y-only-negative", "unequal-both"],
+    )
+    @pytest.mark.parametrize(
+        "origin",
+        ["center", "centroid", (2.5, -1.5)],
+        ids=["center", "centroid", "explicit"],
+    )
+    def test_skew_2d(self, xs, ys, origin):
+        geoms = [
+            self.points[2],
+            self.linestrings[2],
+            self.t1,
+            self.multipoints[2],
+            self.multilinestrings[2],
+            self.multipolygons[1],
+            self.geomcollection[1],
+        ]
+
+        sgpd_result = GeoSeries(geoms).skew(xs=xs, ys=ys, origin=origin)
+        gpd_result = gpd.GeoSeries(geoms).skew(xs=xs, ys=ys, origin=origin)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_skew_radians(self):
+        geoms = [
+            self.points[2],
+            self.linestrings[2],
+            self.t1,
+            self.multipoints[2],
+            self.multilinestrings[2],
+            self.multipolygons[1],
+            self.geomcollection[1],
+        ]
+        skew_kwargs = {
+            "xs": np.pi / 7,
+            "ys": -np.pi / 9,
+            "origin": (1.25, -2.5),
+            "use_radians": True,
+        }
+
+        sgpd_result = GeoSeries(geoms).skew(**skew_kwargs)
+        gpd_result = gpd.GeoSeries(geoms).skew(**skew_kwargs)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_skew_3d_preserves_z(self):
+        polygon = Polygon([(0, 0, 1), (3, 0, 2), (1, 2, 4), (0, 0, 1)])
+        geoms = [
+            Point(1, 2, 3),
+            LineString([(0, 0, 1), (2, 1, 4)]),
+            polygon,
+            MultiPoint([(0, 0, 1), (1, 2, 3)]),
+            MultiLineString([[(0, 0, 1), (2, 1, 3)], [(1, -1, 2), (3, 2, 4)]]),
+            MultiPolygon([polygon]),
+            GeometryCollection(
+                [Point(1, 2, 3), LineString([(0, 0, 1), (2, 1, 4)]), polygon]
+            ),
+        ]
+        skew_kwargs = {
+            "xs": 25.0,
+            "ys": -10.0,
+            "origin": (1.0, -2.0, 7.0),
+        }
+
+        sgpd_result = GeoSeries(geoms).skew(**skew_kwargs)
+        gpd_result = gpd.GeoSeries(geoms).skew(**skew_kwargs)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+        actual_z = shapely.get_coordinates(
+            sgpd_result.to_geopandas().array, include_z=True
+        )[:, 2]
+        expected_z = shapely.get_coordinates(geoms, include_z=True)[:, 2]
+        np.testing.assert_array_equal(actual_z, expected_z)
+
+    @pytest.mark.parametrize(
+        "xoff,yoff,zoff",
+        [
+            (2, 3, 0),
+            (0, 0, 0),
+            (1.5, -2, 0),
+            (0, 0, 5),
+        ],
+        ids=["positive", "identity", "mixed", "z-only"],
+    )
+    def test_translate_2d(self, xoff, yoff, zoff):
+        for geom in self.geoms:
+            # Filter empty geometries within each group
+            non_empty = [g for g in geom if g is not None and not g.is_empty]
+            if not non_empty:
+                continue
+
+            sgpd_result = GeoSeries(non_empty).translate(xoff, yoff, zoff)
+            gpd_result = gpd.GeoSeries(non_empty).translate(xoff, yoff, zoff)
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_translate_3d(self):
+        polygon = Polygon([(0, 0, 1), (3, 0, 2), (1, 2, 4), (0, 0, 1)])
+        geoms = [
+            Point(1, 2, 3),
+            LineString([(0, 0, 1), (2, 1, 4)]),
+            polygon,
+            MultiPoint([(0, 0, 1), (1, 2, 3)]),
+            MultiLineString([[(0, 0, 1), (2, 1, 3)], [(1, -1, 2), (3, 2, 4)]]),
+            MultiPolygon([polygon]),
+            GeometryCollection(
+                [Point(1, 2, 3), LineString([(0, 0, 1), (2, 1, 4)]), polygon]
+            ),
+        ]
+        translate_kwargs = {"xoff": -2.5, "yoff": 3.25, "zoff": 5.0}
+
+        sgpd_result = GeoSeries(geoms).translate(**translate_kwargs)
+        gpd_result = gpd.GeoSeries(geoms).translate(**translate_kwargs)
+
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+        actual_z = shapely.get_coordinates(
+            sgpd_result.to_geopandas().sort_index().array, include_z=True
+        )[:, 2]
+        source_z = shapely.get_coordinates(geoms, include_z=True)[:, 2]
+        np.testing.assert_allclose(actual_z, source_z + translate_kwargs["zoff"])
 
     def test_force_2d(self):
         # force_2d was added from geopandas 1.0.0

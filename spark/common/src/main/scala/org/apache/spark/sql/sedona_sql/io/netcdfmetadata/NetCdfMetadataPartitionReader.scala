@@ -29,6 +29,7 @@ import org.apache.spark.sql.connector.read.PartitionReader
 import org.apache.spark.sql.execution.datasources.PartitionedFile
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.unsafe.types.UTF8String
+import org.datasyslab.proj4sedona.cf.CfGridMapping
 import org.datasyslab.proj4sedona.core.Proj
 import ucar.nc2.Attribute
 import ucar.nc2.Dimension
@@ -539,14 +540,15 @@ class NetCdfMetadataPartitionReader(
   }
 
   /**
-   * Resolve the CRS: the faithful WKT as declared by the file, plus the derived EPSG code.
+   * Resolve the CRS: the WKT plus the derived EPSG code.
    *
    * The CF `grid_mapping` variable of the grid-defining variable takes precedence (`crs_wkt` per
    * CF, `spatial_ref` as written by GDAL); global attributes with the same names are the
-   * fallback. The WKT is reported verbatim — downstream conversion for GeoTools-based raster
-   * functions is `RS_SetCRS`'s job, which accepts WKT1 and WKT2. When the file carries no WKT, a
-   * `latitude_longitude` grid mapping with no explicit ellipsoid/datum parameters is assumed to
-   * be WGS 84 (EPSG:4326); parameter-defined projected mappings are not translated.
+   * fallback. Declared WKT is reported verbatim — downstream conversion for GeoTools-based raster
+   * functions is `RS_SetCRS`'s job, which accepts WKT1 and WKT2. When the file carries no WKT but
+   * the grid mapping variable defines the CRS through CF parameters (`grid_mapping_name` plus
+   * projection and ellipsoid attributes, per CF Appendix F), the parameters are translated via
+   * proj4sedona and `crs` carries the derived WKT2.
    */
   private def resolveCrs(
       ncFile: NetcdfFile,
@@ -569,11 +571,79 @@ class NetCdfMetadataPartitionReader(
       .orElse(Option(globalAttrs.findAttributeString("crs_wkt", null)))
       .orElse(Option(globalAttrs.findAttributeString("spatial_ref", null)))
       .orNull
-    val srid =
-      if (!needSrid) None
-      else if (wkt != null) lookupSrid(wkt)
-      else gmVar.flatMap(latitudeLongitudeSrid)
-    (wkt, srid)
+    if (wkt != null) {
+      (wkt, if (needSrid) lookupSrid(wkt) else None)
+    } else {
+      gmVar.flatMap(v => translateGridMapping(v, gridVar)) match {
+        case Some(proj) =>
+          derivedCrs(proj.toWkt2, if (needSrid) projSrid(proj) else None)
+        case None => (null, None)
+      }
+    }
+  }
+
+  /**
+   * CRS defined through CF grid mapping parameters, translated to a projection via proj4sedona
+   * (pure Java — keeps this data source free of the optional LGPL GeoTools runtime). CF requires
+   * `false_easting`/`false_northing` to be in the units of the projection coordinates, so those
+   * units ride along. A `latitude_longitude` mapping is translated only when its attributes
+   * positively identify the Earth figure (a resolvable datum or ellipsoid name, explicit figure
+   * parameters, or `towgs84`) — the WGS 84 assumption GDAL and pyproj apply to a bare geographic
+   * mapping must not be reported as if the file declared it. Unsupported or malformed mappings
+   * translate to nothing rather than failing the row.
+   */
+  private def translateGridMapping(gmVar: Variable, gridVar: Option[Variable]): Option[Proj] = {
+    Option(attrString(gmVar, "grid_mapping_name")).flatMap { name =>
+      Try {
+        val attrs = cfAttributeMap(gmVar)
+        if (name.trim.equalsIgnoreCase("latitude_longitude") &&
+          !CfGridMapping.identifiesEarthShape(attrs)) {
+          null
+        } else {
+          val (xUnits, yUnits) =
+            gridVar.map(projectionCoordinateUnits).getOrElse((null, null))
+          CfGridMapping.toProj(attrs, xUnits, yUnits)
+        }
+      }.toOption.flatMap(Option(_))
+    }
+  }
+
+  /**
+   * The grid mapping variable's attributes as the value shapes proj4sedona coerces: strings stay
+   * strings, single numerics become `Number`, and multi-valued numerics (e.g. the two standard
+   * parallels) become `double[]`. Unsigned values are widened to their positive representation;
+   * non-numeric array attributes are skipped rather than misread.
+   */
+  private def cfAttributeMap(gmVar: Variable): java.util.Map[String, Object] = {
+    val map = new java.util.HashMap[String, Object]()
+    gmVar.attributes().asScala.foreach { attr =>
+      val value: Object =
+        if (attr.isString) attr.getStringValue
+        else if (attr.getLength == 1) numericAttrValue(attr, 0)
+        else {
+          val values = new Array[Double](attr.getLength)
+          val numeric = (0 until attr.getLength).forall { i =>
+            val n = numericAttrValue(attr, i)
+            if (n != null) values(i) = n.doubleValue()
+            n != null
+          }
+          if (numeric) values else null
+        }
+      if (value != null) map.put(attr.getShortName, value)
+    }
+    map
+  }
+
+  /**
+   * The `units` attributes of the grid's x and y projection coordinate variables. CF declares
+   * `false_easting` in the x unit and `false_northing` in the y unit; proj4sedona accepts
+   * equivalent spellings and rejects incompatible axes rather than misscaling either offset.
+   */
+  private def projectionCoordinateUnits(gridVar: Variable): (String, String) = {
+    val (yDim, xDim) = trailingDims(gridVar)
+    def unitsOf(dim: Dimension): String =
+      findCoordinateVariable(gridVar, dim).map(v => attrString(v, "units")).orNull
+    (unitsOf(xDim), unitsOf(yDim))
   }
 
   /**
@@ -638,50 +708,17 @@ class NetCdfMetadataPartitionReader(
   }
 
   /**
-   * Minimal CF grid-mapping support for files with no CRS WKT: EPSG:4326 is reported only when a
-   * `latitude_longitude` grid mapping positively identifies the WGS 84 datum by *name*
-   * (`horizontal_datum_name` or `geographic_crs_name`) with a Greenwich prime meridian. Ellipsoid
-   * parameters can only veto, never qualify: many datums (e.g. CR05) use the WGS 84 ellipsoid, so
-   * the Earth figure does not identify the datum. Any present identifier that disagrees with WGS
-   * 84 disables the inference.
-   */
-  private def latitudeLongitudeSrid(gmVar: Variable): Option[Int] = {
-    if (attrString(gmVar, "grid_mapping_name") != "latitude_longitude") return None
-
-    def normalized(attr: String): Option[String] =
-      Option(attrString(gmVar, attr)).map(_.toLowerCase.replaceAll("[^a-z0-9]", ""))
-
-    val datumName = normalized("horizontal_datum_name")
-    val crsName = normalized("geographic_crs_name")
-    val nameIdentifiesWgs84 =
-      datumName.exists(WGS84_DATUM_NAMES.contains) || crsName.exists(WGS84_DATUM_NAMES.contains)
-    val nameContradicts =
-      datumName.exists(!WGS84_DATUM_NAMES.contains(_)) ||
-        crsName.exists(!WGS84_DATUM_NAMES.contains(_)) ||
-        normalized("reference_ellipsoid_name").exists(!WGS84_ELLIPSOID_NAMES.contains(_)) ||
-        normalized("prime_meridian_name").exists(_ != "greenwich")
-
-    // Ellipsoid parameters, when present, must be consistent with the WGS 84 ellipsoid
-    val paramsContradict =
-      attrDouble(gmVar, "semi_major_axis").exists(a => math.abs(a - 6378137.0) >= 1e-3) ||
-        attrDouble(gmVar, "inverse_flattening").exists(f =>
-          math.abs(f - 298.257223563) >= 1e-6) ||
-        attrDouble(gmVar, "semi_minor_axis").exists(b => math.abs(b - 6356752.314245) >= 1e-3)
-
-    val greenwich = attrDouble(gmVar, "longitude_of_prime_meridian").forall(_ == 0.0)
-
-    if (nameIdentifiesWgs84 && !nameContradicts && !paramsContradict && greenwich) Some(4326)
-    else None
-  }
-
-  /**
    * EPSG code for a CRS WKT via proj4sedona (pure Java — keeps this data source free of the
    * optional LGPL GeoTools runtime). Resolves the WKT's EPSG authority identifier, including
    * structural matches for common authority-less WKT; null when no EPSG identity is found.
    */
-  private def lookupSrid(crsWkt: String): Option[Int] = {
+  private def lookupSrid(crsWkt: String): Option[Int] =
+    Try(new Proj(crsWkt)).toOption.flatMap(projSrid)
+
+  /** EPSG code of a resolved projection; None when no EPSG identity is found. */
+  private def projSrid(proj: Proj): Option[Int] = {
     Try {
-      val authority = new Proj(crsWkt).toAuthority
+      val authority = proj.toAuthority
       if (authority != null && authority.length == 2 && "EPSG".equalsIgnoreCase(authority(0))) {
         Try(authority(1).trim.toInt).toOption
       } else None
@@ -764,6 +801,17 @@ class NetCdfMetadataPartitionReader(
 object NetCdfMetadataPartitionReader {
 
   /**
+   * Build an atomic derived-CRS result. An SRID is meaningful only alongside the WKT from which
+   * it was derived, so a null or failed serialization returns neither. Both arguments are lazy so
+   * SRID lookup is skipped when WKT serialization fails.
+   */
+  private[apache] def derivedCrs(wkt: => String, srid: => Option[Int]): (String, Option[Int]) =
+    Try(wkt).toOption.filter(_ != null) match {
+      case Some(value) => (value, srid)
+      case None => (null, None)
+    }
+
+  /**
    * Maximum allowed deviation of any coordinate from the best-fit affine line, in pixels, for the
    * grid to be treated as regular. Half a pixel is the point beyond which an affine-mapped cell
    * center would land in the wrong cell.
@@ -786,16 +834,6 @@ object NetCdfMetadataPartitionReader {
     "cell_measures",
     "formula_terms",
     "grid_mapping")
-
-  /**
-   * Normalized datum/CRS name values that identify WGS 84, including the EPSG:6326 ensemble name
-   * ("World Geodetic System 1984 ensemble").
-   */
-  private val WGS84_DATUM_NAMES =
-    Set("wgs84", "wgs1984", "worldgeodeticsystem1984", "worldgeodeticsystem1984ensemble")
-
-  /** Normalized `reference_ellipsoid_name` values consistent with the WGS 84 ellipsoid. */
-  private val WGS84_ELLIPSOID_NAMES = Set("wgs84", "wgs1984", "worldgeodeticsystem1984")
 
   // Fields that require opening the file and parsing its header
   private val HEADER_FIELDS =

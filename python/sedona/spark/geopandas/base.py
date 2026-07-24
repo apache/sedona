@@ -1375,6 +1375,56 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("segmentize", self, max_segment_length)
 
+    def affine_transform(self, matrix):
+        """Return a ``GeoSeries`` with transformed geometries.
+
+        The coefficient matrix is provided as an ordered sequence with 6 or
+        12 items for 2D or 3D transformations, respectively.
+
+        For a 2D affine transformation, ``matrix`` is
+        ``[a, b, d, e, xoff, yoff]`` and the transformed coordinates are::
+
+            x' = a * x + b * y + xoff
+            y' = d * x + e * y + yoff
+
+        For a 3D affine transformation, ``matrix`` is
+        ``[a, b, c, d, e, f, g, h, i, xoff, yoff, zoff]`` and the transformed
+        coordinates are::
+
+            x' = a * x + b * y + c * z + xoff
+            y' = d * x + e * y + f * z + yoff
+            z' = g * x + h * y + i * z + zoff
+
+        Parameters
+        ----------
+        matrix : sequence of float
+            Six or twelve coefficients for a 2D or 3D affine transformation.
+
+        Returns
+        -------
+        GeoSeries
+            The transformed geometries.
+
+        Notes
+        -----
+        Results for mixed 2D/3D ``GeometryCollection`` objects, M or ZM
+        ordinates, and NaN Z coordinates may differ from GeoPandas because
+        Sedona uses JTS while GeoPandas uses Shapely. This method applies
+        Sedona's distributed semantics and does not materialize geometries
+        locally to emulate Shapely.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, LineString
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries([Point(1, 1), LineString([(1, -1), (1, 0)])])
+        >>> s.affine_transform([0, 1, 1, 0, 0, 0])
+        0                   POINT (1 1)
+        1    LINESTRING (-1 1, 0 1)
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column("affine_transform", self, matrix)
+
     # def transform(self, transformation, include_z=False):
     #     raise NotImplementedError("This method is not implemented yet.")
 
@@ -1428,6 +1478,154 @@ class GeoFrame(metaclass=ABCMeta):
 
         """
         return _delegate_to_geometry_column("rotate", self, angle, origin, use_radians)
+
+    def scale(self, xfact=1.0, yfact=1.0, zfact=1.0, origin="center"):
+        """Return a ``GeoSeries`` with scaled geometries.
+
+        Each geometry is scaled independently around its origin. The default
+        origin is the center of the geometry's bounding box.
+
+        Parameters
+        ----------
+        xfact : float, default 1.0
+            Scaling factor for the x dimension.
+        yfact : float, default 1.0
+            Scaling factor for the y dimension.
+        zfact : float, default 1.0
+            Scaling factor for the z dimension.
+        origin : {"center", "centroid"}, Point, or tuple, default "center"
+            The scaling origin. ``"center"`` uses each geometry's bounding-box
+            center and ``"centroid"`` uses each geometry's centroid. A 2D or
+            3D Shapely Point or coordinate tuple may also be supplied. The z
+            origin is 0 for keyword and 2D origins.
+
+        Returns
+        -------
+        GeoSeries
+            The scaled geometries.
+
+        Notes
+        -----
+        Results for mixed 2D/3D ``GeometryCollection`` objects, M or ZM
+        ordinates, NaN Z coordinates, non-finite factors, and non-finite
+        origin coordinates may differ from GeoPandas because Sedona uses JTS
+        while GeoPandas uses Shapely. This method applies Sedona's distributed
+        semantics and does not materialize geometries locally to emulate
+        Shapely.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries([Point(1, 2), Point(-1, -2)])
+        >>> s.scale(xfact=2, yfact=3, origin=(0, 0))
+        0      POINT (2 6)
+        1    POINT (-2 -6)
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column("scale", self, xfact, yfact, zfact, origin)
+
+    def skew(self, xs=0.0, ys=0.0, origin="center", use_radians=False):
+        """Return a ``GeoSeries`` with skewed geometries.
+
+        Each geometry is sheared independently along its x and y dimensions.
+        Negative angles shear in the opposite direction.
+
+        Parameters
+        ----------
+        xs : float, default 0.0
+            Shear angle for the x dimension, in degrees by default.
+        ys : float, default 0.0
+            Shear angle for the y dimension, in degrees by default.
+        origin : {"center", "centroid"}, Point, or tuple, default "center"
+            The skew origin. ``"center"`` uses each geometry's bounding-box
+            center and ``"centroid"`` uses each geometry's centroid. A 2D or
+            3D Shapely Point or coordinate tuple may also be supplied. Skew is
+            a 2D operation, so an explicit origin's z coordinate is ignored.
+        use_radians : bool, default False
+            If True, interpret ``xs`` and ``ys`` as radians instead of degrees.
+
+        Returns
+        -------
+        GeoSeries
+            The skewed geometries.
+
+        Notes
+        -----
+        Existing z coordinates are preserved. Results for mixed 2D/3D
+        ``GeometryCollection`` objects, M or ZM ordinates, NaN z coordinates,
+        non-finite angles or origin coordinates, and angles near 90 degrees
+        may differ from GeoPandas because Sedona uses JTS while GeoPandas uses
+        Shapely. This method applies Sedona's distributed semantics and does
+        not materialize geometries locally to emulate Shapely.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries([Point(1, 2), Point(-1, -2)])
+        >>> s.skew(xs=45, origin=(0, 0))
+        0      POINT (3 2)
+        1    POINT (-3 -2)
+        dtype: geometry
+        """
+        return _delegate_to_geometry_column("skew", self, xs, ys, origin, use_radians)
+
+    def translate(self, xoff=0.0, yoff=0.0, zoff=0.0):
+        """Return a ``GeoSeries`` with translated geometries.
+
+        Each geometry is shifted by constant offsets along its coordinate
+        dimensions.
+
+        Parameters
+        ----------
+        xoff : float, default 0.0
+            Offset along the x dimension.
+        yoff : float, default 0.0
+            Offset along the y dimension.
+        zoff : float, default 0.0
+            Offset along the z dimension for geometries that have z
+            coordinates.
+
+        Returns
+        -------
+        GeoSeries
+            The translated geometries.
+
+        Notes
+        -----
+        Two-dimensional geometries remain two-dimensional. Results for mixed
+        2D/3D ``GeometryCollection`` objects, M or ZM ordinates, NaN z
+        coordinates, and non-finite offsets may differ from GeoPandas because
+        Sedona uses JTS while GeoPandas uses Shapely. This method applies
+        Sedona's distributed semantics and does not materialize geometries
+        locally to emulate Shapely.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point, LineString, Polygon
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(1, 1),
+        ...         LineString([(1, -1), (1, 0)]),
+        ...         Polygon([(3, -1), (4, 0), (3, 1)]),
+        ...     ]
+        ... )
+        >>> s
+        0                         POINT (1 1)
+        1              LINESTRING (1 -1, 1 0)
+        2    POLYGON ((3 -1, 4 0, 3 1, 3 -1))
+        dtype: geometry
+
+        >>> s.translate(2, 3)
+        0                       POINT (3 4)
+        1            LINESTRING (3 2, 3 3)
+        2    POLYGON ((5 2, 6 3, 5 4, 5 2))
+        dtype: geometry
+
+        """
+        return _delegate_to_geometry_column("translate", self, xoff, yoff, zoff)
 
     def force_2d(self):
         """Force the dimensionality of a geometry to 2D.

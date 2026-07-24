@@ -99,6 +99,70 @@ IMPLEMENTATION_PRIORITY = {
 }
 
 
+def _normalize_affine_scalar(value, error_message: str) -> float:
+    """Normalize an operation-wide affine parameter to a Python float."""
+    if (
+        value is None
+        or isinstance(value, (str, bytes, bytearray))
+        or not np.isscalar(value)
+    ):
+        raise TypeError(error_message)
+    try:
+        return float(value)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise TypeError(error_message) from exc
+
+
+def _interpret_origin(geometry: PySparkColumn, origin, with_z: bool):
+    """Resolve a local affinity origin to distributed coordinate columns."""
+    if isinstance(origin, str):
+        if origin == "center":
+            origin_geometry = stf.ST_Centroid(stf.ST_Envelope(geometry))
+        elif origin == "centroid":
+            origin_geometry = stf.ST_Centroid(geometry)
+        else:
+            raise ValueError(
+                "origin must be 'center', 'centroid', a Point, or a "
+                f"two- or three-element tuple, got {origin!r}"
+            )
+        origin_columns = (
+            stf.ST_X(origin_geometry),
+            stf.ST_Y(origin_geometry),
+            F.lit(0.0),
+        )
+    elif isinstance(origin, tuple):
+        if len(origin) not in (2, 3):
+            raise ValueError("'origin' tuple must contain two or three coordinates")
+        coordinates = [
+            _normalize_affine_scalar(
+                coordinate,
+                "'origin' tuple must contain only numeric coordinates",
+            )
+            for coordinate in origin
+        ]
+        if len(coordinates) == 2:
+            coordinates.append(0.0)
+        origin_columns = tuple(F.lit(value) for value in coordinates)
+    elif isinstance(origin, shapely.geometry.Point):
+        if origin.is_empty:
+            raise ValueError("'origin' Point must be a non-empty 2D or 3D Point")
+        coordinates = tuple(origin.coords[0])
+        if len(coordinates) not in (2, 3) or (
+            len(coordinates) == 3 and not origin.has_z
+        ):
+            raise ValueError("'origin' Point must be a non-empty 2D or 3D Point")
+        if len(coordinates) == 2:
+            coordinates += (0.0,)
+        origin_columns = tuple(F.lit(float(value)) for value in coordinates)
+    else:
+        raise TypeError(
+            "origin must be 'center', 'centroid', a Point, or a "
+            "two- or three-element tuple"
+        )
+
+    return origin_columns if with_z else origin_columns[:2]
+
+
 def _not_implemented_error(method_name: str, additional_info: str = "") -> str:
     """
     Generate a standardized NotImplementedError message.
@@ -1156,6 +1220,73 @@ class GeoSeries(GeoFrame, pspd.Series):
             returns_geom=True,
         )
 
+    def affine_transform(self, matrix) -> "GeoSeries":
+        invalid_matrix_types = (
+            str,
+            bytes,
+            bytearray,
+            dict,
+            set,
+            frozenset,
+            PandasOnSparkSeries,
+            PandasOnSparkDataFrame,
+            pspd.Index,
+        )
+        if (
+            isinstance(matrix, invalid_matrix_types)
+            or not hasattr(matrix, "__len__")
+            or not hasattr(matrix, "__iter__")
+        ):
+            raise TypeError("'matrix' must be a local ordered sequence")
+
+        try:
+            matrix_length = len(matrix)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise TypeError("'matrix' must be a local ordered sequence") from exc
+
+        if matrix_length not in (6, 12):
+            raise ValueError("'matrix' expects either 6 or 12 coefficients")
+
+        try:
+            matrix = tuple(matrix)
+        except (TypeError, ValueError) as exc:
+            raise TypeError("'matrix' must be a local ordered sequence") from exc
+
+        if len(matrix) not in (6, 12):
+            raise ValueError("'matrix' expects either 6 or 12 coefficients")
+
+        coefficients = [
+            _normalize_affine_scalar(
+                coefficient, "'matrix' must contain only numeric coefficients"
+            )
+            for coefficient in matrix
+        ]
+
+        if len(coefficients) == 6:
+            a, b, d, e, xoff, yoff = coefficients
+            spark_expr = stf.ST_Affine(self.spark.column, a, b, d, e, xoff, yoff)
+        else:
+            a, b, c, d, e, f, g, h, i, xoff, yoff, zoff = coefficients
+            # ST_Affine's Python wrapper lists the 2D coefficients first, so
+            # reorder the GeoPandas matrix before selecting its 3D overload.
+            spark_expr = stf.ST_Affine(
+                self.spark.column,
+                a,
+                b,
+                d,
+                e,
+                xoff,
+                yoff,
+                c,
+                f,
+                g,
+                h,
+                i,
+                zoff,
+            )
+
+        return self._query_geometry_column(spark_expr, returns_geom=True)
+
     def transform(self, transformation, include_z=False):
         # Implementation of the abstract method.
         raise NotImplementedError("This method is not implemented yet.")
@@ -1188,6 +1319,81 @@ class GeoSeries(GeoFrame, pspd.Series):
             raise TypeError(
                 "origin must be 'center', 'centroid', a Point, or a two-element tuple/list"
             )
+        return self._query_geometry_column(spark_expr, returns_geom=True)
+
+    def scale(self, xfact=1.0, yfact=1.0, zfact=1.0, origin="center") -> "GeoSeries":
+        xfact = _normalize_affine_scalar(xfact, "'xfact' must be a numeric scalar")
+        yfact = _normalize_affine_scalar(yfact, "'yfact' must be a numeric scalar")
+        zfact = _normalize_affine_scalar(zfact, "'zfact' must be a numeric scalar")
+
+        geometry = self.spark.column
+        origin_x, origin_y, origin_z = _interpret_origin(geometry, origin, with_z=True)
+
+        xoff = origin_x - origin_x * F.lit(xfact)
+        yoff = origin_y - origin_y * F.lit(yfact)
+        zoff = origin_z - origin_z * F.lit(zfact)
+
+        # ST_Affine's Python wrapper order is geometry, a, b, d, e, xoff,
+        # yoff, c, f, g, h, i, zoff. Use its 3D overload for zfact while
+        # keeping 2D input geometries 2D.
+        scaled = stf.ST_Affine(
+            geometry,
+            xfact,
+            0.0,
+            0.0,
+            yfact,
+            xoff,
+            yoff,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            zfact,
+            zoff,
+        )
+        spark_expr = F.when(stf.ST_IsEmpty(geometry), geometry).otherwise(scaled)
+        return self._query_geometry_column(spark_expr, returns_geom=True)
+
+    def skew(self, xs=0.0, ys=0.0, origin="center", use_radians=False) -> "GeoSeries":
+        import math
+
+        xs = _normalize_affine_scalar(xs, "'xs' must be a numeric scalar")
+        ys = _normalize_affine_scalar(ys, "'ys' must be a numeric scalar")
+        if not isinstance(use_radians, (bool, np.bool_)):
+            raise TypeError("'use_radians' must be a boolean")
+
+        if not use_radians:
+            xs = xs * math.pi / 180.0
+            ys = ys * math.pi / 180.0
+        tan_x = math.tan(xs)
+        tan_y = math.tan(ys)
+        if abs(tan_x) < 2.5e-16:
+            tan_x = 0.0
+        if abs(tan_y) < 2.5e-16:
+            tan_y = 0.0
+
+        geometry = self.spark.column
+        origin_x, origin_y = _interpret_origin(geometry, origin, with_z=False)
+
+        xoff = -origin_y * F.lit(tan_x)
+        yoff = -origin_x * F.lit(tan_y)
+        skewed = stf.ST_Affine(
+            geometry,
+            1.0,
+            tan_x,
+            tan_y,
+            1.0,
+            xoff,
+            yoff,
+        )
+        spark_expr = F.when(stf.ST_IsEmpty(geometry), geometry).otherwise(skewed)
+        return self._query_geometry_column(spark_expr, returns_geom=True)
+
+    def translate(self, xoff=0.0, yoff=0.0, zoff=0.0) -> "GeoSeries":
+        xoff = _normalize_affine_scalar(xoff, "'xoff' must be a numeric scalar")
+        yoff = _normalize_affine_scalar(yoff, "'yoff' must be a numeric scalar")
+        zoff = _normalize_affine_scalar(zoff, "'zoff' must be a numeric scalar")
+        spark_expr = stf.ST_Translate(self.spark.column, xoff, yoff, zoff)
         return self._query_geometry_column(spark_expr, returns_geom=True)
 
     def force_2d(self) -> "GeoSeries":

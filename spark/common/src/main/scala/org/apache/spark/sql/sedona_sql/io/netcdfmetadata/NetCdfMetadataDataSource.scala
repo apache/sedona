@@ -24,12 +24,14 @@ import org.apache.hadoop.mapreduce.Job
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.catalog.Table
 import org.apache.spark.sql.connector.catalog.TableProvider
+import org.apache.spark.sql.execution.datasources.DataSource
 import org.apache.spark.sql.execution.datasources.FileFormat
 import org.apache.spark.sql.execution.datasources.OutputWriterFactory
 import org.apache.spark.sql.execution.datasources.v2.FileDataSourceV2
 import org.apache.spark.sql.sources.DataSourceRegister
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
+import org.apache.spark.util.HadoopFSUtils
 
 import scala.collection.JavaConverters._
 import scala.util.Try
@@ -46,12 +48,10 @@ class NetCdfMetadataDataSource
 
   override def shortName(): String = "netcdf.metadata"
 
-  private val loadNcPattern = "(.*)/([^/]*\\*[^/]*\\.(?i:nc|nc4|netcdf))$".r
-
   private def createTable(
       options: CaseInsensitiveStringMap,
       userSchema: Option[StructType] = None): Table = {
-    var paths = getPaths(options)
+    val paths = getPaths(options)
     var optionsWithoutPaths = getOptionsWithoutPaths(options)
     val tableName = getTableName(options, paths)
 
@@ -63,24 +63,16 @@ class NetCdfMetadataDataSource
     val hasUserGlobFilter = optionsWithoutPaths.containsKey("pathGlobFilter")
     val hasUserRecursive = optionsWithoutPaths.containsKey("recursiveFileLookup")
 
-    if (paths.size == 1 && !isDirectory(paths.head, optionsWithoutPaths)) {
-      // Rewrite glob patterns like /path/to/some*glob*.nc into /path/to with
-      // pathGlobFilter="some*glob*.nc" to avoid listing .nc files as directories. When the
-      // user supplied their own pathGlobFilter, keep the glob path untouched so Spark applies
-      // both constraints natively (the rewrite could only keep one of them).
-      paths.head match {
-        case loadNcPattern(prefix, glob) if !hasUserGlobFilter =>
-          paths = Seq(prefix)
-          newOptions.put("pathGlobFilter", glob)
-        case _ =>
-      }
-    } else if (paths.nonEmpty && paths.forall(p => isDirectory(p, optionsWithoutPaths))) {
-      // Directory roots (single or multiple, with or without trailing slash): default to a
-      // recursive scan filtered to NetCDF extensions. These are defaults only — an explicit
-      // recursiveFileLookup=false keeps Hive-style partition discovery available. They apply
-      // only when EVERY root is a directory: Spark applies pathGlobFilter to all roots, so a
-      // mixed load(dir, explicitFile) must not silently drop an explicitly named file whose
-      // name does not match the extension filter.
+    // File paths and file globs are passed to Spark untouched, keeping native listing
+    // semantics: a glob such as /dir/a*.nc matches direct children of /dir only, with or
+    // without recursiveFileLookup. Directory roots (single or multiple; plain, with a
+    // trailing slash, or produced by a glob such as /data/region*) default to a recursive
+    // scan filtered to NetCDF extensions. These are defaults only — an explicit
+    // recursiveFileLookup=false keeps Hive-style partition discovery available. They apply
+    // only when EVERY root stands for directories: Spark applies pathGlobFilter to all
+    // roots, so a mixed load(dir, explicitFile) must not silently drop an explicitly named
+    // file whose name does not match the extension filter.
+    if (paths.nonEmpty && paths.forall(p => isDirectoryRoot(p, optionsWithoutPaths))) {
       if (!hasUserRecursive) {
         newOptions.put("recursiveFileLookup", "true")
       }
@@ -117,22 +109,53 @@ class NetCdfMetadataDataSource
     classOf[NetCdfMetadataUnsupportedFileFormat]
 
   /**
-   * Check if a path points to a directory. A trailing `/` is treated as a directory without any
-   * FS call; otherwise, Hadoop `FileSystem.getFileStatus(path).isDirectory` is consulted. Returns
-   * `false` if the FS call fails (e.g., path does not exist or is a glob pattern). Uses the same
-   * per-read options (e.g., `fs.s3a.*`) as the scan so directory detection works on the
-   * configured filesystem.
+   * Whether a load path stands for directories. A trailing `/` is treated as a directory
+   * assertion without any FS call. A glob pattern (unless `__globPaths__` disables expansion,
+   * exactly as `FileTable` honors it) is expanded with Hadoop `FileSystem.globStatus` and must
+   * match at least one status, with every match visible to Spark's scan being a directory.
+   * Hidden-named file matches (`_SUCCESS`, dotfiles, `*._COPYING_`) are invisible — Spark's
+   * listing discards them — so they neither sway the classification nor, when a glob matches
+   * nothing else, veto the defaults earned by the remaining roots; hidden-named DIRECTORY matches
+   * count normally, because Spark traverses a directory root regardless of its name. Anything
+   * else is probed literally with `getFileStatus`; the hidden-name rule never applies here,
+   * because Spark exempts explicitly given roots from it. Returns `false` when the probe fails or
+   * a glob matches nothing (Spark reports the missing path itself during listing). Uses the same
+   * per-read options (e.g., `fs.s3a.*`) as the scan so detection works on the configured
+   * filesystem.
    */
-  private def isDirectory(pathStr: String, options: CaseInsensitiveStringMap): Boolean = {
+  private def isDirectoryRoot(pathStr: String, options: CaseInsensitiveStringMap): Boolean = {
     if (pathStr.endsWith("/")) return true
     Try {
       val hadoopConf =
         sparkSession.sessionState.newHadoopConfWithOptions(options.asScala.toMap)
       val path = new Path(pathStr)
       val fs = path.getFileSystem(hadoopConf)
-      fs.getFileStatus(path).isDirectory
+      if (globbingEnabled(options) && isGlobPath(path)) {
+        val matches = Option(fs.globStatus(path)).getOrElse(Array.empty[FileStatus])
+        // An unmatched glob is not a directory root (Spark itself reports the missing
+        // path). Otherwise classify by what Spark's listing will actually read: it drops
+        // hidden-named FILE matches (their own name comes back from listStatus and is
+        // name-checked) but traverses a directory root regardless of its name — only the
+        // children are name-checked. Hidden files are therefore invisible to the scan,
+        // and a glob whose visible contribution is empty (e.g. matching only a _SUCCESS
+        // marker) must not veto the defaults earned by the other roots.
+        matches.nonEmpty && matches
+          .filterNot(m =>
+            !m.isDirectory && HadoopFSUtils.shouldFilterOutPathName(m.getPath.getName))
+          .forall(_.isDirectory)
+      } else {
+        fs.getFileStatus(path).isDirectory
+      }
     }.getOrElse(false)
   }
+
+  /** Mirrors `FileTable.globPaths`: expansion is on unless `__globPaths__` is set to non-true. */
+  private def globbingEnabled(options: CaseInsensitiveStringMap): Boolean =
+    Option(options.get(DataSource.GLOB_PATHS_KEY)).forall(_ == "true")
+
+  /** The wildcard set of `SparkHadoopUtil.isGlobPath`, which governs Spark's own expansion. */
+  private def isGlobPath(path: Path): Boolean =
+    path.toString.exists("{}[]*?\\".contains(_))
 }
 
 /**

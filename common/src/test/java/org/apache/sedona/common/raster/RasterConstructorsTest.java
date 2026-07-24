@@ -98,10 +98,10 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     double[] expected =
         new double[] {
-          3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0,
+          3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0,
           3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3093151.0,
-          3093151.0, 3093151.0, 3093151.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
-          3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0
+          3093151.0, 3093151.0, 3093151.0, 3.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
+          3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0
         };
 
     assertArrayEquals(expected, actual, 0.1d);
@@ -142,8 +142,8 @@ public class RasterConstructorsTest extends RasterTestBase {
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected =
         new double[] {
-          3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
-          3093151.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3.0, 3.0, 3093151.0,
+          3093151.0, 3093151.0, 3.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
+          3093151.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3.0, 3093151.0, 3093151.0,
           3093151.0, 3.0
         };
     assertArrayEquals(expected, actual, 0.1d);
@@ -697,6 +697,49 @@ public class RasterConstructorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testAsRasterTouchedPixelsExactTraversal() throws FactoryException, ParseException {
+    // A boundary edge that clips a pixel over a chord shorter than one pixel
+    // must still burn that pixel under allTouched, matching GDAL. Fixed-step
+    // sampling of the edge misses such pixels; exact cell traversal does not.
+    // Square unit pixels, so this is independent of the non-square-pixel
+    // selection path. Expected matrices are from GDAL
+    // (rasterio.features.rasterize, all_touched=True).
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 6, 6, 0, 6, 1, -1, 0, 0, 0);
+
+    Geometry polygon =
+        Constructors.geomFromWKT("POLYGON ((3.7 1.28, 0.92 5.23, 4.26 4.15, 3.7 1.28))", 0);
+    GridCoverage2D rasterized =
+        RasterConstructors.asRaster(polygon, raster, "d", true, 1d, 0d, false);
+    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+    double[] expected =
+        new double[] {
+          1, 1, 0, 0, 0, 0,
+          0, 1, 1, 1, 1, 0,
+          0, 1, 1, 1, 1, 0,
+          0, 0, 1, 1, 1, 0,
+          0, 0, 0, 1, 0, 0,
+          0, 0, 0, 0, 0, 0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // A LineString goes through the same segment code regardless of allTouched
+    // (a line has no interior); every pixel it crosses must be burned.
+    Geometry line = Constructors.geomFromWKT("LINESTRING (3.97 1.57, 0.31 3.24)", 0);
+    rasterized = RasterConstructors.asRaster(line, raster, "d", false, 1d, 0d, false);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0,
+          1, 0, 0, 0, 0, 0,
+          1, 1, 1, 1, 0, 0,
+          0, 0, 0, 1, 0, 0,
+          0, 0, 0, 0, 0, 0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+  }
+
+  @Test
   public void testAsRasterLingString() throws FactoryException, ParseException {
     // Horizontal LineString
     GridCoverage2D raster =
@@ -737,6 +780,9 @@ public class RasterConstructorsTest extends RasterTestBase {
         Constructors.geomFromWKT("POLYGON((1.5 1.5, 3.8 3.0, 4.5 4.4, 3.4 3.5, 1.5 1.5))", 0);
     GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", true, 612028, 5d);
     double[] actual = Arrays.stream(MapAlgebra.bandAsArray(rasterized, 1)).toArray();
+    // Matches GDAL/rasterio all_touched=True except where a vertex lands exactly on a grid line:
+    // there the geometry touches a cell only at a corner or edge and Sedona burns it (a superset
+    // consistent with "all pixels touched"), while GDAL omits it. Tracked separately; see the PR.
     double[] expected = {
       5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 612028.0, 5.0, 5.0, 5.0,
       5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
@@ -746,11 +792,11 @@ public class RasterConstructorsTest extends RasterTestBase {
       612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
       612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
       612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
-      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+      612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0,
       612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0,
-      612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 612028.0, 5.0,
-      5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0,
-      5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0
+      612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 612028.0, 5.0, 5.0,
+      5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0
     };
     assertArrayEquals(expected, actual, 0.1d);
 
