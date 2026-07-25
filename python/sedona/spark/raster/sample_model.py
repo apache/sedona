@@ -17,6 +17,7 @@
 
 from abc import ABC, abstractmethod
 from typing import List
+from warnings import warn
 
 import numpy as np
 
@@ -194,8 +195,7 @@ class MultiPixelPackedSampleModel(SampleModel):
         samples = data_buffer.bank_samples()
         bits_per_value = samples.dtype.itemsize * 8
 
-        # Resolve every pixel on its own, the way Java does: this sample model requires
-        # num_bits to divide the size of a data element, so no pixel spans two elements.
+        # Resolve every pixel on its own, the way Java does
         pixel_bits = self.data_bit_offset + np.arange(self.width) * self.num_bits
         cols = pixel_bits // bits_per_value
         shifts = bits_per_value - (pixel_bits % bits_per_value) - self.num_bits
@@ -210,10 +210,27 @@ class MultiPixelPackedSampleModel(SampleModel):
         # multiple of num_bits, which leaves a pixel straddling two samples and gives a
         # negative distance here, shifts the top bits of the sample down rather than
         # shifting the whole sample out, and a pixel occupying a whole 32 bit sample gets a
-        # zero mask and reads as zero.
-        values = samples[positions].astype(np.int32)
-        shifts = (shifts & 31).astype(np.int32)
+        # zero mask and reads as zero. Neither layout can hold a pixel that survives a round
+        # trip through Java, so warn about them rather than read them some other way.
         bit_mask = np.int32((1 << (self.num_bits % 32)) - 1)
-        pixels = (values >> shifts) & bit_mask
+        if bit_mask == 0:
+            warn(
+                "This raster packs one pixel per 32 bit sample. java.awt.image derives the "
+                "bit mask for it as `(1 << 32) - 1`, which is zero on an int, so Java reads "
+                "every pixel of such a raster as zero and writes to it are no-ops. "
+                "Returning zeroes to match."
+            )
+        elif (shifts < 0).any():
+            warn(
+                f"This raster's data bit offset ({self.data_bit_offset}) is not a multiple "
+                f"of its {self.num_bits} bits per pixel, so some pixels straddle two "
+                "samples. java.awt.image shifts those by a negative distance, which it "
+                "takes modulo 32, reading the top bits of the sample instead; Java's own "
+                "writes to those pixels are lossy in the same way. Returning what Java "
+                "reads."
+            )
+
+        values = samples[positions].astype(np.int32)
+        pixels = (values >> (shifts & 31).astype(np.int32)) & bit_mask
 
         return pixels.astype(samples.dtype).reshape(1, self.height, self.width)

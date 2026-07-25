@@ -22,6 +22,7 @@ buffer to java.awt.image, so they record what Java AWT reads for these layouts. 
 names the Java layout it covers, which is enough to reproduce it.
 """
 
+import warnings
 from typing import List
 
 import numpy as np
@@ -233,9 +234,13 @@ def test_multi_pixel_packed_applies_bit_and_bank_offsets() -> None:
         [1],
     )
 
+    # an ordinary packed layout, so reading it must not warn about Java's shift quirks
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        arr = sample_model.as_numpy(data_buffer)
+
     np.testing.assert_array_equal(
-        sample_model.as_numpy(data_buffer),
-        np.array([[[1, 2, 3, 4, 5], [9, 10, 11, 12, 13]]]),
+        arr, np.array([[[1, 2, 3, 4, 5], [9, 10, 11, 12, 13]]])
     )
 
 
@@ -289,9 +294,10 @@ def test_multi_pixel_packed_pixel_straddling_two_samples(
     sample_model = MultiPixelPackedSampleModel(DataBuffer.TYPE_INT, 4, 1, 8, 1, 4)
     data_buffer = DataBuffer(DataBuffer.TYPE_INT, [int_bank(bank)], 2, [0])
 
-    np.testing.assert_array_equal(
-        sample_model.as_numpy(data_buffer), np.array([[expected]])
-    )
+    with pytest.warns(UserWarning, match="straddle two samples"):
+        arr = sample_model.as_numpy(data_buffer)
+
+    np.testing.assert_array_equal(arr, np.array([[expected]]))
 
 
 def test_multi_pixel_packed_whole_sample_pixels_read_zero() -> None:
@@ -319,10 +325,10 @@ def test_multi_pixel_packed_whole_sample_pixels_read_zero() -> None:
         [0],
     )
 
-    np.testing.assert_array_equal(
-        sample_model.as_numpy(data_buffer),
-        np.array([[[0, 0, 0], [0, 0, 0]]]),
-    )
+    with pytest.warns(UserWarning, match="one pixel per 32 bit sample"):
+        arr = sample_model.as_numpy(data_buffer)
+
+    np.testing.assert_array_equal(arr, np.array([[[0, 0, 0], [0, 0, 0]]]))
 
 
 @pytest.mark.parametrize(
