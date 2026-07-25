@@ -784,18 +784,20 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(geom).has_z
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
-        wkts = [
-            "GEOMETRYCOLLECTION (POINT (0 0), POINT Z (1 1 2))",
-            (
-                "GEOMETRYCOLLECTION (POINT (0 0), "
-                "GEOMETRYCOLLECTION (POINT Z (1 1 2)))"
-            ),
-            "POINT EMPTY",
-            None,
-        ]
-        sgpd_result = GeoSeries.from_wkt(wkts).has_z
-        gpd_result = gpd.GeoSeries.from_wkt(wkts).has_z
-        self.check_pd_series_equal(sgpd_result, gpd_result)
+        # Shapely 2.1 added mixed-dimension GeometryCollection support to has_z.
+        if parse_version(shapely.__version__) >= parse_version("2.1.0"):
+            wkts = [
+                "GEOMETRYCOLLECTION (POINT (0 0), POINT Z (1 1 2))",
+                (
+                    "GEOMETRYCOLLECTION (POINT (0 0), "
+                    "GEOMETRYCOLLECTION (POINT Z (1 1 2)))"
+                ),
+                "POINT EMPTY",
+                None,
+            ]
+            sgpd_result = GeoSeries.from_wkt(wkts).has_z
+            gpd_result = gpd.GeoSeries.from_wkt(wkts).has_z
+            self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_has_m(self):
         if parse_version(gpd.__version__) < parse_version("1.1.0"):
