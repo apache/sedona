@@ -40,6 +40,7 @@ class SampleModel(ABC):
     data_type: int
     width: int
     height: int
+    scanline_stride: int
 
     def __init__(self, sample_model_type, data_type, width, height):
         self.sample_model_type = sample_model_type
@@ -52,6 +53,16 @@ class SampleModel(ABC):
         raise NotImplementedError(
             "Abstract method as_numpy was not implemented by subclass"
         )
+
+    def _pixel_positions(self, pixel_stride: int, offset: int = 0) -> np.ndarray:
+        """Sample position of every pixel, as a (height, width) array of indices.
+
+        The positions are relative to the start of a bank, so they index the arrays
+        returned by :meth:`DataBuffer.bank_samples`.
+        """
+        rows = np.arange(self.height) * self.scanline_stride + offset
+        cols = np.arange(self.width) * pixel_stride
+        return rows[:, np.newaxis] + cols[np.newaxis, :]
 
 
 class ComponentSampleModel(SampleModel):
@@ -77,33 +88,27 @@ class ComponentSampleModel(SampleModel):
         self.band_offsets = band_offsets
 
     def as_numpy(self, data_buffer: DataBuffer) -> np.ndarray:
-        if self.scanline_stride == self.width and self.pixel_stride == 1:
-            # Fast path: no gaps between pixels
-            band_arrs = []
-            for k, bank_index in enumerate(self.bank_indices):
-                bank_data = data_buffer.bank_data[bank_index]
-                offset = self.band_offsets[k]
-                if offset != 0:
-                    bank_data = bank_data[offset : (offset + self.width * self.height)]
-                band_arr = bank_data.reshape(self.height, self.width)
-                band_arrs.append(band_arr)
-            return np.array(band_arrs)
-        else:
-            # Slow path
-            band_arrs = []
-            for k in range(len(self.bank_indices)):
-                bank_index = self.bank_indices[k]
-                bank_data = data_buffer.bank_data[bank_index]
-                offset = self.band_offsets[k]
-                band_pixel_data = []
-                for y in range(self.height):
-                    for x in range(self.width):
-                        pos = offset + y * self.scanline_stride + x * self.pixel_stride
-                        band_pixel_data.append(bank_data[pos])
-                arr = np.array(band_pixel_data).reshape(self.height, self.width)
-                band_arrs.append(arr)
+        contiguous = self.scanline_stride == self.width and self.pixel_stride == 1
+        num_samples = self.width * self.height
 
-            return np.array(band_arrs)
+        band_arrs = []
+        for k, bank_index in enumerate(self.bank_indices):
+            # The band offset is relative to the offset of the bank the band lives in, and
+            # bank_indices/band_offsets are both indexed by band, not by bank.
+            samples = data_buffer.bank_samples(bank_index)
+            offset = self.band_offsets[k]
+            if contiguous:
+                # Fast path: the samples of a band follow each other. The bank may still
+                # hold more samples than the band needs, so slice a bounded window.
+                band_arr = samples[offset : (offset + num_samples)].reshape(
+                    self.height, self.width
+                )
+            else:
+                # Slow path: gaps between pixels or scanlines
+                band_arr = samples[self._pixel_positions(self.pixel_stride, offset)]
+            band_arrs.append(band_arr)
+
+        return np.array(band_arrs)
 
 
 class PixelInterleavedSampleModel(SampleModel):
@@ -121,26 +126,23 @@ class PixelInterleavedSampleModel(SampleModel):
 
     def as_numpy(self, data_buffer: DataBuffer) -> np.ndarray:
         num_bands = len(self.band_offsets)
-        bank_data = data_buffer.bank_data[0]
+        samples = data_buffer.bank_samples()
         if (
             self.pixel_stride == num_bands
             and self.scanline_stride == self.width * num_bands
             and self.band_offsets == list(range(0, num_bands))
         ):
-            # Fast path: no gapping in between band data, no band reordering
-            arr = bank_data.reshape(self.height, self.width, num_bands)
+            # Fast path: no gapping in between band data, no band reordering. The bank may
+            # still hold more samples than the image needs, so slice a bounded window.
+            num_samples = self.width * self.height * num_bands
+            arr = samples[:num_samples].reshape(self.height, self.width, num_bands)
             return np.transpose(arr, [2, 0, 1])
         else:
-            # Slow path
-            pixel_data = []
-            for y in range(self.height):
-                for x in range(self.width):
-                    begin = y * self.scanline_stride + x * self.pixel_stride
-                    end = begin + num_bands
-                    pixel = bank_data[begin:end][self.band_offsets]
-                    pixel_data.append(pixel)
-            arr = np.array(pixel_data).reshape(self.height, self.width, num_bands)
-            return np.transpose(arr, [2, 0, 1])
+            # Slow path. Band offsets are positions within a scanline, so they are not
+            # bound to the pixel they belong to and may reach past its pixel stride.
+            positions = self._pixel_positions(self.pixel_stride)
+            band_arrs = [samples[positions + offset] for offset in self.band_offsets]
+            return np.array(band_arrs)
 
 
 class SinglePixelPackedSampleModel(SampleModel):
@@ -157,21 +159,20 @@ class SinglePixelPackedSampleModel(SampleModel):
             self.bit_offsets.append((v & -v).bit_length() - 1)
 
     def as_numpy(self, data_buffer: DataBuffer) -> np.ndarray:
-        num_bands = len(self.bit_masks)
-        bank_data = data_buffer.bank_data[0]
-        pixel_data = []
-        for y in range(self.height):
-            for x in range(self.width):
-                pos = y * self.scanline_stride + x
-                value = bank_data[pos]
-                pixel = []
-                for mask, bit_offset in zip(self.bit_masks, self.bit_offsets):
-                    pixel.append((value & mask) >> bit_offset)
-                pixel_data.append(pixel)
-        arr = np.array(pixel_data, dtype=bank_data.dtype).reshape(
-            self.height, self.width, num_bands
-        )
-        return np.transpose(arr, [2, 0, 1])
+        samples = data_buffer.bank_samples()
+        # Java extracts the bands with `(value & mask) >>> bitOffset`. Read the samples as
+        # unsigned so that a mask covering the sign bit, such as the alpha mask of an ARGB
+        # raster, does not sign-extend into the band values.
+        unsigned_dtype = np.dtype(f"u{samples.dtype.itemsize}")
+        values = samples[self._pixel_positions(1)].astype(unsigned_dtype)
+        # The bit masks are deserialized as signed 32 bit integers, so masks covering the
+        # sign bit arrive negative. Take their two's complement bits.
+        value_mask = (1 << (samples.dtype.itemsize * 8)) - 1
+        band_arrs = [
+            (values & unsigned_dtype.type(mask & value_mask)) >> bit_offset
+            for mask, bit_offset in zip(self.bit_masks, self.bit_offsets)
+        ]
+        return np.array(band_arrs).astype(samples.dtype)
 
 
 class MultiPixelPackedSampleModel(SampleModel):
@@ -188,27 +189,21 @@ class MultiPixelPackedSampleModel(SampleModel):
         self.data_bit_offset = data_bit_offset
 
     def as_numpy(self, data_buffer: DataBuffer) -> np.ndarray:
-        bank_data = data_buffer.bank_data[0]
-        bits_per_value = bank_data.dtype.itemsize * 8
-        pixel_per_value = bits_per_value / self.num_bits
-        shift_right = bits_per_value - self.num_bits
-        mask = ((1 << self.num_bits) - 1) << shift_right
+        samples = data_buffer.bank_samples()
+        bits_per_value = samples.dtype.itemsize * 8
 
-        band_data = []
-        for y in range(self.height):
-            pos = y * self.scanline_stride + self.data_bit_offset // bits_per_value
-            value = bank_data[pos]
-            shift = self.data_bit_offset % bits_per_value
-            value = value << shift
-            pixels: List[int] = []
-            while len(pixels) < self.width:
-                while shift < bits_per_value and len(pixels) < self.width:
-                    pixels.append((value & mask) >> shift_right)
-                    value = value << self.num_bits
-                    shift += self.num_bits
-                pos += 1
-                value = bank_data[pos]
-                shift = 0
-            band_data.append(np.array(pixels, dtype=bank_data.dtype))
+        # Resolve every pixel on its own, the way Java does: this sample model requires
+        # num_bits to divide the size of a data element, so no pixel spans two elements.
+        pixel_bits = self.data_bit_offset + np.arange(self.width) * self.num_bits
+        cols = pixel_bits // bits_per_value
+        shifts = bits_per_value - (pixel_bits % bits_per_value) - self.num_bits
 
-        return np.array(band_data).reshape(1, self.height, self.width)
+        rows = np.arange(self.height) * self.scanline_stride
+        positions = rows[:, np.newaxis] + cols[np.newaxis, :]
+        # Shift the samples as unsigned values, otherwise pixels held in the sign bit of a
+        # signed data type would sign-extend instead of shifting in zeroes.
+        unsigned_dtype = np.dtype(f"u{samples.dtype.itemsize}")
+        values = samples[positions].astype(unsigned_dtype)
+        pixels = (values >> shifts) & ((1 << self.num_bits) - 1)
+
+        return pixels.astype(samples.dtype).reshape(1, self.height, self.width)

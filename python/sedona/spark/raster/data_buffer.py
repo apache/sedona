@@ -40,3 +40,16 @@ class DataBuffer:
         self.bank_data = bank_data
         self.size = size
         self.offsets = offsets
+
+    def bank_samples(self, bank_index: int = 0) -> np.ndarray:
+        """Return the samples of a bank as an array indexed by sample index.
+
+        The offset of the bank is applied, so index ``i`` of the returned array holds
+        the same sample as ``DataBuffer.getElem(bank_index, i)`` does in Java AWT.
+        Sample models must go through this method instead of indexing
+        :attr:`bank_data` directly, otherwise samples of banks with a non-zero offset
+        are read from the wrong positions.
+        """
+        offset = self.offsets[bank_index]
+        bank_data = self.bank_data[bank_index]
+        return bank_data[offset:] if offset else bank_data
