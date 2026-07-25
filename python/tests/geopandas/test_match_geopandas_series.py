@@ -763,7 +763,26 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_ccw(self):
-        pass
+        data = [
+            LineString([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]),
+            LineString([(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)]),
+            LineString([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            LineString([(0, 1), (0, -1), (-1, -2), (3, -2)]),
+            LineString([(0, 0), (1, 0), (0, 1)]),
+            LineString([(0, 0), (1, 0), (0, 0)]),
+            LinearRing([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            Polygon([(0, 0), (1, 0), (0, 1), (0, 0)]),
+            Point(0, 0),
+            MultiLineString([[(0, 0), (1, 0)], [(1, 0), (1, 1)]]),
+            LineString(),
+            Polygon(),
+            None,
+        ]
+        index = pd.Index(range(10, 23), name="feature_id")
+
+        sgpd_result = GeoSeries(data, index=index).is_ccw
+        gpd_result = gpd.GeoSeries(data, index=index).is_ccw
+        self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_is_closed(self):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
@@ -1021,7 +1040,68 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_interiors(self):
-        pass
+        polygon_with_holes = Polygon(
+            [(0, 0), (0, 5), (5, 5), (5, 0), (0, 0)],
+            [
+                [(1, 1), (2, 1), (1, 2), (1, 1)],
+                [(3, 3), (4, 3), (4, 4), (3, 3)],
+            ],
+        )
+        polygon_without_holes = Polygon([(10, 10), (10, 12), (12, 10), (10, 10)])
+        data = [
+            polygon_with_holes,
+            polygon_without_holes,
+            Polygon(),
+            Point(0, 0),
+            Point(),
+            LineString(),
+            MultiPolygon([polygon_without_holes]),
+            GeometryCollection([polygon_with_holes]),
+            None,
+        ]
+        index = pd.MultiIndex.from_tuples(
+            [
+                ("polygon", "holes"),
+                ("polygon", "no-holes"),
+                ("polygon", "empty"),
+                ("point", "value"),
+                ("point", "empty"),
+                ("line", "empty"),
+                ("multipolygon", "value"),
+                ("collection", "value"),
+                ("null", "value"),
+            ],
+            names=["geometry_type", "case"],
+        )
+
+        sgpd_result = GeoSeries(data, index=index).interiors.to_pandas()
+        gpd_result = gpd.GeoSeries(data, index=index).interiors
+
+        def normalized(series):
+            return pd.Series(
+                [
+                    (
+                        None
+                        if rings is None
+                        else [
+                            tuple(tuple(coordinate) for coordinate in ring.coords)
+                            for ring in rings
+                        ]
+                    )
+                    for rings in series
+                ],
+                index=series.index,
+                name=series.name,
+                dtype=object,
+            )
+
+        # Sedona serializes rings as LineStrings, while GeoPandas exposes
+        # LinearRings. Coordinate sequences and object-Series null/list
+        # semantics must still match.
+        pd.testing.assert_series_equal(
+            normalized(sgpd_result),
+            normalized(gpd_result),
+        )
 
     def test_remove_repeated_points(self):
         for geom in self.geoms:
@@ -1087,6 +1167,76 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             sgpd_result = GeoSeries(geom).normalize()
             gpd_result = gpd.GeoSeries(geom).normalize()
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    def test_orient_polygons(self):
+        if parse_version(gpd.__version__) < parse_version("1.1.0"):
+            pytest.skip("geopandas orient_polygons requires version 1.1.0 or higher")
+        if parse_version(shapely.__version__) < parse_version("2.1.0"):
+            pytest.skip("geopandas orient_polygons requires shapely 2.1.0 or higher")
+
+        clockwise_polygon = Polygon(
+            [(0, 0), (0, 5), (5, 5), (5, 0), (0, 0)],
+            [[(1, 1), (4, 1), (4, 4), (1, 4), (1, 1)]],
+        )
+        second_polygon = Polygon([(10, 0), (10, 2), (12, 2), (12, 0), (10, 0)])
+        nested_collection = GeometryCollection(
+            [
+                Point(20, 20),
+                GeometryCollection(
+                    [
+                        clockwise_polygon,
+                        MultiPolygon([second_polygon]),
+                    ]
+                ),
+            ]
+        )
+        geoms = [
+            clockwise_polygon,
+            MultiPolygon([clockwise_polygon, second_polygon]),
+            nested_collection,
+            Point(1, 1),
+            LineString([(0, 0), (1, 1)]),
+            Point(),
+            LineString(),
+            Polygon(),
+            MultiPolygon(),
+            GeometryCollection(),
+            None,
+        ]
+        index = pd.Index(range(100, 111), name="feature_id")
+
+        def orientation_signature(geometry):
+            if geometry is None:
+                return None
+            if isinstance(geometry, Polygon):
+                if geometry.is_empty:
+                    return ("Polygon", "empty")
+                return (
+                    "Polygon",
+                    bool(geometry.exterior.is_ccw),
+                    tuple(bool(ring.is_ccw) for ring in geometry.interiors),
+                )
+            if isinstance(geometry, (MultiPolygon, GeometryCollection)):
+                return (
+                    geometry.geom_type,
+                    tuple(orientation_signature(part) for part in geometry.geoms),
+                )
+            return (geometry.geom_type, bool(geometry.is_empty))
+
+        for exterior_cw in (False, True):
+            sgpd_result = GeoSeries(geoms, index=index).orient_polygons(
+                exterior_cw=exterior_cw
+            )
+            gpd_result = gpd.GeoSeries(geoms, index=index).orient_polygons(
+                exterior_cw=exterior_cw
+            )
+
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+            actual = sgpd_result.to_geopandas().sort_index()
+            expected = gpd_result.sort_index()
+            assert [orientation_signature(geometry) for geometry in actual] == [
+                orientation_signature(geometry) for geometry in expected
+            ]
 
     def test_make_valid(self):
         import shapely

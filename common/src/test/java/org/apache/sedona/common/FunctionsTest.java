@@ -1773,6 +1773,139 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void testForcePolygonCWRecursesIntoNestedGeometryCollections() throws ParseException {
+    Geometry source =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION ("
+                + "POINT (9 9), "
+                + "GEOMETRYCOLLECTION ("
+                + "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0)), "
+                + "LINESTRING (3 3, 4 4), "
+                + "GEOMETRYCOLLECTION EMPTY, "
+                + "MULTIPOLYGON (((10 0, 12 0, 12 2, 10 2, 10 0)))), "
+                + "POLYGON ((20 0, 22 0, 22 2, 20 2, 20 0)))",
+            4326);
+
+    Geometry result = Functions.forcePolygonCW(source);
+
+    assertNestedCollectionOrientation(source, result, true);
+  }
+
+  @Test
+  public void testForcePolygonCCWRecursesIntoNestedGeometryCollections() throws ParseException {
+    Geometry source =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION ("
+                + "POINT (9 9), "
+                + "GEOMETRYCOLLECTION ("
+                + "POLYGON ((0 0, 0 2, 2 2, 2 0, 0 0)), "
+                + "LINESTRING (3 3, 4 4), "
+                + "GEOMETRYCOLLECTION EMPTY, "
+                + "MULTIPOLYGON (((10 0, 10 2, 12 2, 12 0, 10 0)))), "
+                + "POLYGON ((20 0, 20 2, 22 2, 22 0, 20 0)))",
+            4326);
+
+    Geometry result = Functions.forcePolygonCCW(source);
+
+    assertNestedCollectionOrientation(source, result, false);
+  }
+
+  private void assertNestedCollectionOrientation(
+      Geometry source, Geometry result, boolean clockwise) {
+    assertTrue(result instanceof GeometryCollection);
+    assertEquals(source.getSRID(), result.getSRID());
+    assertEquals(source.getNumGeometries(), result.getNumGeometries());
+
+    assertEquals(source.getGeometryN(0), result.getGeometryN(0));
+    assertTrue(result.getGeometryN(1) instanceof GeometryCollection);
+    assertTrue(result.getGeometryN(2) instanceof Polygon);
+
+    GeometryCollection sourceNested = (GeometryCollection) source.getGeometryN(1);
+    GeometryCollection resultNested = (GeometryCollection) result.getGeometryN(1);
+    assertEquals(sourceNested.getSRID(), resultNested.getSRID());
+    assertEquals(sourceNested.getNumGeometries(), resultNested.getNumGeometries());
+
+    assertTrue(resultNested.getGeometryN(0) instanceof Polygon);
+    assertEquals(sourceNested.getGeometryN(1), resultNested.getGeometryN(1));
+    assertEquals(sourceNested.getGeometryN(2), resultNested.getGeometryN(2));
+    assertTrue(resultNested.getGeometryN(2).isEmpty());
+    assertTrue(resultNested.getGeometryN(3) instanceof MultiPolygon);
+
+    Geometry nestedPolygon = resultNested.getGeometryN(0);
+    Geometry nestedMultiPolygon = resultNested.getGeometryN(3);
+    Geometry topLevelPolygon = result.getGeometryN(2);
+    assertEquals(source.getSRID(), nestedPolygon.getSRID());
+    assertEquals(source.getSRID(), nestedMultiPolygon.getSRID());
+    assertEquals(source.getSRID(), topLevelPolygon.getSRID());
+
+    if (clockwise) {
+      assertTrue(Functions.isPolygonCW(nestedPolygon));
+      assertTrue(Functions.isPolygonCW(nestedMultiPolygon));
+      assertTrue(Functions.isPolygonCW(topLevelPolygon));
+      assertTrue(Functions.isPolygonCCW(sourceNested.getGeometryN(0)));
+      assertTrue(Functions.isPolygonCCW(sourceNested.getGeometryN(3)));
+      assertTrue(Functions.isPolygonCCW(source.getGeometryN(2)));
+    } else {
+      assertTrue(Functions.isPolygonCCW(nestedPolygon));
+      assertTrue(Functions.isPolygonCCW(nestedMultiPolygon));
+      assertTrue(Functions.isPolygonCCW(topLevelPolygon));
+      assertTrue(Functions.isPolygonCW(sourceNested.getGeometryN(0)));
+      assertTrue(Functions.isPolygonCW(sourceNested.getGeometryN(3)));
+      assertTrue(Functions.isPolygonCW(source.getGeometryN(2)));
+    }
+  }
+
+  @Test
+  public void testForcePolygonOrientationPreservesCollectionMetadata() throws ParseException {
+    Geometry source =
+        Constructors.geomFromWKT(
+            "GEOMETRYCOLLECTION ("
+                + "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0)), "
+                + "POLYGON ((10 0, 10 2, 12 2, 12 0, 10 0)))",
+            0);
+    source.setSRID(4326);
+    source.setUserData("metadata");
+
+    Geometry clockwise = Functions.forcePolygonCW(source);
+    Geometry counterClockwise = Functions.forcePolygonCCW(source);
+
+    assertEquals(0, source.getFactory().getSRID());
+    assertEquals(4326, clockwise.getSRID());
+    assertEquals(4326, counterClockwise.getSRID());
+    assertEquals("metadata", clockwise.getUserData());
+    assertEquals("metadata", counterClockwise.getUserData());
+  }
+
+  @Test
+  public void testForcePolygonOrientationPreservesNull() {
+    assertNull(Functions.forcePolygonCW(null));
+    assertNull(Functions.forcePolygonCCW(null));
+  }
+
+  @Test
+  public void testIsLineStringCCW() throws ParseException {
+    Geometry closedCCW = Constructors.geomFromWKT("LINESTRING (0 0, 1 0, 1 1, 0 1, 0 0)", 0);
+    Geometry closedCW = Constructors.geomFromWKT("LINESTRING (0 0, 0 1, 1 1, 1 0, 0 0)", 0);
+    Geometry openCCW = Constructors.geomFromWKT("LINESTRING (0 0, 1 0, 1 1, 0 1)", 0);
+    Geometry asymmetricOpen = Constructors.geomFromWKT("LINESTRING (0 1, 0 -1, -1 -2, 3 -2)", 0);
+    Geometry asymmetricClosed =
+        Constructors.geomFromWKT("LINESTRING (0 1, 0 -1, -1 -2, 3 -2, 0 1)", 0);
+
+    assertTrue(Functions.isLineStringCCW(closedCCW));
+    assertFalse(Functions.isLineStringCCW(closedCW));
+    assertTrue(Functions.isLineStringCCW(openCCW));
+    assertFalse(Functions.isLineStringCCW(asymmetricOpen));
+    assertTrue(Functions.isLineStringCCW(asymmetricClosed));
+    assertFalse(
+        Functions.isLineStringCCW(Constructors.geomFromWKT("LINESTRING (0 0, 1 0, 0 1)", 0)));
+    assertFalse(
+        Functions.isLineStringCCW(Constructors.geomFromWKT("LINESTRING (0 0, 1 0, 0 0)", 0)));
+    assertFalse(Functions.isLineStringCCW(Constructors.geomFromWKT("LINESTRING EMPTY", 0)));
+    assertFalse(Functions.isLineStringCCW(Constructors.geomFromWKT("POINT (0 0)", 0)));
+    assertFalse(Functions.isLineStringCCW(null));
+  }
+
+  @Test
   public void testIsPolygonCW() throws ParseException {
     Geometry polyCCW =
         Constructors.geomFromWKT(

@@ -561,9 +561,32 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("is_ring", self)
 
-    # @property
-    # def is_ccw(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    @property
+    def is_ccw(self):
+        """Return a ``Series`` of ``dtype('bool')`` with value ``True`` if a
+        LineString or LinearRing is counter-clockwise.
+
+        This property returns ``False`` for non-linear geometries and for lines
+        with fewer than four points.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString, LinearRing, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         LinearRing([(0, 0), (1, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (1, 1), (1, 0), (0, 0)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s.is_ccw
+        0     True
+        1    False
+        2    False
+        dtype: bool
+        """
+        return _delegate_to_geometry_column("is_ccw", self)
 
     @property
     def is_closed(self):
@@ -1175,9 +1198,32 @@ class GeoFrame(metaclass=ABCMeta):
             "offset_curve", self, distance, quad_segs, join_style, mitre_limit
         )
 
-    # @property
-    # def interiors(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    @property
+    def interiors(self):
+        """Return a ``Series`` of lists containing polygon interior rings.
+
+        Polygons without holes return an empty list. Non-polygon geometries
+        and null values return ``None``.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon(
+        ...             [(0, 0), (0, 5), (5, 5), (5, 0)],
+        ...             [[(1, 1), (2, 1), (1, 2)]],
+        ...         ),
+        ...         Polygon([(0, 0), (0, 1), (1, 0)]),
+        ...     ]
+        ... )
+        >>> s.interiors
+        0    [LINESTRING (1 1, 2 1, 1 2, 1 1)]
+        1                                      []
+        dtype: object
+        """
+        return _delegate_to_geometry_column("interiors", self)
 
     def remove_repeated_points(self, tolerance=0.0):
         """Return a ``GeoSeries`` with duplicate points removed.
@@ -1397,6 +1443,39 @@ class GeoFrame(metaclass=ABCMeta):
 
         """
         return _delegate_to_geometry_column("normalize", self)
+
+    def orient_polygons(self, *, exterior_cw=False):
+        """Return geometries with a consistent polygon ring orientation.
+
+        By default, polygon exterior rings are oriented counter-clockwise and
+        interior rings clockwise. Set ``exterior_cw=True`` to use the opposite
+        orientation. Polygonal members of GeometryCollections are processed
+        recursively, while non-polygonal members are left unchanged.
+
+        Parameters
+        ----------
+        exterior_cw : bool, default False
+            If ``True``, orient exterior rings clockwise and interior rings
+            counter-clockwise.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [Polygon([(0, 0), (0, 1), (1, 0), (0, 0)])]
+        ... )
+        >>> s.orient_polygons()
+        0    POLYGON ((0 0, 1 0, 0 1, 0 0))
+        dtype: object
+        """
+        return _delegate_to_geometry_column(
+            "orient_polygons", self, exterior_cw=exterior_cw
+        )
 
     def make_valid(self, *, method="linework", keep_collapsed=True):
         """Repairs invalid geometries.
