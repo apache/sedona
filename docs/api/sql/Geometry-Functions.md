@@ -82,6 +82,7 @@ These functions extract information and properties from geometry objects.
 | [ST_IsClosed](Geometry-Accessors/ST_IsClosed.md) | Boolean | RETURNS true if the LINESTRING start and end point are the same. | v1.0.0 |
 | [ST_IsCollection](Geometry-Accessors/ST_IsCollection.md) | Boolean | Returns `TRUE` if the geometry type of the input is a geometry collection type. Collection types are the following: | v1.5.0 |
 | [ST_IsEmpty](Geometry-Accessors/ST_IsEmpty.md) | Boolean | Test if a geometry is empty geometry | v1.2.1 |
+| [ST_IsLineStringCCW](Geometry-Accessors/ST_IsLineStringCCW.md) | Boolean | Returns true if the input is a LineString whose coordinate sequence has counter-clockwise ring orientation. Open LineStrings are evaluated as supplied, without appending the start coordinate. | v1.9.1 |
 | [ST_IsPolygonCCW](Geometry-Accessors/ST_IsPolygonCCW.md) | Boolean | Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise. | v1.6.0 |
 | [ST_IsPolygonCW](Geometry-Accessors/ST_IsPolygonCW.md) | Boolean | Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise. | v1.6.0 |
 | [ST_IsRing](Geometry-Accessors/ST_IsRing.md) | Boolean | RETURN true if LINESTRING is ST_IsClosed and ST_IsSimple. | v1.0.0 |

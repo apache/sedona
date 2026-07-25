@@ -98,6 +98,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[ST_IsClosed](),
     function[ST_IsCollection](),
     function[ST_IsEmpty](),
+    function[ST_IsLineStringCCW](),
     function[ST_IsPolygonCCW](),
     function[ST_IsPolygonCW](),
     function[ST_IsRing](),

@@ -584,9 +584,9 @@ object st_functions {
   def ST_IsPolygonCCW(geometry: Column): Column = wrapExpression[ST_IsPolygonCCW](geometry)
   def ST_IsPolygonCCW(geometry: String): Column = wrapExpression[ST_IsPolygonCCW](geometry)
 
-  // Internal bridge for the distributed GeoPandas is_ccw implementation.
-  // It is intentionally not registered in the SQL function catalog.
   def ST_IsLineStringCCW(geometry: Column): Column =
+    wrapExpression[ST_IsLineStringCCW](geometry)
+  def ST_IsLineStringCCW(geometry: String): Column =
     wrapExpression[ST_IsLineStringCCW](geometry)
 
   def ST_ForcePolygonCCW(geometry: Column): Column = wrapExpression[ST_ForcePolygonCCW](geometry)

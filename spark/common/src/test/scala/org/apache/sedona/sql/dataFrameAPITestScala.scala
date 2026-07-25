@@ -2276,6 +2276,14 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertFalse(actual)
     }
 
+    it("Passed ST_IsLineStringCCW") {
+      val baseDf =
+        sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 1, 0 0)') AS line")
+
+      assertTrue(baseDf.select(ST_IsLineStringCCW("line")).first().getBoolean(0))
+      assertTrue(baseDf.select(ST_IsLineStringCCW(col("line"))).first().getBoolean(0))
+    }
+
     it("Passed ST_Translate") {
       val polyDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON ((1 0 1, 1 1 1, 2 1 1, 2 0 1, 1 0 1))') AS geom")

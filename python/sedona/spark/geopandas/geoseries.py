@@ -1156,7 +1156,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Apply JTS' ring-orientation algorithm to the original coordinate
         # sequence. Open lines must not be closed first because GEOS does not
         # do so when implementing GeoPandas' is_ccw property.
-        spark_expr = stf._call_st_function("ST_IsLineStringCCW", geometry)
+        spark_expr = stf.ST_IsLineStringCCW(geometry)
         result = self._query_geometry_column(
             spark_expr,
             returns_geom=False,
