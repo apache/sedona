@@ -270,6 +270,30 @@ def test_multi_pixel_packed_scanline_spanning_several_samples() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "bank,expected",
+    [
+        # the top sample has its sign bit set, so Java's arithmetic shift extends it
+        ([0x89ABCDEF, 0x12345678], [154, 188, 222, 248]),
+        # and a positive sample, where the shifted-down top bits are not sign bits
+        ([0x12345678, 0], [35, 69, 103, 1]),
+    ],
+)
+def test_multi_pixel_packed_pixel_straddling_two_samples(
+    bank: List[int], expected: List[int]
+) -> None:
+    # MultiPixelPackedSampleModel(TYPE_INT, 4, 1, 8, 1, 4): a data bit offset that is not a
+    # multiple of num_bits leaves the last pixel straddling two samples, and Java's shift
+    # distance for it goes negative. Java takes an int shift distance modulo 32, so -4 shifts
+    # right by 28 and reads the top bits of the sample rather than shifting it all out.
+    sample_model = MultiPixelPackedSampleModel(DataBuffer.TYPE_INT, 4, 1, 8, 1, 4)
+    data_buffer = DataBuffer(DataBuffer.TYPE_INT, [int_bank(bank)], 2, [0])
+
+    np.testing.assert_array_equal(
+        sample_model.as_numpy(data_buffer), np.array([[expected]])
+    )
+
+
 def test_multi_pixel_packed_whole_sample_pixels_read_zero() -> None:
     # MultiPixelPackedSampleModel(TYPE_INT, 3, 2, 32, 4, 0): Java accepts a pixel that
     # occupies a whole 32 bit sample, but derives a zero bit mask for it from

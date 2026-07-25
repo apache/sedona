@@ -202,14 +202,18 @@ class MultiPixelPackedSampleModel(SampleModel):
 
         rows = np.arange(self.height) * self.scanline_stride
         positions = rows[:, np.newaxis] + cols[np.newaxis, :]
-        # Shift the samples as unsigned values, otherwise pixels held in the sign bit of a
-        # signed data type would sign-extend instead of shifting in zeroes.
-        unsigned_dtype = np.dtype(f"u{samples.dtype.itemsize}")
-        values = samples[positions].astype(unsigned_dtype)
-        # Java derives this mask as `(1 << numberOfBits) - 1` on an int, and the shift count
-        # of an int shift is taken modulo 32. A pixel occupying a whole 32 bit sample
-        # therefore ends up with a zero mask, and Java reads every such pixel as zero.
-        bit_mask = (1 << (self.num_bits % 32)) - 1
+
+        # Java reads a sample through DataBuffer.getElem(), which widens it to a signed int,
+        # zero extending byte and ushort samples, and then shifts it with `>>`. Both that
+        # shift and the `1 <<` below are int operations, whose shift distance Java takes
+        # modulo 32, and `>>` propagates the sign bit. So a data bit offset that is not a
+        # multiple of num_bits, which leaves a pixel straddling two samples and gives a
+        # negative distance here, shifts the top bits of the sample down rather than
+        # shifting the whole sample out, and a pixel occupying a whole 32 bit sample gets a
+        # zero mask and reads as zero.
+        values = samples[positions].astype(np.int32)
+        shifts = (shifts & 31).astype(np.int32)
+        bit_mask = np.int32((1 << (self.num_bits % 32)) - 1)
         pixels = (values >> shifts) & bit_mask
 
         return pixels.astype(samples.dtype).reshape(1, self.height, self.width)
