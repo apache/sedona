@@ -784,12 +784,25 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(geom).has_z
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
+        wkts = [
+            "GEOMETRYCOLLECTION (POINT (0 0), POINT Z (1 1 2))",
+            (
+                "GEOMETRYCOLLECTION (POINT (0 0), "
+                "GEOMETRYCOLLECTION (POINT Z (1 1 2)))"
+            ),
+            "POINT EMPTY",
+            None,
+        ]
+        sgpd_result = GeoSeries.from_wkt(wkts).has_z
+        gpd_result = gpd.GeoSeries.from_wkt(wkts).has_z
+        self.check_pd_series_equal(sgpd_result, gpd_result)
+
     def test_has_m(self):
         if parse_version(gpd.__version__) < parse_version("1.1.0"):
             pytest.skip("geopandas has_m requires version 1.1.0 or higher")
         if parse_version(shapely.__version__) < parse_version("2.1.0"):
             pytest.skip("geopandas has_m requires shapely 2.1.0 or higher")
-        if parse_version(shapely.geos_version_string) < parse_version("3.12.0"):
+        if shapely.geos_version < (3, 12, 0):
             pytest.skip("has_m requires GEOS 3.12.0 or higher")
 
         wkts = [
@@ -916,7 +929,7 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             pytest.skip(
                 "geopandas constrained_delaunay_triangles requires shapely 2.1.0 or higher"
             )
-        if parse_version(shapely.geos_version_string) < parse_version("3.10.0"):
+        if shapely.geos_version < (3, 10, 0):
             pytest.skip("constrained_delaunay_triangles requires GEOS 3.10.0 or higher")
 
         geoms = [

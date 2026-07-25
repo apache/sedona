@@ -1171,11 +1171,20 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def has_z(self) -> pspd.Series:
-        spark_expr = stf.ST_HasZ(self.spark.column)
-        return self._query_geometry_column(
+        # ST_HasZ checks the first coordinate. GeoPandas checks every component
+        # of a mixed-dimensional GeometryCollection.
+        spark_expr = F.when(
+            stf.ST_GeometryType(self.spark.column) == "ST_GeometryCollection",
+            F.exists(
+                stf.ST_DumpPoints(self.spark.column),
+                lambda point: stf.ST_HasZ(point),
+            ),
+        ).otherwise(stf.ST_HasZ(self.spark.column))
+        result = self._query_geometry_column(
             spark_expr,
             returns_geom=False,
         )
+        return _to_bool(result)
 
     @property
     def has_m(self) -> pspd.Series:

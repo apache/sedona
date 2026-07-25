@@ -1425,6 +1425,20 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().has_z
         self.check_pd_series_equal(df_result, expected)
 
+        mixed = GeoSeries.from_wkt(
+            [
+                "GEOMETRYCOLLECTION (POINT (0 0), POINT Z (1 1 2))",
+                (
+                    "GEOMETRYCOLLECTION (POINT (0 0), "
+                    "GEOMETRYCOLLECTION (POINT Z (1 1 2)))"
+                ),
+                "POINT EMPTY",
+                None,
+            ]
+        )
+        mixed_expected = pd.Series([True, True, False, False])
+        self.check_pd_series_equal(mixed.has_z, mixed_expected)
+
     def test_has_m(self):
         s = GeoSeries.from_wkt(
             [
