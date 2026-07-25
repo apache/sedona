@@ -156,7 +156,9 @@ class SinglePixelPackedSampleModel(SampleModel):
         self.bit_masks = bit_masks
         self.bit_offsets = []
         for v in self.bit_masks:
-            self.bit_offsets.append((v & -v).bit_length() - 1)
+            # Java leaves the bit offset of a zero mask at zero, and reads such a band as
+            # zero. Deriving it from the mask would give -1 for it.
+            self.bit_offsets.append((v & -v).bit_length() - 1 if v else 0)
 
     def as_numpy(self, data_buffer: DataBuffer) -> np.ndarray:
         samples = data_buffer.bank_samples()
@@ -204,6 +206,10 @@ class MultiPixelPackedSampleModel(SampleModel):
         # signed data type would sign-extend instead of shifting in zeroes.
         unsigned_dtype = np.dtype(f"u{samples.dtype.itemsize}")
         values = samples[positions].astype(unsigned_dtype)
-        pixels = (values >> shifts) & ((1 << self.num_bits) - 1)
+        # Java derives this mask as `(1 << numberOfBits) - 1` on an int, and the shift count
+        # of an int shift is taken modulo 32. A pixel occupying a whole 32 bit sample
+        # therefore ends up with a zero mask, and Java reads every such pixel as zero.
+        bit_mask = (1 << (self.num_bits % 32)) - 1
+        pixels = (values >> shifts) & bit_mask
 
         return pixels.astype(samples.dtype).reshape(1, self.height, self.width)

@@ -181,6 +181,23 @@ def test_single_pixel_packed_argb_does_not_sign_extend() -> None:
     )
 
 
+def test_single_pixel_packed_zero_mask_reads_zero() -> None:
+    # SinglePixelPackedSampleModel(TYPE_INT, 2, 1, 2, {0xFF0000, 0xFF00, 0xFF, 0}): Java
+    # accepts a zero mask, leaves its bit offset at zero and reads the band as zero
+    sample_model = SinglePixelPackedSampleModel(
+        DataBuffer.TYPE_INT, 2, 1, 2, [0x00FF0000, 0x0000FF00, 0x000000FF, 0]
+    )
+    assert sample_model.bit_offsets == [16, 8, 0, 0]
+    data_buffer = DataBuffer(
+        DataBuffer.TYPE_INT, [int_bank([0x8090A0B0, 0xFFFFFFFF])], 2, [0]
+    )
+
+    np.testing.assert_array_equal(
+        sample_model.as_numpy(data_buffer),
+        np.array([[[144, 255]], [[160, 255]], [[176, 255]], [[0, 0]]]),
+    )
+
+
 def test_single_pixel_packed_applies_bank_offset() -> None:
     # SinglePixelPackedSampleModel(TYPE_USHORT, 2, 2, 4, {0xF800, 0x7E0, 0x1F}) over
     # DataBufferUShort(bank, 8, {2}): RGB 565 pixels starting two samples into the bank
@@ -250,6 +267,37 @@ def test_multi_pixel_packed_scanline_spanning_several_samples() -> None:
     np.testing.assert_array_equal(
         sample_model.as_numpy(data_buffer),
         np.array([[[3, 3, 2, 1, 0], [0, 1, 0, 3, 2]]]),
+    )
+
+
+def test_multi_pixel_packed_whole_sample_pixels_read_zero() -> None:
+    # MultiPixelPackedSampleModel(TYPE_INT, 3, 2, 32, 4, 0): Java accepts a pixel that
+    # occupies a whole 32 bit sample, but derives a zero bit mask for it from
+    # `(1 << 32) - 1`, so it reads every pixel of such a raster as zero
+    sample_model = MultiPixelPackedSampleModel(DataBuffer.TYPE_INT, 3, 2, 32, 4, 0)
+    data_buffer = DataBuffer(
+        DataBuffer.TYPE_INT,
+        [
+            int_bank(
+                [
+                    0x11223344,
+                    0x55667788,
+                    0x99AABBCC,
+                    0,
+                    0xDEADBEEF,
+                    0x0F0F0F0F,
+                    0x12345678,
+                    0,
+                ]
+            )
+        ],
+        8,
+        [0],
+    )
+
+    np.testing.assert_array_equal(
+        sample_model.as_numpy(data_buffer),
+        np.array([[[0, 0, 0], [0, 0, 0]]]),
     )
 
 
