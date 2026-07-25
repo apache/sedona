@@ -1561,7 +1561,7 @@ public class Functions {
       return geom;
     }
 
-    if (isHeterogeneousGeometryCollection(geom)) {
+    if (isPlainGeometryCollection(geom)) {
       return forcePolygonOrientationInCollection((GeometryCollection) geom, true);
     }
 
@@ -1684,7 +1684,7 @@ public class Functions {
       return geom;
     }
 
-    if (isHeterogeneousGeometryCollection(geom)) {
+    if (isPlainGeometryCollection(geom)) {
       return forcePolygonOrientationInCollection((GeometryCollection) geom, false);
     }
 
@@ -1708,7 +1708,7 @@ public class Functions {
     return geom;
   }
 
-  private static boolean isHeterogeneousGeometryCollection(Geometry geometry) {
+  private static boolean isPlainGeometryCollection(Geometry geometry) {
     return geometry instanceof GeometryCollection
         && !(geometry instanceof MultiPoint)
         && !(geometry instanceof MultiLineString)

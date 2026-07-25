@@ -572,6 +572,11 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(geom).geom_type
             self.check_pd_series_equal(sgpd_result, gpd_result)
 
+        geometries_with_null = [Point(0, 0), None]
+        sgpd_result = GeoSeries(geometries_with_null).geom_type
+        gpd_result = gpd.GeoSeries(geometries_with_null).geom_type
+        self.check_pd_series_equal(sgpd_result, gpd_result)
+
     def test_type(self):
         for geom in self.geoms:
             # Sedona converts LinearRing to LineString

@@ -1220,7 +1220,7 @@ class GeoFrame(metaclass=ABCMeta):
         ... )
         >>> s.interiors
         0    [LINESTRING (1 1, 2 1, 1 2, 1 1)]
-        1                                      []
+        1                                   []
         dtype: object
         """
         return _delegate_to_geometry_column("interiors", self)
@@ -2156,7 +2156,10 @@ class GeoFrame(metaclass=ABCMeta):
         `interior` of the other but does not contain it, and the dimension of
         the intersection is less than the dimension of the one or the other.
 
-        Note: Unlike Geopandas, Sedona's implementation always return NULL when GeometryCollection is involved.
+        The underlying Sedona expression returns ``NULL`` when a
+        GeometryCollection is involved. This GeoSeries method normalizes that
+        result to ``False`` to preserve GeoPandas' non-nullable boolean
+        contract.
 
         The operation works on a 1-to-1 row-wise manner.
 

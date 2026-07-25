@@ -1367,6 +1367,8 @@ class GeoSeries(GeoFrame, pspd.Series):
             F.sequence(F.lit(0), ring_count - 1),
             lambda index: stf.ST_InteriorRingN(geometry, index),
         )
+        # Spark creates a descending sequence for sequence(0, -1), so this guard
+        # is required to keep polygons without interior rings as an empty array.
         polygon_rings = F.when(ring_count > 0, rings).otherwise(empty_rings)
         spark_expr = F.when(
             stf.ST_GeometryType(geometry) == "ST_Polygon",
@@ -4180,6 +4182,6 @@ def _get_series_col_name(ps_series: pspd.Series) -> str:
 
 def _to_bool(ps_series: pspd.Series, default: bool = False) -> pspd.Series:
     """
-    Cast a ps.Series to bool type if it's not one, converting None values to the default value.
+    Convert null values to the default and return a non-nullable boolean Series.
     """
     return ps_series.fillna(default).astype(bool)

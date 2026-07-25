@@ -23,6 +23,7 @@ import geopandas as gpd
 import pyspark.pandas as ps
 import sedona.spark.geopandas as sgpd
 from sedona.spark.geopandas import GeoSeries, GeoDataFrame
+from sedona.spark.geopandas.geoseries import _to_bool
 from sedona.spark.sql import st_functions as stf
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from shapely import wkt
@@ -66,6 +67,29 @@ class TestGeoSeries(TestGeopandasBase):
     def test_empty_list(self):
         s = sgpd.GeoSeries([])
         assert s.count() == 0
+
+    def test_to_bool_fills_nullable_boolean_series(self):
+        nullable = self.spark.createDataFrame(
+            [(0, True), (1, None), (2, False)],
+            "id long, value boolean",
+        ).pandas_api(index_col="id")["value"]
+
+        self.check_pd_series_equal(
+            _to_bool(nullable),
+            pd.Series(
+                [True, False, False],
+                index=pd.Index([0, 1, 2], name="id"),
+                name="value",
+            ),
+        )
+        self.check_pd_series_equal(
+            _to_bool(nullable, default=True),
+            pd.Series(
+                [True, True, False],
+                index=pd.Index([0, 1, 2], name="id"),
+                name="value",
+            ),
+        )
 
     def test_non_geom_fails(self):
         with pytest.raises(TypeError):
@@ -737,6 +761,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 ),
                 GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)])]),
                 LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
+                None,
             ]
         )
         result = geoseries.geom_type
@@ -750,6 +775,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 "MultiPolygon",
                 "GeometryCollection",
                 "LineString",  # Note: Sedona returns LineString instead of LinearRing
+                None,
             ]
         )
         self.check_pd_series_equal(result, expected)
@@ -3522,9 +3548,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().crosses(s2, align=False)
         self.check_pd_series_equal(df_result, expected)
 
-        # Sedona ST_Crosses doesn't support GeometryCollection, so it returns NULL for now.
-        # https://github.com/apache/sedona/issues/2417
-        # Once this is resolved, we can update the expected result of this test.
+        # The underlying ST_Crosses expression returns NULL for GeometryCollection
+        # (https://github.com/apache/sedona/issues/2417), which the GeoSeries
+        # predicate normalizes to False to match GeoPandas' boolean contract.
         # Ensure M-dimension doesn't break things.
         s = GeoSeries(
             [
@@ -3534,7 +3560,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         line = LineString([(0, 0), (1, 1)])
         result = s.crosses(line)
-        expected = pd.Series([None, False])
+        expected = pd.Series([False, False], dtype=bool)
         self.check_pd_series_equal(result, expected)
 
     def test_disjoint(self):
