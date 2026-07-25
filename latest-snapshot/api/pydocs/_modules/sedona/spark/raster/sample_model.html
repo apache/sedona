@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.raster.sample_model &mdash; Apache Sedona Python Documentation</title>
@@ -227,6 +226,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">warn</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -250,6 +250,7 @@
     <span class="n">data_type</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">width</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">height</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">scanline_stride</span><span class="p">:</span> <span class="nb">int</span>
 
 <div class="viewcode-block" id="SampleModel.__init__"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.sample_model.SampleModel.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_model_type</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_model_type</span> <span class="o">=</span> <span class="n">sample_model_type</span>
@@ -261,7 +262,17 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">as_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_buffer</span><span class="p">:</span> <span class="n">DataBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="s2">&quot;Abstract method as_numpy was not implemented by subclass&quot;</span>
-        <span class="p">)</span></div></div>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_pixel_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixel_stride</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample position of every pixel, as a (height, width) array of indices.</span>
+
+<span class="sd">        The positions are relative to the start of a bank, so they index the arrays</span>
+<span class="sd">        returned by :meth:`DataBuffer.bank_samples`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanline_stride</span> <span class="o">+</span> <span class="n">offset</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span> <span class="o">*</span> <span class="n">pixel_stride</span>
+        <span class="k">return</span> <span class="n">rows</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">+</span> <span class="n">cols</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span></div>
 
 
 <div class="viewcode-block" id="ComponentSampleModel"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.sample_model.ComponentSampleModel">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ComponentSampleModel</span><span class="p">(</span><span class="n">SampleModel</span><span class="p">):</span>
@@ -287,33 +298,27 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">band_offsets</span> <span class="o">=</span> <span class="n">band_offsets</span></div>
 
 <div class="viewcode-block" id="ComponentSampleModel.as_numpy"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.sample_model.ComponentSampleModel.as_numpy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">as_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_buffer</span><span class="p">:</span> <span class="n">DataBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanline_stride</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_stride</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="c1"># Fast path: no gaps between pixels</span>
-            <span class="n">band_arrs</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">bank_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bank_indices</span><span class="p">:</span>
-                <span class="n">bank_data</span> <span class="o">=</span> <span class="n">data_buffer</span><span class="o">.</span><span class="n">bank_data</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span>
-                <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">band_offsets</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">offset</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">bank_data</span> <span class="o">=</span> <span class="n">bank_data</span><span class="p">[</span><span class="n">offset</span> <span class="p">:</span> <span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)]</span>
-                <span class="n">band_arr</span> <span class="o">=</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
-                <span class="n">band_arrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">band_arr</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">band_arrs</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Slow path</span>
-            <span class="n">band_arrs</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_indices</span><span class="p">)):</span>
-                <span class="n">bank_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bank_indices</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-                <span class="n">bank_data</span> <span class="o">=</span> <span class="n">data_buffer</span><span class="o">.</span><span class="n">bank_data</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span>
-                <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">band_offsets</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-                <span class="n">band_pixel_data</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">):</span>
-                    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">):</span>
-                        <span class="n">pos</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanline_stride</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_stride</span>
-                        <span class="n">band_pixel_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bank_data</span><span class="p">[</span><span class="n">pos</span><span class="p">])</span>
-                <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">band_pixel_data</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
-                <span class="n">band_arrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+        <span class="n">contiguous</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanline_stride</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_stride</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="n">num_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span>
 
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">band_arrs</span><span class="p">)</span></div></div>
+        <span class="n">band_arrs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">bank_index</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_indices</span><span class="p">):</span>
+            <span class="c1"># The band offset is relative to the offset of the bank the band lives in, and</span>
+            <span class="c1"># bank_indices/band_offsets are both indexed by band, not by bank.</span>
+            <span class="n">samples</span> <span class="o">=</span> <span class="n">data_buffer</span><span class="o">.</span><span class="n">bank_samples</span><span class="p">(</span><span class="n">bank_index</span><span class="p">)</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">band_offsets</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">contiguous</span><span class="p">:</span>
+                <span class="c1"># Fast path: the samples of a band follow each other. The bank may still</span>
+                <span class="c1"># hold more samples than the band needs, so slice a bounded window.</span>
+                <span class="n">band_arr</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="n">offset</span> <span class="p">:</span> <span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="n">num_samples</span><span class="p">)]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Slow path: gaps between pixels or scanlines</span>
+                <span class="n">band_arr</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_pixel_positions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_stride</span><span class="p">,</span> <span class="n">offset</span><span class="p">)]</span>
+            <span class="n">band_arrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">band_arr</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">band_arrs</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="PixelInterleavedSampleModel"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.sample_model.PixelInterleavedSampleModel">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PixelInterleavedSampleModel</span><span class="p">(</span><span class="n">SampleModel</span><span class="p">):</span>
@@ -331,26 +336,23 @@
 
 <div class="viewcode-block" id="PixelInterleavedSampleModel.as_numpy"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.sample_model.PixelInterleavedSampleModel.as_numpy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">as_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_buffer</span><span class="p">:</span> <span class="n">DataBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="n">num_bands</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">band_offsets</span><span class="p">)</span>
-        <span class="n">bank_data</span> <span class="o">=</span> <span class="n">data_buffer</span><span class="o">.</span><span class="n">bank_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">data_buffer</span><span class="o">.</span><span class="n">bank_samples</span><span class="p">()</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pixel_stride</span> <span class="o">==</span> <span class="n">num_bands</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanline_stride</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="n">num_bands</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">band_offsets</span> <span class="o">==</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_bands</span><span class="p">))</span>
         <span class="p">):</span>
-            <span class="c1"># Fast path: no gapping in between band data, no band reordering</span>
-            <span class="n">arr</span> <span class="o">=</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">num_bands</span><span class="p">)</span>
+            <span class="c1"># Fast path: no gapping in between band data, no band reordering. The bank may</span>
+            <span class="c1"># still hold more samples than the image needs, so slice a bounded window.</span>
+            <span class="n">num_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span> <span class="n">num_bands</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[:</span><span class="n">num_samples</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">num_bands</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Slow path</span>
-            <span class="n">pixel_data</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">):</span>
-                    <span class="n">begin</span> <span class="o">=</span> <span class="n">y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanline_stride</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pixel_stride</span>
-                    <span class="n">end</span> <span class="o">=</span> <span class="n">begin</span> <span class="o">+</span> <span class="n">num_bands</span>
-                    <span class="n">pixel</span> <span class="o">=</span> <span class="n">bank_data</span><span class="p">[</span><span class="n">begin</span><span class="p">:</span><span class="n">end</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">band_offsets</span><span class="p">]</span>
-                    <span class="n">pixel_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pixel</span><span class="p">)</span>
-            <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pixel_data</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">num_bands</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span></div></div>
+            <span class="c1"># Slow path. Band offsets are positions within a scanline, so they are not</span>
+            <span class="c1"># bound to the pixel they belong to and may reach past its pixel stride.</span>
+            <span class="n">positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pixel_positions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pixel_stride</span><span class="p">)</span>
+            <span class="n">band_arrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">samples</span><span class="p">[</span><span class="n">positions</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span> <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">band_offsets</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">band_arrs</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="SinglePixelPackedSampleModel"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.sample_model.SinglePixelPackedSampleModel">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SinglePixelPackedSampleModel</span><span class="p">(</span><span class="n">SampleModel</span><span class="p">):</span>
@@ -364,24 +366,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">bit_masks</span> <span class="o">=</span> <span class="n">bit_masks</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bit_offsets</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bit_masks</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">bit_offsets</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v</span> <span class="o">&amp;</span> <span class="o">-</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div>
+            <span class="c1"># Java leaves the bit offset of a zero mask at zero, and reads such a band as</span>
+            <span class="c1"># zero. Deriving it from the mask would give -1 for it.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bit_offsets</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v</span> <span class="o">&amp;</span> <span class="o">-</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">v</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SinglePixelPackedSampleModel.as_numpy"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.sample_model.SinglePixelPackedSampleModel.as_numpy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">as_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_buffer</span><span class="p">:</span> <span class="n">DataBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="n">num_bands</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bit_masks</span><span class="p">)</span>
-        <span class="n">bank_data</span> <span class="o">=</span> <span class="n">data_buffer</span><span class="o">.</span><span class="n">bank_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">pixel_data</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">):</span>
-                <span class="n">pos</span> <span class="o">=</span> <span class="n">y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanline_stride</span> <span class="o">+</span> <span class="n">x</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">bank_data</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span>
-                <span class="n">pixel</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">mask</span><span class="p">,</span> <span class="n">bit_offset</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bit_masks</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bit_offsets</span><span class="p">):</span>
-                    <span class="n">pixel</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">value</span> <span class="o">&amp;</span> <span class="n">mask</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">bit_offset</span><span class="p">)</span>
-                <span class="n">pixel_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pixel</span><span class="p">)</span>
-        <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pixel_data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">bank_data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">num_bands</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span></div></div>
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">data_buffer</span><span class="o">.</span><span class="n">bank_samples</span><span class="p">()</span>
+        <span class="c1"># Java extracts the bands with `(value &amp; mask) &gt;&gt;&gt; bitOffset`. Read the samples as</span>
+        <span class="c1"># unsigned so that a mask covering the sign bit, such as the alpha mask of an ARGB</span>
+        <span class="c1"># raster, does not sign-extend into the band values.</span>
+        <span class="n">unsigned_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;u</span><span class="si">{</span><span class="n">samples</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_pixel_positions</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">unsigned_dtype</span><span class="p">)</span>
+        <span class="c1"># The bit masks are deserialized as signed 32 bit integers, so masks covering the</span>
+        <span class="c1"># sign bit arrive negative. Take their two&#39;s complement bits.</span>
+        <span class="n">value_mask</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="mi">8</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">band_arrs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">values</span> <span class="o">&amp;</span> <span class="n">unsigned_dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">mask</span> <span class="o">&amp;</span> <span class="n">value_mask</span><span class="p">))</span> <span class="o">&gt;&gt;</span> <span class="n">bit_offset</span>
+            <span class="k">for</span> <span class="n">mask</span><span class="p">,</span> <span class="n">bit_offset</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bit_masks</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bit_offsets</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">band_arrs</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="MultiPixelPackedSampleModel"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.sample_model.MultiPixelPackedSampleModel">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">MultiPixelPackedSampleModel</span><span class="p">(</span><span class="n">SampleModel</span><span class="p">):</span>
@@ -398,30 +401,48 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data_bit_offset</span> <span class="o">=</span> <span class="n">data_bit_offset</span></div>
 
 <div class="viewcode-block" id="MultiPixelPackedSampleModel.as_numpy"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.sample_model.MultiPixelPackedSampleModel.as_numpy">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">as_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_buffer</span><span class="p">:</span> <span class="n">DataBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="n">bank_data</span> <span class="o">=</span> <span class="n">data_buffer</span><span class="o">.</span><span class="n">bank_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">bits_per_value</span> <span class="o">=</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="mi">8</span>
-        <span class="n">pixel_per_value</span> <span class="o">=</span> <span class="n">bits_per_value</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_bits</span>
-        <span class="n">shift_right</span> <span class="o">=</span> <span class="n">bits_per_value</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_bits</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_bits</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">shift_right</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">data_buffer</span><span class="o">.</span><span class="n">bank_samples</span><span class="p">()</span>
+        <span class="n">bits_per_value</span> <span class="o">=</span> <span class="n">samples</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="mi">8</span>
 
-        <span class="n">band_data</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">):</span>
-            <span class="n">pos</span> <span class="o">=</span> <span class="n">y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanline_stride</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_bit_offset</span> <span class="o">//</span> <span class="n">bits_per_value</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">bank_data</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span>
-            <span class="n">shift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_bit_offset</span> <span class="o">%</span> <span class="n">bits_per_value</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">&lt;&lt;</span> <span class="n">shift</span>
-            <span class="n">pixels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">pixels</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">:</span>
-                <span class="k">while</span> <span class="n">shift</span> <span class="o">&lt;</span> <span class="n">bits_per_value</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">pixels</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">:</span>
-                    <span class="n">pixels</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">value</span> <span class="o">&amp;</span> <span class="n">mask</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">shift_right</span><span class="p">)</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">&lt;&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_bits</span>
-                    <span class="n">shift</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_bits</span>
-                <span class="n">pos</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">bank_data</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span>
-                <span class="n">shift</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">band_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pixels</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">bank_data</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+        <span class="c1"># Resolve every pixel on its own, the way Java does</span>
+        <span class="n">pixel_bits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_bit_offset</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_bits</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="n">pixel_bits</span> <span class="o">//</span> <span class="n">bits_per_value</span>
+        <span class="n">shifts</span> <span class="o">=</span> <span class="n">bits_per_value</span> <span class="o">-</span> <span class="p">(</span><span class="n">pixel_bits</span> <span class="o">%</span> <span class="n">bits_per_value</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_bits</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">band_data</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span></div></div>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanline_stride</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">+</span> <span class="n">cols</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="c1"># Java reads a sample through DataBuffer.getElem(), which widens it to a signed int,</span>
+        <span class="c1"># zero extending byte and ushort samples, and then shifts it with `&gt;&gt;`. Both that</span>
+        <span class="c1"># shift and the `1 &lt;&lt;` below are int operations, whose shift distance Java takes</span>
+        <span class="c1"># modulo 32, and `&gt;&gt;` propagates the sign bit. So a data bit offset that is not a</span>
+        <span class="c1"># multiple of num_bits, which leaves a pixel straddling two samples and gives a</span>
+        <span class="c1"># negative distance here, shifts the top bits of the sample down rather than</span>
+        <span class="c1"># shifting the whole sample out, and a pixel occupying a whole 32 bit sample gets a</span>
+        <span class="c1"># zero mask and reads as zero. Neither layout can hold a pixel that survives a round</span>
+        <span class="c1"># trip through Java, so warn about them rather than read them some other way.</span>
+        <span class="n">bit_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_bits</span> <span class="o">%</span> <span class="mi">32</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bit_mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;This raster packs one pixel per 32 bit sample. java.awt.image derives the &quot;</span>
+                <span class="s2">&quot;bit mask for it as `(1 &lt;&lt; 32) - 1`, which is zero on an int, so Java reads &quot;</span>
+                <span class="s2">&quot;every pixel of such a raster as zero and writes to it are no-ops. &quot;</span>
+                <span class="s2">&quot;Returning zeroes to match.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">shifts</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;This raster&#39;s data bit offset (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data_bit_offset</span><span class="si">}</span><span class="s2">) is not a multiple &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;of its </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_bits</span><span class="si">}</span><span class="s2"> bits per pixel, so some pixels straddle two &quot;</span>
+                <span class="s2">&quot;samples. java.awt.image shifts those by a negative distance, which it &quot;</span>
+                <span class="s2">&quot;takes modulo 32, reading the top bits of the sample instead; Java&#39;s own &quot;</span>
+                <span class="s2">&quot;writes to those pixels are lossy in the same way. Returning what Java &quot;</span>
+                <span class="s2">&quot;reads.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">values</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">pixels</span> <span class="o">=</span> <span class="p">(</span><span class="n">values</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="n">shifts</span> <span class="o">&amp;</span> <span class="mi">31</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">))</span> <span class="o">&amp;</span> <span class="n">bit_mask</span>
+
+        <span class="k">return</span> <span class="n">pixels</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

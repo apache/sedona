@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.raster.data_buffer &mdash; Apache Sedona Python Documentation</title>
@@ -249,7 +248,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="n">data_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bank_data</span> <span class="o">=</span> <span class="n">bank_data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">offsets</span> <span class="o">=</span> <span class="n">offsets</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offsets</span> <span class="o">=</span> <span class="n">offsets</span></div>
+
+<div class="viewcode-block" id="DataBuffer.bank_samples"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.data_buffer.DataBuffer.bank_samples">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">bank_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bank_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the samples of a bank as an array indexed by sample index.</span>
+
+<span class="sd">        The offset of the bank is applied, so index ``i`` of the returned array holds</span>
+<span class="sd">        the same sample as ``DataBuffer.getElem(bank_index, i)`` does in Java AWT.</span>
+<span class="sd">        Sample models must go through this method instead of indexing</span>
+<span class="sd">        :attr:`bank_data` directly, otherwise samples of banks with a non-zero offset</span>
+<span class="sd">        are read from the wrong positions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsets</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span>
+        <span class="n">bank_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bank_data</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">bank_data</span><span class="p">[</span><span class="n">offset</span><span class="p">:]</span> <span class="k">if</span> <span class="n">offset</span> <span class="k">else</span> <span class="n">bank_data</span></div></div>
 </pre></div>
 
            </div>

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -307,6 +306,17 @@
 <span class="sig-name descname"><span class="pre">bank_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#sedona.spark.raster.data_buffer.DataBuffer.bank_data" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.raster.data_buffer.DataBuffer.bank_samples">
+<span class="sig-name descname"><span class="pre">bank_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bank_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/raster/data_buffer.html#DataBuffer.bank_samples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.raster.data_buffer.DataBuffer.bank_samples" title="Permalink to this definition"></a></dt>
+<dd><p>Return the samples of a bank as an array indexed by sample index.</p>
+<p>The offset of the bank is applied, so index <code class="docutils literal notranslate"><span class="pre">i</span></code> of the returned array holds
+the same sample as <code class="docutils literal notranslate"><span class="pre">DataBuffer.getElem(bank_index,</span> <span class="pre">i)</span></code> does in Java AWT.
+Sample models must go through this method instead of indexing
+<a class="reference internal" href="#sedona.spark.raster.data_buffer.DataBuffer.bank_data" title="sedona.spark.raster.data_buffer.DataBuffer.bank_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">bank_data</span></code></a> directly, otherwise samples of banks with a non-zero offset
+are read from the wrong positions.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="sedona.spark.raster.data_buffer.DataBuffer.data_type">
 <span class="sig-name descname"><span class="pre">data_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></em><a class="headerlink" href="#sedona.spark.raster.data_buffer.DataBuffer.data_type" title="Permalink to this definition"></a></dt>
@@ -598,6 +608,11 @@ SampleModel class in Java AWT.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="sedona.spark.raster.sample_model.SampleModel.sample_model_type">
 <span class="sig-name descname"><span class="pre">sample_model_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></em><a class="headerlink" href="#sedona.spark.raster.sample_model.SampleModel.sample_model_type" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sedona.spark.raster.sample_model.SampleModel.scanline_stride">
+<span class="sig-name descname"><span class="pre">scanline_stride</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></em><a class="headerlink" href="#sedona.spark.raster.sample_model.SampleModel.scanline_stride" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
