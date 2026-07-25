@@ -1903,6 +1903,19 @@ public class Functions {
     }
   }
 
+  public static class ST_IsLineStringCCW extends ScalarFunction {
+    @DataTypeHint("Boolean")
+    public boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o) {
+      Geometry geom = (Geometry) o;
+      return org.apache.sedona.common.Functions.isLineStringCCW(geom);
+    }
+  }
+
   public static class ST_IsPolygonCW extends ScalarFunction {
     @DataTypeHint("Boolean")
     public boolean eval(

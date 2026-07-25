@@ -733,6 +733,13 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geometry"},
+      argTypes = {"Geometry"})
+  public static boolean ST_IsLineStringCCW(String geometry) {
+    return Functions.isLineStringCCW(GeometrySerde.deserGeoJson(geometry));
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geom"},
       argTypes = {"Geometry"})
   public static boolean ST_IsPolygonCCW(String geom) {

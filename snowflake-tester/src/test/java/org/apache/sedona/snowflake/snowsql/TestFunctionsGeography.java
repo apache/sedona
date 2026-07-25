@@ -39,4 +39,15 @@ public class TestFunctionsGeography extends TestBase {
         "SELECT SEDONA.ST_EqualsExact(ST_GeographyFromWKT('POINT (0 0)'), ST_GeographyFromWKT('POINT (0.03 0.04)'), 0.049)",
         false);
   }
+
+  @Test
+  public void test_ST_IsLineStringCCW() {
+    registerUDFGeography("ST_IsLineStringCCW", String.class);
+    verifySqlSingleRes(
+        "SELECT SEDONA.ST_IsLineStringCCW(ST_GeographyFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 1, 0 0)'))",
+        true);
+    verifySqlSingleRes(
+        "SELECT SEDONA.ST_IsLineStringCCW(ST_GeographyFromWKT('LINESTRING (0 0, 0 1, 1 1, 1 0, 0 0)'))",
+        false);
+  }
 }
