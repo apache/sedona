@@ -533,6 +533,17 @@ public class TestFunctionsV2 extends TestBase {
   }
 
   @Test
+  public void test_ST_IsLineStringCCW() {
+    registerUDFV2("ST_IsLineStringCCW", String.class);
+    verifySqlSingleRes(
+        "select sedona.ST_IsLineStringCCW(ST_GeometryFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 1, 0 0)'))",
+        true);
+    verifySqlSingleRes(
+        "select sedona.ST_IsLineStringCCW(ST_GeometryFromWKT('LINESTRING (0 1, 0 -1, -1 -2, 3 -2)'))",
+        false);
+  }
+
+  @Test
   public void test_ST_IsRing() {
     registerUDFV2("ST_IsRing", String.class);
     verifySqlSingleRes(

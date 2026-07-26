@@ -584,6 +584,11 @@ object st_functions {
   def ST_IsPolygonCCW(geometry: Column): Column = wrapExpression[ST_IsPolygonCCW](geometry)
   def ST_IsPolygonCCW(geometry: String): Column = wrapExpression[ST_IsPolygonCCW](geometry)
 
+  def ST_IsLineStringCCW(geometry: Column): Column =
+    wrapExpression[ST_IsLineStringCCW](geometry)
+  def ST_IsLineStringCCW(geometry: String): Column =
+    wrapExpression[ST_IsLineStringCCW](geometry)
+
   def ST_ForcePolygonCCW(geometry: Column): Column = wrapExpression[ST_ForcePolygonCCW](geometry)
   def ST_ForcePolygonCCW(geometry: String): Column = wrapExpression[ST_ForcePolygonCCW](geometry)
 

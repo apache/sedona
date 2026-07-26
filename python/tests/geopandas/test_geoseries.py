@@ -23,6 +23,7 @@ import geopandas as gpd
 import pyspark.pandas as ps
 import sedona.spark.geopandas as sgpd
 from sedona.spark.geopandas import GeoSeries, GeoDataFrame
+from sedona.spark.geopandas.geoseries import _to_bool
 from sedona.spark.sql import st_functions as stf
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from shapely import wkt
@@ -66,6 +67,29 @@ class TestGeoSeries(TestGeopandasBase):
     def test_empty_list(self):
         s = sgpd.GeoSeries([])
         assert s.count() == 0
+
+    def test_to_bool_fills_nullable_boolean_series(self):
+        nullable = self.spark.createDataFrame(
+            [(0, True), (1, None), (2, False)],
+            "id long, value boolean",
+        ).pandas_api(index_col="id")["value"]
+
+        self.check_pd_series_equal(
+            _to_bool(nullable),
+            pd.Series(
+                [True, False, False],
+                index=pd.Index([0, 1, 2], name="id"),
+                name="value",
+            ),
+        )
+        self.check_pd_series_equal(
+            _to_bool(nullable, default=True),
+            pd.Series(
+                [True, True, False],
+                index=pd.Index([0, 1, 2], name="id"),
+                name="value",
+            ),
+        )
 
     def test_non_geom_fails(self):
         with pytest.raises(TypeError):
@@ -737,6 +761,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 ),
                 GeometryCollection([Point(0, 0), LineString([(0, 0), (1, 1)])]),
                 LinearRing([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
+                None,
             ]
         )
         result = geoseries.geom_type
@@ -750,6 +775,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                 "MultiPolygon",
                 "GeometryCollection",
                 "LineString",  # Note: Sedona returns LineString instead of LinearRing
+                None,
             ]
         )
         self.check_pd_series_equal(result, expected)
@@ -1381,7 +1407,64 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_pd_series_equal(result, expected)
 
     def test_is_ccw(self):
-        pass
+        index = pd.Index(
+            [
+                "ccw-line",
+                "cw-line",
+                "ccw-open-line",
+                "asymmetric-open-line",
+                "open-three-point-line",
+                "closed-three-point-line",
+                "ccw-ring",
+                "polygon",
+                "point",
+                "empty-line",
+                "empty-polygon",
+                "null",
+            ],
+            name="feature_id",
+        )
+        s = GeoSeries(
+            [
+                LineString([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]),
+                LineString([(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)]),
+                LineString([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                LineString([(0, 1), (0, -1), (-1, -2), (3, -2)]),
+                LineString([(0, 0), (1, 0), (0, 1)]),
+                LineString([(0, 0), (1, 0), (0, 0)]),
+                LinearRing([(0, 0), (1, 0), (1, 1), (0, 1)]),
+                Polygon([(0, 0), (1, 0), (0, 1), (0, 0)]),
+                Point(0, 0),
+                LineString(),
+                Polygon(),
+                None,
+            ],
+            index=index,
+        )
+        expected = pd.Series(
+            [
+                True,
+                False,
+                True,
+                False,
+                False,
+                False,
+                True,
+                False,
+                False,
+                False,
+                False,
+                False,
+            ],
+            index=index,
+        )
+
+        result = s.is_ccw
+        self.check_pd_series_equal(result, expected)
+
+        # Check that GeoDataFrame works too.
+        frame_result = s.to_geoframe().is_ccw
+        self.check_pd_series_equal(frame_result, expected)
 
     def test_is_closed(self):
         s = GeoSeries(
@@ -1912,7 +1995,100 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_sgpd_equals_gpd(df_result, expected)
 
     def test_interiors(self):
-        pass
+        polygon_with_holes = Polygon(
+            [(0, 0), (0, 5), (5, 5), (5, 0), (0, 0)],
+            [
+                [(1, 1), (2, 1), (1, 2), (1, 1)],
+                [(3, 3), (4, 3), (4, 4), (3, 3)],
+            ],
+        )
+        polygon_without_holes = Polygon([(10, 10), (10, 12), (12, 10), (10, 10)])
+        index = pd.MultiIndex.from_tuples(
+            [
+                ("polygon", "holes"),
+                ("polygon", "no-holes"),
+                ("polygon", "empty"),
+                ("point", "value"),
+                ("point", "empty"),
+                ("line", "empty"),
+                ("multipolygon", "value"),
+                ("collection", "value"),
+                ("null", "value"),
+            ],
+            names=["geometry_type", "case"],
+        )
+        source = GeoSeries(
+            [
+                polygon_with_holes,
+                polygon_without_holes,
+                Polygon(),
+                Point(0, 0),
+                Point(),
+                LineString(),
+                MultiPolygon([polygon_without_holes]),
+                GeometryCollection([polygon_with_holes]),
+                None,
+            ],
+            index=index,
+        )
+
+        result = source.interiors
+
+        assert isinstance(result, ps.Series)
+        actual = result.to_pandas()
+        pd.testing.assert_index_equal(actual.index, index)
+        assert actual.dtype == object
+
+        rings = actual.iloc[0]
+        assert isinstance(rings, list)
+        assert all(isinstance(ring, (LineString, LinearRing)) for ring in rings)
+        assert [list(ring.coords) for ring in rings] == [
+            [(1.0, 1.0), (2.0, 1.0), (1.0, 2.0), (1.0, 1.0)],
+            [(3.0, 3.0), (4.0, 3.0), (4.0, 4.0), (3.0, 3.0)],
+        ]
+        assert actual.iloc[1] == []
+        assert actual.iloc[2] == []
+        assert all(value is None for value in actual.iloc[3:])
+
+        # Check GeoDataFrame delegation separately; GeoSeries.to_geoframe()
+        # does not currently accept a MultiIndex.
+        delegated_index = pd.Index(
+            ["holes", "no-holes", "point", "null"],
+            name="feature_id",
+        )
+        delegated_source = GeoSeries(
+            [
+                polygon_with_holes,
+                polygon_without_holes,
+                Point(0, 0),
+                None,
+            ],
+            index=delegated_index,
+        )
+        frame_result = delegated_source.to_geoframe().interiors
+        assert isinstance(frame_result, ps.Series)
+        frame_actual = frame_result.to_pandas()
+        pd.testing.assert_index_equal(frame_actual.index, delegated_index)
+        assert frame_actual.dtype == object
+        assert [
+            (
+                None
+                if value is None
+                else [
+                    tuple(tuple(coordinate) for coordinate in ring.coords)
+                    for ring in value
+                ]
+            )
+            for value in frame_actual
+        ] == [
+            [
+                ((1.0, 1.0), (2.0, 1.0), (1.0, 2.0), (1.0, 1.0)),
+                ((3.0, 3.0), (4.0, 3.0), (4.0, 4.0), (3.0, 3.0)),
+            ],
+            [],
+            None,
+            None,
+        ]
 
     def test_remove_repeated_points(self):
         s = GeoSeries(
@@ -2116,6 +2292,106 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         # Check that GeoDataFrame works too
         df_result = s.to_geoframe().normalize()
         self.check_sgpd_equals_gpd(df_result, expected)
+
+    def test_orient_polygons(self):
+        clockwise_polygon = Polygon(
+            [(0, 0), (0, 5), (5, 5), (5, 0), (0, 0)],
+            [[(1, 1), (4, 1), (4, 4), (1, 4), (1, 1)]],
+        )
+        second_polygon = Polygon([(10, 0), (10, 2), (12, 2), (12, 0), (10, 0)])
+        multipolygon = MultiPolygon([clockwise_polygon, second_polygon])
+        nested_collection = GeometryCollection(
+            [
+                Point(20, 20),
+                GeometryCollection(
+                    [
+                        clockwise_polygon,
+                        MultiPolygon([second_polygon]),
+                    ]
+                ),
+            ]
+        )
+        geoms = [
+            clockwise_polygon,
+            multipolygon,
+            nested_collection,
+            Point(1, 1),
+            LineString([(0, 0), (1, 1)]),
+            Point(),
+            LineString(),
+            Polygon(),
+            MultiPolygon(),
+            GeometryCollection(),
+            None,
+        ]
+        index = pd.Index(
+            [
+                "polygon",
+                "multipolygon",
+                "nested",
+                "point",
+                "line",
+                "empty-point",
+                "empty-line",
+                "empty-polygon",
+                "empty-multipolygon",
+                "empty-collection",
+                "null",
+            ],
+            name="feature_id",
+        )
+        source = GeoSeries(geoms, index=index, crs="EPSG:3857")
+        expected = gpd.GeoSeries(geoms, index=index, crs="EPSG:3857")
+
+        def assert_oriented(geometry, exterior_cw):
+            if geometry is None or geometry.is_empty:
+                return
+            if isinstance(geometry, Polygon):
+                assert bool(geometry.exterior.is_ccw) is not exterior_cw
+                assert all(
+                    bool(ring.is_ccw) is exterior_cw for ring in geometry.interiors
+                )
+            elif isinstance(geometry, (MultiPolygon, GeometryCollection)):
+                for part in geometry.geoms:
+                    assert_oriented(part, exterior_cw)
+
+        for exterior_cw in (False, True):
+            result = source.orient_polygons(exterior_cw=exterior_cw)
+
+            self.check_sgpd_equals_gpd(result, expected)
+            assert result.crs == source.crs
+            actual = result.to_geopandas().sort_index()
+            for geometry in actual:
+                assert_oriented(geometry, exterior_cw)
+
+            nested = actual.loc["nested"]
+            assert isinstance(nested, GeometryCollection)
+            assert isinstance(nested.geoms[1], GeometryCollection)
+            assert isinstance(nested.geoms[1].geoms[1], MultiPolygon)
+
+            for label, geometry_type in [
+                ("empty-point", "Point"),
+                ("empty-line", "LineString"),
+                ("empty-polygon", "Polygon"),
+                ("empty-multipolygon", "MultiPolygon"),
+                ("empty-collection", "GeometryCollection"),
+            ]:
+                assert actual.loc[label].is_empty
+                assert actual.loc[label].geom_type == geometry_type
+            assert actual.loc["null"] is None
+
+            srids = result._internal.spark_frame.select(
+                stf.ST_SRID(result.spark.column).alias("srid")
+            ).collect()
+            assert {row.srid for row in srids if row.srid is not None} == {3857}
+
+            # Check that GeoDataFrame works too.
+            frame_result = source.to_geoframe().orient_polygons(exterior_cw=exterior_cw)
+            self.check_sgpd_equals_gpd(frame_result, expected)
+            assert frame_result.crs == source.crs
+            frame_actual = frame_result.to_geopandas().sort_index()
+            for geometry in frame_actual:
+                assert_oriented(geometry, exterior_cw)
 
     def test_make_valid(self):
         s = sgpd.GeoSeries(
@@ -3272,9 +3548,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().crosses(s2, align=False)
         self.check_pd_series_equal(df_result, expected)
 
-        # Sedona ST_Crosses doesn't support GeometryCollection, so it returns NULL for now.
-        # https://github.com/apache/sedona/issues/2417
-        # Once this is resolved, we can update the expected result of this test.
+        # The underlying ST_Crosses expression returns NULL for GeometryCollection
+        # (https://github.com/apache/sedona/issues/2417), which the GeoSeries
+        # predicate normalizes to False to match GeoPandas' boolean contract.
         # Ensure M-dimension doesn't break things.
         s = GeoSeries(
             [
@@ -3284,7 +3560,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         line = LineString([(0, 0), (1, 1)])
         result = s.crosses(line)
-        expected = pd.Series([None, False])
+        expected = pd.Series([False, False], dtype=bool)
         self.check_pd_series_equal(result, expected)
 
     def test_disjoint(self):

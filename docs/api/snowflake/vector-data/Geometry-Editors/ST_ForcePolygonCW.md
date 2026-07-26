@@ -19,7 +19,7 @@
 
 # ST_ForcePolygonCW
 
-Introduction: For (Multi)Polygon geometries, this function sets the exterior ring orientation to clockwise and interior rings to counter-clockwise orientation. Non-polygonal geometries are returned unchanged.
+Introduction: Sets Polygon and MultiPolygon exterior rings clockwise and interior rings counter-clockwise. Polygonal members of GeometryCollections are oriented recursively, while non-polygonal members are preserved unchanged.
 
 ![ST_ForcePolygonCW](../../../../image/ST_ForcePolygonCW/ST_ForcePolygonCW.svg "ST_ForcePolygonCW")
 

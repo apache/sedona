@@ -1136,6 +1136,12 @@ public class Functions {
         && geometry.isSimple();
   }
 
+  public static boolean isLineStringCCW(Geometry geometry) {
+    return geometry instanceof LineString
+        && geometry.getNumPoints() >= 4
+        && Orientation.isCCW(((LineString) geometry).getCoordinateSequence());
+  }
+
   public static boolean isSimple(Geometry geometry) {
     return new IsSimpleOp(geometry).isSimple();
   }
@@ -1544,12 +1550,21 @@ public class Functions {
 
   /**
    * Forces a Polygon/MultiPolygon to use clockwise orientation for the exterior ring and a
-   * counter-clockwise for the interior ring(s).
+   * counter-clockwise for the interior ring(s). Polygonal members inside GeometryCollections are
+   * transformed recursively.
    *
    * @param geom
-   * @return a clockwise orientated (Multi)Polygon
+   * @return the geometry with polygonal components oriented clockwise
    */
   public static Geometry forcePolygonCW(Geometry geom) {
+    if (geom == null || geom.isEmpty()) {
+      return geom;
+    }
+
+    if (isPlainGeometryCollection(geom)) {
+      return forcePolygonOrientationInCollection((GeometryCollection) geom, true);
+    }
+
     if (isPolygonCW(geom)) {
       return geom;
     }
@@ -1658,12 +1673,21 @@ public class Functions {
 
   /**
    * Forces a Polygon/MultiPolygon to use counter-clockwise orientation for the exterior ring and a
-   * clockwise for the interior ring(s).
+   * clockwise for the interior ring(s). Polygonal members inside GeometryCollections are
+   * transformed recursively.
    *
    * @param geom
-   * @return a counter-clockwise orientated (Multi)Polygon
+   * @return the geometry with polygonal components oriented counter-clockwise
    */
   public static Geometry forcePolygonCCW(Geometry geom) {
+    if (geom == null || geom.isEmpty()) {
+      return geom;
+    }
+
+    if (isPlainGeometryCollection(geom)) {
+      return forcePolygonOrientationInCollection((GeometryCollection) geom, false);
+    }
+
     if (isPolygonCCW(geom)) {
       return geom;
     }
@@ -1682,6 +1706,34 @@ public class Functions {
     }
     // Non-polygonal geometries are returned unchanged
     return geom;
+  }
+
+  private static boolean isPlainGeometryCollection(Geometry geometry) {
+    return geometry instanceof GeometryCollection
+        && !(geometry instanceof MultiPoint)
+        && !(geometry instanceof MultiLineString)
+        && !(geometry instanceof MultiPolygon);
+  }
+
+  private static Geometry forcePolygonOrientationInCollection(
+      GeometryCollection collection, boolean clockwise) {
+    Geometry[] orientedGeometries = new Geometry[collection.getNumGeometries()];
+    boolean changed = false;
+    for (int i = 0; i < collection.getNumGeometries(); i++) {
+      Geometry geometry = collection.getGeometryN(i);
+      Geometry orientedGeometry = clockwise ? forcePolygonCW(geometry) : forcePolygonCCW(geometry);
+      orientedGeometries[i] = orientedGeometry;
+      changed |= orientedGeometry != geometry;
+    }
+
+    if (!changed) {
+      return collection;
+    }
+    GeometryCollection orientedCollection =
+        collection.getFactory().createGeometryCollection(orientedGeometries);
+    orientedCollection.setSRID(collection.getSRID());
+    orientedCollection.setUserData(collection.getUserData());
+    return orientedCollection;
   }
 
   private static Geometry transformCCW(Polygon polygon) {

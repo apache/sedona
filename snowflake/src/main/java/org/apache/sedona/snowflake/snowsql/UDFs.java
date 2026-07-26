@@ -580,6 +580,11 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+  public static boolean ST_IsLineStringCCW(byte[] geometry) {
+    return Functions.isLineStringCCW(GeometrySerde.deserialize(geometry));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static boolean ST_IsPolygonCW(byte[] geom) {
     return Functions.isPolygonCW(GeometrySerde.deserialize(geom));
   }

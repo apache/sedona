@@ -703,7 +703,13 @@ class GeoSeries(GeoFrame, pspd.Series):
             index_names=index_names if index_spark_columns else [None],
             column_labels=([(rename,)] if is_aggr else self._internal.column_labels),
             data_spark_columns=[scol_for(sdf, rename)],
-            data_fields=[self._internal.data_fields[0].copy(name=rename)],
+            data_fields=[
+                (
+                    self._internal.data_fields[0].copy(name=rename)
+                    if returns_geom
+                    else InternalField.from_struct_field(sdf.schema[rename])
+                )
+            ],
             column_label_names=[(rename,)],
         )
         ps_series = first_series(PandasOnSparkDataFrame(internal))
@@ -902,16 +908,15 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def geom_type(self) -> pspd.Series:
-        spark_col = stf.ST_GeometryType(self.spark.column)
-        result = self._query_geometry_column(
+        # ST_GeometryType returns string as 'ST_Point'
+        # so strip the prefix to get 'Point'.
+        spark_col = F.regexp_replace(
+            stf.ST_GeometryType(self.spark.column), r"^ST_", ""
+        )
+        return self._query_geometry_column(
             spark_col,
             returns_geom=False,
         )
-
-        # ST_GeometryType returns string as 'ST_Point'
-        # we crop the prefix off to get 'Point'
-        result = result.map(lambda x: x[3:])
-        return result
 
     @property
     def type(self):
@@ -1147,13 +1152,16 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def is_ccw(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError(
-            _not_implemented_error(
-                "is_ccw",
-                "Tests if LinearRing geometries are oriented counter-clockwise.",
-            )
+        geometry = self.spark.column
+        # Apply JTS' ring-orientation algorithm to the original coordinate
+        # sequence. Open lines must not be closed first because GEOS does not
+        # do so when implementing GeoPandas' is_ccw property.
+        spark_expr = stf.ST_IsLineStringCCW(geometry)
+        result = self._query_geometry_column(
+            spark_expr,
+            returns_geom=False,
         )
+        return _to_bool(result)
 
     @property
     def is_closed(self):
@@ -1352,8 +1360,24 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def interiors(self):
-        # Implementation of the abstract method.
-        raise NotImplementedError("This method is not implemented yet.")
+        geometry = self.spark.column
+        ring_count = stf.ST_NumInteriorRings(geometry)
+        empty_rings = F.slice(stf.ST_Dump(geometry), 1, 0)
+        rings = F.transform(
+            F.sequence(F.lit(0), ring_count - 1),
+            lambda index: stf.ST_InteriorRingN(geometry, index),
+        )
+        # Spark creates a descending sequence for sequence(0, -1), so this guard
+        # is required to keep polygons without interior rings as an empty array.
+        polygon_rings = F.when(ring_count > 0, rings).otherwise(empty_rings)
+        spark_expr = F.when(
+            stf.ST_GeometryType(geometry) == "ST_Polygon",
+            polygon_rings,
+        )
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=False,
+        )
 
     def remove_repeated_points(self, tolerance=0.0):
         args = (self.spark.column, tolerance) if tolerance else (self.spark.column,)
@@ -1412,6 +1436,21 @@ class GeoSeries(GeoFrame, pspd.Series):
         spark_expr = stf.ST_Normalize(self.spark.column)
         return self._query_geometry_column(
             spark_expr,
+            returns_geom=True,
+        )
+
+    def orient_polygons(self, *, exterior_cw=False):
+        if not isinstance(exterior_cw, (bool, np.bool_, int, np.integer)):
+            raise TypeError("'exterior_cw' must be a boolean")
+
+        geometry = self.spark.column
+        oriented = (
+            stf.ST_ForcePolygonCW(geometry)
+            if bool(exterior_cw)
+            else stf.ST_ForcePolygonCCW(geometry)
+        )
+        return self._query_geometry_column(
+            oriented,
             returns_geom=True,
         )
 
@@ -4143,10 +4182,6 @@ def _get_series_col_name(ps_series: pspd.Series) -> str:
 
 def _to_bool(ps_series: pspd.Series, default: bool = False) -> pspd.Series:
     """
-    Cast a ps.Series to bool type if it's not one, converting None values to the default value.
+    Convert null values to the default and return a non-nullable boolean Series.
     """
-    if ps_series.dtype.name != "bool":
-        # fill None values with the default value
-        ps_series.fillna(default, inplace=True)
-
-    return ps_series
+    return ps_series.fillna(default).astype(bool)
