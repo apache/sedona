@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_functions &mdash; Apache Sedona Python Documentation</title>
@@ -1351,6 +1350,22 @@
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_IsClosed&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="ST_IsLineStringCCW"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_IsLineStringCCW">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_IsLineStringCCW</span><span class="p">(</span><span class="n">line_string</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether a LineString coordinate sequence has counter-clockwise ring orientation.</span>
+
+<span class="sd">    Open LineStrings are evaluated as supplied, without appending the start</span>
+<span class="sd">    coordinate. Non-LineString geometries and LineStrings with fewer than four</span>
+<span class="sd">    points return False.</span>
+
+<span class="sd">    :param line_string: LineString geometry column to check.</span>
+<span class="sd">    :type line_string: ColumnOrName</span>
+<span class="sd">    :return: True if the coordinate sequence is counter-clockwise and False otherwise.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_IsLineStringCCW&quot;</span><span class="p">,</span> <span class="n">line_string</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="ST_IsEmpty"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_IsEmpty">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_IsEmpty</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the geometry in a geometry column is an empty geometry.</span>
@@ -2230,10 +2245,14 @@
 
 <div class="viewcode-block" id="ST_ForcePolygonCCW"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_ForcePolygonCCW">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_ForcePolygonCCW</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a geometry with counter-clockwise oriented exterior ring and clockwise oriented interior rings</span>
-<span class="sd">    :param geometry: Geometry column to change orientation</span>
-<span class="sd">    :return: counter-clockwise oriented geometry</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Orient polygonal components with counter-clockwise exterior rings.</span>
+
+<span class="sd">    Interior rings are oriented clockwise. Polygonal members of</span>
+<span class="sd">    GeometryCollections are processed recursively, while non-polygonal members</span>
+<span class="sd">    are preserved unchanged.</span>
+
+<span class="sd">    :param geometry: Geometry column to orient.</span>
+<span class="sd">    :return: Geometry with counter-clockwise polygon exterior rings.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_ForcePolygonCCW&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
 
@@ -2714,20 +2733,28 @@
 
 <div class="viewcode-block" id="ST_ForcePolygonCW"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_ForcePolygonCW">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_ForcePolygonCW</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns</span>
-<span class="sd">    :param geometry: Geometry column to change orientation</span>
-<span class="sd">    :return: Clockwise oriented geometry</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Orient polygonal components with clockwise exterior rings.</span>
+
+<span class="sd">    Interior rings are oriented counter-clockwise. Polygonal members of</span>
+<span class="sd">    GeometryCollections are processed recursively, while non-polygonal members</span>
+<span class="sd">    are preserved unchanged.</span>
+
+<span class="sd">    :param geometry: Geometry column to orient.</span>
+<span class="sd">    :return: Geometry with clockwise polygon exterior rings.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_ForcePolygonCW&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ST_ForceRHR"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_ForceRHR">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_ForceRHR</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns</span>
-<span class="sd">    :param geometry: Geometry column to change orientation</span>
-<span class="sd">    :return: Clockwise oriented geometry</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply right-hand-rule orientation to polygonal components.</span>
+
+<span class="sd">    This is an alias for :func:`ST_ForcePolygonCW`. Polygonal members of</span>
+<span class="sd">    GeometryCollections are processed recursively, while non-polygonal members</span>
+<span class="sd">    are preserved unchanged.</span>
+
+<span class="sd">    :param geometry: Geometry column to orient.</span>
+<span class="sd">    :return: Geometry with clockwise polygon exterior rings.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_ForceRHR&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
 

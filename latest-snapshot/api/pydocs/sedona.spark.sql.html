@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -2427,25 +2426,52 @@ geometry is already 4D, if geometry either has z or m, it will not change the ex
 <dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_ForcePolygonCCW">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_ForcePolygonCCW</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_ForcePolygonCCW"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_ForcePolygonCCW" title="Permalink to this definition"></a></dt>
-<dd><p>Returns a geometry with counter-clockwise oriented exterior ring and clockwise oriented interior rings
-:param geometry: Geometry column to change orientation
-:return: counter-clockwise oriented geometry</p>
+<dd><p>Orient polygonal components with counter-clockwise exterior rings.</p>
+<p>Interior rings are oriented clockwise. Polygonal members of
+GeometryCollections are processed recursively, while non-polygonal members
+are preserved unchanged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>geometry</strong> – Geometry column to orient.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Geometry with counter-clockwise polygon exterior rings.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_ForcePolygonCW">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_ForcePolygonCW</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_ForcePolygonCW"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_ForcePolygonCW" title="Permalink to this definition"></a></dt>
-<dd><p>Returns
-:param geometry: Geometry column to change orientation
-:return: Clockwise oriented geometry</p>
+<dd><p>Orient polygonal components with clockwise exterior rings.</p>
+<p>Interior rings are oriented counter-clockwise. Polygonal members of
+GeometryCollections are processed recursively, while non-polygonal members
+are preserved unchanged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>geometry</strong> – Geometry column to orient.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Geometry with clockwise polygon exterior rings.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_ForceRHR">
 <span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_ForceRHR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_ForceRHR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_ForceRHR" title="Permalink to this definition"></a></dt>
-<dd><p>Returns
-:param geometry: Geometry column to change orientation
-:return: Clockwise oriented geometry</p>
+<dd><p>Apply right-hand-rule orientation to polygonal components.</p>
+<p>This is an alias for <a class="reference internal" href="#sedona.spark.sql.st_functions.ST_ForcePolygonCW" title="sedona.spark.sql.st_functions.ST_ForcePolygonCW"><code class="xref py py-func docutils literal notranslate"><span class="pre">ST_ForcePolygonCW()</span></code></a>. Polygonal members of
+GeometryCollections are processed recursively, while non-polygonal members
+are preserved unchanged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>geometry</strong> – Geometry column to orient.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Geometry with clockwise polygon exterior rings.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -2831,6 +2857,26 @@ Optionally, a distance fraction can also be provided which decreases the gap bet
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>True if the geometry is empty and False otherwise as a boolean column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.sql.st_functions.ST_IsLineStringCCW">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.sql.st_functions.</span></span><span class="sig-name descname"><span class="pre">ST_IsLineStringCCW</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line_string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#sedona.spark.sql.dataframe_api.ConnectColumn" title="sedona.spark.sql.dataframe_api.ConnectColumn"><span class="pre">ConnectColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.Column.html#pyspark.sql.Column" title="(in PySpark vmaster)"><span class="pre">Column</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/sql/st_functions.html#ST_IsLineStringCCW"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.sql.st_functions.ST_IsLineStringCCW" title="Permalink to this definition"></a></dt>
+<dd><p>Check whether a LineString coordinate sequence has counter-clockwise ring orientation.</p>
+<p>Open LineStrings are evaluated as supplied, without appending the start
+coordinate. Non-LineString geometries and LineStrings with fewer than four
+points return False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>line_string</strong> (<em>ColumnOrName</em>) – LineString geometry column to check.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the coordinate sequence is counter-clockwise and False otherwise.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Column</p>

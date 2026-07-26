@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -913,7 +912,13 @@
             <span class="n">index_names</span><span class="o">=</span><span class="n">index_names</span> <span class="k">if</span> <span class="n">index_spark_columns</span> <span class="k">else</span> <span class="p">[</span><span class="kc">None</span><span class="p">],</span>
             <span class="n">column_labels</span><span class="o">=</span><span class="p">([(</span><span class="n">rename</span><span class="p">,)]</span> <span class="k">if</span> <span class="n">is_aggr</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">column_labels</span><span class="p">),</span>
             <span class="n">data_spark_columns</span><span class="o">=</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="n">rename</span><span class="p">)],</span>
-            <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">rename</span><span class="p">)],</span>
+            <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">rename</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">returns_geom</span>
+                    <span class="k">else</span> <span class="n">InternalField</span><span class="o">.</span><span class="n">from_struct_field</span><span class="p">(</span><span class="n">sdf</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">rename</span><span class="p">])</span>
+                <span class="p">)</span>
+            <span class="p">],</span>
             <span class="n">column_label_names</span><span class="o">=</span><span class="p">[(</span><span class="n">rename</span><span class="p">,)],</span>
         <span class="p">)</span>
         <span class="n">ps_series</span> <span class="o">=</span> <span class="n">first_series</span><span class="p">(</span><span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">))</span>
@@ -1112,16 +1117,15 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">geom_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
-        <span class="n">spark_col</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_GeometryType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+        <span class="c1"># ST_GeometryType returns string as &#39;ST_Point&#39;</span>
+        <span class="c1"># so strip the prefix to get &#39;Point&#39;.</span>
+        <span class="n">spark_col</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">regexp_replace</span><span class="p">(</span>
+            <span class="n">stf</span><span class="o">.</span><span class="n">ST_GeometryType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">),</span> <span class="sa">r</span><span class="s2">&quot;^ST_&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
             <span class="n">spark_col</span><span class="p">,</span>
             <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
-
-        <span class="c1"># ST_GeometryType returns string as &#39;ST_Point&#39;</span>
-        <span class="c1"># we crop the prefix off to get &#39;Point&#39;</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
-        <span class="k">return</span> <span class="n">result</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1357,13 +1361,16 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_ccw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method.</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="n">_not_implemented_error</span><span class="p">(</span>
-                <span class="s2">&quot;is_ccw&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;Tests if LinearRing geometries are oriented counter-clockwise.&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
+        <span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span>
+        <span class="c1"># Apply JTS&#39; ring-orientation algorithm to the original coordinate</span>
+        <span class="c1"># sequence. Open lines must not be closed first because GEOS does not</span>
+        <span class="c1"># do so when implementing GeoPandas&#39; is_ccw property.</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_IsLineStringCCW</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+            <span class="n">spark_expr</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="k">return</span> <span class="n">_to_bool</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_closed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1562,8 +1569,24 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">interiors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Implementation of the abstract method.</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This method is not implemented yet.&quot;</span><span class="p">)</span>
+        <span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span>
+        <span class="n">ring_count</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_NumInteriorRings</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="n">empty_rings</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_Dump</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">rings</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">sequence</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">ring_count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="k">lambda</span> <span class="n">index</span><span class="p">:</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_InteriorRingN</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">index</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="c1"># Spark creates a descending sequence for sequence(0, -1), so this guard</span>
+        <span class="c1"># is required to keep polygons without interior rings as an empty array.</span>
+        <span class="n">polygon_rings</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">ring_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">rings</span><span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">empty_rings</span><span class="p">)</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+            <span class="n">stf</span><span class="o">.</span><span class="n">ST_GeometryType</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;ST_Polygon&quot;</span><span class="p">,</span>
+            <span class="n">polygon_rings</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+            <span class="n">spark_expr</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="GeoSeries.remove_repeated_points"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.remove_repeated_points">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">remove_repeated_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span> <span class="k">if</span> <span class="n">tolerance</span> <span class="k">else</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,)</span>
@@ -1622,6 +1645,21 @@
         <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Normalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
             <span class="n">spark_expr</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeoSeries.orient_polygons"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.orient_polygons">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">orient_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">exterior_cw</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exterior_cw</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;exterior_cw&#39; must be a boolean&quot;</span><span class="p">)</span>
+
+        <span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span>
+        <span class="n">oriented</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">stf</span><span class="o">.</span><span class="n">ST_ForcePolygonCW</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">exterior_cw</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_ForcePolygonCCW</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+            <span class="n">oriented</span><span class="p">,</span>
             <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -4353,13 +4391,9 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_to_bool</span><span class="p">(</span><span class="n">ps_series</span><span class="p">:</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Cast a ps.Series to bool type if it&#39;s not one, converting None values to the default value.</span>
+<span class="sd">    Convert null values to the default and return a non-nullable boolean Series.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">ps_series</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;bool&quot;</span><span class="p">:</span>
-        <span class="c1"># fill None values with the default value</span>
-        <span class="n">ps_series</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">ps_series</span>
+    <span class="k">return</span> <span class="n">ps_series</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">default</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
 </pre></div>
 
            </div>

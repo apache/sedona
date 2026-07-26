@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -1287,7 +1286,10 @@ each aligned geometry that cross <cite>other</cite>.</p>
 <p>An object is said to cross <cite>other</cite> if its <cite>interior</cite> intersects the
 <cite>interior</cite> of the other but does not contain it, and the dimension of
 the intersection is less than the dimension of the one or the other.</p>
-<p>Note: Unlike Geopandas, Sedona’s implementation always return NULL when GeometryCollection is involved.</p>
+<p>The underlying Sedona expression returns <code class="docutils literal notranslate"><span class="pre">NULL</span></code> when a
+GeometryCollection is involved. This GeoSeries method normalizes that
+result to <code class="docutils literal notranslate"><span class="pre">False</span></code> to preserve GeoPandas’ non-nullable boolean
+contract.</p>
 <p>The operation works on a 1-to-1 row-wise manner.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2849,7 +2851,28 @@ the segment length is closest to the given fraction.</p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.interiors">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">interiors</span></span><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.interiors" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Return a <code class="docutils literal notranslate"><span class="pre">Series</span></code> of lists containing polygon interior rings.</p>
+<p>Polygons without holes return an empty list. Non-polygon geometries
+and null values return <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>
+<span class="gp">... </span>            <span class="p">[[(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]],</span>
+<span class="gp">... </span>        <span class="p">),</span>
+<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">interiors</span>
+<span class="go">0    [LINESTRING (1 1, 2 1, 1 2, 1 1)]</span>
+<span class="go">1                                   []</span>
+<span class="go">dtype: object</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.interpolate">
@@ -3126,7 +3149,28 @@ of one GeoSeries <code class="docutils literal notranslate"><span class="pre">cr
 <dl class="py property">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.is_ccw">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_ccw</span></span><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.is_ccw" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Return a <code class="docutils literal notranslate"><span class="pre">Series</span></code> of <code class="docutils literal notranslate"><span class="pre">dtype('bool')</span></code> with value <code class="docutils literal notranslate"><span class="pre">True</span></code> if a
+LineString or LinearRing is counter-clockwise.</p>
+<p>This property returns <code class="docutils literal notranslate"><span class="pre">False</span></code> for non-linear geometries and for lines
+with fewer than four points.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">LinearRing</span><span class="p">,</span> <span class="n">Point</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">LinearRing</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">is_ccw</span>
+<span class="go">0     True</span>
+<span class="go">1    False</span>
+<span class="go">2    False</span>
+<span class="go">dtype: bool</span>
+</pre></div>
+</div>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.is_closed">
@@ -3840,6 +3884,36 @@ compatibility but are currently ignored by Sedona’s
 <span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">offset_curve</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 <span class="go">0    LINESTRING (0 1, 10 1)</span>
 <span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.orient_polygons">
+<span class="sig-name descname"><span class="pre">orient_polygons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exterior_cw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.orient_polygons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.orient_polygons" title="Permalink to this definition"></a></dt>
+<dd><p>Return geometries with a consistent polygon ring orientation.</p>
+<p>By default, polygon exterior rings are oriented counter-clockwise and
+interior rings clockwise. Set <code class="docutils literal notranslate"><span class="pre">exterior_cw=True</span></code> to use the opposite
+orientation. Polygonal members of GeometryCollections are processed
+recursively, while non-polygonal members are left unchanged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>exterior_cw</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default False</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, orient exterior rings clockwise and interior rings
+counter-clockwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">orient_polygons</span><span class="p">()</span>
+<span class="go">0    POLYGON ((0 0, 1 0, 0 1, 0 0))</span>
+<span class="go">dtype: object</span>
 </pre></div>
 </div>
 </dd></dl>

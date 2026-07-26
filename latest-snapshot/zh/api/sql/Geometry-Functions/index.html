@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6321,6 +6320,12 @@
 <td style="text-align: left;">v1.2.1</td>
 </tr>
 <tr>
+<td style="text-align: left;"><a href="../Geometry-Accessors/ST_IsLineStringCCW/">ST_IsLineStringCCW</a></td>
+<td style="text-align: left;">Boolean</td>
+<td style="text-align: left;">Returns true if the input is a LineString whose coordinate sequence has counter-clockwise ring orientation. Open LineStrings are evaluated as supplied, without appending the start coordinate.</td>
+<td style="text-align: left;">v1.9.1</td>
+</tr>
+<tr>
 <td style="text-align: left;"><a href="../Geometry-Accessors/ST_IsPolygonCCW/">ST_IsPolygonCCW</a></td>
 <td style="text-align: left;">Boolean</td>
 <td style="text-align: left;">Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise.</td>
@@ -6329,7 +6334,7 @@
 <tr>
 <td style="text-align: left;"><a href="../Geometry-Accessors/ST_IsPolygonCW/">ST_IsPolygonCW</a></td>
 <td style="text-align: left;">Boolean</td>
-<td style="text-align: left;">Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise.</td>
+<td style="text-align: left;">Returns true if all polygonal components in the input geometry have their exterior rings oriented clockwise and interior rings oriented counter-clockwise.</td>
 <td style="text-align: left;">v1.6.0</td>
 </tr>
 <tr>
@@ -6517,19 +6522,19 @@
 <tr>
 <td style="text-align: left;"><a href="../Geometry-Editors/ST_ForcePolygonCCW/">ST_ForcePolygonCCW</a></td>
 <td style="text-align: left;">Geometry</td>
-<td style="text-align: left;">For (Multi)Polygon geometries, this function sets the exterior ring orientation to counter-clockwise and interior rings to clockwise orientation. Non-polygonal geometries are returned unchanged.</td>
+<td style="text-align: left;">Sets polygon exterior rings counter-clockwise and interior rings clockwise, including polygonal members nested in GeometryCollections. Non-polygonal members are preserved unchanged.</td>
 <td style="text-align: left;">v1.6.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Geometry-Editors/ST_ForcePolygonCW/">ST_ForcePolygonCW</a></td>
 <td style="text-align: left;">Geometry</td>
-<td style="text-align: left;">For (Multi)Polygon geometries, this function sets the exterior ring orientation to clockwise and interior rings to counter-clockwise orientation. Non-polygonal geometries are returned unchanged.</td>
+<td style="text-align: left;">Sets polygon exterior rings clockwise and interior rings counter-clockwise, including polygonal members nested in GeometryCollections. Non-polygonal members are preserved unchanged.</td>
 <td style="text-align: left;">v1.6.0</td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="../Geometry-Editors/ST_ForceRHR/">ST_ForceRHR</a></td>
 <td style="text-align: left;">Geometry</td>
-<td style="text-align: left;">Sets the orientation of polygon vertex orderings to follow the Right-Hand-Rule convention. The exterior ring will have a clockwise winding order, while any interior rings are oriented counter-clock...</td>
+<td style="text-align: left;">Applies right-hand-rule ring orientation recursively to polygonal members, including those nested in GeometryCollections. Non-polygonal members are preserved unchanged.</td>
 <td style="text-align: left;">v1.6.1</td>
 </tr>
 <tr>
@@ -7718,7 +7723,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 24, 2026 19:22:20 UTC">July 24, 2026 19:22:20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 26, 2026 01:59:25 UTC">July 26, 2026 01:59:25</span>
   </span>
 
     
