@@ -1962,6 +1962,30 @@ public class FunctionsTest extends TestBase {
   }
 
   @Test
+  public void testIsPolygonOrientationHandlesEmptyPolygons() throws ParseException {
+    Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
+    MultiPolygon emptyMultiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[0]);
+
+    assertTrue(Functions.isPolygonCW(emptyPolygon));
+    assertTrue(Functions.isPolygonCCW(emptyPolygon));
+    assertTrue(Functions.isPolygonCW(emptyMultiPolygon));
+    assertTrue(Functions.isPolygonCCW(emptyMultiPolygon));
+
+    Polygon clockwisePolygon =
+        (Polygon) Constructors.geomFromWKT("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", 0);
+    Polygon counterClockwisePolygon =
+        (Polygon) Constructors.geomFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 0);
+
+    MultiPolygon clockwiseWithEmpty =
+        GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {emptyPolygon, clockwisePolygon});
+    MultiPolygon counterClockwiseWithEmpty =
+        GEOMETRY_FACTORY.createMultiPolygon(new Polygon[] {emptyPolygon, counterClockwisePolygon});
+
+    assertTrue(Functions.isPolygonCW(clockwiseWithEmpty));
+    assertTrue(Functions.isPolygonCCW(counterClockwiseWithEmpty));
+  }
+
+  @Test
   public void testTriangulatePolygon() throws ParseException {
     Geometry geom =
         Constructors.geomFromWKT(
