@@ -1213,6 +1213,18 @@ public class TestFunctionsV2 extends TestBase {
         true);
     verifySqlSingleRes("SELECT sedona.ST_IsPolygonCW(ST_GeomFromWKT('POLYGON EMPTY'))", true);
     verifySqlSingleRes("SELECT sedona.ST_IsPolygonCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY'))", true);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_IsPolygonCW(ST_GeomFromWKT('LINESTRING (0 0, 1 0, 0 0)'))", true);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_IsPolygonCW(ST_GeomFromWKT('GEOMETRYCOLLECTION (POINT (0 0), GEOMETRYCOLLECTION (LINESTRING (0 0, 1 1)))'))",
+        true);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_IsPolygonCW(ST_GeomFromWKT('GEOMETRYCOLLECTION (POINT (2 2), GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0)), MULTIPOLYGON EMPTY))'))",
+        true);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_IsPolygonCW(ST_GeomFromWKT('GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0)), GEOMETRYCOLLECTION (POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))))'))",
+        false);
+    verifySqlSingleRes("SELECT sedona.ST_IsPolygonCW(CAST(NULL AS GEOMETRY))", null);
   }
 
   @Test
@@ -1246,6 +1258,18 @@ public class TestFunctionsV2 extends TestBase {
         true);
     verifySqlSingleRes("SELECT sedona.ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON EMPTY'))", true);
     verifySqlSingleRes("SELECT sedona.ST_IsPolygonCCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY'))", true);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_IsPolygonCCW(ST_GeomFromWKT('LINESTRING (0 0, 1 0, 0 0)'))", true);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_IsPolygonCCW(ST_GeomFromWKT('GEOMETRYCOLLECTION (POINT (0 0), GEOMETRYCOLLECTION (LINESTRING (0 0, 1 1)))'))",
+        true);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_IsPolygonCCW(ST_GeomFromWKT('GEOMETRYCOLLECTION (LINESTRING (0 0, 1 1), GEOMETRYCOLLECTION (POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))))'))",
+        true);
+    verifySqlSingleRes(
+        "SELECT sedona.ST_IsPolygonCCW(ST_GeomFromWKT('GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0)), GEOMETRYCOLLECTION (POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))))'))",
+        false);
+    verifySqlSingleRes("SELECT sedona.ST_IsPolygonCCW(CAST(NULL AS GEOMETRY))", null);
   }
 
   @Test

@@ -1175,8 +1175,10 @@ def ST_IsPolygonCW(geometry: ColumnOrName) -> Column:
 
     :param geometry: Geometry column to check.
     :type geometry: ColumnOrName
-    :return: True if every exterior ring is clockwise and every interior ring
-        is counter-clockwise. Empty Polygon and MultiPolygon values return True.
+    :return: True if every polygonal component has clockwise exterior rings and
+        counter-clockwise interior rings. Geometry collections are checked
+        recursively, non-polygonal components are ignored, and inputs without
+        polygonal components return True.
     :rtype: Column
     """
     return _call_st_function("ST_IsPolygonCW", geometry)
@@ -2028,8 +2030,10 @@ def ST_IsPolygonCCW(geometry: ColumnOrName) -> Column:
 
     :param geometry: Geometry column to check.
     :type geometry: ColumnOrName
-    :return: True if every exterior ring is counter-clockwise and every interior
-        ring is clockwise. Empty Polygon and MultiPolygon values return True.
+    :return: True if every polygonal component has counter-clockwise exterior
+        rings and clockwise interior rings. Geometry collections are checked
+        recursively, non-polygonal components are ignored, and inputs without
+        polygonal components return True.
     :rtype: Column
     """
     return _call_st_function("ST_IsPolygonCCW", geometry)

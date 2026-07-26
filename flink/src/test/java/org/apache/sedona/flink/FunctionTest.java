@@ -2703,19 +2703,53 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
-  public void testIsPolygonOrientationForEmptyGeometries() {
-    Table result =
-        tableEnv.sqlQuery(
-            "SELECT "
-                + "ST_IsPolygonCW(ST_GeomFromWKT('POLYGON EMPTY')), "
-                + "ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON EMPTY')), "
-                + "ST_IsPolygonCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY')), "
-                + "ST_IsPolygonCCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY'))");
+  public void testIsPolygonOrientationChecksOnlyPolygonalComponents() {
+    Object[][] testCases = {
+      {"POLYGON EMPTY", true, true},
+      {"MULTIPOLYGON EMPTY", true, true},
+      {"POINT (0 0)", true, true},
+      {"LINESTRING (0 0, 1 0, 0 0)", true, true},
+      {"GEOMETRYCOLLECTION (POINT (0 0), GEOMETRYCOLLECTION (LINESTRING (0 0, 1 1)))", true, true},
+      {
+        "GEOMETRYCOLLECTION (POINT (2 2), GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0)), MULTIPOLYGON EMPTY))",
+        true,
+        false
+      },
+      {
+        "GEOMETRYCOLLECTION (LINESTRING (0 0, 1 1), GEOMETRYCOLLECTION (POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))))",
+        false,
+        true
+      },
+      {
+        "GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0)), GEOMETRYCOLLECTION (POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))))",
+        false,
+        false
+      }
+    };
 
-    Row row = first(result);
-    for (int i = 0; i < row.getArity(); i++) {
-      assertTrue((boolean) row.getField(i));
+    for (Object[] testCase : testCases) {
+      Row row =
+          first(
+              tableEnv.sqlQuery(
+                  "SELECT "
+                      + "ST_IsPolygonCW(ST_GeomFromWKT('"
+                      + testCase[0]
+                      + "')), "
+                      + "ST_IsPolygonCCW(ST_GeomFromWKT('"
+                      + testCase[0]
+                      + "'))"));
+      assertEquals(testCase[1], row.getField(0));
+      assertEquals(testCase[2], row.getField(1));
     }
+
+    Row nullRow =
+        first(
+            tableEnv.sqlQuery(
+                "SELECT "
+                    + "ST_IsPolygonCW(ST_GeomFromWKT(CAST(NULL AS STRING))), "
+                    + "ST_IsPolygonCCW(ST_GeomFromWKT(CAST(NULL AS STRING)))"));
+    assertNull(nullRow.getField(0));
+    assertNull(nullRow.getField(1));
   }
 
   @Test
