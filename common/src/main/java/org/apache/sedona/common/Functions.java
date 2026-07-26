@@ -1612,15 +1612,29 @@ public class Functions {
   }
 
   /**
-   * Returns true if every polygonal component has a clockwise exterior ring and counter-clockwise
-   * interior rings. GeometryCollections are traversed recursively and non-polygonal components are
-   * ignored. Geometries without polygonal components return true.
+   * This function accepts Polygon and MultiPolygon, if any other type is provided then it will
+   * return false. If the exterior ring is clockwise and the interior ring(s) are counter-clockwise
+   * then returns true, otherwise false. Empty Polygon and MultiPolygon inputs return true because
+   * they contain no rings with the opposite orientation.
    *
-   * @param geom Geometry to inspect
-   * @return Whether all polygonal components use clockwise orientation
+   * @param geom Polygon or MultiPolygon
+   * @return
    */
   public static boolean isPolygonCW(Geometry geom) {
-    return arePolygonComponentsOriented(geom, true);
+    if (geom instanceof MultiPolygon) {
+      MultiPolygon multiPolygon = (MultiPolygon) geom;
+
+      for (int i = 0; i < multiPolygon.getNumGeometries(); i++) {
+        if (!checkIfPolygonCW((Polygon) multiPolygon.getGeometryN(i))) {
+          return false;
+        }
+      }
+      return true;
+    } else if (geom instanceof Polygon) {
+      return checkIfPolygonCW((Polygon) geom);
+    }
+    // False for remaining geometry types
+    return false;
   }
 
   private static boolean checkIfPolygonCW(Polygon geom) {
@@ -1755,15 +1769,29 @@ public class Functions {
   }
 
   /**
-   * Returns true if every polygonal component has a counter-clockwise exterior ring and clockwise
-   * interior rings. GeometryCollections are traversed recursively and non-polygonal components are
-   * ignored. Geometries without polygonal components return true.
+   * This function accepts Polygon and MultiPolygon, if any other type is provided then it will
+   * return false. If the exterior ring is counter-clockwise and the interior ring(s) are clockwise
+   * then returns true, otherwise false. Empty Polygon and MultiPolygon inputs return true because
+   * they contain no rings with the opposite orientation.
    *
-   * @param geom Geometry to inspect
-   * @return Whether all polygonal components use counter-clockwise orientation
+   * @param geom Polygon or MultiPolygon
+   * @return
    */
   public static boolean isPolygonCCW(Geometry geom) {
-    return arePolygonComponentsOriented(geom, false);
+    if (geom instanceof MultiPolygon) {
+      MultiPolygon multiPolygon = (MultiPolygon) geom;
+
+      for (int i = 0; i < multiPolygon.getNumGeometries(); i++) {
+        if (!checkIfPolygonCCW((Polygon) multiPolygon.getGeometryN(i))) {
+          return false;
+        }
+      }
+      return true;
+    } else if (geom instanceof Polygon) {
+      return checkIfPolygonCCW((Polygon) geom);
+    }
+    // False for remaining geometry types
+    return false;
   }
 
   private static boolean checkIfPolygonCCW(Polygon geom) {
@@ -1786,24 +1814,6 @@ public class Functions {
     }
 
     return isExteriorRingCCW && isInteriorRingCCW;
-  }
-
-  private static boolean arePolygonComponentsOriented(Geometry geom, boolean clockwise) {
-    if (geom == null) {
-      return false;
-    }
-    if (geom instanceof Polygon) {
-      return clockwise ? checkIfPolygonCW((Polygon) geom) : checkIfPolygonCCW((Polygon) geom);
-    }
-    if (geom instanceof GeometryCollection) {
-      GeometryCollection collection = (GeometryCollection) geom;
-      for (int i = 0; i < collection.getNumGeometries(); i++) {
-        if (!arePolygonComponentsOriented(collection.getGeometryN(i), clockwise)) {
-          return false;
-        }
-      }
-    }
-    return true;
   }
 
   public static Geometry addMeasure(Geometry geom, double measure_start, double measure_end) {

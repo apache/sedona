@@ -1563,46 +1563,18 @@ class functionTestScala
       assert(actual == false)
     }
 
-    it("Should check only polygonal components for polygon orientation predicates") {
-      val results = sparkSession
+    it("Should pass polygon orientation predicates for empty polygonal geometries") {
+      val actual = sparkSession
         .sql("""
             |SELECT
-            |  wkt,
-            |  ST_IsPolygonCW(ST_GeomFromWKT(wkt)) AS actual_cw,
-            |  ST_IsPolygonCCW(ST_GeomFromWKT(wkt)) AS actual_ccw,
-            |  expected_cw,
-            |  expected_ccw
-            |FROM VALUES
-            |  ('POLYGON EMPTY', true, true),
-            |  ('MULTIPOLYGON EMPTY', true, true),
-            |  ('POINT (0 0)', true, true),
-            |  ('LINESTRING (0 0, 1 0, 0 0)', true, true),
-            |  ('GEOMETRYCOLLECTION (POINT (0 0), GEOMETRYCOLLECTION (LINESTRING (0 0, 1 1)))', true, true),
-            |  ('GEOMETRYCOLLECTION (POINT (2 2), GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0)), MULTIPOLYGON EMPTY))', true, false),
-            |  ('GEOMETRYCOLLECTION (LINESTRING (0 0, 1 1), GEOMETRYCOLLECTION (POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))))', false, true),
-            |  ('GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0)), GEOMETRYCOLLECTION (POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))))', false, false)
-            |AS test_cases(wkt, expected_cw, expected_ccw)
-            |""".stripMargin)
-        .collect()
-
-      results.foreach { row =>
-        assert(
-          row.getBoolean(1) == row.getBoolean(3),
-          s"Unexpected CW result for ${row.getString(0)}")
-        assert(
-          row.getBoolean(2) == row.getBoolean(4),
-          s"Unexpected CCW result for ${row.getString(0)}")
-      }
-
-      val nullResults = sparkSession
-        .sql("""
-            |SELECT
-            |  ST_IsPolygonCW(ST_GeomFromWKT(CAST(NULL AS STRING))),
-            |  ST_IsPolygonCCW(ST_GeomFromWKT(CAST(NULL AS STRING)))
+            |  ST_IsPolygonCW(ST_GeomFromWKT('POLYGON EMPTY')),
+            |  ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON EMPTY')),
+            |  ST_IsPolygonCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY')),
+            |  ST_IsPolygonCCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY'))
             |""".stripMargin)
         .first()
-      assertTrue(nullResults.isNullAt(0))
-      assertTrue(nullResults.isNullAt(1))
+
+      (0 until 4).foreach(index => assertTrue(actual.getBoolean(index)))
     }
 
     it("Should pass ST_IsLineStringCCW") {

@@ -21,7 +21,7 @@
 
 Introduction: Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise.
 
-Non-polygonal components are ignored, and geometry collections are evaluated recursively. Inputs with no polygonal components, including empty geometries and closed line strings, return `true`.
+`POLYGON EMPTY` and `MULTIPOLYGON EMPTY` return `true` because they contain no rings with the opposite orientation.
 
 ![ST_IsPolygonCCW](../../../image/ST_IsPolygonCCW/ST_IsPolygonCCW.svg "ST_IsPolygonCCW")
 

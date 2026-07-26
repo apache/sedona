@@ -1927,10 +1927,10 @@ public class FunctionsTest extends TestBase {
     assertTrue(Functions.isPolygonCW(mPoly));
 
     Geometry point = Constructors.geomFromWKT("POINT (45 20)", 0);
-    assertTrue(Functions.isPolygonCW(point));
+    assertFalse(Functions.isPolygonCW(point));
 
     Geometry lineClosed = Constructors.geomFromWKT("LINESTRING (30 20, 20 25, 20 15, 30 20)", 0);
-    assertTrue(Functions.isPolygonCW(lineClosed));
+    assertFalse(Functions.isPolygonCW(lineClosed));
   }
 
   @Test
@@ -1955,24 +1955,21 @@ public class FunctionsTest extends TestBase {
     assertTrue(Functions.isPolygonCCW(mPoly));
 
     Geometry point = Constructors.geomFromWKT("POINT (45 20)", 0);
-    assertTrue(Functions.isPolygonCCW(point));
+    assertFalse(Functions.isPolygonCCW(point));
 
     Geometry lineClosed = Constructors.geomFromWKT("LINESTRING (30 20, 20 25, 20 15, 30 20)", 0);
-    assertTrue(Functions.isPolygonCCW(lineClosed));
+    assertFalse(Functions.isPolygonCCW(lineClosed));
   }
 
   @Test
-  public void testIsPolygonOrientationChecksOnlyPolygonalComponents() throws ParseException {
+  public void testIsPolygonOrientationHandlesEmptyPolygons() throws ParseException {
     Polygon emptyPolygon = GEOMETRY_FACTORY.createPolygon();
     MultiPolygon emptyMultiPolygon = GEOMETRY_FACTORY.createMultiPolygon(new Polygon[0]);
-    GeometryCollection emptyCollection = GEOMETRY_FACTORY.createGeometryCollection();
 
     assertTrue(Functions.isPolygonCW(emptyPolygon));
     assertTrue(Functions.isPolygonCCW(emptyPolygon));
     assertTrue(Functions.isPolygonCW(emptyMultiPolygon));
     assertTrue(Functions.isPolygonCCW(emptyMultiPolygon));
-    assertTrue(Functions.isPolygonCW(emptyCollection));
-    assertTrue(Functions.isPolygonCCW(emptyCollection));
 
     Polygon clockwisePolygon =
         (Polygon) Constructors.geomFromWKT("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", 0);
@@ -1986,45 +1983,6 @@ public class FunctionsTest extends TestBase {
 
     assertTrue(Functions.isPolygonCW(clockwiseWithEmpty));
     assertTrue(Functions.isPolygonCCW(counterClockwiseWithEmpty));
-
-    Geometry noPolygonalComponents =
-        Constructors.geomFromWKT(
-            "GEOMETRYCOLLECTION (POINT (0 0), LINESTRING (0 0, 1 1), "
-                + "GEOMETRYCOLLECTION (MULTIPOINT ((0 0), (1 1)), "
-                + "MULTILINESTRING ((0 0, 1 1))))",
-            0);
-    assertTrue(Functions.isPolygonCW(noPolygonalComponents));
-    assertTrue(Functions.isPolygonCCW(noPolygonalComponents));
-
-    Geometry nestedClockwise =
-        GEOMETRY_FACTORY.createGeometryCollection(
-            new Geometry[] {
-              GEOMETRY_FACTORY.createPoint(new Coordinate(2, 2)),
-              GEOMETRY_FACTORY.createGeometryCollection(
-                  new Geometry[] {emptyPolygon, clockwisePolygon})
-            });
-    assertTrue(Functions.isPolygonCW(nestedClockwise));
-    assertFalse(Functions.isPolygonCCW(nestedClockwise));
-
-    Geometry nestedCounterClockwise =
-        GEOMETRY_FACTORY.createGeometryCollection(
-            new Geometry[] {
-              GEOMETRY_FACTORY.createLineString(
-                  new Coordinate[] {new Coordinate(0, 0), new Coordinate(1, 1)}),
-              GEOMETRY_FACTORY.createGeometryCollection(
-                  new Geometry[] {emptyMultiPolygon, counterClockwisePolygon})
-            });
-    assertFalse(Functions.isPolygonCW(nestedCounterClockwise));
-    assertTrue(Functions.isPolygonCCW(nestedCounterClockwise));
-
-    Geometry mixedOrientations =
-        GEOMETRY_FACTORY.createGeometryCollection(
-            new Geometry[] {clockwisePolygon, nestedCounterClockwise});
-    assertFalse(Functions.isPolygonCW(mixedOrientations));
-    assertFalse(Functions.isPolygonCCW(mixedOrientations));
-
-    assertFalse(Functions.isPolygonCW(null));
-    assertFalse(Functions.isPolygonCCW(null));
   }
 
   @Test
