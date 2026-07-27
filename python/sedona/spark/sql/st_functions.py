@@ -1171,12 +1171,12 @@ def ST_IsEmpty(geometry: ColumnOrName) -> Column:
 
 @validate_argument_types
 def ST_IsPolygonCW(geometry: ColumnOrName) -> Column:
-    """Check if the Polygon or MultiPolygon use a clockwise orientation for exterior ring and counter-clockwise
-    orientation for interior ring.
+    """Check whether polygon rings use clockwise exterior orientation.
 
     :param geometry: Geometry column to check.
     :type geometry: ColumnOrName
-    :return: True if the geometry is empty and False otherwise as a boolean column.
+    :return: True if every exterior ring is clockwise and every interior ring
+        is counter-clockwise. Empty Polygon and MultiPolygon values return True.
     :rtype: Column
     """
     return _call_st_function("ST_IsPolygonCW", geometry)
@@ -2024,11 +2024,12 @@ def ST_Snap(
 
 @validate_argument_types
 def ST_IsPolygonCCW(geometry: ColumnOrName) -> Column:
-    """Check if the Polygon or MultiPolygon use a counter-clockwise orientation for exterior ring and clockwise
-    orientation for interior ring.
+    """Check whether polygon rings use counter-clockwise exterior orientation.
+
     :param geometry: Geometry column to check.
     :type geometry: ColumnOrName
-    :return: True if the geometry is empty and False otherwise as a boolean column.
+    :return: True if every exterior ring is counter-clockwise and every interior
+        ring is clockwise. Empty Polygon and MultiPolygon values return True.
     :rtype: Column
     """
     return _call_st_function("ST_IsPolygonCCW", geometry)

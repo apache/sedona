@@ -2976,6 +2976,29 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert list(numpy_bool_radians.coords) == pytest.approx(expected)
         assert list(clamped.coords) == [(0.0, 0.0), (2.0, 4.0)]
 
+    @pytest.mark.parametrize(
+        "use_radians",
+        [
+            pytest.param(0, id="int-false"),
+            pytest.param(1, id="int-true"),
+            pytest.param(np.int64(0), id="numpy-int-false"),
+            pytest.param(np.int64(1), id="numpy-int-true"),
+        ],
+    )
+    def test_skew_accepts_integer_use_radians(self, use_radians):
+        source = GeoSeries([LineString([(0, 0), (2, 4)])])
+        kwargs = {
+            "xs": 0.5,
+            "ys": -0.25,
+            "origin": (0, 0),
+            "use_radians": use_radians,
+        }
+
+        result = source.skew(**kwargs)
+        expected = source.to_geopandas().skew(**kwargs)
+
+        self.check_sgpd_equals_gpd(result, expected)
+
     def test_skew_center_and_centroid_origins(self):
         source = GeoSeries([Polygon([(0, 0), (4, 0), (0, 2), (0, 0)])])
 
@@ -3081,7 +3104,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             with pytest.raises(TypeError, match=rf"'{name}' must be a numeric scalar"):
                 source.skew(**{name: ps.Series([45.0])})
 
-        for use_radians in (None, 0, 1, "true", [True], np.array(True)):
+        for use_radians in (None, 0.0, 1.0, "true", [True], np.array(True)):
             with pytest.raises(TypeError, match="'use_radians' must be a boolean"):
                 source.skew(use_radians=use_radians)
 
@@ -3118,7 +3141,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             with pytest.raises(TypeError, match=rf"'{name}' must be a numeric scalar"):
                 empty_source.skew(**{name: None})
         with pytest.raises(TypeError, match="'use_radians' must be a boolean"):
-            empty_source.skew(use_radians=1)
+            empty_source.skew(use_radians=1.0)
         with pytest.raises(ValueError, match="origin must be"):
             empty_source.skew(origin="invalid")
 

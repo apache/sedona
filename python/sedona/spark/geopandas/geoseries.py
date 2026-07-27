@@ -1624,10 +1624,10 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         xs = _normalize_affine_scalar(xs, "'xs' must be a numeric scalar")
         ys = _normalize_affine_scalar(ys, "'ys' must be a numeric scalar")
-        if not isinstance(use_radians, (bool, np.bool_)):
+        if not isinstance(use_radians, (bool, np.bool_, int, np.integer)):
             raise TypeError("'use_radians' must be a boolean")
 
-        if not use_radians:
+        if not bool(use_radians):
             xs = xs * math.pi / 180.0
             ys = ys * math.pi / 180.0
         tan_x = math.tan(xs)

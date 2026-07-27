@@ -1614,7 +1614,8 @@ public class Functions {
   /**
    * This function accepts Polygon and MultiPolygon, if any other type is provided then it will
    * return false. If the exterior ring is clockwise and the interior ring(s) are counter-clockwise
-   * then returns true, otherwise false.
+   * then returns true, otherwise false. Empty Polygon and MultiPolygon inputs return true because
+   * they contain no rings with the opposite orientation.
    *
    * @param geom Polygon or MultiPolygon
    * @return
@@ -1623,11 +1624,12 @@ public class Functions {
     if (geom instanceof MultiPolygon) {
       MultiPolygon multiPolygon = (MultiPolygon) geom;
 
-      boolean arePolygonsCW = checkIfPolygonCW((Polygon) multiPolygon.getGeometryN(0));
-      for (int i = 1; i < multiPolygon.getNumGeometries(); i++) {
-        arePolygonsCW = arePolygonsCW && checkIfPolygonCW((Polygon) multiPolygon.getGeometryN(i));
+      for (int i = 0; i < multiPolygon.getNumGeometries(); i++) {
+        if (!checkIfPolygonCW((Polygon) multiPolygon.getGeometryN(i))) {
+          return false;
+        }
       }
-      return arePolygonsCW;
+      return true;
     } else if (geom instanceof Polygon) {
       return checkIfPolygonCW((Polygon) geom);
     }
@@ -1636,6 +1638,10 @@ public class Functions {
   }
 
   private static boolean checkIfPolygonCW(Polygon geom) {
+    if (geom.isEmpty()) {
+      return true;
+    }
+
     LinearRing exteriorRing = geom.getExteriorRing();
     boolean isExteriorRingCW = !Orientation.isCCW(exteriorRing.getCoordinateSequence());
 
@@ -1765,7 +1771,8 @@ public class Functions {
   /**
    * This function accepts Polygon and MultiPolygon, if any other type is provided then it will
    * return false. If the exterior ring is counter-clockwise and the interior ring(s) are clockwise
-   * then returns true, otherwise false.
+   * then returns true, otherwise false. Empty Polygon and MultiPolygon inputs return true because
+   * they contain no rings with the opposite orientation.
    *
    * @param geom Polygon or MultiPolygon
    * @return
@@ -1774,12 +1781,12 @@ public class Functions {
     if (geom instanceof MultiPolygon) {
       MultiPolygon multiPolygon = (MultiPolygon) geom;
 
-      boolean arePolygonsCCW = checkIfPolygonCCW(((Polygon) multiPolygon.getGeometryN(0)));
-      for (int i = 1; i < multiPolygon.getNumGeometries(); i++) {
-        arePolygonsCCW =
-            arePolygonsCCW && checkIfPolygonCCW((Polygon) multiPolygon.getGeometryN(i));
+      for (int i = 0; i < multiPolygon.getNumGeometries(); i++) {
+        if (!checkIfPolygonCCW((Polygon) multiPolygon.getGeometryN(i))) {
+          return false;
+        }
       }
-      return arePolygonsCCW;
+      return true;
     } else if (geom instanceof Polygon) {
       return checkIfPolygonCCW((Polygon) geom);
     }
@@ -1788,6 +1795,10 @@ public class Functions {
   }
 
   private static boolean checkIfPolygonCCW(Polygon geom) {
+    if (geom.isEmpty()) {
+      return true;
+    }
+
     LinearRing exteriorRing = geom.getExteriorRing();
     boolean isExteriorRingCCW = Orientation.isCCW(exteriorRing.getCoordinateSequence());
 

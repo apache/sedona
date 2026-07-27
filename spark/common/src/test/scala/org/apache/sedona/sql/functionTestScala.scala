@@ -1563,6 +1563,20 @@ class functionTestScala
       assert(actual == false)
     }
 
+    it("Should pass polygon orientation predicates for empty polygonal geometries") {
+      val actual = sparkSession
+        .sql("""
+            |SELECT
+            |  ST_IsPolygonCW(ST_GeomFromWKT('POLYGON EMPTY')),
+            |  ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON EMPTY')),
+            |  ST_IsPolygonCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY')),
+            |  ST_IsPolygonCCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY'))
+            |""".stripMargin)
+        .first()
+
+      (0 until 4).foreach(index => assertTrue(actual.getBoolean(index)))
+    }
+
     it("Should pass ST_IsLineStringCCW") {
       val actual = sparkSession
         .sql("""

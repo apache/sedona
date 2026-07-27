@@ -2703,6 +2703,22 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testIsPolygonOrientationForEmptyGeometries() {
+    Table result =
+        tableEnv.sqlQuery(
+            "SELECT "
+                + "ST_IsPolygonCW(ST_GeomFromWKT('POLYGON EMPTY')), "
+                + "ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON EMPTY')), "
+                + "ST_IsPolygonCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY')), "
+                + "ST_IsPolygonCCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY'))");
+
+    Row row = first(result);
+    for (int i = 0; i < row.getArity(); i++) {
+      assertTrue((boolean) row.getField(i));
+    }
+  }
+
+  @Test
   public void testTranslate() {
     Table polyTable =
         tableEnv.sqlQuery(
