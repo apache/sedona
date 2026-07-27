@@ -83,6 +83,20 @@ class CRSTransformProj4Test extends TestBaseScala {
       assertEquals(4180998.88, result.getCoordinate.y, COORD_TOLERANCE)
     }
 
+    it("should apply the RT90 datum shift for EPSG:3021 to EPSG:3006 (GH-3161)") {
+      val result = sparkSession
+        .sql("SELECT ST_Transform(ST_Point(1272691.622, 6404578.16), 'epsg:3021', 'epsg:3006')")
+        .first()
+        .getAs[Geometry](0)
+
+      assertNotNull(result)
+      assertEquals(3006, result.getSRID)
+      // PostGIS reference reported in GH-3161. The one-metre suite tolerance allows for
+      // projection-algorithm differences while guarding against the reported 180-metre error.
+      assertEquals(320728.44351324334, result.getCoordinate.x, COORD_TOLERANCE)
+      assertEquals(6400228.104394391, result.getCoordinate.y, COORD_TOLERANCE)
+    }
+
     it("should transform using PROJ string") {
       val projString =
         "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +no_defs"
