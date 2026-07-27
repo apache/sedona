@@ -343,6 +343,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         self._col_label: Label
         self._sindex: SpatialIndex = None
         self._empty_crs_source: typing.Optional["GeoSeries"] = None
+        self._empty_crs_value = None
 
         if isinstance(
             data, (GeoDataFrame, GeoSeries, PandasOnSparkSeries, PandasOnSparkDataFrame)
@@ -461,6 +462,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         from pyproj import CRS
 
         if self._is_empty():
+            if self._empty_crs_value is not None:
+                return self._empty_crs_value
             if self._empty_crs_source is not None:
                 return self._empty_crs_source.crs
             return None
@@ -615,9 +618,15 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         spark_col = stf.ST_SetSRID(self.spark.column, new_epsg)
         result = self._query_geometry_column(spark_col, keep_name=True)
+        result._empty_crs_value = crs
+        if crs is None:
+            result._empty_crs_source = None
 
         if inplace:
             self._update_inplace(result, invalidate_sindex=False)
+            self._empty_crs_value = crs
+            if crs is None:
+                self._empty_crs_source = None
             return None
 
         return result

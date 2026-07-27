@@ -296,7 +296,7 @@ buildings_projected["perimeter"] = buildings_projected.geometry.length
 
 ## Supported Operations
 
-The GeoPandas API for Apache Sedona has implemented **39 GeoSeries functions** and **10 GeoDataFrame functions**, covering the most commonly used GeoPandas operations:
+The GeoPandas API for Apache Sedona has implemented **39 GeoSeries functions** and **11 GeoDataFrame functions**, covering the most commonly used GeoPandas operations:
 
 ### Data I/O
 
@@ -334,6 +334,30 @@ The GeoPandas API for Apache Sedona has implemented **39 GeoSeries functions** a
 - `intersection()` - Geometric intersection
 - `make_valid()` - Geometry validation and repair
 - `sindex` - Spatial indexing (limited functionality)
+
+### Distributed Geometry Aggregation
+
+- `GeoDataFrame.dissolve()` - Group rows and union each group's geometries
+  with Sedona's native distributed aggregate
+- `sedona.spark.geopandas.tools.collect()` - Collect a distributed GeoSeries
+  into one geometry, using a homogeneous multipart geometry when needed
+
+```python
+from sedona.spark.geopandas.tools import collect
+
+by_region = buildings.dissolve(
+    by="region",
+    aggfunc={"population": "sum", "name": "first"},
+)
+all_building_parts = collect(buildings.geometry)
+```
+
+`dissolve` supports the `unary` union method. Fixed-precision `grid_size`,
+`coverage`, and `disjoint_subset` unions are rejected explicitly. Multiple
+attribute aggregations remain a two-level pandas-on-Spark `MultiIndex`;
+GeoPandas instead represents their tuple labels in a one-level object index.
+Both operations aggregate input rows on Spark executors. `collect` transfers
+only aggregate metadata and the API's single geometry result to the driver.
 
 ### Data Conversion
 
