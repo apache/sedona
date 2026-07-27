@@ -20,6 +20,8 @@ import numpy as np
 import pandas as pd
 import pytest
 import pyspark.pandas as ps
+import shapely
+from packaging.version import parse as parse_version
 from pyspark.sql import DataFrame as SparkDataFrame
 
 try:
@@ -27,6 +29,7 @@ try:
 except ImportError:
     EmptyPartError = ValueError
 from shapely.geometry import (
+    GeometryCollection,
     LineString,
     MultiPoint,
     Point,
@@ -37,6 +40,9 @@ from sedona.spark.geopandas import GeoDataFrame, GeoSeries
 from sedona.spark.geopandas.tools import collect
 from sedona.spark.sql import st_functions as stf
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
+
+SHAPELY_GE_20 = parse_version(shapely.__version__) >= parse_version("2.0.0")
+GEOPANDAS_HAS_UNION_ALL = hasattr(gpd.GeoSeries, "union_all")
 
 
 class TestGeometryAggregation(TestGeopandasBase):
@@ -70,7 +76,10 @@ class TestGeometryAggregation(TestGeopandasBase):
         collected = result.to_geopandas()
         null_group = collected[collected.index.isna()].iloc[0]
         assert null_group["label"] == "missing"
-        assert null_group["shape"].is_empty
+        if GEOPANDAS_HAS_UNION_ALL:
+            assert null_group["shape"].is_empty
+        else:
+            assert null_group["shape"] is None
 
         srids = (
             result.geometry._internal.spark_frame.select(
@@ -79,9 +88,10 @@ class TestGeometryAggregation(TestGeopandasBase):
             .distinct()
             .collect()
         )
-        assert [row.srid for row in srids] == [3857]
+        expected_srids = {3857} if GEOPANDAS_HAS_UNION_ALL else {3857, None}
+        assert {row.srid for row in srids} == expected_srids
 
-    def test_dissolve_all_null_geometry_preserves_crs_and_srid(self):
+    def test_dissolve_all_null_geometry_matches_geopandas_and_preserves_crs(self):
         expected_source = gpd.GeoDataFrame(
             {
                 "zone": ["a", "a"],
@@ -101,7 +111,8 @@ class TestGeometryAggregation(TestGeopandasBase):
         srids = result.geometry._internal.spark_frame.select(
             stf.ST_SRID(result.geometry.spark.column).alias("srid")
         ).collect()
-        assert [row.srid for row in srids] == [4326]
+        expected_srid = 4326 if GEOPANDAS_HAS_UNION_ALL else None
+        assert [row.srid for row in srids] == [expected_srid]
 
     def test_dissolve_series_grouper_retains_data_column(self):
         local = gpd.GeoDataFrame(
@@ -462,16 +473,39 @@ class TestGeometryAggregation(TestGeopandasBase):
         assert collected_lines.geom_type == "MultiLineString"
         assert len(collected_lines.geoms) == 2
 
-        polygons = [
-            Polygon(),
-            Polygon([(0, 0), (1, 0), (0, 1)]),
-        ]
-        collected_polygons = collect(GeoSeries(polygons))
-        assert collected_polygons.geom_type == "MultiPolygon"
-        assert len(collected_polygons.geoms) == 1
-        assert collect(GeoSeries([Polygon()]), multi=True).equals(
-            gpd.tools.collect(Polygon(), multi=True)
-        )
+        if SHAPELY_GE_20:
+            polygons = [
+                Polygon(),
+                Polygon([(0, 0), (1, 0), (0, 1)]),
+            ]
+            collected_polygons = collect(GeoSeries(polygons))
+            assert collected_polygons.geom_type == "MultiPolygon"
+            assert len(collected_polygons.geoms) == 1
+            assert collect(GeoSeries([Polygon()]), multi=True).equals(
+                gpd.tools.collect(Polygon(), multi=True)
+            )
+        else:
+            polygons = [
+                Polygon([(0, 0), (1, 0), (0, 1)]),
+                Polygon([(2, 0), (3, 0), (2, 1)]),
+            ]
+            collected_polygons = collect(GeoSeries(polygons))
+            assert collected_polygons.geom_type == "MultiPolygon"
+            assert len(collected_polygons.geoms) == 2
+            with pytest.raises(ValueError, match="homogeneous"):
+                collect(GeoSeries([Polygon(), polygons[0]]))
+            with pytest.raises(KeyError, match="GeometryCollection"):
+                collect(GeoSeries([Polygon()]), multi=True)
+
+        with pytest.raises(ValueError, match="homogeneous"):
+            collect(
+                GeoSeries(
+                    [
+                        GeometryCollection(),
+                        Polygon([(0, 0), (1, 0), (0, 1)]),
+                    ]
+                )
+            )
 
     def test_collect_validation_matches_geopandas(self):
         with pytest.raises(IndexError, match="list index out of range"):
@@ -489,5 +523,9 @@ class TestGeometryAggregation(TestGeopandasBase):
                     ]
                 )
             )
-        with pytest.raises(EmptyPartError, match="empty component"):
-            collect(GeoSeries([Point()]), multi=True)
+        if SHAPELY_GE_20:
+            with pytest.raises(EmptyPartError, match="empty component"):
+                collect(GeoSeries([Point()]), multi=True)
+        else:
+            with pytest.raises(KeyError, match="GeometryCollection"):
+                collect(GeoSeries([Point()]), multi=True)

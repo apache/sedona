@@ -16,10 +16,14 @@
 # under the License.
 
 import geopandas as gpd
+import shapely
+from packaging.version import parse as parse_version
 from pyspark.sql import functions as F
 
 from sedona.spark.sql import st_aggregates as sta
 from sedona.spark.sql import st_functions as stf
+
+SHAPELY_LT_20 = parse_version(shapely.__version__) < parse_version("2.0.0")
 
 
 def collect(x, multi=False):
@@ -64,6 +68,13 @@ def collect(x, multi=False):
 
     geometry = x.spark.column
     geometry_type = stf.ST_GeometryType(geometry)
+    if SHAPELY_LT_20:
+        # Shapely 1 reports every empty geometry as GeometryCollection,
+        # regardless of whether the serializer retains its original family.
+        geometry_type = F.when(
+            stf.ST_IsEmpty(geometry),
+            F.lit("ST_GeometryCollection"),
+        ).otherwise(geometry_type)
     metadata = x._internal.spark_frame.agg(
         F.count(F.lit(1)).alias("__collect_count__"),
         F.count(geometry).alias("__collect_non_null_count__"),

@@ -2032,14 +2032,15 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         # unsupported function/dtype combinations fail before Spark executes.
         crs = self.crs
         srid = crs.to_epsg() if crs is not None else 0
-        empty_geometry = stc.ST_GeomFromWKT(
-            F.lit("GEOMETRYCOLLECTION EMPTY"),
-            srid or 0,
-        )
-        geometry_union = F.coalesce(
-            sta.ST_Union_Aggr(F.col(geometry_input_name)),
-            empty_geometry,
-        )
+        geometry_union = sta.ST_Union_Aggr(F.col(geometry_input_name))
+        if hasattr(gpd.GeoSeries, "union_all"):
+            # GeoPandas 1.0 changed an all-null union from None to an empty
+            # GeometryCollection. Preserve its CRS in that representation.
+            empty_geometry = stc.ST_GeomFromWKT(
+                F.lit("GEOMETRYCOLLECTION EMPTY"),
+                srid or 0,
+            )
+            geometry_union = F.coalesce(geometry_union, empty_geometry)
         aggregated_sdf = aggregation_input.groupBy(*group_column_names).agg(
             geometry_union.alias(geometry_output_name),
             F.min(F.col(order_input_name)).alias(order_output_spark_name),
