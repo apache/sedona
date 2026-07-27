@@ -108,6 +108,18 @@ class TestDistributedSpatialSubsetting(TestGeopandasBase):
         with pytest.raises(TypeError, match="numeric"):
             source.cx["left":"right", :]
 
+    def test_cx_all_null_series_preserves_crs(self):
+        expected_source = gpd.GeoSeries([None], name="shape", crs=4326)
+        source = GeoSeries([None], name="shape", crs=4326)
+
+        result = source.cx[0:1, 0:1]
+        expected = expected_source.cx[0:1, 0:1]
+
+        self.check_sgpd_equals_gpd(result, expected)
+        assert len(result) == 0
+        assert source.crs == expected_source.crs
+        assert result.crs == expected.crs
+
     def test_cx_geodataframe_preserves_columns_active_geometry_and_crs(self):
         index = pd.MultiIndex.from_tuples(
             [("b", 2), ("a", 2), ("a", 1)], names=["group", "position"]
@@ -223,6 +235,18 @@ class TestDistributedSpatialSubsetting(TestGeopandasBase):
         assert len(empty_frame) == 0
         assert empty_frame.crs == expected_source.crs
         assert empty_frame.active_geometry_name == "geometry"
+
+    def test_clip_all_null_series_preserves_crs(self):
+        expected_source = gpd.GeoSeries([None], name="shape", crs=4326)
+        source = GeoSeries([None], name="shape", crs=4326)
+
+        result = source.clip(box(0, 0, 1, 1))
+        expected = expected_source.clip(box(0, 0, 1, 1))
+
+        self.check_sgpd_equals_gpd(result, expected)
+        assert len(result) == 0
+        assert source.crs == expected_source.crs
+        assert result.crs == expected.crs
 
     def test_clip_geodataframe_preserves_index_columns_and_active_geometry(self):
         index = pd.MultiIndex.from_tuples(
