@@ -75,6 +75,36 @@ class TestGeometryAggregation(TestGeopandasBase):
         )
         assert [row.srid for row in srids] == [3857]
 
+    def test_dissolve_series_grouper_retains_data_column(self):
+        local = gpd.GeoDataFrame(
+            {
+                "zone": ["a", "a", "b"],
+                "label": ["first-a", "second-a", "only-b"],
+                "value": [1, 2, 3],
+                "geometry": [Point(0, 0), Point(1, 1), Point(2, 2)],
+            },
+            crs="EPSG:4326",
+        )
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            source = GeoDataFrame(local)
+
+        label_result = source.dissolve(by="zone")
+        series_result = source.dissolve(by=source["zone"])
+        expected = local.dissolve(by=local["zone"])
+
+        assert "zone" not in label_result.columns
+        assert list(series_result.columns) == [
+            "geometry",
+            "zone",
+            "label",
+            "value",
+        ]
+        collected = series_result.to_geopandas()
+        assert collected.loc["a", "zone"] == "a"
+        assert collected.loc["a", "label"] == "first-a"
+        assert collected.loc["a", "value"] == 1
+        self.check_sgpd_df_equals_gpd_df(series_result, expected)
+
     def test_dissolve_all_rows_and_as_index_false(self):
         data = {
             "label": ["first", "second"],

@@ -1728,8 +1728,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             group_fields.append(None)
             group_index_names.append(None)
         else:
+            groupers_are_column_labels = True
             if isinstance(by, PandasOnSparkSeries):
                 groupers = [by]
+                groupers_are_column_labels = False
                 if by._psdf is not self:
                     raise NotImplementedError(
                         "Sedona dissolve requires Series groupers to come from "
@@ -1774,7 +1776,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 )
                 group_fields.append(internal.field_for(grouper._column_label))
                 group_index_names.append(grouper._column_label)
-                grouped_column_labels.append(grouper._column_label)
+                if groupers_are_column_labels:
+                    grouped_column_labels.append(grouper._column_label)
 
         if not group_expressions:
             raise ValueError("No group keys passed")
