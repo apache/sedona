@@ -75,6 +75,27 @@ class TestGeometryAggregation(TestGeopandasBase):
         )
         assert [row.srid for row in srids] == [3857]
 
+    def test_dissolve_all_null_geometry_preserves_crs_and_srid(self):
+        expected_source = gpd.GeoDataFrame(
+            {
+                "zone": ["a", "a"],
+                "geometry": [None, None],
+            },
+            crs="EPSG:4326",
+        )
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            source = GeoDataFrame(expected_source)
+
+        result = source.dissolve("zone")
+        expected = expected_source.dissolve("zone")
+
+        self.check_sgpd_df_equals_gpd_df(result, expected)
+        assert result.crs == expected.crs
+        srids = result.geometry._internal.spark_frame.select(
+            stf.ST_SRID(result.geometry.spark.column).alias("srid")
+        ).collect()
+        assert [row.srid for row in srids] == [4326]
+
     def test_dissolve_series_grouper_retains_data_column(self):
         local = gpd.GeoDataFrame(
             {

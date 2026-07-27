@@ -140,6 +140,24 @@ def _not_implemented_error(method_name: str, additional_info: str = "") -> str:
     return base_message + workaround
 
 
+def _dissolve_crs_with_metadata_fallback(geometry):
+    """Return CRS metadata even when every geometry value is null."""
+
+    crs = geometry.crs
+    if crs is not None:
+        return crs
+
+    source = geometry
+    seen = set()
+    while source is not None and id(source) not in seen:
+        seen.add(id(source))
+        crs = getattr(source, "_empty_crs_value", None)
+        if crs is not None:
+            return crs
+        source = getattr(source, "_empty_crs_source", None)
+    return None
+
+
 def _normalize_dissolve_aggfunc(aggfunc):
     """Translate explicitly supported callables to native aggregate names."""
 
@@ -1935,7 +1953,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         # CRS lookup is eager. Keep it after all aggregation validation so
         # unsupported function/dtype combinations fail before Spark executes.
-        crs = self.crs
+        crs = _dissolve_crs_with_metadata_fallback(self.geometry)
         srid = crs.to_epsg() if crs is not None else 0
         empty_geometry = stc.ST_GeomFromWKT(
             F.lit("GEOMETRYCOLLECTION EMPTY"),
