@@ -159,8 +159,18 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   }
 
   @Test
+  public void testProjJsonRoundTrip_Geographic_NAD27_4267() throws FactoryException {
+    assertProjJsonRoundTrip(4267);
+  }
+
+  @Test
   public void testProjJsonRoundTrip_TransverseMercator_32617() throws FactoryException {
     assertProjJsonRoundTrip(32617);
+  }
+
+  @Test
+  public void testProjJsonRoundTrip_TransverseMercator_NAD27_26711() throws FactoryException {
+    assertProjJsonRoundTrip(26711);
   }
 
   @Test
@@ -362,8 +372,18 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   }
 
   @Test
+  public void testWkt2RoundTrip_Geographic_NAD27_4267() throws FactoryException {
+    assertWkt2RoundTrip(4267);
+  }
+
+  @Test
   public void testWkt2RoundTrip_TransverseMercator_32617() throws FactoryException {
     assertWkt2RoundTrip(32617);
+  }
+
+  @Test
+  public void testWkt2RoundTrip_TransverseMercator_NAD27_26711() throws FactoryException {
+    assertWkt2RoundTrip(26711);
   }
 
   @Test
@@ -534,6 +554,10 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
     // First export from EPSG
     String export1 = RasterAccessors.crs(raster1, "projjson");
     assertNotNull("EPSG:" + epsg + " export to PROJJSON should not be null", export1);
+    assertEquals(
+        "EPSG:" + epsg + " default CRS export should equal explicit PROJJSON",
+        export1,
+        RasterAccessors.crs(raster1));
 
     // Re-import from PROJJSON string and re-export
     GridCoverage2D raster2 = RasterEditors.setCrs(baseRaster, export1);
