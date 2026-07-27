@@ -237,6 +237,36 @@ intersects_result = left_df.sjoin(right_df, predicate="intersects")
 contains_result = left_df.sjoin(right_df, predicate="contains")
 ```
 
+### Nearest-Neighbor Joins
+
+`sjoin_nearest()` uses Sedona's distributed KNN join plan, so geometry rows are
+not collected to the driver. It supports `inner`, `left`, and `right` results;
+left and right joins retain unmatched rows from their respective side while
+nearest matching remains distributed.
+
+```python
+nearest = left_df.sjoin_nearest(
+    right_df,
+    how="left",
+    max_distance=500,
+    distance_col="distance",
+    exclusive=True,
+)
+```
+
+Every candidate tied at the nearest distance is returned. `max_distance`
+limits eligible matches, but it is currently applied after nearest candidates
+are found and does not prune the distributed KNN search. `exclusive=True`
+excludes candidates topologically equal to the query geometry before ranking.
+Distances are planar and use CRS units; geographic CRS inputs emit a warning
+because their distance results may be inaccurate.
+
+For inputs with MultiIndex columns or tuple-valued index names, the result uses
+a padded MultiIndex when needed. This is the pandas-on-Spark representation of
+GeoPandas' mixed tuple-and-string object column index, which pandas-on-Spark
+cannot represent directly. The operation rejects suffixing or padding
+combinations that would create duplicate labels.
+
 ### Coordinate Reference System Operations
 
 Transform geometries between different coordinate reference systems:
@@ -296,7 +326,7 @@ buildings_projected["perimeter"] = buildings_projected.geometry.length
 
 ## Supported Operations
 
-The GeoPandas API for Apache Sedona has implemented **39 GeoSeries functions** and **10 GeoDataFrame functions**, covering the most commonly used GeoPandas operations:
+The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries and GeoDataFrame operations:
 
 ### Data I/O
 
@@ -307,6 +337,7 @@ The GeoPandas API for Apache Sedona has implemented **39 GeoSeries functions** a
 ### Spatial Operations
 
 - `sjoin()` - Spatial joins with various predicates
+- `sjoin_nearest()` - Distributed nearest-neighbor joins
 - `buffer()` - Geometric buffering
 - `distance()` - Distance calculations
 - `intersects()`, `contains()`, `within()` - Spatial predicates

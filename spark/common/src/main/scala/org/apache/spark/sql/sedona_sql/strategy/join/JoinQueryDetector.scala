@@ -627,7 +627,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   rightShape,
                   spatialPredicate = SpatialPredicate.KNN,
                   isGeography = false,
-                  condition,
+                  extraCondition,
                   Some(k)))
 
             case ST_KNN(Seq(leftShape, rightShape, k, useSpheroid)) =>
@@ -640,7 +640,31 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
                   rightShape,
                   spatialPredicate = SpatialPredicate.KNN,
                   isGeography = useSpheroidUnwrapped,
-                  condition,
+                  extraCondition,
+                  Some(k)))
+            case ST_KNN(Seq(leftShape, rightShape, k, useSpheroid, _)) =>
+              val useSpheroidUnwrapped = useSpheroid.eval().asInstanceOf[Boolean]
+              Some(
+                JoinQueryDetection(
+                  left,
+                  right,
+                  leftShape,
+                  rightShape,
+                  spatialPredicate = SpatialPredicate.KNN,
+                  isGeography = useSpheroidUnwrapped,
+                  extraCondition,
+                  Some(k)))
+            case ST_KNN(Seq(leftShape, rightShape, k, useSpheroid, _, _)) =>
+              val useSpheroidUnwrapped = useSpheroid.eval().asInstanceOf[Boolean]
+              Some(
+                JoinQueryDetection(
+                  left,
+                  right,
+                  leftShape,
+                  rightShape,
+                  spatialPredicate = SpatialPredicate.KNN,
+                  isGeography = useSpheroidUnwrapped,
+                  extraCondition,
                   Some(k)))
 
             case _ => None
@@ -665,7 +689,8 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
               detection.isGeography,
               detection.extraCondition,
               detection.distance,
-              detection.geographyShape)
+              detection.geographyShape,
+              condition)
           case _ =>
             Nil
         }
@@ -831,6 +856,7 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
 
     logInfo(
       "Planning knn join, left side is for queries and right size is for the object to be searched")
+    val options = extractKNNOptions(condition)
     KNNJoinExec(
       planLater(left),
       planLater(right),
@@ -841,7 +867,9 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
       spatialPredicate = null,
       isGeography,
       condition,
-      extractExtraKNNJoinCondition(condition)) :: Nil
+      extraCondition,
+      options.includeTies,
+      options.exclusive) :: Nil
   }
 
   private def planDistanceJoin(
@@ -903,22 +931,39 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
     }
   }
 
-  private def extractExtraKNNJoinCondition(condition: Expression): Option[Expression] = {
-    condition match {
-      case and: And =>
-        // Check both left and right sides for ST_KNN or ST_AKNN
-        if (and.left.isInstanceOf[ST_KNN]) {
-          Some(and.right)
-        } else if (and.right.isInstanceOf[ST_KNN]) {
-          Some(and.left)
-        } else {
-          None
-        }
-      case _: ST_KNN =>
-        None
-      case _ =>
-        Some(condition)
+  private case class KNNOptions(includeTies: Option[Boolean] = None, exclusive: Boolean = false)
+
+  private def extractKNNOptions(condition: Expression): KNNOptions = {
+    val knn = findKNNExpression(condition).getOrElse(
+      throw new IllegalArgumentException("KNN join condition does not contain ST_KNN"))
+    knn.inputExpressions match {
+      case Seq(_, _, _) | Seq(_, _, _, _) =>
+        KNNOptions()
+      case Seq(_, _, _, _, includeTies) =>
+        KNNOptions(includeTies = Some(evalKNNBoolean(includeTies, "includeTies")))
+      case Seq(_, _, _, _, includeTies, exclusive) =>
+        KNNOptions(
+          includeTies = Some(evalKNNBoolean(includeTies, "includeTies")),
+          exclusive = evalKNNBoolean(exclusive, "exclusive"))
+      case expressions =>
+        throw new IllegalArgumentException(
+          s"ST_KNN expects between 3 and 6 arguments, got ${expressions.size}")
     }
+  }
+
+  private def findKNNExpression(expression: Expression): Option[ST_KNN] =
+    expression match {
+      case knn: ST_KNN => Some(knn)
+      case And(left, right) =>
+        findKNNExpression(left).orElse(findKNNExpression(right))
+      case _ => None
+    }
+
+  private def evalKNNBoolean(expression: Expression, name: String): Boolean = {
+    require(expression.foldable, s"ST_KNN $name must be a constant boolean")
+    val value = expression.eval()
+    require(value != null, s"ST_KNN $name must not be null")
+    value.asInstanceOf[Boolean]
   }
 
   private def planBroadcastJoin(
@@ -933,7 +978,8 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
       isGeography: Boolean,
       extraCondition: Option[Expression],
       distance: Option[Expression],
-      geographyShape: Boolean = false): Seq[SparkPlan] = {
+      geographyShape: Boolean = false,
+      condition: Option[Expression] = None): Seq[SparkPlan] = {
 
     val broadcastSide = joinType match {
       case Inner if broadcastLeft => Some(LeftSide)
@@ -951,6 +997,8 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
 
     if (spatialPredicate == SpatialPredicate.KNN) {
       {
+        val knnCondition = condition.get
+        val options = extractKNNOptions(knnCondition)
         // validate the k value for KNN join
         val kValue: Int = distance.get.eval().asInstanceOf[Int]
         require(kValue >= 1, "The number of neighbors (k) must be equal or greater than 1.")
@@ -980,7 +1028,9 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
             spatialPredicate,
             isGeography,
             condition = null,
-            extraCondition = None) :: Nil
+            extraCondition = extraCondition,
+            includeTies = options.includeTies,
+            exclusive = options.exclusive) :: Nil
         } else {
           // broadcast is on object side
           return BroadcastObjectSideKNNJoinExec(
@@ -995,7 +1045,9 @@ class JoinQueryDetector(sparkSession: SparkSession) extends SparkStrategy {
             spatialPredicate,
             isGeography,
             condition = null,
-            extraCondition = None) :: Nil
+            extraCondition = extraCondition,
+            includeTies = options.includeTies,
+            exclusive = options.exclusive) :: Nil
         }
       }
     }

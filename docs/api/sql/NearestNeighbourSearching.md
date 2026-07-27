@@ -24,21 +24,43 @@ Sedona supports nearest-neighbour searching on geospatial data by providing a ge
 
 Introduction: join operation to find the k-nearest neighbors of a point or region in a spatial dataset.
 
-Format: `ST_KNN(R: Table, S: Table, k: Integer, use_spheroid: Boolean)`
+Formats:
 
-Where R is the queries side table and S is the object side table, K is the number of neighbors. use_spheroid is a boolean value that determines whether to use the spheroid distance or not.
+```sql
+ST_KNN(query_geometry, object_geometry, k)
+ST_KNN(query_geometry, object_geometry, k, use_spheroid)
+ST_KNN(query_geometry, object_geometry, k, use_spheroid, include_ties)
+ST_KNN(query_geometry, object_geometry, k, use_spheroid, include_ties, exclusive)
+```
+
+`query_geometry` belongs to the query-side table, `object_geometry` belongs to
+the candidate-side table, and `k` is the number of neighbours. `use_spheroid`
+selects spheroid distance instead of planar distance.
+
+The optional `include_ties` argument controls ties for this query. It overrides
+the `spark.sedona.join.knn.includeTieBreakers` session setting when supplied.
+The optional `exclusive` argument excludes candidates that are topologically
+equal to the query geometry before nearest neighbours are ranked. For example,
+the two line strings `LINESTRING (0 0, 1 0)` and
+`LINESTRING (1 0, 0 0)` are equal and are excluded from one another by
+`exclusive = true`.
+
+The three- and four-argument forms retain their existing behavior. To use
+`exclusive`, both query-local Boolean arguments must be supplied.
 
 Queries side table contains geometries that are used to find the k-nearest neighbors in the object side table.
 
 When either queries or objects data contain non-point data (geometries), we take the centroid of each geometry.
 
-In case there are ties in the distance, the result will include all the tied geometries only when the following sedona config is set to true:
+With the three- or four-argument form, tied geometries are included only when
+the following Sedona configuration is set to true:
 
 **Note for Inner Join:**
 
 - The `ST_KNN` join only supports left inner join.
 - It returns only pairs where there is at least one matching neighbor within the k nearest neighbors.
 - If a query point has no valid neighbor (e.g., because k is too large), it is excluded from the result.
+- Null and empty geometries do not participate in a match.
 
 ```
 spark.sedona.join.knn.includeTieBreakers=true

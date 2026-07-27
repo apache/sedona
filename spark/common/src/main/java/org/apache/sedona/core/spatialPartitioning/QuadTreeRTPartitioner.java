@@ -69,7 +69,17 @@ public class QuadTreeRTPartitioner extends QuadTreePartitioner {
   }
 
   public QuadTreeRTPartitioner nonOverlappedPartitioner() {
-    ExtendedQuadTree<Integer> nonOverlappedTree = new ExtendedQuadTree<>(extendedQuadTree, true);
+    return nonOverlappedPartitioner(false);
+  }
+
+  /**
+   * Returns a query-side partitioner over the original cells.
+   *
+   * @param useFullGeometry whether non-point geometries are routed to every cell they intersect
+   */
+  public QuadTreeRTPartitioner nonOverlappedPartitioner(boolean useFullGeometry) {
+    ExtendedQuadTree<Integer> nonOverlappedTree =
+        new ExtendedQuadTree<>(extendedQuadTree, true, useFullGeometry);
     return new QuadTreeRTPartitioner(nonOverlappedTree);
   }
 

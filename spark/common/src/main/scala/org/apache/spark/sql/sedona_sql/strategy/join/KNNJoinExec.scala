@@ -70,7 +70,9 @@ case class KNNJoinExec(
     spatialPredicate: SpatialPredicate,
     isGeography: Boolean,
     condition: Expression,
-    extraCondition: Option[Expression] = None)
+    extraCondition: Option[Expression] = None,
+    includeTies: Option[Boolean] = None,
+    exclusive: Boolean = false)
     extends SedonaBinaryExecNode
     with TraitKNNJoinQueryExec
     with Logging {
@@ -109,7 +111,7 @@ case class KNNJoinExec(
       rdd: RDD[UnsafeRow],
       shapeExpression: Expression,
       projection: Option[Seq[Expression]] = None): SpatialRDD[Geometry] = {
-    toSpatialRDD(rdd, shapeExpression)
+    toKNNSpatialRDD(rdd, shapeExpression)
   }
 
   /**
@@ -126,7 +128,7 @@ case class KNNJoinExec(
       rdd: RDD[UnsafeRow],
       shapeExpression: Expression,
       projection: Option[Seq[Expression]] = None): SpatialRDD[Geometry] = {
-    toSpatialRDD(rdd, shapeExpression)
+    toKNNSpatialRDD(rdd, shapeExpression)
   }
 
   /**
@@ -163,10 +165,19 @@ case class KNNJoinExec(
     require(numPartitions > 0, "The number of partitions must be greater than 0.")
     val kValue: Int = this.k.eval().asInstanceOf[Int]
     require(kValue >= 1, "The number of neighbors (k) must be equal or greater than 1.")
-    objectsShapes.setNeighborSampleNumber(kValue)
+    objectsShapes.setNeighborSampleNumber(if (exclusive) kValue + 1 else kValue)
+    objectsShapes.setUseKnnSamples(useAccurateRegularKnn)
+    objectsShapes.setUseAccurateKnnPartitioning(useAccurateRegularKnn)
+    objectsShapes.setDeduplicateKnnSamples(exclusive)
 
     exactSpatialPartitioning(objectsShapes, queryShapes, numPartitions)
   }
+
+  /**
+   * The planar five- and six-argument forms opt into globally reconciled regular-plan results.
+   * Legacy and geography forms retain their historical centroid routing.
+   */
+  override protected def useAccurateRegularKnn: Boolean = useQueryLocalTieSemantics
 
   /**
    * Exact spatial partitioning for KNN join
@@ -179,10 +190,6 @@ case class KNNJoinExec(
       dominantShapes: SpatialRDD[Geometry],
       followerShapes: SpatialRDD[Geometry],
       numPartitions: Integer): Unit = {
-    // analyze the both RDDs to get the statistics (e.g., boundary)
-    dominantShapes.analyze()
-    followerShapes.analyze()
-
     // expand the boundary for partition to include both RDDs
     dominantShapes.boundaryEnvelope.expandToInclude(followerShapes.boundaryEnvelope)
 
@@ -191,7 +198,7 @@ case class KNNJoinExec(
     followerShapes.spatialPartitioning(
       dominantShapes.getPartitioner
         .asInstanceOf[QuadTreeRTPartitioner]
-        .nonOverlappedPartitioner())
+        .nonOverlappedPartitioner(useAccurateRegularKnn))
 
     dominantShapes.buildIndex(IndexType.RTREE, true)
   }

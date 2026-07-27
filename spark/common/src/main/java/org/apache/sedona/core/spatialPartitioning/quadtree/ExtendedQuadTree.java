@@ -62,6 +62,8 @@ public class ExtendedQuadTree<T> extends PartitioningUtils implements Serializab
   private STRtree spatialExpandedBoundaryIndex;
 
   private boolean useNonOverlapped = false;
+  private boolean useFullGeometry = false;
+  private boolean useAccurateKnnPartitioning = false;
 
   public HashMap<Integer, List<Envelope>> getExpandedBoundaries() {
     return expandedBoundaries;
@@ -89,12 +91,26 @@ public class ExtendedQuadTree<T> extends PartitioningUtils implements Serializab
    * @param useNonOverlapped
    */
   public ExtendedQuadTree(ExtendedQuadTree<?> extendedQuadTree, boolean useNonOverlapped) {
+    this(extendedQuadTree, useNonOverlapped, false);
+  }
+
+  /**
+   * Constructor to initialize the partitions list with non-overlapped boundaries.
+   *
+   * @param extendedQuadTree source tree
+   * @param useNonOverlapped whether original non-overlapped boundaries are used
+   * @param useFullGeometry whether a geometry is routed to every base cell it intersects
+   */
+  public ExtendedQuadTree(
+      ExtendedQuadTree<?> extendedQuadTree, boolean useNonOverlapped, boolean useFullGeometry) {
     this.boundary = extendedQuadTree.boundary;
     this.numPartitions = extendedQuadTree.numPartitions;
     this.expandedBoundaries = extendedQuadTree.expandedBoundaries;
     this.spatialExpandedBoundaryIndex = extendedQuadTree.spatialExpandedBoundaryIndex;
     this.partitionTree = extendedQuadTree.partitionTree;
     this.useNonOverlapped = useNonOverlapped;
+    this.useFullGeometry = useFullGeometry;
+    this.useAccurateKnnPartitioning = extendedQuadTree.useAccurateKnnPartitioning;
   }
 
   /**
@@ -136,6 +152,10 @@ public class ExtendedQuadTree<T> extends PartitioningUtils implements Serializab
     if (useNonOverlapped) {
       Objects.requireNonNull(geometry, "spatialObject");
 
+      if (useFullGeometry && !(geometry instanceof Point)) {
+        return placeFullGeometry(geometry);
+      }
+
       // KNN join uses geometry's centroid to calculate the distance
       final Envelope envelope = geometry.getCentroid().getEnvelopeInternal();
 
@@ -165,7 +185,10 @@ public class ExtendedQuadTree<T> extends PartitioningUtils implements Serializab
       Envelope objectEnvelope = geometry.getEnvelopeInternal();
 
       // Query the spatial index for intersecting envelopes
-      List<Integer> intersectingIds = spatialExpandedBoundaryIndex.query(objectEnvelope);
+      Collection<Integer> intersectingIds = spatialExpandedBoundaryIndex.query(objectEnvelope);
+      if (useAccurateKnnPartitioning) {
+        intersectingIds = new LinkedHashSet<>(intersectingIds);
+      }
 
       for (Integer partitionId : intersectingIds) {
         result.add(new Tuple2<>(partitionId, geometry));
@@ -173,6 +196,52 @@ public class ExtendedQuadTree<T> extends PartitioningUtils implements Serializab
 
       return result.iterator();
     }
+  }
+
+  /**
+   * Routes a non-point query to each original quadtree cell that the geometry intersects.
+   *
+   * <p>The local KNN candidates from these cells are merged globally by query row identity. Using
+   * exact geometry/cell intersection avoids replicating a sparse line to every cell in its
+   * envelope. If a topology predicate cannot be evaluated, envelope routing is used as a safe
+   * fallback.
+   */
+  private Iterator<Tuple2<Integer, Geometry>> placeFullGeometry(Geometry geometry) {
+    final Set<Integer> partitionIds = getFullGeometryPartitionIds(geometry);
+    final List<Tuple2<Integer, Geometry>> result = new ArrayList<>(partitionIds.size());
+    for (Integer partitionId : partitionIds) {
+      result.add(new Tuple2<>(partitionId, geometry));
+    }
+    return result.iterator();
+  }
+
+  private Set<Integer> getFullGeometryPartitionIds(Geometry geometry) {
+    final List<QuadRectangle> matchedPartitions =
+        this.partitionTree.findZones(new QuadRectangle(geometry.getEnvelopeInternal()));
+    final Set<Integer> result = new LinkedHashSet<>();
+
+    try {
+      for (QuadRectangle rectangle : matchedPartitions) {
+        Geometry cell = geometry.getFactory().toGeometry(rectangle.getEnvelope());
+        if (geometry.intersects(cell)) {
+          result.add(rectangle.partitionId);
+        }
+      }
+    } catch (RuntimeException e) {
+      result.clear();
+      for (QuadRectangle rectangle : matchedPartitions) {
+        result.add(rectangle.partitionId);
+      }
+    }
+
+    // A non-empty geometry inside the global boundary should intersect at least one cell. Retain
+    // envelope matches if numerical precision at a cell edge produces no exact match.
+    if (result.isEmpty()) {
+      for (QuadRectangle rectangle : matchedPartitions) {
+        result.add(rectangle.partitionId);
+      }
+    }
+    return result;
   }
 
   /**
@@ -185,10 +254,15 @@ public class ExtendedQuadTree<T> extends PartitioningUtils implements Serializab
    */
   @Override
   public Set<Integer> getKeys(Geometry geometry) {
-    if (!useNonOverlapped) {
+    if (useAccurateKnnPartitioning && useNonOverlapped) {
+      Objects.requireNonNull(geometry, "spatialObject");
+      if (useFullGeometry && !(geometry instanceof Point)) {
+        return getFullGeometryPartitionIds(geometry);
+      }
+
       // knn join uses the centroid of the geometry
       return partitionTree.getKeys(geometry.getCentroid());
-    } else {
+    } else if (useAccurateKnnPartitioning) {
       // use the expanded boundaries
       Set<Integer> keys = new HashSet<>();
       Envelope objectEnvelope = geometry.getEnvelopeInternal();
@@ -198,6 +272,13 @@ public class ExtendedQuadTree<T> extends PartitioningUtils implements Serializab
 
       keys.addAll(intersectingIds);
 
+      return keys;
+    } else if (!useNonOverlapped) {
+      // Preserve the historical routing exposed by getKeys for legacy KNN partitioners.
+      return partitionTree.getKeys(geometry.getCentroid());
+    } else {
+      Set<Integer> keys = new HashSet<>();
+      keys.addAll(spatialExpandedBoundaryIndex.query(geometry.getEnvelopeInternal()));
       return keys;
     }
   }
@@ -223,6 +304,47 @@ public class ExtendedQuadTree<T> extends PartitioningUtils implements Serializab
    *     tree.
    */
   public void build(int neighborSampleNumber) throws Exception {
+    build(neighborSampleNumber, false);
+  }
+
+  /**
+   * Builds the partitioning tree and optionally counts identical sample envelopes once when
+   * deriving KNN distance bounds.
+   *
+   * @param neighborSampleNumber the number of neighbour samples
+   * @param deduplicateKnnSamples whether identical sample envelopes count once
+   */
+  public void build(int neighborSampleNumber, boolean deduplicateKnnSamples) throws Exception {
+    build(neighborSampleNumber, deduplicateKnnSamples, deduplicateKnnSamples, false);
+  }
+
+  /**
+   * Builds the partitioner and controls sample-driven KNN distance bounds independently from sample
+   * deduplication.
+   *
+   * @param neighborSampleNumber the number of neighbour samples
+   * @param deduplicateKnnSamples whether identical sample envelopes count once
+   * @param useKnnSamples whether samples are used and insufficient samples trigger a safe fallback
+   */
+  public void build(int neighborSampleNumber, boolean deduplicateKnnSamples, boolean useKnnSamples)
+      throws Exception {
+    build(neighborSampleNumber, deduplicateKnnSamples, useKnnSamples, useKnnSamples);
+  }
+
+  /**
+   * Builds the partitioner and independently gates the new accurate planar placement behavior.
+   *
+   * @param neighborSampleNumber the number of neighbour samples
+   * @param deduplicateKnnSamples whether identical sample envelopes count once
+   * @param useKnnSamples whether samples are used and insufficient samples trigger a safe fallback
+   * @param useAccurateKnnPartitioning whether to use exact bounds and replica-safe placement
+   */
+  public void build(
+      int neighborSampleNumber,
+      boolean deduplicateKnnSamples,
+      boolean useKnnSamples,
+      boolean useAccurateKnnPartitioning)
+      throws Exception {
     // Force the quad-tree to grow up to a certain level
     // So the actual num of partitions might be slightly different
     int minLevel = (int) Math.max(Math.log(numPartitions) / Math.log(4), 0);
@@ -231,9 +353,15 @@ public class ExtendedQuadTree<T> extends PartitioningUtils implements Serializab
     partitionTree = quadTreeRTPartitioning.getPartitionTree();
 
     // Create the expanded boundaries
-    quadTreeRTPartitioning.buildSTRTree(samples, neighborSampleNumber);
+    quadTreeRTPartitioning.buildSTRTree(
+        samples,
+        neighborSampleNumber,
+        deduplicateKnnSamples,
+        useKnnSamples,
+        useAccurateKnnPartitioning);
     expandedBoundaries = quadTreeRTPartitioning.getMbrs();
     spatialExpandedBoundaryIndex = quadTreeRTPartitioning.getMbrSpatialIndex();
+    this.useAccurateKnnPartitioning = useAccurateKnnPartitioning;
 
     // Make sure not to broadcast all the samples used to build the Quad
     // tree to all nodes which are doing partitioning

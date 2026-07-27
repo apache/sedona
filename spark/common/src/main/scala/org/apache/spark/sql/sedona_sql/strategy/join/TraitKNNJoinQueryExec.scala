@@ -22,7 +22,9 @@ import org.apache.commons.lang3.Range
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialOperator.JoinQuery.JoinParams
 import org.apache.sedona.core.spatialPartitioning.{QuadTreeRTPartitioner, SpatialPartitioner}
+import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.SedonaConf
+import org.apache.sedona.core.wrapper.KnnGeometryMetadata
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
@@ -48,6 +50,12 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
 
   protected var broadcastJoin: Boolean = false
   protected var querySide: JoinSide = null
+  def includeTies: Option[Boolean]
+  def exclusive: Boolean
+  def isGeography: Boolean
+  protected def useAccurateRegularKnn: Boolean = false
+  protected def useQueryLocalTieSemantics: Boolean =
+    includeTies.isDefined && !isGeography
 
   private lazy val sedonaConf = SedonaConf.fromActiveSession
   override lazy val metrics: Map[String, SQLMetric] = Map.empty
@@ -91,7 +99,16 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
     val (queryShapes, objectShapes) =
       toSpatialRddPair(queryResultsRaw, boundQueryShape, objectResultsRaw, boundObjectShape)
 
+    if (useQueryLocalTieSemantics) {
+      ensureStableRowIds(queryShapes)
+      ensureStableRowIds(objectShapes)
+    }
+
     objectShapes.analyze()
+    queryShapes.analyze()
+    if (objectShapes.approximateTotalCount == 0 || queryShapes.approximateTotalCount == 0) {
+      return joinedRddToRowRdd(sparkContext.emptyRDD[(Geometry, Geometry)], swapped)
+    }
     log.info(
       "[SedonaSQL] Number of partitions on the objectShapes (right): " + objectResultsRaw.partitions.size)
 
@@ -132,8 +149,11 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
                 queryShapes,
                 objectShapes,
                 joinParams,
-                sedonaConf.isIncludeTieBreakersInKNNJoins,
-                broadcastJoin)
+                includeTies.getOrElse(sedonaConf.isIncludeTieBreakersInKNNJoins),
+                exclusive,
+                broadcastJoin,
+                useAccurateRegularKnn,
+                useQueryLocalTieSemantics)
               .rdd
           } else {
             sparkContext.parallelize(Seq[(Geometry, Geometry)]())
@@ -144,13 +164,51 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
               queryShapes,
               objectShapes,
               joinParams,
-              sedonaConf.isIncludeTieBreakersInKNNJoins,
-              broadcastJoin)
+              includeTies.getOrElse(sedonaConf.isIncludeTieBreakersInKNNJoins),
+              exclusive,
+              broadcastJoin,
+              useAccurateRegularKnn,
+              useQueryLocalTieSemantics)
             .rdd
       }
 
     // Convert the matchesRDD to RowRDD
     joinedRddToRowRdd(matchesRDD, swapped)
+  }
+
+  /**
+   * Converts rows to KNN shapes while dropping null and empty geometries. Such rows cannot
+   * participate in an inner KNN match, and removing them lets the executor detect an empty
+   * query/candidate side before attempting spatial partitioning.
+   */
+  protected def toKNNSpatialRDD(
+      rdd: RDD[UnsafeRow],
+      shapeExpression: Expression): SpatialRDD[Geometry] = {
+    val spatialRdd = new SpatialRDD[Geometry]
+    spatialRdd.setRawSpatialRDD(
+      rdd
+        .flatMap { row =>
+          val shape = TraitJoinQueryBase.shapeToGeometry(shapeExpression, row)
+          if (shape == null || shape.isEmpty) {
+            None
+          } else {
+            shape.setUserData(row.copy)
+            Some(shape)
+          }
+        }
+        .toJavaRDD())
+    spatialRdd
+  }
+
+  private def ensureStableRowIds(spatialRdd: SpatialRDD[Geometry]): Unit = {
+    spatialRdd.setRawSpatialRDD(
+      spatialRdd.rawSpatialRDD.rdd
+        .zipWithUniqueId()
+        .map { case (geometry, uniqueId) =>
+          geometry.setUserData(KnnGeometryMetadata.wrap(uniqueId, geometry.getUserData))
+          geometry
+        }
+        .toJavaRDD())
   }
 
   def knnJoinPartitionNumOptimizer(
@@ -228,8 +286,8 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
       }
 
       val joined = iter.map { case (l, r) =>
-        val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
-        val rightRow = r.getUserData.asInstanceOf[UnsafeRow]
+        val leftRow = getOriginalRow(l)
+        val rightRow = getOriginalRow(r)
         if (swapped)
           joinRow(rightRow, leftRow)
         else
@@ -245,6 +303,25 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
       }
     }
   }
+
+  private def getOriginalRow(geometry: Geometry): UnsafeRow = {
+    geometry.getUserData match {
+      case metadata: KnnGeometryMetadata =>
+        metadata.getOriginalUserData match {
+          case row: UnsafeRow => row
+          case other =>
+            throw new IllegalStateException(
+              s"KNN stable row metadata must wrap UnsafeRow, found ${userDataType(other)}")
+        }
+      case row: UnsafeRow => row
+      case other =>
+        throw new IllegalStateException(
+          s"KNN geometry must carry UnsafeRow user data, found ${userDataType(other)}")
+    }
+  }
+
+  private def userDataType(userData: Any): String =
+    if (userData == null) "null" else userData.getClass.getName
 
   private def saveKNNPartitionerToFile(
       partitioner: SpatialPartitioner,

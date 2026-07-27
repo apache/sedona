@@ -101,6 +101,15 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   /** The neighbor sample number. */
   private int neighborSampleNumber = -1;
 
+  /** Whether KNN distance-bound samples with identical envelopes should be counted once. */
+  private boolean deduplicateKnnSamples = false;
+
+  /** Whether sampled object envelopes should be used to derive KNN partition distance bounds. */
+  private boolean useKnnSamples = false;
+
+  /** Whether the new exact planar KNN partitioning and replica handling should be used. */
+  private boolean useAccurateKnnPartitioning = false;
+
   public int getSampleNumber() {
     return sampleNumber;
   }
@@ -121,6 +130,37 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
    */
   public void setNeighborSampleNumber(int neighborSampleNumber) {
     this.neighborSampleNumber = neighborSampleNumber;
+  }
+
+  /**
+   * Controls whether equal sample envelopes are counted once when deriving KNN partition bounds.
+   *
+   * <p>Exclusive KNN joins need this so an arbitrary number of geometries equal to a query cannot
+   * consume every neighbour sample and hide the next non-equal candidate outside the expanded
+   * partition.
+   *
+   * @param deduplicateKnnSamples whether to deduplicate sample envelopes
+   */
+  public void setDeduplicateKnnSamples(boolean deduplicateKnnSamples) {
+    this.deduplicateKnnSamples = deduplicateKnnSamples;
+  }
+
+  /**
+   * Controls whether object samples are used to derive safe KNN partition distance bounds.
+   *
+   * @param useKnnSamples whether to use sampled object envelopes
+   */
+  public void setUseKnnSamples(boolean useKnnSamples) {
+    this.useKnnSamples = useKnnSamples;
+  }
+
+  /**
+   * Controls exact bounds and replica-safe placement for planar query-local KNN.
+   *
+   * @param useAccurateKnnPartitioning whether to enable accurate planar partitioning
+   */
+  public void setUseAccurateKnnPartitioning(boolean useAccurateKnnPartitioning) {
+    this.useAccurateKnnPartitioning = useAccurateKnnPartitioning;
   }
 
   /**
@@ -312,7 +352,19 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
         {
           ExtendedQuadTree tree = new ExtendedQuadTree<>(paddedBoundary, numPartitions);
           ExtendedQuadTree<Integer> extendedQuadTree = (ExtendedQuadTree<Integer>) tree;
-          extendedQuadTree.build(neighborSampleNumber);
+          // Preserve the historical and geography ST_KNN partition bounds. Planar query-local
+          // 5/6-argument KNN opts into sample-driven bounds so replicated non-point queries can be
+          // merged exactly.
+          if (useKnnSamples) {
+            for (Envelope sample : samples) {
+              extendedQuadTree.insert(sample);
+            }
+          }
+          extendedQuadTree.build(
+              neighborSampleNumber,
+              deduplicateKnnSamples,
+              useKnnSamples,
+              useAccurateKnnPartitioning);
           partitioner = new QuadTreeRTPartitioner(extendedQuadTree);
           break;
         }

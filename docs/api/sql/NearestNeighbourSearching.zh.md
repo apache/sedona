@@ -24,21 +24,40 @@ Sedona 通过提供地理空间 k 近邻（kNN）连接方法来支持对地理�
 
 简介：用于在空间数据集中查找一个点或区域的 k 个最近邻的连接操作。
 
-格式：`ST_KNN(R: Table, S: Table, k: Integer, use_spheroid: Boolean)`
+格式：
 
-其中 R 是查询侧表，S 是对象侧表，K 是邻居数量。use_spheroid 是一个布尔值，决定是否使用椭球距离。
+```sql
+ST_KNN(query_geometry, object_geometry, k)
+ST_KNN(query_geometry, object_geometry, k, use_spheroid)
+ST_KNN(query_geometry, object_geometry, k, use_spheroid, include_ties)
+ST_KNN(query_geometry, object_geometry, k, use_spheroid, include_ties, exclusive)
+```
+
+`query_geometry` 属于查询侧表，`object_geometry` 属于候选对象侧表，`k`
+是邻居数量。`use_spheroid` 用于选择椭球距离而不是平面距离。
+
+可选参数 `include_ties` 仅控制当前查询的并列结果；提供该参数时，它会覆盖
+会话配置 `spark.sedona.join.knn.includeTieBreakers`。可选参数 `exclusive`
+会在近邻排序之前排除与查询几何拓扑相等的候选对象。例如，
+`LINESTRING (0 0, 1 0)` 和 `LINESTRING (1 0, 0 0)` 拓扑相等，因此在
+`exclusive = true` 时会互相排除。
+
+三个和四个参数的形式保持原有行为。若要使用 `exclusive`，必须同时提供两个
+查询级布尔参数。
 
 查询侧表包含用于在对象侧表中查找 k 近邻的几何对象。
 
 当查询数据或对象数据中存在非点几何（其他几何类型）时，会取每个几何对象的质心。
 
-当距离上出现并列时，只有在下面的 sedona 配置被设置为 true 时，结果才会包含所有并列的几何对象：
+使用三个或四个参数的形式时，只有在下面的 Sedona 配置被设置为 true 时，
+结果才会包含所有并列的几何对象：
 
 **关于内连接的说明：**
 
 - `ST_KNN` 连接仅支持 left inner join。
 - 它只返回那些至少存在一个在 k 近邻范围内的匹配邻居的对。
 - 如果某个查询点没有有效邻居（例如 k 设得太大），它会被从结果中排除。
+- 空几何和 null 几何不会参与匹配。
 
 ```
 spark.sedona.join.knn.includeTieBreakers=true
