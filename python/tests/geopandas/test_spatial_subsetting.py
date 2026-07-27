@@ -358,9 +358,18 @@ class TestDistributedSpatialSubsetting(TestGeopandasBase):
 
         result = source.clip(mask, keep_geom_type=True)
         expected = expected_source.clip(mask, keep_geom_type=True)
+        # GeoPandas 0.13 drops the index name when clip explodes collections.
+        # Sedona intentionally preserves the source index metadata.
+        expected.index.names = expected_source.index.names
 
         self.check_sgpd_equals_gpd(result, expected)
-        assert list(result.to_geopandas().index) == list(expected.index)
+        # Preserve source-row order even though GeoPandas 0.13 places exploded
+        # multipart rows before the collection row.
+        assert list(result.to_geopandas().index) == [
+            "collection",
+            "multipart",
+            "multipart",
+        ]
         assert list(result.geom_type.to_pandas()) == ["Polygon"] * 3
         self._assert_srid(result, 4326)
 
@@ -411,6 +420,9 @@ class TestDistributedSpatialSubsetting(TestGeopandasBase):
 
         result = source.clip(mask, keep_geom_type=True)
         expected = expected_source.clip(mask, keep_geom_type=True)
+        # GeoPandas 0.13 drops the index name when clip explodes collections.
+        # Sedona intentionally preserves the source index metadata.
+        expected.index.names = expected_source.index.names
 
         self.check_sgpd_equals_gpd(result, expected)
         assert list(result.to_geopandas().index) == ["collection", "collection"]
