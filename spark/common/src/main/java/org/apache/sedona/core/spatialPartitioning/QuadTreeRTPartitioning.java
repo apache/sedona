@@ -91,6 +91,50 @@ public class QuadTreeRTPartitioning extends QuadtreePartitioning {
    * @return the partition-boundary R-tree
    */
   public STRtree buildSTRTree(List<Envelope> samples, int k, boolean deduplicateSamples) {
+    return buildSTRTree(samples, k, deduplicateSamples, deduplicateSamples, false);
+  }
+
+  /**
+   * Builds sample-driven KNN partition bounds with an optional safe fallback when the collected
+   * sample cannot bound the requested number of neighbours.
+   *
+   * @param samples sampled object envelopes
+   * @param k number of neighbouring sample envelopes to cover
+   * @param deduplicateSamples whether identical envelopes count once
+   * @param fallbackOnInsufficientSamples whether insufficient samples use the global boundary
+   * @return the partition-boundary R-tree
+   */
+  public STRtree buildSTRTree(
+      List<Envelope> samples,
+      int k,
+      boolean deduplicateSamples,
+      boolean fallbackOnInsufficientSamples) {
+    return buildSTRTree(
+        samples,
+        k,
+        deduplicateSamples,
+        fallbackOnInsufficientSamples,
+        fallbackOnInsufficientSamples);
+  }
+
+  /**
+   * Builds KNN partition bounds and independently controls the exact circle predicate used by the
+   * accurate planar path.
+   *
+   * @param samples sampled object envelopes
+   * @param k number of neighbouring sample envelopes to cover
+   * @param deduplicateSamples whether identical envelopes count once
+   * @param fallbackOnInsufficientSamples whether insufficient samples use the global boundary
+   * @param useExactCircleIntersection whether to avoid the historical polygonal circle
+   *     approximation
+   * @return the partition-boundary R-tree
+   */
+  public STRtree buildSTRTree(
+      List<Envelope> samples,
+      int k,
+      boolean deduplicateSamples,
+      boolean fallbackOnInsufficientSamples,
+      boolean useExactCircleIntersection) {
     // The partitioned MBRs
     mbrs = new HashMap<>();
 
@@ -118,10 +162,11 @@ public class QuadTreeRTPartitioning extends QuadtreePartitioning {
       Point point =
           geometryFactory.createPoint(
               new Coordinate(sample.centre().getX(), sample.centre().getY()));
+      point.setUserData(sample);
       sampleTree.insert(sample, point);
     }
 
-    if (deduplicateSamples && distanceSamples.size() < k) {
+    if (fallbackOnInsufficientSamples && distanceSamples.size() < k) {
       // The sampled objects cannot provide a safe distance bound for the requested number of
       // distinct neighbours. Replicate every object partition to every query partition instead of
       // risking pruning the first non-equal neighbour.
@@ -133,7 +178,8 @@ public class QuadTreeRTPartitioning extends QuadtreePartitioning {
         mbrs.put(quadRect.partitionId, Collections.singletonList(new Envelope(globalBoundary)));
       }
     } else {
-      processPartitions(partitionMBRs, mbrs, k, sampleTree, geometryFactory);
+      processPartitions(
+          partitionMBRs, mbrs, k, sampleTree, geometryFactory, useExactCircleIntersection);
     }
 
     // Construct a spatial index for the MBRs
@@ -154,9 +200,25 @@ public class QuadTreeRTPartitioning extends QuadtreePartitioning {
       int k,
       STRtree sampleTree,
       GeometryFactory geometryFactory) {
+    processPartitions(partitionMBRs, mbrs, k, sampleTree, geometryFactory, false);
+  }
 
+  private void processPartitions(
+      List<QuadRectangle> partitionMBRs,
+      Map<Integer, List<Envelope>> mbrs,
+      int k,
+      STRtree sampleTree,
+      GeometryFactory geometryFactory,
+      boolean useExactCircleIntersection) {
     for (QuadRectangle quadRect : partitionMBRs) {
-      processPartition(partitionMBRs, quadRect, mbrs, k, sampleTree, geometryFactory);
+      processPartition(
+          partitionMBRs,
+          quadRect,
+          mbrs,
+          k,
+          sampleTree,
+          geometryFactory,
+          useExactCircleIntersection);
     }
   }
 
@@ -166,7 +228,8 @@ public class QuadTreeRTPartitioning extends QuadtreePartitioning {
       Map<Integer, List<Envelope>> mbrs,
       int k,
       STRtree sampleTree,
-      GeometryFactory geometryFactory) {
+      GeometryFactory geometryFactory,
+      boolean useExactCircleIntersection) {
 
     Envelope partitionMBR = quadRect.getEnvelope();
 
@@ -182,7 +245,7 @@ public class QuadTreeRTPartitioning extends QuadtreePartitioning {
     // Calculate the maximum distance from the centroid to the k-nearest neighbors in the samples
     double maxDistance = getMaxDistanceFromSamples(k, sampleTree, centroid);
     List<Envelope> intersectingMBRs =
-        getMBRIntersectEnvelopes(ui, maxDistance, centroidX, centroidY);
+        getMBRIntersectEnvelopes(ui, maxDistance, centroidX, centroidY, useExactCircleIntersection);
 
     mbrs.put(quadRect.partitionId, intersectingMBRs);
   }
@@ -254,15 +317,40 @@ public class QuadTreeRTPartitioning extends QuadtreePartitioning {
         sampleTree.nearestNeighbour(
             centroid.getEnvelopeInternal(), centroid, new EuclideanItemDistance(), k);
 
-    // 4 - Calculate the distance to the farthest neighbor
+    // Each selected sample represents an arbitrary geometry inside its envelope. The distance to
+    // the envelope's farthest corner is an upper bound on the distance to that geometry. Taking
+    // the largest such bound for any k sampled objects therefore safely upper-bounds the kth
+    // object distance, including for non-point objects.
     double maxDistance = 0;
     for (Object neighbor : kNearestNeighbors) {
       if (neighbor instanceof Geometry) {
-        Envelope neighborEnvelope = ((Geometry) neighbor).getEnvelopeInternal();
-        Coordinate neighborCoord =
-            new Coordinate(neighborEnvelope.centre().getX(), neighborEnvelope.centre().getY());
-        Point neighborPoint = geometryFactory.createPoint(neighborCoord);
-        double distance = centroid.distance(neighborPoint);
+        Object userData = ((Geometry) neighbor).getUserData();
+        Envelope neighborEnvelope =
+            userData instanceof Envelope
+                ? (Envelope) userData
+                : ((Geometry) neighbor).getEnvelopeInternal();
+        double distance =
+            Math.max(
+                centroid
+                    .getCoordinate()
+                    .distance(
+                        new Coordinate(neighborEnvelope.getMinX(), neighborEnvelope.getMinY())),
+                Math.max(
+                    centroid
+                        .getCoordinate()
+                        .distance(
+                            new Coordinate(neighborEnvelope.getMinX(), neighborEnvelope.getMaxY())),
+                    Math.max(
+                        centroid
+                            .getCoordinate()
+                            .distance(
+                                new Coordinate(
+                                    neighborEnvelope.getMaxX(), neighborEnvelope.getMinY())),
+                        centroid
+                            .getCoordinate()
+                            .distance(
+                                new Coordinate(
+                                    neighborEnvelope.getMaxX(), neighborEnvelope.getMaxY())))));
         if (distance > maxDistance) {
           maxDistance = distance;
         }
@@ -284,7 +372,11 @@ public class QuadTreeRTPartitioning extends QuadtreePartitioning {
    * @return
    */
   private List<Envelope> getMBRIntersectEnvelopes(
-      double ui, double maxDistance, double centroidX, double centroidY) {
+      double ui,
+      double maxDistance,
+      double centroidX,
+      double centroidY,
+      boolean useExactCircleIntersection) {
     // 5 - Construct the circle with radius ui and center centroid
     // Calculate the radius of the circle
     double gamma_i = 2 * ui + maxDistance;
@@ -295,20 +387,32 @@ public class QuadTreeRTPartitioning extends QuadtreePartitioning {
             centroidX - gamma_i, centroidX + gamma_i,
             centroidY - gamma_i, centroidY + gamma_i);
 
-    Coordinate center = new Coordinate(centroidX, centroidY);
-    Geometry circle = geometryFactory.createPoint(center).buffer(gamma_i);
-
     // 6 - Compute all the MBRs that intersect with the circle and add them to a hash map
     List<Envelope> candidateEnvelopes = strTree.query(circleEnvelope);
 
-    // Filter the candidate envelopes to find those that intersect with the circle
+    // Filter using exact point-to-envelope distance. Geometry.buffer approximates a circle with an
+    // inscribed polygon and can incorrectly exclude an envelope close to the true circular arc.
     List<Envelope> intersectingMBRs = new ArrayList<>();
     for (Envelope candidateEnvelope : candidateEnvelopes) {
-      Geometry envelopeGeometry = geometryFactory.toGeometry(candidateEnvelope);
-      if (circle.intersects(envelopeGeometry)) {
+      if (intersectsCircle(
+          candidateEnvelope, centroidX, centroidY, gamma_i, useExactCircleIntersection)) {
         intersectingMBRs.add(candidateEnvelope);
       }
     }
     return intersectingMBRs;
+  }
+
+  static boolean intersectsCircle(
+      Envelope envelope,
+      double centerX,
+      double centerY,
+      double radius,
+      boolean useExactCircleIntersection) {
+    Coordinate center = new Coordinate(centerX, centerY);
+    if (useExactCircleIntersection) {
+      return envelope.distance(new Envelope(center)) <= radius;
+    }
+    Geometry circle = geometryFactory.createPoint(center).buffer(radius);
+    return circle.intersects(geometryFactory.toGeometry(envelope));
   }
 }

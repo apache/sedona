@@ -155,6 +155,7 @@ public class PointRDDTest extends SpatialRDDTestBase {
     PointRDD spatialRDD = new PointRDD(sc.parallelize(points, 8));
     spatialRDD.analyze();
     spatialRDD.setNeighborSampleNumber(points.size());
+    spatialRDD.setUseKnnSamples(true);
     spatialRDD.setDeduplicateKnnSamples(true);
     spatialRDD.spatialPartitioning(GridType.QUADTREE_RTREE, 16);
 
@@ -176,6 +177,7 @@ public class PointRDDTest extends SpatialRDDTestBase {
     PointRDD spatialRDD = new PointRDD(sc.parallelize(points, 8));
     spatialRDD.analyze();
     spatialRDD.setNeighborSampleNumber(65);
+    spatialRDD.setUseKnnSamples(true);
     spatialRDD.setDeduplicateKnnSamples(true);
     spatialRDD.spatialPartitioning(GridType.QUADTREE_RTREE, 16);
 
@@ -188,5 +190,29 @@ public class PointRDDTest extends SpatialRDDTestBase {
     for (List<?> expandedGrids : partitioner.getOverlappedGrids().values()) {
       assertEquals(1, expandedGrids.size());
     }
+  }
+
+  @Test
+  public void testQuadTreeRTreePartitioningFallsBackForInsufficientSamples() throws Exception {
+    GeometryFactory geometryFactory = new GeometryFactory();
+    List<Point> points =
+        IntStream.range(0, 128)
+            .mapToObj(x -> geometryFactory.createPoint(new Coordinate((double) x, 0.0)))
+            .collect(Collectors.toList());
+    PointRDD spatialRDD = new PointRDD(sc.parallelize(points, 8));
+    spatialRDD.analyze();
+    spatialRDD.setNeighborSampleNumber(points.size() + 1);
+    spatialRDD.setUseKnnSamples(true);
+    spatialRDD.spatialPartitioning(GridType.QUADTREE_RTREE, 16);
+
+    QuadTreeRTPartitioner partitioner = (QuadTreeRTPartitioner) spatialRDD.getPartitioner();
+    int gridCount = partitioner.getGrids().size();
+    for (List<?> expandedGrids : partitioner.getOverlappedGrids().values()) {
+      assertEquals(1, expandedGrids.size());
+    }
+    Point object = geometryFactory.createPoint(new Coordinate(63.0, 0.0));
+    assertEquals(
+        gridCount,
+        partitioner.getSTRForOverlappedGrids().query(object.getEnvelopeInternal()).size());
   }
 }

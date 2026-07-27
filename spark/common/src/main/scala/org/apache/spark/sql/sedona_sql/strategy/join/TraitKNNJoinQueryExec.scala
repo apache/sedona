@@ -24,6 +24,7 @@ import org.apache.sedona.core.spatialOperator.JoinQuery.JoinParams
 import org.apache.sedona.core.spatialPartitioning.{QuadTreeRTPartitioner, SpatialPartitioner}
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.SedonaConf
+import org.apache.sedona.core.wrapper.KnnGeometryMetadata
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.codegen.GenerateUnsafeRowJoiner
@@ -51,6 +52,7 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
   protected var querySide: JoinSide = null
   def includeTies: Option[Boolean]
   def exclusive: Boolean
+  protected def useAccurateRegularKnn: Boolean = false
 
   private lazy val sedonaConf = SedonaConf.fromActiveSession
   override lazy val metrics: Map[String, SQLMetric] = Map.empty
@@ -93,6 +95,11 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
 
     val (queryShapes, objectShapes) =
       toSpatialRddPair(queryResultsRaw, boundQueryShape, objectResultsRaw, boundObjectShape)
+
+    if (useAccurateRegularKnn) {
+      attachStableRowIds(queryShapes)
+      attachStableRowIds(objectShapes)
+    }
 
     objectShapes.analyze()
     queryShapes.analyze()
@@ -141,7 +148,8 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
                 joinParams,
                 includeTies.getOrElse(sedonaConf.isIncludeTieBreakersInKNNJoins),
                 exclusive,
-                broadcastJoin)
+                broadcastJoin,
+                useAccurateRegularKnn)
               .rdd
           } else {
             sparkContext.parallelize(Seq[(Geometry, Geometry)]())
@@ -154,7 +162,8 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
               joinParams,
               includeTies.getOrElse(sedonaConf.isIncludeTieBreakersInKNNJoins),
               exclusive,
-              broadcastJoin)
+              broadcastJoin,
+              useAccurateRegularKnn)
             .rdd
       }
 
@@ -184,6 +193,17 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
         }
         .toJavaRDD())
     spatialRdd
+  }
+
+  private def attachStableRowIds(spatialRdd: SpatialRDD[Geometry]): Unit = {
+    spatialRdd.setRawSpatialRDD(
+      spatialRdd.rawSpatialRDD.rdd
+        .zipWithUniqueId()
+        .map { case (geometry, uniqueId) =>
+          geometry.setUserData(new KnnGeometryMetadata(uniqueId, geometry.getUserData))
+          geometry
+        }
+        .toJavaRDD())
   }
 
   def knnJoinPartitionNumOptimizer(
@@ -261,8 +281,8 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
       }
 
       val joined = iter.map { case (l, r) =>
-        val leftRow = l.getUserData.asInstanceOf[UnsafeRow]
-        val rightRow = r.getUserData.asInstanceOf[UnsafeRow]
+        val leftRow = getOriginalRow(l)
+        val rightRow = getOriginalRow(r)
         if (swapped)
           joinRow(rightRow, leftRow)
         else
@@ -276,6 +296,14 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
           joined.filter(row => boundCondition.eval(row))
         case None => joined
       }
+    }
+  }
+
+  private def getOriginalRow(geometry: Geometry): UnsafeRow = {
+    geometry.getUserData match {
+      case metadata: KnnGeometryMetadata =>
+        metadata.getOriginalUserData.asInstanceOf[UnsafeRow]
+      case row: UnsafeRow => row
     }
   }
 

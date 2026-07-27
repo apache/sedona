@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.core.spatialOperator;
 
+import java.io.Serializable;
 import java.util.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.LogManager;
@@ -32,6 +33,7 @@ import org.apache.sedona.core.monitoring.Metrics;
 import org.apache.sedona.core.spatialPartitioning.SpatialPartitioner;
 import org.apache.sedona.core.spatialRDD.CircleRDD;
 import org.apache.sedona.core.spatialRDD.SpatialRDD;
+import org.apache.sedona.core.wrapper.KnnGeometryMetadata;
 import org.apache.sedona.core.wrapper.UniqueGeometry;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
@@ -795,6 +797,31 @@ public class JoinQuery {
       boolean exclusive,
       boolean broadcastJoin)
       throws Exception {
+    return knnJoin(queryRDD, objectRDD, joinParams, includeTies, exclusive, broadcastJoin, false);
+  }
+
+  /**
+   * Joins each query geometry to its nearest object geometries.
+   *
+   * @param queryRDD geometries for which neighbours are searched
+   * @param objectRDD candidate neighbour geometries
+   * @param joinParams KNN join parameters
+   * @param includeTies whether to return every candidate tied at the kth distance
+   * @param exclusive whether candidates topologically equal to the query are excluded before
+   *     ranking
+   * @param broadcastJoin whether either side uses the broadcast KNN path
+   * @param mergeReplicatedQueries whether regular-plan local candidates are reconciled by stable
+   *     row identity
+   */
+  public static <U extends Geometry, T extends Geometry> JavaPairRDD<U, T> knnJoin(
+      SpatialRDD<U> queryRDD,
+      SpatialRDD<T> objectRDD,
+      JoinParams joinParams,
+      boolean includeTies,
+      boolean exclusive,
+      boolean broadcastJoin,
+      boolean mergeReplicatedQueries)
+      throws Exception {
     verifyCRSMatch(queryRDD, objectRDD);
     if (!broadcastJoin) verifyPartitioningNumberMatch(queryRDD, objectRDD);
 
@@ -833,7 +860,7 @@ public class JoinQuery {
 
     // The reason for using objectRDD as the right side is that the partitions are built on the
     // right side.
-    final JavaRDD<Pair<U, T>> joinResult;
+    JavaRDD<Pair<U, T>> joinResult;
     if (broadcastObjectsTreeIndex == null && broadcastQueryObjects == null) {
       // no broadcast join
       final KnnJoinIndexJudgement<U, T> judgement =
@@ -850,6 +877,11 @@ public class JoinQuery {
               candidateCount);
       joinResult =
           queryRDD.spatialPartitionedRDD.zipPartitions(objectRDD.spatialPartitionedRDD, judgement);
+      if (mergeReplicatedQueries) {
+        joinResult =
+            mergeReplicatedKnnResults(
+                joinResult, joinParams.k, joinParams.distanceMetric, includeTies, exclusive);
+      }
     } else if (broadcastObjectsTreeIndex != null) {
       // broadcast join with objectRDD as broadcast side
       final KnnJoinIndexJudgement<U, T> judgement =
@@ -886,6 +918,163 @@ public class JoinQuery {
 
     return joinResult.mapToPair(
         (PairFunction<Pair<U, T>, U, T>) pair -> new Tuple2<>(pair.getKey(), pair.getValue()));
+  }
+
+  /**
+   * Reconciles partition-local candidates for query geometries routed to multiple base cells.
+   *
+   * <p>Each input row has an independent stable ID in {@link KnnGeometryMetadata}. Object IDs
+   * remove only partition replicas, so distinct duplicate input rows remain distinct candidates.
+   */
+  private static <U extends Geometry, T extends Geometry>
+      JavaRDD<Pair<U, T>> mergeReplicatedKnnResults(
+          JavaRDD<Pair<U, T>> localResults,
+          int k,
+          DistanceMetric distanceMetric,
+          boolean includeTies,
+          boolean exclusive) {
+    return localResults
+        .mapToPair(
+            pair ->
+                new Tuple2<Long, Pair<U, T>>(
+                    getKnnRowId(pair.getKey()), Pair.of(pair.getKey(), pair.getValue())))
+        .combineByKey(
+            pair ->
+                new KnnCandidateAccumulator<U, T>(k, distanceMetric, includeTies, exclusive)
+                    .add(pair),
+            KnnCandidateAccumulator::add,
+            KnnCandidateAccumulator::merge)
+        .values()
+        .flatMap(KnnCandidateAccumulator::iterator);
+  }
+
+  private static long getKnnRowId(Geometry geometry) {
+    Object userData = geometry.getUserData();
+    if (!(userData instanceof KnnGeometryMetadata)) {
+      throw new IllegalStateException(
+          "Replicated regular KNN geometries must carry stable row metadata");
+    }
+    return ((KnnGeometryMetadata) userData).getUniqueId();
+  }
+
+  /**
+   * Mergeable bounded state for one replicated query row.
+   *
+   * <p>The map is ordered first by distance and then by stable object-row ID. It contains at most
+   * {@code k} candidates, except that include-ties mode retains every candidate at the current kth
+   * distance because all of them are required output.
+   */
+  private static final class KnnCandidateAccumulator<U extends Geometry, T extends Geometry>
+      implements Serializable {
+    private final int k;
+    private final DistanceMetric distanceMetric;
+    private final boolean includeTies;
+    private final boolean exclusive;
+    private final NavigableMap<Double, NavigableMap<Long, T>> candidates = new TreeMap<>();
+    private final Set<Long> candidateIds = new HashSet<>();
+    private U query;
+    private long size;
+
+    private KnnCandidateAccumulator(
+        int k, DistanceMetric distanceMetric, boolean includeTies, boolean exclusive) {
+      this.k = k;
+      this.distanceMetric = distanceMetric;
+      this.includeTies = includeTies;
+      this.exclusive = exclusive;
+    }
+
+    private KnnCandidateAccumulator<U, T> add(Pair<U, T> pair) {
+      if (query == null) {
+        query = pair.getKey();
+      }
+      T candidate = pair.getValue();
+      if (exclusive && KnnJoinIndexJudgement.areTopologicallyEqual(query, candidate)) {
+        return this;
+      }
+
+      long candidateId = getKnnRowId(candidate);
+      if (candidateIds.contains(candidateId)) {
+        return this;
+      }
+      double distance = KnnJoinIndexJudgement.distance(query, candidate, distanceMetric);
+
+      if (size < k) {
+        insert(distance, candidateId, candidate);
+      } else if (includeTies) {
+        addWithTies(distance, candidateId, candidate);
+      } else {
+        addWithoutTies(distance, candidateId, candidate);
+      }
+      return this;
+    }
+
+    private void addWithTies(double distance, long candidateId, T candidate) {
+      double kthDistance = candidates.lastKey();
+      int comparison = Double.compare(distance, kthDistance);
+      if (comparison > 0) {
+        return;
+      }
+      if (comparison == 0) {
+        insert(distance, candidateId, candidate);
+        return;
+      }
+
+      long betterCandidateCount = size - candidates.lastEntry().getValue().size();
+      insert(distance, candidateId, candidate);
+      if (betterCandidateCount + 1 >= k) {
+        removeDistance(kthDistance);
+      }
+    }
+
+    private void addWithoutTies(double distance, long candidateId, T candidate) {
+      Map.Entry<Double, NavigableMap<Long, T>> lastEntry = candidates.lastEntry();
+      int distanceComparison = Double.compare(distance, lastEntry.getKey());
+      if (distanceComparison > 0) {
+        return;
+      }
+      if (distanceComparison == 0 && candidateId >= lastEntry.getValue().lastKey()) {
+        return;
+      }
+
+      insert(distance, candidateId, candidate);
+      Map.Entry<Double, NavigableMap<Long, T>> largestDistance = candidates.lastEntry();
+      Map.Entry<Long, T> removed = largestDistance.getValue().pollLastEntry();
+      candidateIds.remove(removed.getKey());
+      size--;
+      if (largestDistance.getValue().isEmpty()) {
+        candidates.remove(largestDistance.getKey());
+      }
+    }
+
+    private void insert(double distance, long candidateId, T candidate) {
+      candidates.computeIfAbsent(distance, ignored -> new TreeMap<>()).put(candidateId, candidate);
+      candidateIds.add(candidateId);
+      size++;
+    }
+
+    private void removeDistance(double distance) {
+      NavigableMap<Long, T> removed = candidates.remove(distance);
+      if (removed != null) {
+        candidateIds.removeAll(removed.keySet());
+        size -= removed.size();
+      }
+    }
+
+    private KnnCandidateAccumulator<U, T> merge(KnnCandidateAccumulator<U, T> other) {
+      for (NavigableMap<Long, T> distanceCandidates : other.candidates.values()) {
+        for (T candidate : distanceCandidates.values()) {
+          add(Pair.of(other.query, candidate));
+        }
+      }
+      return this;
+    }
+
+    private Iterator<Pair<U, T>> iterator() {
+      return candidates.values().stream()
+          .flatMap(distanceCandidates -> distanceCandidates.values().stream())
+          .map(candidate -> Pair.of(query, candidate))
+          .iterator();
+    }
   }
 
   /**

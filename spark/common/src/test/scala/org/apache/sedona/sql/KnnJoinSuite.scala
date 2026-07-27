@@ -580,6 +580,94 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       }
     }
 
+    it("query-local KNN should use a line's full geometry in the regular plan") {
+      withConf(
+        Map(
+          "sedona.join.autoBroadcastJoinThreshold" -> "-1",
+          "spark.sql.autoBroadcastJoinThreshold" -> "-1")) {
+        val queries =
+          createGeometryDataFrame(Seq(0 -> "LINESTRING (0 0, 1000000000 0)"), 64)
+        val objects = sparkSession
+          .range(0, 10001, 1, 64)
+          .selectExpr(
+            "cast(id as int) AS id",
+            """CASE WHEN id = 0 THEN ST_Point(0.0, 0.0)
+              |ELSE ST_Point(500000000.0 + cast(id as double), 10.0) END AS geom""".stripMargin)
+
+        val df = queries
+          .alias("q")
+          .join(objects.alias("o"), expr("ST_KNN(q.geom, o.geom, 1, false, false)"))
+          .selectExpr("q.id AS qid", "o.id AS oid")
+
+        findKNNJoinExec(df).isInstanceOf[KNNJoinExec] should be(true)
+        df.collect().mkString should be("[0,0]")
+      }
+    }
+
+    it("query-local KNN should use a polygon's full geometry in the regular plan") {
+      withConf(
+        Map(
+          "sedona.join.autoBroadcastJoinThreshold" -> "-1",
+          "spark.sql.autoBroadcastJoinThreshold" -> "-1")) {
+        val queries = createGeometryDataFrame(
+          Seq(0 -> "POLYGON ((0 0, 1000000000 0, 1000000000 100, 0 100, 0 0))"),
+          32)
+        val objects = sparkSession
+          .range(0, 4097, 1, 32)
+          .selectExpr(
+            "cast(id as int) AS id",
+            """CASE WHEN id = 0 THEN ST_Point(0.0, 50.0)
+              |ELSE ST_Point(500000000.0 + cast(id as double), 110.0) END AS geom""".stripMargin)
+
+        val df = queries
+          .alias("q")
+          .join(objects.alias("o"), expr("ST_KNN(q.geom, o.geom, 1, false, false)"))
+          .selectExpr("q.id AS qid", "o.id AS oid")
+
+        findKNNJoinExec(df).isInstanceOf[KNNJoinExec] should be(true)
+        df.collect().mkString should be("[0,0]")
+      }
+    }
+
+    it("query-local regular KNN should preserve duplicate spanning rows without replicas") {
+      withConf(
+        Map(
+          "sedona.join.autoBroadcastJoinThreshold" -> "-1",
+          "spark.sql.autoBroadcastJoinThreshold" -> "-1")) {
+        val queries = createGeometryDataFrame(
+          Seq(0 -> "LINESTRING (0 0, 1000000000 0)", 1 -> "LINESTRING (0 0, 1000000000 0)"),
+          32)
+        val objects = sparkSession
+          .range(0, 4098, 1, 32)
+          .selectExpr(
+            "cast(id as int) AS id",
+            """CASE WHEN id < 2
+              |THEN ST_GeomFromText('MULTIPOINT ((0 0), (1000000000 0))')
+              |ELSE ST_Point(500000000.0 + cast(id as double), 10.0) END AS geom""".stripMargin)
+
+        val includeTiesResult = queries
+          .alias("q")
+          .join(objects.alias("o"), expr("ST_KNN(q.geom, o.geom, 1, false, true)"))
+          .selectExpr("q.id AS qid", "o.id AS oid")
+        findKNNJoinExec(includeTiesResult).isInstanceOf[KNNJoinExec] should be(true)
+        includeTiesResult
+          .collect()
+          .sortBy(row => (row.getInt(0), row.getInt(1)))
+          .mkString should be("[0,0][0,1][1,0][1,1]")
+
+        val excludeTiesResult = queries
+          .alias("q")
+          .join(objects.alias("o"), expr("ST_KNN(q.geom, o.geom, 1, false, false)"))
+          .selectExpr("q.id AS qid", "o.id AS oid")
+        val untiedRows = excludeTiesResult.collect()
+        untiedRows.length should be(2)
+        untiedRows
+          .groupBy(_.getInt(0))
+          .map { case (queryId, rows) => queryId -> rows.length } should be(Map(0 -> 1, 1 -> 1))
+        untiedRows.foreach(row => Set(0, 1).contains(row.getInt(1)) should be(true))
+      }
+    }
+
     it("KNN Join with exact algorithms should not fail with null geometries") {
       val df1 = sparkSession.sql(
         "SELECT ST_GeomFromText(col1) as geom1 from values ('POINT (0.0 0.0)'), (null)")
@@ -866,5 +954,18 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     val df2 = createDataFrame(points2)
 
     (df1, df2)
+  }
+
+  private def createGeometryDataFrame(
+      geometries: Seq[(Int, String)],
+      partitions: Int): DataFrame = {
+    val schema = StructType(
+      Seq(
+        StructField("id", IntegerType, nullable = false),
+        StructField("wkt", StringType, nullable = false)))
+    val rows = geometries.map { case (id, wkt) => Row(id, wkt) }
+    sparkSession
+      .createDataFrame(sparkSession.sparkContext.parallelize(rows, partitions), schema)
+      .selectExpr("id", "ST_GeomFromText(wkt) AS geom")
   }
 }

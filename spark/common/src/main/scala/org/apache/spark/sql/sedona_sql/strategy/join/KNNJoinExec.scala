@@ -166,10 +166,18 @@ case class KNNJoinExec(
     val kValue: Int = this.k.eval().asInstanceOf[Int]
     require(kValue >= 1, "The number of neighbors (k) must be equal or greater than 1.")
     objectsShapes.setNeighborSampleNumber(if (exclusive) kValue + 1 else kValue)
+    objectsShapes.setUseKnnSamples(useAccurateRegularKnn)
+    objectsShapes.setUseAccurateKnnPartitioning(useAccurateRegularKnn)
     objectsShapes.setDeduplicateKnnSamples(exclusive)
 
     exactSpatialPartitioning(objectsShapes, queryShapes, numPartitions)
   }
+
+  /**
+   * The planar five- and six-argument forms opt into globally reconciled regular-plan results.
+   * Legacy and geography forms retain their historical centroid routing.
+   */
+  override protected def useAccurateRegularKnn: Boolean = includeTies.isDefined && !isGeography
 
   /**
    * Exact spatial partitioning for KNN join
@@ -190,7 +198,7 @@ case class KNNJoinExec(
     followerShapes.spatialPartitioning(
       dominantShapes.getPartitioner
         .asInstanceOf[QuadTreeRTPartitioner]
-        .nonOverlappedPartitioner())
+        .nonOverlappedPartitioner(useAccurateRegularKnn))
 
     dominantShapes.buildIndex(IndexType.RTREE, true)
   }

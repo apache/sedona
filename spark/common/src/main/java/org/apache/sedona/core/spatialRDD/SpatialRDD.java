@@ -104,6 +104,12 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   /** Whether KNN distance-bound samples with identical envelopes should be counted once. */
   private boolean deduplicateKnnSamples = false;
 
+  /** Whether sampled object envelopes should be used to derive KNN partition distance bounds. */
+  private boolean useKnnSamples = false;
+
+  /** Whether the new exact planar KNN partitioning and replica handling should be used. */
+  private boolean useAccurateKnnPartitioning = false;
+
   public int getSampleNumber() {
     return sampleNumber;
   }
@@ -137,6 +143,24 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
    */
   public void setDeduplicateKnnSamples(boolean deduplicateKnnSamples) {
     this.deduplicateKnnSamples = deduplicateKnnSamples;
+  }
+
+  /**
+   * Controls whether object samples are used to derive safe KNN partition distance bounds.
+   *
+   * @param useKnnSamples whether to use sampled object envelopes
+   */
+  public void setUseKnnSamples(boolean useKnnSamples) {
+    this.useKnnSamples = useKnnSamples;
+  }
+
+  /**
+   * Controls exact bounds and replica-safe placement for planar query-local KNN.
+   *
+   * @param useAccurateKnnPartitioning whether to enable accurate planar partitioning
+   */
+  public void setUseAccurateKnnPartitioning(boolean useAccurateKnnPartitioning) {
+    this.useAccurateKnnPartitioning = useAccurateKnnPartitioning;
   }
 
   /**
@@ -328,15 +352,19 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
         {
           ExtendedQuadTree tree = new ExtendedQuadTree<>(paddedBoundary, numPartitions);
           ExtendedQuadTree<Integer> extendedQuadTree = (ExtendedQuadTree<Integer>) tree;
-          // Preserve the historical 3/4-argument ST_KNN partition bounds. Exclusive KNN opts
-          // into sample-driven bounds because it must look beyond an arbitrary number of equal
-          // candidates to find the next non-equal neighbour.
-          if (deduplicateKnnSamples) {
+          // Preserve the historical and geography ST_KNN partition bounds. Planar query-local
+          // 5/6-argument KNN opts into sample-driven bounds so replicated non-point queries can be
+          // merged exactly.
+          if (useKnnSamples) {
             for (Envelope sample : samples) {
               extendedQuadTree.insert(sample);
             }
           }
-          extendedQuadTree.build(neighborSampleNumber, deduplicateKnnSamples);
+          extendedQuadTree.build(
+              neighborSampleNumber,
+              deduplicateKnnSamples,
+              useKnnSamples,
+              useAccurateKnnPartitioning);
           partitioner = new QuadTreeRTPartitioner(extendedQuadTree);
           break;
         }
