@@ -27,7 +27,7 @@ import geopandas as gpd
 import numpy as np
 from pandas.api.types import is_list_like
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
-from pyspark.pandas.internal import InternalFrame, NATURAL_ORDER_COLUMN_NAME
+from pyspark.pandas.internal import NATURAL_ORDER_COLUMN_NAME
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for, verify_temp_column_name
 from pyspark.sql import functions as F
@@ -103,13 +103,9 @@ def _project_replaced_geometry(sdf, geometry_name: str, geometry):
 
 def _sort_by_natural_order(sdf):
     """Restore input positional order, matching GeoPandas' sorted index query."""
-    ordered = sdf.orderBy(scol_for(sdf, NATURAL_ORDER_COLUMN_NAME).asc()).drop(
-        NATURAL_ORDER_COLUMN_NAME
+    return sdf.orderBy(scol_for(sdf, NATURAL_ORDER_COLUMN_NAME).asc()).select(
+        *[scol_for(sdf, name) for name in sdf.columns]
     )
-    ordered = InternalFrame.attach_distributed_sequence_column(
-        ordered, NATURAL_ORDER_COLUMN_NAME
-    )
-    return ordered.select(*[scol_for(ordered, name) for name in sdf.columns])
 
 
 def _normalize_slice_bound(value, axis: str):
@@ -340,7 +336,9 @@ def _source_geometry_family(source_sdf, geometry_name):
             F.when(geometry_type == _GEOMETRY_COLLECTION, F.lit(1)).otherwise(F.lit(0))
         ).alias("has_collection"),
         F.countDistinct(family).alias("family_count"),
-        F.first(family, ignorenulls=True).alias("family"),
+        F.min_by(family, scol_for(source_sdf, NATURAL_ORDER_COLUMN_NAME)).alias(
+            "family"
+        ),
     ).first()
     return summary.has_collection, summary.family_count, summary.family
 
@@ -386,30 +384,27 @@ def _keep_only_family(internal, sdf, geometry_name, family):
         "line": _LINE_TYPES,
         "polygon": _POLYGON_TYPES,
     }[family]
-    expanded = (
-        expanded.where(
-            stf.ST_GeometryType(scol_for(expanded, geometry_value_name)).isin(
-                *allowed_types
+    expanded = expanded.where(
+        stf.ST_GeometryType(scol_for(expanded, geometry_value_name)).isin(
+            *allowed_types
+        )
+    ).select(
+        *[
+            (
+                scol_for(expanded, geometry_value_name).alias(geometry_name)
+                if name == geometry_name
+                else scol_for(expanded, name)
             )
-        )
-        .select(
-            *[
-                (
-                    scol_for(expanded, geometry_value_name).alias(geometry_name)
-                    if name == geometry_name
-                    else scol_for(expanded, name)
-                )
-                for name in internal.spark_frame.columns
-                if name != NATURAL_ORDER_COLUMN_NAME
-            ],
-            scol_for(expanded, parent_order_name),
-            scol_for(expanded, position_name),
-        )
-        .orderBy(parent_order_name, position_name)
-        .drop(parent_order_name, position_name)
+            for name in internal.spark_frame.columns
+            if name != NATURAL_ORDER_COLUMN_NAME
+        ],
+        scol_for(expanded, parent_order_name),
+        scol_for(expanded, position_name),
     )
-    expanded = InternalFrame.attach_distributed_sequence_column(
-        expanded, NATURAL_ORDER_COLUMN_NAME
+    expanded = (
+        expanded.orderBy(parent_order_name, position_name)
+        .withColumn(NATURAL_ORDER_COLUMN_NAME, F.monotonically_increasing_id())
+        .drop(parent_order_name, position_name)
     )
     return expanded.select(
         *[scol_for(expanded, name) for name in internal.spark_frame.columns]

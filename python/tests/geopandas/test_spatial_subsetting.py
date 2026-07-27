@@ -22,6 +22,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import pyspark.pandas as ps
+from packaging.version import parse as parse_version
 from shapely.geometry import (
     GeometryCollection,
     LineString,
@@ -253,7 +254,13 @@ class TestDistributedSpatialSubsetting(TestGeopandasBase):
             mask = GeoDataFrame(expected_mask)
 
         result = source.clip(mask, sort=True)
-        expected = expected_source.clip(expected_mask, sort=True)
+        if parse_version(gpd.__version__) >= parse_version("1.0.0"):
+            expected = expected_source.clip(expected_mask, sort=True)
+        else:
+            expected = expected_source.clip(expected_mask)
+            expected = expected.loc[
+                expected_source.index[expected_source.index.isin(expected.index)]
+            ]
 
         self.check_sgpd_df_equals_gpd_df(result, expected)
         assert result.active_geometry_name == "shape"
@@ -301,6 +308,28 @@ class TestDistributedSpatialSubsetting(TestGeopandasBase):
         collection = GeoSeries(expected_collection, crs=4326)
         with pytest.warns(UserWarning, match="GeometryCollection"):
             collection.clip(mask, keep_geom_type=True)
+
+    def test_clip_keep_geom_type_uses_first_geometry_type_including_null(self):
+        mask = box(0, 0, 1, 1)
+        expected_source = gpd.GeoSeries(
+            [
+                None,
+                LineString([(-1, 0.25), (2, 0.25)]),
+                LineString([(1, 0.5), (2, 0.5)]),
+            ],
+            index=pd.Index(["null", "line", "point"], name="feature_id"),
+            crs=4326,
+        )
+        source_seed = expected_source.copy()
+        source_seed.iloc[0] = LineString([(0, 0), (1, 1)])
+        source = GeoSeries(source_seed, crs=4326)
+        source.iloc[0] = None
+
+        result = source.clip(mask, keep_geom_type=True)
+        expected = expected_source.clip(mask, keep_geom_type=True)
+
+        self.check_sgpd_equals_gpd(result, expected)
+        assert set(result.geom_type.to_pandas()) == {"LineString", "Point"}
 
     def test_clip_crs_mismatch_warns_and_invalid_inputs_fail(self):
         source = GeoSeries([Point(0.5, 0.5)], crs=4326)
