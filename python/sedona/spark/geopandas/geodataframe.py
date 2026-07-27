@@ -208,6 +208,197 @@ def _normalize_dissolve_aggfunc(aggfunc):
     return normalize_one(aggfunc)
 
 
+class _DissolveGroupers(typing.NamedTuple):
+    expressions: list
+    fields: list
+    index_names: list
+    column_labels: list
+
+
+def _resolve_dissolve_groupers(
+    frame,
+    internal,
+    geometry_label,
+    by,
+    level,
+    observed,
+):
+    """Resolve dissolve groupers without constructing the aggregation plan."""
+
+    group_expressions = []
+    group_fields = []
+    group_index_names = []
+    grouped_column_labels = []
+
+    if level is not None:
+        levels = list(level) if isinstance(level, (list, tuple)) else [level]
+        index_names = list(internal.index_names)
+
+        def level_position(value):
+            if isinstance(value, (int, np.integer)):
+                position = int(value)
+                if position < 0:
+                    position += len(index_names)
+                if position < 0 or position >= len(index_names):
+                    raise IndexError(
+                        f"Too many levels: Index has only {len(index_names)} levels"
+                    )
+                return position
+
+            wanted = value if isinstance(value, tuple) else (value,)
+            matches = [
+                position for position, name in enumerate(index_names) if name == wanted
+            ]
+            if not matches:
+                raise KeyError(f"Level {value} not found")
+            if len(matches) > 1:
+                raise ValueError(
+                    f"The name {value} occurs multiple times, use a level number"
+                )
+            return matches[0]
+
+        positions = [level_position(value) for value in levels]
+        for position in positions:
+            group_expressions.append(internal.index_spark_columns[position])
+            group_fields.append(internal.index_fields[position])
+            group_index_names.append(internal.index_names[position])
+    elif by is None:
+        group_expressions.append(F.lit(0).cast("long"))
+        group_fields.append(None)
+        group_index_names.append(None)
+    else:
+        groupers_are_column_labels = True
+        if isinstance(by, PandasOnSparkSeries):
+            groupers = [by]
+            groupers_are_column_labels = False
+            if by._psdf is not frame:
+                raise NotImplementedError(
+                    "Sedona dissolve requires Series groupers to come from "
+                    "the GeoDataFrame being dissolved."
+                )
+        else:
+            try:
+                candidate = frame[by]
+            except (KeyError, TypeError):
+                candidate = None
+
+            if isinstance(candidate, PandasOnSparkSeries):
+                groupers = [candidate]
+            elif isinstance(by, list):
+                groupers = []
+                for key in by:
+                    try:
+                        grouper = frame[key]
+                    except (KeyError, TypeError) as exc:
+                        raise NotImplementedError(
+                            "Sedona dissolve supports column labels, not "
+                            "driver-side grouping vectors."
+                        ) from exc
+                    if not isinstance(grouper, PandasOnSparkSeries):
+                        raise ValueError(f"Grouper for '{key}' is not 1-dimensional")
+                    groupers.append(grouper)
+            else:
+                raise NotImplementedError(
+                    "Sedona dissolve supports column labels, not driver-side "
+                    "grouping vectors."
+                )
+
+        for grouper in groupers:
+            if grouper._column_label == geometry_label:
+                raise NotImplementedError(
+                    "Grouping by the active geometry column is not supported."
+                )
+            group_expressions.append(internal.spark_column_for(grouper._column_label))
+            group_fields.append(internal.field_for(grouper._column_label))
+            group_index_names.append(grouper._column_label)
+            if groupers_are_column_labels:
+                grouped_column_labels.append(grouper._column_label)
+
+    if not group_expressions:
+        raise ValueError("No group keys passed")
+
+    if not observed:
+        categorical_groupers = [
+            field
+            for field in group_fields
+            if field is not None and isinstance(field.dtype, pd.CategoricalDtype)
+        ]
+        if categorical_groupers:
+            raise NotImplementedError(
+                "Sedona dissolve cannot materialize unobserved categorical "
+                "groups; pass observed=True."
+            )
+
+    return _DissolveGroupers(
+        group_expressions,
+        group_fields,
+        group_index_names,
+        grouped_column_labels,
+    )
+
+
+class _DissolveResultLabels(typing.NamedTuple):
+    geometry_label: Label
+    attribute_labels: list
+    order_label: Label
+    geometry_name: Label
+    order_name: Label
+    column_label_names: list
+
+
+def _build_dissolve_result_labels(
+    internal,
+    geometry_label,
+    aggregation_specs,
+    result_column_levels,
+):
+    """Build non-colliding output labels for a dissolve result."""
+
+    result_geometry_label = geometry_label + ("",) * (
+        result_column_levels - len(geometry_label)
+    )
+    result_attribute_labels = [spec[3] for spec in aggregation_specs]
+    result_order_label_name = "__dissolve_group_order__"
+    result_order_label = (result_order_label_name,) + ("",) * (result_column_levels - 1)
+    result_labels = {result_geometry_label, *result_attribute_labels}
+    result_order_suffix = 0
+    while result_order_label in result_labels:
+        result_order_suffix += 1
+        result_order_label_name = f"__dissolve_group_order_{result_order_suffix}__"
+        result_order_label = (result_order_label_name,) + ("",) * (
+            result_column_levels - 1
+        )
+
+    result_geometry_name = (
+        result_geometry_label[0]
+        if len(result_geometry_label) == 1
+        else result_geometry_label
+    )
+    result_order_name = (
+        result_order_label[0] if len(result_order_label) == 1 else result_order_label
+    )
+    result_column_label_names = [
+        internal.column_label_names[0],
+        *([None] * (result_column_levels - 1)),
+    ]
+    return _DissolveResultLabels(
+        result_geometry_label,
+        result_attribute_labels,
+        result_order_label,
+        result_geometry_name,
+        result_order_name,
+        result_column_label_names,
+    )
+
+
+def _as_geodataframe_with_geometry(frame, geometry_name):
+    """Wrap a pandas-on-Spark result and restore its active geometry label."""
+
+    result = GeoDataFrame(frame)
+    result._geometry_column_name = geometry_name
+    return result
+
+
 def _dissolve_aggregation_expression(
     column,
     field,
@@ -1599,6 +1790,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             takes precedence over ``by``, matching pandas.
         sort : bool, default True
             Sort group keys. With ``False``, groups follow first occurrence.
+            Preserving that order still requires a distributed sort by each
+            group's first source-row position.
         observed : bool, default False
             For categorical groupers, ``True`` returns observed groups.
             Materializing unobserved categorical combinations is unsupported.
@@ -1681,118 +1874,20 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 "Sedona dissolve does not yet support MultiIndex columns."
             )
 
-        geometry_name = self.active_geometry_name
         geometry_label = self.geometry._column_label
 
-        group_expressions = []
-        group_fields = []
-        group_index_names = []
-        grouped_column_labels = []
-
-        if level is not None:
-            levels = list(level) if isinstance(level, (list, tuple)) else [level]
-            index_names = list(internal.index_names)
-
-            def level_position(value):
-                if isinstance(value, (int, np.integer)):
-                    position = int(value)
-                    if position < 0:
-                        position += len(index_names)
-                    if position < 0 or position >= len(index_names):
-                        raise IndexError(
-                            f"Too many levels: Index has only {len(index_names)} levels"
-                        )
-                    return position
-
-                wanted = value if isinstance(value, tuple) else (value,)
-                matches = [
-                    position
-                    for position, name in enumerate(index_names)
-                    if name == wanted
-                ]
-                if not matches:
-                    raise KeyError(f"Level {value} not found")
-                if len(matches) > 1:
-                    raise ValueError(
-                        f"The name {value} occurs multiple times, use a level number"
-                    )
-                return matches[0]
-
-            positions = [level_position(value) for value in levels]
-            for position in positions:
-                group_expressions.append(internal.index_spark_columns[position])
-                group_fields.append(internal.index_fields[position])
-                group_index_names.append(internal.index_names[position])
-        elif by is None:
-            group_expressions.append(F.lit(0).cast("long"))
-            group_fields.append(None)
-            group_index_names.append(None)
-        else:
-            groupers_are_column_labels = True
-            if isinstance(by, PandasOnSparkSeries):
-                groupers = [by]
-                groupers_are_column_labels = False
-                if by._psdf is not self:
-                    raise NotImplementedError(
-                        "Sedona dissolve requires Series groupers to come from "
-                        "the GeoDataFrame being dissolved."
-                    )
-            else:
-                try:
-                    candidate = self[by]
-                except (KeyError, TypeError):
-                    candidate = None
-
-                if isinstance(candidate, PandasOnSparkSeries):
-                    groupers = [candidate]
-                elif isinstance(by, list):
-                    groupers = []
-                    for key in by:
-                        try:
-                            grouper = self[key]
-                        except (KeyError, TypeError) as exc:
-                            raise NotImplementedError(
-                                "Sedona dissolve supports column labels, not "
-                                "driver-side grouping vectors."
-                            ) from exc
-                        if not isinstance(grouper, PandasOnSparkSeries):
-                            raise ValueError(
-                                f"Grouper for '{key}' is not 1-dimensional"
-                            )
-                        groupers.append(grouper)
-                else:
-                    raise NotImplementedError(
-                        "Sedona dissolve supports column labels, not driver-side "
-                        "grouping vectors."
-                    )
-
-            for grouper in groupers:
-                if grouper._column_label == geometry_label:
-                    raise NotImplementedError(
-                        "Grouping by the active geometry column is not supported."
-                    )
-                group_expressions.append(
-                    internal.spark_column_for(grouper._column_label)
-                )
-                group_fields.append(internal.field_for(grouper._column_label))
-                group_index_names.append(grouper._column_label)
-                if groupers_are_column_labels:
-                    grouped_column_labels.append(grouper._column_label)
-
-        if not group_expressions:
-            raise ValueError("No group keys passed")
-
-        if not observed:
-            categorical_groupers = [
-                field
-                for field in group_fields
-                if field is not None and isinstance(field.dtype, pd.CategoricalDtype)
-            ]
-            if categorical_groupers:
-                raise NotImplementedError(
-                    "Sedona dissolve cannot materialize unobserved categorical "
-                    "groups; pass observed=True."
-                )
+        groupers = _resolve_dissolve_groupers(
+            self,
+            internal,
+            geometry_label,
+            by,
+            level,
+            observed,
+        )
+        group_expressions = groupers.expressions
+        group_fields = groupers.fields
+        group_index_names = groupers.index_names
+        grouped_column_labels = groupers.column_labels
 
         normalized_aggfunc = _normalize_dissolve_aggfunc(aggfunc)
         available_attribute_labels = [
@@ -1953,36 +2048,12 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         if dropna:
             aggregated_sdf = aggregated_sdf.dropna(subset=group_column_names)
 
-        result_geometry_label = geometry_label + ("",) * (
-            result_column_levels - len(geometry_label)
+        result_labels = _build_dissolve_result_labels(
+            internal,
+            geometry_label,
+            aggregation_specs,
+            result_column_levels,
         )
-        result_attribute_labels = [spec[3] for spec in aggregation_specs]
-        result_order_label_name = "__dissolve_group_order__"
-        result_order_label = (result_order_label_name,) + ("",) * (
-            result_column_levels - 1
-        )
-        result_labels = {result_geometry_label, *result_attribute_labels}
-        result_order_suffix = 0
-        while result_order_label in result_labels:
-            result_order_suffix += 1
-            result_order_label_name = f"__dissolve_group_order_{result_order_suffix}__"
-            result_order_label = (result_order_label_name,) + ("",) * (
-                result_column_levels - 1
-            )
-        result_geometry_name = (
-            result_geometry_label[0]
-            if len(result_geometry_label) == 1
-            else result_geometry_label
-        )
-        result_order_name = (
-            result_order_label[0]
-            if len(result_order_label) == 1
-            else result_order_label
-        )
-        result_column_label_names = [
-            internal.column_label_names[0],
-            *([None] * (result_column_levels - 1)),
-        ]
 
         result_internal = InternalFrame(
             spark_frame=aggregated_sdf,
@@ -1999,9 +2070,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 for field, name in zip(group_fields, group_column_names)
             ],
             column_labels=[
-                result_geometry_label,
-                result_order_label,
-                *result_attribute_labels,
+                result_labels.geometry_label,
+                result_labels.order_label,
+                *result_labels.attribute_labels,
             ],
             data_spark_columns=[
                 scol_for(aggregated_sdf, geometry_output_name),
@@ -2032,23 +2103,34 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                     ), name in zip(aggregation_specs, attribute_output_names)
                 ],
             ],
-            column_label_names=result_column_label_names,
+            column_label_names=result_labels.column_label_names,
         )
-        aggregated = GeoDataFrame(PandasOnSparkDataFrame(result_internal))
-        aggregated._geometry_column_name = result_geometry_name
+        aggregated = _as_geodataframe_with_geometry(
+            PandasOnSparkDataFrame(result_internal),
+            result_labels.geometry_name,
+        )
 
         if sort:
-            aggregated = GeoDataFrame(aggregated.sort_index(na_position="last"))
+            aggregated = _as_geodataframe_with_geometry(
+                aggregated.sort_index(na_position="last"),
+                result_labels.geometry_name,
+            )
         else:
-            aggregated = GeoDataFrame(aggregated.sort_values(result_order_name))
-        aggregated._geometry_column_name = result_geometry_name
+            aggregated = _as_geodataframe_with_geometry(
+                aggregated.sort_values(result_labels.order_name),
+                result_labels.geometry_name,
+            )
 
-        aggregated = GeoDataFrame(aggregated.drop(columns=[result_order_name]))
-        aggregated._geometry_column_name = result_geometry_name
+        aggregated = _as_geodataframe_with_geometry(
+            aggregated.drop(columns=[result_labels.order_name]),
+            result_labels.geometry_name,
+        )
 
         if not as_index:
-            aggregated = GeoDataFrame(aggregated.reset_index())
-            aggregated._geometry_column_name = result_geometry_name
+            aggregated = _as_geodataframe_with_geometry(
+                aggregated.reset_index(),
+                result_labels.geometry_name,
+            )
 
         object.__setattr__(aggregated, "_empty_crs_source", self.geometry)
         return aggregated

@@ -26,9 +26,9 @@ def collect(x, multi=False):
     """Collect single-part geometries into their multipart counterpart.
 
     A Sedona :class:`~sedona.spark.geopandas.GeoSeries` is aggregated on
-    executors with ``ST_Collect_Agg``. Only aggregate metadata and the single
-    geometry required by this scalar-returning API are materialized on the
-    driver. Local Shapely and GeoPandas inputs retain GeoPandas' behavior.
+    executors with ``ST_Collect_Agg``. One aggregate action materializes only
+    the metadata and single geometry required by this scalar-returning API on
+    the driver. Local Shapely and GeoPandas inputs retain GeoPandas' behavior.
 
     Parameters
     ----------
@@ -72,6 +72,8 @@ def collect(x, multi=False):
         F.max(F.when(stf.ST_IsEmpty(geometry), F.lit(1)).otherwise(F.lit(0))).alias(
             "__collect_has_empty__"
         ),
+        F.first(geometry, ignorenulls=True).alias("__collect_single_geometry__"),
+        sta.ST_Collect_Agg(geometry).alias("__collect_geometry__"),
     ).first()
 
     count = metadata["__collect_count__"]
@@ -94,7 +96,7 @@ def collect(x, multi=False):
         )
 
     if count == 1 and (is_multi or not multi):
-        return x._internal.spark_frame.select(geometry.alias("geometry")).first()[0]
+        return metadata["__collect_single_geometry__"]
 
     if geometry_type_name not in {"Point", "LineString", "Polygon"}:
         raise KeyError(geometry_type_name)
@@ -115,6 +117,4 @@ def collect(x, multi=False):
             f"Can't create Multi{geometry_type_name} with empty component"
         )
 
-    return x._internal.spark_frame.select(
-        sta.ST_Collect_Agg(geometry).alias("geometry")
-    ).first()[0]
+    return metadata["__collect_geometry__"]

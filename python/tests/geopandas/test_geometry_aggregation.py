@@ -20,6 +20,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import pyspark.pandas as ps
+from pyspark.sql import DataFrame as SparkDataFrame
 
 try:
     from shapely.errors import EmptyPartError
@@ -52,6 +53,10 @@ class TestGeometryAggregation(TestGeopandasBase):
         result = source.dissolve(
             "zone", aggfunc={"label": "first", "value": "sum"}, dropna=False
         )
+        spark_frame = result._internal.spark_frame
+        if hasattr(spark_frame, "_jdf"):
+            plan = spark_frame._jdf.queryExecution().analyzed().toString()
+            assert "PythonUDF" not in plan
         expected = expected_source.dissolve(
             "zone",
             aggfunc={"label": "first", "value": "sum"},
@@ -183,7 +188,7 @@ class TestGeometryAggregation(TestGeopandasBase):
         self.check_sgpd_df_equals_gpd_df(multikey_result, multikey_expected)
         assert multikey_result.index.names == ["kind", "value"]
 
-    def test_dissolve_multiple_aggregations(self):
+    def test_dissolve_multiple_aggregations_including_grouping_column(self):
         local = gpd.GeoDataFrame(
             {
                 "zone": ["a", "a", "b"],
@@ -426,6 +431,22 @@ class TestGeometryAggregation(TestGeopandasBase):
 
         multi_point = MultiPoint([(0, 0), (1, 1)])
         assert collect(GeoSeries([multi_point]), multi=True).equals(multi_point)
+
+    def test_collect_uses_one_spark_action(self, monkeypatch):
+        first_calls = 0
+        original_first = SparkDataFrame.first
+
+        def count_first(frame):
+            nonlocal first_calls
+            first_calls += 1
+            return original_first(frame)
+
+        monkeypatch.setattr(SparkDataFrame, "first", count_first)
+
+        result = collect(GeoSeries([Point(0, 0), Point(1, 1)]))
+
+        assert result.equals(MultiPoint([(0, 0), (1, 1)]))
+        assert first_calls == 1
 
     def test_collect_distributed_geometry_families(self):
         assert collect(GeoSeries([Point(0, 0), Point(1, 1)])).equals(
