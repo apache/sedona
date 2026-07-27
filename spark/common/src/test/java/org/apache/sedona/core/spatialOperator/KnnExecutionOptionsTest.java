@@ -18,14 +18,35 @@
  */
 package org.apache.sedona.core.spatialOperator;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
+import java.util.Arrays;
+import java.util.Collections;
+import org.apache.sedona.core.TestBase;
 import org.apache.sedona.core.enums.DistanceMetric;
 import org.apache.sedona.core.enums.IndexType;
 import org.apache.sedona.core.spatialOperator.JoinQuery.JoinParams;
+import org.apache.sedona.core.spatialRDD.SpatialRDD;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 
-public class KnnExecutionOptionsTest {
+public class KnnExecutionOptionsTest extends TestBase {
+  @BeforeClass
+  public static void setup() {
+    initialize(KnnExecutionOptionsTest.class.getName());
+  }
+
+  @AfterClass
+  public static void teardown() {
+    sc.stop();
+  }
+
   @Test
   public void acceptsSupportedPlanAndMetricCombinations() {
     JoinQuery.validateKnnExecutionOptions(planarParams(), false, true, true);
@@ -58,6 +79,25 @@ public class KnnExecutionOptionsTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> JoinQuery.validateKnnExecutionOptions(geographyParams, false, false, true));
+  }
+
+  @Test
+  public void convenienceOverloadDoesNotRequireInternalRowMetadata() throws Exception {
+    GeometryFactory factory = new GeometryFactory();
+    SpatialRDD<Point> queries = new SpatialRDD<>();
+    queries.setRawSpatialRDD(
+        sc.parallelize(Collections.singletonList(factory.createPoint(new Coordinate(0.0, 0.0)))));
+    SpatialRDD<Point> objects = new SpatialRDD<>();
+    objects.setRawSpatialRDD(
+        sc.parallelize(
+            Arrays.asList(
+                factory.createPoint(new Coordinate(-1.0, 0.0)),
+                factory.createPoint(new Coordinate(1.0, 0.0)))));
+
+    JavaPairRDD<Point, Point> matches =
+        JoinQuery.knnJoin(queries, objects, planarParams(), false, false, true);
+
+    assertEquals(1L, matches.count());
   }
 
   private JoinParams planarParams() {

@@ -799,47 +799,7 @@ public class JoinQuery {
       boolean broadcastJoin)
       throws Exception {
     return knnJoin(
-        queryRDD,
-        objectRDD,
-        joinParams,
-        includeTies,
-        exclusive,
-        broadcastJoin,
-        false,
-        joinParams.distanceMetric == DistanceMetric.EUCLIDEAN);
-  }
-
-  /**
-   * Joins each query geometry to its nearest object geometries.
-   *
-   * @param queryRDD geometries for which neighbours are searched
-   * @param objectRDD candidate neighbour geometries
-   * @param joinParams KNN join parameters
-   * @param includeTies whether to return every candidate tied at the kth distance
-   * @param exclusive whether candidates topologically equal to the query are excluded before
-   *     ranking
-   * @param broadcastJoin whether either side uses the broadcast KNN path
-   * @param mergeReplicatedQueries whether regular-plan local candidates are reconciled by stable
-   *     row identity
-   */
-  public static <U extends Geometry, T extends Geometry> JavaPairRDD<U, T> knnJoin(
-      SpatialRDD<U> queryRDD,
-      SpatialRDD<T> objectRDD,
-      JoinParams joinParams,
-      boolean includeTies,
-      boolean exclusive,
-      boolean broadcastJoin,
-      boolean mergeReplicatedQueries)
-      throws Exception {
-    return knnJoin(
-        queryRDD,
-        objectRDD,
-        joinParams,
-        includeTies,
-        exclusive,
-        broadcastJoin,
-        mergeReplicatedQueries,
-        joinParams.distanceMetric == DistanceMetric.EUCLIDEAN);
+        queryRDD, objectRDD, joinParams, includeTies, exclusive, broadcastJoin, false, false);
   }
 
   /**
@@ -855,7 +815,8 @@ public class JoinQuery {
    * @param mergeReplicatedQueries whether regular-plan local candidates are reconciled by stable
    *     row identity
    * @param queryLocalTieSemantics whether tie distances use the requested metric and duplicate
-   *     input rows retain their independent identity
+   *     input rows retain their independent identity; callers enabling this internal execution
+   *     mode must attach {@link KnnGeometryMetadata} to both inputs before partitioning
    */
   public static <U extends Geometry, T extends Geometry> JavaPairRDD<U, T> knnJoin(
       SpatialRDD<U> queryRDD,
