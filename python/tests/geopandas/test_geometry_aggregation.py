@@ -23,6 +23,7 @@ import pyspark.pandas as ps
 import shapely
 from packaging.version import parse as parse_version
 from pyspark.sql import DataFrame as SparkDataFrame
+from pyspark.sql import functions as F
 
 try:
     from shapely.errors import EmptyPartError
@@ -139,6 +140,9 @@ class TestGeometryAggregation(TestGeopandasBase):
             "value",
         ]
         collected = series_result.to_geopandas()
+        assert collected.index.name == expected.index.name == "zone"
+        assert collected.geometry.name == "geometry"
+        assert collected.crs == expected.crs == source.crs
         assert collected.loc["a", "zone"] == "a"
         assert collected.loc["a", "label"] == "first-a"
         assert collected.loc["a", "value"] == 1
@@ -444,21 +448,63 @@ class TestGeometryAggregation(TestGeopandasBase):
         multi_point = MultiPoint([(0, 0), (1, 1)])
         assert collect(GeoSeries([multi_point]), multi=True).equals(multi_point)
 
-    def test_collect_uses_one_spark_action(self, monkeypatch):
+    @pytest.mark.parametrize(
+        "geometries, crs, expected_srid",
+        [
+            ([Point(0, 0), Point(1, 1)], None, 0),
+            pytest.param(
+                [
+                    Polygon(),
+                    Polygon([(0, 0), (1, 0), (0, 1)]),
+                ],
+                None,
+                0,
+                marks=pytest.mark.skipif(
+                    not SHAPELY_GE_20,
+                    reason="Shapely 1 does not retain typed empty geometries",
+                ),
+            ),
+            pytest.param(
+                [Polygon(), Polygon()],
+                "EPSG:4326",
+                4326,
+                marks=pytest.mark.skipif(
+                    not SHAPELY_GE_20,
+                    reason="Shapely 1 does not retain typed empty geometries",
+                ),
+            ),
+        ],
+    )
+    def test_collect_uses_one_spark_action(
+        self,
+        monkeypatch,
+        geometries,
+        crs,
+        expected_srid,
+    ):
         first_calls = 0
+        result_srids = []
         original_first = SparkDataFrame.first
 
         def count_first(frame):
             nonlocal first_calls
             first_calls += 1
-            return original_first(frame)
+            enriched = frame.select(
+                "*",
+                stf.ST_SRID(F.col("__collect_geometry__")).alias(
+                    "__collect_result_srid__"
+                ),
+            )
+            result = original_first(enriched)
+            result_srids.append(result["__collect_result_srid__"])
+            return result
 
         monkeypatch.setattr(SparkDataFrame, "first", count_first)
 
-        result = collect(GeoSeries([Point(0, 0), Point(1, 1)]))
+        collect(GeoSeries(geometries, crs=crs))
 
-        assert result.equals(MultiPoint([(0, 0), (1, 1)]))
         assert first_calls == 1
+        assert result_srids == [expected_srid]
 
     def test_collect_distributed_geometry_families(self):
         assert collect(GeoSeries([Point(0, 0), Point(1, 1)])).equals(
@@ -474,16 +520,31 @@ class TestGeometryAggregation(TestGeopandasBase):
         assert len(collected_lines.geoms) == 2
 
         if SHAPELY_GE_20:
-            polygons = [
-                Polygon(),
-                Polygon([(0, 0), (1, 0), (0, 1)]),
-            ]
-            collected_polygons = collect(GeoSeries(polygons))
-            assert collected_polygons.geom_type == "MultiPolygon"
-            assert len(collected_polygons.geoms) == 1
-            assert collect(GeoSeries([Polygon()]), multi=True).equals(
-                gpd.tools.collect(Polygon(), multi=True)
-            )
+            empty_polygon = Polygon()
+            polygon = Polygon([(0, 0), (1, 0), (0, 1)])
+            for polygons in (
+                [empty_polygon, polygon],
+                [polygon, empty_polygon],
+            ):
+                collected_polygons = collect(GeoSeries(polygons))
+                assert collected_polygons.geom_type == "MultiPolygon"
+                assert len(collected_polygons.geoms) == 1
+
+            singleton_empty = collect(GeoSeries([empty_polygon]))
+            assert singleton_empty.geom_type == "Polygon"
+            assert singleton_empty.is_empty
+
+            for polygons in (
+                [empty_polygon],
+                [empty_polygon, empty_polygon],
+            ):
+                collected_empty = collect(
+                    GeoSeries(polygons, crs="EPSG:4326"),
+                    multi=True,
+                )
+                assert collected_empty.geom_type == "MultiPolygon"
+                assert collected_empty.is_empty
+                assert len(collected_empty.geoms) == 0
         else:
             polygons = [
                 Polygon([(0, 0), (1, 0), (0, 1)]),
@@ -524,8 +585,17 @@ class TestGeometryAggregation(TestGeopandasBase):
                 )
             )
         if SHAPELY_GE_20:
-            with pytest.raises(EmptyPartError, match="empty component"):
-                collect(GeoSeries([Point()]), multi=True)
+            for empty, non_empty in (
+                (Point(), Point(0, 0)),
+                (LineString(), LineString([(0, 0), (1, 1)])),
+            ):
+                singleton_empty = collect(GeoSeries([empty]))
+                assert singleton_empty.geom_type == empty.geom_type
+                assert singleton_empty.is_empty
+                with pytest.raises(EmptyPartError, match="empty component"):
+                    collect(GeoSeries([empty]), multi=True)
+                with pytest.raises(EmptyPartError, match="empty component"):
+                    collect(GeoSeries([empty, non_empty]))
         else:
             with pytest.raises(KeyError, match="GeometryCollection"):
                 collect(GeoSeries([Point()]), multi=True)

@@ -21,6 +21,7 @@ from packaging.version import parse as parse_version
 from pyspark.sql import functions as F
 
 from sedona.spark.sql import st_aggregates as sta
+from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
 
 SHAPELY_LT_20 = parse_version(shapely.__version__) < parse_version("2.0.0")
@@ -68,23 +69,35 @@ def collect(x, multi=False):
 
     geometry = x.spark.column
     geometry_type = stf.ST_GeometryType(geometry)
+    geometry_is_empty = stf.ST_IsEmpty(geometry)
     if SHAPELY_LT_20:
         # Shapely 1 reports every empty geometry as GeometryCollection,
         # regardless of whether the serializer retains its original family.
         geometry_type = F.when(
-            stf.ST_IsEmpty(geometry),
+            geometry_is_empty,
             F.lit("ST_GeometryCollection"),
         ).otherwise(geometry_type)
+    non_empty_geometry = F.when(~geometry_is_empty, geometry)
+    first_geometry_type = F.first(geometry_type, ignorenulls=True)
+    empty_multipolygon = stc.ST_GeomFromWKT(
+        F.lit("MULTIPOLYGON EMPTY"),
+        F.first(stf.ST_SRID(geometry), ignorenulls=True),
+    )
+    collected_geometry = F.coalesce(
+        sta.ST_Collect_Agg(non_empty_geometry),
+        F.when(
+            first_geometry_type == F.lit("ST_Polygon"),
+            empty_multipolygon,
+        ),
+    )
     metadata = x._internal.spark_frame.agg(
         F.count(F.lit(1)).alias("__collect_count__"),
         F.count(geometry).alias("__collect_non_null_count__"),
+        F.count(non_empty_geometry).alias("__collect_non_empty_count__"),
         F.countDistinct(geometry_type).alias("__collect_type_count__"),
-        F.first(geometry_type, ignorenulls=True).alias("__collect_type__"),
-        F.max(F.when(stf.ST_IsEmpty(geometry), F.lit(1)).otherwise(F.lit(0))).alias(
-            "__collect_has_empty__"
-        ),
+        first_geometry_type.alias("__collect_type__"),
         F.first(geometry, ignorenulls=True).alias("__collect_single_geometry__"),
-        sta.ST_Collect_Agg(geometry).alias("__collect_geometry__"),
+        collected_geometry.alias("__collect_geometry__"),
     ).first()
 
     count = metadata["__collect_count__"]
@@ -112,7 +125,9 @@ def collect(x, multi=False):
     if geometry_type_name not in {"Point", "LineString", "Polygon"}:
         raise KeyError(geometry_type_name)
 
-    if metadata["__collect_has_empty__"] and geometry_type_name in {
+    non_empty_count = metadata["__collect_non_empty_count__"]
+    has_empty = non_empty_count != count
+    if has_empty and geometry_type_name in {
         "Point",
         "LineString",
     }:
