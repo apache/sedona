@@ -1514,7 +1514,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         how : {"inner", "left", "right"}, default "inner"
             Join mode and side whose index and active geometry are retained.
         max_distance : float, optional
-            Maximum planar distance for a nearest match.
+            Maximum planar distance for a nearest match. This is applied after
+            nearest candidates are found and does not currently prune the KNN
+            search.
         lsuffix, rsuffix : str
             Suffixes for overlapping columns.
         distance_col : str, optional

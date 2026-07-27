@@ -255,10 +255,11 @@ nearest = left_df.sjoin_nearest(
 ```
 
 Every candidate tied at the nearest distance is returned. `max_distance`
-limits eligible matches, and `exclusive=True` excludes candidates
-topologically equal to the query geometry before ranking. Distances are
-planar and use CRS units; geographic CRS inputs emit a warning because their
-distance results may be inaccurate.
+limits eligible matches, but it is currently applied after nearest candidates
+are found and does not prune the distributed KNN search. `exclusive=True`
+excludes candidates topologically equal to the query geometry before ranking.
+Distances are planar and use CRS units; geographic CRS inputs emit a warning
+because their distance results may be inaccurate.
 
 For inputs with MultiIndex columns or tuple-valued index names, the result uses
 a padded MultiIndex when needed. This is the pandas-on-Spark representation of

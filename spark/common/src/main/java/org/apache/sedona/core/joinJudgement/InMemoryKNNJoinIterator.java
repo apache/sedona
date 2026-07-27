@@ -20,6 +20,7 @@ package org.apache.sedona.core.joinJudgement;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -28,6 +29,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.core.enums.DistanceMetric;
+import org.apache.sedona.core.wrapper.KnnGeometryMetadata;
 import org.apache.sedona.core.wrapper.UniqueGeometry;
 import org.apache.spark.util.LongAccumulator;
 import org.locationtech.jts.geom.Envelope;
@@ -163,7 +165,14 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
         nearest.add(candidate);
       }
     }
-    if (includeTies) {
+    if (queryLocalTieSemantics) {
+      // Inspect every candidate tied at the local kth distance even when ties are excluded. Stable
+      // row identity can then select the same k candidates in regular and broadcast plans.
+      nearest = getUpdatedLocalKWithTies(queryGeom, nearest, strTree);
+      if (!includeTies) {
+        nearest = deterministicTopK(queryGeom, nearest);
+      }
+    } else if (includeTies) {
       nearest = getUpdatedLocalKWithTies(queryGeom, nearest, strTree);
     }
 
@@ -206,17 +215,42 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
           continue;
         }
         double distance = tieDistance(streamShape, candidate);
-        boolean isNewCandidate =
-            queryLocalTieSemantics
-                ? uniqueCandidates.add(candidate)
-                : !uniqueCandidates.contains(candidate);
-        if (distance == maxDistance && isNewCandidate) {
-          tiedResults.add(candidate);
+        if (distance == maxDistance) {
+          // Keep the legacy equality-based membership check unchanged. Query-local semantics use
+          // identity so duplicate input rows with equal geometries remain separate candidates.
+          boolean isNewCandidate;
+          if (queryLocalTieSemantics) {
+            isNewCandidate = uniqueCandidates.add(candidate);
+          } else {
+            isNewCandidate = !uniqueCandidates.contains(candidate);
+          }
+          if (isNewCandidate) {
+            tiedResults.add(candidate);
+          }
         }
       }
       localK = tiedResults;
     }
     return localK;
+  }
+
+  private List<U> deterministicTopK(Geometry query, List<U> candidates) {
+    if (candidates.size() <= k) {
+      return candidates;
+    }
+    candidates.sort(
+        Comparator.comparingDouble((U candidate) -> tieDistance(query, candidate))
+            .thenComparingLong(this::stableCandidateId));
+    return new ArrayList<>(candidates.subList(0, k));
+  }
+
+  private long stableCandidateId(U candidate) {
+    Object userData = candidate.getUserData();
+    if (!(userData instanceof KnnGeometryMetadata)) {
+      throw new IllegalStateException(
+          "Query-local planar KNN candidates must carry stable row metadata");
+    }
+    return ((KnnGeometryMetadata) userData).getUniqueId();
   }
 
   private double tieDistance(Geometry query, Geometry candidate) {

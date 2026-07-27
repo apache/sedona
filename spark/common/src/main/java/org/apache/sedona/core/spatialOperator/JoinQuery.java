@@ -867,6 +867,8 @@ public class JoinQuery {
       boolean mergeReplicatedQueries,
       boolean queryLocalTieSemantics)
       throws Exception {
+    validateKnnExecutionOptions(
+        joinParams, broadcastJoin, mergeReplicatedQueries, queryLocalTieSemantics);
     verifyCRSMatch(queryRDD, objectRDD);
     if (!broadcastJoin) verifyPartitioningNumberMatch(queryRDD, objectRDD);
 
@@ -961,11 +963,31 @@ public class JoinQuery {
               resultCount,
               candidateCount);
       joinResult =
-          querySideBroadcastKNNJoin(objectRDD, joinParams, judgement, includeTies, exclusive);
+          querySideBroadcastKNNJoin(
+              objectRDD, joinParams, judgement, includeTies, exclusive, queryLocalTieSemantics);
     }
 
     return joinResult.mapToPair(
         (PairFunction<Pair<U, T>, U, T>) pair -> new Tuple2<>(pair.getKey(), pair.getValue()));
+  }
+
+  static void validateKnnExecutionOptions(
+      JoinParams joinParams,
+      boolean broadcastJoin,
+      boolean mergeReplicatedQueries,
+      boolean queryLocalTieSemantics) {
+    if (mergeReplicatedQueries && broadcastJoin) {
+      throw new IllegalArgumentException(
+          "Replicated KNN reconciliation is only valid for the regular join plan");
+    }
+    if (mergeReplicatedQueries && !queryLocalTieSemantics) {
+      throw new IllegalArgumentException(
+          "Replicated KNN reconciliation requires query-local tie semantics and stable row metadata");
+    }
+    if (queryLocalTieSemantics && joinParams.distanceMetric != DistanceMetric.EUCLIDEAN) {
+      throw new IllegalArgumentException(
+          "Query-local tie semantics are only supported for planar Euclidean KNN joins");
+    }
   }
 
   /**
@@ -985,7 +1007,7 @@ public class JoinQuery {
         .mapToPair(
             pair ->
                 new Tuple2<Long, Pair<U, T>>(
-                    getKnnRowId(pair.getKey()), Pair.of(pair.getKey(), pair.getValue())))
+                    getKnnRowId(pair.getKey(), "query"), Pair.of(pair.getKey(), pair.getValue())))
         .combineByKey(
             pair ->
                 new KnnCandidateAccumulator<U, T>(k, distanceMetric, includeTies, exclusive)
@@ -996,11 +1018,13 @@ public class JoinQuery {
         .flatMap(KnnCandidateAccumulator::iterator);
   }
 
-  private static long getKnnRowId(Geometry geometry) {
+  private static long getKnnRowId(Geometry geometry, String role) {
     Object userData = geometry.getUserData();
     if (!(userData instanceof KnnGeometryMetadata)) {
       throw new IllegalStateException(
-          "Replicated regular KNN geometries must carry stable row metadata");
+          "Query-local KNN "
+              + role
+              + " geometries must carry KnnGeometryMetadata; check execution option wiring");
     }
     return ((KnnGeometryMetadata) userData).getUniqueId();
   }
@@ -1040,7 +1064,7 @@ public class JoinQuery {
         return this;
       }
 
-      long candidateId = getKnnRowId(candidate);
+      long candidateId = getKnnRowId(candidate, "candidate");
       if (candidateIds.contains(candidateId)) {
         return this;
       }
@@ -1150,7 +1174,8 @@ public class JoinQuery {
           JoinParams joinParams,
           KnnJoinIndexJudgement<UniqueGeometry<U>, T> judgement,
           boolean includeTies,
-          boolean exclusive) {
+          boolean exclusive,
+          boolean queryLocalTieSemantics) {
     final JavaRDD<Pair<U, T>> joinResult;
     JavaRDD<Pair<UniqueGeometry<U>, T>> joinResultMapped =
         objectRDD.rawSpatialRDD.mapPartitions(judgement::callUsingBroadcastQueryList);
@@ -1187,7 +1212,13 @@ public class JoinQuery {
                         double distance2 =
                             KnnJoinIndexJudgement.distance(
                                 p2.getKey(), p2.getValue(), distanceMetric);
-                        return Double.compare(distance1, distance2); // Sort ascending by distance
+                        int distanceComparison = Double.compare(distance1, distance2);
+                        if (distanceComparison != 0 || !queryLocalTieSemantics) {
+                          return distanceComparison;
+                        }
+                        return Long.compare(
+                            getKnnRowId(p1.getValue(), "candidate"),
+                            getKnnRowId(p2.getValue(), "candidate"));
                       });
 
                   if (includeTies) {

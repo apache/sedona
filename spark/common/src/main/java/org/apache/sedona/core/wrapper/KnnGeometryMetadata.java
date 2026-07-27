@@ -20,7 +20,7 @@ package org.apache.sedona.core.wrapper;
 
 import java.io.Serializable;
 
-/** Stable row identity used while merging replicated regular KNN candidates. */
+/** Stable row identity used by query-local planar KNN execution. */
 public final class KnnGeometryMetadata implements Serializable {
   private final long uniqueId;
   private final Object originalUserData;
@@ -30,11 +30,27 @@ public final class KnnGeometryMetadata implements Serializable {
     this.originalUserData = originalUserData;
   }
 
+  /**
+   * Adds stable identity without nesting metadata when an execution path is prepared more than
+   * once.
+   */
+  public static KnnGeometryMetadata wrap(long uniqueId, Object userData) {
+    if (userData instanceof KnnGeometryMetadata) {
+      return (KnnGeometryMetadata) userData;
+    }
+    return new KnnGeometryMetadata(uniqueId, userData);
+  }
+
   public long getUniqueId() {
     return uniqueId;
   }
 
+  /** Returns the row payload, tolerating metadata nested by an older or external caller. */
   public Object getOriginalUserData() {
-    return originalUserData;
+    Object userData = originalUserData;
+    while (userData instanceof KnnGeometryMetadata) {
+      userData = ((KnnGeometryMetadata) userData).originalUserData;
+    }
+    return userData;
   }
 }

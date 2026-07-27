@@ -823,6 +823,8 @@ def sjoin_nearest(
         Join mode and the side whose index and active geometry are retained.
     max_distance : float, optional
         Maximum planar distance for a nearest match. Must be greater than zero.
+        This is currently applied after nearest candidates are found, so it
+        limits output matches but does not prune the distributed KNN search.
     lsuffix, rsuffix : str
         Suffixes applied to overlapping left and right column names.
     distance_col : str, optional
@@ -856,6 +858,9 @@ def sjoin_nearest(
     -----
     Distances are planar and expressed in CRS units. Geographic CRS inputs
     therefore emit the same accuracy warning as GeoPandas.
+
+    ``max_distance`` is currently a post-filter rather than an index search
+    bound. It preserves result semantics but does not reduce KNN search work.
 
     When either input has MultiIndex columns or tuple-valued index names,
     pandas-on-Spark cannot represent GeoPandas' one-level object index

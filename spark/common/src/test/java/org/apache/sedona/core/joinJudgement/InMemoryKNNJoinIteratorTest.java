@@ -19,7 +19,10 @@
 package org.apache.sedona.core.joinJudgement;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,10 +30,12 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.core.enums.DistanceMetric;
+import org.apache.sedona.core.wrapper.KnnGeometryMetadata;
 import org.apache.spark.util.LongAccumulator;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.index.strtree.STRtree;
 
@@ -80,10 +85,66 @@ public class InMemoryKNNJoinIteratorTest {
     assertEquals(1, results.size());
   }
 
+  @Test
+  public void queryLocalNoTiesSelectsLowestStableRowId() {
+    Point query = point(0, 0);
+    Point higherId = point(-1, 0);
+    higherId.setUserData(KnnGeometryMetadata.wrap(9, "higher"));
+    Point lowerId = point(1, 0);
+    lowerId.setUserData(KnnGeometryMetadata.wrap(2, "lower"));
+
+    List<Point> results =
+        collect(query, Arrays.asList(higherId, lowerId), DistanceMetric.EUCLIDEAN, false, true);
+
+    assertEquals(Collections.singletonList(lowerId), results);
+  }
+
+  @Test
+  public void queryLocalNoTiesDoesNotRequireMetadataWithoutTieAmbiguity() {
+    Point query = point(0, 0);
+    Point candidate = point(1, 0);
+
+    List<Point> results =
+        collect(query, Collections.singletonList(candidate), DistanceMetric.EUCLIDEAN, false, true);
+
+    assertEquals(Collections.singletonList(candidate), results);
+  }
+
+  @Test
+  public void stableMetadataWrappingIsIdempotentAndRobustToOlderNesting() {
+    Object originalRow = new Object();
+    KnnGeometryMetadata metadata = KnnGeometryMetadata.wrap(4, originalRow);
+
+    assertSame(metadata, KnnGeometryMetadata.wrap(7, metadata));
+    assertSame(originalRow, new KnnGeometryMetadata(8, metadata).getOriginalUserData());
+  }
+
+  @Test
+  public void topologicalEqualityUsesSafeShortCircuits() {
+    Point point = point(0, 0);
+    assertTrue(KnnJoinIndexJudgement.areTopologicallyEqual(point, point));
+    assertFalse(KnnJoinIndexJudgement.areTopologicallyEqual(point, point(1, 0)));
+
+    LineString forward =
+        factory.createLineString(new Coordinate[] {new Coordinate(0, 0), new Coordinate(1, 0)});
+    LineString reverse =
+        factory.createLineString(new Coordinate[] {new Coordinate(1, 0), new Coordinate(0, 0)});
+    assertTrue(KnnJoinIndexJudgement.areTopologicallyEqual(forward, reverse));
+  }
+
   private List<Point> collect(
       Point query,
       List<Point> candidates,
       DistanceMetric distanceMetric,
+      boolean queryLocalTieSemantics) {
+    return collect(query, candidates, distanceMetric, true, queryLocalTieSemantics);
+  }
+
+  private List<Point> collect(
+      Point query,
+      List<Point> candidates,
+      DistanceMetric distanceMetric,
+      boolean includeTies,
       boolean queryLocalTieSemantics) {
     InMemoryKNNJoinIterator<Point, Point> iterator =
         new InMemoryKNNJoinIterator<>(
@@ -91,7 +152,7 @@ public class InMemoryKNNJoinIteratorTest {
             index(candidates),
             1,
             distanceMetric,
-            true,
+            includeTies,
             false,
             queryLocalTieSemantics,
             new LongAccumulator(),

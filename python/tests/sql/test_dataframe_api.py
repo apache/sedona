@@ -1995,6 +1995,27 @@ class TestDataFrameAPI(TestBase):
         ).select(tied_objects["id"].alias("id"))
         assert sorted(row.id for row in tied.collect()) == [0, 1]
 
+        for broadcast_side in ("queries", "objects"):
+            query_plan = (
+                queries.hint("broadcast") if broadcast_side == "queries" else queries
+            ).alias("queries")
+            object_plan = (
+                tied_objects.hint("broadcast")
+                if broadcast_side == "objects"
+                else tied_objects
+            ).alias("objects")
+            no_ties = query_plan.join(
+                object_plan,
+                stp.ST_KNN(
+                    query_plan["geom"],
+                    object_plan["geom"],
+                    1,
+                    use_spheroid=False,
+                    include_ties=False,
+                ),
+            ).select(object_plan["id"].alias("id"))
+            assert [row.id for row in no_ties.collect()] == [0]
+
         exclusive_objects = (
             self.spark.createDataFrame(
                 [(0, "POINT (0 0)"), (1, "POINT (2 0)")],

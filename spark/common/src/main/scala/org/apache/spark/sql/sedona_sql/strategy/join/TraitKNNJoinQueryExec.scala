@@ -99,9 +99,9 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
     val (queryShapes, objectShapes) =
       toSpatialRddPair(queryResultsRaw, boundQueryShape, objectResultsRaw, boundObjectShape)
 
-    if (useAccurateRegularKnn) {
-      attachStableRowIds(queryShapes)
-      attachStableRowIds(objectShapes)
+    if (useQueryLocalTieSemantics) {
+      ensureStableRowIds(queryShapes)
+      ensureStableRowIds(objectShapes)
     }
 
     objectShapes.analyze()
@@ -200,12 +200,12 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
     spatialRdd
   }
 
-  private def attachStableRowIds(spatialRdd: SpatialRDD[Geometry]): Unit = {
+  private def ensureStableRowIds(spatialRdd: SpatialRDD[Geometry]): Unit = {
     spatialRdd.setRawSpatialRDD(
       spatialRdd.rawSpatialRDD.rdd
         .zipWithUniqueId()
         .map { case (geometry, uniqueId) =>
-          geometry.setUserData(new KnnGeometryMetadata(uniqueId, geometry.getUserData))
+          geometry.setUserData(KnnGeometryMetadata.wrap(uniqueId, geometry.getUserData))
           geometry
         }
         .toJavaRDD())
@@ -307,10 +307,21 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
   private def getOriginalRow(geometry: Geometry): UnsafeRow = {
     geometry.getUserData match {
       case metadata: KnnGeometryMetadata =>
-        metadata.getOriginalUserData.asInstanceOf[UnsafeRow]
+        metadata.getOriginalUserData match {
+          case row: UnsafeRow => row
+          case other =>
+            throw new IllegalStateException(
+              s"KNN stable row metadata must wrap UnsafeRow, found ${userDataType(other)}")
+        }
       case row: UnsafeRow => row
+      case other =>
+        throw new IllegalStateException(
+          s"KNN geometry must carry UnsafeRow user data, found ${userDataType(other)}")
     }
   }
+
+  private def userDataType(userData: Any): String =
+    if (userData == null) "null" else userData.getClass.getName
 
   private def saveKNNPartitionerToFile(
       partitioner: SpatialPartitioner,

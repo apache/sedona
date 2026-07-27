@@ -315,6 +315,14 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
   }
 
   public static boolean areTopologicallyEqual(Geometry left, Geometry right) {
+    if (left == right) {
+      return true;
+    }
+    // Topologically equal geometries must have equal envelopes. This avoids constructing a DE-9IM
+    // relate matrix for nearly every candidate considered by an exclusive KNN search.
+    if (!left.getEnvelopeInternal().equals(right.getEnvelopeInternal())) {
+      return false;
+    }
     return left.equalsTopo(right);
   }
 

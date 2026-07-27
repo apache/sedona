@@ -541,6 +541,40 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       }
     }
 
+    it("query-local no-tie selection should be stable across regular and broadcast plans") {
+      sparkSession
+        .range(0, 1, 1, 1)
+        .selectExpr("cast(id as int) AS id", "ST_Point(cast(id - id as double), 0.0) AS geom")
+        .createOrReplaceTempView("STABLE_TIE_QUERIES")
+      sparkSession
+        .range(0, 2, 1, 1)
+        .selectExpr("cast(id as int) AS id", "ST_Point(cast(id - id + 1 as double), 0.0) AS geom")
+        .createOrReplaceTempView("STABLE_TIE_OBJECTS")
+
+      withConf(
+        Map(
+          "sedona.join.autoBroadcastJoinThreshold" -> "-1",
+          "spark.sql.autoBroadcastJoinThreshold" -> "-1")) {
+        def nearestWithHint(hint: String) =
+          sparkSession.sql(s"""SELECT $hint q.ID AS qid, o.ID AS oid
+              |FROM STABLE_TIE_QUERIES q JOIN STABLE_TIE_OBJECTS o
+              |ON ST_KNN(q.GEOM, o.GEOM, 1, false, false)""".stripMargin)
+
+        val regular = nearestWithHint("")
+        val broadcastQuery = nearestWithHint("/*+ BROADCAST(q) */")
+        val broadcastObject = nearestWithHint("/*+ BROADCAST(o) */")
+
+        findKNNJoinExec(regular).isInstanceOf[KNNJoinExec] should be(true)
+        findKNNJoinExec(broadcastQuery).isInstanceOf[BroadcastQuerySideKNNJoinExec] should be(
+          true)
+        findKNNJoinExec(broadcastObject).isInstanceOf[BroadcastObjectSideKNNJoinExec] should be(
+          true)
+
+        Seq(regular, broadcastQuery, broadcastObject).map(
+          _.collect().map(_.getInt(1)).toSeq) should be(Seq(Seq(0), Seq(0), Seq(0)))
+      }
+    }
+
     it("query-local geography should retain historical planar tie expansion") {
       val points1 = Seq((0, "POINT(0 90)", "query"))
       val points2 = Seq(
