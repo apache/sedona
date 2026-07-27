@@ -298,7 +298,7 @@ buildings_projected["perimeter"] = buildings_projected.geometry.length
 
 ## 已支持的操作
 
-Apache Sedona 的 GeoPandas API 已实现 **39 个 GeoSeries 函数** 与 **10 个 GeoDataFrame 函数**，覆盖了 GeoPandas 中最常用的操作：
+Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame 操作：
 
 ### 数据 I/O
 
