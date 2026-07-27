@@ -258,6 +258,11 @@ nearest = left_df.sjoin_nearest(
 距离按平面计算并使用 CRS 的单位；输入为地理坐标系时会发出警告，因为距离
 结果可能不准确。
 
+对于使用 MultiIndex 列或元组型索引名称的输入，结果会在必要时使用补齐后的
+MultiIndex。这是 pandas-on-Spark 对 GeoPandas 混合元组与字符串对象列索引的表示
+方式；后者无法由 pandas-on-Spark 直接表达。如果后缀处理或补齐会产生重复标签，
+该操作将拒绝执行。
+
 ### 坐标参考系操作
 
 在不同坐标参考系（CRS）之间转换几何对象：
@@ -317,7 +322,7 @@ buildings_projected["perimeter"] = buildings_projected.geometry.length
 
 ## 已支持的操作
 
-Apache Sedona 的 GeoPandas API 已实现 **39 个 GeoSeries 函数** 与 **10 个 GeoDataFrame 函数**，覆盖了 GeoPandas 中最常用的操作：
+Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame 操作：
 
 ### 数据 I/O
 

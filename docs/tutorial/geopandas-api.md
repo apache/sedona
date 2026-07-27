@@ -260,6 +260,12 @@ topologically equal to the query geometry before ranking. Distances are
 planar and use CRS units; geographic CRS inputs emit a warning because their
 distance results may be inaccurate.
 
+For inputs with MultiIndex columns or tuple-valued index names, the result uses
+a padded MultiIndex when needed. This is the pandas-on-Spark representation of
+GeoPandas' mixed tuple-and-string object column index, which pandas-on-Spark
+cannot represent directly. The operation rejects suffixing or padding
+combinations that would create duplicate labels.
+
 ### Coordinate Reference System Operations
 
 Transform geometries between different coordinate reference systems:
@@ -319,7 +325,7 @@ buildings_projected["perimeter"] = buildings_projected.geometry.length
 
 ## Supported Operations
 
-The GeoPandas API for Apache Sedona has implemented **39 GeoSeries functions** and **10 GeoDataFrame functions**, covering the most commonly used GeoPandas operations:
+The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries and GeoDataFrame operations:
 
 ### Data I/O
 

@@ -50,13 +50,26 @@ class _NearestJoinSide:
     data_aliases: Tuple[str, ...]
     data_labels: Tuple[Tuple[Any, ...], ...]
     active_label: Tuple[Any, ...]
-    active_name: Any
     geometry_alias: str
     order_alias: str
 
 
 def _qualified_column(qualifier: str, name: str) -> Column:
     return F.col(f"{qualifier}.`{name}`")
+
+
+def _nearest_label_in_columns(
+    label: Tuple[Any, ...],
+    column_labels: List[Tuple[Any, ...]],
+) -> bool:
+    """Apply pandas Index/MultiIndex membership rules to a column label."""
+
+    if label in column_labels:
+        return True
+    return len(label) == 1 and any(
+        len(column_label) > 1 and column_label[0] == label[0]
+        for column_label in column_labels
+    )
 
 
 def _prepare_nearest_side(frame: GeoDataFrame, prefix: str) -> _NearestJoinSide:
@@ -98,7 +111,6 @@ def _prepare_nearest_side(frame: GeoDataFrame, prefix: str) -> _NearestJoinSide:
         data_aliases=data_aliases,
         data_labels=tuple(internal.column_labels),
         active_label=active_label,
-        active_name=frame.active_geometry_name,
         geometry_alias=data_aliases[geometry_position],
         order_alias=order_alias,
     )
@@ -107,7 +119,8 @@ def _prepare_nearest_side(frame: GeoDataFrame, prefix: str) -> _NearestJoinSide:
 def _nearest_reset_index_labels(
     side: _NearestJoinSide,
     suffix: str,
-    other: _NearestJoinSide,
+    side_data_labels: List[Tuple[Any, ...]],
+    other_data_labels: List[Tuple[Any, ...]],
 ) -> List[Tuple[Any, ...]]:
     """Return GeoPandas-compatible labels for reset index levels."""
 
@@ -119,13 +132,15 @@ def _nearest_reset_index_labels(
                 f"index_{suffix}{position}" if multiple_levels else f"index_{suffix}"
             )
             label = (generated,)
-            if label in side.data_labels or label in other.data_labels:
+            if _nearest_label_in_columns(
+                label, side_data_labels
+            ) or _nearest_label_in_columns(label, other_data_labels):
                 raise ValueError(
                     f"'{generated}' cannot be a column name in the frames being joined"
                 )
         else:
             label = name
-            if label in side.data_labels:
+            if _nearest_label_in_columns(label, side_data_labels):
                 display_name = label[0] if len(label) == 1 else label
                 raise ValueError(f"cannot insert {display_name}, already exists")
         labels.append(label)
@@ -135,7 +150,7 @@ def _nearest_reset_index_labels(
 def _nearest_suffix_label(label: Tuple[Any, ...], suffix: str) -> Tuple[Any, ...]:
     if len(label) == 1:
         return (f"{label[0]}_{suffix}",)
-    return (*label[:-1], f"{label[-1]}_{suffix}")
+    return (f"{label}_{suffix}",)
 
 
 def _nearest_output_columns(
@@ -147,9 +162,6 @@ def _nearest_output_columns(
 ) -> List[Tuple[str, Tuple[Any, ...]]]:
     """Resolve output values and labels using GeoPandas reset/suffix rules."""
 
-    left_index_labels = _nearest_reset_index_labels(left, lsuffix, right)
-    right_index_labels = _nearest_reset_index_labels(right, rsuffix, left)
-
     left_data = [
         (alias, label)
         for alias, label in zip(left.data_aliases, left.data_labels)
@@ -160,9 +172,23 @@ def _nearest_output_columns(
         for alias, label in zip(right.data_aliases, right.data_labels)
         if how == "right" or alias != right.geometry_alias
     ]
+    left_data_labels = [label for _, label in left_data]
+    right_data_labels = [label for _, label in right_data]
+    left_index_labels = _nearest_reset_index_labels(
+        left,
+        lsuffix,
+        left_data_labels,
+        right_data_labels,
+    )
+    right_index_labels = _nearest_reset_index_labels(
+        right,
+        rsuffix,
+        right_data_labels,
+        left_data_labels,
+    )
 
-    left_reset_labels = left_index_labels + [label for _, label in left_data]
-    right_reset_labels = right_index_labels + [label for _, label in right_data]
+    left_reset_labels = left_index_labels + left_data_labels
+    right_reset_labels = right_index_labels + right_data_labels
     overlap = set(left_reset_labels).intersection(right_reset_labels)
 
     def rename(
@@ -204,9 +230,6 @@ def _nearest_result_index_names(
     rsuffix: str,
 ) -> List[Any]:
     """Apply the reset/merge suffix rules to the retained index names."""
-
-    left_index_labels = _nearest_reset_index_labels(left, lsuffix, right)
-    right_index_labels = _nearest_reset_index_labels(right, rsuffix, left)
     left_data_labels = [
         label
         for alias, label in zip(left.data_aliases, left.data_labels)
@@ -217,6 +240,18 @@ def _nearest_result_index_names(
         for alias, label in zip(right.data_aliases, right.data_labels)
         if how == "right" or alias != right.geometry_alias
     ]
+    left_index_labels = _nearest_reset_index_labels(
+        left,
+        lsuffix,
+        left_data_labels,
+        right_data_labels,
+    )
+    right_index_labels = _nearest_reset_index_labels(
+        right,
+        rsuffix,
+        right_data_labels,
+        left_data_labels,
+    )
     overlap = set(left_index_labels + left_data_labels).intersection(
         right_index_labels + right_data_labels
     )
@@ -234,6 +269,47 @@ def _nearest_result_index_names(
         )
         for name, label in zip(side.index_names, labels)
     ]
+
+
+def _normalize_nearest_output_labels(
+    output_columns: List[Tuple[str, Tuple[Any, ...]]],
+) -> Tuple[List[Tuple[str, Tuple[Any, ...]]], int]:
+    """Pad labels to the uniform depth required by pandas-on-Spark."""
+
+    output_levels = max((len(label) for _, label in output_columns), default=1)
+    if output_levels == 1:
+        return output_columns, output_levels
+    return (
+        [
+            (alias, label + ("",) * (output_levels - len(label)))
+            for alias, label in output_columns
+        ],
+        output_levels,
+    )
+
+
+def _validate_nearest_output_labels(
+    output_columns: List[Tuple[str, Tuple[Any, ...]]],
+) -> None:
+    """Reject duplicate labels that pandas-on-Spark cannot represent safely."""
+
+    seen_labels = set()
+    duplicate_labels = set()
+    for _, label in output_columns:
+        if label in seen_labels:
+            duplicate_labels.add(label)
+        seen_labels.add(label)
+    if duplicate_labels:
+        display_labels = ", ".join(
+            sorted(
+                repr(label[0] if len(label) == 1 else label)
+                for label in duplicate_labels
+            )
+        )
+        raise ValueError(
+            "sjoin_nearest cannot represent duplicate output columns after "
+            f"suffixing or MultiIndex padding: {display_labels}"
+        )
 
 
 def _check_sjoin_nearest_crs(left_df: GeoDataFrame, right_df: GeoDataFrame) -> None:
@@ -372,6 +448,11 @@ def _nearest_frame_join(
                 break
         if not replaced:
             output_columns.append((distance_alias, distance_label))
+    output_columns, output_column_levels = _normalize_nearest_output_labels(
+        output_columns
+    )
+    _validate_nearest_output_labels(output_columns)
+    output_column_label_names = [None] * output_column_levels
 
     index_names = [
         f"__sjoin_nearest_result_index_{position}__"
@@ -404,11 +485,7 @@ def _nearest_frame_join(
         ),
         column_labels=[label for _, label in output_columns],
         data_spark_columns=[scol_for(result_frame, name) for name in data_names],
-        column_label_names=(
-            left_df._internal.column_label_names
-            if how in ("inner", "left")
-            else right_df._internal.column_label_names
-        ),
+        column_label_names=output_column_label_names,
     )
     result = GeoDataFrame(ps.DataFrame(internal))
     if distance_replaces_geometry:
@@ -419,7 +496,13 @@ def _nearest_frame_join(
         )
         object.__setattr__(result, "_geometry_column_name", None)
     else:
-        object.__setattr__(result, "_geometry_column_name", active.active_name)
+        active_output_label = active.active_label + ("",) * (
+            output_column_levels - len(active.active_label)
+        )
+        active_output_name = (
+            active_output_label[0] if output_column_levels == 1 else active_output_label
+        )
+        object.__setattr__(result, "_geometry_column_name", active_output_name)
         object.__setattr__(
             result,
             "_empty_crs_source",
@@ -773,6 +856,14 @@ def sjoin_nearest(
     -----
     Distances are planar and expressed in CRS units. Geographic CRS inputs
     therefore emit the same accuracy warning as GeoPandas.
+
+    When either input has MultiIndex columns or tuple-valued index names,
+    pandas-on-Spark cannot represent GeoPandas' one-level object index
+    containing both tuple and string labels. Sedona therefore returns an
+    equivalent padded MultiIndex when needed and preserves the retained active
+    geometry label. Outputs whose suffixing or padding would collapse distinct
+    labels to duplicates are rejected because pandas-on-Spark cannot represent
+    them safely.
     """
     _basic_checks(left_df, right_df, how, lsuffix, rsuffix)
 

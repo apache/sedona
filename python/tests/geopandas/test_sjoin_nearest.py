@@ -142,6 +142,236 @@ class TestSpatialJoinNearest(TestGeopandasBase):
             crs="EPSG:3857",
         )
 
+        expected = left.sjoin_nearest(
+            right,
+            how=how,
+            distance_col="distance",
+        )
+        actual = sjoin_nearest(
+            self._to_sedona(left),
+            self._to_sedona(right),
+            how=how,
+            distance_col="distance",
+        )
+        self._assert_matches_geopandas(actual, expected)
+        assert actual.index.names == expected.index.names
+
+    @pytest.mark.parametrize("how", ["inner", "left", "right"])
+    def test_multiindex_columns_use_padded_output(self, how):
+        columns = pd.MultiIndex.from_tuples(
+            [("a", "value"), ("g", "geometry")],
+            names=["kind", "field"],
+        )
+        left = gpd.GeoDataFrame(
+            [[1, Point(0, 0)]],
+            columns=columns,
+            geometry=("g", "geometry"),
+            crs="EPSG:3857",
+        )
+        right = gpd.GeoDataFrame(
+            [[2, Point(1, 0)]],
+            columns=columns,
+            geometry=("g", "geometry"),
+            crs="EPSG:3857",
+        )
+        distance_col = "('a', 'value')_left" if how == "inner" else "distance"
+
+        expected = left.sjoin_nearest(
+            right,
+            how=how,
+            distance_col=distance_col,
+        )
+        actual = sjoin_nearest(
+            self._to_sedona(left),
+            self._to_sedona(right),
+            how=how,
+            distance_col=distance_col,
+        )
+        collected = actual.to_geopandas()
+
+        assert isinstance(actual.columns, pd.MultiIndex)
+        assert actual.columns.names == [None, None]
+        expected_padded_columns = pd.MultiIndex.from_tuples(
+            [
+                label if isinstance(label, tuple) else (label, "")
+                for label in expected.columns
+            ]
+        )
+        assert actual.columns.equals(expected_padded_columns)
+        expected_active = ("g", "geometry")
+        assert actual.active_geometry_name == expected_active
+        assert actual.crs == expected.crs
+
+        # GeoPandas flattens reset-index and suffixed labels into a mixed
+        # one-level object Index. pandas-on-Spark cannot represent that Index,
+        # so compare values after assigning the oracle's labels.
+        collected.columns = expected.columns
+        collected._geometry_column_name = expected.active_geometry_name
+        assert_geodataframe_equal(
+            collected,
+            expected,
+            check_dtype=False,
+            check_index_type=False,
+        )
+
+    @pytest.mark.parametrize("how", ["inner", "left", "right"])
+    def test_column_axis_name_is_dropped(self, how):
+        left = gpd.GeoDataFrame(
+            {"a": [1], "geometry": [Point(0, 0)]},
+            crs="EPSG:3857",
+        )
+        right = gpd.GeoDataFrame(
+            {"b": [2], "geometry": [Point(1, 0)]},
+            crs="EPSG:3857",
+        )
+        left.columns.name = "left_columns"
+        right.columns.name = "right_columns"
+
+        expected = left.sjoin_nearest(right, how=how)
+        actual = sjoin_nearest(
+            self._to_sedona(left),
+            self._to_sedona(right),
+            how=how,
+        )
+
+        self._assert_matches_geopandas(actual, expected)
+        assert actual.columns.name is None
+
+    @pytest.mark.parametrize("how", ["inner", "right"])
+    def test_tuple_index_name_suffixes_match_geopandas(self, how):
+        index = pd.Index([0], name=("idx", "part"))
+        left = gpd.GeoDataFrame(
+            {"a": [1], "geometry": [Point(0, 0)]},
+            index=index,
+            crs="EPSG:3857",
+        )
+        right = gpd.GeoDataFrame(
+            {"b": [2], "geometry": [Point(1, 0)]},
+            index=index,
+            crs="EPSG:3857",
+        )
+
+        expected = left.sjoin_nearest(right, how=how)
+        actual = sjoin_nearest(
+            self._to_sedona(left),
+            self._to_sedona(right),
+            how=how,
+        )
+
+        self._assert_matches_geopandas(actual, expected)
+        assert list(actual.columns) == list(expected.columns)
+        assert actual.index.names == expected.index.names
+
+    def test_suffix_created_duplicate_labels_are_rejected(self):
+        left = gpd.GeoDataFrame(
+            {
+                "a": [10],
+                "a_left": [20],
+                "geometry": [Point(0, 0)],
+            },
+            crs="EPSG:3857",
+        )
+        right = gpd.GeoDataFrame(
+            {
+                "a": [30],
+                "geometry": [Point(3, 4)],
+            },
+            crs="EPSG:3857",
+        )
+
+        with pytest.warns(FutureWarning):
+            left.sjoin_nearest(
+                right,
+                distance_col="a_left",
+            )
+        with pytest.raises(ValueError, match="duplicate output columns.*a_left"):
+            sjoin_nearest(
+                self._to_sedona(left),
+                self._to_sedona(right),
+                distance_col="a_left",
+            )
+
+    def test_multiindex_padding_collision_is_rejected(self):
+        left = gpd.GeoDataFrame(
+            {"a": [1], "geometry": [Point(0, 0)]},
+            crs="EPSG:3857",
+        )
+        right_columns = pd.MultiIndex.from_tuples([("a", ""), ("g", "geometry")])
+        right = gpd.GeoDataFrame(
+            [[2, Point(1, 0)]],
+            columns=right_columns,
+            geometry=("g", "geometry"),
+            crs="EPSG:3857",
+        )
+
+        expected = left.sjoin_nearest(right)
+        assert expected.columns.is_unique
+        with pytest.raises(ValueError, match="duplicate output columns.*a"):
+            sjoin_nearest(
+                self._to_sedona(left),
+                self._to_sedona(right),
+            )
+
+    @pytest.mark.parametrize(
+        "multi_on_left,how",
+        [(True, "right"), (False, "inner")],
+    )
+    def test_mixed_column_depth_preserves_active_geometry(
+        self,
+        multi_on_left,
+        how,
+    ):
+        columns = pd.MultiIndex.from_tuples(
+            [("a", "value"), ("g", "geometry")],
+            names=["kind", "field"],
+        )
+        multi = gpd.GeoDataFrame(
+            [[1, Point(0, 0)]],
+            columns=columns,
+            geometry=("g", "geometry"),
+            crs="EPSG:3857",
+        )
+        plain = gpd.GeoDataFrame(
+            {"a": [2], "geometry": [Point(1, 0)]},
+            crs="EPSG:3857",
+        )
+        left, right = (multi, plain) if multi_on_left else (plain, multi)
+
+        expected = left.sjoin_nearest(right, how=how)
+        actual = sjoin_nearest(
+            self._to_sedona(left),
+            self._to_sedona(right),
+            how=how,
+        )
+        collected = actual.to_geopandas()
+
+        assert isinstance(actual.columns, pd.MultiIndex)
+        assert actual.active_geometry_name == ("geometry", "")
+        assert actual.crs == expected.crs
+        collected.columns = expected.columns
+        collected._geometry_column_name = expected.active_geometry_name
+        assert_geodataframe_equal(
+            collected,
+            expected,
+            check_dtype=False,
+            check_index_type=False,
+        )
+
+    @pytest.mark.parametrize("how", ["inner", "left"])
+    def test_dropped_right_geometry_does_not_conflict_with_left_index(self, how):
+        left = gpd.GeoDataFrame(
+            {"geometry": [Point(0, 0)]},
+            crs="EPSG:3857",
+        )
+        right = gpd.GeoDataFrame(
+            {
+                "x": [1],
+                "index_left": [Point(1, 0)],
+            },
+            geometry="index_left",
+            crs="EPSG:3857",
+        )
+
         expected = left.sjoin_nearest(right, how=how)
         actual = sjoin_nearest(
             self._to_sedona(left),
@@ -149,7 +379,63 @@ class TestSpatialJoinNearest(TestGeopandasBase):
             how=how,
         )
         self._assert_matches_geopandas(actual, expected)
-        assert actual.index.names == expected.index.names
+
+    def test_dropped_left_geometry_does_not_conflict_with_right_index(self):
+        left = gpd.GeoDataFrame(
+            {
+                "x": [1],
+                "index_right": [Point(0, 0)],
+            },
+            geometry="index_right",
+            crs="EPSG:3857",
+        )
+        right = gpd.GeoDataFrame(
+            {"geometry": [Point(1, 0)]},
+            crs="EPSG:3857",
+        )
+
+        expected = left.sjoin_nearest(right, how="right")
+        actual = sjoin_nearest(
+            self._to_sedona(left),
+            self._to_sedona(right),
+            how="right",
+        )
+        self._assert_matches_geopandas(actual, expected)
+
+    @pytest.mark.parametrize(
+        "column_name,how",
+        [("index_left", "inner"), ("index_right", "right")],
+    )
+    def test_generated_index_detects_multiindex_first_level_collision(
+        self,
+        column_name,
+        how,
+    ):
+        columns = pd.MultiIndex.from_tuples([(column_name, "value"), ("g", "geometry")])
+        conflicting = gpd.GeoDataFrame(
+            [[1, Point(0, 0)]],
+            columns=columns,
+            geometry=("g", "geometry"),
+            crs="EPSG:3857",
+        )
+        plain = gpd.GeoDataFrame(
+            {"geometry": [Point(1, 0)]},
+            crs="EPSG:3857",
+        )
+        left, right = (
+            (conflicting, plain)
+            if column_name == "index_left"
+            else (plain, conflicting)
+        )
+
+        with pytest.raises(ValueError, match=column_name):
+            left.sjoin_nearest(right, how=how)
+        with pytest.raises(ValueError, match=column_name):
+            sjoin_nearest(
+                self._to_sedona(left),
+                self._to_sedona(right),
+                how=how,
+            )
 
     def test_exclusive_uses_topological_equality(self):
         left = gpd.GeoDataFrame(
