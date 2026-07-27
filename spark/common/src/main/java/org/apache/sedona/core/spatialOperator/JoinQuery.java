@@ -815,8 +815,8 @@ public class JoinQuery {
    * @param mergeReplicatedQueries whether regular-plan local candidates are reconciled by stable
    *     row identity
    * @param queryLocalTieSemantics whether tie distances use the requested metric and duplicate
-   *     input rows retain their independent identity; callers enabling this internal execution
-   *     mode must attach {@link KnnGeometryMetadata} to both inputs before partitioning
+   *     input rows retain their independent identity; callers enabling this internal execution mode
+   *     must attach {@link KnnGeometryMetadata} to both inputs before partitioning
    */
   public static <U extends Geometry, T extends Geometry> JavaPairRDD<U, T> knnJoin(
       SpatialRDD<U> queryRDD,
