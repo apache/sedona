@@ -33,6 +33,7 @@ from pyspark.pandas.utils import log_advice
 
 from sedona.spark.geopandas._typing import Label
 from sedona.spark.geopandas.base import GeoFrame
+from sedona.spark.sql import st_functions as stf
 
 from pandas.api.extensions import register_extension_dtype
 from geopandas.geodataframe import crs_mismatch_error
@@ -336,9 +337,49 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             self._geometry_column_name = data._geometry_column_name
             if crs is not None and data.crs != crs:
                 raise ValueError(crs_mismatch_error)
+            if isinstance(data, GeoDataFrame):
+                empty_crs_source = getattr(data, "_empty_crs_source", None)
+                if empty_crs_source is not None:
+                    object.__setattr__(
+                        self,
+                        "_empty_crs_source",
+                        empty_crs_source,
+                    )
 
         if geometry:
-            self.set_geometry(geometry, inplace=True, crs=crs)
+            existing_geometry = None
+            if crs is not None and pd.api.types.is_hashable(geometry):
+                try:
+                    candidate = self[geometry]
+                except (KeyError, TypeError, ValueError):
+                    pass
+                else:
+                    if isinstance(candidate, sgpd.GeoSeries):
+                        existing_geometry = candidate
+
+            if existing_geometry is None:
+                self.set_geometry(geometry, inplace=True, crs=crs)
+            else:
+                # Updating the existing Spark column directly avoids index
+                # alignment, which would multiply rows for duplicate indexes.
+                from pyproj import CRS
+
+                normalized_crs = CRS.from_user_input(crs)
+                new_epsg = normalized_crs.to_epsg() or 0
+                self._update_internal_frame(
+                    self._internal.with_new_spark_column(
+                        existing_geometry._column_label,
+                        stf.ST_SetSRID(existing_geometry.spark.column, new_epsg),
+                    )
+                )
+                self._geometry_column_name = geometry
+                empty_crs_source = self[geometry]
+                empty_crs_source._empty_crs_value = normalized_crs
+                object.__setattr__(
+                    self,
+                    "_empty_crs_source",
+                    empty_crs_source,
+                )
 
         if geometry is None and "geometry" in self.columns:
 
@@ -396,7 +437,11 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 )
 
             raise MissingGeometryColumnError(msg)
-        return self[self._geometry_column_name]
+        geometry = self[self._geometry_column_name]
+        empty_crs_source = getattr(self, "_empty_crs_source", None)
+        if empty_crs_source is not None:
+            geometry._empty_crs_source = empty_crs_source
+        return geometry
 
     def _set_geometry(self, col):
         # This check is included in the original geopandas. Note that this prevents assigning a str to the property
@@ -509,7 +554,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         else:
             frame = self.copy()
 
-        geo_column_name = self._geometry_column_name
+        previous_geometry_name = self._geometry_column_name
+        geo_column_name = previous_geometry_name
         new_series = False
 
         if geo_column_name is None:
@@ -591,6 +637,11 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         if new_series:
             # Note: This casts GeoSeries back into pspd.Series, so we lose any metadata that's not serialized.
             frame[geo_column_name] = level
+            object.__setattr__(frame, "_empty_crs_source", level)
+        elif geo_column_name != previous_geometry_name:
+            # A frame-level fallback belongs only to the active geometry
+            # column that produced it. Do not leak it to another column.
+            object.__setattr__(frame, "_empty_crs_source", None)
 
         if not inplace:
             return frame
@@ -710,7 +761,14 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             else:
                 pd_df[col_name] = series._to_pandas()
 
-        return gpd.GeoDataFrame(pd_df, geometry=self._geometry_column_name)
+        result = gpd.GeoDataFrame(
+            pd_df,
+            geometry=self._geometry_column_name,
+            crs=self.crs if self._geometry_column_name is not None else None,
+        )
+        if self._geometry_column_name is None:
+            result._geometry_column_name = None
+        return result
 
     def to_spark_pandas(self) -> pspd.DataFrame:
         """
@@ -744,9 +802,13 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         0  POINT (1 1)       2       3
         """
         # Note: The deep parameter is a dummy parameter just as it is in PySpark pandas.
-        return GeoDataFrame(
+        result = GeoDataFrame(
             pspd.DataFrame(self._internal.copy()), geometry=self.active_geometry_name
         )
+        empty_crs_source = getattr(self, "_empty_crs_source", None)
+        if empty_crs_source is not None:
+            object.__setattr__(result, "_empty_crs_source", empty_crs_source)
+        return result
 
     def _safe_get_crs(self):
         """

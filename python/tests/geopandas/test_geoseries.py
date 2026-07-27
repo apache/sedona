@@ -4790,6 +4790,29 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         geo_series = sgpd.GeoSeries(self.geoseries, crs=4326)
         assert geo_series.crs.to_epsg() == 4326
 
+        all_null = sgpd.GeoSeries([None], name="geometry", crs=4326)
+        assert all_null.crs.to_epsg() == 4326
+        assert all_null.copy(deep=True).crs.to_epsg() == 4326
+
+        without_crs = all_null.set_crs(None, allow_override=True)
+        assert without_crs.crs is None
+        assert all_null.crs.to_epsg() == 4326
+
+        with_other_crs = all_null.set_crs(3857, allow_override=True)
+        assert with_other_crs.crs.to_epsg() == 3857
+        assert all_null.crs.to_epsg() == 4326
+
+        empty_result = sgpd.GeoSeries(
+            [GeometryCollection()],
+            crs=4326,
+        ).explode(ignore_index=True)
+        assert len(empty_result) == 0
+        assert empty_result.crs.to_epsg() == 4326
+        assert empty_result.set_crs(3857, allow_override=True).crs.to_epsg() == 3857
+
+        all_null.set_crs(None, inplace=True, allow_override=True)
+        assert all_null.crs is None
+
         # This test errors due to a bug in pyspark.
         # We can uncomment it once the fix is https://github.com/apache/spark/pull/51475 is merged
         # It was tested locally by using the fixed version of pyspark

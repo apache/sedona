@@ -63,13 +63,26 @@ class TestGeoDataFrame(TestGeopandasBase):
 
     def test_construct_from_geopandas(self):
         gpd_df = gpd.GeoDataFrame(
-            {"geometry1": [Point(0, 0)]}, geometry="geometry1", crs="EPSG:3857"
+            {"geometry1": [Point(0, 0), Point(1, 1)]},
+            index=[0, 0],
+            geometry="geometry1",
+            crs="EPSG:3857",
         )
         with ps.option_context("compute.ops_on_diff_frames", True):
             sgpd_df = GeoDataFrame(gpd_df)
         assert sgpd_df.crs == "EPSG:3857"
         assert sgpd_df.geometry.crs == "EPSG:3857"
         assert sgpd_df.geometry.name == "geometry1"
+        assert len(sgpd_df) == len(gpd_df)
+
+        all_null_gpd = gpd.GeoDataFrame(
+            {"geometry": [None]},
+            crs="EPSG:4326",
+        )
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            all_null_sgpd = GeoDataFrame(all_null_gpd)
+        assert all_null_sgpd.crs == "EPSG:4326"
+        assert all_null_sgpd.to_geopandas().crs == "EPSG:4326"
 
     @pytest.mark.parametrize(
         "obj",
@@ -402,6 +415,32 @@ class TestGeoDataFrame(TestGeopandasBase):
 
         assert df.crs == "EPSG:3857"
         assert df.geometry.crs == "EPSG:3857"
+
+        all_null = GeoSeries([None], name="shape", crs="EPSG:4326")
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            df = GeoDataFrame({"value": [1]}).set_geometry(all_null)
+
+        assert df.active_geometry_name == "shape"
+        assert df.crs == "EPSG:4326"
+        assert df.geometry.crs == "EPSG:4326"
+
+        copied = df.copy()
+        reconstructed = GeoDataFrame(df)
+        assert copied.crs == "EPSG:4326"
+        assert reconstructed.crs == "EPSG:4326"
+
+        same_geometry = df.set_geometry("shape")
+        assert same_geometry.crs == "EPSG:4326"
+
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            switchable = GeoDataFrame({"other": [Point(0, 0)]}).set_geometry(all_null)
+
+        switched = switchable.set_geometry("other")
+        assert switched.crs is None
+        assert switchable.crs == "EPSG:4326"
+
+        switchable.set_geometry("other", inplace=True)
+        assert switchable.crs is None
 
     def test_active_geometry_name(self):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):
