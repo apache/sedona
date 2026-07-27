@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_functions &mdash; Apache Sedona Python Documentation</title>
@@ -1381,12 +1380,12 @@
 
 <div class="viewcode-block" id="ST_IsPolygonCW"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_IsPolygonCW">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_IsPolygonCW</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the Polygon or MultiPolygon use a clockwise orientation for exterior ring and counter-clockwise</span>
-<span class="sd">    orientation for interior ring.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether polygon rings use clockwise exterior orientation.</span>
 
 <span class="sd">    :param geometry: Geometry column to check.</span>
 <span class="sd">    :type geometry: ColumnOrName</span>
-<span class="sd">    :return: True if the geometry is empty and False otherwise as a boolean column.</span>
+<span class="sd">    :return: True if every exterior ring is clockwise and every interior ring</span>
+<span class="sd">        is counter-clockwise. Empty Polygon and MultiPolygon values return True.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_IsPolygonCW&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
@@ -2234,11 +2233,12 @@
 
 <div class="viewcode-block" id="ST_IsPolygonCCW"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_IsPolygonCCW">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_IsPolygonCCW</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the Polygon or MultiPolygon use a counter-clockwise orientation for exterior ring and clockwise</span>
-<span class="sd">    orientation for interior ring.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether polygon rings use counter-clockwise exterior orientation.</span>
+
 <span class="sd">    :param geometry: Geometry column to check.</span>
 <span class="sd">    :type geometry: ColumnOrName</span>
-<span class="sd">    :return: True if the geometry is empty and False otherwise as a boolean column.</span>
+<span class="sd">    :return: True if every exterior ring is counter-clockwise and every interior</span>
+<span class="sd">        ring is clockwise. Empty Polygon and MultiPolygon values return True.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_IsPolygonCCW&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>

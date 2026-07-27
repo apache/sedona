@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -1834,10 +1833,10 @@
 
         <span class="n">xs</span> <span class="o">=</span> <span class="n">_normalize_affine_scalar</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="s2">&quot;&#39;xs&#39; must be a numeric scalar&quot;</span><span class="p">)</span>
         <span class="n">ys</span> <span class="o">=</span> <span class="n">_normalize_affine_scalar</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="s2">&quot;&#39;ys&#39; must be a numeric scalar&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">use_radians</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">use_radians</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;use_radians&#39; must be a boolean&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">use_radians</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">use_radians</span><span class="p">):</span>
             <span class="n">xs</span> <span class="o">=</span> <span class="n">xs</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
             <span class="n">ys</span> <span class="o">=</span> <span class="n">ys</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.0</span>
         <span class="n">tan_x</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
