@@ -141,6 +141,30 @@ class GeographyFunctionTest extends TestBaseScala {
       assertEquals(1.0, point.getX, 1e-9)
       assertEquals(2.0, point.getY, 1e-9)
     }
+
+    it("ST_X and ST_Y") {
+      val row = sparkSession
+        .sql("""
+          SELECT
+            ST_X(ST_GeogFromWKT('POINT (-73.9857 40.7484)', 4326)) AS x,
+            ST_Y(ST_GeogFromWKT('POINT (-73.9857 40.7484)', 4326)) AS y
+        """)
+        .first()
+      assertEquals(-73.9857, row.getDouble(0), 0.0)
+      assertEquals(40.7484, row.getDouble(1), 0.0)
+    }
+
+    it("ST_X and ST_Y return null for non-point geography") {
+      val row = sparkSession
+        .sql("""
+          SELECT
+            ST_X(ST_GeogFromWKT('LINESTRING (0 0, 1 1)', 4326)) AS x,
+            ST_Y(ST_GeogFromWKT('LINESTRING (0 0, 1 1)', 4326)) AS y
+        """)
+        .first()
+      assertTrue(row.isNullAt(0))
+      assertTrue(row.isNullAt(1))
+    }
   }
 
   // ─── Level 2: ST_Length, ST_Area, ST_Distance ──────────────────────────

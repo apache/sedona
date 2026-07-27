@@ -148,6 +148,22 @@ public class FunctionTest {
     assertEquals(5, Functions.nPoints(g));
   }
 
+  @Test
+  public void xY_point() throws ParseException {
+    Geography g = Constructors.geogFromWKT("POINT (-73.9857 40.7484)", 4326);
+    assertEquals(-73.9857, Functions.x(g), 0.0);
+    assertEquals(40.7484, Functions.y(g), 0.0);
+  }
+
+  @Test
+  public void xY_nonPointAndNull() throws ParseException {
+    Geography line = Constructors.geogFromWKT("LINESTRING (0 0, 1 1)", 4326);
+    assertNull(Functions.x(line));
+    assertNull(Functions.y(line));
+    assertNull(Functions.x(null));
+    assertNull(Functions.y(null));
+  }
+
   // S2 area-weighted centroids on small polygons differ from planar by an O(d^2/R^2)
   // spherical correction. 5e-3 deg (~500 m) is wide enough to absorb that drift on
   // 1°-scale shapes near origin, while still catching any real bug (a planar/JTS centroid
