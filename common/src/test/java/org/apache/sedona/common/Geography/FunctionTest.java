@@ -158,8 +158,11 @@ public class FunctionTest {
   @Test
   public void xY_nonPointAndNull() throws ParseException {
     Geography line = Constructors.geogFromWKT("LINESTRING (0 0, 1 1)", 4326);
+    Geography emptyPoint = Constructors.geogFromWKT("POINT EMPTY", 4326);
     assertNull(Functions.x(line));
     assertNull(Functions.y(line));
+    assertNull(Functions.x(emptyPoint));
+    assertNull(Functions.y(emptyPoint));
     assertNull(Functions.x(null));
     assertNull(Functions.y(null));
   }

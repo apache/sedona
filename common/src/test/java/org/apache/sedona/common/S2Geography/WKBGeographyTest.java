@@ -49,6 +49,8 @@ public class WKBGeographyTest {
     WKBGeography geog = WKBGeography.fromWKB(wkb, 4326);
     assertEquals(4326, geog.getSRID());
     assertSame(wkb, geog.getWKBBytes());
+    assertEquals(30.0, geog.getPointX(), EPS);
+    assertEquals(10.0, geog.getPointY(), EPS);
 
     // Accessing JTS should parse lazily
     Geometry jts = geog.getJTSGeometry();
@@ -245,6 +247,8 @@ public class WKBGeographyTest {
     byte[] bytes = GeographyWKBSerializer.serialize(original);
     Geography deserialized = GeographyWKBSerializer.deserialize(bytes);
     assertTrue(deserialized instanceof WKBGeography);
+    assertNull(((WKBGeography) deserialized).getPointX());
+    assertNull(((WKBGeography) deserialized).getPointY());
   }
 
   // ─── Serialize S2 Geography via new serializer ────────────────────────────
@@ -418,6 +422,8 @@ public class WKBGeographyTest {
     // isPoint() must recognize the base type after stripping the EWKB SRID flag.
     assertTrue(geog.isPoint());
     assertEquals(0, geog.dimension());
+    assertEquals(30.0, geog.getPointX(), EPS);
+    assertEquals(10.0, geog.getPointY(), EPS);
 
     // extractPoint() must skip the 4 SRID bytes; lon/lat should be the original values.
     S2Point p = geog.extractPoint();
@@ -432,6 +438,8 @@ public class WKBGeographyTest {
     WKBGeography geog = WKBGeography.fromWKB(wkbZ, 0);
     // isPoint() is safe — just tests base type — but extractPoint/shape must refuse Z/M.
     assertTrue(geog.isPoint());
+    assertEquals(30.0, geog.getPointX(), EPS);
+    assertEquals(10.0, geog.getPointY(), EPS);
     assertThrows(UnsupportedOperationException.class, geog::extractPoint);
     assertThrows(UnsupportedOperationException.class, () -> new WkbS2Shape(wkbZ));
   }

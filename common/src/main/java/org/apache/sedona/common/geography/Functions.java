@@ -186,12 +186,14 @@ public class Functions {
   /** Return the longitude (X coordinate) of a point geography, or null for non-point inputs. */
   public static Double x(Geography g) {
     if (g == null) return null;
+    if (g instanceof WKBGeography) return ((WKBGeography) g).getPointX();
     return org.apache.sedona.common.Functions.x(toJTS(g));
   }
 
   /** Return the latitude (Y coordinate) of a point geography, or null for non-point inputs. */
   public static Double y(Geography g) {
     if (g == null) return null;
+    if (g instanceof WKBGeography) return ((WKBGeography) g).getPointY();
     return org.apache.sedona.common.Functions.y(toJTS(g));
   }
 
