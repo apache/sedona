@@ -23,7 +23,7 @@
 from sedona.spark.geopandas.geoseries import GeoSeries
 from sedona.spark.geopandas.geodataframe import GeoDataFrame
 
-from sedona.spark.geopandas.tools import sjoin
+from sedona.spark.geopandas.tools import clip, sjoin
 
 from sedona.spark.geopandas.io import read_file, read_parquet
 

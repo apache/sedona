@@ -396,7 +396,11 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 )
 
             raise MissingGeometryColumnError(msg)
-        return self[self._geometry_column_name]
+        geometry = self[self._geometry_column_name]
+        empty_crs_source = getattr(self, "_empty_crs_source", None)
+        if empty_crs_source is not None:
+            geometry._empty_crs_source = empty_crs_source
+        return geometry
 
     def _set_geometry(self, col):
         # This check is included in the original geopandas. Note that this prevents assigning a str to the property

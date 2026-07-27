@@ -181,7 +181,8 @@ nyc_buildings.head()
 
 ### 空间过滤
 
-使用空间索引与过滤方法。注意：当前版本尚未实现 `cx` 空间索引：
+使用 `cx` 进行分布式坐标范围筛选；如需将相交的几何裁剪到掩膜边界，
+可继续使用 `clip`：
 
 ```python
 from shapely.geometry import box
@@ -194,13 +195,14 @@ central_park_bbox = box(
     40.789,  # 右上角（经度，纬度）
 )
 
-# 使用空间索引筛选边界框内的建筑
-# 注意：该写法需要把数据收集到 driver 才能进行空间过滤
-# 对于大规模数据，建议改用空间连接（spatial join）
-buildings_sample = nyc_buildings.sample(1000)  # 演示用：抽样 1000 行
-central_park_buildings = buildings_sample[
-    buildings_sample.geometry.intersects(central_park_bbox)
+# 筛选与坐标范围相交的要素
+central_park_buildings = nyc_buildings.cx[
+    -73.973:-73.951,
+    40.764:40.789,
 ]
+
+# 将筛选后的几何裁剪到精确的多边形边界
+central_park_buildings = central_park_buildings.clip(central_park_bbox)
 
 # 显示结果
 print(
@@ -307,6 +309,8 @@ Apache Sedona 的 GeoPandas API 已实现 **39 个 GeoSeries 函数** 与 **10 �
 ### 空间操作
 
 - `sjoin()` —— 多种谓词的空间连接
+- `cx` —— 基于坐标范围的空间筛选
+- `clip()` —— 使用标量、矩形或分布式掩膜裁剪几何
 - `buffer()` —— 几何缓冲
 - `distance()` —— 距离计算
 - `intersects()`、`contains()`、`within()` —— 空间谓词
@@ -333,6 +337,8 @@ Apache Sedona 的 GeoPandas API 已实现 **39 个 GeoSeries 函数** 与 **10 �
 - `intersects()`、`contains()`、`within()` —— 空间谓词
 - `intersection()` —— 几何相交
 - `make_valid()` —— 几何校验与修复
+- `cx` —— 基于坐标范围的空间筛选
+- `clip()` —— 分布式几何裁剪
 - `sindex` —— 空间索引（功能有限）
 
 ### 数据转换
