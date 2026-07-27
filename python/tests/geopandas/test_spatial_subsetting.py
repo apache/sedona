@@ -364,6 +364,59 @@ class TestDistributedSpatialSubsetting(TestGeopandasBase):
         assert list(result.geom_type.to_pandas()) == ["Polygon"] * 3
         self._assert_srid(result, 4326)
 
+    def test_clip_keep_geom_type_preserves_multipart_without_collection(self):
+        mask = box(0, 0, 2, 2)
+        expected_source = gpd.GeoSeries(
+            [
+                MultiPolygon(
+                    [
+                        box(0.2, 0.2, 0.4, 0.4),
+                        box(0.6, 0.6, 0.8, 0.8),
+                    ]
+                ),
+                box(2, 0.5, 3, 1),
+            ],
+            index=pd.Index(["multi", "edge"], name="feature_id"),
+            crs=4326,
+        )
+        source = GeoSeries(expected_source, crs=4326)
+
+        result = source.clip(mask, keep_geom_type=True)
+        expected = expected_source.clip(mask, keep_geom_type=True)
+
+        self.check_sgpd_equals_gpd(result, expected)
+        assert list(result.to_geopandas().index) == ["multi"]
+        assert list(result.geom_type.to_pandas()) == ["MultiPolygon"]
+        self._assert_srid(result, 4326)
+
+    def test_clip_keep_geom_type_explodes_collection_with_null_first_row(self):
+        mask = box(0, 0, 2, 2)
+        expected_source = gpd.GeoSeries(
+            [
+                None,
+                MultiPolygon(
+                    [
+                        box(0.5, 0.5, 1, 1),
+                        box(2, 0.5, 3, 1),
+                    ]
+                ),
+            ],
+            index=pd.Index(["null", "collection"], name="feature_id"),
+            crs=4326,
+        )
+        source_seed = expected_source.copy()
+        source_seed.iloc[0] = box(0, 0, 0.1, 0.1)
+        source = GeoSeries(source_seed, crs=4326)
+        source.iloc[0] = None
+
+        result = source.clip(mask, keep_geom_type=True)
+        expected = expected_source.clip(mask, keep_geom_type=True)
+
+        self.check_sgpd_equals_gpd(result, expected)
+        assert list(result.to_geopandas().index) == ["collection", "collection"]
+        assert set(result.geom_type.to_pandas()) == {"Polygon", "LineString"}
+        self._assert_srid(result, 4326)
+
     def test_clip_keep_geom_type_uses_first_geometry_type_including_null(self):
         mask = box(0, 0, 1, 1)
         expected_source = gpd.GeoSeries(

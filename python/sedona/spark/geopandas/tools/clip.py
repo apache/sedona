@@ -364,13 +364,16 @@ def _geometry_summaries(source_sdf, clipped_sdf, geometry_name):
     return summary.first()
 
 
-def _keep_only_family(internal, sdf, geometry_name, family):
-    """Explode multipart rows and retain the source line or polygon family."""
+def _keep_only_family(internal, sdf, geometry_name, family, explode):
+    """Retain the source line or polygon family, exploding when requested."""
     reserved = set(sdf.columns)
     parent_order_name = _temporary_column_name(sdf, "clip_parent_order", reserved)
     position_name = _temporary_column_name(sdf, "clip_position", reserved)
     geometry_value_name = _temporary_column_name(sdf, "clip_geometry", reserved)
     geometry = scol_for(sdf, geometry_name)
+    # GeoPandas explodes the entire result only when clipping introduces a
+    # GeometryCollection. Multiple basic families alone trigger filtering.
+    geometry_parts = stf.ST_Dump(geometry) if explode else F.array(geometry)
 
     expanded = sdf.select(
         *[
@@ -379,9 +382,7 @@ def _keep_only_family(internal, sdf, geometry_name, family):
             if name not in (geometry_name, NATURAL_ORDER_COLUMN_NAME)
         ],
         scol_for(sdf, NATURAL_ORDER_COLUMN_NAME).alias(parent_order_name),
-        # GeoPandas explodes the entire clipped result when any new collection
-        # appears, including sibling MultiPolygon and MultiLineString rows.
-        F.posexplode(stf.ST_Dump(geometry)).alias(position_name, geometry_value_name),
+        F.posexplode(geometry_parts).alias(position_name, geometry_value_name),
     )
 
     allowed_types = {
@@ -409,8 +410,14 @@ def _keep_only_family(internal, sdf, geometry_name, family):
         scol_for(expanded, parent_order_name),
         scol_for(expanded, position_name),
     )
+    sort_columns = [scol_for(expanded, parent_order_name)]
+    if explode:
+        # GEOS overlay collections place higher-dimensional components first,
+        # while JTS may emit them in the opposite order.
+        sort_columns.append(stf.ST_Dimension(scol_for(expanded, geometry_name)).desc())
+    sort_columns.append(scol_for(expanded, position_name))
     expanded = (
-        expanded.orderBy(parent_order_name, position_name)
+        expanded.orderBy(*sort_columns)
         .withColumn(NATURAL_ORDER_COLUMN_NAME, F.monotonically_increasing_id())
         .drop(parent_order_name, position_name)
     )
@@ -495,6 +502,7 @@ def clip(gdf, mask, keep_geom_type: bool = False, sort: bool = False):
     if keep_geom_type:
         summary = _geometry_summaries(source_sdf, clipped_sdf, geometry_name)
         source_family = summary.source_family
+        source_supports_keep_geom_type = True
         if summary.source_has_collection:
             warnings.warn(
                 "keep_geom_type can not be called on a "
@@ -502,23 +510,27 @@ def clip(gdf, mask, keep_geom_type: bool = False, sort: bool = False):
                 UserWarning,
                 stacklevel=2,
             )
-            source_family = None
+            source_supports_keep_geom_type = False
         elif summary.source_family_count > 1:
             warnings.warn(
                 "keep_geom_type can not be called on a mixed type GeoDataFrame.",
                 UserWarning,
                 stacklevel=2,
             )
-            source_family = None
+            source_supports_keep_geom_type = False
 
         # GeoPandas filters only when clipping introduces a collection or an
         # additional basic family. If every line collapses to a point, for
         # example, those points remain even with keep_geom_type=True.
-        if source_family is not None and (
-            summary.clipped_has_collection or summary.clipped_family_count > 1
-        ):
+        explode = bool(summary.clipped_has_collection)
+        filter_family = source_family is not None and summary.clipped_family_count > 1
+        if source_supports_keep_geom_type and (explode or filter_family):
             clipped_sdf = _keep_only_family(
-                internal, clipped_sdf, geometry_name, source_family
+                internal,
+                clipped_sdf,
+                geometry_name,
+                source_family,
+                explode=explode,
             )
 
     if sort:
