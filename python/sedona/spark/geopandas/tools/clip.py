@@ -87,6 +87,7 @@ def _rebuild_like(obj, internal, sdf):
 
     result = GeoDataFrame(PandasOnSparkDataFrame(result_internal))
     result._geometry_column_name = obj.active_geometry_name
+    # Bypass GeoDataFrame.__setattr__, which would interpret this as a new column.
     object.__setattr__(result, "_empty_crs_source", obj.geometry)
     return result
 
@@ -326,48 +327,50 @@ def _geometry_family(geometry):
     )
 
 
-def _source_geometry_family(source_sdf, geometry_name):
-    """Summarize source geometry families without collecting geometries."""
+def _source_geometry_summary(source_sdf, geometry_name):
+    """Build a one-row source geometry-family summary."""
     geometry = scol_for(source_sdf, geometry_name)
     geometry_type = stf.ST_GeometryType(geometry)
     family = _geometry_family(geometry)
-    summary = source_sdf.agg(
+    return source_sdf.agg(
         F.max(
             F.when(geometry_type == _GEOMETRY_COLLECTION, F.lit(1)).otherwise(F.lit(0))
-        ).alias("has_collection"),
-        F.countDistinct(family).alias("family_count"),
+        ).alias("source_has_collection"),
+        F.countDistinct(family).alias("source_family_count"),
         F.min_by(family, scol_for(source_sdf, NATURAL_ORDER_COLUMN_NAME)).alias(
-            "family"
+            "source_family"
         ),
-    ).first()
-    return summary.has_collection, summary.family_count, summary.family
+    )
 
 
 def _clipped_geometry_summary(sdf, geometry_name):
-    """Return collection presence and basic family count for clipped rows."""
+    """Build a one-row clipped geometry-family summary."""
     geometry = scol_for(sdf, geometry_name)
     geometry_type = stf.ST_GeometryType(geometry)
     family = _geometry_family(geometry)
-    summary = sdf.agg(
+    return sdf.agg(
         F.max(
             F.when(geometry_type == _GEOMETRY_COLLECTION, F.lit(1)).otherwise(F.lit(0))
-        ).alias("has_collection"),
-        F.countDistinct(family).alias("family_count"),
-    ).first()
-    return summary.has_collection, summary.family_count
+        ).alias("clipped_has_collection"),
+        F.countDistinct(family).alias("clipped_family_count"),
+    )
+
+
+def _geometry_summaries(source_sdf, clipped_sdf, geometry_name):
+    """Collect source and clipped type metadata in one Spark action."""
+    summary = _source_geometry_summary(source_sdf, geometry_name).crossJoin(
+        _clipped_geometry_summary(clipped_sdf, geometry_name)
+    )
+    return summary.first()
 
 
 def _keep_only_family(internal, sdf, geometry_name, family):
-    """Explode new collections and retain only the source geometry family."""
+    """Explode multipart rows and retain the source line or polygon family."""
     reserved = set(sdf.columns)
     parent_order_name = _temporary_column_name(sdf, "clip_parent_order", reserved)
     position_name = _temporary_column_name(sdf, "clip_position", reserved)
     geometry_value_name = _temporary_column_name(sdf, "clip_geometry", reserved)
     geometry = scol_for(sdf, geometry_name)
-    geometry_parts = F.when(
-        stf.ST_GeometryType(geometry) == _GEOMETRY_COLLECTION,
-        stf.ST_Dump(geometry),
-    ).otherwise(F.array(geometry))
 
     expanded = sdf.select(
         *[
@@ -376,19 +379,24 @@ def _keep_only_family(internal, sdf, geometry_name, family):
             if name not in (geometry_name, NATURAL_ORDER_COLUMN_NAME)
         ],
         scol_for(sdf, NATURAL_ORDER_COLUMN_NAME).alias(parent_order_name),
-        F.posexplode(geometry_parts).alias(position_name, geometry_value_name),
+        # GeoPandas explodes the entire clipped result when any new collection
+        # appears, including sibling MultiPolygon and MultiLineString rows.
+        F.posexplode(stf.ST_Dump(geometry)).alias(position_name, geometry_value_name),
     )
 
     allowed_types = {
-        "point": _POINT_TYPES,
         "line": _LINE_TYPES,
         "polygon": _POLYGON_TYPES,
-    }[family]
-    expanded = expanded.where(
-        stf.ST_GeometryType(scol_for(expanded, geometry_value_name)).isin(
-            *allowed_types
+    }.get(family)
+    # GeoPandas filters only line and polygon sources after exploding. Point
+    # sources retain every exploded part.
+    if allowed_types is not None:
+        expanded = expanded.where(
+            stf.ST_GeometryType(scol_for(expanded, geometry_value_name)).isin(
+                *allowed_types
+            )
         )
-    ).select(
+    expanded = expanded.select(
         *[
             (
                 scol_for(expanded, geometry_value_name).alias(geometry_name)
@@ -427,7 +435,9 @@ def clip(gdf, mask, keep_geom_type: bool = False, sort: bool = False):
         ``(minx, miny, maxx, maxy)``.
     keep_geom_type : bool, default False
         Retain only the input geometry family when clipping creates lower
-        dimensional geometries.
+        dimensional geometries. Matching GeoPandas' warnings and filtering
+        trigger requires one eager metadata aggregation; geometry rows remain
+        distributed.
     sort : bool, default False
         Return matching rows in their original positional order.
 
@@ -459,27 +469,6 @@ def clip(gdf, mask, keep_geom_type: bool = False, sort: bool = False):
     internal, source_sdf, geometry_name = _geometry_context(gdf)
     reserved = set(source_sdf.columns)
 
-    source_family = None
-    if keep_geom_type:
-        has_collection, family_count, source_family = _source_geometry_family(
-            source_sdf, geometry_name
-        )
-        if has_collection:
-            warnings.warn(
-                "keep_geom_type can not be called on a "
-                "GeoDataFrame with GeometryCollection.",
-                UserWarning,
-                stacklevel=2,
-            )
-            source_family = None
-        elif family_count > 1:
-            warnings.warn(
-                "keep_geom_type can not be called on a mixed type GeoDataFrame.",
-                UserWarning,
-                stacklevel=2,
-            )
-            source_family = None
-
     working_sdf, mask_geometry, rectangle = _mask_expression(source_sdf, mask, reserved)
     source_geometry = scol_for(working_sdf, geometry_name)
     geometry_type = stf.ST_GeometryType(source_geometry)
@@ -503,14 +492,31 @@ def clip(gdf, mask, keep_geom_type: bool = False, sort: bool = False):
             ~stf.ST_IsEmpty(scol_for(clipped_sdf, geometry_name))
         )
 
-    if source_family is not None:
-        has_new_collection, clipped_family_count = _clipped_geometry_summary(
-            clipped_sdf, geometry_name
-        )
+    if keep_geom_type:
+        summary = _geometry_summaries(source_sdf, clipped_sdf, geometry_name)
+        source_family = summary.source_family
+        if summary.source_has_collection:
+            warnings.warn(
+                "keep_geom_type can not be called on a "
+                "GeoDataFrame with GeometryCollection.",
+                UserWarning,
+                stacklevel=2,
+            )
+            source_family = None
+        elif summary.source_family_count > 1:
+            warnings.warn(
+                "keep_geom_type can not be called on a mixed type GeoDataFrame.",
+                UserWarning,
+                stacklevel=2,
+            )
+            source_family = None
+
         # GeoPandas filters only when clipping introduces a collection or an
         # additional basic family. If every line collapses to a point, for
         # example, those points remain even with keep_geom_type=True.
-        if has_new_collection or clipped_family_count > 1:
+        if source_family is not None and (
+            summary.clipped_has_collection or summary.clipped_family_count > 1
+        ):
             clipped_sdf = _keep_only_family(
                 internal, clipped_sdf, geometry_name, source_family
             )

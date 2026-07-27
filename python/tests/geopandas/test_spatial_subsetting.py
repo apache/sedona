@@ -27,6 +27,7 @@ from shapely.geometry import (
     GeometryCollection,
     LineString,
     MultiPoint,
+    MultiPolygon,
     Point,
     Polygon,
     box,
@@ -332,6 +333,36 @@ class TestDistributedSpatialSubsetting(TestGeopandasBase):
         collection = GeoSeries(expected_collection, crs=4326)
         with pytest.warns(UserWarning, match="GeometryCollection"):
             collection.clip(mask, keep_geom_type=True)
+
+    def test_clip_keep_geom_type_explodes_all_multipart_rows(self):
+        mask = box(0, 0, 2, 2)
+        expected_source = gpd.GeoSeries(
+            [
+                MultiPolygon(
+                    [
+                        box(0.5, 0.5, 1, 1),
+                        box(2, 0.5, 3, 1),
+                    ]
+                ),
+                MultiPolygon(
+                    [
+                        box(0.2, 1.2, 0.4, 1.4),
+                        box(0.6, 1.2, 0.8, 1.4),
+                    ]
+                ),
+            ],
+            index=pd.Index(["collection", "multipart"], name="feature_id"),
+            crs=4326,
+        )
+        source = GeoSeries(expected_source, crs=4326)
+
+        result = source.clip(mask, keep_geom_type=True)
+        expected = expected_source.clip(mask, keep_geom_type=True)
+
+        self.check_sgpd_equals_gpd(result, expected)
+        assert list(result.to_geopandas().index) == list(expected.index)
+        assert list(result.geom_type.to_pandas()) == ["Polygon"] * 3
+        self._assert_srid(result, 4326)
 
     def test_clip_keep_geom_type_uses_first_geometry_type_including_null(self):
         mask = box(0, 0, 1, 1)

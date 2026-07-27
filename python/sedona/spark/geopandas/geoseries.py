@@ -343,6 +343,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         self._col_label: Label
         self._sindex: SpatialIndex = None
         self._empty_crs_source: typing.Optional["GeoSeries"] = None
+        # Explicit CRS metadata wins over the lineage fallback below when
+        # geometry rows are empty or carry SRID 0.
         self._empty_crs_value = None
 
         if isinstance(
@@ -462,6 +464,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         from pyproj import CRS
 
         if self._is_empty():
+            # Empty data has no SRID to inspect, so explicit CRS metadata wins
+            # over the inherited lineage metadata.
             if self._empty_crs_value is not None:
                 return self._empty_crs_value
             if self._empty_crs_source is not None:
@@ -487,6 +491,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         # Sedona returns 0 if SRID doesn't exist.
         if srid != 0:
             return CRS.from_user_input(srid)
+        # These fallbacks are metadata rather than a fresh read from geometry
+        # coordinates. Explicit metadata takes precedence over inherited
+        # lineage metadata, including for non-empty geometries with SRID 0.
         if self._empty_crs_value is not None:
             return self._empty_crs_value
         if self._empty_crs_source is not None:
