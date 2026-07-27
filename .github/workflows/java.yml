@@ -65,13 +65,18 @@ jobs:
           - spark: 4.1.1
             scala: 2.13.17
             jdk: '17'
+            skipLibPostalTests: 'true'
           - spark: 4.0.2
             scala: 2.13.17
             jdk: '17'
+            skipLibPostalTests: 'true'
           - spark: 3.5.8
             scala: 2.13.8
             jdk: '11'
             skipTests: ''
+            skipLibPostalTests: 'true'
+          # The libpostal suite needs ~1.3 GB of model data, so it runs in this
+          # combination only. See the libpostal steps below.
           - spark: 3.5.8
             scala: 2.12.15
             jdk: '11'
@@ -80,10 +85,12 @@ jobs:
             scala: 2.13.8
             jdk: '11'
             skipTests: ''
+            skipLibPostalTests: 'true'
           - spark: 3.4.0
             scala: 2.12.15
             jdk: '11'
             skipTests: ''
+            skipLibPostalTests: 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -101,10 +108,45 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+      # jpostal downloads ~1.3 GB of model data the first time an address
+      # function runs. Cache it so the suite does not depend on the object
+      # store being reachable. The key is a constant because the data version
+      # is pinned by the jpostal dependency, not by anything in the tree; bump
+      # it when that dependency changes.
+      - name: Cache libpostal model data
+        if: ${{ !matrix.skipLibPostalTests }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: /tmp/libpostal
+          key: libpostal-senzing-v1.1.0-jpostal-1.2.2
+      # On a cache miss, fetch the data here rather than letting jpostal do it
+      # inside the test JVM: DataDownloadUtils has a 15 s connect timeout and
+      # no retry, so a transient stall fails the whole build.
+      - name: Pre-fetch libpostal model data
+        if: ${{ !matrix.skipLibPostalTests }}
+        run: |
+          set -euo pipefail
+          DIR=/tmp/libpostal
+          populated=1
+          for d in transliteration numex address_parser address_expansions language_classifier; do
+            [ -d "$DIR/$d" ] || populated=0
+          done
+          if [ "$populated" = 1 ]; then
+            echo "libpostal data already present, skipping download"
+            exit 0
+          fi
+          mkdir -p "$DIR"
+          for f in libpostal_data.tar.gz parser.tar.gz language_classifier.tar.gz; do
+            curl -fsSL --retry 5 --retry-all-errors --retry-delay 10 --connect-timeout 30 \
+              -o "$DIR/$f" "https://public-read-libpostal-data.s3.amazonaws.com/v1.1.0/$f"
+            tar -xzf "$DIR/$f" -C "$DIR"
+            rm -f "$DIR/$f"
+          done
       - env:
           SPARK_VERSION: ${{ matrix.spark }}
           SCALA_VERSION: ${{ matrix.scala }}
           SKIP_TESTS: ${{ matrix.skipTests }}
+          SEDONA_SKIP_LIBPOSTAL_TESTS: ${{ matrix.skipLibPostalTests }}
         run: |
           SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
 
