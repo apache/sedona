@@ -649,12 +649,9 @@ public class RasterUtils {
 
   /**
    * Verifies that {@code noDataValue} can be stored in the pixel type named by {@code pixelType}
-   * without silent coercion, returning it unchanged when it can. Writing a value that is out of the
-   * pixel type's range, or fractional for an integer pixel type, coerces the stored sample to a
-   * different number than the value recorded as the band's nodata metadata (for example -1.0 or
-   * 300.0 wraps to 255 or 44 in an unsigned 8-bit band), so the background would then read back as
-   * data rather than nodata. Such a value is a correctness violation, not a per-row data condition,
-   * so this rejects it with an {@link IllegalArgumentException} instead of coercing.
+   * without silent coercion, returning it unchanged when it can. Delegates to {@link
+   * #assertRepresentable(double, String, String)} with the argument name {@code "noDataValue"} so
+   * the nodata path keeps its existing error messages.
    *
    * @param noDataValue the candidate nodata / background value
    * @param pixelType a Sedona pixel type string accepted by {@link #getDataTypeCode(String)} (for
@@ -664,6 +661,29 @@ public class RasterUtils {
    *     type
    */
   public static double assertNoDataValueRepresentable(double noDataValue, String pixelType) {
+    return assertRepresentable(noDataValue, pixelType, "noDataValue");
+  }
+
+  /**
+   * Verifies that {@code value} (a nodata / background value, or a burn value) can be stored in the
+   * pixel type named by {@code pixelType} without silent coercion, returning it unchanged when it
+   * can. Writing a value that is out of the pixel type's range, or fractional for an integer pixel
+   * type, coerces the stored sample to a different number than the value the caller asked for (for
+   * example -1.0 or 300.0 wraps to 255 or 44 in an unsigned 8-bit band), so the sample would read
+   * back as a different number than requested. For float / double pixel types a value that does not
+   * round-trip exactly through 32-bit float storage, and any non-finite value (NaN or +/-Infinity),
+   * are rejected for the same reason. Such a value is a correctness violation, not a per-row data
+   * condition, so this rejects it with an {@link IllegalArgumentException} instead of coercing.
+   *
+   * @param value the candidate value
+   * @param pixelType a Sedona pixel type string accepted by {@link #getDataTypeCode(String)} (for
+   *     example {@code "B"}, {@code "I"}, {@code "D"})
+   * @param argName the name of the argument being validated (for example {@code "noDataValue"} or
+   *     {@code "value"}), used in the exception message
+   * @return {@code value}, unchanged, when it is representable in the pixel type
+   * @throws IllegalArgumentException when {@code value} cannot be represented in the pixel type
+   */
+  public static double assertRepresentable(double value, String pixelType, String argName) {
     int dataTypeCode = getDataTypeCode(pixelType);
     long min;
     long max;
@@ -690,32 +710,49 @@ public class RasterUtils {
         description = "signed 32-bit";
         break;
       case DataBuffer.TYPE_FLOAT:
+        // NaN and infinite values cannot be used on a float/double band: NaN is the codebase's
+        // internal "no nodata" sentinel, so it cannot be stored as a distinct nodata value and
+        // would be silently dropped; an infinite value is not a valid GeoTools category bound and
+        // crashes deep in GeoTools with "Range [Infinity .. Infinity] is not valid". Reject both
+        // up front with a clear error (fail loud) rather than dropping them or crashing later.
+        if (!Double.isFinite(value)) {
+          throw new IllegalArgumentException(
+              String.format(
+                  "%s %s is not supported for pixel type '%s' (NaN and infinite values are not supported); use a finite value",
+                  argName, value, pixelType));
+        }
         // A nodata value is a sentinel, so it must round-trip exactly through the band's
         // 32-bit float storage — otherwise the stored sentinel differs from the value the
         // caller set (e.g. 0.1 would be stored as 0.10000000149...), and comparisons against
-        // the caller's value would miss it. Overflow to +/-Infinity is caught by the same
-        // test. NaN and +/-Infinity are exactly representable and allowed.
-        if (Double.isFinite(noDataValue) && (double) (float) noDataValue != noDataValue) {
+        // the caller's value would miss it.
+        if ((double) (float) value != value) {
           throw new IllegalArgumentException(
               String.format(
-                  "noDataValue %s is not exactly representable in pixel type '%s' (32-bit float)",
-                  noDataValue, pixelType));
+                  "%s %s is not exactly representable in pixel type '%s' (32-bit float)",
+                  argName, value, pixelType));
         }
-        return noDataValue;
+        return value;
       case DataBuffer.TYPE_DOUBLE:
       default:
-        // 64-bit float represents every double value; nothing to reject.
-        return noDataValue;
+        // 64-bit float represents every finite double value; only NaN and infinities are rejected
+        // (see the float arm for why).
+        if (!Double.isFinite(value)) {
+          throw new IllegalArgumentException(
+              String.format(
+                  "%s %s is not supported for pixel type '%s' (NaN and infinite values are not supported); use a finite value",
+                  argName, value, pixelType));
+        }
+        return value;
     }
 
     // Integer pixel types: reject out-of-range and fractional values (Math.rint also rejects NaN).
-    if (noDataValue < min || noDataValue > max || noDataValue != Math.rint(noDataValue)) {
+    if (value < min || value > max || value != Math.rint(value)) {
       throw new IllegalArgumentException(
           String.format(
-              "noDataValue %s is not representable in pixel type '%s' (%s integer, valid range %d..%d)",
-              noDataValue, pixelType, description, min, max));
+              "%s %s is not representable in pixel type '%s' (%s integer, valid range %d..%d)",
+              argName, value, pixelType, description, min, max));
     }
-    return noDataValue;
+    return value;
   }
 
   /**

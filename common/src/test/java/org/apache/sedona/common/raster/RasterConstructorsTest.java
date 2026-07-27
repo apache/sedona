@@ -543,8 +543,8 @@ public class RasterConstructorsTest extends RasterTestBase {
     // A nodata sentinel must round-trip exactly through a 32-bit float band. 0.1 has no exact
     // float32 representation (it would store as 0.10000000149...), so RS_AsRaster on an 'F' band
     // rejects it up front rather than recording a sentinel no pixel could equal. Previously this
-    // value crashed deep in GeoTools. Values that ARE exactly representable in float32 -- and NaN
-    // -- must still construct without throwing.
+    // value crashed deep in GeoTools. Values that ARE exactly representable in float32 must still
+    // construct without throwing.
     GridCoverage2D raster =
         RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
     Geometry geom =
@@ -558,10 +558,40 @@ public class RasterConstructorsTest extends RasterTestBase {
     Assert.assertTrue(inexact.getMessage(), inexact.getMessage().contains("0.1"));
     Assert.assertTrue(inexact.getMessage(), inexact.getMessage().contains("'F'"));
 
-    // Exactly representable in float32 (0.5 = 2^-1, -9999 and 2^24 are integers below 2^24) plus
-    // NaN construct without throwing.
-    for (double exact : new double[] {0.5d, -9999.0d, 16777216.0d, Double.NaN}) {
+    // Exactly representable in float32 (0.5 = 2^-1, -9999 and 2^24 are integers below 2^24)
+    // construct without throwing.
+    for (double exact : new double[] {0.5d, -9999.0d, 16777216.0d}) {
       Assert.assertNotNull(RasterConstructors.asRaster(geom, raster, "F", false, 1d, exact, false));
+    }
+  }
+
+  @Test
+  public void testAsRasterRejectsNonFiniteNoDataValue() throws FactoryException, ParseException {
+    // NaN and +/-Infinity are rejected as a nodata value on float ('F') and double ('D') bands.
+    // NaN is the codebase's internal "no nodata" sentinel, so it would be silently dropped rather
+    // than recorded (leaving the NaN-filled background reading back as data); an infinite value is
+    // not a valid GeoTools category bound and previously crashed deep in GeoTools with
+    // "Range [Infinity .. Infinity] is not valid". Both are now rejected up front with a clear
+    // error that names the offending value and pixel type.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    for (String pixelType : new String[] {"F", "D"}) {
+      for (double nonFinite :
+          new double[] {Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY}) {
+        IllegalArgumentException error =
+            Assert.assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                    RasterConstructors.asRaster(
+                        geom, raster, pixelType, false, 1d, nonFinite, false));
+        Assert.assertTrue(
+            error.getMessage(), error.getMessage().contains(String.valueOf(nonFinite)));
+        Assert.assertTrue(error.getMessage(), error.getMessage().contains("'" + pixelType + "'"));
+      }
     }
   }
 
@@ -593,6 +623,64 @@ public class RasterConstructorsTest extends RasterTestBase {
         };
     assertArrayEquals(expected, actual, 0.0d);
     assertEquals(9d, RasterUtils.getNoDataValue(rasterized.getSampleDimension(0)), 0.0d);
+  }
+
+  @Test
+  public void testAsRasterRejectsNonRepresentableBurnValue()
+      throws FactoryException, ParseException {
+    // The burn value is validated for representability just like the noDataValue: 265 cannot be
+    // stored in an unsigned 8-bit ('B') band and would silently coerce to 9, burning a different
+    // number than requested, so RS_AsRaster rejects it up front. A value that fits ('B' with 200)
+    // still constructs.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    IllegalArgumentException error =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, "B", false, 265d, 0d, false));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("value"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("265"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("'B'"));
+
+    // A representable value/nodata pair still constructs.
+    Assert.assertNotNull(RasterConstructors.asRaster(geom, raster, "B", false, 200d, 0d, false));
+  }
+
+  @Test
+  public void testAsRasterRejectsBurnValueEqualToNoDataValue()
+      throws FactoryException, ParseException {
+    // If the burn value equals the noDataValue every covered pixel reads back as nodata, so the
+    // geometry vanishes. Reject that. This holds both when both are passed explicitly (value 1 ==
+    // nodata 1 on a 'D' band) and when the default value of 1 collides with an inherited nodata of
+    // 1.0.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    IllegalArgumentException explicit =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, "D", false, 1d, 1d, false));
+    Assert.assertTrue(explicit.getMessage(), explicit.getMessage().contains("burn value"));
+    Assert.assertTrue(explicit.getMessage(), explicit.getMessage().contains("noDataValue"));
+
+    // The default-value-1 x inherited-nodata-1.0 footgun: the reference band's nodata is 1.0 and
+    // the noDataValue-less overload burns the default value 1, so they collide and are rejected.
+    GridCoverage2D rasterWithNoData = RasterBandEditors.setBandNoDataValue(raster, 1, 1d);
+    IllegalArgumentException inherited =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, rasterWithNoData, "d"));
+    Assert.assertTrue(inherited.getMessage(), inherited.getMessage().contains("burn value"));
+
+    // A distinct value/nodata pair still constructs.
+    Assert.assertNotNull(RasterConstructors.asRaster(geom, raster, "D", false, 2d, 1d, false));
   }
 
   @Test
@@ -645,6 +733,32 @@ public class RasterConstructorsTest extends RasterTestBase {
             IllegalArgumentException.class, () -> RasterConstructors.asRaster(geom, raster, "d"));
     Assert.assertTrue(error.getMessage(), error.getMessage().contains("noDataValue"));
     Assert.assertTrue(error.getMessage(), error.getMessage().contains("band 1"));
+  }
+
+  @Test
+  public void testAsRasterInheritedNoDataValueNotRepresentableErrors()
+      throws FactoryException, ParseException {
+    // When the noDataValue is omitted, the reference band's nodata is inherited -- but if that
+    // inherited value cannot be stored in the OUTPUT pixel type (here -9999.0 into an unsigned
+    // 8-bit 'B' band) the call is rejected. The error must say the value was inherited from the
+    // reference band and point the user at the explicit-noDataValue override (which works from
+    // SQL), rather than the generic representability message the core check would give.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    raster = RasterBandEditors.setBandNoDataValue(raster, 1, -9999d);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    GridCoverage2D finalRaster = raster;
+    IllegalArgumentException error =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, finalRaster, "B"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("reference"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("-9999"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("'B'"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("override"));
   }
 
   @Test

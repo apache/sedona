@@ -131,6 +131,12 @@ public class RasterConstructors {
       boolean useGeometryExtent)
       throws FactoryException {
 
+    // Reject a burn value that cannot be represented in the target pixel type, for the same reason
+    // the noDataValue is rejected below: silently coercing an out-of-range or fractional value (for
+    // example 265 -> 9 in an unsigned 8-bit band) would store a different number than the caller
+    // asked to burn. Unlike noDataValue this is a primitive double, so it is always validated.
+    RasterUtils.assertRepresentable(value, pixelType, "value");
+
     // Reject a noDataValue that cannot be represented in the target pixel type rather than
     // silently coercing it: writing an out-of-range or fractional value into an integer sample
     // stores a different number than the value recorded as the band's nodata metadata, so the
@@ -138,6 +144,17 @@ public class RasterConstructors {
     // nodata metadata below using the same value.
     if (noDataValue != null) {
       noDataValue = RasterUtils.assertNoDataValueRepresentable(noDataValue, pixelType);
+    }
+
+    // If the burn value equals the noDataValue, every covered pixel reads back as nodata, so the
+    // geometry would vanish from the output. Reject rather than produce an all-nodata raster; this
+    // also catches the default burn value of 1 colliding with an inherited nodata of 1.0.
+    if (noDataValue != null && Double.compare(value, noDataValue) == 0) {
+      throw new IllegalArgumentException(
+          String.format(
+              "RS_AsRaster: burn value (%s) equals the noDataValue, so every covered pixel would "
+                  + "read as nodata; use a different value or noDataValue",
+              value));
     }
 
     List<Object> objects =
@@ -200,7 +217,8 @@ public class RasterConstructors {
    */
   public static GridCoverage2D asRaster(Geometry geom, GridCoverage2D raster, String pixelType)
       throws FactoryException {
-    return asRaster(geom, raster, pixelType, false, 1, inheritReferenceNoDataValue(raster));
+    return asRaster(
+        geom, raster, pixelType, false, 1, inheritReferenceNoDataValue(raster, pixelType));
   }
 
   /**
@@ -218,7 +236,8 @@ public class RasterConstructors {
   public static GridCoverage2D asRaster(
       Geometry geom, GridCoverage2D raster, String pixelType, boolean allTouched)
       throws FactoryException {
-    return asRaster(geom, raster, pixelType, allTouched, 1, inheritReferenceNoDataValue(raster));
+    return asRaster(
+        geom, raster, pixelType, allTouched, 1, inheritReferenceNoDataValue(raster, pixelType));
   }
 
   /**
@@ -238,7 +257,7 @@ public class RasterConstructors {
       Geometry geom, GridCoverage2D raster, String pixelType, boolean allTouched, double value)
       throws FactoryException {
     return asRaster(
-        geom, raster, pixelType, allTouched, value, inheritReferenceNoDataValue(raster));
+        geom, raster, pixelType, allTouched, value, inheritReferenceNoDataValue(raster, pixelType));
   }
 
   /**
@@ -251,15 +270,30 @@ public class RasterConstructors {
    * overload to opt out of a nodata value entirely.
    *
    * @param raster the reference raster whose first band nodata value is inherited
+   * @param pixelType the output pixel type the inherited value must be representable in
    * @return the reference band's nodata value
-   * @throws IllegalArgumentException when the reference band has no nodata value to inherit
+   * @throws IllegalArgumentException when the reference band has no nodata value to inherit, or
+   *     when its nodata value is not representable in {@code pixelType}
    */
-  private static double inheritReferenceNoDataValue(GridCoverage2D raster) {
+  private static double inheritReferenceNoDataValue(GridCoverage2D raster, String pixelType) {
     Double referenceNoDataValue = RasterBandAccessors.getBandNoDataValue(raster, 1);
     if (referenceNoDataValue == null) {
       throw new IllegalArgumentException(
           "RS_AsRaster: noDataValue omitted but reference raster band 1 has no nodata value to "
               + "inherit; pass an explicit noDataValue, or pass NULL for no nodata");
+    }
+    // The inherited value must be representable in the output pixel type. The core asRaster would
+    // reject it too, but with a generic message that neither says the value was inherited nor how
+    // to override it; rethrow with actionable inherit-specific guidance instead.
+    try {
+      RasterUtils.assertNoDataValueRepresentable(referenceNoDataValue, pixelType);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalArgumentException(
+          String.format(
+              "RS_AsRaster: the reference raster band 1 nodata value (%s) is not representable in "
+                  + "the output pixel type '%s'; pass an explicit noDataValue representable in '%s' "
+                  + "to override it",
+              referenceNoDataValue, pixelType, pixelType));
     }
     return referenceNoDataValue;
   }
