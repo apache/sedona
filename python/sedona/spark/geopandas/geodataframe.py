@@ -16,6 +16,7 @@
 # under the License.
 from __future__ import annotations
 
+import builtins
 from typing import Any, Literal, Callable, Union
 import typing
 
@@ -35,9 +36,19 @@ from pyspark.pandas.internal import (
     NATURAL_ORDER_COLUMN_NAME,
     SPARK_INDEX_NAME_FORMAT,
 )
-from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for
 from pyspark.sql import functions as F
+from pyspark.sql.types import (
+    BooleanType,
+    ByteType,
+    DoubleType,
+    FloatType,
+    IntegerType,
+    LongType,
+    NumericType,
+    ShortType,
+    StringType,
+)
 from pyspark.pandas.utils import log_advice
 
 from sedona.spark.geopandas._typing import Label
@@ -130,39 +141,57 @@ def _not_implemented_error(method_name: str, additional_info: str = "") -> str:
 
 
 def _normalize_dissolve_aggfunc(aggfunc):
-    """Translate scalable callable aggregations to Spark aggregate names."""
+    """Translate explicitly supported callables to native aggregate names."""
 
-    callable_names = {
-        "amax": "max",
-        "amin": "min",
-        "average": "mean",
+    supported_names = {
+        "count",
+        "first",
+        "last",
+        "max",
+        "mean",
+        "median",
+        "min",
+        "nunique",
+        "std",
+        "sum",
+        "var",
     }
+    callable_names = (
+        (builtins.max, "max"),
+        (builtins.min, "min"),
+        (builtins.sum, "sum"),
+        (np.amax, "max"),
+        (np.amin, "min"),
+        (np.max, "max"),
+        (np.mean, "mean"),
+        (np.median, "median"),
+        (np.min, "min"),
+        (np.std, "std"),
+        (np.sum, "sum"),
+        (np.var, "var"),
+    )
 
     def normalize_one(value):
         if isinstance(value, str):
+            if value in {"prod", "product"}:
+                raise NotImplementedError(
+                    "Sedona dissolve does not support the prod aggregation."
+                )
+            if value not in supported_names:
+                raise NotImplementedError(
+                    f"Sedona dissolve does not support the {value!r} aggregation."
+                )
             return value
-        if callable(value):
-            name = getattr(value, "__name__", None)
-            if name:
-                name = callable_names.get(name, name)
-                if name in {
-                    "count",
-                    "first",
-                    "last",
-                    "max",
-                    "mean",
-                    "median",
-                    "min",
-                    "nunique",
-                    "prod",
-                    "std",
-                    "sum",
-                    "var",
-                }:
-                    return name
+        for known_callable, name in callable_names:
+            if value is known_callable:
+                return name
+        if value is np.prod:
+            raise NotImplementedError(
+                "Sedona dissolve does not support the prod aggregation."
+            )
         raise NotImplementedError(
-            "Sedona dissolve only supports named Spark aggregations and "
-            "equivalent built-in or NumPy aggregation functions."
+            "Sedona dissolve only supports documented aggregation names and "
+            "known built-in or NumPy aggregation callables."
         )
 
     if isinstance(aggfunc, dict):
@@ -177,6 +206,100 @@ def _normalize_dissolve_aggfunc(aggfunc):
     if isinstance(aggfunc, (list, tuple)):
         return [normalize_one(value) for value in aggfunc]
     return normalize_one(aggfunc)
+
+
+def _dissolve_aggregation_expression(
+    column,
+    field,
+    aggregation,
+    natural_order,
+    column_label,
+):
+    """Build a validated native Spark aggregation for one attribute column."""
+
+    spark_type = field.spark_type
+    is_categorical = isinstance(field.dtype, pd.CategoricalDtype)
+    is_boolean = isinstance(spark_type, BooleanType)
+    is_numeric = isinstance(spark_type, NumericType)
+    is_float = isinstance(spark_type, (FloatType, DoubleType))
+    dtype_name = str(field.dtype) if is_categorical else spark_type.simpleString()
+
+    clean_column = (
+        F.when(F.isnan(column), F.lit(None)).otherwise(column) if is_float else column
+    )
+
+    if aggregation == "first":
+        return F.min_by(
+            clean_column,
+            F.when(clean_column.isNotNull(), natural_order),
+        )
+    if aggregation == "last":
+        return F.max_by(
+            clean_column,
+            F.when(clean_column.isNotNull(), natural_order),
+        )
+    if aggregation == "count":
+        return F.count(clean_column)
+    if aggregation == "nunique":
+        if is_categorical or not (
+            is_numeric or is_boolean or isinstance(spark_type, StringType)
+        ):
+            raise NotImplementedError(
+                "Sedona dissolve does not support aggregation "
+                f"{aggregation!r} for column {column_label!r} with data "
+                f"type {dtype_name!r}."
+            )
+        return F.countDistinct(clean_column)
+
+    if is_categorical or not (is_numeric or is_boolean):
+        raise NotImplementedError(
+            "Sedona dissolve supports aggregation "
+            f"{aggregation!r} only for numeric or boolean columns; "
+            f"column {column_label!r} has data type {dtype_name!r}."
+        )
+
+    numeric_column = clean_column.cast("double") if is_boolean else clean_column
+
+    if aggregation == "sum":
+        if is_boolean or isinstance(
+            spark_type,
+            (ByteType, ShortType, IntegerType, LongType),
+        ):
+            result = F.sum(numeric_column.cast("long")).cast("long")
+            identity = F.lit(0).cast("long")
+        elif isinstance(spark_type, FloatType):
+            result = F.sum(numeric_column).cast("float")
+            identity = F.lit(0).cast("float")
+        elif isinstance(spark_type, DoubleType):
+            result = F.sum(numeric_column).cast("double")
+            identity = F.lit(0).cast("double")
+        else:
+            result = F.sum(numeric_column)
+            identity = F.lit(0).cast(spark_type)
+        return F.coalesce(result, identity)
+
+    if aggregation == "mean":
+        result = F.avg(numeric_column)
+    elif aggregation == "median":
+        result = F.median(numeric_column)
+    elif aggregation == "std":
+        result = F.stddev_samp(numeric_column)
+    elif aggregation == "var":
+        result = F.var_samp(numeric_column)
+    elif aggregation == "min":
+        if is_boolean:
+            return F.min(clean_column.cast("integer")).cast("boolean")
+        return F.min(clean_column)
+    elif aggregation == "max":
+        if is_boolean:
+            return F.max(clean_column.cast("integer")).cast("boolean")
+        return F.max(clean_column)
+    else:
+        raise AssertionError(f"Unexpected dissolve aggregation: {aggregation}")
+
+    if isinstance(spark_type, FloatType):
+        return result.cast("float")
+    return result
 
 
 class GeoDataFrame(GeoFrame, pspd.DataFrame):
@@ -1454,8 +1577,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """Dissolve geometries within groups using distributed aggregation.
 
         Geometry unions are evaluated by Sedona's ``ST_Union_Aggr`` aggregate.
-        Attribute columns use pandas-on-Spark group aggregation and therefore
-        remain distributed as well.
+        Attribute columns use validated native Spark aggregate expressions and
+        therefore remain distributed as well.
 
         Parameters
         ----------
@@ -1463,7 +1586,12 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             Columns defining the groups. ``None`` dissolves all rows into one
             group. Arbitrary driver-side grouping vectors are not supported.
         aggfunc : str, callable, list, or dict, default "first"
-            Scalable Spark aggregation(s) for non-geometry columns.
+            Aggregation(s) for non-geometry columns. ``first``, ``last``, and
+            ``count`` support every Spark data type. ``nunique`` supports
+            numeric, boolean, and string columns. ``min``, ``max``, ``sum``,
+            ``mean``, ``median``, ``std``, and ``var`` support numeric and
+            boolean columns. String ``sum`` and every ``prod`` aggregation are
+            not supported.
         as_index : bool, default True
             Place grouping columns in the result index.
         level : int, name, or sequence, default None
@@ -1509,8 +1637,13 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Notes
         -----
-        Python row UDFs are not used. Callable aggregations are accepted only
-        when they map directly to a named Spark aggregate.
+        Python row UDFs are not used. Callable aliases are limited to built-in
+        ``min``, ``max``, and ``sum``, plus NumPy ``amin``, ``amax``, ``min``,
+        ``max``, ``sum``, ``mean``, ``median``, ``std``, and ``var``.
+        ``first`` and ``last`` follow source row order and skip null and NaN
+        values. Numeric and boolean ``sum`` use pandas' zero identity for an
+        all-null group; boolean sums are returned as integers and boolean
+        statistical aggregations as floating-point values.
 
         GeoPandas flattens multiple aggregation labels into a one-level object
         index containing tuples. pandas-on-Spark cannot represent tuple-valued
@@ -1550,7 +1683,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         geometry_name = self.active_geometry_name
         geometry_label = self.geometry._column_label
-        crs = self.crs
 
         group_expressions = []
         group_fields = []
@@ -1592,7 +1724,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 group_fields.append(internal.index_fields[position])
                 group_index_names.append(internal.index_names[position])
         elif by is None:
-            group_expressions.append(F.lit(0))
+            group_expressions.append(F.lit(0).cast("long"))
             group_fields.append(None)
             group_index_names.append(None)
         else:
@@ -1659,36 +1791,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                     "groups; pass observed=True."
                 )
 
-        existing_labels = set(internal.column_labels)
-        temporary_names = []
-        new_columns = list(internal.data_spark_columns)
-        new_fields = list(internal.data_fields)
-        new_labels = list(internal.column_labels)
-
-        for position, (expression, field) in enumerate(
-            zip(group_expressions, group_fields)
-        ):
-            suffix = position
-            name = f"__dissolve_group_{suffix}__"
-            label = (name,)
-            while label in existing_labels or name in internal.spark_frame.columns:
-                suffix += 1
-                name = f"__dissolve_group_{suffix}__"
-                label = (name,)
-            existing_labels.add(label)
-            temporary_names.append(name)
-            new_columns.append(expression.alias(name))
-            new_fields.append(field.copy(name=name) if field is not None else None)
-            new_labels.append(label)
-
-        working_internal = internal.with_new_columns(
-            new_columns,
-            column_labels=new_labels,
-            data_fields=new_fields,
-        )
-        working = GeoDataFrame(PandasOnSparkDataFrame(working_internal))
-        working._geometry_column_name = geometry_name
-
         normalized_aggfunc = _normalize_dissolve_aggfunc(aggfunc)
         available_attribute_labels = [
             label for label in internal.column_labels if label != geometry_label
@@ -1717,51 +1819,120 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             attribute_labels = [
                 label
                 for label in attribute_labels
-                if pd.api.types.is_numeric_dtype(working[label[0]].dtype)
+                if pd.api.types.is_numeric_dtype(internal.field_for(label).dtype)
             ]
 
-        aggregated_data = None
-        if attribute_labels:
-            attribute_names = [label[0] for label in attribute_labels]
-            data = PandasOnSparkDataFrame(
-                working[attribute_names + temporary_names]._internal
+        aggregation_specs = []
+        if isinstance(normalized_aggfunc, dict):
+            result_column_levels = (
+                2
+                if any(
+                    isinstance(functions, list)
+                    for functions in normalized_aggfunc.values()
+                )
+                else 1
             )
-            groupby_keys = (
-                temporary_names[0] if len(temporary_names) == 1 else temporary_names
+            for key, functions in normalized_aggfunc.items():
+                source_label = (key,)
+                field = internal.field_for(source_label)
+                function_names = (
+                    functions if isinstance(functions, list) else [functions]
+                )
+                for function_name in function_names:
+                    result_label = (
+                        (key, function_name)
+                        if result_column_levels == 2
+                        else source_label
+                    )
+                    aggregation_specs.append(
+                        (source_label, field, function_name, result_label)
+                    )
+        else:
+            function_names = (
+                normalized_aggfunc
+                if isinstance(normalized_aggfunc, list)
+                else [normalized_aggfunc]
             )
-            aggregated_data = data.groupby(
-                groupby_keys,
-                as_index=True,
-                dropna=dropna,
-            ).agg(normalized_aggfunc)
+            if not function_names:
+                raise ValueError("No objects to concatenate")
+            result_column_levels = 2 if isinstance(normalized_aggfunc, list) else 1
+            for source_label in attribute_labels:
+                field = internal.field_for(source_label)
+                for function_name in function_names:
+                    result_label = (
+                        (source_label[0], function_name)
+                        if result_column_levels == 2
+                        else source_label
+                    )
+                    aggregation_specs.append(
+                        (source_label, field, function_name, result_label)
+                    )
 
-            data_internal = aggregated_data._internal
-            data_internal = data_internal.copy(index_names=group_index_names)
-            aggregated_data = PandasOnSparkDataFrame(data_internal)
+        if isinstance(normalized_aggfunc, list) and not aggregation_specs:
+            raise ValueError("No objects to concatenate")
+        if isinstance(normalized_aggfunc, dict) and not aggregation_specs:
+            # GeoPandas treats a non-empty dict containing only empty
+            # function lists as a geometry-only aggregation.
+            result_column_levels = 1
 
-        source_sdf = working_internal.spark_frame
+        source_sdf = internal.spark_frame
         group_column_names = [
             SPARK_INDEX_NAME_FORMAT(position)
-            for position in range(len(temporary_names))
+            for position in range(len(group_expressions))
         ]
         geometry_input_name = "__dissolve_geometry_input__"
         order_input_name = "__dissolve_order_input__"
         geometry_output_name = "__dissolve_geometry_output__"
-        order_output_name = "__dissolve_group_order__"
-        order_output_suffix = 0
-        while (order_output_name,) in existing_labels:
-            order_output_suffix += 1
-            order_output_name = f"__dissolve_group_order_{order_output_suffix}__"
+        order_output_spark_name = "__dissolve_group_order__"
+
+        attribute_input_names = {}
+        attribute_input_columns = []
+        for source_label, _, _, _ in aggregation_specs:
+            if source_label not in attribute_input_names:
+                input_name = (
+                    f"__dissolve_attribute_input_{len(attribute_input_names)}__"
+                )
+                attribute_input_names[source_label] = input_name
+                attribute_input_columns.append(
+                    internal.spark_column_for(source_label).alias(input_name)
+                )
 
         aggregation_input = source_sdf.select(
             *[
-                working[name].spark.column.alias(group_name)
-                for name, group_name in zip(temporary_names, group_column_names)
+                expression.alias(group_name)
+                for expression, group_name in zip(
+                    group_expressions,
+                    group_column_names,
+                )
             ],
-            working.geometry.spark.column.alias(geometry_input_name),
+            internal.spark_column_for(geometry_label).alias(geometry_input_name),
             scol_for(source_sdf, NATURAL_ORDER_COLUMN_NAME).alias(order_input_name),
+            *attribute_input_columns,
         )
 
+        attribute_output_names = [
+            f"__dissolve_attribute_{position}__"
+            for position in range(len(aggregation_specs))
+        ]
+        attribute_aggregations = [
+            _dissolve_aggregation_expression(
+                F.col(attribute_input_names[source_label]),
+                field,
+                function_name,
+                F.col(order_input_name),
+                source_label[0],
+            ).alias(output_name)
+            for (
+                source_label,
+                field,
+                function_name,
+                _,
+            ), output_name in zip(aggregation_specs, attribute_output_names)
+        ]
+
+        # CRS lookup is eager. Keep it after all aggregation validation so
+        # unsupported function/dtype combinations fail before Spark executes.
+        crs = self.crs
         srid = crs.to_epsg() if crs is not None else 0
         empty_geometry = stc.ST_GeomFromWKT(
             F.lit("GEOMETRYCOLLECTION EMPTY"),
@@ -1773,20 +1944,28 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         )
         aggregated_sdf = aggregation_input.groupBy(*group_column_names).agg(
             geometry_union.alias(geometry_output_name),
-            F.min(F.col(order_input_name)).alias(order_output_name),
+            F.min(F.col(order_input_name)).alias(order_output_spark_name),
+            *attribute_aggregations,
         )
         if dropna:
             aggregated_sdf = aggregated_sdf.dropna(subset=group_column_names)
 
-        result_column_levels = (
-            aggregated_data._internal.column_labels_level
-            if aggregated_data is not None
-            else 1
-        )
         result_geometry_label = geometry_label + ("",) * (
             result_column_levels - len(geometry_label)
         )
-        result_order_label = (order_output_name,) + ("",) * (result_column_levels - 1)
+        result_attribute_labels = [spec[3] for spec in aggregation_specs]
+        result_order_label_name = "__dissolve_group_order__"
+        result_order_label = (result_order_label_name,) + ("",) * (
+            result_column_levels - 1
+        )
+        result_labels = {result_geometry_label, *result_attribute_labels}
+        result_order_suffix = 0
+        while result_order_label in result_labels:
+            result_order_suffix += 1
+            result_order_label_name = f"__dissolve_group_order_{result_order_suffix}__"
+            result_order_label = (result_order_label_name,) + ("",) * (
+                result_column_levels - 1
+            )
         result_geometry_name = (
             result_geometry_label[0]
             if len(result_geometry_label) == 1
@@ -1797,13 +1976,12 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             if len(result_order_label) == 1
             else result_order_label
         )
-        result_column_label_names = (
-            aggregated_data._internal.column_label_names
-            if aggregated_data is not None
-            else [None]
-        )
+        result_column_label_names = [
+            internal.column_label_names[0],
+            *([None] * (result_column_levels - 1)),
+        ]
 
-        geometry_internal = InternalFrame(
+        result_internal = InternalFrame(
             spark_frame=aggregated_sdf,
             index_spark_columns=[
                 scol_for(aggregated_sdf, name) for name in group_column_names
@@ -1817,10 +1995,15 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 )
                 for field, name in zip(group_fields, group_column_names)
             ],
-            column_labels=[result_geometry_label, result_order_label],
+            column_labels=[
+                result_geometry_label,
+                result_order_label,
+                *result_attribute_labels,
+            ],
             data_spark_columns=[
                 scol_for(aggregated_sdf, geometry_output_name),
-                scol_for(aggregated_sdf, order_output_name),
+                scol_for(aggregated_sdf, order_output_spark_name),
+                *[scol_for(aggregated_sdf, name) for name in attribute_output_names],
             ],
             data_fields=[
                 InternalField(
@@ -1828,87 +2011,28 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                     aggregated_sdf.schema[geometry_output_name],
                 ),
                 InternalField.from_struct_field(
-                    aggregated_sdf.schema[order_output_name]
+                    aggregated_sdf.schema[order_output_spark_name]
                 ),
+                *[
+                    (
+                        InternalField(field.dtype, aggregated_sdf.schema[name])
+                        if function_name in {"first", "last", "min", "max"}
+                        else InternalField.from_struct_field(
+                            aggregated_sdf.schema[name]
+                        )
+                    )
+                    for (
+                        _,
+                        field,
+                        function_name,
+                        _,
+                    ), name in zip(aggregation_specs, attribute_output_names)
+                ],
             ],
             column_label_names=result_column_label_names,
         )
-        aggregated = GeoDataFrame(PandasOnSparkDataFrame(geometry_internal))
+        aggregated = GeoDataFrame(PandasOnSparkDataFrame(result_internal))
         aggregated._geometry_column_name = result_geometry_name
-
-        if aggregated_data is not None:
-            data_internal = aggregated_data._internal
-            left_sdf = geometry_internal.spark_frame.alias("__geometry__")
-            right_sdf = data_internal.spark_frame.alias("__attributes__")
-            join_condition = F.lit(True)
-            for left_name, right_name in zip(
-                geometry_internal.index_spark_column_names,
-                data_internal.index_spark_column_names,
-            ):
-                join_condition = join_condition & left_sdf[left_name].eqNullSafe(
-                    right_sdf[right_name]
-                )
-
-            attribute_spark_names = [
-                f"__dissolve_attribute_{position}__"
-                for position in range(len(data_internal.data_spark_columns))
-            ]
-            combined_sdf = left_sdf.join(
-                right_sdf,
-                join_condition,
-                "left",
-            ).select(
-                *[
-                    left_sdf[name].alias(name)
-                    for name in geometry_internal.index_spark_column_names
-                ],
-                left_sdf[geometry_output_name],
-                left_sdf[order_output_name],
-                *[
-                    column.alias(name)
-                    for column, name in zip(
-                        data_internal.data_spark_columns,
-                        attribute_spark_names,
-                    )
-                ],
-            )
-            combined_internal = InternalFrame(
-                spark_frame=combined_sdf,
-                index_spark_columns=[
-                    scol_for(combined_sdf, name)
-                    for name in geometry_internal.index_spark_column_names
-                ],
-                index_names=group_index_names,
-                index_fields=[
-                    InternalField(field.dtype, combined_sdf.schema[field.name])
-                    for field in geometry_internal.index_fields
-                ],
-                column_labels=(
-                    geometry_internal.column_labels + data_internal.column_labels
-                ),
-                data_spark_columns=[
-                    scol_for(combined_sdf, geometry_output_name),
-                    scol_for(combined_sdf, order_output_name),
-                    *[scol_for(combined_sdf, name) for name in attribute_spark_names],
-                ],
-                data_fields=[
-                    InternalField(
-                        field.dtype,
-                        combined_sdf.schema[column_name],
-                    )
-                    for field, column_name in zip(
-                        geometry_internal.data_fields + data_internal.data_fields,
-                        [
-                            geometry_output_name,
-                            order_output_name,
-                            *attribute_spark_names,
-                        ],
-                    )
-                ],
-                column_label_names=result_column_label_names,
-            )
-            aggregated = GeoDataFrame(PandasOnSparkDataFrame(combined_internal))
-            aggregated._geometry_column_name = result_geometry_name
 
         if sort:
             aggregated = GeoDataFrame(aggregated.sort_index(na_position="last"))

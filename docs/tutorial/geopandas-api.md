@@ -356,6 +356,12 @@ all_building_parts = collect(buildings.geometry)
 `coverage`, and `disjoint_subset` unions are rejected explicitly. Multiple
 attribute aggregations remain a two-level pandas-on-Spark `MultiIndex`;
 GeoPandas instead represents their tuple labels in a one-level object index.
+Native `first`, `last`, and `count` aggregation supports every attribute type;
+`nunique` supports numeric, boolean, and string columns; and `min`, `max`,
+`sum`, `mean`, `median`, `std`, and `var` support numeric and boolean columns.
+String `sum` and every `prod` aggregation are rejected explicitly. Callable
+aliases are limited to built-in `min`, `max`, and `sum`, plus NumPy `amin`,
+`amax`, `min`, `max`, `sum`, `mean`, `median`, `std`, and `var`.
 Both operations aggregate input rows on Spark executors. `collect` transfers
 only aggregate metadata and the API's single geometry result to the driver.
 

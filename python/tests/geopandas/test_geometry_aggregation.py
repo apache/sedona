@@ -16,10 +16,15 @@
 # under the License.
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pytest
 import pyspark.pandas as ps
-from shapely.errors import EmptyPartError
+
+try:
+    from shapely.errors import EmptyPartError
+except ImportError:
+    EmptyPartError = ValueError
 from shapely.geometry import (
     LineString,
     MultiPoint,
@@ -90,6 +95,7 @@ class TestGeometryAggregation(TestGeopandasBase):
         assert row["value"] == 5
         assert row["geometry"].equals(MultiPoint([(0, 0), (1, 1)]))
         assert result.crs == source.crs
+        assert result["index"].dtype == np.dtype("int64")
 
     def test_dissolve_level_multikey_and_sort(self):
         index = pd.MultiIndex.from_tuples(
@@ -126,7 +132,7 @@ class TestGeometryAggregation(TestGeopandasBase):
         assert multikey_result.index.names == ["kind", "value"]
 
     def test_dissolve_multiple_aggregations(self):
-        source = GeoDataFrame(
+        local = gpd.GeoDataFrame(
             {
                 "zone": ["a", "a", "b"],
                 "value": [1, 3, 2],
@@ -134,6 +140,9 @@ class TestGeometryAggregation(TestGeopandasBase):
                 "geometry": [Point(0, 0), Point(1, 1), Point(2, 2)],
             }
         )
+        local.columns.name = "attributes"
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            source = GeoDataFrame(local)
         result = source.dissolve(
             "zone",
             aggfunc={
@@ -145,11 +154,106 @@ class TestGeometryAggregation(TestGeopandasBase):
         collected = result.to_geopandas()
 
         assert isinstance(result.columns, pd.MultiIndex)
+        assert result.columns.names == ["attributes", None]
         assert result.active_geometry_name == ("geometry", "")
         assert collected.loc["a", ("zone", "first")] == "a"
         assert collected.loc["a", ("value", "sum")] == 4
         assert collected.loc["a", ("value", "max")] == 3
         assert collected.loc["a", ("label", "first")] == "x"
+
+    def test_dissolve_first_last_skip_nulls_in_source_order(self):
+        source = GeoDataFrame(
+            {
+                "zone": ["a"] * 6 + ["b"] * 2,
+                "label": [
+                    None,
+                    "first",
+                    "middle",
+                    None,
+                    "last",
+                    None,
+                    None,
+                    None,
+                ],
+                "value": [
+                    np.nan,
+                    1.0,
+                    2.0,
+                    np.nan,
+                    3.0,
+                    np.nan,
+                    np.nan,
+                    np.nan,
+                ],
+                "geometry": [Point(i, i) for i in range(8)],
+            }
+        )
+        distributed_result = source.dissolve(
+            "zone",
+            aggfunc={
+                "label": ["first", "last", "count", "nunique"],
+                "value": ["first", "last", "count", "nunique"],
+            },
+        )
+        spark_frame = distributed_result._internal.spark_frame
+        if hasattr(spark_frame, "_jdf"):
+            plan = spark_frame._jdf.queryExecution().analyzed().toString().lower()
+            assert "min_by" in plan
+            assert "max_by" in plan
+        result = distributed_result.to_geopandas()
+
+        assert result.loc["a", ("label", "first")] == "first"
+        assert result.loc["a", ("label", "last")] == "last"
+        assert result.loc["a", ("label", "count")] == 3
+        assert result.loc["a", ("label", "nunique")] == 3
+        assert result.loc["a", ("value", "first")] == 1.0
+        assert result.loc["a", ("value", "last")] == 3.0
+        assert result.loc["a", ("value", "count")] == 3
+        assert result.loc["a", ("value", "nunique")] == 3
+        assert result.loc["b", ("label", "first")] is None
+        assert result.loc["b", ("label", "last")] is None
+        assert result.loc["b", ("label", "count")] == 0
+        assert result.loc["b", ("label", "nunique")] == 0
+        assert pd.isna(result.loc["b", ("value", "first")])
+        assert pd.isna(result.loc["b", ("value", "last")])
+
+    def test_dissolve_numeric_boolean_aggregation_semantics(self):
+        local = gpd.GeoDataFrame(
+            {
+                "zone": ["a", "a", "b", "b"],
+                "integer": [1, 2, 3, 4],
+                "number": [1.5, 2.5, np.nan, np.nan],
+                "flag": pd.Series([True, False, None, None], dtype="boolean"),
+                "geometry": [Point(i, i) for i in range(4)],
+            }
+        )
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            source = GeoDataFrame(local)
+
+        result = source.dissolve(
+            "zone",
+            aggfunc={
+                "integer": [np.sum, np.mean],
+                "number": "sum",
+                "flag": ["sum", "mean", "median", "std", "var", "min", "max"],
+            },
+        ).to_geopandas()
+
+        assert result.loc["a", ("integer", "sum")] == 3
+        assert result.loc["a", ("integer", "mean")] == 1.5
+        assert result[("integer", "sum")].dtype == np.dtype("int64")
+        assert result.loc["b", ("number", "sum")] == 0.0
+        assert result.loc["a", ("flag", "sum")] == 1
+        assert result.loc["b", ("flag", "sum")] == 0
+        assert result[("flag", "sum")].dtype == np.dtype("int64")
+        assert result.loc["a", ("flag", "mean")] == 0.5
+        assert result.loc["a", ("flag", "median")] == 0.5
+        assert result.loc["a", ("flag", "std")] == pytest.approx(2**-0.5)
+        assert result.loc["a", ("flag", "var")] == 0.5
+        assert not bool(result.loc["a", ("flag", "min")])
+        assert bool(result.loc["a", ("flag", "max")])
+        for function_name in ["mean", "median", "std", "var"]:
+            assert result[("flag", function_name)].dtype == np.dtype("float64")
 
     def test_dissolve_empty_preserves_crs(self):
         with ps.option_context("compute.ops_on_diff_frames", True):
@@ -181,7 +285,7 @@ class TestGeometryAggregation(TestGeopandasBase):
             source.dissolve("zone", method="coverage")
         with pytest.raises(NotImplementedError, match="grid_size"):
             source.dissolve("zone", grid_size=1)
-        with pytest.raises(NotImplementedError, match="named Spark"):
+        with pytest.raises(NotImplementedError, match="known built-in"):
             source.dissolve("zone", aggfunc=lambda values: values.iloc[0])
         with pytest.raises(NotImplementedError, match="grouping vectors"):
             source.dissolve(["a"])
@@ -191,6 +295,38 @@ class TestGeometryAggregation(TestGeopandasBase):
                 aggfunc={"zone": "first"},
                 numeric_only=True,
             )
+        with pytest.raises(NotImplementedError, match="prod aggregation"):
+            source.dissolve("zone", aggfunc="prod")
+
+        strings = GeoDataFrame(
+            {
+                "zone": ["a", "a"],
+                "label": ["x", "y"],
+                "geometry": [Point(0, 0), Point(1, 1)],
+            }
+        )
+        for aggregation in ["min", "max", "sum", "mean", "median", "std", "var"]:
+            with pytest.raises(
+                NotImplementedError,
+                match=rf"'{aggregation}'.*column 'label'.*'string'",
+            ):
+                strings.dissolve("zone", aggfunc=aggregation)
+
+        def sum(values):
+            return values.sum()
+
+        with pytest.raises(NotImplementedError, match="known built-in"):
+            source.dissolve("zone", aggfunc=sum)
+
+        geometry_only = GeoDataFrame({"geometry": [Point(0, 0)]})
+        assert list(geometry_only.dissolve().columns) == ["geometry"]
+        with pytest.raises(ValueError, match="No objects to concatenate"):
+            geometry_only.dissolve(aggfunc=["first"])
+
+        empty_dict_functions = GeoDataFrame(
+            {"value": [1], "geometry": [Point(0, 0)]}
+        ).dissolve(aggfunc={"value": []})
+        assert list(empty_dict_functions.columns) == ["geometry"]
 
         with ps.option_context("compute.ops_on_diff_frames", True):
             categorical = GeoDataFrame(
@@ -203,6 +339,30 @@ class TestGeometryAggregation(TestGeopandasBase):
             )
         with pytest.raises(NotImplementedError, match="observed=True"):
             categorical.dissolve("zone")
+
+        categorical_values = gpd.GeoDataFrame(
+            {
+                "zone": ["a", "a"],
+                "category": pd.Categorical(["x", None]),
+                "geometry": [Point(0, 0), Point(1, 1)],
+            }
+        )
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            distributed_categories = GeoDataFrame(categorical_values)
+        category_result = distributed_categories.dissolve(
+            "zone",
+            aggfunc={"category": "first"},
+        ).to_geopandas()
+        assert category_result.loc["a", "category"] == "x"
+        assert isinstance(category_result["category"].dtype, pd.CategoricalDtype)
+        with pytest.raises(
+            NotImplementedError,
+            match="'nunique'.*'category'",
+        ):
+            distributed_categories.dissolve(
+                "zone",
+                aggfunc={"category": "nunique"},
+            )
 
     def test_collect_scalar_and_distributed_singletons(self):
         point = Point(0, 0)
