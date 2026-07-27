@@ -296,7 +296,7 @@ buildings_projected["perimeter"] = buildings_projected.geometry.length
 
 ## Supported Operations
 
-The GeoPandas API for Apache Sedona has implemented **39 GeoSeries functions** and **11 GeoDataFrame functions**, covering the most commonly used GeoPandas operations:
+The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries and GeoDataFrame operations:
 
 ### Data I/O
 
