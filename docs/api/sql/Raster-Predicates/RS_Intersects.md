@@ -26,7 +26,8 @@ The convex hull of the raster is considered in the test.
 
 Rules for testing spatial relationship:
 
-- If the raster or geometry does not have a defined SRID, it is assumed to be in WGS84.
+- If neither side has a defined CRS, the relationship test is performed directly without CRS transformation.
+- If exactly one side has a defined CRS, the function throws an error.
 - If both sides are in the same CRS, then perform the relationship test directly.
 - Otherwise, both sides will be transformed to WGS84 before the relationship test.
 
@@ -45,7 +46,7 @@ Since: `v1.5.0`
 SQL Example
 
 ```sql
-SELECT RS_Intersects(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), ST_SetSRID(ST_PolygonFromEnvelope(0, 0, 10, 10), 4326)) rast_geom,
+SELECT RS_Intersects(RS_SetSRID(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), 4326), ST_SetSRID(ST_PolygonFromEnvelope(0, 0, 10, 10), 4326)) rast_geom,
     RS_Intersects(RS_MakeEmptyRaster(1, 20, 20, 2, 22, 1), RS_MakeEmptyRaster(1, 10, 10, 1, 11, 1)) rast_rast
 ```
 

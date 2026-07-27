@@ -169,7 +169,8 @@ trait TestBaseScala extends FunSpec with BeforeAndAfterAll {
   lazy val buildRasterDf =
     loadGeoTiff(rasterDataLocation).selectExpr("RS_FromGeoTiff(content) as raster")
   lazy val buildBuildingsDf =
-    loadCsvWithHeader(buildingDataLocation).selectExpr("ST_GeomFromWKT(geometry) as building")
+    loadCsvWithHeader(buildingDataLocation)
+      .selectExpr("ST_SetSRID(ST_GeomFromWKT(geometry), 4326) as building")
   lazy val buildSmallRasterDf =
     loadGeoTiff(smallRasterDataLocation).selectExpr("RS_FromGeoTiff(content) as raster")
 

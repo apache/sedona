@@ -1510,16 +1510,10 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .load(resourceFolder + "raster/test1.tiff")
         .selectExpr("path", "RS_FromGeoTiff(content) as raster")
 
-      // query window without SRID, will be assumed to be in WGS84
-      assert(
-        df.selectExpr("RS_Intersects(raster, ST_Point(-117.47993, 33.81798))")
-          .first()
-          .getBoolean(0))
-      assert(
-        !df
-          .selectExpr("RS_Intersects(raster, ST_Point(-117.27868, 33.97896))")
-          .first()
-          .getBoolean(0))
+      // Exactly one input has a CRS, so the predicate cannot determine a common coordinate frame.
+      intercept[Exception] {
+        df.selectExpr("RS_Intersects(raster, ST_Point(-117.47993, 33.81798))").collect()
+      }
 
       // query window and raster are in the same CRS
       assert(
@@ -1558,11 +1552,13 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       assert(df.selectExpr("RS_Intersects(raster, raster)").first().getBoolean(0))
       assert(
         !df
-          .selectExpr("RS_Intersects(raster, RS_MakeEmptyRaster(1, 10, 10, 0, 0, 1))")
+          .selectExpr(
+            "RS_Intersects(raster, RS_SetSRID(RS_MakeEmptyRaster(1, 10, 10, 0, 0, 1), 4326))")
           .first()
           .getBoolean(0))
       assert(
-        df.selectExpr("RS_Intersects(raster, RS_MakeEmptyRaster(1, 10, 10, -118, 34, 1))")
+        df.selectExpr(
+          "RS_Intersects(raster, RS_SetSRID(RS_MakeEmptyRaster(1, 10, 10, -118, 34, 1), 4326))")
           .first()
           .getBoolean(0))
     }
