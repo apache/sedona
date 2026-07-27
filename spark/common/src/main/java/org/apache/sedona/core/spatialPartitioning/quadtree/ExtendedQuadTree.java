@@ -223,6 +223,17 @@ public class ExtendedQuadTree<T> extends PartitioningUtils implements Serializab
    *     tree.
    */
   public void build(int neighborSampleNumber) throws Exception {
+    build(neighborSampleNumber, false);
+  }
+
+  /**
+   * Builds the partitioning tree and optionally counts identical sample envelopes once when
+   * deriving KNN distance bounds.
+   *
+   * @param neighborSampleNumber the number of neighbour samples
+   * @param deduplicateKnnSamples whether identical sample envelopes count once
+   */
+  public void build(int neighborSampleNumber, boolean deduplicateKnnSamples) throws Exception {
     // Force the quad-tree to grow up to a certain level
     // So the actual num of partitions might be slightly different
     int minLevel = (int) Math.max(Math.log(numPartitions) / Math.log(4), 0);
@@ -231,7 +242,7 @@ public class ExtendedQuadTree<T> extends PartitioningUtils implements Serializab
     partitionTree = quadTreeRTPartitioning.getPartitionTree();
 
     // Create the expanded boundaries
-    quadTreeRTPartitioning.buildSTRTree(samples, neighborSampleNumber);
+    quadTreeRTPartitioning.buildSTRTree(samples, neighborSampleNumber, deduplicateKnnSamples);
     expandedBoundaries = quadTreeRTPartitioning.getMbrs();
     spatialExpandedBoundaryIndex = quadTreeRTPartitioning.getMbrSpatialIndex();
 

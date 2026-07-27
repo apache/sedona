@@ -33,6 +33,7 @@ from pyspark.pandas.utils import log_advice
 
 from sedona.spark.geopandas._typing import Label
 from sedona.spark.geopandas.base import GeoFrame
+from sedona.spark.sql import st_functions as stf
 
 from pandas.api.extensions import register_extension_dtype
 from geopandas.geodataframe import crs_mismatch_error
@@ -338,7 +339,39 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 raise ValueError(crs_mismatch_error)
 
         if geometry:
-            self.set_geometry(geometry, inplace=True, crs=crs)
+            existing_geometry = None
+            if crs is not None and pd.api.types.is_hashable(geometry):
+                try:
+                    candidate = self[geometry]
+                except (KeyError, TypeError, ValueError):
+                    pass
+                else:
+                    if isinstance(candidate, sgpd.GeoSeries):
+                        existing_geometry = candidate
+
+            if existing_geometry is None:
+                self.set_geometry(geometry, inplace=True, crs=crs)
+            else:
+                # Updating the existing Spark column directly avoids index
+                # alignment, which would multiply rows for duplicate indexes.
+                from pyproj import CRS
+
+                normalized_crs = CRS.from_user_input(crs)
+                new_epsg = normalized_crs.to_epsg() or 0
+                self._update_internal_frame(
+                    self._internal.with_new_spark_column(
+                        existing_geometry._column_label,
+                        stf.ST_SetSRID(existing_geometry.spark.column, new_epsg),
+                    )
+                )
+                self._geometry_column_name = geometry
+                empty_crs_source = self[geometry]
+                empty_crs_source._empty_crs_value = normalized_crs
+                object.__setattr__(
+                    self,
+                    "_empty_crs_source",
+                    empty_crs_source,
+                )
 
         if geometry is None and "geometry" in self.columns:
 
@@ -396,7 +429,11 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 )
 
             raise MissingGeometryColumnError(msg)
-        return self[self._geometry_column_name]
+        geometry = self[self._geometry_column_name]
+        empty_crs_source = getattr(self, "_empty_crs_source", None)
+        if empty_crs_source is not None:
+            geometry._empty_crs_source = empty_crs_source
+        return geometry
 
     def _set_geometry(self, col):
         # This check is included in the original geopandas. Note that this prevents assigning a str to the property
@@ -591,6 +628,7 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         if new_series:
             # Note: This casts GeoSeries back into pspd.Series, so we lose any metadata that's not serialized.
             frame[geo_column_name] = level
+            object.__setattr__(frame, "_empty_crs_source", level)
 
         if not inplace:
             return frame
@@ -710,7 +748,14 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             else:
                 pd_df[col_name] = series._to_pandas()
 
-        return gpd.GeoDataFrame(pd_df, geometry=self._geometry_column_name)
+        result = gpd.GeoDataFrame(
+            pd_df,
+            geometry=self._geometry_column_name,
+            crs=self.crs if self._geometry_column_name is not None else None,
+        )
+        if self._geometry_column_name is None:
+            result._geometry_column_name = None
+        return result
 
     def to_spark_pandas(self) -> pspd.DataFrame:
         """
@@ -1448,6 +1493,57 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             distance=distance,
             on_attribute=on_attribute,
             **kwargs,
+        )
+
+    def sjoin_nearest(
+        self,
+        other,
+        how="inner",
+        max_distance=None,
+        lsuffix="left",
+        rsuffix="right",
+        distance_col=None,
+        exclusive=False,
+    ):
+        """Join another GeoDataFrame using distributed nearest neighbours.
+
+        Parameters
+        ----------
+        other : GeoDataFrame
+            Right-hand frame.
+        how : {"inner", "left", "right"}, default "inner"
+            Join mode and side whose index and active geometry are retained.
+        max_distance : float, optional
+            Maximum planar distance for a nearest match.
+        lsuffix, rsuffix : str
+            Suffixes for overlapping columns.
+        distance_col : str, optional
+            Name of a column containing match distances.
+        exclusive : bool, default False
+            Exclude topologically equal candidates.
+
+        Returns
+        -------
+        GeoDataFrame
+            Distributed nearest-join result.
+
+        See Also
+        --------
+        sedona.spark.geopandas.sjoin_nearest
+        """
+        from sedona.spark.geopandas.tools.sjoin import (
+            sjoin_nearest as sjoin_nearest_tool,
+        )
+
+        return sjoin_nearest_tool(
+            self,
+            other,
+            how=how,
+            max_distance=max_distance,
+            lsuffix=lsuffix,
+            rsuffix=rsuffix,
+            distance_col=distance_col,
+            exclusive=exclusive,
         )
 
     # ============================================================================

@@ -93,4 +93,34 @@ object st_predicates {
     wrapExpression[ST_KNN](a, b, distance, useSphere)
   def ST_KNN(a: String, b: String, distance: Double, useSphere: Boolean): Column =
     wrapExpression[ST_KNN](a, b, distance, useSphere)
+  def ST_KNN(
+      a: Column,
+      b: Column,
+      distance: Column,
+      useSphere: Column,
+      includeTies: Column): Column =
+    wrapExpression[ST_KNN](a, b, distance, useSphere, includeTies)
+  def ST_KNN(
+      a: String,
+      b: String,
+      distance: Double,
+      useSphere: Boolean,
+      includeTies: Boolean): Column =
+    wrapExpression[ST_KNN](a, b, distance, useSphere, includeTies)
+  def ST_KNN(
+      a: Column,
+      b: Column,
+      distance: Column,
+      useSphere: Column,
+      includeTies: Column,
+      exclusive: Column): Column =
+    wrapExpression[ST_KNN](a, b, distance, useSphere, includeTies, exclusive)
+  def ST_KNN(
+      a: String,
+      b: String,
+      distance: Double,
+      useSphere: Boolean,
+      includeTies: Boolean,
+      exclusive: Boolean): Column =
+    wrapExpression[ST_KNN](a, b, distance, useSphere, includeTies, exclusive)
 }

@@ -14,16 +14,418 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import numbers
 import re
+import warnings
+from dataclasses import dataclass
+from typing import Any, List, Optional, Tuple
+
+import numpy as np
 import pyspark.pandas as ps
-from pyspark.pandas.internal import SPARK_DEFAULT_INDEX_NAME, InternalFrame
+from pyspark.pandas.internal import (
+    NATURAL_ORDER_COLUMN_NAME,
+    SPARK_DEFAULT_INDEX_NAME,
+    InternalFrame,
+)
 from pyspark.pandas.utils import scol_for
+from pyspark.sql import Column, DataFrame as SparkDataFrame
+from pyspark.sql import functions as F
 from pyspark.sql.functions import expr
 
 from sedona.spark.geopandas import GeoDataFrame, GeoSeries
+from sedona.spark.sql import st_functions as stf
+from sedona.spark.sql import st_predicates as stp
 
 # Pre-compiled regex pattern for suffix validation.
 SUFFIX_PATTERN = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
+
+
+@dataclass(frozen=True)
+class _NearestJoinSide:
+    """A join input projected onto collision-proof Spark column names."""
+
+    spark_frame: SparkDataFrame
+    index_aliases: Tuple[str, ...]
+    index_names: Tuple[Any, ...]
+    data_aliases: Tuple[str, ...]
+    data_labels: Tuple[Tuple[Any, ...], ...]
+    active_label: Tuple[Any, ...]
+    active_name: Any
+    geometry_alias: str
+    order_alias: str
+
+
+def _qualified_column(qualifier: str, name: str) -> Column:
+    return F.col(f"{qualifier}.`{name}`")
+
+
+def _prepare_nearest_side(frame: GeoDataFrame, prefix: str) -> _NearestJoinSide:
+    internal = frame._internal
+    active_label = frame.geometry._column_label
+    if active_label is None:
+        raise ValueError("GeoDataFrame geometry column is not set")
+
+    try:
+        geometry_position = internal.column_labels.index(active_label)
+    except ValueError as exc:
+        raise ValueError("GeoDataFrame geometry column is not present") from exc
+
+    index_aliases = tuple(
+        f"__sjoin_nearest_{prefix}_index_{position}__"
+        for position in range(len(internal.index_spark_columns))
+    )
+    data_aliases = tuple(
+        f"__sjoin_nearest_{prefix}_data_{position}__"
+        for position in range(len(internal.data_spark_columns))
+    )
+    order_alias = f"__sjoin_nearest_{prefix}_order__"
+
+    projected = internal.spark_frame.select(
+        *[
+            column.alias(alias)
+            for column, alias in zip(internal.index_spark_columns, index_aliases)
+        ],
+        *[
+            column.alias(alias)
+            for column, alias in zip(internal.data_spark_columns, data_aliases)
+        ],
+        scol_for(internal.spark_frame, NATURAL_ORDER_COLUMN_NAME).alias(order_alias),
+    )
+    return _NearestJoinSide(
+        spark_frame=projected,
+        index_aliases=index_aliases,
+        index_names=tuple(internal.index_names),
+        data_aliases=data_aliases,
+        data_labels=tuple(internal.column_labels),
+        active_label=active_label,
+        active_name=frame.active_geometry_name,
+        geometry_alias=data_aliases[geometry_position],
+        order_alias=order_alias,
+    )
+
+
+def _nearest_reset_index_labels(
+    side: _NearestJoinSide,
+    suffix: str,
+    other: _NearestJoinSide,
+) -> List[Tuple[Any, ...]]:
+    """Return GeoPandas-compatible labels for reset index levels."""
+
+    labels: List[Tuple[Any, ...]] = []
+    multiple_levels = len(side.index_names) > 1
+    for position, name in enumerate(side.index_names):
+        if name is None:
+            generated = (
+                f"index_{suffix}{position}" if multiple_levels else f"index_{suffix}"
+            )
+            label = (generated,)
+            if label in side.data_labels or label in other.data_labels:
+                raise ValueError(
+                    f"'{generated}' cannot be a column name in the frames being joined"
+                )
+        else:
+            label = name
+            if label in side.data_labels:
+                display_name = label[0] if len(label) == 1 else label
+                raise ValueError(f"cannot insert {display_name}, already exists")
+        labels.append(label)
+    return labels
+
+
+def _nearest_suffix_label(label: Tuple[Any, ...], suffix: str) -> Tuple[Any, ...]:
+    if len(label) == 1:
+        return (f"{label[0]}_{suffix}",)
+    return (*label[:-1], f"{label[-1]}_{suffix}")
+
+
+def _nearest_output_columns(
+    left: _NearestJoinSide,
+    right: _NearestJoinSide,
+    how: str,
+    lsuffix: str,
+    rsuffix: str,
+) -> List[Tuple[str, Tuple[Any, ...]]]:
+    """Resolve output values and labels using GeoPandas reset/suffix rules."""
+
+    left_index_labels = _nearest_reset_index_labels(left, lsuffix, right)
+    right_index_labels = _nearest_reset_index_labels(right, rsuffix, left)
+
+    left_data = [
+        (alias, label)
+        for alias, label in zip(left.data_aliases, left.data_labels)
+        if how != "right" or alias != left.geometry_alias
+    ]
+    right_data = [
+        (alias, label)
+        for alias, label in zip(right.data_aliases, right.data_labels)
+        if how == "right" or alias != right.geometry_alias
+    ]
+
+    left_reset_labels = left_index_labels + [label for _, label in left_data]
+    right_reset_labels = right_index_labels + [label for _, label in right_data]
+    overlap = set(left_reset_labels).intersection(right_reset_labels)
+
+    def rename(
+        label: Tuple[Any, ...],
+        suffix: str,
+        geometry_label: Tuple[Any, ...],
+    ) -> Tuple[Any, ...]:
+        if label in overlap and label != geometry_label:
+            return _nearest_suffix_label(label, suffix)
+        return label
+
+    output: List[Tuple[str, Tuple[Any, ...]]] = []
+    if how == "right":
+        output.extend(
+            (alias, rename(label, lsuffix, left.active_label))
+            for alias, label in zip(left.index_aliases, left_index_labels)
+        )
+    output.extend(
+        (alias, rename(label, lsuffix, left.active_label)) for alias, label in left_data
+    )
+
+    if how in ("inner", "left"):
+        output.extend(
+            (alias, rename(label, rsuffix, right.active_label))
+            for alias, label in zip(right.index_aliases, right_index_labels)
+        )
+    output.extend(
+        (alias, rename(label, rsuffix, right.active_label))
+        for alias, label in right_data
+    )
+    return output
+
+
+def _nearest_result_index_names(
+    left: _NearestJoinSide,
+    right: _NearestJoinSide,
+    how: str,
+    lsuffix: str,
+    rsuffix: str,
+) -> List[Any]:
+    """Apply the reset/merge suffix rules to the retained index names."""
+
+    left_index_labels = _nearest_reset_index_labels(left, lsuffix, right)
+    right_index_labels = _nearest_reset_index_labels(right, rsuffix, left)
+    left_data_labels = [
+        label
+        for alias, label in zip(left.data_aliases, left.data_labels)
+        if how != "right" or alias != left.geometry_alias
+    ]
+    right_data_labels = [
+        label
+        for alias, label in zip(right.data_aliases, right.data_labels)
+        if how == "right" or alias != right.geometry_alias
+    ]
+    overlap = set(left_index_labels + left_data_labels).intersection(
+        right_index_labels + right_data_labels
+    )
+
+    if how in ("inner", "left"):
+        side, labels, suffix = left, left_index_labels, lsuffix
+    else:
+        side, labels, suffix = right, right_index_labels, rsuffix
+
+    return [
+        (
+            _nearest_suffix_label(label, suffix)
+            if name is not None and label in overlap
+            else name
+        )
+        for name, label in zip(side.index_names, labels)
+    ]
+
+
+def _check_sjoin_nearest_crs(left_df: GeoDataFrame, right_df: GeoDataFrame) -> None:
+    left_crs = left_df.crs
+    right_crs = right_df.crs
+
+    if left_crs != right_crs:
+        left_crs_text = "None" if left_crs is None else left_crs.to_string()
+        right_crs_text = "None" if right_crs is None else right_crs.to_string()
+        warnings.warn(
+            "CRS mismatch between the CRS of left geometries and the CRS of "
+            "right geometries.\nUse `to_crs()` to reproject one of the input "
+            "geometries to match the CRS of the other.\n\n"
+            f"Left CRS: {left_crs_text}\n"
+            f"Right CRS: {right_crs_text}\n",
+            UserWarning,
+            stacklevel=3,
+        )
+
+    geographic_warning = (
+        "Geometry is in a geographic CRS. Results from 'sjoin_nearest' are "
+        "likely incorrect. Use 'GeoSeries.to_crs()' to re-project geometries "
+        "to a projected CRS before this operation.\n"
+    )
+    for crs in (left_crs, right_crs):
+        if crs is not None and crs.is_geographic:
+            warnings.warn(
+                geographic_warning,
+                UserWarning,
+                stacklevel=3,
+            )
+
+
+def _normalize_max_distance(max_distance) -> Optional[float]:
+    if max_distance is None:
+        return None
+    if not isinstance(max_distance, numbers.Real):
+        raise TypeError("max_distance must be a number")
+    max_distance = float(max_distance)
+    if max_distance <= 0:
+        raise ValueError("max_distance must be greater than 0")
+    return max_distance
+
+
+def _nearest_frame_join(
+    left_df: GeoDataFrame,
+    right_df: GeoDataFrame,
+    how: str,
+    max_distance: Optional[float],
+    lsuffix: str,
+    rsuffix: str,
+    distance_col: Optional[str],
+    exclusive: bool,
+) -> GeoDataFrame:
+    left = _prepare_nearest_side(left_df, "left")
+    right = _prepare_nearest_side(right_df, "right")
+
+    if how == "right":
+        query, objects = right, left
+        left_qualifier, right_qualifier = "o", "q"
+    else:
+        query, objects = left, right
+        left_qualifier, right_qualifier = "q", "o"
+
+    query_frame = query.spark_frame.alias("q")
+    object_frame = objects.spark_frame.alias("o")
+    query_geometry = _qualified_column("q", query.geometry_alias)
+    object_geometry = _qualified_column("o", objects.geometry_alias)
+    distance = stf.ST_Distance(query_geometry, object_geometry)
+    condition = stp.ST_KNN(
+        query_geometry,
+        object_geometry,
+        1,
+        use_spheroid=False,
+        include_ties=True,
+        exclusive=exclusive,
+    )
+    if max_distance is not None:
+        condition = condition & (distance <= F.lit(max_distance))
+
+    matches = query_frame.join(object_frame, condition, "inner")
+    distance_alias = "__sjoin_nearest_distance__"
+
+    if how == "inner":
+        joined = matches.select(
+            *[
+                _qualified_column(left_qualifier, name).alias(name)
+                for name in left.spark_frame.columns
+            ],
+            *[
+                _qualified_column(right_qualifier, name).alias(name)
+                for name in right.spark_frame.columns
+            ],
+            *([distance.alias(distance_alias)] if distance_col is not None else []),
+        )
+    else:
+        match_id = "__sjoin_nearest_match_id__"
+        payload = matches.select(
+            _qualified_column("q", query.order_alias).alias(match_id),
+            *[
+                _qualified_column("o", name).alias(name)
+                for name in objects.spark_frame.columns
+            ],
+            *([distance.alias(distance_alias)] if distance_col is not None else []),
+        )
+        joined = query.spark_frame.alias("base").join(
+            payload.alias("match"),
+            _qualified_column("base", query.order_alias)
+            == _qualified_column("match", match_id),
+            "left",
+        )
+
+    active = left if how in ("inner", "left") else right
+    opposite = right if how in ("inner", "left") else left
+    joined = joined.orderBy(
+        F.col(active.order_alias).asc(),
+        F.col(opposite.order_alias).asc_nulls_last(),
+    )
+
+    output_columns = _nearest_output_columns(
+        left,
+        right,
+        how,
+        lsuffix,
+        rsuffix,
+    )
+    distance_replaces_geometry = False
+    if distance_col is not None:
+        distance_label = (distance_col,)
+        distance_replaces_geometry = distance_label == active.active_label
+        replaced = False
+        for position, (_, label) in enumerate(output_columns):
+            if label == distance_label:
+                output_columns[position] = (distance_alias, distance_label)
+                replaced = True
+                break
+        if not replaced:
+            output_columns.append((distance_alias, distance_label))
+
+    index_names = [
+        f"__sjoin_nearest_result_index_{position}__"
+        for position in range(len(active.index_aliases))
+    ]
+    data_names = [
+        f"__sjoin_nearest_result_data_{position}__"
+        for position in range(len(output_columns))
+    ]
+    result_frame = joined.select(
+        *[
+            F.col(alias).alias(name)
+            for alias, name in zip(active.index_aliases, index_names)
+        ],
+        *[
+            F.col(alias).alias(name)
+            for (alias, _), name in zip(output_columns, data_names)
+        ],
+    )
+
+    internal = InternalFrame(
+        spark_frame=result_frame,
+        index_spark_columns=[scol_for(result_frame, name) for name in index_names],
+        index_names=_nearest_result_index_names(
+            left,
+            right,
+            how,
+            lsuffix,
+            rsuffix,
+        ),
+        column_labels=[label for _, label in output_columns],
+        data_spark_columns=[scol_for(result_frame, name) for name in data_names],
+        column_label_names=(
+            left_df._internal.column_label_names
+            if how in ("inner", "left")
+            else right_df._internal.column_label_names
+        ),
+    )
+    result = GeoDataFrame(ps.DataFrame(internal))
+    if distance_replaces_geometry:
+        warnings.warn(
+            "Geometry column does not contain geometry.",
+            UserWarning,
+            stacklevel=3,
+        )
+        object.__setattr__(result, "_geometry_column_name", None)
+    else:
+        object.__setattr__(result, "_geometry_column_name", active.active_name)
+        object.__setattr__(
+            result,
+            "_empty_crs_source",
+            left_df.geometry if how in ("inner", "left") else right_df.geometry,
+        )
+    return result
 
 
 def _frame_join(
@@ -312,6 +714,97 @@ def sjoin(
     )
 
     return joined
+
+
+def sjoin_nearest(
+    left_df: GeoDataFrame,
+    right_df: GeoDataFrame,
+    how: str = "inner",
+    max_distance: Optional[float] = None,
+    lsuffix: str = "left",
+    rsuffix: str = "right",
+    distance_col: Optional[str] = None,
+    exclusive: bool = False,
+) -> GeoDataFrame:
+    """Spatial join based on the nearest distributed geometry matches.
+
+    Every equidistant nearest match is returned. The operation is planned as
+    Sedona's distributed KNN join and does not collect geometry rows to the
+    driver.
+
+    Parameters
+    ----------
+    left_df, right_df : GeoDataFrame
+        Frames to join.
+    how : {"inner", "left", "right"}, default "inner"
+        Join mode and the side whose index and active geometry are retained.
+    max_distance : float, optional
+        Maximum planar distance for a nearest match. Must be greater than zero.
+    lsuffix, rsuffix : str
+        Suffixes applied to overlapping left and right column names.
+    distance_col : str, optional
+        Output column containing the planar distance between each match.
+    exclusive : bool, default False
+        Exclude candidates topologically equal to the query geometry before
+        nearest matches are ranked.
+
+    Returns
+    -------
+    GeoDataFrame
+        Distributed nearest-join result.
+
+    Examples
+    --------
+    >>> from shapely.geometry import Point
+    >>> from sedona.spark.geopandas import GeoDataFrame, sjoin_nearest
+    >>> left = GeoDataFrame(
+    ...     {"name": ["a"], "geometry": [Point(0, 0)]}, crs="EPSG:3857"
+    ... )
+    >>> right = GeoDataFrame(
+    ...     {"value": [1, 2], "geometry": [Point(-1, 0), Point(1, 0)]},
+    ...     crs="EPSG:3857",
+    ... )
+    >>> sjoin_nearest(left, right, distance_col="distance").sort_values("value")
+      name     geometry  index_right  value  distance
+    0    a  POINT (0 0)            0      1       1.0
+    0    a  POINT (0 0)            1      2       1.0
+
+    Notes
+    -----
+    Distances are planar and expressed in CRS units. Geographic CRS inputs
+    therefore emit the same accuracy warning as GeoPandas.
+    """
+    _basic_checks(left_df, right_df, how, lsuffix, rsuffix)
+
+    if left_df.active_geometry_name is None:
+        raise ValueError("Left DataFrame geometry column not set")
+    if right_df.active_geometry_name is None:
+        raise ValueError("Right DataFrame geometry column not set")
+    if isinstance(exclusive, np.bool_):
+        exclusive = bool(exclusive)
+    elif isinstance(exclusive, numbers.Integral):
+        if exclusive not in (0, 1):
+            raise ValueError("exclusive parameter must be boolean")
+        exclusive = bool(exclusive)
+    elif not isinstance(exclusive, bool):
+        if not np.isscalar(exclusive):
+            raise ValueError("exclusive parameter only accepts scalar values")
+        raise ValueError("exclusive parameter must be boolean")
+    if distance_col is not None and not isinstance(distance_col, str):
+        raise TypeError("distance_col must be a string or None")
+
+    max_distance = _normalize_max_distance(max_distance)
+    _check_sjoin_nearest_crs(left_df, right_df)
+    return _nearest_frame_join(
+        left_df,
+        right_df,
+        how,
+        max_distance,
+        lsuffix,
+        rsuffix,
+        distance_col,
+        exclusive,
+    )
 
 
 def _maybe_make_list(obj):

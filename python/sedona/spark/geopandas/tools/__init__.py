@@ -15,8 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from .sjoin import sjoin
+from .sjoin import sjoin, sjoin_nearest
 
 __all__ = [
     "sjoin",
+    "sjoin_nearest",
 ]

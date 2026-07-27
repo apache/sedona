@@ -1652,6 +1652,12 @@ wrong_type_configurations = [
     (stp.ST_EqualsExact, (None, "", 0.0)),
     (stp.ST_EqualsExact, ("", None, 0.0)),
     (stp.ST_EqualsExact, ("", "", None)),
+    (stp.ST_KNN, (None, "", 1)),
+    (stp.ST_KNN, ("", None, 1)),
+    (stp.ST_KNN, ("", "", 1.0)),
+    (stp.ST_KNN, ("", "", 1, 1.0)),
+    (stp.ST_KNN, ("", "", 1, False, 1.0)),
+    (stp.ST_KNN, ("", "", 1, False, True, 1.0)),
     (stp.ST_Overlaps, (None, "")),
     (stp.ST_Overlaps, ("", None)),
     (stp.ST_Touches, (None, "")),
@@ -1961,6 +1967,54 @@ class TestDataFrameAPI(TestBase):
             concurrent.futures.wait(futures)
         for future in futures:
             future.result()
+
+    def test_knn_query_local_options(self):
+        queries = (
+            self.spark.createDataFrame([(0, "POINT (0 0)")], ["id", "wkt"])
+            .select("id", stc.ST_GeomFromWKT("wkt").alias("geom"))
+            .alias("queries")
+        )
+        tied_objects = (
+            self.spark.createDataFrame(
+                [(0, "POINT (-1 0)"), (1, "POINT (1 0)"), (2, "POINT (10 0)")],
+                ["id", "wkt"],
+            )
+            .select("id", stc.ST_GeomFromWKT("wkt").alias("geom"))
+            .alias("objects")
+        )
+
+        tied = queries.join(
+            tied_objects,
+            stp.ST_KNN(
+                queries["geom"],
+                tied_objects["geom"],
+                1,
+                use_spheroid=False,
+                include_ties=True,
+            ),
+        ).select(tied_objects["id"].alias("id"))
+        assert sorted(row.id for row in tied.collect()) == [0, 1]
+
+        exclusive_objects = (
+            self.spark.createDataFrame(
+                [(0, "POINT (0 0)"), (1, "POINT (2 0)")],
+                ["id", "wkt"],
+            )
+            .select("id", stc.ST_GeomFromWKT("wkt").alias("geom"))
+            .alias("exclusive_objects")
+        )
+        exclusive = queries.join(
+            exclusive_objects,
+            stp.ST_KNN(
+                queries["geom"],
+                exclusive_objects["geom"],
+                1,
+                use_spheroid=False,
+                include_ties=True,
+                exclusive=True,
+            ),
+        ).select(exclusive_objects["id"].alias("id"))
+        assert [row.id for row in exclusive.collect()] == [1]
 
     @pytest.mark.skipif(
         os.getenv("SPARK_REMOTE") is not None and pyspark.__version__ < "4.0.0",

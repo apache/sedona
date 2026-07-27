@@ -773,6 +773,28 @@ public class JoinQuery {
       boolean includeTies,
       boolean broadcastJoin)
       throws Exception {
+    return knnJoin(queryRDD, objectRDD, joinParams, includeTies, false, broadcastJoin);
+  }
+
+  /**
+   * Joins each query geometry to its nearest object geometries.
+   *
+   * @param queryRDD geometries for which neighbours are searched
+   * @param objectRDD candidate neighbour geometries
+   * @param joinParams KNN join parameters
+   * @param includeTies whether to return every candidate tied at the kth distance
+   * @param exclusive whether candidates topologically equal to the query are excluded before
+   *     ranking
+   * @param broadcastJoin whether either side uses the broadcast KNN path
+   */
+  public static <U extends Geometry, T extends Geometry> JavaPairRDD<U, T> knnJoin(
+      SpatialRDD<U> queryRDD,
+      SpatialRDD<T> objectRDD,
+      JoinParams joinParams,
+      boolean includeTies,
+      boolean exclusive,
+      boolean broadcastJoin)
+      throws Exception {
     verifyCRSMatch(queryRDD, objectRDD);
     if (!broadcastJoin) verifyPartitioningNumberMatch(queryRDD, objectRDD);
 
@@ -819,6 +841,7 @@ public class JoinQuery {
               joinParams.k,
               joinParams.distanceMetric,
               includeTies,
+              exclusive,
               null,
               null,
               buildCount,
@@ -834,6 +857,7 @@ public class JoinQuery {
               joinParams.k,
               joinParams.distanceMetric,
               includeTies,
+              exclusive,
               null,
               broadcastObjectsTreeIndex,
               buildCount,
@@ -849,13 +873,15 @@ public class JoinQuery {
               joinParams.k,
               joinParams.distanceMetric,
               includeTies,
+              exclusive,
               broadcastQueryObjects,
               null,
               buildCount,
               streamCount,
               resultCount,
               candidateCount);
-      joinResult = querySideBroadcastKNNJoin(objectRDD, joinParams, judgement, includeTies);
+      joinResult =
+          querySideBroadcastKNNJoin(objectRDD, joinParams, judgement, includeTies, exclusive);
     }
 
     return joinResult.mapToPair(
@@ -886,7 +912,8 @@ public class JoinQuery {
           SpatialRDD<T> objectRDD,
           JoinParams joinParams,
           KnnJoinIndexJudgement<UniqueGeometry<U>, T> judgement,
-          boolean includeTies) {
+          boolean includeTies,
+          boolean exclusive) {
     final JavaRDD<Pair<U, T>> joinResult;
     JavaRDD<Pair<UniqueGeometry<U>, T>> joinResultMapped =
         objectRDD.rawSpatialRDD.mapPartitions(judgement::callUsingBroadcastQueryList);
@@ -907,7 +934,11 @@ public class JoinQuery {
                   List<Pair<U, T>> sortedPairs = new ArrayList<>();
                   for (Pair<UniqueGeometry<U>, T> p : values) {
                     Pair<U, T> newPair = Pair.of(p.getKey().getOriginalGeometry(), p.getValue());
-                    sortedPairs.add(newPair);
+                    if (!exclusive
+                        || !KnnJoinIndexJudgement.areTopologicallyEqual(
+                            newPair.getKey(), newPair.getValue())) {
+                      sortedPairs.add(newPair);
+                    }
                   }
 
                   // Sort pairs based on the distance function between the two geometries

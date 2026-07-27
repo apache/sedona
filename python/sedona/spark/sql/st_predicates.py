@@ -134,6 +134,54 @@ def ST_Intersects(a: ColumnOrName, b: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_KNN(
+    a: ColumnOrName,
+    b: ColumnOrName,
+    k: Union[ColumnOrName, int],
+    use_spheroid: Optional[Union[ColumnOrName, bool]] = None,
+    include_ties: Optional[Union[ColumnOrName, bool]] = None,
+    exclusive: Optional[Union[ColumnOrName, bool]] = None,
+) -> Column:
+    """Build an optimizer-recognized K-nearest-neighbour join predicate.
+
+    ``include_ties`` and ``exclusive`` are query-local controls. When
+    ``include_ties`` is omitted, the existing
+    ``spark.sedona.join.knn.includeTieBreakers`` session setting is used.
+    ``exclusive=True`` excludes topologically equal candidates before nearest
+    neighbours are ranked.
+
+    This predicate is only valid as an inner join condition.
+
+    :param a: Query geometry column.
+    :param b: Candidate geometry column.
+    :param k: Number of nearest neighbours.
+    :param use_spheroid: Whether to use spheroid distance.
+    :param include_ties: Whether to return every candidate tied at the kth distance.
+    :param exclusive: Whether to exclude candidates equal to the query geometry.
+    :return: A KNN join predicate column.
+    """
+    if exclusive is not None and include_ties is None:
+        raise ValueError("exclusive requires include_ties to be specified")
+
+    if include_ties is not None:
+        args = (
+            a,
+            b,
+            k,
+            False if use_spheroid is None else use_spheroid,
+            include_ties,
+        )
+        if exclusive is not None:
+            args += (exclusive,)
+    elif use_spheroid is not None:
+        args = (a, b, k, use_spheroid)
+    else:
+        args = (a, b, k)
+
+    return _call_predicate_function("ST_KNN", args)
+
+
+@validate_argument_types
 def ST_OrderingEquals(a: ColumnOrName, b: ColumnOrName) -> Column:
     """Check whether two geometries have identical vertices that are in the same order.
 

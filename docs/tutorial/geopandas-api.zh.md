@@ -237,6 +237,27 @@ intersects_result = left_df.sjoin(right_df, predicate="intersects")
 contains_result = left_df.sjoin(right_df, predicate="contains")
 ```
 
+### 最近邻连接
+
+`sjoin_nearest()` 使用 Sedona 的分布式 KNN 连接计划，不会把几何数据行收集到
+driver。它支持 `inner`、`left` 和 `right`；left 与 right 连接会保留对应一侧
+未匹配的行，而最近邻匹配本身仍以分布式方式执行。
+
+```python
+nearest = left_df.sjoin_nearest(
+    right_df,
+    how="left",
+    max_distance=500,
+    distance_col="distance",
+    exclusive=True,
+)
+```
+
+所有在最近距离上并列的候选对象都会返回。`max_distance` 用于限制可匹配的
+距离，`exclusive=True` 会在排序之前排除与查询几何拓扑相等的候选对象。
+距离按平面计算并使用 CRS 的单位；输入为地理坐标系时会发出警告，因为距离
+结果可能不准确。
+
 ### 坐标参考系操作
 
 在不同坐标参考系（CRS）之间转换几何对象：
@@ -307,6 +328,7 @@ Apache Sedona 的 GeoPandas API 已实现 **39 个 GeoSeries 函数** 与 **10 �
 ### 空间操作
 
 - `sjoin()` —— 多种谓词的空间连接
+- `sjoin_nearest()` —— 分布式最近邻连接
 - `buffer()` —— 几何缓冲
 - `distance()` —— 距离计算
 - `intersects()`、`contains()`、`within()` —— 空间谓词

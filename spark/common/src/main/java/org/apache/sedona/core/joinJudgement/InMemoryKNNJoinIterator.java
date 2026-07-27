@@ -20,10 +20,11 @@ package org.apache.sedona.core.joinJudgement;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.core.enums.DistanceMetric;
 import org.apache.sedona.core.wrapper.UniqueGeometry;
@@ -41,6 +42,7 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
   private final int k;
   private final DistanceMetric distanceMetric;
   private final boolean includeTies;
+  private final boolean exclusive;
   private final ItemDistance itemDistance;
 
   private final LongAccumulator streamCount;
@@ -57,13 +59,34 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
       boolean includeTies,
       LongAccumulator streamCount,
       LongAccumulator resultCount) {
+    this(
+        querySideIterator,
+        strTree,
+        k,
+        distanceMetric,
+        includeTies,
+        false,
+        streamCount,
+        resultCount);
+  }
+
+  public InMemoryKNNJoinIterator(
+      Iterator<T> querySideIterator,
+      STRtree strTree,
+      int k,
+      DistanceMetric distanceMetric,
+      boolean includeTies,
+      boolean exclusive,
+      LongAccumulator streamCount,
+      LongAccumulator resultCount) {
     this.querySideIterator = querySideIterator;
     this.strTree = strTree;
 
     this.k = k;
     this.distanceMetric = distanceMetric;
     this.includeTies = includeTies;
-    this.itemDistance = KnnJoinIndexJudgement.getItemDistance(distanceMetric);
+    this.exclusive = exclusive;
+    this.itemDistance = KnnJoinIndexJudgement.getItemDistance(distanceMetric, exclusive);
 
     this.streamCount = streamCount;
     this.resultCount = resultCount;
@@ -108,28 +131,37 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
 
     Object[] localK =
         strTree.nearestNeighbour(queryGeom.getEnvelopeInternal(), queryGeom, itemDistance, k);
-    if (includeTies) {
-      localK = getUpdatedLocalKWithTies(queryGeom, localK, strTree);
-    }
-
+    List<U> nearest = new ArrayList<>();
     for (Object obj : localK) {
       U candidate = (U) obj;
+      if (!exclusive || !KnnJoinIndexJudgement.areTopologicallyEqual(queryGeom, candidate)) {
+        nearest.add(candidate);
+      }
+    }
+    if (includeTies) {
+      nearest = getUpdatedLocalKWithTies(queryGeom, nearest, strTree);
+    }
+
+    for (U candidate : nearest) {
       Pair<T, U> pair = Pair.of(queryItem, candidate);
       currentResults.add(pair);
       resultCount.add(1);
     }
   }
 
-  private Object[] getUpdatedLocalKWithTies(
-      Geometry streamShape, Object[] localK, STRtree strTree) {
+  private List<U> getUpdatedLocalKWithTies(Geometry streamShape, List<U> localK, STRtree strTree) {
+    if (localK.isEmpty()) {
+      return localK;
+    }
+
     Envelope searchEnvelope = streamShape.getEnvelopeInternal();
     // get the maximum distance from the k nearest neighbors
     double maxDistance = 0.0;
-    LinkedHashSet<U> uniqueCandidates = new LinkedHashSet<>();
-    for (Object obj : localK) {
-      U candidate = (U) obj;
+    Set<U> uniqueCandidates = Collections.newSetFromMap(new IdentityHashMap<>());
+    for (U candidate : localK) {
       uniqueCandidates.add(candidate);
-      double distance = streamShape.distance(candidate);
+      double distance =
+          KnnJoinIndexJudgement.distanceByMetric(streamShape, candidate, distanceMetric);
       if (distance > maxDistance) {
         maxDistance = distance;
       }
@@ -138,17 +170,21 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
     List<U> candidates = strTree.query(searchEnvelope);
     if (!candidates.isEmpty()) {
       // update localK with all candidates that are within the maxDistance
-      List<Object> tiedResults = new ArrayList<>();
+      List<U> tiedResults = new ArrayList<>();
       // add all localK
-      Collections.addAll(tiedResults, localK);
+      tiedResults.addAll(localK);
 
       for (U candidate : candidates) {
-        double distance = streamShape.distance(candidate);
-        if (distance == maxDistance && !uniqueCandidates.contains(candidate)) {
+        if (exclusive && KnnJoinIndexJudgement.areTopologicallyEqual(streamShape, candidate)) {
+          continue;
+        }
+        double distance =
+            KnnJoinIndexJudgement.distanceByMetric(streamShape, candidate, distanceMetric);
+        if (distance == maxDistance && uniqueCandidates.add(candidate)) {
           tiedResults.add(candidate);
         }
       }
-      localK = tiedResults.toArray();
+      localK = tiedResults;
     }
     return localK;
   }

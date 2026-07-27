@@ -237,6 +237,29 @@ intersects_result = left_df.sjoin(right_df, predicate="intersects")
 contains_result = left_df.sjoin(right_df, predicate="contains")
 ```
 
+### Nearest-Neighbor Joins
+
+`sjoin_nearest()` uses Sedona's distributed KNN join plan, so geometry rows are
+not collected to the driver. It supports `inner`, `left`, and `right` results;
+left and right joins retain unmatched rows from their respective side while
+nearest matching remains distributed.
+
+```python
+nearest = left_df.sjoin_nearest(
+    right_df,
+    how="left",
+    max_distance=500,
+    distance_col="distance",
+    exclusive=True,
+)
+```
+
+Every candidate tied at the nearest distance is returned. `max_distance`
+limits eligible matches, and `exclusive=True` excludes candidates
+topologically equal to the query geometry before ranking. Distances are
+planar and use CRS units; geographic CRS inputs emit a warning because their
+distance results may be inaccurate.
+
 ### Coordinate Reference System Operations
 
 Transform geometries between different coordinate reference systems:
@@ -307,6 +330,7 @@ The GeoPandas API for Apache Sedona has implemented **39 GeoSeries functions** a
 ### Spatial Operations
 
 - `sjoin()` - Spatial joins with various predicates
+- `sjoin_nearest()` - Distributed nearest-neighbor joins
 - `buffer()` - Geometric buffering
 - `distance()` - Distance calculations
 - `intersects()`, `contains()`, `within()` - Spatial predicates

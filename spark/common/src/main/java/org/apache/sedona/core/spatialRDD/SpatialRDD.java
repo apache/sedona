@@ -101,6 +101,9 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
   /** The neighbor sample number. */
   private int neighborSampleNumber = -1;
 
+  /** Whether KNN distance-bound samples with identical envelopes should be counted once. */
+  private boolean deduplicateKnnSamples = false;
+
   public int getSampleNumber() {
     return sampleNumber;
   }
@@ -121,6 +124,19 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
    */
   public void setNeighborSampleNumber(int neighborSampleNumber) {
     this.neighborSampleNumber = neighborSampleNumber;
+  }
+
+  /**
+   * Controls whether equal sample envelopes are counted once when deriving KNN partition bounds.
+   *
+   * <p>Exclusive KNN joins need this so an arbitrary number of geometries equal to a query cannot
+   * consume every neighbour sample and hide the next non-equal candidate outside the expanded
+   * partition.
+   *
+   * @param deduplicateKnnSamples whether to deduplicate sample envelopes
+   */
+  public void setDeduplicateKnnSamples(boolean deduplicateKnnSamples) {
+    this.deduplicateKnnSamples = deduplicateKnnSamples;
   }
 
   /**
@@ -312,7 +328,15 @@ public class SpatialRDD<T extends Geometry> implements Serializable {
         {
           ExtendedQuadTree tree = new ExtendedQuadTree<>(paddedBoundary, numPartitions);
           ExtendedQuadTree<Integer> extendedQuadTree = (ExtendedQuadTree<Integer>) tree;
-          extendedQuadTree.build(neighborSampleNumber);
+          // Preserve the historical 3/4-argument ST_KNN partition bounds. Exclusive KNN opts
+          // into sample-driven bounds because it must look beyond an arbitrary number of equal
+          // candidates to find the next non-equal neighbour.
+          if (deduplicateKnnSamples) {
+            for (Envelope sample : samples) {
+              extendedQuadTree.insert(sample);
+            }
+          }
+          extendedQuadTree.build(neighborSampleNumber, deduplicateKnnSamples);
           partitioner = new QuadTreeRTPartitioner(extendedQuadTree);
           break;
         }

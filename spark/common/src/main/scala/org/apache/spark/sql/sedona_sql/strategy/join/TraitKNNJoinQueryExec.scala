@@ -22,6 +22,7 @@ import org.apache.commons.lang3.Range
 import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.spatialOperator.JoinQuery.JoinParams
 import org.apache.sedona.core.spatialPartitioning.{QuadTreeRTPartitioner, SpatialPartitioner}
+import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
@@ -48,6 +49,8 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
 
   protected var broadcastJoin: Boolean = false
   protected var querySide: JoinSide = null
+  def includeTies: Option[Boolean]
+  def exclusive: Boolean
 
   private lazy val sedonaConf = SedonaConf.fromActiveSession
   override lazy val metrics: Map[String, SQLMetric] = Map.empty
@@ -92,6 +95,10 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
       toSpatialRddPair(queryResultsRaw, boundQueryShape, objectResultsRaw, boundObjectShape)
 
     objectShapes.analyze()
+    queryShapes.analyze()
+    if (objectShapes.approximateTotalCount == 0 || queryShapes.approximateTotalCount == 0) {
+      return joinedRddToRowRdd(sparkContext.emptyRDD[(Geometry, Geometry)], swapped)
+    }
     log.info(
       "[SedonaSQL] Number of partitions on the objectShapes (right): " + objectResultsRaw.partitions.size)
 
@@ -132,7 +139,8 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
                 queryShapes,
                 objectShapes,
                 joinParams,
-                sedonaConf.isIncludeTieBreakersInKNNJoins,
+                includeTies.getOrElse(sedonaConf.isIncludeTieBreakersInKNNJoins),
+                exclusive,
                 broadcastJoin)
               .rdd
           } else {
@@ -144,13 +152,38 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
               queryShapes,
               objectShapes,
               joinParams,
-              sedonaConf.isIncludeTieBreakersInKNNJoins,
+              includeTies.getOrElse(sedonaConf.isIncludeTieBreakersInKNNJoins),
+              exclusive,
               broadcastJoin)
             .rdd
       }
 
     // Convert the matchesRDD to RowRDD
     joinedRddToRowRdd(matchesRDD, swapped)
+  }
+
+  /**
+   * Converts rows to KNN shapes while dropping null and empty geometries. Such rows cannot
+   * participate in an inner KNN match, and removing them lets the executor detect an empty
+   * query/candidate side before attempting spatial partitioning.
+   */
+  protected def toKNNSpatialRDD(
+      rdd: RDD[UnsafeRow],
+      shapeExpression: Expression): SpatialRDD[Geometry] = {
+    val spatialRdd = new SpatialRDD[Geometry]
+    spatialRdd.setRawSpatialRDD(
+      rdd
+        .flatMap { row =>
+          val shape = TraitJoinQueryBase.shapeToGeometry(shapeExpression, row)
+          if (shape == null || shape.isEmpty) {
+            None
+          } else {
+            shape.setUserData(row.copy)
+            Some(shape)
+          }
+        }
+        .toJavaRDD())
+    spatialRdd
   }
 
   def knnJoinPartitionNumOptimizer(

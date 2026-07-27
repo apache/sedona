@@ -44,7 +44,9 @@ case class BroadcastQuerySideKNNJoinExec(
     spatialPredicate: SpatialPredicate,
     isGeography: Boolean,
     condition: Expression,
-    extraCondition: Option[Expression] = None)
+    extraCondition: Option[Expression] = None,
+    includeTies: Option[Boolean] = None,
+    exclusive: Boolean = false)
     extends SedonaBinaryExecNode
     with TraitKNNJoinQueryExec
     with Logging {
@@ -83,7 +85,7 @@ case class BroadcastQuerySideKNNJoinExec(
       rdd: RDD[UnsafeRow],
       shapeExpression: Expression,
       projection: Option[Seq[Expression]] = None): SpatialRDD[Geometry] = {
-    toSpatialRDD(rdd, shapeExpression)
+    toKNNSpatialRDD(rdd, shapeExpression)
   }
 
   /**
@@ -100,7 +102,7 @@ case class BroadcastQuerySideKNNJoinExec(
       rdd: RDD[UnsafeRow],
       shapeExpression: Expression,
       projection: Option[Seq[Expression]] = None): SpatialRDD[Geometry] = {
-    toSpatialRDD(rdd, shapeExpression)
+    toKNNSpatialRDD(rdd, shapeExpression)
   }
 
   /**
@@ -128,7 +130,8 @@ case class BroadcastQuerySideKNNJoinExec(
     require(numPartitions > 0, "The number of partitions must be greater than 0.")
     val kValue: Int = this.k.eval().asInstanceOf[Int]
     require(kValue >= 1, "The number of neighbors (k) must be equal or greater than 1.")
-    objectsShapes.setNeighborSampleNumber(kValue)
+    objectsShapes.setNeighborSampleNumber(if (exclusive) kValue + 1 else kValue)
+    objectsShapes.setDeduplicateKnnSamples(exclusive)
 
     // index the objects on regular partitions (not spatial partitions)
     // this avoids the cost of spatial partitioning

@@ -22,8 +22,10 @@ import org.apache.spark.sql.catalyst.expressions.Literal
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.sedona_sql.UDT.GeometryUDT
 import org.apache.spark.sql.sedona_sql.expressions.st_constructors.ST_GeomFromText
-import org.apache.spark.sql.sedona_sql.strategy.join.KNNJoinExec
-import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
+import org.apache.spark.sql.sedona_sql.strategy.join.{BroadcastObjectSideKNNJoinExec, BroadcastQuerySideKNNJoinExec, KNNJoinExec, TraitKNNJoinQueryExec}
+import org.apache.spark.sql.execution.SparkPlan
+import org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec
+import org.apache.spark.sql.types.{IntegerType, LongType, StringType, StructField, StructType}
 import org.apache.spark.sql.{Column, DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions.expr
 import org.scalatest.matchers.must.Matchers.{be, include}
@@ -207,6 +209,34 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       resultAll.length should be(3 * 4) // 3 queries and 4 neighbors each
       resultAll.mkString should be(
         "[1,3][1,6][1,13][1,16][2,1][2,5][2,11][2,15][3,3][3,9][3,13][3,19]")
+    }
+
+    for (broadcastSide <- Seq("queries", "objects")) {
+      it(s"KNN Join should apply extra conditions when broadcasting $broadcastSide") {
+        sparkSession
+          .range(0, 2)
+          .selectExpr("id", "ST_Point(id, 0.0) AS geom")
+          .createOrReplaceTempView("BROADCAST_EXTRA_QUERIES")
+        sparkSession
+          .range(0, 2)
+          .selectExpr("id", "ST_Point(id + 10.0, 0.0) AS geom")
+          .createOrReplaceTempView("BROADCAST_EXTRA_OBJECTS")
+
+        val hint = if (broadcastSide == "queries") "BROADCAST(q)" else "BROADCAST(o)"
+        val df = sparkSession.sql(s"""SELECT /*+ $hint */ q.id, o.id
+             |FROM BROADCAST_EXTRA_QUERIES q
+             |JOIN BROADCAST_EXTRA_OBJECTS o
+             |ON ST_KNN(q.geom, o.geom, 1, false)
+             |AND ST_Distance(q.geom, o.geom) <= 1.0""".stripMargin)
+
+        df.count() should be(0)
+        val plan = findKNNJoinExec(df)
+        if (broadcastSide == "queries") {
+          plan.isInstanceOf[BroadcastQuerySideKNNJoinExec] should be(true)
+        } else {
+          plan.isInstanceOf[BroadcastObjectSideKNNJoinExec] should be(true)
+        }
+      }
     }
 
     it("KNN Join should verify the correct parameter k is passed to the join function") {
@@ -442,6 +472,114 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       }
     }
 
+    it("KNN Join should support query-local tie controls") {
+      val points1 = Seq((0, "POINT(0 0)", "query"))
+      val points2 =
+        Seq((0, "POINT(-1 0)", "west"), (1, "POINT(1 0)", "east"), (2, "POINT(10 0)", "far"))
+      val (df1, df2) = createPointsDataFrames(sparkSession, points1, points2)
+      df1.createOrReplaceTempView("QUERIES")
+      df2.createOrReplaceTempView("OBJECTS")
+
+      withExportTies(export = false) {
+        val df = sparkSession.sql("""SELECT QUERIES.ID AS qid, OBJECTS.ID AS oid
+            |FROM QUERIES JOIN OBJECTS
+            |ON ST_KNN(QUERIES.GEOM, OBJECTS.GEOM, 1, false, true)""".stripMargin)
+
+        val result = df.collect().sortBy(_.getInt(1))
+        result.mkString should be("[0,0][0,1]")
+        val plan = findKNNJoinExec(df)
+        plan.includeTies should be(Some(true))
+        plan.exclusive should be(false)
+      }
+
+      withExportTies(export = true) {
+        val df = sparkSession.sql("""SELECT QUERIES.ID AS qid, OBJECTS.ID AS oid
+            |FROM QUERIES JOIN OBJECTS
+            |ON ST_KNN(QUERIES.GEOM, OBJECTS.GEOM, 1, false, false)""".stripMargin)
+
+        val result = df.collect()
+        result.length should be(1)
+        Set(0, 1).contains(result.head.getInt(1)) should be(true)
+        findKNNJoinExec(df).includeTies should be(Some(false))
+      }
+    }
+
+    it("KNN query-local spheroid ties should preserve duplicate candidate rows") {
+      val points1 = Seq((0, "POINT(0 90)", "query"))
+      val points2 = Seq(
+        (0, "POINT(0 -90)", "antipode-a"),
+        (1, "POINT(100 -90)", "antipode-b"),
+        (2, "POINT(100 -90)", "antipode-b-duplicate"))
+      val (df1, df2) = createPointsDataFrames(sparkSession, points1, points2)
+      df1.createOrReplaceTempView("SPHEROID_TIE_QUERIES")
+      df2.createOrReplaceTempView("SPHEROID_TIE_OBJECTS")
+
+      val df = sparkSession.sql("""SELECT q.ID AS qid, o.ID AS oid
+          |FROM SPHEROID_TIE_QUERIES q JOIN SPHEROID_TIE_OBJECTS o
+          |ON ST_KNN(q.GEOM, o.GEOM, 1, true, true)""".stripMargin)
+
+      df.collect().sortBy(_.getInt(1)).mkString should be("[0,0][0,1][0,2]")
+    }
+
+    it("KNN Join exclusive mode should promote the nearest non-equal geometry") {
+      val queries = sparkSession
+        .range(0, 2)
+        .selectExpr(
+          "cast(id as int) AS id",
+          """CASE WHEN id = 0
+            |THEN ST_MakeLine(ST_Point(0.0, 0.0), ST_Point(1.0, 0.0))
+            |ELSE ST_MakeLine(ST_Point(10.0, 0.0), ST_Point(11.0, 0.0)) END AS geom""".stripMargin)
+        .repartition(2)
+      val objects = sparkSession
+        .range(0, 2)
+        .selectExpr(
+          "cast(id as int) AS id",
+          """CASE WHEN id = 0
+            |THEN ST_GeomFromText('LINESTRING(1 0, 0 0)')
+            |ELSE ST_GeomFromText('LINESTRING(0 2, 1 2)') END AS geom""".stripMargin)
+        .repartition(2)
+      queries.createOrReplaceTempView("QUERIES")
+      objects.createOrReplaceTempView("OBJECTS")
+
+      val df = sparkSession.sql("""SELECT QUERIES.ID AS qid, OBJECTS.ID AS oid
+          |FROM QUERIES JOIN OBJECTS
+          |ON ST_KNN(QUERIES.GEOM, OBJECTS.GEOM, 1, false, true, true)""".stripMargin)
+
+      df.where("qid = 0").collect().mkString should be("[0,1]")
+      val plan = findKNNJoinExec(df)
+      plan.includeTies should be(Some(true))
+      plan.exclusive should be(true)
+    }
+
+    it("KNN Join exclusive mode should find a distant candidate across partitions") {
+      withConf(
+        Map(
+          "sedona.join.autoBroadcastJoinThreshold" -> "-1",
+          "spark.sql.autoBroadcastJoinThreshold" -> "-1")) {
+        val queries = sparkSession
+          .range(0, 2)
+          .selectExpr(
+            "cast(id as int) AS id",
+            "CASE WHEN id = 0 THEN ST_Point(0.0, 0.0) ELSE ST_Point(2000.0, 0.0) END AS geom")
+          .repartition(4)
+        val objects = sparkSession
+          .range(0, 101)
+          .selectExpr(
+            "cast(id as int) AS id",
+            "CASE WHEN id < 100 THEN ST_Point(0.0, 0.0) ELSE ST_Point(1000.0, 0.0) END AS geom")
+          .repartition(8)
+        queries.createOrReplaceTempView("QUERIES")
+        objects.createOrReplaceTempView("OBJECTS")
+
+        val df = sparkSession.sql("""SELECT QUERIES.ID AS qid, OBJECTS.ID AS oid
+            |FROM QUERIES JOIN OBJECTS
+            |ON ST_KNN(QUERIES.GEOM, OBJECTS.GEOM, 1, false, true, true)""".stripMargin)
+
+        df.where("qid = 0").collect().mkString should be("[0,100]")
+        findKNNJoinExec(df).exclusive should be(true)
+      }
+    }
+
     it("KNN Join with exact algorithms should not fail with null geometries") {
       val df1 = sparkSession.sql(
         "SELECT ST_GeomFromText(col1) as geom1 from values ('POINT (0.0 0.0)'), (null)")
@@ -457,6 +595,42 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       df1.cache()
       df2.cache()
       df1.join(df2, expr("ST_KNN(geom1, geom2, 1)")).count() should be(0)
+    }
+
+    it("KNN Join should return no matches for empty or all-null candidate sides") {
+      val queries = sparkSession
+        .range(0, 2)
+        .selectExpr("id", "ST_Point(id, 0.0) AS geom")
+      val emptyObjects = sparkSession
+        .createDataFrame(
+          sparkSession.sparkContext.emptyRDD[Row],
+          StructType(
+            Seq(
+              StructField("id", LongType, nullable = false),
+              StructField("wkt", StringType, nullable = true))))
+        .selectExpr("id", "ST_GeomFromText(wkt) AS geom")
+      val nullObjects = sparkSession
+        .createDataFrame(
+          sparkSession.sparkContext.parallelize(Seq(Row(0L, null), Row(1L, null)), 2),
+          StructType(
+            Seq(
+              StructField("id", LongType, nullable = false),
+              StructField("wkt", StringType, nullable = true))))
+        .selectExpr("id", "ST_GeomFromText(wkt) AS geom")
+
+      val emptyResult = queries
+        .alias("queries")
+        .join(
+          emptyObjects.alias("emptyObjects"),
+          expr("ST_KNN(queries.geom, emptyObjects.geom, 1)"))
+      val nullResult = queries
+        .alias("queries")
+        .join(nullObjects.alias("nullObjects"), expr("ST_KNN(queries.geom, nullObjects.geom, 1)"))
+
+      emptyResult.queryExecution.executedPlan.toString should include("KNNJoin")
+      nullResult.queryExecution.executedPlan.toString should include("KNNJoin")
+      emptyResult.count() should be(0)
+      nullResult.count() should be(0)
     }
 
     it("KNN Join using spider data source") {
@@ -502,6 +676,18 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
 
   private def withSpatialPartitionerExport(path: String)(body: => Unit): Unit = {
     withConf(Map("spark.sedona.join.debug.spatialPartitionerSavePath" -> path))(body)
+  }
+
+  private def findKNNJoinExec(df: DataFrame): TraitKNNJoinQueryExec = {
+    def collect(plan: SparkPlan): Option[TraitKNNJoinQueryExec] =
+      plan.collectFirst { case knn: TraitKNNJoinQueryExec => knn }
+
+    val executedPlan = df.queryExecution.executedPlan
+    collect(executedPlan)
+      .orElse(executedPlan.collectFirst { case adaptive: AdaptiveSparkPlanExec =>
+        collect(adaptive.executedPlan)
+      }.flatten)
+      .get
   }
 
   def validateQueryPlan(

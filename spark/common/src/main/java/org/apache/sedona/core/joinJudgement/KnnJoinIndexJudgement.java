@@ -32,6 +32,7 @@ import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.util.LongAccumulator;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.index.strtree.GeometryItemDistance;
+import org.locationtech.jts.index.strtree.ItemBoundable;
 import org.locationtech.jts.index.strtree.ItemDistance;
 import org.locationtech.jts.index.strtree.STRtree;
 
@@ -48,6 +49,7 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
   private final int k;
   private final DistanceMetric distanceMetric;
   private final boolean includeTies;
+  private final boolean exclusive;
   private final Broadcast<List<T>> broadcastQueryObjects;
   private final Broadcast<STRtree> broadcastObjectsTreeIndex;
 
@@ -73,10 +75,35 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
       LongAccumulator streamCount,
       LongAccumulator resultCount,
       LongAccumulator candidateCount) {
+    this(
+        k,
+        distanceMetric,
+        includeTies,
+        false,
+        broadcastQueryObjects,
+        broadcastObjectsTreeIndex,
+        buildCount,
+        streamCount,
+        resultCount,
+        candidateCount);
+  }
+
+  public KnnJoinIndexJudgement(
+      int k,
+      DistanceMetric distanceMetric,
+      boolean includeTies,
+      boolean exclusive,
+      Broadcast<List<T>> broadcastQueryObjects,
+      Broadcast<STRtree> broadcastObjectsTreeIndex,
+      LongAccumulator buildCount,
+      LongAccumulator streamCount,
+      LongAccumulator resultCount,
+      LongAccumulator candidateCount) {
     super(null, buildCount, streamCount, resultCount, candidateCount);
     this.k = k;
     this.distanceMetric = distanceMetric;
     this.includeTies = includeTies;
+    this.exclusive = exclusive;
     this.broadcastQueryObjects = broadcastQueryObjects;
     this.broadcastObjectsTreeIndex = broadcastObjectsTreeIndex;
   }
@@ -104,7 +131,7 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
 
     STRtree strTree = buildSTRtree(objectShapes);
     return new InMemoryKNNJoinIterator<>(
-        queryShapes, strTree, k, distanceMetric, includeTies, streamCount, resultCount);
+        queryShapes, strTree, k, distanceMetric, includeTies, exclusive, streamCount, resultCount);
   }
 
   /**
@@ -127,7 +154,7 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
     // broadcasted, the STRtree built from the broadcasted object should be able to fit into memory.
     STRtree strTree = broadcastObjectsTreeIndex.getValue();
     return new InMemoryKNNJoinIterator<>(
-        queryShapes, strTree, k, distanceMetric, includeTies, streamCount, resultCount);
+        queryShapes, strTree, k, distanceMetric, includeTies, exclusive, streamCount, resultCount);
   }
 
   /**
@@ -148,7 +175,14 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
     List<T> queryItems = broadcastQueryObjects.getValue();
     STRtree strTree = buildSTRtree(objectShapes);
     return new InMemoryKNNJoinIterator<>(
-        queryItems.iterator(), strTree, k, distanceMetric, includeTies, streamCount, resultCount);
+        queryItems.iterator(),
+        strTree,
+        k,
+        distanceMetric,
+        includeTies,
+        exclusive,
+        streamCount,
+        resultCount);
   }
 
   private STRtree buildSTRtree(Iterator<U> objectShapes) {
@@ -227,8 +261,33 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
   }
 
   public static ItemDistance getItemDistance(DistanceMetric distanceMetric) {
-    ItemDistance itemDistance;
-    itemDistance = getItemDistanceByMetric(distanceMetric);
-    return itemDistance;
+    return getItemDistance(distanceMetric, false);
+  }
+
+  public static ItemDistance getItemDistance(DistanceMetric distanceMetric, boolean exclusive) {
+    ItemDistance itemDistance = getItemDistanceByMetric(distanceMetric);
+    return exclusive ? new ExclusiveItemDistance(itemDistance) : itemDistance;
+  }
+
+  public static boolean areTopologicallyEqual(Geometry left, Geometry right) {
+    return left.equalsTopo(right);
+  }
+
+  private static class ExclusiveItemDistance implements ItemDistance, Serializable {
+    private final ItemDistance delegate;
+
+    private ExclusiveItemDistance(ItemDistance delegate) {
+      this.delegate = delegate;
+    }
+
+    @Override
+    public double distance(ItemBoundable item1, ItemBoundable item2) {
+      Geometry left = (Geometry) item1.getItem();
+      Geometry right = (Geometry) item2.getItem();
+      if (areTopologicallyEqual(left, right)) {
+        return Double.MAX_VALUE;
+      }
+      return delegate.distance(item1, item2);
+    }
   }
 }

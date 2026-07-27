@@ -21,10 +21,16 @@ package org.apache.sedona.core.spatialRDD;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import org.apache.sedona.core.enums.GridType;
 import org.apache.sedona.core.enums.IndexType;
+import org.apache.sedona.core.spatialPartitioning.QuadTreeRTPartitioner;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.index.strtree.STRtree;
 
@@ -136,6 +142,51 @@ public class PointRDDTest extends SpatialRDDTestBase {
       List<Point> result = spatialRDD.indexedRDD.take(1).get(0).query(spatialRDD.boundaryEnvelope);
     } else {
       List<Point> result = spatialRDD.indexedRDD.take(1).get(0).query(spatialRDD.boundaryEnvelope);
+    }
+  }
+
+  @Test
+  public void testQuadTreeRTreePartitioningUsesObjectSamples() throws Exception {
+    GeometryFactory geometryFactory = new GeometryFactory();
+    List<Point> points =
+        IntStream.range(0, 128)
+            .mapToObj(x -> geometryFactory.createPoint(new Coordinate((double) x, 0.0)))
+            .collect(Collectors.toList());
+    PointRDD spatialRDD = new PointRDD(sc.parallelize(points, 8));
+    spatialRDD.analyze();
+    spatialRDD.setNeighborSampleNumber(points.size());
+    spatialRDD.setDeduplicateKnnSamples(true);
+    spatialRDD.spatialPartitioning(GridType.QUADTREE_RTREE, 16);
+
+    QuadTreeRTPartitioner partitioner = (QuadTreeRTPartitioner) spatialRDD.getPartitioner();
+    int gridCount = partitioner.getGrids().size();
+    for (List<?> expandedGrids : partitioner.getOverlappedGrids().values()) {
+      assertEquals(gridCount, expandedGrids.size());
+    }
+  }
+
+  @Test
+  public void testQuadTreeRTreePartitioningFallsBackForInsufficientUniqueSamples()
+      throws Exception {
+    GeometryFactory geometryFactory = new GeometryFactory();
+    List<Point> points =
+        IntStream.range(0, 128)
+            .mapToObj(x -> geometryFactory.createPoint(new Coordinate((double) (x / 2), 0.0)))
+            .collect(Collectors.toList());
+    PointRDD spatialRDD = new PointRDD(sc.parallelize(points, 8));
+    spatialRDD.analyze();
+    spatialRDD.setNeighborSampleNumber(65);
+    spatialRDD.setDeduplicateKnnSamples(true);
+    spatialRDD.spatialPartitioning(GridType.QUADTREE_RTREE, 16);
+
+    QuadTreeRTPartitioner partitioner = (QuadTreeRTPartitioner) spatialRDD.getPartitioner();
+    int gridCount = partitioner.getGrids().size();
+    Point object = geometryFactory.createPoint(new Coordinate(63.0, 0.0));
+    assertEquals(
+        gridCount,
+        partitioner.getSTRForOverlappedGrids().query(object.getEnvelopeInternal()).size());
+    for (List<?> expandedGrids : partitioner.getOverlappedGrids().values()) {
+      assertEquals(1, expandedGrids.size());
     }
   }
 }

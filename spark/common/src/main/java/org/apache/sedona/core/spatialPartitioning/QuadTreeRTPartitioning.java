@@ -79,6 +79,18 @@ public class QuadTreeRTPartitioning extends QuadtreePartitioning {
    * @return
    */
   public STRtree buildSTRTree(List<Envelope> samples, int k) {
+    return buildSTRTree(samples, k, false);
+  }
+
+  /**
+   * Builds the sample R-tree used to derive expanded KNN partition boundaries.
+   *
+   * @param samples sampled object envelopes
+   * @param k number of neighbouring sample envelopes to cover
+   * @param deduplicateSamples whether identical envelopes count once
+   * @return the partition-boundary R-tree
+   */
+  public STRtree buildSTRTree(List<Envelope> samples, int k, boolean deduplicateSamples) {
     // The partitioned MBRs
     mbrs = new HashMap<>();
 
@@ -99,7 +111,9 @@ public class QuadTreeRTPartitioning extends QuadtreePartitioning {
 
     // Insert samples into an STR tree for k-nearest neighbor search
     STRtree sampleTree = new STRtree();
-    for (Envelope sample : samples) {
+    Collection<Envelope> distanceSamples =
+        deduplicateSamples ? new LinkedHashSet<>(samples) : samples;
+    for (Envelope sample : distanceSamples) {
       // convert sample to a point
       Point point =
           geometryFactory.createPoint(
@@ -107,7 +121,20 @@ public class QuadTreeRTPartitioning extends QuadtreePartitioning {
       sampleTree.insert(sample, point);
     }
 
-    processPartitions(partitionMBRs, mbrs, k, sampleTree, geometryFactory);
+    if (deduplicateSamples && distanceSamples.size() < k) {
+      // The sampled objects cannot provide a safe distance bound for the requested number of
+      // distinct neighbours. Replicate every object partition to every query partition instead of
+      // risking pruning the first non-equal neighbour.
+      Envelope globalBoundary = new Envelope();
+      for (QuadRectangle quadRect : partitionMBRs) {
+        globalBoundary.expandToInclude(quadRect.getEnvelope());
+      }
+      for (QuadRectangle quadRect : partitionMBRs) {
+        mbrs.put(quadRect.partitionId, Collections.singletonList(new Envelope(globalBoundary)));
+      }
+    } else {
+      processPartitions(partitionMBRs, mbrs, k, sampleTree, geometryFactory);
+    }
 
     // Construct a spatial index for the MBRs
     this.mbrSpatialIndex = new STRtree();

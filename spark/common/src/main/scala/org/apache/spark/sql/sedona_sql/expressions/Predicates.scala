@@ -350,7 +350,9 @@ private[apache] case class ST_3DDWithin(inputExpressions: Seq[Expression])
 private[apache] case class ST_KNN(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction3(Predicates.knn),
-      inferrableFunction4(Predicates.knn)) {
+      inferrableFunction4(Predicates.knn),
+      inferrableFunction5(Predicates.knn),
+      inferrableFunction6(Predicates.knn)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
