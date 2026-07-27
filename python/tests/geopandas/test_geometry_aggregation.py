@@ -55,8 +55,9 @@ class TestGeometryAggregation(TestGeopandasBase):
         )
         spark_frame = result._internal.spark_frame
         if hasattr(spark_frame, "_jdf"):
-            plan = spark_frame._jdf.queryExecution().analyzed().toString()
-            assert "PythonUDF" not in plan
+            plan = spark_frame._jdf.queryExecution().executedPlan().toString()
+            assert "BatchEvalPython" not in plan
+            assert "ArrowEvalPython" not in plan
         expected = expected_source.dissolve(
             "zone",
             aggfunc={"label": "first", "value": "sum"},
