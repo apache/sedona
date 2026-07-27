@@ -177,7 +177,7 @@ case class KNNJoinExec(
    * The planar five- and six-argument forms opt into globally reconciled regular-plan results.
    * Legacy and geography forms retain their historical centroid routing.
    */
-  override protected def useAccurateRegularKnn: Boolean = includeTies.isDefined && !isGeography
+  override protected def useAccurateRegularKnn: Boolean = useQueryLocalTieSemantics
 
   /**
    * Exact spatial partitioning for KNN join

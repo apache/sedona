@@ -50,6 +50,7 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
   private final DistanceMetric distanceMetric;
   private final boolean includeTies;
   private final boolean exclusive;
+  private final boolean queryLocalTieSemantics;
   private final Broadcast<List<T>> broadcastQueryObjects;
   private final Broadcast<STRtree> broadcastObjectsTreeIndex;
 
@@ -99,11 +100,38 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
       LongAccumulator streamCount,
       LongAccumulator resultCount,
       LongAccumulator candidateCount) {
+    this(
+        k,
+        distanceMetric,
+        includeTies,
+        exclusive,
+        false,
+        broadcastQueryObjects,
+        broadcastObjectsTreeIndex,
+        buildCount,
+        streamCount,
+        resultCount,
+        candidateCount);
+  }
+
+  public KnnJoinIndexJudgement(
+      int k,
+      DistanceMetric distanceMetric,
+      boolean includeTies,
+      boolean exclusive,
+      boolean queryLocalTieSemantics,
+      Broadcast<List<T>> broadcastQueryObjects,
+      Broadcast<STRtree> broadcastObjectsTreeIndex,
+      LongAccumulator buildCount,
+      LongAccumulator streamCount,
+      LongAccumulator resultCount,
+      LongAccumulator candidateCount) {
     super(null, buildCount, streamCount, resultCount, candidateCount);
     this.k = k;
     this.distanceMetric = distanceMetric;
     this.includeTies = includeTies;
     this.exclusive = exclusive;
+    this.queryLocalTieSemantics = queryLocalTieSemantics;
     this.broadcastQueryObjects = broadcastQueryObjects;
     this.broadcastObjectsTreeIndex = broadcastObjectsTreeIndex;
   }
@@ -131,7 +159,15 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
 
     STRtree strTree = buildSTRtree(objectShapes);
     return new InMemoryKNNJoinIterator<>(
-        queryShapes, strTree, k, distanceMetric, includeTies, exclusive, streamCount, resultCount);
+        queryShapes,
+        strTree,
+        k,
+        distanceMetric,
+        includeTies,
+        exclusive,
+        queryLocalTieSemantics,
+        streamCount,
+        resultCount);
   }
 
   /**
@@ -154,7 +190,15 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
     // broadcasted, the STRtree built from the broadcasted object should be able to fit into memory.
     STRtree strTree = broadcastObjectsTreeIndex.getValue();
     return new InMemoryKNNJoinIterator<>(
-        queryShapes, strTree, k, distanceMetric, includeTies, exclusive, streamCount, resultCount);
+        queryShapes,
+        strTree,
+        k,
+        distanceMetric,
+        includeTies,
+        exclusive,
+        queryLocalTieSemantics,
+        streamCount,
+        resultCount);
   }
 
   /**
@@ -181,6 +225,7 @@ public class KnnJoinIndexJudgement<T extends Geometry, U extends Geometry>
         distanceMetric,
         includeTies,
         exclusive,
+        queryLocalTieSemantics,
         streamCount,
         resultCount);
   }

@@ -504,7 +504,44 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       }
     }
 
-    it("KNN query-local spheroid ties should preserve duplicate candidate rows") {
+    it("query-local planar ties should preserve duplicate rows in both broadcast plans") {
+      sparkSession
+        .range(0, 1, 1, 1)
+        .selectExpr("cast(id as int) AS id", "ST_Point(cast(id as double), 0.0) AS geom")
+        .createOrReplaceTempView("BROADCAST_TIE_QUERIES")
+      sparkSession
+        .range(0, 2, 1, 1)
+        .selectExpr("cast(id as int) AS id", "ST_Point(1.0, cast(id - id as double)) AS geom")
+        .createOrReplaceTempView("BROADCAST_TIE_OBJECTS")
+
+      for (broadcastSide <- Seq("q", "o")) {
+        val queryLocal = sparkSession.sql(s"""SELECT /*+ BROADCAST($broadcastSide) */
+            |q.ID AS qid, o.ID AS oid
+            |FROM BROADCAST_TIE_QUERIES q JOIN BROADCAST_TIE_OBJECTS o
+            |ON ST_KNN(q.GEOM, o.GEOM, 1, false, true)""".stripMargin)
+
+        queryLocal.collect().sortBy(_.getInt(1)).mkString should be("[0,0][0,1]")
+        val queryLocalPlan = findKNNJoinExec(queryLocal)
+        if (broadcastSide == "q") {
+          queryLocalPlan.isInstanceOf[BroadcastQuerySideKNNJoinExec] should be(true)
+        } else {
+          queryLocalPlan.isInstanceOf[BroadcastObjectSideKNNJoinExec] should be(true)
+        }
+
+        withExportTies(export = true) {
+          val legacy = sparkSession.sql(s"""SELECT /*+ BROADCAST($broadcastSide) */
+              |q.ID AS qid, o.ID AS oid
+              |FROM BROADCAST_TIE_QUERIES q JOIN BROADCAST_TIE_OBJECTS o
+              |ON ST_KNN(q.GEOM, o.GEOM, 1, false)""".stripMargin)
+
+          val legacyRows = legacy.collect()
+          legacyRows.length should be(1)
+          Set(0, 1).contains(legacyRows.head.getInt(1)) should be(true)
+        }
+      }
+    }
+
+    it("query-local geography should retain historical planar tie expansion") {
       val points1 = Seq((0, "POINT(0 90)", "query"))
       val points2 = Seq(
         (0, "POINT(0 -90)", "antipode-a"),
@@ -514,11 +551,14 @@ class KnnJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
       df1.createOrReplaceTempView("SPHEROID_TIE_QUERIES")
       df2.createOrReplaceTempView("SPHEROID_TIE_OBJECTS")
 
-      val df = sparkSession.sql("""SELECT q.ID AS qid, o.ID AS oid
+      val df = sparkSession.sql("""SELECT /*+ BROADCAST(o) */ q.ID AS qid, o.ID AS oid
           |FROM SPHEROID_TIE_QUERIES q JOIN SPHEROID_TIE_OBJECTS o
           |ON ST_KNN(q.GEOM, o.GEOM, 1, true, true)""".stripMargin)
 
-      df.collect().sortBy(_.getInt(1)).mkString should be("[0,0][0,1][0,2]")
+      val rows = df.collect()
+      rows.length should be(1)
+      Set(0, 1, 2).contains(rows.head.getInt(1)) should be(true)
+      findKNNJoinExec(df).isInstanceOf[BroadcastObjectSideKNNJoinExec] should be(true)
     }
 
     it("KNN Join exclusive mode should promote the nearest non-equal geometry") {

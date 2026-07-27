@@ -775,7 +775,8 @@ public class JoinQuery {
       boolean includeTies,
       boolean broadcastJoin)
       throws Exception {
-    return knnJoin(queryRDD, objectRDD, joinParams, includeTies, false, broadcastJoin);
+    return knnJoin(
+        queryRDD, objectRDD, joinParams, includeTies, false, broadcastJoin, false, false);
   }
 
   /**
@@ -797,7 +798,15 @@ public class JoinQuery {
       boolean exclusive,
       boolean broadcastJoin)
       throws Exception {
-    return knnJoin(queryRDD, objectRDD, joinParams, includeTies, exclusive, broadcastJoin, false);
+    return knnJoin(
+        queryRDD,
+        objectRDD,
+        joinParams,
+        includeTies,
+        exclusive,
+        broadcastJoin,
+        false,
+        joinParams.distanceMetric == DistanceMetric.EUCLIDEAN);
   }
 
   /**
@@ -821,6 +830,42 @@ public class JoinQuery {
       boolean exclusive,
       boolean broadcastJoin,
       boolean mergeReplicatedQueries)
+      throws Exception {
+    return knnJoin(
+        queryRDD,
+        objectRDD,
+        joinParams,
+        includeTies,
+        exclusive,
+        broadcastJoin,
+        mergeReplicatedQueries,
+        joinParams.distanceMetric == DistanceMetric.EUCLIDEAN);
+  }
+
+  /**
+   * Joins each query geometry to its nearest object geometries.
+   *
+   * @param queryRDD geometries for which neighbours are searched
+   * @param objectRDD candidate neighbour geometries
+   * @param joinParams KNN join parameters
+   * @param includeTies whether to return every candidate tied at the kth distance
+   * @param exclusive whether candidates topologically equal to the query are excluded before
+   *     ranking
+   * @param broadcastJoin whether either side uses the broadcast KNN path
+   * @param mergeReplicatedQueries whether regular-plan local candidates are reconciled by stable
+   *     row identity
+   * @param queryLocalTieSemantics whether tie distances use the requested metric and duplicate
+   *     input rows retain their independent identity
+   */
+  public static <U extends Geometry, T extends Geometry> JavaPairRDD<U, T> knnJoin(
+      SpatialRDD<U> queryRDD,
+      SpatialRDD<T> objectRDD,
+      JoinParams joinParams,
+      boolean includeTies,
+      boolean exclusive,
+      boolean broadcastJoin,
+      boolean mergeReplicatedQueries,
+      boolean queryLocalTieSemantics)
       throws Exception {
     verifyCRSMatch(queryRDD, objectRDD);
     if (!broadcastJoin) verifyPartitioningNumberMatch(queryRDD, objectRDD);
@@ -869,6 +914,7 @@ public class JoinQuery {
               joinParams.distanceMetric,
               includeTies,
               exclusive,
+              queryLocalTieSemantics,
               null,
               null,
               buildCount,
@@ -890,6 +936,7 @@ public class JoinQuery {
               joinParams.distanceMetric,
               includeTies,
               exclusive,
+              queryLocalTieSemantics,
               null,
               broadcastObjectsTreeIndex,
               buildCount,
@@ -906,6 +953,7 @@ public class JoinQuery {
               joinParams.distanceMetric,
               includeTies,
               exclusive,
+              queryLocalTieSemantics,
               broadcastQueryObjects,
               null,
               buildCount,

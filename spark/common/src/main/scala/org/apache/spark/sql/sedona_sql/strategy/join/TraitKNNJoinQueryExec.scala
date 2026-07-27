@@ -52,7 +52,10 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
   protected var querySide: JoinSide = null
   def includeTies: Option[Boolean]
   def exclusive: Boolean
+  def isGeography: Boolean
   protected def useAccurateRegularKnn: Boolean = false
+  protected def useQueryLocalTieSemantics: Boolean =
+    includeTies.isDefined && !isGeography
 
   private lazy val sedonaConf = SedonaConf.fromActiveSession
   override lazy val metrics: Map[String, SQLMetric] = Map.empty
@@ -149,7 +152,8 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
                 includeTies.getOrElse(sedonaConf.isIncludeTieBreakersInKNNJoins),
                 exclusive,
                 broadcastJoin,
-                useAccurateRegularKnn)
+                useAccurateRegularKnn,
+                useQueryLocalTieSemantics)
               .rdd
           } else {
             sparkContext.parallelize(Seq[(Geometry, Geometry)]())
@@ -163,7 +167,8 @@ trait TraitKNNJoinQueryExec extends TraitJoinQueryExec {
               includeTies.getOrElse(sedonaConf.isIncludeTieBreakersInKNNJoins),
               exclusive,
               broadcastJoin,
-              useAccurateRegularKnn)
+              useAccurateRegularKnn,
+              useQueryLocalTieSemantics)
             .rdd
       }
 

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -43,6 +44,7 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
   private final DistanceMetric distanceMetric;
   private final boolean includeTies;
   private final boolean exclusive;
+  private final boolean queryLocalTieSemantics;
   private final ItemDistance itemDistance;
 
   private final LongAccumulator streamCount;
@@ -79,6 +81,28 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
       boolean exclusive,
       LongAccumulator streamCount,
       LongAccumulator resultCount) {
+    this(
+        querySideIterator,
+        strTree,
+        k,
+        distanceMetric,
+        includeTies,
+        exclusive,
+        false,
+        streamCount,
+        resultCount);
+  }
+
+  public InMemoryKNNJoinIterator(
+      Iterator<T> querySideIterator,
+      STRtree strTree,
+      int k,
+      DistanceMetric distanceMetric,
+      boolean includeTies,
+      boolean exclusive,
+      boolean queryLocalTieSemantics,
+      LongAccumulator streamCount,
+      LongAccumulator resultCount) {
     this.querySideIterator = querySideIterator;
     this.strTree = strTree;
 
@@ -86,6 +110,7 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
     this.distanceMetric = distanceMetric;
     this.includeTies = includeTies;
     this.exclusive = exclusive;
+    this.queryLocalTieSemantics = queryLocalTieSemantics;
     this.itemDistance = KnnJoinIndexJudgement.getItemDistance(distanceMetric, exclusive);
 
     this.streamCount = streamCount;
@@ -157,11 +182,13 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
     Envelope searchEnvelope = streamShape.getEnvelopeInternal();
     // get the maximum distance from the k nearest neighbors
     double maxDistance = 0.0;
-    Set<U> uniqueCandidates = Collections.newSetFromMap(new IdentityHashMap<>());
+    Set<U> uniqueCandidates =
+        queryLocalTieSemantics
+            ? Collections.newSetFromMap(new IdentityHashMap<>())
+            : new LinkedHashSet<>();
     for (U candidate : localK) {
       uniqueCandidates.add(candidate);
-      double distance =
-          KnnJoinIndexJudgement.distanceByMetric(streamShape, candidate, distanceMetric);
+      double distance = tieDistance(streamShape, candidate);
       if (distance > maxDistance) {
         maxDistance = distance;
       }
@@ -178,14 +205,24 @@ public class InMemoryKNNJoinIterator<T extends Geometry, U extends Geometry>
         if (exclusive && KnnJoinIndexJudgement.areTopologicallyEqual(streamShape, candidate)) {
           continue;
         }
-        double distance =
-            KnnJoinIndexJudgement.distanceByMetric(streamShape, candidate, distanceMetric);
-        if (distance == maxDistance && uniqueCandidates.add(candidate)) {
+        double distance = tieDistance(streamShape, candidate);
+        boolean isNewCandidate =
+            queryLocalTieSemantics
+                ? uniqueCandidates.add(candidate)
+                : !uniqueCandidates.contains(candidate);
+        if (distance == maxDistance && isNewCandidate) {
           tiedResults.add(candidate);
         }
       }
       localK = tiedResults;
     }
     return localK;
+  }
+
+  private double tieDistance(Geometry query, Geometry candidate) {
+    if (queryLocalTieSemantics) {
+      return KnnJoinIndexJudgement.distanceByMetric(query, candidate, distanceMetric);
+    }
+    return query.distance(candidate);
   }
 }
