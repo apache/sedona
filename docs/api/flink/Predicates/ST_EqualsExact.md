@@ -17,28 +17,46 @@
  under the License.
  -->
 
-# ST_IsPolygonCCW
+# ST_EqualsExact
 
-Introduction: Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise.
+Introduction: Return true if A and B have the same structure and their corresponding coordinates are equal within a tolerance.
 
-`POLYGON EMPTY` and `MULTIPOLYGON EMPTY` return `true` because they contain no rings with the opposite orientation.
+Unlike `ST_Equals`, this predicate requires geometry types, component order, ring order, and vertex order to match. The tolerance is the maximum distance allowed between each pair of corresponding coordinates. The comparison uses x and y coordinates and ignores z and m coordinates.
 
-![ST_IsPolygonCCW](../../../image/ST_IsPolygonCCW/ST_IsPolygonCCW.svg "ST_IsPolygonCCW")
-
-Format: `ST_IsPolygonCCW(geom: Geometry)`
+Format: `ST_EqualsExact (A: Geometry, B: Geometry, tolerance: Double)`
 
 Return type: `Boolean`
 
-Since: `v1.6.0`
+Since: `v1.9.1`
 
-SQL Example:
+Example:
 
 ```sql
-SELECT ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35), (30 20, 20 15, 20 25, 30 20))'))
+SELECT ST_EqualsExact(
+    ST_GeomFromWKT('POINT (0 0)'),
+    ST_GeomFromWKT('POINT (0.03 0.04)'),
+    0.05
+)
 ```
 
 Output:
 
 ```
 true
+```
+
+The order of coordinates must match:
+
+```sql
+SELECT ST_EqualsExact(
+    ST_GeomFromWKT('LINESTRING (0 0, 1 1)'),
+    ST_GeomFromWKT('LINESTRING (1 1, 0 0)'),
+    0.0
+)
+```
+
+Output:
+
+```
+false
 ```

@@ -36,6 +36,11 @@ object st_predicates {
   def ST_Equals(a: Column, b: Column): Column = wrapExpression[ST_Equals](a, b)
   def ST_Equals(a: String, b: String): Column = wrapExpression[ST_Equals](a, b)
 
+  def ST_EqualsExact(a: Column, b: Column, tolerance: Column): Column =
+    wrapExpression[ST_EqualsExact](a, b, tolerance)
+  def ST_EqualsExact(a: String, b: String, tolerance: Double): Column =
+    wrapExpression[ST_EqualsExact](a, b, tolerance)
+
   def ST_Intersects(a: Column, b: Column): Column = wrapExpression[ST_Intersects](a, b)
   def ST_Intersects(a: String, b: String): Column = wrapExpression[ST_Intersects](a, b)
 

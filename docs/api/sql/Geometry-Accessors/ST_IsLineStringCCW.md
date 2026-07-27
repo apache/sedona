@@ -17,24 +17,28 @@
  under the License.
  -->
 
-# ST_ForcePolygonCCW
+# ST_IsLineStringCCW
 
-Introduction: Sets Polygon and MultiPolygon exterior rings counter-clockwise and interior rings clockwise. Polygonal members of GeometryCollections are oriented recursively, while non-polygonal members are preserved unchanged.
+Introduction: Returns true if the input is a LineString whose coordinate sequence has counter-clockwise ring orientation. Open LineStrings are evaluated as supplied, without appending the start coordinate. Non-LineString geometries and LineStrings with fewer than four points return false.
 
-![ST_ForcePolygonCCW](../../../../image/ST_ForcePolygonCCW/ST_ForcePolygonCCW.svg "ST_ForcePolygonCCW")
+![ST_IsLineStringCCW](../../../image/ST_IsLineStringCCW/ST_IsLineStringCCW.svg "ST_IsLineStringCCW")
 
-Format: `ST_ForcePolygonCCW(geom: Geometry)`
+Format: `ST_IsLineStringCCW(geom: Geometry)`
 
-Return type: `Geometry`
+Return type: `Boolean`
+
+Since: `v1.9.1`
 
 SQL Example:
 
 ```sql
-SELECT ST_AsText(ST_ForcePolygonCCW(ST_GeomFromText('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))')))
+SELECT ST_IsLineStringCCW(
+    ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 1, 0 0)')
+)
 ```
 
 Output:
 
 ```
-POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35), (30 20, 20 15, 20 25, 30 20))
+true
 ```

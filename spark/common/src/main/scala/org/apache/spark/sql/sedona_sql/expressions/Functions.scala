@@ -1934,6 +1934,13 @@ private[apache] case class ST_IsPolygonCCW(inputExpressions: Seq[Expression])
   }
 }
 
+private[apache] case class ST_IsLineStringCCW(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.isLineStringCCW _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
 private[apache] case class ST_ForcePolygonCCW(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.forcePolygonCCW _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {

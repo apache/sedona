@@ -363,6 +363,78 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("count_coordinates", self)
 
+    def get_coordinates(
+        self,
+        include_z=False,
+        ignore_index=False,
+        index_parts=False,
+        *,
+        include_m=False,
+    ):
+        """Get coordinates as a distributed pandas-on-Spark ``DataFrame``.
+
+        The returned frame has ``x`` and ``y`` columns. With
+        ``include_z=True`` or ``include_m=True``, it also has ``z`` or ``m``
+        columns, respectively. Missing optional ordinates are represented by
+        ``NaN``.
+
+        Parameters
+        ----------
+        include_z : bool, default False
+            Include Z coordinates.
+        ignore_index : bool, default False
+            If True, label the result with a new zero-based sequential index,
+            ignoring ``index_parts``.
+        index_parts : bool, default False
+            If True, append a zero-based coordinate-position level to the
+            original index.
+        include_m : bool, default False
+            Include M coordinates.
+
+        Returns
+        -------
+        pyspark.pandas.DataFrame
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point, LineString, Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(1, 1),
+        ...         LineString([(1, -1), (1, 0)]),
+        ...         Polygon([(3, -1), (4, 0), (3, 1)]),
+        ...     ]
+        ... )
+        >>> s.get_coordinates()
+             x    y
+        0  1.0  1.0
+        1  1.0 -1.0
+        1  1.0  0.0
+        2  3.0 -1.0
+        2  4.0  0.0
+        2  3.0  1.0
+        2  3.0 -1.0
+
+        >>> s.get_coordinates(index_parts=True)
+               x    y
+        0 0  1.0  1.0
+        1 0  1.0 -1.0
+          1  1.0  0.0
+        2 0  3.0 -1.0
+          1  4.0  0.0
+          2  3.0  1.0
+          3  3.0 -1.0
+        """
+        return _delegate_to_geometry_column(
+            "get_coordinates",
+            self,
+            include_z,
+            ignore_index,
+            index_parts,
+            include_m=include_m,
+        )
+
     def count_geometries(self):
         """Return a ``Series`` of ``dtype('int')`` with the number of
         geometries in each multi-geometry or geometry collection.
@@ -489,9 +561,32 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("is_ring", self)
 
-    # @property
-    # def is_ccw(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    @property
+    def is_ccw(self):
+        """Return a ``Series`` of ``dtype('bool')`` with value ``True`` if a
+        LineString or LinearRing is counter-clockwise.
+
+        This property returns ``False`` for non-linear geometries and for lines
+        with fewer than four points.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString, LinearRing, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         LinearRing([(0, 0), (1, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (1, 1), (1, 0), (0, 0)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s.is_ccw
+        0     True
+        1    False
+        2    False
+        dtype: bool
+        """
+        return _delegate_to_geometry_column("is_ccw", self)
 
     @property
     def is_closed(self):
@@ -559,6 +654,29 @@ class GeoFrame(metaclass=ABCMeta):
         dtype: bool
         """
         return _delegate_to_geometry_column("has_z", self)
+
+    @property
+    def has_m(self):
+        """Return a ``Series`` of ``dtype('bool')`` with value ``True`` for
+        features that have an m-component.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries.from_wkt(
+        ...     [
+        ...         "POINT M (2 3 5)",
+        ...         "POINT Z (1 2 3)",
+        ...         "POINT (0 0)",
+        ...     ]
+        ... )
+        >>> s.has_m
+        0     True
+        1    False
+        2    False
+        dtype: bool
+        """
+        return _delegate_to_geometry_column("has_m", self)
 
     # def get_precision(self):
     #     raise NotImplementedError("This method is not implemented yet.")
@@ -847,6 +965,31 @@ class GeoFrame(metaclass=ABCMeta):
             "delaunay_triangles", self, tolerance, only_edges
         )
 
+    def constrained_delaunay_triangles(self):
+        """Return the constrained Delaunay triangulation of each polygon.
+
+        The edges of each input polygon are included in the resulting triangle
+        edges. The result for each row is a ``GeometryCollection`` of polygons.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries([Polygon([(0, 0), (1, 1), (0, 1)])])
+        >>> s.constrained_delaunay_triangles()
+        0    GEOMETRYCOLLECTION (POLYGON ((0 0, 0 1, 1 1, 0...
+        dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.delaunay_triangles : unconstrained Delaunay triangulation
+        """
+        return _delegate_to_geometry_column("constrained_delaunay_triangles", self)
+
     def voronoi_polygons(self, tolerance=0.0, extend_to=None, only_edges=False):
         """Return Voronoi diagram of the vertices of each geometry.
 
@@ -1055,9 +1198,32 @@ class GeoFrame(metaclass=ABCMeta):
             "offset_curve", self, distance, quad_segs, join_style, mitre_limit
         )
 
-    # @property
-    # def interiors(self):
-    #     raise NotImplementedError("This method is not implemented yet.")
+    @property
+    def interiors(self):
+        """Return a ``Series`` of lists containing polygon interior rings.
+
+        Polygons without holes return an empty list. Non-polygon geometries
+        and null values return ``None``.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon(
+        ...             [(0, 0), (0, 5), (5, 5), (5, 0)],
+        ...             [[(1, 1), (2, 1), (1, 2)]],
+        ...         ),
+        ...         Polygon([(0, 0), (0, 1), (1, 0)]),
+        ...     ]
+        ... )
+        >>> s.interiors
+        0    [LINESTRING (1 1, 2 1, 1 2, 1 1)]
+        1                                   []
+        dtype: object
+        """
+        return _delegate_to_geometry_column("interiors", self)
 
     def remove_repeated_points(self, tolerance=0.0):
         """Return a ``GeoSeries`` with duplicate points removed.
@@ -1214,6 +1380,40 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("minimum_clearance", self)
 
+    def minimum_clearance_line(self):
+        """Return linestrings whose endpoints define the minimum clearance.
+
+        A geometry's minimum clearance is the smallest distance by which a
+        vertex could be moved to produce an invalid geometry. If a geometry has
+        no minimum clearance, an empty LineString is returned.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon, LineString, Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 1), (0, 1), (0, 0)]),
+        ...         LineString([(0, 0), (1, 1), (3, 2)]),
+        ...         Point(0, 0),
+        ...     ]
+        ... )
+        >>> s.minimum_clearance_line()
+        0    LINESTRING (0 1, 0.5 0.5)
+        1        LINESTRING (0 0, 1 1)
+        2             LINESTRING EMPTY
+        dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.minimum_clearance : minimum clearance distance
+        """
+        return _delegate_to_geometry_column("minimum_clearance_line", self)
+
     def normalize(self):
         """Return a ``GeoSeries`` of normalized geometries.
 
@@ -1243,6 +1443,39 @@ class GeoFrame(metaclass=ABCMeta):
 
         """
         return _delegate_to_geometry_column("normalize", self)
+
+    def orient_polygons(self, *, exterior_cw=False):
+        """Return geometries with a consistent polygon ring orientation.
+
+        By default, polygon exterior rings are oriented counter-clockwise and
+        interior rings clockwise. Set ``exterior_cw=True`` to use the opposite
+        orientation. Polygonal members of GeometryCollections are processed
+        recursively, while non-polygonal members are left unchanged.
+
+        Parameters
+        ----------
+        exterior_cw : bool, default False
+            If ``True``, orient exterior rings clockwise and interior rings
+            counter-clockwise.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [Polygon([(0, 0), (0, 1), (1, 0), (0, 0)])]
+        ... )
+        >>> s.orient_polygons()
+        0    POLYGON ((0 0, 1 0, 0 1, 0 0))
+        dtype: object
+        """
+        return _delegate_to_geometry_column(
+            "orient_polygons", self, exterior_cw=exterior_cw
+        )
 
     def make_valid(self, *, method="linework", keep_collapsed=True):
         """Repairs invalid geometries.
@@ -1923,7 +2156,10 @@ class GeoFrame(metaclass=ABCMeta):
         `interior` of the other but does not contain it, and the dimension of
         the intersection is less than the dimension of the one or the other.
 
-        Note: Unlike Geopandas, Sedona's implementation always return NULL when GeometryCollection is involved.
+        The underlying Sedona expression returns ``NULL`` when a
+        GeometryCollection is involved. This GeoSeries method normalizes that
+        result to ``False`` to preserve GeoPandas' non-nullable boolean
+        contract.
 
         The operation works on a 1-to-1 row-wise manner.
 
@@ -2931,6 +3167,73 @@ class GeoFrame(metaclass=ABCMeta):
         GeoSeries.geom_equals_exact
         """
         return _delegate_to_geometry_column("geom_equals", self, other, align)
+
+    def geom_equals_exact(self, other, tolerance, align=None):
+        """Return ``True`` for geometries that equal aligned `other` to a
+        given tolerance, otherwise ``False``.
+
+        Equality is structural: geometry types, component ordering, ring
+        ordering, and vertex ordering must match. Corresponding x and y
+        coordinates may differ by at most ``tolerance``. Z and M coordinates
+        are ignored.
+
+        The operation works in a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to compare to.
+        tolerance : float
+            Maximum distance allowed between corresponding coordinates.
+        align : bool | None (default None)
+            If True, automatically align GeoSeries based on their indices.
+            If False, compare values in their existing order. None defaults
+            to True.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(0, 1.1),
+        ...         Point(0, 1.0),
+        ...         Point(0, 1.2),
+        ...     ]
+        ... )
+        >>> s.geom_equals_exact(Point(0, 1), tolerance=0.1)
+        0    False
+        1     True
+        2    False
+        dtype: bool
+
+        >>> s.geom_equals_exact(Point(0, 1), tolerance=0.15)
+        0     True
+        1     True
+        2    False
+        dtype: bool
+
+        Notes
+        -----
+        This method checks geometries row by row; it does not compare each
+        geometry with every value in `other`.
+
+        As elsewhere in Sedona's GeoPandas compatibility layer, standalone
+        ``LinearRing`` geometries are serialized as ``LineString`` geometries.
+        Consequently, this method cannot distinguish those two standalone
+        input types when their coordinates match.
+
+        See also
+        --------
+        GeoSeries.geom_equals
+        """
+        return _delegate_to_geometry_column(
+            "geom_equals_exact", self, other, tolerance, align
+        )
 
     def interpolate(self, distance, normalized=False):
         """Return a point at the specified distance along each geometry.

@@ -1142,6 +1142,22 @@ def ST_IsClosed(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_IsLineStringCCW(line_string: ColumnOrName) -> Column:
+    """Check whether a LineString coordinate sequence has counter-clockwise ring orientation.
+
+    Open LineStrings are evaluated as supplied, without appending the start
+    coordinate. Non-LineString geometries and LineStrings with fewer than four
+    points return False.
+
+    :param line_string: LineString geometry column to check.
+    :type line_string: ColumnOrName
+    :return: True if the coordinate sequence is counter-clockwise and False otherwise.
+    :rtype: Column
+    """
+    return _call_st_function("ST_IsLineStringCCW", line_string)
+
+
+@validate_argument_types
 def ST_IsEmpty(geometry: ColumnOrName) -> Column:
     """Check if the geometry in a geometry column is an empty geometry.
 
@@ -1155,12 +1171,12 @@ def ST_IsEmpty(geometry: ColumnOrName) -> Column:
 
 @validate_argument_types
 def ST_IsPolygonCW(geometry: ColumnOrName) -> Column:
-    """Check if the Polygon or MultiPolygon use a clockwise orientation for exterior ring and counter-clockwise
-    orientation for interior ring.
+    """Check whether polygon rings use clockwise exterior orientation.
 
     :param geometry: Geometry column to check.
     :type geometry: ColumnOrName
-    :return: True if the geometry is empty and False otherwise as a boolean column.
+    :return: True if every exterior ring is clockwise and every interior ring
+        is counter-clockwise. Empty Polygon and MultiPolygon values return True.
     :rtype: Column
     """
     return _call_st_function("ST_IsPolygonCW", geometry)
@@ -2008,11 +2024,12 @@ def ST_Snap(
 
 @validate_argument_types
 def ST_IsPolygonCCW(geometry: ColumnOrName) -> Column:
-    """Check if the Polygon or MultiPolygon use a counter-clockwise orientation for exterior ring and clockwise
-    orientation for interior ring.
+    """Check whether polygon rings use counter-clockwise exterior orientation.
+
     :param geometry: Geometry column to check.
     :type geometry: ColumnOrName
-    :return: True if the geometry is empty and False otherwise as a boolean column.
+    :return: True if every exterior ring is counter-clockwise and every interior
+        ring is clockwise. Empty Polygon and MultiPolygon values return True.
     :rtype: Column
     """
     return _call_st_function("ST_IsPolygonCCW", geometry)
@@ -2020,10 +2037,14 @@ def ST_IsPolygonCCW(geometry: ColumnOrName) -> Column:
 
 @validate_argument_types
 def ST_ForcePolygonCCW(geometry: ColumnOrName) -> Column:
-    """
-    Returns a geometry with counter-clockwise oriented exterior ring and clockwise oriented interior rings
-    :param geometry: Geometry column to change orientation
-    :return: counter-clockwise oriented geometry
+    """Orient polygonal components with counter-clockwise exterior rings.
+
+    Interior rings are oriented clockwise. Polygonal members of
+    GeometryCollections are processed recursively, while non-polygonal members
+    are preserved unchanged.
+
+    :param geometry: Geometry column to orient.
+    :return: Geometry with counter-clockwise polygon exterior rings.
     """
     return _call_st_function("ST_ForcePolygonCCW", geometry)
 
@@ -2504,20 +2525,28 @@ def ST_ForceCollection(geometry: ColumnOrName) -> Column:
 
 @validate_argument_types
 def ST_ForcePolygonCW(geometry: ColumnOrName) -> Column:
-    """
-    Returns
-    :param geometry: Geometry column to change orientation
-    :return: Clockwise oriented geometry
+    """Orient polygonal components with clockwise exterior rings.
+
+    Interior rings are oriented counter-clockwise. Polygonal members of
+    GeometryCollections are processed recursively, while non-polygonal members
+    are preserved unchanged.
+
+    :param geometry: Geometry column to orient.
+    :return: Geometry with clockwise polygon exterior rings.
     """
     return _call_st_function("ST_ForcePolygonCW", geometry)
 
 
 @validate_argument_types
 def ST_ForceRHR(geometry: ColumnOrName) -> Column:
-    """
-    Returns
-    :param geometry: Geometry column to change orientation
-    :return: Clockwise oriented geometry
+    """Apply right-hand-rule orientation to polygonal components.
+
+    This is an alias for :func:`ST_ForcePolygonCW`. Polygonal members of
+    GeometryCollections are processed recursively, while non-polygonal members
+    are preserved unchanged.
+
+    :param geometry: Geometry column to orient.
+    :return: Geometry with clockwise polygon exterior rings.
     """
     return _call_st_function("ST_ForceRHR", geometry)
 

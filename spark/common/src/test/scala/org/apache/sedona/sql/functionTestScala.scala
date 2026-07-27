@@ -1563,6 +1563,35 @@ class functionTestScala
       assert(actual == false)
     }
 
+    it("Should pass polygon orientation predicates for empty polygonal geometries") {
+      val actual = sparkSession
+        .sql("""
+            |SELECT
+            |  ST_IsPolygonCW(ST_GeomFromWKT('POLYGON EMPTY')),
+            |  ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON EMPTY')),
+            |  ST_IsPolygonCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY')),
+            |  ST_IsPolygonCCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY'))
+            |""".stripMargin)
+        .first()
+
+      (0 until 4).foreach(index => assertTrue(actual.getBoolean(index)))
+    }
+
+    it("Should pass ST_IsLineStringCCW") {
+      val actual = sparkSession
+        .sql("""
+            |SELECT
+            |  ST_IsLineStringCCW(ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 1, 0 0)')),
+            |  ST_IsLineStringCCW(ST_GeomFromWKT('LINESTRING (0 0, 0 1, 1 1, 1 0, 0 0)')),
+            |  ST_IsLineStringCCW(ST_GeomFromWKT('POINT (0 0)'))
+            |""".stripMargin)
+        .first()
+
+      assertTrue(actual.getBoolean(0))
+      assertFalse(actual.getBoolean(1))
+      assertFalse(actual.getBoolean(2))
+    }
+
     it("Should pass ST_Snap") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))') AS poly, ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)') AS line")

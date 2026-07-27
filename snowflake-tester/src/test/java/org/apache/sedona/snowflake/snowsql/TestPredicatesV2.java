@@ -65,6 +65,20 @@ public class TestPredicatesV2 extends TestBase {
   }
 
   @Test
+  public void test_ST_EqualsExact() {
+    registerUDFV2("ST_EqualsExact", String.class, String.class, double.class);
+    verifySqlSingleRes(
+        "SELECT SEDONA.ST_EqualsExact(ST_GeometryFromWKT('POINT (0 0)'), ST_GeometryFromWKT('POINT (0.03 0.04)'), 0.051)",
+        true);
+    verifySqlSingleRes(
+        "SELECT SEDONA.ST_EqualsExact(ST_GeometryFromWKT('POINT (0 0)'), ST_GeometryFromWKT('POINT (0.03 0.04)'), 0.049)",
+        false);
+    verifySqlSingleRes(
+        "SELECT SEDONA.ST_EqualsExact(ST_GeometryFromWKT('LINESTRING (0 0, 1 1)'), ST_GeometryFromWKT('LINESTRING (1 1, 0 0)'), 0.0)",
+        false);
+  }
+
+  @Test
   public void test_ST_Intersects() {
     registerUDFV2("ST_Intersects", String.class, String.class);
     verifySqlSingleRes(

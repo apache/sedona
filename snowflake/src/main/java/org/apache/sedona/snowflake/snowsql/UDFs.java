@@ -402,6 +402,15 @@ public class UDFs {
         GeometrySerde.deserialize(leftGeometry), GeometrySerde.deserialize(rightGeometry));
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry", "tolerance"})
+  public static boolean ST_EqualsExact(
+      byte[] leftGeometry, byte[] rightGeometry, double tolerance) {
+    return Predicates.equalsExact(
+        GeometrySerde.deserialize(leftGeometry),
+        GeometrySerde.deserialize(rightGeometry),
+        tolerance);
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static byte[] ST_ExteriorRing(byte[] geometry) {
     return GeometrySerde.serialize(Functions.exteriorRing(GeometrySerde.deserialize(geometry)));
@@ -568,6 +577,11 @@ public class UDFs {
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static boolean ST_IsEmpty(byte[] geometry) {
     return Functions.isEmpty(GeometrySerde.deserialize(geometry));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"geometry"})
+  public static boolean ST_IsLineStringCCW(byte[] geometry) {
+    return Functions.isLineStringCCW(GeometrySerde.deserialize(geometry));
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})

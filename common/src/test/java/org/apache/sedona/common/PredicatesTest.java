@@ -339,6 +339,42 @@ public class PredicatesTest extends TestBase {
   }
 
   @Test
+  public void testEqualsExact() throws ParseException {
+    Geometry origin = geomFromEWKT("POINT(0 0)");
+    Geometry nearby = geomFromEWKT("POINT(0.03 0.04)");
+    assertTrue(Predicates.equalsExact(origin, origin, 0.0));
+    assertTrue(Predicates.equalsExact(origin, nearby, 0.05));
+    assertTrue(Predicates.equalsExact(origin, nearby, 0.051));
+    assertFalse(Predicates.equalsExact(origin, nearby, 0.049));
+    assertFalse(Predicates.equalsExact(origin, origin, -1.0));
+    assertFalse(Predicates.equalsExact(origin, origin, Double.NaN));
+    assertTrue(Predicates.equalsExact(origin, nearby, Double.POSITIVE_INFINITY));
+
+    Geometry line = geomFromEWKT("LINESTRING(0 0, 1 1, 2 0)");
+    Geometry reversed = geomFromEWKT("LINESTRING(2 0, 1 1, 0 0)");
+    assertFalse(Predicates.equalsExact(line, reversed, 0.0));
+
+    Geometry pointZ1 = geomFromEWKT("POINT Z (1 2 3)");
+    Geometry pointZ2 = geomFromEWKT("POINT Z (1 2 99)");
+    assertTrue(Predicates.equalsExact(pointZ1, pointZ2, 0.0));
+
+    Geometry pointM1 = geomFromEWKT("POINT M (1 2 3)");
+    Geometry pointM2 = geomFromEWKT("POINT M (1 2 99)");
+    assertTrue(Predicates.equalsExact(pointM1, pointM2, 0.0));
+  }
+
+  @Test
+  public void testEqualsExactEmptyAndCollectionStructure() throws ParseException {
+    Geometry pointEmpty = geomFromEWKT("POINT EMPTY");
+    assertTrue(Predicates.equalsExact(pointEmpty, geomFromEWKT("POINT EMPTY"), 0.0));
+    assertFalse(Predicates.equalsExact(pointEmpty, geomFromEWKT("POLYGON EMPTY"), 0.0));
+
+    Geometry collection = geomFromEWKT("GEOMETRYCOLLECTION(POINT(0 0), LINESTRING(0 0, 1 1))");
+    Geometry reordered = geomFromEWKT("GEOMETRYCOLLECTION(LINESTRING(0 0, 1 1), POINT(0 0))");
+    assertFalse(Predicates.equalsExact(collection, reordered, 0.0));
+  }
+
+  @Test
   public void testRelateBoolean() throws ParseException {
     Geometry geom1 = geomFromEWKT("POINT(1 2)");
     Geometry geom2 = Functions.buffer(geomFromEWKT("POINT(1 2)"), 2);

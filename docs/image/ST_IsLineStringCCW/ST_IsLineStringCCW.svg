@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="300" viewBox="0 0 500 300">
+  <defs>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <rect width="500" height="300" fill="white" rx="8"/>
+  <polyline points="140,250 360,250 360,70 140,70 140,250" fill="none" stroke="#4a90d9" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="140" cy="250" r="6" fill="#4a90d9"/>
+  <circle cx="360" cy="250" r="6" fill="#4a90d9"/>
+  <circle cx="360" cy="70" r="6" fill="#4a90d9"/>
+  <circle cx="140" cy="70" r="6" fill="#4a90d9"/>
+  <polygon points="250,250 238,243 238,257" fill="#4a90d9"/>
+  <polygon points="360,160 353,172 367,172" fill="#4a90d9"/>
+  <polygon points="250,70 262,63 262,77" fill="#4a90d9"/>
+  <polygon points="140,160 133,148 147,148" fill="#4a90d9"/>
+  <rect x="180" y="8" width="140" height="28" rx="14" fill="#2ecc71" fill-opacity="0.15" stroke="#2ecc71" stroke-width="1.5"/>
+  <text x="250" y="27" text-anchor="middle" fill="#2ecc71" font-size="14" font-weight="bold">CCW → true</text>
+  <text x="490" y="290" text-anchor="end" fill="#999" font-size="11">ST_IsLineStringCCW</text>
+</svg>

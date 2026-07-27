@@ -81,8 +81,9 @@ These functions extract information and properties from geometry objects.
 | [ST_IsClosed](Geometry-Accessors/ST_IsClosed.md) | Boolean | RETURNS true if the LINESTRING start and end point are the same. | v1.3.0 |
 | [ST_IsCollection](Geometry-Accessors/ST_IsCollection.md) | Boolean | Returns `TRUE` if the geometry type of the input is a geometry collection type. Collection types are the following: | v1.5.0 |
 | [ST_IsEmpty](Geometry-Accessors/ST_IsEmpty.md) | Boolean | Test if a geometry is empty geometry | v1.2.1 |
+| [ST_IsLineStringCCW](Geometry-Accessors/ST_IsLineStringCCW.md) | Boolean | Returns true if the input LineString's coordinate sequence has counter-clockwise ring orientation. | v1.9.1 |
 | [ST_IsPolygonCCW](Geometry-Accessors/ST_IsPolygonCCW.md) | Boolean | Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise. | v1.6.0 |
-| [ST_IsPolygonCW](Geometry-Accessors/ST_IsPolygonCW.md) | Boolean | Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise. | v1.6.0 |
+| [ST_IsPolygonCW](Geometry-Accessors/ST_IsPolygonCW.md) | Boolean | Returns true if all polygonal components in the input geometry have their exterior rings oriented clockwise and interior rings oriented counter-clockwise. | v1.6.0 |
 | [ST_IsRing](Geometry-Accessors/ST_IsRing.md) | Boolean | RETURN true if LINESTRING is ST_IsClosed and ST_IsSimple. | v1.3.0 |
 | [ST_IsSimple](Geometry-Accessors/ST_IsSimple.md) | Boolean | Test if geometry's only self-intersections are at boundary points. | v1.3.0 |
 | [ST_M](Geometry-Accessors/ST_M.md) | Double | Returns M Coordinate of given Point, null otherwise. | v1.6.1 |
@@ -118,9 +119,9 @@ These functions create modified geometries by changing type, structure, or verti
 | [ST_Force4D](Geometry-Editors/ST_Force4D.md) | Geometry | Converts the input geometry to 4D XYZM representation. Retains original Z and M values if present. Assigning 0.0 defaults if `mValue` and `zValue` aren't specified. The output contains X, Y, Z, and... | v1.6.1 |
 | [ST_Force_2D](Geometry-Editors/ST_Force_2D.md) | Geometry | Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force2D](Geometry-Editors/ST_Force2D.md). | v1.2.1 |
 | [ST_ForceCollection](Geometry-Editors/ST_ForceCollection.md) | Geometry | This function converts the input geometry into a GeometryCollection, regardless of the original geometry type. If the input is a multipart geometry, such as a MultiPolygon or MultiLineString, it wi... | v1.6.1 |
-| [ST_ForcePolygonCCW](Geometry-Editors/ST_ForcePolygonCCW.md) | Geometry | For (Multi)Polygon geometries, this function sets the exterior ring orientation to counter-clockwise and interior rings to clockwise orientation. Non-polygonal geometries are returned unchanged. | v1.6.0 |
-| [ST_ForcePolygonCW](Geometry-Editors/ST_ForcePolygonCW.md) | Geometry | For (Multi)Polygon geometries, this function sets the exterior ring orientation to clockwise and interior rings to counter-clockwise orientation. Non-polygonal geometries are returned unchanged. | v1.6.0 |
-| [ST_ForceRHR](Geometry-Editors/ST_ForceRHR.md) | Geometry | Sets the orientation of polygon vertex orderings to follow the Right-Hand-Rule convention. The exterior ring will have a clockwise winding order, while any interior rings are oriented counter-clock... | v1.6.1 |
+| [ST_ForcePolygonCCW](Geometry-Editors/ST_ForcePolygonCCW.md) | Geometry | Sets polygon exterior rings counter-clockwise and interior rings clockwise, including polygonal members nested in GeometryCollections. Non-polygonal members are preserved unchanged. | v1.6.0 |
+| [ST_ForcePolygonCW](Geometry-Editors/ST_ForcePolygonCW.md) | Geometry | Sets polygon exterior rings clockwise and interior rings counter-clockwise, including polygonal members nested in GeometryCollections. Non-polygonal members are preserved unchanged. | v1.6.0 |
+| [ST_ForceRHR](Geometry-Editors/ST_ForceRHR.md) | Geometry | Applies right-hand-rule ring orientation recursively to polygonal members, including those nested in GeometryCollections. Non-polygonal members are preserved unchanged. | v1.6.1 |
 | [ST_LineFromMultiPoint](Geometry-Editors/ST_LineFromMultiPoint.md) | Geometry | Creates a LineString from a MultiPoint geometry. | v1.3.0 |
 | [ST_LineMerge](Geometry-Editors/ST_LineMerge.md) | Geometry | Returns a LineString or MultiLineString formed by sewing together the constituent line work of a MULTILINESTRING. | v1.5.0 |
 | [ST_LineSegments](Geometry-Editors/ST_LineSegments.md) | `Array<Geometry>` | This function transforms a LineString containing multiple coordinates into an array of LineStrings, each with precisely two coordinates. The `lenient` argument, true by default, prevents an excepti... | v1.7.1 |
@@ -166,6 +167,7 @@ These functions test spatial relationships between geometries, returning boolean
 | [ST_Disjoint](Predicates/ST_Disjoint.md) | Boolean | Return true if A and B are disjoint | v1.2.1 |
 | [ST_DWithin](Predicates/ST_DWithin.md) | Boolean | Returns true if 'leftGeometry' and 'rightGeometry' are within a specified 'distance'. | v1.5.1 |
 | [ST_Equals](Predicates/ST_Equals.md) | Boolean | Return true if A equals to B | v1.5.0 |
+| [ST_EqualsExact](Predicates/ST_EqualsExact.md) | Boolean | Return true if A and B have matching structures and corresponding coordinates within a tolerance | v1.9.1 |
 | [ST_Intersects](Predicates/ST_Intersects.md) | Boolean | Return true if A intersects B | v1.2.0 |
 | [ST_OrderingEquals](Predicates/ST_OrderingEquals.md) | Boolean | Returns true if the geometries are equal and the coordinates are in the same order | v1.2.1 |
 | [ST_Overlaps](Predicates/ST_Overlaps.md) | Boolean | Return true if A overlaps B | v1.5.0 |

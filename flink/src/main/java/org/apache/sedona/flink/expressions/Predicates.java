@@ -347,6 +347,30 @@ public class Predicates {
     }
   }
 
+  public static class ST_EqualsExact extends ScalarFunction {
+
+    public ST_EqualsExact() {}
+
+    @DataTypeHint("Boolean")
+    public Boolean eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o1,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o2,
+        @DataTypeHint("Double") Double tolerance) {
+      if (o1 == null || o2 == null || tolerance == null) return null;
+      Geometry geom1 = (Geometry) o1;
+      Geometry geom2 = (Geometry) o2;
+      return org.apache.sedona.common.Predicates.equalsExact(geom1, geom2, tolerance);
+    }
+  }
+
   public static class ST_OrderingEquals extends ScalarFunction {
 
     /** Constructor for relation checking without duplicate removal */
