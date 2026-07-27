@@ -86,6 +86,7 @@ class TestGeometryAggregation(TestGeopandasBase):
         with ps.option_context("compute.ops_on_diff_frames", True):
             source = GeoDataFrame(expected_source)
 
+        assert source.crs == expected_source.crs
         result = source.dissolve("zone")
         expected = expected_source.dissolve("zone")
 
