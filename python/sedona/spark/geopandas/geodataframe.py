@@ -1660,6 +1660,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Duplicate column labels remain subject to pandas-on-Spark's DataFrame
         construction restrictions.
 
+        Unlike GeoPandas, this method returns a lazy pandas-on-Spark DataFrame.
+        Call ``to_pandas()`` on the result to materialize a local pandas
+        DataFrame.
+
         See Also
         --------
         GeoDataFrame.to_wkt
@@ -1693,6 +1697,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         -----
         Duplicate column labels remain subject to pandas-on-Spark's DataFrame
         construction restrictions.
+
+        Unlike GeoPandas, this method returns a lazy pandas-on-Spark DataFrame.
+        Call ``to_pandas()`` on the result to materialize a local pandas
+        DataFrame.
 
         Sedona's native WKT writer preserves stored coordinate precision.
         GeoPandas delegates to Shapely, whose default writer rounds coordinates

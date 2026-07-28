@@ -1633,8 +1633,8 @@ class GeoFrame(metaclass=ABCMeta):
         seed : optional
             Deprecated alias for ``rng``.
         rng : optional
-            Any seed accepted by ``numpy.random.default_rng``. A supplied seed
-            makes repeated evaluation deterministic.
+            Any seed accepted by ``numpy.random.default_rng``. Fresh generators
+            initialized with the same seed produce reproducible results.
         **kwargs
             Accepted for GeoPandas signature compatibility and ignored for
             uniform sampling.
@@ -1664,10 +1664,11 @@ class GeoFrame(metaclass=ABCMeta):
         -----
         Sedona and GeoPandas use different random number generators, so the
         sampled coordinates are not expected to be identical for the same
-        seed. A stateful NumPy ``Generator`` is reduced to one engine seed and
-        then varied by row, so its state advancement also differs. Unsupported
-        nonempty geometry types produce empty MultiPoints without GeoPandas's
-        per-row warning, avoiding an eager type scan.
+        seed. A stateful NumPy ``Generator`` or ``BitGenerator`` is reduced to
+        one engine seed and then varied deterministically by row position, so
+        its state advancement also differs. Unsupported nonempty geometry types
+        produce empty MultiPoints without GeoPandas's per-row warning, avoiding
+        an eager type scan.
         """
         return _delegate_to_geometry_column(
             "sample_points",

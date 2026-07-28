@@ -382,6 +382,10 @@ only aggregate metadata and the API's single geometry result to the driver.
   from coordinate columns without collecting distributed inputs
 - `geom_type` - Get geometry types
 
+Unlike GeoPandas, `GeoDataFrame.to_wkb()` and `GeoDataFrame.to_wkt()` return a
+lazy pandas-on-Spark DataFrame. Call `.to_pandas()` on the result only when a
+local pandas DataFrame is required.
+
 ## Complete Workflow Example
 
 ```python

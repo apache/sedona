@@ -32,7 +32,14 @@ from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalField, InternalFrame
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for, verify_temp_column_name
-from pyspark.sql.types import IntegralType, NullType
+from pyspark.sql.types import (
+    BooleanType,
+    IntegralType,
+    LongType,
+    NullType,
+    StructField,
+    StructType,
+)
 from sedona.spark.sql.types import GeometryType
 
 from sedona.spark.sql import st_aggregates as sta
@@ -42,6 +49,15 @@ from sedona.spark.sql import st_predicates as stp
 
 from pyspark.sql import Column as PySparkColumn
 from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+
+try:
+    from pyspark.sql.utils import is_remote
+except ImportError:
+
+    def is_remote():
+        return False
+
 
 import shapely
 from shapely.geometry.base import BaseGeometry
@@ -149,6 +165,73 @@ def _normalize_sample_seed(rng) -> int:
     """Map a NumPy-compatible RNG argument to Sedona's positive seed range."""
     generator = np.random.default_rng(rng)
     return int(generator.integers(1, 2_147_483_647))
+
+
+def _attach_ordered_sequence_column(
+    sdf,
+    order_column: PySparkColumn,
+    sequence_column: str,
+):
+    """Attach dense positions without a single-partition window over all rows."""
+    if not is_remote():
+        return InternalFrame.attach_distributed_sequence_column(
+            sdf.orderBy(order_column), sequence_column
+        )
+
+    reserved_columns = set(sdf.columns)
+    reserved_columns.add(sequence_column)
+
+    def temp_column_name(base: str) -> str:
+        suffix = 0
+        candidate = f"__sample_points_{base}__"
+        while candidate in reserved_columns:
+            suffix += 1
+            candidate = f"__sample_points_{base}_{suffix}__"
+        reserved_columns.add(candidate)
+        return candidate
+
+    partition_column = temp_column_name("partition")
+    local_position_column = temp_column_name("local_position")
+    partition_size_column = temp_column_name("partition_size")
+    partition_offset_column = temp_column_name("partition_offset")
+
+    # Spark Connect cannot use pandas-on-Spark's JVM-backed distributed
+    # sequence helper. Fixed-width order buckets keep row-number windows
+    # bounded and deterministic. Only the small table of bucket counts is
+    # collected into one window to compute offsets.
+    source_columns = [scol_for(sdf, column) for column in sdf.columns]
+    partitioned = sdf.select(
+        *source_columns,
+        F.shiftrightunsigned(order_column.cast("long"), 20)
+        .cast("long")
+        .alias(partition_column),
+    )
+    local_window = Window.partitionBy(partition_column).orderBy(order_column)
+    numbered = partitioned.withColumn(
+        local_position_column,
+        (F.row_number().over(local_window) - F.lit(1)).cast("long"),
+    )
+    partition_sizes = partitioned.groupBy(partition_column).agg(
+        F.count(F.lit(1)).cast("long").alias(partition_size_column)
+    )
+    offset_window = Window.orderBy(partition_column).rowsBetween(
+        Window.unboundedPreceding, -1
+    )
+    partition_offsets = partition_sizes.select(
+        F.col(partition_column),
+        F.coalesce(
+            F.sum(partition_size_column).over(offset_window),
+            F.lit(0),
+        )
+        .cast("long")
+        .alias(partition_offset_column),
+    )
+    return numbered.join(partition_offsets, on=partition_column).select(
+        (F.col(partition_offset_column) + F.col(local_position_column)).alias(
+            sequence_column
+        ),
+        *source_columns,
+    )
 
 
 def _sample_points_expression(
@@ -1629,7 +1712,8 @@ class GeoSeries(GeoFrame, pspd.Series):
             )
             rng = seed
 
-        randomize_per_row = rng is None or isinstance(rng, np.random.Generator)
+        stateful_rng = isinstance(rng, (np.random.Generator, np.random.BitGenerator))
+        randomize_per_row = rng is None or stateful_rng
         engine_seed = _normalize_sample_seed(rng)
 
         has_crs_metadata, metadata_crs = read_crs_metadata(
@@ -1641,47 +1725,18 @@ class GeoSeries(GeoFrame, pspd.Series):
             else 0
         )
 
-        def seed_column(order_column: PySparkColumn) -> PySparkColumn:
+        def seed_column(row_key: PySparkColumn) -> PySparkColumn:
             if not randomize_per_row:
                 return F.lit(engine_seed)
             return (
                 F.pmod(
-                    F.xxhash64(F.lit(engine_seed), order_column.cast("long")),
+                    F.xxhash64(F.lit(engine_seed), row_key.cast("long")),
                     F.lit(2_147_483_646),
                 )
                 + F.lit(1)
             ).cast("int")
 
-        if isinstance(size, PandasOnSparkSeries):
-            size_series = size
-        elif pd.api.types.is_list_like(size):
-            size_series = pspd.Series(
-                [_normalize_sample_size_scalar(value) for value in size],
-                dtype=np.int64,
-            )
-        else:
-            normalized_size = _normalize_sample_size_scalar(size)
-            source_frame = self._internal.spark_frame
-            spark_expr = _sample_points_expression(
-                self.spark.column,
-                F.lit(normalized_size),
-                seed_column(scol_for(source_frame, NATURAL_ORDER_COLUMN_NAME)),
-                fallback_srid,
-            )
-            return GeoSeries(
-                self._query_geometry_column(
-                    spark_expr,
-                    returns_geom=True,
-                ).rename("sampled_points")
-            )
-
-        size_type_is_integral = isinstance(size_series.spark.data_type, IntegralType)
-
-        reserved_columns = set(self._internal.spark_frame.columns) | set(
-            size_series._internal.spark_frame.columns
-        )
-
-        def temp_column_name(base: str) -> str:
+        def temp_column_name(base: str, reserved_columns) -> str:
             suffix = 0
             candidate = f"__sample_points_{base}__"
             while candidate in reserved_columns:
@@ -1690,11 +1745,56 @@ class GeoSeries(GeoFrame, pspd.Series):
             reserved_columns.add(candidate)
             return candidate
 
-        geometry_value_col = temp_column_name("geometry")
-        size_value_col = temp_column_name("size")
-        position_col = temp_column_name("position")
-        right_present_col = temp_column_name("right_present")
-        right_order_col = temp_column_name("right_order")
+        if isinstance(size, PandasOnSparkSeries):
+            size_series = size
+            local_sizes = None
+        elif pd.api.types.is_list_like(size):
+            size_series = None
+            local_sizes = [_normalize_sample_size_scalar(value) for value in size]
+        else:
+            normalized_size = _normalize_sample_size_scalar(size)
+            source_internal = self._internal.resolved_copy
+            source_frame = source_internal.spark_frame
+            geometry_column = source_internal.data_spark_columns[0]
+            row_key = scol_for(source_frame, NATURAL_ORDER_COLUMN_NAME)
+            if stateful_rng:
+                # Natural-order IDs encode Spark partition IDs. Compress them
+                # to row positions so fresh, equivalently seeded stateful RNGs
+                # remain reproducible when the partition layout changes.
+                reserved_columns = set(source_frame.columns)
+                position_col = temp_column_name("position", reserved_columns)
+                source_frame = _attach_ordered_sequence_column(
+                    source_frame,
+                    scol_for(source_frame, NATURAL_ORDER_COLUMN_NAME),
+                    position_col,
+                )
+                row_key = F.col(position_col)
+            spark_expr = _sample_points_expression(
+                geometry_column,
+                F.lit(normalized_size),
+                seed_column(row_key),
+                fallback_srid,
+            )
+            return GeoSeries(
+                self._query_geometry_column(
+                    spark_expr,
+                    source_frame,
+                    returns_geom=True,
+                ).rename("sampled_points")
+            )
+
+        size_type_is_integral = size_series is None or isinstance(
+            size_series.spark.data_type, IntegralType
+        )
+
+        reserved_columns = set(self._internal.spark_frame.columns)
+        if size_series is not None:
+            reserved_columns.update(size_series._internal.spark_frame.columns)
+
+        geometry_value_col = temp_column_name("geometry", reserved_columns)
+        size_value_col = temp_column_name("size", reserved_columns)
+        position_col = temp_column_name("position", reserved_columns)
+        right_present_col = temp_column_name("right_present", reserved_columns)
 
         left_frame = self._internal.spark_frame.select(
             self.spark.column.alias(geometry_value_col),
@@ -1709,20 +1809,47 @@ class GeoSeries(GeoFrame, pspd.Series):
                 NATURAL_ORDER_COLUMN_NAME
             ),
         )
-        right_frame = size_series._internal.spark_frame.select(
-            size_series.spark.column.alias(size_value_col),
-            scol_for(
-                size_series._internal.spark_frame,
-                NATURAL_ORDER_COLUMN_NAME,
-            ).alias(right_order_col),
-            F.lit(True).alias(right_present_col),
+        left_frame = _attach_ordered_sequence_column(
+            left_frame,
+            F.col(NATURAL_ORDER_COLUMN_NAME),
+            position_col,
         )
-        left_frame = InternalFrame.attach_distributed_sequence_column(
-            left_frame.orderBy(NATURAL_ORDER_COLUMN_NAME), position_col
-        )
-        right_frame = InternalFrame.attach_distributed_sequence_column(
-            right_frame.orderBy(right_order_col), position_col
-        )
+        if size_series is not None:
+            right_order_col = temp_column_name("right_order", reserved_columns)
+            right_frame = size_series._internal.spark_frame.select(
+                size_series.spark.column.alias(size_value_col),
+                scol_for(
+                    size_series._internal.spark_frame,
+                    NATURAL_ORDER_COLUMN_NAME,
+                ).alias(right_order_col),
+                F.lit(True).alias(right_present_col),
+            )
+            right_frame = _attach_ordered_sequence_column(
+                right_frame,
+                F.col(right_order_col),
+                position_col,
+            )
+        else:
+            # A local sequence already has a driver-side position. Keep those
+            # positions as Spark rows instead of sorting a temporary
+            # pandas-on-Spark Series or embedding a large Catalyst literal.
+            right_schema = StructType(
+                [
+                    StructField(position_col, LongType(), nullable=False),
+                    StructField(size_value_col, LongType(), nullable=False),
+                    StructField(right_present_col, BooleanType(), nullable=False),
+                ]
+            )
+            # Keep this collection sized: Spark Connect cannot construct an
+            # explicitly typed empty DataFrame from an exhausted generator.
+            right_rows = [
+                (position, size_value, True)
+                for position, size_value in enumerate(local_sizes)
+            ]
+            right_frame = self._internal.spark_frame.sparkSession.createDataFrame(
+                right_rows,
+                schema=right_schema,
+            )
         # GeoPandas zips geometries with array-like sizes: missing sizes are an
         # error, while extra sizes are ignored (including for an empty source).
         aligned_frame = left_frame.join(
@@ -1740,7 +1867,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         spark_expr = _sample_points_expression(
             F.col(geometry_value_col),
             size_value,
-            seed_column(F.col(NATURAL_ORDER_COLUMN_NAME)),
+            seed_column(F.col(position_col)),
             fallback_srid,
         )
         spark_expr = F.when(

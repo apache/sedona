@@ -22,6 +22,10 @@ import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
 import sedona.spark.geopandas as sgpd
+import sedona.spark.geopandas.geoseries as geoseries_module
+from pyspark.pandas.internal import InternalFrame, NATURAL_ORDER_COLUMN_NAME
+from pyspark.pandas.utils import scol_for
+from pyspark.sql import functions as F
 from sedona.spark.geopandas import GeoSeries, GeoDataFrame
 from sedona.spark.geopandas.geoseries import _to_bool
 from sedona.spark.sql import st_functions as stf
@@ -2516,12 +2520,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert [geometry.wkb for geometry in actual] == [
             geometry.wkb for geometry in repeated
         ]
-        stateful = (
-            GeoSeries([line, line])
-            .sample_points(4, rng=np.random.default_rng(0))
-            .to_geopandas()
-        )
-        assert not stateful.iloc[0].equals(stateful.iloc[1])
         for source_geometry, sampled in zip(geometries[:4], actual.iloc[:4]):
             assert sampled.geom_type == "MultiPoint"
             assert len(sampled.geoms) == 4
@@ -2626,10 +2624,86 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             source.sample_points(1, method="cluster_poisson")
         with pytest.raises(Exception, match="sample size values must be integers"):
             source.sample_points(ps.Series([1.0] * len(source))).to_geopandas()
-        with pytest.raises(Exception, match="Length of sample sizes"):
-            source.sample_points([1], rng=1).to_geopandas()
+        for short_sizes in ([], [1]):
+            with pytest.raises(Exception, match="Length of sample sizes"):
+                source.sample_points(short_sizes, rng=1).to_geopandas()
         with pytest.warns(FutureWarning, match="'seed' keyword is deprecated"):
             source.sample_points(1, seed=1)
+
+    def test_sample_points_stateful_rng_is_partition_stable(self, monkeypatch):
+        # Exercise the public-expression fallback used by Spark Connect while
+        # retaining the local Spark session used by the test suite.
+        monkeypatch.setattr(geoseries_module, "is_remote", lambda: True)
+
+        line = LineString([(0, 0), (2, 0), (2, 2)])
+        identical_source = GeoSeries(
+            [line, line, line, line],
+            index=pd.Index(["duplicate"] * 4, name="feature_id"),
+        )
+        test_position_col = "__sample_points_test_position__"
+        positioned_frame = InternalFrame.attach_distributed_sequence_column(
+            identical_source._internal.spark_frame.orderBy(NATURAL_ORDER_COLUMN_NAME),
+            test_position_col,
+        )
+        ordered_rows = positioned_frame.select(
+            F.col(test_position_col).alias("position"),
+            scol_for(
+                positioned_frame,
+                identical_source._internal.index_spark_column_names[0],
+            ).alias("feature_id"),
+            scol_for(
+                positioned_frame,
+                identical_source._internal.data_spark_column_names[0],
+            ).alias("geometry"),
+        )
+
+        # These encodings have the same row order but mimic natural-order IDs
+        # generated with one partition and with a boundary before position 2.
+        natural_order_encodings = [
+            F.col("position"),
+            F.when(F.col("position") < 2, F.col("position")).otherwise(
+                F.lit(1 << 33) + F.col("position") - F.lit(2)
+            ),
+        ]
+
+        def source_with_natural_order(encoding):
+            spark_frame = ordered_rows.select(
+                F.col("feature_id"),
+                F.col("geometry"),
+                encoding.cast("long").alias(NATURAL_ORDER_COLUMN_NAME),
+            )
+            return GeoSeries(spark_frame.pandas_api(index_col="feature_id")["geometry"])
+
+        for rng_factory in (
+            lambda: np.random.default_rng(0),
+            lambda: np.random.PCG64(0),
+        ):
+            stateful_results = [
+                source_with_natural_order(encoding).sample_points(4, rng=rng_factory())
+                for encoding in natural_order_encodings
+            ]
+            assert (
+                stateful_results[0]
+                .to_geopandas()
+                .index.equals(pd.Index(["duplicate"] * 4, name="feature_id"))
+            )
+            ordered_wkb = [
+                [
+                    row.geometry.wkb
+                    for row in result._internal.spark_frame.select(
+                        result.spark.column.alias("geometry"),
+                        scol_for(
+                            result._internal.spark_frame,
+                            NATURAL_ORDER_COLUMN_NAME,
+                        ).alias("natural_order"),
+                    )
+                    .orderBy("natural_order")
+                    .collect()
+                ]
+                for result in stateful_results
+            ]
+            assert ordered_wkb[0] == ordered_wkb[1]
+            assert len(set(ordered_wkb[0])) == len(ordered_wkb[0])
 
     def test_segmentize(self):
         s = GeoSeries(

@@ -379,6 +379,10 @@ all_building_parts = collect(buildings.geometry)
   GeoSeries，且不收集分布式输入
 - `geom_type` —— 获取几何类型
 
+与 GeoPandas 不同，`GeoDataFrame.to_wkb()` 和 `GeoDataFrame.to_wkt()` 返回
+惰性的 pandas-on-Spark DataFrame。仅在需要本地 pandas DataFrame 时，才对结果
+调用 `.to_pandas()`。
+
 ## 完整工作流示例
 
 ```python
