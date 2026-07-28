@@ -1737,6 +1737,16 @@ public class Functions {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.x(geom);
     }
+
+    @DataTypeHint("Double")
+    public Double eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = org.apache.sedona.common.S2Geography.Geography.class)
+            org.apache.sedona.common.S2Geography.Geography geog) {
+      return org.apache.sedona.common.geography.Functions.x(geog);
+    }
   }
 
   public static class ST_Y extends ScalarFunction {
@@ -1749,6 +1759,16 @@ public class Functions {
             Object o) {
       Geometry geom = (Geometry) o;
       return org.apache.sedona.common.Functions.y(geom);
+    }
+
+    @DataTypeHint("Double")
+    public Double eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = org.apache.sedona.common.S2Geography.Geography.class)
+            org.apache.sedona.common.S2Geography.Geography geog) {
+      return org.apache.sedona.common.geography.Functions.y(geog);
     }
   }
 

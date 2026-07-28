@@ -22,6 +22,7 @@ import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
 import static org.apache.flink.table.api.Expressions.lit;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -138,6 +139,23 @@ public class GeographyFunctionTest extends TestBase {
     Object out =
         eval("POINT (1 2)", call(Functions.ST_GeometryType.class.getSimpleName(), $("geog")));
     assertEquals("ST_Point", out.toString());
+  }
+
+  @Test
+  public void testXY() {
+    String wkt = "POINT (-73.9857 40.7484)";
+    Object x = eval(wkt, call(Functions.ST_X.class.getSimpleName(), $("geog")));
+    Object y = eval(wkt, call(Functions.ST_Y.class.getSimpleName(), $("geog")));
+    assertEquals(-73.9857, (Double) x, 1e-12);
+    assertEquals(40.7484, (Double) y, 1e-12);
+  }
+
+  @Test
+  public void testXYReturnNullForNonPointAndEmpty() {
+    for (String wkt : new String[] {"LINESTRING (0 0, 1 1)", "POINT EMPTY"}) {
+      assertNull(eval(wkt, call(Functions.ST_X.class.getSimpleName(), $("geog"))));
+      assertNull(eval(wkt, call(Functions.ST_Y.class.getSimpleName(), $("geog"))));
+    }
   }
 
   @Test
