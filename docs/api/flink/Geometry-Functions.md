@@ -125,7 +125,7 @@ These functions create modified geometries by changing type, structure, or verti
 | [ST_LineFromMultiPoint](Geometry-Editors/ST_LineFromMultiPoint.md) | Geometry | Creates a LineString from a MultiPoint geometry. | v1.3.0 |
 | [ST_LineMerge](Geometry-Editors/ST_LineMerge.md) | Geometry | Returns a LineString or MultiLineString formed by sewing together the constituent line work of a MULTILINESTRING. | v1.5.0 |
 | [ST_LineSegments](Geometry-Editors/ST_LineSegments.md) | `Array<Geometry>` | This function transforms a LineString containing multiple coordinates into an array of LineStrings, each with precisely two coordinates. The `lenient` argument, true by default, prevents an excepti... | v1.7.1 |
-| [ST_MakeLine](Geometry-Editors/ST_MakeLine.md) | Geometry | Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error. | v1.5.0 |
+| [ST_MakeLine](Geometry-Editors/ST_MakeLine.md) | Geometry or Geography | Creates a LineString from two Point, MultiPoint, or LineString inputs. Geometry also supports an array signature; Geography supports only the two-argument signature. | v1.5.0 |
 | [ST_MakePolygon](Geometry-Editors/ST_MakePolygon.md) | Geometry | Function to convert closed linestring to polygon including holes. If holes are provided, they should be fully contained within the shell. Holes outside the shell will produce an invalid polygon (ma... | v1.5.0 |
 | [ST_Multi](Geometry-Editors/ST_Multi.md) | Geometry | Returns a MultiGeometry object based on the geometry input. ST_Multi is basically an alias for ST_Collect with one geometry. | v1.5.0 |
 | [ST_Normalize](Geometry-Editors/ST_Normalize.md) | Geometry | Returns the input geometry in its normalized form. | v1.3.0 |

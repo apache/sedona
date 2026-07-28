@@ -87,6 +87,38 @@ public class GeographyFunctionTest extends TestBase {
   }
 
   @Test
+  public void testMakeLinePreservesRepeatedVertices() throws Exception {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT ST_MakeLine("
+                + "ST_GeogFromWKT('LINESTRING (0 0, 1 0)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (1 0, 2 0)', 4326)) AS line");
+
+    Geography line = first(table).getFieldAs("line");
+    assertEquals(
+        "LINESTRING (0 0, 1 0, 1 0, 2 0)",
+        org.apache.sedona.common.geography.Functions.asText(line));
+    assertEquals(4, org.apache.sedona.common.geography.Functions.nPoints(line));
+    assertEquals(4326, line.getSRID());
+  }
+
+  @Test
+  public void testMakeLinePreservesCoincidentPointsAndFirstSRID() throws Exception {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT ST_MakeLine("
+                + "ST_GeogFromWKT('POINT (0 0)', 4326), "
+                + "ST_GeogFromWKT('POINT (0 0)', 3857)) AS line");
+
+    Geography line = first(table).getFieldAs("line");
+    assertEquals(
+        "LINESTRING (0 0, 0 0)", org.apache.sedona.common.geography.Functions.asText(line));
+    assertEquals(2, org.apache.sedona.common.geography.Functions.nPoints(line));
+    assertEquals(0.0, org.apache.sedona.common.geography.Functions.length(line), 0.0);
+    assertEquals(4326, line.getSRID());
+  }
+
+  @Test
   public void testDistance() throws Exception {
     String wktA = "POINT (0 0)";
     String wktB = "POINT (0 1)";
