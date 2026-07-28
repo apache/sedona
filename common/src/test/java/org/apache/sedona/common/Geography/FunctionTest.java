@@ -151,8 +151,8 @@ public class FunctionTest {
   @Test
   public void xY_point() throws ParseException {
     Geography g = Constructors.geogFromWKT("POINT (-73.9857 40.7484)", 4326);
-    assertEquals(-73.9857, Functions.x(g), 0.0);
-    assertEquals(40.7484, Functions.y(g), 0.0);
+    assertEquals(-73.9857, Functions.x(g), 1e-12);
+    assertEquals(40.7484, Functions.y(g), 1e-12);
   }
 
   @Test

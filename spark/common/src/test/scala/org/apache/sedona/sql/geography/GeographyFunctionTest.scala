@@ -150,8 +150,8 @@ class GeographyFunctionTest extends TestBaseScala {
             ST_Y(ST_GeogFromWKT('POINT (-73.9857 40.7484)', 4326)) AS y
         """)
         .first()
-      assertEquals(-73.9857, row.getDouble(0), 0.0)
-      assertEquals(40.7484, row.getDouble(1), 0.0)
+      assertEquals(-73.9857, row.getDouble(0), 1e-12)
+      assertEquals(40.7484, row.getDouble(1), 1e-12)
     }
 
     it("ST_X and ST_Y return null for non-point geography") {

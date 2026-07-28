@@ -255,6 +255,10 @@ public class WKBGeography extends Geography {
     return getPointOrdinate(1);
   }
 
+  /**
+   * Reads X or Y directly from the WKB payload. Z/M ordinates are intentionally tolerated and
+   * ignored so these accessors match Geometry ST_X/ST_Y behavior for higher-dimensional points.
+   */
   private Double getPointOrdinate(int ordinate) {
     if (!isPoint()) return null;
 
