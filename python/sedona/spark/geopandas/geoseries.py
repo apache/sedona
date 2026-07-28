@@ -3150,40 +3150,20 @@ class GeoSeries(GeoFrame, pspd.Series):
         2    POINT (-3 1.5)
         dtype: geometry
         """
-        from pyspark.sql.types import StructType, StructField, DoubleType
+        from sedona.spark.geopandas.array import _points_from_xy
 
-        schema = StructType(
-            [StructField("x", DoubleType(), True), StructField("y", DoubleType(), True)]
+        unsupported = set(kwargs) - {"name"}
+        if unsupported:
+            arguments = ", ".join(sorted(unsupported))
+            raise TypeError(f"Unsupported GeoSeries.from_xy arguments: {arguments}")
+        return _points_from_xy(
+            x,
+            y,
+            z=z,
+            crs=crs,
+            index=index,
+            name=kwargs.get("name"),
         )
-
-        # Spark doesn't automatically cast ints to floats for us
-        x = [float(num) for num in x]
-        y = [float(num) for num in y]
-        z = [float(num) for num in z] if z else None
-
-        if z:
-            data = list(zip(x, y, z))
-            select = stc.ST_PointZ(F.col("x"), F.col("y"), F.col("z"))
-            schema.add(StructField("z", DoubleType(), True))
-        else:
-            data = list(zip(x, y))
-            select = stc.ST_Point(F.col("x"), F.col("y"))
-
-        geoseries = cls._create_from_select(
-            select,
-            data,
-            schema,
-            index,
-            crs,
-            **kwargs,
-        )
-
-        if crs:
-            from pyproj import CRS
-
-            geoseries.crs = CRS.from_user_input(crs).to_epsg()
-
-        return geoseries
 
     @classmethod
     def from_shapely(
