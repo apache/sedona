@@ -2516,6 +2516,12 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert [geometry.wkb for geometry in actual] == [
             geometry.wkb for geometry in repeated
         ]
+        stateful = (
+            GeoSeries([line, line])
+            .sample_points(4, rng=np.random.default_rng(0))
+            .to_geopandas()
+        )
+        assert not stateful.iloc[0].equals(stateful.iloc[1])
         for source_geometry, sampled in zip(geometries[:4], actual.iloc[:4]):
             assert sampled.geom_type == "MultiPoint"
             assert len(sampled.geoms) == 4
@@ -2537,6 +2543,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             )
             assert "BatchEvalPython" not in plan
             assert "ArrowEvalPython" not in plan
+            assert "PythonUDF" not in plan
 
         frame_result = source.to_geoframe().sample_points(4, rng=0)
         assert isinstance(frame_result, GeoSeries)
@@ -2554,6 +2561,21 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         one = GeoSeries([polygon, line, Point(0, 0)]).sample_points(1, rng=1)
         one_types = [geometry.geom_type for geometry in one.to_geopandas()]
         assert one_types == ["Point", "Point", "MultiPoint"]
+
+        degenerate_lines = GeoSeries(
+            [
+                LineString([(0, 0), (0, 0)]),
+                MultiLineString([[(1, 1), (1, 1)], [(1, 1), (1, 1)]]),
+            ]
+        ).sample_points(4, rng=1)
+        degenerate_actual = degenerate_lines.to_geopandas()
+        assert [geometry.geom_type for geometry in degenerate_actual] == [
+            "Point",
+            "Point",
+        ]
+        assert all(
+            geometry.equals(Point(i, i)) for i, geometry in enumerate(degenerate_actual)
+        )
 
         multi_index = pd.MultiIndex.from_tuples(
             [("a", 1), ("a", 2), ("b", 1), ("b", 2)],
@@ -2573,6 +2595,27 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             for geometry in distributed_result
         ] == [1, 2, 3, 4]
 
+        extra_sizes = distributed_source.sample_points(
+            [1, 2, 3, 4, 99], rng=7
+        ).to_geopandas()
+        assert [
+            1 if geometry.geom_type == "Point" else len(geometry.geoms)
+            for geometry in extra_sizes
+        ] == [1, 2, 3, 4]
+
+        for sizes in ([], [1, 2, 3]):
+            empty_result = GeoSeries([], crs="EPSG:3857").sample_points(sizes, rng=7)
+            assert len(empty_result) == 0
+            assert empty_result.name == "sampled_points"
+            assert empty_result.crs == "EPSG:3857"
+
+        empty_float_sizes = GeoSeries([], crs="EPSG:3857").sample_points(
+            ps.Series([], dtype=float), rng=7
+        )
+        assert len(empty_float_sizes) == 0
+        assert empty_float_sizes.name == "sampled_points"
+        assert empty_float_sizes.crs == "EPSG:3857"
+
         with pytest.raises(TypeError):
             source.sample_points(True)
         with pytest.raises(TypeError):
@@ -2581,8 +2624,8 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             source.sample_points(-1)
         with pytest.raises(NotImplementedError):
             source.sample_points(1, method="cluster_poisson")
-        with pytest.raises(TypeError):
-            source.sample_points(ps.Series([1.0] * len(source)))
+        with pytest.raises(Exception, match="sample size values must be integers"):
+            source.sample_points(ps.Series([1.0] * len(source))).to_geopandas()
         with pytest.raises(Exception, match="Length of sample sizes"):
             source.sample_points([1], rng=1).to_geopandas()
         with pytest.warns(FutureWarning, match="'seed' keyword is deprecated"):

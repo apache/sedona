@@ -19,11 +19,12 @@
 
 from __future__ import annotations
 
-from typing import Any, Iterable
+from typing import Any
 
 import numpy as np
 import pandas as pd
 import pyspark.pandas as pspd
+from pyproj import CRS
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import (
     InternalField,
@@ -42,6 +43,7 @@ from pyspark.sql.types import (
 
 from sedona.spark.geopandas._crs import with_crs_metadata
 from sedona.spark.sql import st_constructors as stc
+from sedona.spark.sql import st_functions as stf
 from sedona.spark.sql.types import GeometryType
 
 
@@ -62,14 +64,34 @@ def _coordinate_expression(series: pspd.Series, label: str):
     return F.coalesce(series.spark.column.cast("double"), F.lit(float("nan")))
 
 
+def _coordinate_scalar_expression(value: Any, label: str):
+    try:
+        array = np.asarray(value, dtype="float64")
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise TypeError(
+            f"{label} must be a numeric scalar or pandas-on-Spark Series"
+        ) from exc
+    if array.ndim != 0:
+        raise TypeError(
+            f"{label} must be a numeric scalar when another coordinate is "
+            "distributed"
+        )
+    return F.lit(float(array))
+
+
 def _distributed_points_from_xy(
-    coordinates: list[pspd.Series],
+    coordinates: list[Any],
     labels: list[str],
     crs: Any | None,
     name: Any | None,
 ):
-    source = coordinates[0]
-    if not all(same_anchor(source, coordinate) for coordinate in coordinates[1:]):
+    distributed_coordinates = [
+        coordinate for coordinate in coordinates if _is_distributed_series(coordinate)
+    ]
+    source = distributed_coordinates[0]
+    if not all(
+        same_anchor(source, coordinate) for coordinate in distributed_coordinates[1:]
+    ):
         raise ValueError(
             "pandas-on-Spark coordinate Series must share the same distributed "
             "frame and index; align them in one DataFrame before calling "
@@ -77,7 +99,11 @@ def _distributed_points_from_xy(
         )
 
     expressions = [
-        _coordinate_expression(coordinate, label)
+        (
+            _coordinate_expression(coordinate, label)
+            if _is_distributed_series(coordinate)
+            else _coordinate_scalar_expression(coordinate, label)
+        )
         for coordinate, label in zip(coordinates, labels)
     ]
     point = (
@@ -85,6 +111,9 @@ def _distributed_points_from_xy(
         if len(expressions) == 3
         else stc.ST_Point(*expressions)
     )
+    normalized_crs = CRS.from_user_input(crs) if crs is not None else None
+    if normalized_crs is not None:
+        point = stf.ST_SetSRID(point, normalized_crs.to_epsg() or 0)
 
     source_internal = source._internal
     source_sdf = source_internal.spark_frame
@@ -94,7 +123,7 @@ def _distributed_points_from_xy(
             np.dtype("object"),
             StructField(result_name, GeometryType(), nullable=True),
         ),
-        crs,
+        normalized_crs,
     )
     result_sdf = source_sdf.select(
         point.alias(result_name, metadata=result_template.metadata),
@@ -119,20 +148,18 @@ def _distributed_points_from_xy(
     return GeoSeries(result)
 
 
-def _local_coordinate_array(value: Iterable, label: str) -> np.ndarray:
+def _local_coordinate_array(value: Any, label: str) -> np.ndarray:
     try:
         array = np.asarray(value, dtype="float64")
     except (TypeError, ValueError, OverflowError) as exc:
         raise TypeError(f"{label} must be an iterable of numeric values") from exc
-    if array.ndim == 0:
-        raise TypeError(f"{label} must be an iterable of numeric values")
-    if array.ndim != 1:
+    if array.ndim > 1:
         raise ValueError(f"{label} must be one-dimensional")
     return array
 
 
 def _local_points_from_xy(
-    coordinates: list[Iterable],
+    coordinates: list[Any],
     labels: list[str],
     crs: Any | None,
     index,
@@ -146,11 +173,13 @@ def _local_points_from_xy(
         arrays = list(np.broadcast_arrays(*arrays))
     except ValueError as exc:
         lengths = ", ".join(
-            f"{label}={len(array)}" for label, array in zip(labels, arrays)
+            f"{label}={array.size}" for label, array in zip(labels, arrays)
         )
         raise ValueError(
             f"Coordinate lengths are not broadcast-compatible: {lengths}"
         ) from exc
+    if arrays[0].ndim == 0:
+        raise TypeError("at least one coordinate must be an iterable")
 
     if index is None and all(isinstance(value, pd.Series) for value in coordinates):
         first_index = coordinates[0].index
@@ -184,11 +213,6 @@ def _points_from_xy(
     distributed = [_is_distributed_series(value) for value in coordinates]
 
     if any(distributed):
-        if not all(distributed):
-            raise TypeError(
-                "x, y, and z must all be pandas-on-Spark Series when any "
-                "coordinate is distributed"
-            )
         if index is not None:
             raise TypeError(
                 "index cannot be supplied with distributed coordinate Series; "
@@ -210,8 +234,8 @@ def points_from_xy(x, y, z=None, crs=None):
     Parameters
     ----------
     x, y, z : iterable or pandas-on-Spark Series
-        Coordinate values. If any coordinate is a pandas-on-Spark Series, all
-        supplied coordinates must be Series from the same distributed frame.
+        Coordinate values. Distributed Series must come from the same frame;
+        numeric scalar coordinates are broadcast over that frame.
     crs : value, optional
         Coordinate Reference System accepted by
         :meth:`pyproj.CRS.from_user_input`.
@@ -236,9 +260,9 @@ def points_from_xy(x, y, z=None, crs=None):
     Construction uses native ``ST_Point`` or ``ST_PointZ`` expressions. It
     does not collect pandas-on-Spark inputs or execute a Python row UDF.
 
-    Local iterables use NumPy broadcasting and are paired positionally, as in
-    GeoPandas. Distributed Series are instead paired within their shared Spark
-    plan and retain that plan's index. Series from unrelated plans are rejected
-    because they have no safe distributed positional relationship.
+    Local coordinates use NumPy broadcasting and are paired positionally, as
+    in GeoPandas. Distributed Series are instead paired within their shared
+    Spark plan and retain that plan's index. Series from unrelated plans are
+    rejected because they have no safe distributed positional relationship.
     """
     return _points_from_xy(x, y, z=z, crs=crs)

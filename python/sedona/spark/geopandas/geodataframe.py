@@ -1694,6 +1694,11 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Duplicate column labels remain subject to pandas-on-Spark's DataFrame
         construction restrictions.
 
+        Sedona's native WKT writer preserves stored coordinate precision.
+        GeoPandas delegates to Shapely, whose default writer rounds coordinates
+        to six decimal places. Shapely-specific formatting keyword arguments
+        are not supported here.
+
         See Also
         --------
         GeoDataFrame.to_wkb

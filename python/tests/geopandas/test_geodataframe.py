@@ -244,7 +244,11 @@ class TestGeoDataFrame(TestGeopandasBase):
                 assert "ArrowEvalPython" not in plan
 
     def test_geometry_serialization_kwargs_are_explicitly_unsupported(self):
-        gdf = GeoDataFrame({"geometry": [Point(1.2345, 2.3456)]})
+        gdf = GeoDataFrame({"geometry": [Point(1.234567890123, 2.345678901234)]})
+
+        assert gdf.to_wkt().to_pandas()["geometry"].tolist() == [
+            "POINT (1.234567890123 2.345678901234)"
+        ]
 
         with pytest.raises(NotImplementedError, match="rounding_precision"):
             gdf.to_wkt(rounding_precision=2)

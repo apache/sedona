@@ -337,6 +337,7 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 - `intersects()`、`contains()`、`within()` —— 空间谓词
 - `intersection()` —— 几何相交
 - `make_valid()` —— 几何校验与修复
+- `sample_points()` —— 使用原生分布式表达式按面积对多边形采样、按长度对线采样
 - `cx` —— 基于坐标范围的空间筛选
 - `clip()` —— 分布式几何裁剪
 - `sindex` —— 空间索引（功能有限）
@@ -372,8 +373,10 @@ all_building_parts = collect(buildings.geometry)
 ### 数据转换
 
 - `to_geopandas()` —— 转换为传统 GeoPandas
-- `to_wkb()`、`to_wkt()` —— 转换为 WKB/WKT
-- `from_xy()` —— 通过坐标创建几何
+- `GeoDataFrame.to_wkb()`、`GeoDataFrame.to_wkt()` —— 在分布式
+  pandas-on-Spark DataFrame 中把所有几何列序列化为 WKB/WKT
+- `points_from_xy()`、`GeoSeries.from_xy()` —— 通过坐标列创建分布式
+  GeoSeries，且不收集分布式输入
 - `geom_type` —— 获取几何类型
 
 ## 完整工作流示例

@@ -1664,7 +1664,10 @@ class GeoFrame(metaclass=ABCMeta):
         -----
         Sedona and GeoPandas use different random number generators, so the
         sampled coordinates are not expected to be identical for the same
-        seed.
+        seed. A stateful NumPy ``Generator`` is reduced to one engine seed and
+        then varied by row, so its state advancement also differs. Unsupported
+        nonempty geometry types produce empty MultiPoints without GeoPandas's
+        per-row warning, avoiding an eager type scan.
         """
         return _delegate_to_geometry_column(
             "sample_points",

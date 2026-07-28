@@ -337,6 +337,8 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
 - `intersects()`, `contains()`, `within()` - Spatial predicates
 - `intersection()` - Geometric intersection
 - `make_valid()` - Geometry validation and repair
+- `sample_points()` - Sample polygons by area and lines by length with native
+  distributed expressions
 - `cx` - Coordinate-based spatial filtering
 - `clip()` - Distributed geometry clipping
 - `sindex` - Spatial indexing (limited functionality)
@@ -374,8 +376,10 @@ only aggregate metadata and the API's single geometry result to the driver.
 ### Data Conversion
 
 - `to_geopandas()` - Convert to traditional GeoPandas
-- `to_wkb()`, `to_wkt()` - Convert to WKB/WKT formats
-- `from_xy()` - Create geometries from coordinates
+- `GeoDataFrame.to_wkb()`, `GeoDataFrame.to_wkt()` - Serialize every geometry
+  column to WKB/WKT in a distributed pandas-on-Spark DataFrame
+- `points_from_xy()`, `GeoSeries.from_xy()` - Create a distributed GeoSeries
+  from coordinate columns without collecting distributed inputs
 - `geom_type` - Get geometry types
 
 ## Complete Workflow Example

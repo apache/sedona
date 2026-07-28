@@ -186,7 +186,9 @@ def _sample_points_expression(
             / F.lit(9_007_199_254_740_992.0),
         ),
     )
-    collected_line_samples = stf.ST_Collect(line_samples)
+    # GeoPandas unions interpolated points, which collapses duplicates on
+    # zero-length lines and can therefore return a Point for size > 1.
+    collected_line_samples = stf.ST_UnaryUnion(stf.ST_Collect(line_samples))
 
     sampled = (
         F.when(geometry.isNull() | stf.ST_IsEmpty(geometry), empty_multipoint)
@@ -1627,7 +1629,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             )
             rng = seed
 
-        randomize_per_row = rng is None
+        randomize_per_row = rng is None or isinstance(rng, np.random.Generator)
         engine_seed = _normalize_sample_seed(rng)
 
         has_crs_metadata, metadata_crs = read_crs_metadata(
@@ -1654,7 +1656,8 @@ class GeoSeries(GeoFrame, pspd.Series):
             size_series = size
         elif pd.api.types.is_list_like(size):
             size_series = pspd.Series(
-                [_normalize_sample_size_scalar(value) for value in size]
+                [_normalize_sample_size_scalar(value) for value in size],
+                dtype=np.int64,
             )
         else:
             normalized_size = _normalize_sample_size_scalar(size)
@@ -1672,16 +1675,29 @@ class GeoSeries(GeoFrame, pspd.Series):
                 ).rename("sampled_points")
             )
 
-        if not isinstance(size_series.spark.data_type, IntegralType):
-            raise TypeError("sample size values must be integers")
+        size_type_is_integral = isinstance(size_series.spark.data_type, IntegralType)
 
-        position_col = "__sample_points_position__"
-        left_present_col = "__sample_points_left_present__"
-        right_present_col = "__sample_points_right_present__"
-        right_order_col = "__sample_points_right_order__"
+        reserved_columns = set(self._internal.spark_frame.columns) | set(
+            size_series._internal.spark_frame.columns
+        )
+
+        def temp_column_name(base: str) -> str:
+            suffix = 0
+            candidate = f"__sample_points_{base}__"
+            while candidate in reserved_columns:
+                suffix += 1
+                candidate = f"__sample_points_{base}_{suffix}__"
+            reserved_columns.add(candidate)
+            return candidate
+
+        geometry_value_col = temp_column_name("geometry")
+        size_value_col = temp_column_name("size")
+        position_col = temp_column_name("position")
+        right_present_col = temp_column_name("right_present")
+        right_order_col = temp_column_name("right_order")
 
         left_frame = self._internal.spark_frame.select(
-            self.spark.column.alias("L"),
+            self.spark.column.alias(geometry_value_col),
             *[
                 index_col.alias(index_name)
                 for index_col, index_name in zip(
@@ -1692,10 +1708,9 @@ class GeoSeries(GeoFrame, pspd.Series):
             scol_for(self._internal.spark_frame, NATURAL_ORDER_COLUMN_NAME).alias(
                 NATURAL_ORDER_COLUMN_NAME
             ),
-            F.lit(True).alias(left_present_col),
         )
         right_frame = size_series._internal.spark_frame.select(
-            size_series.spark.column.alias("R"),
+            size_series.spark.column.alias(size_value_col),
             scol_for(
                 size_series._internal.spark_frame,
                 NATURAL_ORDER_COLUMN_NAME,
@@ -1708,16 +1723,28 @@ class GeoSeries(GeoFrame, pspd.Series):
         right_frame = InternalFrame.attach_distributed_sequence_column(
             right_frame.orderBy(right_order_col), position_col
         )
-        aligned_frame = left_frame.join(right_frame, on=position_col, how="outer")
+        # GeoPandas zips geometries with array-like sizes: missing sizes are an
+        # error, while extra sizes are ignored (including for an empty source).
+        aligned_frame = left_frame.join(
+            right_frame, on=position_col, how="left"
+        ).orderBy(position_col)
+
+        size_value = F.col(size_value_col)
+        if not size_type_is_integral:
+            # Keep validation lazy so an empty source follows GeoPandas and
+            # returns empty even when the unused size Series has another dtype.
+            size_value = F.raise_error(
+                F.lit("sample size values must be integers")
+            ).cast("long")
 
         spark_expr = _sample_points_expression(
-            F.col("L"),
-            F.col("R"),
+            F.col(geometry_value_col),
+            size_value,
             seed_column(F.col(NATURAL_ORDER_COLUMN_NAME)),
             fallback_srid,
         )
         spark_expr = F.when(
-            F.col(left_present_col).isNull() | F.col(right_present_col).isNull(),
+            F.col(right_present_col).isNull(),
             F.raise_error(
                 F.lit("Length of sample sizes does not match length of GeoSeries")
             ),

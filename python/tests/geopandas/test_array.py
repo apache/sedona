@@ -24,6 +24,7 @@ from geopandas.testing import assert_geoseries_equal
 
 import sedona.spark.geopandas as sgpd
 from sedona.spark.geopandas import GeoSeries
+from sedona.spark.sql import st_functions as stf
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 
 
@@ -43,11 +44,19 @@ class TestPointsFromXY(TestGeopandasBase):
         assert result.name is None
         assert result.crs == "EPSG:4326"
         assert_geoseries_equal(result.to_geopandas(), expected)
+        srids = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid")
+        ).collect()
+        assert {row.srid for row in srids} == {4326}
 
     def test_points_from_xy_local_3d_broadcast_and_empty(self):
         result = sgpd.points_from_xy([1, 2], [3], [4, 5])
         expected = gpd.GeoSeries(gpd.points_from_xy([1, 2], [3], [4, 5]))
         assert_geoseries_equal(result.to_geopandas(), expected)
+
+        scalar_result = sgpd.points_from_xy(1, [2, 3], 4)
+        scalar_expected = gpd.GeoSeries(gpd.points_from_xy(1, [2, 3], 4))
+        assert_geoseries_equal(scalar_result.to_geopandas(), scalar_expected)
 
         empty = sgpd.points_from_xy([], [], crs="EPSG:3857")
         assert len(empty) == 0
@@ -82,6 +91,10 @@ class TestPointsFromXY(TestGeopandasBase):
 
         assert result.crs == "EPSG:4979"
         assert_geoseries_equal(result.to_geopandas(), expected)
+        srids = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid")
+        ).collect()
+        assert {row.srid for row in srids} == {4979}
 
         spark_frame = result._internal.spark_frame
         if hasattr(spark_frame, "_jdf"):
@@ -89,6 +102,14 @@ class TestPointsFromXY(TestGeopandasBase):
             assert "BatchEvalPython" not in plan
             assert "ArrowEvalPython" not in plan
             assert "PythonUDF" not in plan
+
+        scalar_result = sgpd.points_from_xy(psdf["x"], 10, crs="EPSG:4326")
+        scalar_expected = gpd.GeoSeries(
+            gpd.points_from_xy(pdf["x"], 10, crs="EPSG:4326"),
+            index=index,
+            crs="EPSG:4326",
+        )
+        assert_geoseries_equal(scalar_result.to_geopandas(), scalar_expected)
 
     def test_points_from_xy_null_is_nan_coordinate_not_missing_geometry(self):
         psdf = self.spark.createDataFrame(
@@ -125,13 +146,13 @@ class TestPointsFromXY(TestGeopandasBase):
         assert_geoseries_equal(result.to_geopandas(), expected)
 
     def test_points_from_xy_validates_unsupported_inputs(self):
-        with pytest.raises(TypeError, match="iterable of numeric values"):
-            sgpd.points_from_xy(1, [2])
+        with pytest.raises(TypeError, match="at least one coordinate"):
+            sgpd.points_from_xy(1, 2)
         with pytest.raises(ValueError, match="broadcast-compatible"):
             sgpd.points_from_xy([1, 2], [3, 4, 5])
 
         frame = ps.DataFrame({"x": [1, 2], "y": [3, 4]})
-        with pytest.raises(TypeError, match="must all be pandas-on-Spark Series"):
+        with pytest.raises(TypeError, match="numeric scalar"):
             sgpd.points_from_xy(frame["x"], [3, 4])
         string_frame = ps.DataFrame({"x": [1, 2], "y": ["a", "b"]})
         with pytest.raises(
