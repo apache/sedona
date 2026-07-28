@@ -57,3 +57,5 @@ These functions operate on geography type objects.
 | [ST_DWithin](Geography-Functions/ST_DWithin.md) | Boolean | Test whether two geographies are within a given geodesic distance (in meters) of each other. | v1.9.1 |
 | [ST_Within](Geography-Functions/ST_Within.md) | Boolean | Test whether geography A is fully within geography B. | v1.9.1 |
 | [ST_Equals](Geography-Functions/ST_Equals.md) | Boolean | Test whether two geographies are spatially equal. | v1.9.1 |
+| [ST_X](Geography-Functions/ST_X.md) | Double | Return the longitude (X coordinate) of a point geography. | v1.9.1 |
+| [ST_Y](Geography-Functions/ST_Y.md) | Double | Return the latitude (Y coordinate) of a point geography. | v1.9.1 |

@@ -245,6 +245,34 @@ public class WKBGeography extends Geography {
     return wkbBaseType() == 1;
   }
 
+  /** Returns the X coordinate directly from Point WKB, or null for non-points and empty points. */
+  public Double getPointX() {
+    return getPointOrdinate(0);
+  }
+
+  /** Returns the Y coordinate directly from Point WKB, or null for non-points and empty points. */
+  public Double getPointY() {
+    return getPointOrdinate(1);
+  }
+
+  /**
+   * Reads X or Y directly from the WKB payload. Z/M ordinates are intentionally tolerated and
+   * ignored so these accessors match Geometry ST_X/ST_Y behavior for higher-dimensional points.
+   */
+  private Double getPointOrdinate(int ordinate) {
+    if (!isPoint()) return null;
+
+    boolean le = (wkbBytes[0] == 0x01);
+    int coordOffset = wkbPayloadOffset();
+    ByteBuffer bb =
+        ByteBuffer.wrap(wkbBytes).order(le ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+    double x = bb.getDouble(coordOffset);
+    double y = bb.getDouble(coordOffset + Double.BYTES);
+    // JTS treats a point as empty when either X or Y is NaN.
+    if (Double.isNaN(x) || Double.isNaN(y)) return null;
+    return ordinate == 0 ? x : y;
+  }
+
   /** Extract the S2Point from a Point WKB without full S2 parse. */
   public S2Point extractPoint() {
     requireXYOnly();
