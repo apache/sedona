@@ -4060,13 +4060,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             include_z=include_z,
         )
 
-    def clip(self, mask, keep_geom_type: bool = False, sort=False) -> "GeoSeries":
-        raise NotImplementedError(
-            _not_implemented_error(
-                "clip", "Clips geometries to the bounds of a mask geometry."
-            )
-        )
-
     def to_file(
         self,
         path: str,

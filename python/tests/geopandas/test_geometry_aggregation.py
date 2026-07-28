@@ -22,7 +22,6 @@ import pytest
 import pyspark.pandas as ps
 import shapely
 from packaging.version import parse as parse_version
-from pyspark.sql import DataFrame as SparkDataFrame
 from pyspark.sql import functions as F
 
 try:
@@ -484,7 +483,9 @@ class TestGeometryAggregation(TestGeopandasBase):
     ):
         first_calls = 0
         result_srids = []
-        original_first = SparkDataFrame.first
+        series = GeoSeries(geometries, crs=crs)
+        spark_frame_type = type(series._internal.spark_frame)
+        original_first = spark_frame_type.first
 
         def count_first(frame):
             nonlocal first_calls
@@ -499,9 +500,11 @@ class TestGeometryAggregation(TestGeopandasBase):
             result_srids.append(result["__collect_result_srid__"])
             return result
 
-        monkeypatch.setattr(SparkDataFrame, "first", count_first)
+        # Spark 4 exposes the classic DataFrame as a concrete subclass of
+        # pyspark.sql.DataFrame, so patch the runtime class used by this frame.
+        monkeypatch.setattr(spark_frame_type, "first", count_first)
 
-        collect(GeoSeries(geometries, crs=crs))
+        collect(series)
 
         assert first_calls == 1
         assert result_srids == [expected_srid]
