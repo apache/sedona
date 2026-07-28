@@ -20,6 +20,7 @@ package org.apache.sedona.sql
 
 import org.apache.sedona.common.raster.{RasterConstructors, RasterPredicates}
 import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.functions.{broadcast, expr}
 import org.apache.spark.sql.sedona_sql.strategy.join.{BroadcastIndexJoinExec, DistanceJoinExec, RangeJoinExec}
 import org.geotools.coverage.grid.GridCoverage2D
 import org.locationtech.jts.geom.Geometry
@@ -29,6 +30,8 @@ import org.scalatest.prop.TableDrivenPropertyChecks
 class RasterJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
 
   private val spatialJoinPartitionSideConfKey = "sedona.join.spatitionside"
+  private val missingCrsErrorMessage =
+    "Raster operations require both operands to have a CRS or neither operand to have a CRS"
 
   private val rasters: Seq[(GridCoverage2D, Int)] = Seq(
     // Japan
@@ -43,8 +46,8 @@ class RasterJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     makeRaster(428, 419, 306210, 7840890, 600, 32601),
     // Covering the north pole
     makeRaster(256, 256, -345000.000, 345000.000, 2000, 3996),
-    // Raster without CRS
-    makeRaster(100, 100, 0, 10, 0.1, 0)).zipWithIndex
+    // WGS84 raster
+    makeRaster(100, 100, 0, 10, 0.1, 4326)).zipWithIndex
 
   private val geometries: Seq[(Geometry, Int)] = Seq(
     // Containing the raster in Japan
@@ -85,7 +88,7 @@ class RasterJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     // Within the raster in Europe. EPSG:3035 is in northing/easting axis order.
     makeGeometry("POINT (5484765 4366950)", 3035),
     // The same point in WGS84 lon/lat order
-    makeGeometry("POINT (31.69291306160833 60.778101471493095)", 0),
+    makeGeometry("POINT (31.69291306160833 60.778101471493095)", 4326),
 
     // Intersects with the raster crossing the anti-meridian
     makeGeometry(
@@ -112,14 +115,14 @@ class RasterJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
         |-179.79160719945980418 72.40167640805925942))
         |""".stripMargin,
       4326),
-    // Geometry with SRID = 0 is treated as in WGS84
+    // The same geometry in WGS84
     makeGeometry(
       """Polygon ((-179.79160719945980418 72.40167640805925942,
         |-179.88457658759955393 67.24187536630319073,
         |-177.60682657817568497 67.35808710147787792,
         |-179.79160719945980418 72.40167640805925942))
         |""".stripMargin,
-      0),
+      4326),
 
     // Contains the raster crossing the anti-meridian
     makeGeometry(
@@ -161,8 +164,8 @@ class RasterJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
         |14135017.69104760140180588 21873587.49849328026175499))""".stripMargin,
       3857),
 
-    // Within the raster with no CRS
-    makeGeometry("""Point (5 5)""", 0)).zipWithIndex
+    // Within the WGS84 raster
+    makeGeometry("""Point (5 5)""", 4326)).zipWithIndex
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -246,6 +249,177 @@ class RasterJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     }
   }
 
+  describe("raster join CRS validation") {
+    def rasterWithCrs: DataFrame = {
+      import sparkSession.implicits._
+      // Deliberately outside the canonical WGS84 box so coarse pruning cannot hide validation.
+      Seq((makeRaster(1, 1, 1000, 2000, 1, 4326), 0)).toDF("rast", "id")
+    }
+
+    def rasterWithoutCrs: DataFrame = {
+      import sparkSession.implicits._
+      Seq((makeRaster(1, 1, 0, 1, 1, 0), 0)).toDF("rast", "id")
+    }
+
+    def geometryWithCrs: DataFrame = {
+      import sparkSession.implicits._
+      // Deliberately outside the canonical WGS84 box so coarse pruning cannot hide validation.
+      Seq((makeGeometry("POINT (1000 2000)", 4326), 0)).toDF("geom", "id")
+    }
+
+    def geometryWithoutCrs: DataFrame = {
+      import sparkSession.implicits._
+      Seq((makeGeometry("POINT (0.5 0.5)", 0), 0)).toDF("geom", "id")
+    }
+
+    def emptyGeometryWithCrs: DataFrame = {
+      import sparkSession.implicits._
+      Seq((makeGeometry("GEOMETRYCOLLECTION EMPTY", 4326), 0)).toDF("geom", "id")
+    }
+
+    def geometryWithUnknownSrid: DataFrame = {
+      import sparkSession.implicits._
+      Seq((makeGeometry("POINT (0.5 0.5)", 999999), 0)).toDF("geom", "id")
+    }
+
+    it("allows a join when neither operand has a CRS") {
+      import sparkSession.implicits._
+      val geometriesWithoutCrs = Seq(
+        (makeGeometry("POINT (0.5 0.5)", 0), 0),
+        (makeGeometry("POINT (2 2)", 0), 1)).toDF("geom", "id")
+
+      val result = rasterWithoutCrs
+        .alias("r")
+        .join(geometriesWithoutCrs.alias("g"), expr("RS_Intersects(r.rast, g.geom)"))
+        .selectExpr("g.id")
+
+      assertOptimizedRasterJoin(result)
+      assert(result.collect().map(_.getInt(0)).toSeq == Seq(0))
+    }
+
+    it("errors for a disjoint defined raster and CRS-less geometry") {
+      withConf(Map("sedona.join.autoBroadcastJoinThreshold" -> "-1")) {
+        Seq("RS_Intersects", "RS_Contains", "RS_Within").foreach { predicate =>
+          val result = rasterWithCrs
+            .alias("r")
+            .join(geometryWithoutCrs.alias("g"), expr(s"$predicate(r.rast, g.geom)"))
+
+          withClue(s"$predicate: ") {
+            assertOneSidedCrsFailure(result)
+          }
+        }
+      }
+    }
+
+    it("errors for a disjoint CRS-less raster and defined geometry") {
+      withConf(Map("sedona.join.autoBroadcastJoinThreshold" -> "-1")) {
+        Seq("RS_Intersects", "RS_Contains", "RS_Within").foreach { predicate =>
+          val result = rasterWithoutCrs
+            .alias("r")
+            .join(geometryWithCrs.alias("g"), expr(s"$predicate(r.rast, g.geom)"))
+
+          withClue(s"$predicate: ") {
+            assertOneSidedCrsFailure(result)
+          }
+        }
+      }
+    }
+
+    it("errors with either side broadcast") {
+      Seq("RS_Intersects", "RS_Contains", "RS_Within").foreach { predicate =>
+        val crslessGeometryBroadcast = rasterWithCrs
+          .alias("r")
+          .join(broadcast(geometryWithoutCrs).alias("g"), expr(s"$predicate(r.rast, g.geom)"))
+        withClue(s"$predicate with CRS-less geometry broadcast: ") {
+          assertOneSidedCrsFailure(crslessGeometryBroadcast)
+        }
+
+        val definedRasterBroadcast = broadcast(rasterWithCrs)
+          .alias("r")
+          .join(geometryWithoutCrs.alias("g"), expr(s"$predicate(r.rast, g.geom)"))
+        withClue(s"$predicate with defined raster broadcast: ") {
+          assertOneSidedCrsFailure(definedRasterBroadcast)
+        }
+
+        val crslessRasterBroadcast = broadcast(rasterWithoutCrs)
+          .alias("r")
+          .join(geometryWithCrs.alias("g"), expr(s"$predicate(r.rast, g.geom)"))
+        withClue(s"$predicate with CRS-less raster broadcast: ") {
+          assertOneSidedCrsFailure(crslessRasterBroadcast)
+        }
+
+        val definedGeometryBroadcast = rasterWithoutCrs
+          .alias("r")
+          .join(broadcast(geometryWithCrs).alias("g"), expr(s"$predicate(r.rast, g.geom)"))
+        withClue(s"$predicate with defined geometry broadcast: ") {
+          assertOneSidedCrsFailure(definedGeometryBroadcast)
+        }
+      }
+    }
+
+    it("errors for a disjoint one-sided-CRS raster-raster join") {
+      withConf(Map("sedona.join.autoBroadcastJoinThreshold" -> "-1")) {
+        Seq("RS_Intersects", "RS_Contains", "RS_Within").foreach { predicate =>
+          val result = rasterWithCrs
+            .alias("left")
+            .join(rasterWithoutCrs.alias("right"), expr(s"$predicate(left.rast, right.rast)"))
+
+          withClue(s"$predicate: ") {
+            assertOneSidedCrsFailure(result)
+          }
+        }
+      }
+    }
+
+    it("errors before a defined empty geometry can be pruned") {
+      Seq("RS_Intersects", "RS_Contains", "RS_Within").foreach { predicate =>
+        withConf(Map("sedona.join.autoBroadcastJoinThreshold" -> "-1")) {
+          val rangeJoin = rasterWithoutCrs
+            .alias("r")
+            .join(emptyGeometryWithCrs.alias("g"), expr(s"$predicate(r.rast, g.geom)"))
+          withClue(s"$predicate range join: ") {
+            assertOneSidedCrsFailure(rangeJoin)
+          }
+        }
+
+        val geometryBroadcast = rasterWithoutCrs
+          .alias("r")
+          .join(broadcast(emptyGeometryWithCrs).alias("g"), expr(s"$predicate(r.rast, g.geom)"))
+        withClue(s"$predicate with empty geometry broadcast: ") {
+          assertOneSidedCrsFailure(geometryBroadcast)
+        }
+
+        val rasterBroadcast = broadcast(rasterWithoutCrs)
+          .alias("r")
+          .join(emptyGeometryWithCrs.alias("g"), expr(s"$predicate(r.rast, g.geom)"))
+        withClue(s"$predicate with raster broadcast: ") {
+          assertOneSidedCrsFailure(rasterBroadcast)
+        }
+      }
+    }
+
+    it("defers unknown SRID decoding to scalar CRS validation") {
+      withConf(Map("sedona.join.autoBroadcastJoinThreshold" -> "-1")) {
+        val rangeJoin = rasterWithoutCrs
+          .alias("r")
+          .join(geometryWithUnknownSrid.alias("g"), expr("RS_Intersects(r.rast, g.geom)"))
+        assertOneSidedCrsFailure(rangeJoin)
+      }
+
+      val geometryBroadcast = rasterWithoutCrs
+        .alias("r")
+        .join(
+          broadcast(geometryWithUnknownSrid).alias("g"),
+          expr("RS_Intersects(r.rast, g.geom)"))
+      assertOneSidedCrsFailure(geometryBroadcast)
+
+      val rasterBroadcast = broadcast(rasterWithoutCrs)
+        .alias("r")
+        .join(geometryWithUnknownSrid.alias("g"), expr("RS_Intersects(r.rast, g.geom)"))
+      assertOneSidedCrsFailure(rasterBroadcast)
+    }
+  }
+
   private def prepareTempViewsForTestData(): Unit = {
     import sparkSession.implicits._
     rasters.toDF("rast", "id").createOrReplaceTempView("df1")
@@ -307,6 +481,28 @@ class RasterJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
     assert(actual === expected)
   }
 
+  private def assertOneSidedCrsFailure(result: DataFrame): Unit = {
+    assertOptimizedRasterJoin(result)
+    val exception = intercept[Exception] {
+      result.collect()
+    }
+    val illegalArgument = Iterator
+      .iterate(exception: Throwable)(_.getCause)
+      .takeWhile(_ != null)
+      .find(_.isInstanceOf[IllegalArgumentException])
+    assert(
+      illegalArgument.exists(_.getMessage == missingCrsErrorMessage),
+      s"Expected missing-CRS IllegalArgumentException in cause chain, got: $exception")
+  }
+
+  private def assertOptimizedRasterJoin(result: DataFrame): Unit = {
+    assert(
+      result.queryExecution.executedPlan.collect {
+        case _: BroadcastIndexJoinExec | _: RangeJoinExec => true
+      }.nonEmpty,
+      s"Expected an optimized raster join, got:\n${result.queryExecution.executedPlan}")
+  }
+
   private def isUsingOptimizedSpatialJoin(df: DataFrame): Boolean = {
     df.queryExecution.executedPlan.collect {
       case _: BroadcastIndexJoinExec | _: RangeJoinExec | _: DistanceJoinExec =>
@@ -316,10 +512,10 @@ class RasterJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
 
   describe("RS_DWithin distance join") {
     // Reuse the shared `rasters` / `geometries` set used by the RS_Intersects table above so the
-    // distance-join path is exercised against the same polar / antimeridian-crossing / no-CRS
-    // inputs. The world-envelope fallback in `TraitJoinQueryBase.expandRasterFilterEnvelope`
-    // guarantees the R-tree filter never excludes a pair that the per-row S2 predicate would
-    // match for those footprints.
+    // distance-join path is exercised against the same polar and antimeridian-crossing inputs.
+    // The world-envelope fallback in `TraitJoinQueryBase.expandRasterFilterEnvelope` guarantees
+    // the R-tree filter never excludes a pair that the per-row S2 predicate would match for those
+    // footprints.
     val testDistance = 100000.0
 
     def expectedDWithinPairs: Seq[(Int, Int)] =

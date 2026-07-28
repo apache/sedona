@@ -21,6 +21,8 @@
 
 Introduction: Returns the X coordinate of the grid coordinate of the given world coordinates as an integer.
 
+For the geometry variant, if neither `raster` nor `point` has a defined CRS, their coordinates are used directly. If exactly one input has a defined CRS, the function throws an error. If both inputs have the same CRS, their coordinates are used directly. Otherwise, `point` is transformed to the CRS of `raster`. Numeric world coordinates are always interpreted in the raster's coordinate space.
+
 ![RS_WorldToRasterCoordX](../../../image/RS_WorldToRasterCoordX/RS_WorldToRasterCoordX.svg "RS_WorldToRasterCoordX")
 
 Format:

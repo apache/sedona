@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import javax.media.jai.RasterFactory;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.geometry.BoundingBox;
@@ -50,7 +51,10 @@ public class Rasterization {
     // Validate the input geometry and raster metadata
     double[] metadata = RasterAccessors.metadata(raster);
     validateRasterMetadata(metadata);
-    if (!RasterPredicates.rsIntersects(raster, geom)) {
+    Pair<GridCoverage2D, Geometry> pair = RasterUtils.transformToRasterCRS(raster, geom);
+    raster = pair.getLeft();
+    geom = pair.getRight();
+    if (!RasterPredicates.intersectsInRasterCoordinateSpace(raster, geom)) {
       throw new IllegalArgumentException("Geometry does not intersect Raster.");
     }
 

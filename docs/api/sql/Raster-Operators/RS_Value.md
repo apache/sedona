@@ -22,7 +22,7 @@
 Introduction: Returns the value at the given point in the raster. If no band number is specified it defaults to 1.
 
 !!!Note
-    Since `v1.5.1`, if the coordinate reference system (CRS) of the input `point` geometry differs from that of the `raster`, then `point` will be transformed to match the CRS of the `raster`. If the `raster` or `point` doesn't have a CRS then it will default to `4326/WGS84`.
+    For the geometry variant, if neither `raster` nor `point` has a defined CRS, their coordinates are used directly. If exactly one input has a defined CRS, the function throws an error. If both inputs have the same CRS, their coordinates are used directly. Otherwise, `point` is transformed to the CRS of `raster`.
 
 Format:
 

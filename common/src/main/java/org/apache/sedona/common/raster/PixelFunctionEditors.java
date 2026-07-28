@@ -23,7 +23,6 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import javax.media.jai.RasterFactory;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
@@ -134,10 +133,6 @@ public class PixelFunctionEditors {
       boolean keepNoData)
       throws FactoryException, TransformException {
     RasterUtils.ensureBand(raster, band);
-
-    Pair<GridCoverage2D, Geometry> pair = RasterUtils.setDefaultCRSAndTransform(raster, geom);
-    raster = pair.getLeft();
-    geom = pair.getRight();
 
     // checking if the raster contains the geometry
     if (!RasterPredicates.rsIntersects(raster, geom)) {

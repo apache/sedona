@@ -28,6 +28,7 @@ import static org.junit.Assert.assertEquals;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.raster.MapAlgebra;
 import org.apache.sedona.common.raster.RasterAccessors;
 import org.apache.sedona.common.raster.RasterConstructors;
@@ -148,6 +149,43 @@ public class RasterUtilsTest {
     Assert.assertEquals(2, band3.getCategories().size());
     Assert.assertEquals("GrayScale", band3.getCategory(100).getName().toString());
     Assert.assertEquals("GrayScale", band3.getCategory(199.999).getName().toString());
+  }
+
+  @Test
+  public void testTransformToRasterCRSContract() throws FactoryException {
+    GridCoverage2D rasterWithoutCRS =
+        RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 5, 1, -1, 0, 0, 0);
+    Geometry geometryWithoutCRS = geomFromWKT("POINT (1 1)");
+
+    Pair<GridCoverage2D, Geometry> pair =
+        RasterUtils.transformToRasterCRS(rasterWithoutCRS, geometryWithoutCRS);
+    Assert.assertSame(rasterWithoutCRS, pair.getLeft());
+    Assert.assertSame(geometryWithoutCRS, pair.getRight());
+
+    GridCoverage2D rasterWithCRS =
+        RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 5, 1, -1, 0, 0, 4326);
+    IllegalArgumentException exception =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterUtils.transformToRasterCRS(rasterWithCRS, geometryWithoutCRS));
+    assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
+
+    Geometry geometryWithCRS = setSRID(geomFromWKT("POINT (1 1)"), 4326);
+    exception =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterUtils.transformToRasterCRS(rasterWithoutCRS, geometryWithCRS));
+    assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
+
+    pair = RasterUtils.transformToRasterCRS(rasterWithCRS, geometryWithCRS);
+    Assert.assertSame(geometryWithCRS, pair.getRight());
+
+    Geometry webMercatorPoint =
+        setSRID(geomFromWKT("POINT (111319.49079327357 111325.1428663851)"), 3857);
+    pair = RasterUtils.transformToRasterCRS(rasterWithCRS, webMercatorPoint);
+    assertEquals(4326, pair.getRight().getSRID());
+    assertEquals(1, pair.getRight().getCoordinate().x, 1e-6);
+    assertEquals(1, pair.getRight().getCoordinate().y, 1e-6);
   }
 
   @Test

@@ -221,7 +221,7 @@ public class RasterAccessors {
   public static Geometry getGridCoord(GridCoverage2D raster, Geometry point)
       throws TransformException {
     ensurePoint(point);
-    point = RasterUtils.convertCRSIfNeeded(point, raster.getCoordinateReferenceSystem2D());
+    point = RasterUtils.transformToRasterCRS(raster, point).getRight();
     Point actualPoint = (Point) point;
     return getGridCoord(raster, actualPoint.getX(), actualPoint.getY());
   }
@@ -233,7 +233,7 @@ public class RasterAccessors {
 
   public static int getGridCoordX(GridCoverage2D raster, Geometry point) throws TransformException {
     ensurePoint(point);
-    point = RasterUtils.convertCRSIfNeeded(point, raster.getCoordinateReferenceSystem2D());
+    point = RasterUtils.transformToRasterCRS(raster, point).getRight();
     Point actualPoint = (Point) point;
     return getGridCoordX(raster, actualPoint.getX(), actualPoint.getY());
   }
@@ -245,7 +245,7 @@ public class RasterAccessors {
 
   public static int getGridCoordY(GridCoverage2D raster, Geometry point) throws TransformException {
     ensurePoint(point);
-    point = RasterUtils.convertCRSIfNeeded(point, raster.getCoordinateReferenceSystem2D());
+    point = RasterUtils.transformToRasterCRS(raster, point).getRight();
     Point actualPoint = (Point) point;
     return getGridCoordY(raster, actualPoint.getX(), actualPoint.getY());
   }

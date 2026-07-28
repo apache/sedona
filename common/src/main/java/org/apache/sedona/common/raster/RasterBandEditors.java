@@ -25,7 +25,6 @@ import java.awt.image.WritableRaster;
 import java.util.Collections;
 import javax.media.jai.RasterFactory;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.parameter.ParameterValueGroup;
 import org.geotools.api.referencing.FactoryException;
@@ -338,8 +337,6 @@ public class RasterBandEditors {
 
     // Selecting the band from original raster
     RasterUtils.ensureBand(raster, band);
-    Pair<GridCoverage2D, Geometry> pair = RasterUtils.setDefaultCRSAndTransform(raster, geometry);
-    geometry = pair.getRight();
 
     double[] rasterMetadata = RasterAccessors.metadata(raster);
     int rasterWidth = (int) rasterMetadata[2], rasterHeight = (int) rasterMetadata[3];

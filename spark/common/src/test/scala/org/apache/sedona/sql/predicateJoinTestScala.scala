@@ -42,7 +42,8 @@ class predicateJoinTestScala extends TestBaseScala {
         .load(buildingDataLocation)
       polygonCsvDf.createOrReplaceTempView("polygontable")
       val polygonDf =
-        sparkSession.sql("SELECT ST_GeomFromWKT(geometry) as building from polygontable")
+        sparkSession.sql(
+          "SELECT ST_SetSRID(ST_GeomFromWKT(geometry), 4326) as building from polygontable")
       polygonDf.createOrReplaceTempView("polygondf")
 
       val rasterDf = sparkSession.read
@@ -70,7 +71,7 @@ class predicateJoinTestScala extends TestBaseScala {
         .load(buildingDataLocation)
       polygonCsvDf.createOrReplaceTempView("polygontable")
       val polygonDf = sparkSession.sql(
-        "SELECT ST_GeomFromWKT(geometry) as building from polygontable where confidence > 0.85")
+        "SELECT ST_SetSRID(ST_GeomFromWKT(geometry), 4326) as building from polygontable where confidence > 0.85")
       polygonDf.createOrReplaceTempView("polygondf")
 
       val rasterDf = sparkSession.read

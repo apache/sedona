@@ -29,6 +29,13 @@ Introduction: `RS_AsRaster` converts a vector geometry into a raster dataset by 
 * `noDataValue`: Used for assigning the no data value of the resultant raster. Defaults to `null` if not provided.
 * `useGeometryExtent`: Defines the extent of the resultant raster. When set to `true`, it corresponds to the extent of `geom`, and when set to false, it corresponds to the extent of `raster`. Default value is `true` if not set.
 
+CRS handling:
+
+- If neither `raster` nor `geom` has a defined CRS, their coordinates are used directly.
+- If exactly one input has a defined CRS, the function throws an error.
+- If both inputs have the same CRS, their coordinates are used directly.
+- Otherwise, `geom` is transformed to the CRS of `raster`.
+
 Format:
 
 ```
@@ -70,7 +77,7 @@ SQL Example
 
 ```sql
 SELECT RS_AsRaster(
-        ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))'),
+        ST_SetSRID(ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))'), 4326),
         RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326),
         'D', false, 255.0, 0d
     )
@@ -86,7 +93,7 @@ SQL Example
 
 ```sql
 SELECT RS_AsRaster(
-        ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))'),
+        ST_SetSRID(ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))'), 4326),
         RS_MakeEmptyRaster(2, 255, 255, 3, -215, 2, -2, 0, 0, 4326),
         'D'
     )

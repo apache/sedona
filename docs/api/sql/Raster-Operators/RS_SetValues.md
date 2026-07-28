@@ -25,7 +25,7 @@ of the rectangular region. The new values to be assigned to the pixels in this r
 to this function.
 
 !!!Note
-    Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`.
+    For the geometry variant, if neither `raster` nor `geom` has a defined CRS, their coordinates are used directly. If exactly one input has a defined CRS, the function throws an error. If both inputs have the same CRS, their coordinates are used directly. Otherwise, `geom` is transformed to the CRS of `raster`.
 
 Format without ROI `geom`:
 

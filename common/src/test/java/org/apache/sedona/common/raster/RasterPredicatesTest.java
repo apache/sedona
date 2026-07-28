@@ -19,7 +19,6 @@
 package org.apache.sedona.common.raster;
 
 import java.awt.image.DataBuffer;
-import java.io.IOException;
 import org.geotools.api.geometry.BoundingBox;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
@@ -30,6 +29,7 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -39,11 +39,19 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
 public class RasterPredicatesTest extends RasterTestBase {
+  private static final String MISSING_CRS_ERROR_MESSAGE =
+      "Raster operations require both operands to have a CRS or neither operand to have a CRS";
   private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
+
+  private static void assertMissingCrsError(ThrowingRunnable predicate) {
+    IllegalArgumentException exception =
+        Assert.assertThrows(IllegalArgumentException.class, predicate);
+    Assert.assertEquals(MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
+  }
 
   @Test
   public void testIntersectsNoCrs() {
-    // Both sides are assumed to be in WGS84
+    // When neither side has a CRS, compare them directly in their shared coordinate space.
     Geometry queryWindow = GEOMETRY_FACTORY.toGeometry(new Envelope(0, 10, 0, 10));
     GridCoverage2D raster = createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 0, 100, 1, 1, null);
     boolean result = RasterPredicates.rsIntersects(raster, queryWindow);
@@ -55,26 +63,10 @@ public class RasterPredicatesTest extends RasterTestBase {
 
   @Test
   public void testIntersectsQueryWindowNoCrs() {
-    // Raster is in WGS84, query window is assumed to be in WGS84, no CRS transformation needed
     Geometry queryWindow = GEOMETRY_FACTORY.toGeometry(new Envelope(0, 10, 0, 10));
     GridCoverage2D raster =
         createRandomRaster(DataBuffer.TYPE_BYTE, 100, 100, 0, 100, 1, 1, "EPSG:4326");
-    boolean result = RasterPredicates.rsIntersects(raster, queryWindow);
-    Assert.assertTrue(result);
-    queryWindow = GEOMETRY_FACTORY.toGeometry(new Envelope(1000, 1010, 1000, 1010));
-    result = RasterPredicates.rsIntersects(raster, queryWindow);
-    Assert.assertFalse(result);
-
-    // Raster is not in WGS84, need to transform raster to WGS84, while the query window is assumed
-    // to be in WGS84
-    raster =
-        createRandomRaster(DataBuffer.TYPE_BYTE, 751, 742, 332597, 4256477, 300, 1, "EPSG:32610");
-    queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(-123.663, 37.455));
-    Assert.assertTrue(RasterPredicates.rsIntersects(raster, queryWindow));
-    queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(-120.940, 35.801));
-    Assert.assertFalse(RasterPredicates.rsIntersects(raster, queryWindow));
-    queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(431587, 4150960));
-    Assert.assertFalse(RasterPredicates.rsIntersects(raster, queryWindow));
+    assertMissingCrsError(() -> RasterPredicates.rsIntersects(raster, queryWindow));
   }
 
   @Test
@@ -82,25 +74,7 @@ public class RasterPredicatesTest extends RasterTestBase {
     Geometry queryWindow = GEOMETRY_FACTORY.toGeometry(new Envelope(0, 10, 0, 10));
     queryWindow.setSRID(3857);
     GridCoverage2D raster = createRandomRaster(DataBuffer.TYPE_BYTE, 10, 10, 0, 10, 1, 1, null);
-    boolean result = RasterPredicates.rsIntersects(raster, queryWindow);
-    Assert.assertTrue(result);
-    queryWindow = GEOMETRY_FACTORY.toGeometry(new Envelope(1000, 1010, 1000, 1010));
-    queryWindow.setSRID(3857);
-    result = RasterPredicates.rsIntersects(raster, queryWindow);
-    Assert.assertTrue(result);
-    queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(1740120, 1390880));
-    queryWindow.setSRID(3857);
-    result = RasterPredicates.rsIntersects(raster, queryWindow);
-    Assert.assertFalse(result);
-
-    queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(5, 5));
-    queryWindow.setSRID(4326);
-    result = RasterPredicates.rsIntersects(raster, queryWindow);
-    Assert.assertTrue(result);
-    queryWindow = GEOMETRY_FACTORY.createPoint(new Coordinate(11, 11));
-    queryWindow.setSRID(4326);
-    result = RasterPredicates.rsIntersects(raster, queryWindow);
-    Assert.assertFalse(result);
+    assertMissingCrsError(() -> RasterPredicates.rsIntersects(raster, queryWindow));
   }
 
   @Test
@@ -263,37 +237,15 @@ public class RasterPredicatesTest extends RasterTestBase {
   public void testContainsGeomNoCrs() throws FactoryException {
     Geometry geometry = GEOMETRY_FACTORY.toGeometry(new Envelope(5, 10, 5, 10));
     GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 20, 20, 2, 22, 1, -1, 0, 0, 4326);
-    boolean result = RasterPredicates.rsContains(raster, geometry);
-    Assert.assertTrue(result);
-
-    // overlapping raster and geometry;
-    geometry = GEOMETRY_FACTORY.toGeometry(new Envelope(2, 22, 2, 22));
-    result = RasterPredicates.rsContains(raster, geometry);
-    Assert.assertTrue(result);
-
-    // geometry protruding out of the raster envelope
-    geometry = GEOMETRY_FACTORY.toGeometry(new Envelope(2, 20, 2, 25));
-    result = RasterPredicates.rsContains(raster, geometry);
-    Assert.assertFalse(result);
+    assertMissingCrsError(() -> RasterPredicates.rsContains(raster, geometry));
   }
 
   @Test
-  public void testContainsRasterNoCrs() throws FactoryException, ParseException, IOException {
+  public void testContainsRasterNoCrs() throws FactoryException {
     GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
     Geometry geometry = geometryFactory.toGeometry(new Envelope(5, 10, 5, 10));
     GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 20, 20, 2, 22, 1);
-    boolean result = RasterPredicates.rsContains(raster, geometry);
-    Assert.assertTrue(result);
-
-    // overlapping raster and geometry;
-    geometry = geometryFactory.toGeometry(new Envelope(2, 22, 2, 22));
-    result = RasterPredicates.rsContains(raster, geometry);
-    Assert.assertTrue(result);
-
-    // geometry protruding out of the raster envelope
-    geometry = geometryFactory.toGeometry(new Envelope(2, 20, 2, 25));
-    result = RasterPredicates.rsContains(raster, geometry);
-    Assert.assertFalse(result);
+    assertMissingCrsError(() -> RasterPredicates.rsContains(raster, geometry));
   }
 
   @Test
@@ -357,18 +309,7 @@ public class RasterPredicatesTest extends RasterTestBase {
   public void testWithinGeomNoCrs() throws FactoryException {
     Geometry geometry = GEOMETRY_FACTORY.toGeometry(new Envelope(0, 100, 0, 50));
     GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 20, 20, 2, 22, 1, -1, 0, 0, 3857);
-    boolean result = RasterPredicates.rsWithin(raster, geometry);
-    Assert.assertTrue(result);
-
-    // overlapping raster and geometry;
-    raster = RasterConstructors.makeEmptyRaster(1, 100, 50, 0, 50, 1, -1, 0, 0, 3857);
-    result = RasterPredicates.rsWithin(raster, geometry);
-    Assert.assertTrue(result);
-
-    // raster protruding out of the geometry
-    raster = RasterConstructors.makeEmptyRaster(1, 100, 100, 0, 50, 1, -1, 0, 0, 3857);
-    result = RasterPredicates.rsWithin(raster, geometry);
-    Assert.assertFalse(result);
+    assertMissingCrsError(() -> RasterPredicates.rsWithin(raster, geometry));
   }
 
   @Test
@@ -376,18 +317,7 @@ public class RasterPredicatesTest extends RasterTestBase {
     GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
     Geometry geometry = geometryFactory.toGeometry(new Envelope(0, 100, 0, 50));
     GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 20, 20, 2, 22, 1);
-    boolean result = RasterPredicates.rsWithin(raster, geometry);
-    Assert.assertTrue(result);
-
-    // overlapping raster and geometry;
-    raster = RasterConstructors.makeEmptyRaster(1, 100, 50, 0, 50, 1);
-    result = RasterPredicates.rsWithin(raster, geometry);
-    Assert.assertTrue(result);
-
-    // raster protruding out of the geometry
-    raster = RasterConstructors.makeEmptyRaster(1, 100, 100, 0, 50, 1);
-    result = RasterPredicates.rsWithin(raster, geometry);
-    Assert.assertFalse(result);
+    assertMissingCrsError(() -> RasterPredicates.rsWithin(raster, geometry));
   }
 
   @Test
@@ -472,22 +402,29 @@ public class RasterPredicatesTest extends RasterTestBase {
 
   @Test
   public void testRasterRasterPredicatesNoCrs() throws FactoryException {
-    GridCoverage2D raster1 =
-        RasterConstructors.makeEmptyRaster(
-            1, "B", 428, 419, 306210, 7840890, 600, -600, 0, 0, 32601);
-    GridCoverage2D raster2 =
-        RasterConstructors.makeEmptyRaster(1, "B", 100, 100, -179.3542, 70.0634, 0.01);
-    GridCoverage2D raster3 =
-        RasterConstructors.makeEmptyRaster(1, "B", 100, 100, -175.8738, 69.7670, 0.01);
+    GridCoverage2D outer = RasterConstructors.makeEmptyRaster(1, "B", 20, 20, 0, 20, 1);
+    GridCoverage2D inner = RasterConstructors.makeEmptyRaster(1, "B", 10, 10, 5, 15, 1);
+    GridCoverage2D disjoint = RasterConstructors.makeEmptyRaster(1, "B", 10, 10, 100, 110, 1);
 
-    Assert.assertTrue(RasterPredicates.rsIntersects(raster1, raster2));
-    Assert.assertTrue(RasterPredicates.rsIntersects(raster2, raster1));
-    Assert.assertTrue(RasterPredicates.rsIntersects(raster1, raster3));
-    Assert.assertTrue(RasterPredicates.rsIntersects(raster3, raster1));
-    Assert.assertTrue(RasterPredicates.rsContains(raster1, raster2));
-    Assert.assertFalse(RasterPredicates.rsContains(raster2, raster1));
-    Assert.assertFalse(RasterPredicates.rsIntersects(raster2, raster3));
-    Assert.assertFalse(RasterPredicates.rsIntersects(raster3, raster2));
+    // With neither CRS defined, predicates compare the footprints directly.
+    Assert.assertTrue(RasterPredicates.rsIntersects(outer, inner));
+    Assert.assertTrue(RasterPredicates.rsIntersects(inner, outer));
+    Assert.assertTrue(RasterPredicates.rsContains(outer, inner));
+    Assert.assertFalse(RasterPredicates.rsContains(inner, outer));
+    Assert.assertFalse(RasterPredicates.rsIntersects(outer, disjoint));
+    Assert.assertFalse(RasterPredicates.rsIntersects(disjoint, outer));
+  }
+
+  @Test
+  public void testRasterRasterPredicatesOneCrsMissing() throws FactoryException {
+    GridCoverage2D withCrs =
+        RasterConstructors.makeEmptyRaster(1, "B", 20, 20, 0, 20, 1, -1, 0, 0, 4326);
+    GridCoverage2D withoutCrs = RasterConstructors.makeEmptyRaster(1, "B", 10, 10, 5, 15, 1);
+
+    assertMissingCrsError(() -> RasterPredicates.rsIntersects(withCrs, withoutCrs));
+    assertMissingCrsError(() -> RasterPredicates.rsIntersects(withoutCrs, withCrs));
+    assertMissingCrsError(() -> RasterPredicates.rsContains(withCrs, withoutCrs));
+    assertMissingCrsError(() -> RasterPredicates.rsContains(withoutCrs, withCrs));
   }
 
   @Test

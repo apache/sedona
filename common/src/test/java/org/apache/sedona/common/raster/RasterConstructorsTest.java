@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.coverage.SampleDimensionType;
 import org.geotools.api.geometry.Position;
@@ -87,7 +88,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     GridCoverage2D raster_bottom_up = flipVerticallyPixelSpace(raster);
 
     Geometry geom =
-        Constructors.geomFromWKT("POLYGON((15 -15, 18 -20, 15 -24, 24 -25, 15 -15))", 0);
+        Constructors.geomFromWKT("POLYGON((15 -15, 18 -20, 15 -24, 24 -25, 15 -15))", 4326);
     GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", true, 3093151, 0d);
 
     double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
@@ -132,7 +133,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     geom =
         Constructors.geomFromWKT(
             "MULTIPOLYGON ( ((2 -2, 4 -2, 4 -4, 2 -4, 2 -2)), ((4 -4, 6 -4, 6 -6, 5 -7, 4 -6, 4 -4)), ((6 -6, 8 -6, 8 -8, 6 -8, 6 -6)), ((8 -6, 10 -6, 10 -4, 9 -3, 8 -4, 8 -6)) )",
-            0);
+            4326);
 
     rasterized = RasterConstructors.asRaster(geom, raster, "d", true, 3093151, 0d, true);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
@@ -173,7 +174,8 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     // MultiLineString
     geom =
-        Constructors.geomFromWKT("MULTILINESTRING ((5 -5, 10 -10), (10 -10, 15 -15, 20 -20))", 0);
+        Constructors.geomFromWKT(
+            "MULTILINESTRING ((5 -5, 10 -10), (10 -10, 15 -15, 20 -20))", 4326);
     rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 0d);
 
     actual = MapAlgebra.bandAsArray(rasterized, 1);
@@ -246,7 +248,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     assertArrayEquals(expected, actual, 0.1d);
 
     // LinearRing
-    geom = Constructors.geomFromWKT("LINEARRING (10 -10, 18 -20, 15 -24, 24 -25, 10 -10)", 0);
+    geom = Constructors.geomFromWKT("LINEARRING (10 -10, 18 -20, 15 -24, 24 -25, 10 -10)", 4326);
     rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 0d);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
 
@@ -316,7 +318,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     assertArrayEquals(expected, actual, 0.1d);
 
     // MultiPoints
-    geom = Constructors.geomFromWKT("MULTIPOINT ((5 -5), (10 -10), (15 -15))", 0);
+    geom = Constructors.geomFromWKT("MULTIPOINT ((5 -5), (10 -10), (15 -15))", 4326);
     rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 0d);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
 
@@ -366,7 +368,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     assertArrayEquals(expected, actual, 0.1d);
 
     // Point
-    geom = Constructors.geomFromWKT("POINT (5 -5)", 0);
+    geom = Constructors.geomFromWKT("POINT (5 -5)", 4326);
     rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 0d);
 
     actual = MapAlgebra.bandAsArray(rasterized, 1);
@@ -388,6 +390,46 @@ public class RasterConstructorsTest extends RasterTestBase {
     rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d");
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     assertArrayEquals(expected, actual, 0.1d);
+  }
+
+  @Test
+  public void testAsRasterRejectsOneSidedCRS() throws FactoryException, ParseException {
+    GridCoverage2D rasterWithCRS =
+        RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 5, 1, -1, 0, 0, 4326);
+    Geometry geometryWithoutCRS = Constructors.geomFromWKT("POLYGON((1 1, 1 2, 2 2, 2 1, 1 1))", 0);
+
+    IllegalArgumentException exception =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geometryWithoutCRS, rasterWithCRS, "d"));
+    assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
+
+    GridCoverage2D rasterWithoutCRS =
+        RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 5, 1, -1, 0, 0, 0);
+    Geometry geometryWithCRS = Constructors.geomFromWKT("POLYGON((1 1, 1 2, 2 2, 2 1, 1 1))", 4326);
+
+    exception =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geometryWithCRS, rasterWithoutCRS, "d"));
+    assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
+  }
+
+  @Test
+  public void testAsRasterTransformsGeometryToRasterCRS()
+      throws FactoryException, ParseException, TransformException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 5, 1, -1, 0, 0, 4326);
+    Geometry geometry =
+        Constructors.geomFromWKT("POLYGON ((1.2 1.2, 1.2 2.8, 2.8 2.8, 2.8 1.2, 1.2 1.2))", 4326);
+    Geometry transformedGeometry = FunctionsGeoTools.transform(geometry, "EPSG:4326", "EPSG:3857");
+    transformedGeometry.setSRID(3857);
+
+    GridCoverage2D expected =
+        RasterConstructors.asRaster(geometry, raster, "d", false, 7, 0d, false);
+    GridCoverage2D actual =
+        RasterConstructors.asRaster(transformedGeometry, raster, "d", false, 7, 0d, false);
+
+    assertArrayEquals(MapAlgebra.bandAsArray(expected, 1), MapAlgebra.bandAsArray(actual, 1), 0d);
   }
 
   @Test
@@ -522,7 +564,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     GridCoverage2D raster_bottom_up =
         RasterConstructors.makeEmptyRaster(2, 255, 255, 1, -511, 2, 2, 0, 0, 4326);
 
-    Geometry geom = Constructors.geomFromEWKT("LINESTRING(1 -1, 2 -1, 10 -1)");
+    Geometry geom = Constructors.geomFromWKT("LINESTRING(1 -1, 2 -1, 10 -1)", 4326);
     GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 0d);
     double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
     double[] expected = new double[] {3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0};
@@ -534,7 +576,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     assertArrayEquals(expected, actual, 0.1d);
 
     // Vertical LineString
-    geom = Constructors.geomFromEWKT("LINESTRING(1 -1, 1 -2, 1 -10)");
+    geom = Constructors.geomFromWKT("LINESTRING(1 -1, 1 -2, 1 -10)", 4326);
     rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 3093151, 0d);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected = new double[] {3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0};
@@ -552,7 +594,8 @@ public class RasterConstructorsTest extends RasterTestBase {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
     Geometry geom =
-        Constructors.geomFromWKT("POLYGON((1.5 1.5, 3.8 3.0, 4.5 4.4, 3.4 3.5, 1.5 1.5))", 0);
+        Constructors.geomFromWKT(
+            "POLYGON((1.5 1.5, 3.8 3.0, 4.5 4.4, 3.4 3.5, 1.5 1.5))", RasterAccessors.srid(raster));
     GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", true, 612028, 0d);
     double[] actual = Arrays.stream(MapAlgebra.bandAsArray(rasterized, 1)).toArray();
     // Matches GDAL/rasterio all_touched=True except where a vertex lands exactly on a grid line:
@@ -619,7 +662,7 @@ public class RasterConstructorsTest extends RasterTestBase {
         RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0.0, 0.1, 0.1, 0, 0, 4326);
 
     Geometry geom =
-        Constructors.geomFromWKT("POLYGON((0.1 0.1, 0.1 0.4, 0.4 0.4, 0.4 0.1, 0.1 0.1))", 0);
+        Constructors.geomFromWKT("POLYGON((0.1 0.1, 0.1 0.4, 0.4 0.4, 0.4 0.1, 0.1 0.1))", 4326);
     GridCoverage2D rasterized =
         RasterConstructors.asRasterWithRasterExtent(geom, raster, "d", false, 100d, 0d);
     assertEquals(0, rasterized.getEnvelope2D().getMinX(), 1e-6);

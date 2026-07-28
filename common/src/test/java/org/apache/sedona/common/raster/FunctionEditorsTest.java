@@ -22,6 +22,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -127,31 +128,48 @@ public class FunctionEditorsTest extends RasterTestBase {
   }
 
   @Test
-  public void testSetValuesWithRasterNoSRID()
+  public void testSetValuesTransformsDefinedCRS()
       throws IOException, ParseException, FactoryException, TransformException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
     String polygon =
         "POLYGON ((-77.9148 37.9545, -77.9123 37.8898, -77.9938 37.8878, -77.9964 37.9524, -77.9148 37.9545))";
-    Geometry geom = Constructors.geomFromWKT(polygon, 0);
+    Geometry geom = Constructors.geomFromWKT(polygon, 4326);
 
     GridCoverage2D result = PixelFunctionEditors.setValues(raster, 1, geom, 10, true, false);
 
-    Geometry point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 0);
+    Geometry point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 4326);
     double actual = PixelFunctions.value(result, point, 1);
     double expected = 10.0;
     assertEquals(expected, actual, 0d);
 
     result = PixelFunctionEditors.setValues(raster, 1, geom, 10, false);
 
-    point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 0);
+    point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 4326);
     actual = PixelFunctions.value(result, point, 1);
     expected = 10.0;
     assertEquals(expected, actual, 0d);
 
-    point = Constructors.geomFromWKT("POINT (-77.9549 37.9357)", 0);
+    point = Constructors.geomFromWKT("POINT (-77.9549 37.9357)", 4326);
     actual = PixelFunctions.value(result, point, 1);
     assertEquals(expected, actual, 0d);
+  }
+
+  @Test
+  public void testSetValuesRejectsOneSidedCRS()
+      throws IOException, ParseException, FactoryException {
+    GridCoverage2D raster =
+        rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((-77.9148 37.9545, -77.9123 37.8898, -77.9938 37.8878, -77.9964 37.9524, -77.9148 37.9545))",
+            0);
+
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> PixelFunctionEditors.setValues(raster, 1, geom, 10, true, false));
+    assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
   }
 
   @Test

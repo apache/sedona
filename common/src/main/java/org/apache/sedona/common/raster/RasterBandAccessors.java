@@ -28,7 +28,6 @@ import javax.media.jai.RasterFactory;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
-import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.coverage.GridSampleDimension;
@@ -369,14 +368,6 @@ public class RasterBandAccessors {
       boolean lenient)
       throws FactoryException {
     RasterUtils.ensureBand(raster, band);
-
-    if (RasterAccessors.srid(raster) != roi.getSRID()) {
-      // implicitly converting roi geometry CRS to raster CRS
-      roi = RasterUtils.convertCRSIfNeeded(roi, raster.getCoordinateReferenceSystem());
-      // have to set the SRID as RasterUtils.convertCRSIfNeeded doesn't set it even though the
-      // geometry is in raster's CRS
-      roi = Functions.setSRID(roi, RasterAccessors.srid(raster));
-    }
 
     // checking if the raster contains the geometry
     if (!RasterPredicates.rsIntersects(raster, roi)) {

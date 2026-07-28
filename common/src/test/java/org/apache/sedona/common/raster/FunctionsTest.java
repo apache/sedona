@@ -83,18 +83,29 @@ public class FunctionsTest extends RasterTestBase {
   }
 
   @Test
-  public void valueImplicitTransform()
+  public void valueTransformsDefinedCRS()
       throws TransformException, FactoryException, IOException, ParseException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
 
-    Geometry point = Constructors.geomFromWKT("POINT (-90 50)", 0);
+    Geometry point = Constructors.geomFromWKT("POINT (-90 50)", 4326);
     assertNull(PixelFunctions.value(raster, point, 1));
 
-    point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 0);
+    point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 4326);
     Double value = PixelFunctions.value(raster, point, 1);
     assertNotNull(value);
     assertEquals(99.0d, value, 0.1d);
+  }
+
+  @Test
+  public void valueRejectsOneSidedCRS() throws IOException, FactoryException, ParseException {
+    GridCoverage2D raster =
+        rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+    Geometry point = Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 0);
+
+    IllegalArgumentException exception =
+        assertThrows(IllegalArgumentException.class, () -> PixelFunctions.value(raster, point, 1));
+    assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -121,8 +132,9 @@ public class FunctionsTest extends RasterTestBase {
   @Test
   public void valueWithMultibandRaster() throws TransformException, FactoryException {
     // Multiband raster
-    assertEquals(9d, PixelFunctions.value(multiBandRaster, point(4.5d, 4.5d), 3), 0.1d);
-    assertEquals(255d, PixelFunctions.value(multiBandRaster, point(4.5d, 4.5d), 4), 0.1d);
+    Geometry point = Functions.setSRID(point(4.5d, 4.5d), 4326);
+    assertEquals(9d, PixelFunctions.value(multiBandRaster, point, 3), 0.1d);
+    assertEquals(255d, PixelFunctions.value(multiBandRaster, point, 4), 0.1d);
     assertEquals(4d, PixelFunctions.value(multiBandRaster, 2, 2, 3), 0.1d);
     assertEquals(255d, PixelFunctions.value(multiBandRaster, 3, 4, 4), 0.1d);
   }
@@ -369,7 +381,7 @@ public class FunctionsTest extends RasterTestBase {
   }
 
   @Test
-  public void valuesImplicitTransform()
+  public void valuesTransformDefinedCRS()
       throws TransformException, FactoryException, IOException, ParseException {
     GridCoverage2D raster =
         rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
@@ -377,7 +389,7 @@ public class FunctionsTest extends RasterTestBase {
     List<Geometry> points =
         Arrays.asList(
             Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 4326),
-            Constructors.geomFromWKT("POINT (-78.0059 37.9142)", 0));
+            Constructors.geomFromWKT("POINT (-78.0059 37.9142)", 4326));
 
     List<Double> values = PixelFunctions.values(raster, points, 1);
     assertEquals(2, values.size());
@@ -390,6 +402,18 @@ public class FunctionsTest extends RasterTestBase {
             1);
     assertEquals(2, values.size());
     assertNull("Null geometries should return null values.", values.get(1));
+  }
+
+  @Test
+  public void valuesRejectOneSidedCRS() throws IOException, FactoryException, ParseException {
+    GridCoverage2D raster =
+        rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+    List<Geometry> points = Arrays.asList(Constructors.geomFromWKT("POINT (-77.9146 37.8916)", 0));
+
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class, () -> PixelFunctions.values(raster, points, 1));
+    assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
   }
 
   @Test

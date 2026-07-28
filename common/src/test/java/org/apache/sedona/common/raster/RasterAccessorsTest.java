@@ -21,6 +21,7 @@ package org.apache.sedona.common.raster;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoordinates2D;
@@ -245,6 +246,41 @@ public class RasterAccessorsTest extends RasterTestBase {
     Coordinate coords = RasterAccessors.getGridCoord(emptyRaster, point).getCoordinate();
     assertEquals(7, coords.getX(), 1e-9);
     assertEquals(1, coords.getY(), 1e-9);
+  }
+
+  @Test
+  public void testGridCoordPointRejectsOneSidedCRS() throws FactoryException {
+    GridCoverage2D rasterWithCRS =
+        RasterConstructors.makeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0, 4326);
+    Geometry pointWithoutCRS = new GeometryFactory().createPoint(new Coordinate(-53, 51));
+
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterAccessors.getGridCoord(rasterWithCRS, pointWithoutCRS));
+    assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
+
+    exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterAccessors.getGridCoordX(rasterWithCRS, pointWithoutCRS));
+    assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
+
+    exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterAccessors.getGridCoordY(rasterWithCRS, pointWithoutCRS));
+    assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
+
+    GridCoverage2D rasterWithoutCRS =
+        RasterConstructors.makeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0, 0);
+    Geometry pointWithCRS =
+        new GeometryFactory(new PrecisionModel(), 4326).createPoint(new Coordinate(-53, 51));
+    exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterAccessors.getGridCoord(rasterWithoutCRS, pointWithCRS));
+    assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
   }
 
   @Test

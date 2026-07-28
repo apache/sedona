@@ -24,6 +24,7 @@ import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.S2Geography.WKBGeography;
 import org.apache.sedona.common.utils.CachedCRSTransformFinder;
 import org.apache.sedona.common.utils.GeomUtils;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.ReferenceIdentifier;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
@@ -45,12 +46,15 @@ public class RasterPredicates {
   /**
    * Test if a raster intersects a query window. If both the raster and the query window have a CRS,
    * the query window and the envelope of the raster will be transformed to a common CRS before
-   * testing for intersection. Please note that the CRS transformation will be lenient, which means
-   * that the transformation may not be accurate.
+   * testing for intersection. If neither has a CRS, their coordinates are compared directly. If
+   * exactly one has a CRS, the predicate throws rather than assuming a CRS for the other operand.
+   * Please note that the CRS transformation will be lenient, which means that the transformation
+   * may not be accurate.
    *
    * @param raster the raster
    * @param geometry the query window
    * @return true if the raster intersects the query window
+   * @throws IllegalArgumentException if exactly one operand has a CRS
    */
   public static boolean rsIntersects(GridCoverage2D raster, Geometry geometry) {
     Pair<Geometry, Geometry> geometries = convertCRSIfNeeded(raster, geometry);
@@ -241,6 +245,12 @@ public class RasterPredicates {
 
   private static Pair<Geometry, Geometry> convertCRSIfNeeded(
       GridCoverage2D raster, Geometry queryWindow) {
+    CoordinateReferenceSystem rasterCRS = raster.getCoordinateReferenceSystem();
+    int queryWindowSRID = queryWindow.getSRID();
+    boolean rasterHasCRS = RasterUtils.hasCRS(rasterCRS);
+    boolean queryWindowHasCRS = queryWindowSRID > 0;
+    RasterUtils.ensureMatchingCRSPresence(rasterHasCRS, queryWindowHasCRS);
+
     Geometry rasterGeometry;
     try {
       rasterGeometry = GeometryFunctions.convexHull(raster);
@@ -248,14 +258,8 @@ public class RasterPredicates {
       throw new RuntimeException("Failed to calculate the convex hull of the raster", e);
     }
 
-    CoordinateReferenceSystem rasterCRS = raster.getCoordinateReferenceSystem();
-    if (rasterCRS == null || rasterCRS instanceof DefaultEngineeringCRS) {
-      rasterCRS = DefaultGeographicCRS.WGS84;
-    }
-
-    int queryWindowSRID = queryWindow.getSRID();
-    if (queryWindowSRID <= 0) {
-      queryWindowSRID = 4326;
+    if (!rasterHasCRS) {
+      return Pair.of(rasterGeometry, queryWindow);
     }
 
     if (isCRSMatchesSRID(rasterCRS, queryWindowSRID)) {
@@ -280,6 +284,12 @@ public class RasterPredicates {
 
   private static Pair<Geometry, Geometry> convertCRSIfNeeded(
       GridCoverage2D left, GridCoverage2D right) {
+    CoordinateReferenceSystem leftCRS = left.getCoordinateReferenceSystem();
+    CoordinateReferenceSystem rightCRS = right.getCoordinateReferenceSystem();
+    boolean leftHasCRS = RasterUtils.hasCRS(leftCRS);
+    boolean rightHasCRS = RasterUtils.hasCRS(rightCRS);
+    RasterUtils.ensureMatchingCRSPresence(leftHasCRS, rightHasCRS);
+
     Geometry leftGeometry;
     Geometry rightGeometry;
     try {
@@ -289,13 +299,8 @@ public class RasterPredicates {
       throw new RuntimeException("Failed to calculate the convex hull of the raster", e);
     }
 
-    CoordinateReferenceSystem leftCRS = left.getCoordinateReferenceSystem();
-    if (leftCRS == null || leftCRS instanceof DefaultEngineeringCRS) {
-      leftCRS = DefaultGeographicCRS.WGS84;
-    }
-    CoordinateReferenceSystem rightCRS = right.getCoordinateReferenceSystem();
-    if (rightCRS == null || rightCRS instanceof DefaultEngineeringCRS) {
-      rightCRS = DefaultGeographicCRS.WGS84;
+    if (!leftHasCRS) {
+      return Pair.of(leftGeometry, rightGeometry);
     }
 
     if (leftCRS == rightCRS || CRS.equalsIgnoreMetadata(leftCRS, rightCRS)) {
@@ -307,6 +312,14 @@ public class RasterPredicates {
     Geometry transformedLeftGeometry = transformGeometryToWGS84(leftGeometry, leftCRS);
     Geometry transformedRightGeometry = transformGeometryToWGS84(rightGeometry, rightCRS);
     return Pair.of(transformedLeftGeometry, transformedRightGeometry);
+  }
+
+  static boolean intersectsInRasterCoordinateSpace(GridCoverage2D raster, Geometry queryWindow) {
+    try {
+      return GeometryFunctions.convexHull(raster).intersects(queryWindow);
+    } catch (FactoryException | TransformException e) {
+      throw new RuntimeException("Failed to calculate the convex hull of the raster", e);
+    }
   }
 
   /**
