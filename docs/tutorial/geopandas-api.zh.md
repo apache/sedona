@@ -341,6 +341,34 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 - `clip()` —— 分布式几何裁剪
 - `sindex` —— 空间索引（功能有限）
 
+### 分布式几何聚合
+
+- `GeoDataFrame.dissolve()` —— 对行进行分组，并使用 Sedona 原生分布式聚合
+  对每组几何执行并集
+- `sedona.spark.geopandas.tools.collect()` —— 将分布式 GeoSeries 聚合为一个
+  几何，并在需要时使用同构多部件几何
+
+```python
+from sedona.spark.geopandas.tools import collect
+
+by_region = buildings.dissolve(
+    by="region",
+    aggfunc={"population": "sum", "name": "first"},
+)
+all_building_parts = collect(buildings.geometry)
+```
+
+`dissolve` 支持 `unary` 并集方法，并会明确拒绝定点精度 `grid_size`、
+`coverage` 与 `disjoint_subset` 并集。多个属性聚合会保留为 pandas-on-Spark
+的两级 `MultiIndex`；GeoPandas 则把对应元组标签放在单级 object 索引中。
+原生 `first`、`last` 与 `count` 聚合支持所有属性类型；`nunique` 支持数值、
+布尔与字符串列；`min`、`max`、`sum`、`mean`、`median`、`std` 与 `var`
+支持数值和布尔列。字符串 `sum` 与所有 `prod` 聚合都会被明确拒绝。可调用
+聚合仅限 Python 内置的 `min`、`max`、`sum`，以及 NumPy 的 `amin`、
+`amax`、`min`、`max`、`sum`、`mean`、`median`、`std` 与 `var`。
+两个操作都在 Spark executor 上聚合输入行。`collect` 只会把聚合元数据和
+该 API 所需的单个几何结果传输到 driver。
+
 ### 数据转换
 
 - `to_geopandas()` —— 转换为传统 GeoPandas

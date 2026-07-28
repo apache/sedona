@@ -861,7 +861,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         Same as `to_geopandas()`, without issuing the advice log for internal usage.
         """
         pd_series = self._to_internal_pandas()
-        return gpd.GeoSeries(pd_series, crs=self.crs)
+        return gpd.GeoSeries(
+            pd_series.array,
+            index=pd_series.index,
+            name=pd_series.name,
+            crs=self.crs,
+        )
 
     def to_spark_pandas(self) -> pspd.Series:
         return pspd.Series(pspd.DataFrame(self._psdf._internal))
