@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6445,7 +6444,8 @@
 <span class="n">nyc_buildings</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="_6">空间过滤<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
-<p>使用空间索引与过滤方法。注意：当前版本尚未实现 <code>cx</code> 空间索引：</p>
+<p>使用 <code>cx</code> 进行分布式坐标范围筛选；如需将相交的几何裁剪到掩膜边界，
+可继续使用 <code>clip</code>：</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
 
 <span class="c1"># 中央公园的边界框</span>
@@ -6456,13 +6456,14 @@
     <span class="mf">40.789</span><span class="p">,</span>  <span class="c1"># 右上角（经度，纬度）</span>
 <span class="p">)</span>
 
-<span class="c1"># 使用空间索引筛选边界框内的建筑</span>
-<span class="c1"># 注意：该写法需要把数据收集到 driver 才能进行空间过滤</span>
-<span class="c1"># 对于大规模数据，建议改用空间连接（spatial join）</span>
-<span class="n">buildings_sample</span> <span class="o">=</span> <span class="n">nyc_buildings</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>  <span class="c1"># 演示用：抽样 1000 行</span>
-<span class="n">central_park_buildings</span> <span class="o">=</span> <span class="n">buildings_sample</span><span class="p">[</span>
-    <span class="n">buildings_sample</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">central_park_bbox</span><span class="p">)</span>
+<span class="c1"># 筛选与坐标范围相交的要素</span>
+<span class="n">central_park_buildings</span> <span class="o">=</span> <span class="n">nyc_buildings</span><span class="o">.</span><span class="n">cx</span><span class="p">[</span>
+    <span class="o">-</span><span class="mf">73.973</span><span class="p">:</span><span class="o">-</span><span class="mf">73.951</span><span class="p">,</span>
+    <span class="mf">40.764</span><span class="p">:</span><span class="mf">40.789</span><span class="p">,</span>
 <span class="p">]</span>
+
+<span class="c1"># 将筛选后的几何裁剪到精确的多边形边界</span>
+<span class="n">central_park_buildings</span> <span class="o">=</span> <span class="n">central_park_buildings</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">central_park_bbox</span><span class="p">)</span>
 
 <span class="c1"># 显示结果</span>
 <span class="nb">print</span><span class="p">(</span>
@@ -6539,7 +6540,7 @@
 <li>数据保存在云存储（S3、HDFS 等）</li>
 </ul>
 <h2 id="_12">已支持的操作<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
-<p>Apache Sedona 的 GeoPandas API 已实现 <strong>39 个 GeoSeries 函数</strong> 与 <strong>10 个 GeoDataFrame 函数</strong>，覆盖了 GeoPandas 中最常用的操作：</p>
+<p>Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame 操作：</p>
 <h3 id="io">数据 I/O<a class="headerlink" href="#io" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>read_parquet()</code> —— 读取 GeoParquet 文件</li>
@@ -6549,6 +6550,8 @@
 <h3 id="_13">空间操作<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>sjoin()</code> —— 多种谓词的空间连接</li>
+<li><code>cx</code> —— 基于坐标范围的空间筛选</li>
+<li><code>clip()</code> —— 使用标量、矩形或分布式掩膜裁剪几何</li>
 <li><code>buffer()</code> —— 几何缓冲</li>
 <li><code>distance()</code> —— 距离计算</li>
 <li><code>intersects()</code>、<code>contains()</code>、<code>within()</code> —— 空间谓词</li>
@@ -6575,6 +6578,8 @@
 <li><code>intersects()</code>、<code>contains()</code>、<code>within()</code> —— 空间谓词</li>
 <li><code>intersection()</code> —— 几何相交</li>
 <li><code>make_valid()</code> —— 几何校验与修复</li>
+<li><code>cx</code> —— 基于坐标范围的空间筛选</li>
+<li><code>clip()</code> —— 分布式几何裁剪</li>
 <li><code>sindex</code> —— 空间索引（功能有限）</li>
 </ul>
 <h3 id="_16">数据转换<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
@@ -6652,7 +6657,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月8日 06:54:59 UTC">2026年5月8日 06:54:59</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年7月28日 02:46:04 UTC">2026年7月28日 02:46:04</span>
   </span>
 
     

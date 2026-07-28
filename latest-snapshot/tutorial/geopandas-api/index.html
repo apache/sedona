@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6445,7 +6444,8 @@
 <span class="n">nyc_buildings</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="spatial-filtering">Spatial Filtering<a class="headerlink" href="#spatial-filtering" title="Permanent link">&para;</a></h3>
-<p>Use spatial indexing and filtering methods. Note that <code>cx</code> spatial indexing is not yet implemented in the current version:</p>
+<p>Use <code>cx</code> for distributed coordinate-based filtering and <code>clip</code> when the
+matching geometries should also be cut to the mask:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
 
 <span class="c1"># Define bounding box for Central Park</span>
@@ -6456,13 +6456,14 @@
     <span class="mf">40.789</span><span class="p">,</span>  <span class="c1"># top-right (longitude, latitude)</span>
 <span class="p">)</span>
 
-<span class="c1"># Filter buildings within the bounding box using spatial index</span>
-<span class="c1"># Note: This requires collecting data to driver for spatial filtering</span>
-<span class="c1"># For large datasets, consider using spatial joins instead</span>
-<span class="n">buildings_sample</span> <span class="o">=</span> <span class="n">nyc_buildings</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>  <span class="c1"># Sample for demonstration</span>
-<span class="n">central_park_buildings</span> <span class="o">=</span> <span class="n">buildings_sample</span><span class="p">[</span>
-    <span class="n">buildings_sample</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">central_park_bbox</span><span class="p">)</span>
+<span class="c1"># Select features that intersect the coordinate bounds</span>
+<span class="n">central_park_buildings</span> <span class="o">=</span> <span class="n">nyc_buildings</span><span class="o">.</span><span class="n">cx</span><span class="p">[</span>
+    <span class="o">-</span><span class="mf">73.973</span><span class="p">:</span><span class="o">-</span><span class="mf">73.951</span><span class="p">,</span>
+    <span class="mf">40.764</span><span class="p">:</span><span class="mf">40.789</span><span class="p">,</span>
 <span class="p">]</span>
+
+<span class="c1"># Cut the selected geometries to the exact polygon boundary</span>
+<span class="n">central_park_buildings</span> <span class="o">=</span> <span class="n">central_park_buildings</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">central_park_bbox</span><span class="p">)</span>
 
 <span class="c1"># Display results</span>
 <span class="nb">print</span><span class="p">(</span>
@@ -6539,7 +6540,7 @@
 <li>Data is stored in cloud storage (S3, HDFS, etc.)</li>
 </ul>
 <h2 id="supported-operations">Supported Operations<a class="headerlink" href="#supported-operations" title="Permanent link">&para;</a></h2>
-<p>The GeoPandas API for Apache Sedona has implemented <strong>39 GeoSeries functions</strong> and <strong>10 GeoDataFrame functions</strong>, covering the most commonly used GeoPandas operations:</p>
+<p>The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries and GeoDataFrame operations:</p>
 <h3 id="data-io">Data I/O<a class="headerlink" href="#data-io" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>read_parquet()</code> - Read GeoParquet files</li>
@@ -6549,6 +6550,8 @@
 <h3 id="spatial-operations">Spatial Operations<a class="headerlink" href="#spatial-operations" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>sjoin()</code> - Spatial joins with various predicates</li>
+<li><code>cx</code> - Coordinate-based spatial filtering</li>
+<li><code>clip()</code> - Clip geometries with scalar, rectangular, or distributed masks</li>
 <li><code>buffer()</code> - Geometric buffering</li>
 <li><code>distance()</code> - Distance calculations</li>
 <li><code>intersects()</code>, <code>contains()</code>, <code>within()</code> - Spatial predicates</li>
@@ -6575,6 +6578,8 @@
 <li><code>intersects()</code>, <code>contains()</code>, <code>within()</code> - Spatial predicates</li>
 <li><code>intersection()</code> - Geometric intersection</li>
 <li><code>make_valid()</code> - Geometry validation and repair</li>
+<li><code>cx</code> - Coordinate-based spatial filtering</li>
+<li><code>clip()</code> - Distributed geometry clipping</li>
 <li><code>sindex</code> - Spatial indexing (limited functionality)</li>
 </ul>
 <h3 id="data-conversion">Data Conversion<a class="headerlink" href="#data-conversion" title="Permanent link">&para;</a></h3>
@@ -6652,7 +6657,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="September 8, 2025 03:20:05 UTC">September 8, 2025 03:20:05</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 28, 2026 02:46:04 UTC">July 28, 2026 02:46:04</span>
   </span>
 
     

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -553,6 +552,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_col_label</span><span class="p">:</span> <span class="n">Label</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sindex</span><span class="p">:</span> <span class="n">SpatialIndex</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_empty_crs_source</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;GeoSeries&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Explicit CRS metadata wins over the lineage fallback below when</span>
+        <span class="c1"># geometry rows are empty or carry SRID 0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_empty_crs_value</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
             <span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">GeoSeries</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">,</span> <span class="n">PandasOnSparkDataFrame</span><span class="p">)</span>
@@ -671,6 +673,10 @@
         <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_empty</span><span class="p">():</span>
+            <span class="c1"># Empty data has no SRID to inspect, so explicit CRS metadata wins</span>
+            <span class="c1"># over the inherited lineage metadata.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_empty_crs_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_empty_crs_value</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_empty_crs_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_empty_crs_source</span><span class="o">.</span><span class="n">crs</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -692,7 +698,16 @@
         <span class="n">srid</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">srid</span><span class="p">)</span> <span class="k">else</span> <span class="n">srid</span>
 
         <span class="c1"># Sedona returns 0 if SRID doesn&#39;t exist.</span>
-        <span class="k">return</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">srid</span><span class="p">)</span> <span class="k">if</span> <span class="n">srid</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">srid</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">srid</span><span class="p">)</span>
+        <span class="c1"># These fallbacks are metadata rather than a fresh read from geometry</span>
+        <span class="c1"># coordinates. Explicit metadata takes precedence over inherited</span>
+        <span class="c1"># lineage metadata, including for non-empty geometries with SRID 0.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_empty_crs_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_empty_crs_value</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_empty_crs_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_empty_crs_source</span><span class="o">.</span><span class="n">crs</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@crs</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;CRS&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]):</span>
@@ -825,9 +840,15 @@
 
         <span class="n">spark_col</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">new_epsg</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span><span class="n">spark_col</span><span class="p">,</span> <span class="n">keep_name</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">_empty_crs_value</span> <span class="o">=</span> <span class="n">crs</span>
+        <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">_empty_crs_source</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_update_inplace</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">invalidate_sindex</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_empty_crs_value</span> <span class="o">=</span> <span class="n">crs</span>
+            <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_empty_crs_source</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">return</span> <span class="n">result</span></div>
@@ -4241,13 +4262,6 @@
             <span class="n">geometry_encoding</span><span class="o">=</span><span class="n">geometry_encoding</span><span class="p">,</span>
             <span class="n">interleaved</span><span class="o">=</span><span class="n">interleaved</span><span class="p">,</span>
             <span class="n">include_z</span><span class="o">=</span><span class="n">include_z</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-<div class="viewcode-block" id="GeoSeries.clip"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.clip">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">keep_geom_type</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="n">_not_implemented_error</span><span class="p">(</span>
-                <span class="s2">&quot;clip&quot;</span><span class="p">,</span> <span class="s2">&quot;Clips geometries to the bounds of a mask geometry.&quot;</span>
-            <span class="p">)</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.to_file"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_file">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_file</span><span class="p">(</span>
