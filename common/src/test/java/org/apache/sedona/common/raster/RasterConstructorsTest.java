@@ -628,10 +628,12 @@ public class RasterConstructorsTest extends RasterTestBase {
   @Test
   public void testAsRasterRejectsNonRepresentableBurnValue()
       throws FactoryException, ParseException {
-    // The burn value is validated for representability just like the noDataValue: 265 cannot be
-    // stored in an unsigned 8-bit ('B') band and would silently coerce to 9, burning a different
-    // number than requested, so RS_AsRaster rejects it up front. A value that fits ('B' with 200)
-    // still constructs.
+    // An out-of-range burn value on an integer band is rejected: 265 cannot be stored in an
+    // unsigned 8-bit ('B') band and would silently coerce to 9, burning a different whole number
+    // than requested, so RS_AsRaster rejects it up front. (Unlike the noDataValue, a fractional
+    // burn value on a float band is allowed to round — see
+    // testAsRasterAcceptsFractionalBurnValueOnFloatBand.) A value that fits ('B' with 200) still
+    // constructs.
     GridCoverage2D raster =
         RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
     Geometry geom =
@@ -681,6 +683,51 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     // A distinct value/nodata pair still constructs.
     Assert.assertNotNull(RasterConstructors.asRaster(geom, raster, "D", false, 2d, 1d, false));
+  }
+
+  @Test
+  public void testAsRasterAcceptsFractionalBurnValueOnFloatBand()
+      throws FactoryException, ParseException {
+    // A burn value is ordinary pixel data, not a nodata sentinel, so a fractional value that does
+    // not round-trip exactly through a 32-bit float band (0.1 -> 0.10000000149...) is accepted and
+    // rounded to the pixel type, matching PostGIS ST_AsRaster and gdal_rasterize — unlike the
+    // noDataValue, which must be exactly representable. The burned pixels read back as the rounded
+    // value.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    GridCoverage2D rasterized =
+        RasterConstructors.asRaster(geom, raster, "F", false, 0.1d, 0d, false);
+    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+    // Background is the nodata fill (0.0); the covered pixels are the 32-bit-float rounding of 0.1.
+    Assert.assertEquals((double) (float) 0.1d, Arrays.stream(actual).max().getAsDouble(), 0.0d);
+  }
+
+  @Test
+  public void testAsRasterRejectsNegativeZeroNoDataValueOnIntegerBand()
+      throws FactoryException, ParseException {
+    // Negative zero cannot be stored in an integer sample (the sign is lost), so a -0.0 nodata
+    // sentinel would read back as +0 and be counted as data. It slips past the ordinary
+    // range/fractional check (-0.0 compares equal to +0.0), so it is rejected explicitly for
+    // integer pixel types. It remains valid on float / double bands, which preserve the sign.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    IllegalArgumentException error =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, "B", false, 1d, -0.0d, false));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("negative zero"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("'B'"));
+
+    // A double band preserves the sign of zero, so -0.0 is a valid nodata value there.
+    Assert.assertNotNull(RasterConstructors.asRaster(geom, raster, "D", false, 1d, -0.0d, false));
   }
 
   @Test

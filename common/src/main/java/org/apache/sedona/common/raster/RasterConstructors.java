@@ -131,11 +131,12 @@ public class RasterConstructors {
       boolean useGeometryExtent)
       throws FactoryException {
 
-    // Reject a burn value that cannot be represented in the target pixel type, for the same reason
-    // the noDataValue is rejected below: silently coercing an out-of-range or fractional value (for
-    // example 265 -> 9 in an unsigned 8-bit band) would store a different number than the caller
-    // asked to burn. Unlike noDataValue this is a primitive double, so it is always validated.
-    RasterUtils.assertRepresentable(value, pixelType, "value");
+    // Reject a burn value that cannot be stored as a whole number in an integer pixel type (for
+    // example 265 -> 9 in an unsigned 8-bit band), which would burn a different number than the
+    // caller asked for. Unlike the noDataValue this is ordinary pixel data, not a sentinel, so a
+    // fractional value on a float / double band is accepted and rounded to the pixel type (matching
+    // PostGIS ST_AsRaster and gdal_rasterize) rather than rejected.
+    RasterUtils.assertBurnValueRepresentable(value, pixelType);
 
     // Reject a noDataValue that cannot be represented in the target pixel type rather than
     // silently coercing it: writing an out-of-range or fractional value into an integer sample

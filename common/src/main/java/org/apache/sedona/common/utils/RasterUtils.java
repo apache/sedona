@@ -661,7 +661,27 @@ public class RasterUtils {
    *     type
    */
   public static double assertNoDataValueRepresentable(double noDataValue, String pixelType) {
-    return assertRepresentable(noDataValue, pixelType, "noDataValue");
+    // A nodata value is a sentinel: it must be stored without any coercion (an exact 32-bit float
+    // round-trip, and no negative-zero collapse on integer bands) so the stored background always
+    // matches the recorded nodata metadata.
+    return assertRepresentable(noDataValue, pixelType, "noDataValue", true);
+  }
+
+  /**
+   * Verifies that a burn value can be stored in {@code pixelType}. Unlike a nodata sentinel, a burn
+   * value is ordinary pixel data and does not have to round-trip exactly: a fractional value on a
+   * float / double band (for example {@code 0.1} on {@code "F"}, stored as {@code 0.10000000149…})
+   * is accepted and rounded to the pixel type, matching PostGIS {@code ST_AsRaster} and {@code
+   * gdal_rasterize}. An out-of-range or fractional value on an integer band is still rejected,
+   * since that would burn a different whole number than the caller asked for.
+   *
+   * @param value the candidate burn value
+   * @param pixelType a Sedona pixel type string accepted by {@link #getDataTypeCode(String)}
+   * @return {@code value}, unchanged, when it is storable in the pixel type
+   * @throws IllegalArgumentException when {@code value} cannot be stored in the pixel type
+   */
+  public static double assertBurnValueRepresentable(double value, String pixelType) {
+    return assertRepresentable(value, pixelType, "value", false);
   }
 
   /**
@@ -670,20 +690,26 @@ public class RasterUtils {
    * can. Writing a value that is out of the pixel type's range, or fractional for an integer pixel
    * type, coerces the stored sample to a different number than the value the caller asked for (for
    * example -1.0 or 300.0 wraps to 255 or 44 in an unsigned 8-bit band), so the sample would read
-   * back as a different number than requested. For float / double pixel types a value that does not
-   * round-trip exactly through 32-bit float storage, and any non-finite value (NaN or +/-Infinity),
-   * are rejected for the same reason. Such a value is a correctness violation, not a per-row data
-   * condition, so this rejects it with an {@link IllegalArgumentException} instead of coercing.
+   * back as a different number than requested. Any non-finite value (NaN or +/-Infinity) is always
+   * rejected. When {@code requireExactStorage} is true the value is treated as a sentinel that must
+   * round-trip byte-for-byte, so a float / double value that does not survive 32-bit float storage,
+   * and negative zero on an integer band (whose sign an integer sample cannot preserve), are also
+   * rejected; burn values pass false, since rounding to the pixel type is expected of ordinary
+   * pixel data. Such a violation is a correctness error, not a per-row data condition, so this
+   * rejects it with an {@link IllegalArgumentException} instead of coercing.
    *
    * @param value the candidate value
    * @param pixelType a Sedona pixel type string accepted by {@link #getDataTypeCode(String)} (for
    *     example {@code "B"}, {@code "I"}, {@code "D"})
    * @param argName the name of the argument being validated (for example {@code "noDataValue"} or
    *     {@code "value"}), used in the exception message
+   * @param requireExactStorage true to require the value be stored without any coercion (a nodata
+   *     sentinel); false to allow rounding to the pixel type (a burn value)
    * @return {@code value}, unchanged, when it is representable in the pixel type
    * @throws IllegalArgumentException when {@code value} cannot be represented in the pixel type
    */
-  public static double assertRepresentable(double value, String pixelType, String argName) {
+  public static double assertRepresentable(
+      double value, String pixelType, String argName, boolean requireExactStorage) {
     int dataTypeCode = getDataTypeCode(pixelType);
     long min;
     long max;
@@ -721,11 +747,12 @@ public class RasterUtils {
                   "%s %s is not supported for pixel type '%s' (NaN and infinite values are not supported); use a finite value",
                   argName, value, pixelType));
         }
-        // A nodata value is a sentinel, so it must round-trip exactly through the band's
-        // 32-bit float storage — otherwise the stored sentinel differs from the value the
-        // caller set (e.g. 0.1 would be stored as 0.10000000149...), and comparisons against
-        // the caller's value would miss it.
-        if ((double) (float) value != value) {
+        // A nodata sentinel must round-trip exactly through the band's 32-bit float storage —
+        // otherwise the stored sentinel differs from the value the caller set (e.g. 0.1 would be
+        // stored as 0.10000000149...), and comparisons against the caller's value would miss it. A
+        // burn value is ordinary data, so it is allowed to round to the pixel type (as PostGIS and
+        // gdal_rasterize do) and skips this check.
+        if (requireExactStorage && (double) (float) value != value) {
           throw new IllegalArgumentException(
               String.format(
                   "%s %s is not exactly representable in pixel type '%s' (32-bit float)",
@@ -743,6 +770,23 @@ public class RasterUtils {
                   argName, value, pixelType));
         }
         return value;
+    }
+
+    // A nodata sentinel of negative zero cannot be stored in an integer sample: the sign is lost,
+    // so the background reads back as +0 while the recorded nodata metadata is -0.0, leaving the
+    // background counted as data (and B/US fail later constructing the category as "Ranges
+    // overlap").
+    // Ordinary comparisons treat -0.0 as +0.0, so it slips through the range/fractional check
+    // below;
+    // reject it explicitly for integer pixel types. +0.0 and float/double -0.0 are unaffected, and
+    // burn values (requireExactStorage == false) are ordinary data, so -0.0 simply stores as 0.
+    if (requireExactStorage
+        && Double.doubleToRawLongBits(value) == Double.doubleToRawLongBits(-0.0d)) {
+      throw new IllegalArgumentException(
+          String.format(
+              "%s %s is not representable in pixel type '%s' (%s integer): negative zero cannot be "
+                  + "stored in an integer sample; use 0",
+              argName, value, pixelType, description));
     }
 
     // Integer pixel types: reject out-of-range and fractional values (Math.rint also rejects NaN).
