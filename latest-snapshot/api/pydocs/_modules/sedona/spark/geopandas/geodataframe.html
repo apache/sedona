@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geodataframe &mdash; Apache Sedona Python Documentation</title>
@@ -261,10 +260,12 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_advice</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy_crs_metadata</span><span class="p">,</span> <span class="n">with_crs_metadata</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_aggregates</span> <span class="k">as</span> <span class="n">sta</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_constructors</span> <span class="k">as</span> <span class="n">stc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_functions</span> <span class="k">as</span> <span class="n">stf</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas.api.extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_extension_dtype</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">geopandas.geodataframe</span><span class="w"> </span><span class="kn">import</span> <span class="n">crs_mismatch_error</span>
@@ -827,15 +828,17 @@
         <span class="n">item</span> <span class="o">=</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-            <span class="c1"># Don&#39;t specify crs=self.crs here because it might not include the geometry column.</span>
-            <span class="c1"># If it does include the geometry column, we don&#39;t need to set crs anyways.</span>
-            <span class="k">return</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span>
+            <span class="k">return</span> <span class="n">result</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
             <span class="n">ps_series</span><span class="p">:</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span> <span class="o">=</span> <span class="n">item</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">ps_series</span><span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">ps_series</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">ps_series</span>
+            <span class="k">return</span> <span class="n">result</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Logical Error: Unexpected type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -923,7 +926,47 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">crs_mismatch_error</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">geometry</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+            <span class="n">existing_geometry</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_hashable</span><span class="p">(</span><span class="n">geometry</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">candidate</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">geometry</span><span class="p">]</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">):</span>
+                        <span class="n">existing_geometry</span> <span class="o">=</span> <span class="n">candidate</span>
+
+            <span class="k">if</span> <span class="n">existing_geometry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Updating the existing Spark column directly avoids index</span>
+                <span class="c1"># alignment, which would multiply rows for duplicate indexes.</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
+
+                <span class="n">normalized_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+                <span class="n">new_epsg</span> <span class="o">=</span> <span class="n">normalized_crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span>
+                <span class="n">geometry_field</span> <span class="o">=</span> <span class="n">with_crs_metadata</span><span class="p">(</span>
+                    <span class="n">existing_geometry</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">normalized_crs</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">geometry_column_name</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">existing_geometry</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">geometry_field</span> <span class="o">=</span> <span class="n">geometry_field</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">geometry_column_name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_internal_frame</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">with_new_spark_column</span><span class="p">(</span>
+                        <span class="n">existing_geometry</span><span class="o">.</span><span class="n">_column_label</span><span class="p">,</span>
+                        <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span>
+                            <span class="n">existing_geometry</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span>
+                            <span class="n">new_epsg</span><span class="p">,</span>
+                        <span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
+                            <span class="n">geometry_column_name</span><span class="p">,</span>
+                            <span class="n">metadata</span><span class="o">=</span><span class="n">geometry_field</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+                        <span class="p">),</span>
+                        <span class="n">field</span><span class="o">=</span><span class="n">geometry_field</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="o">=</span> <span class="n">geometry</span>
 
         <span class="k">if</span> <span class="n">geometry</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;geometry&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
 
@@ -981,11 +1024,7 @@
                 <span class="p">)</span>
 
             <span class="k">raise</span> <span class="n">MissingGeometryColumnError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span><span class="p">]</span>
-        <span class="n">empty_crs_source</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_empty_crs_source&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">empty_crs_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">geometry</span><span class="o">.</span><span class="n">_empty_crs_source</span> <span class="o">=</span> <span class="n">empty_crs_source</span>
-        <span class="k">return</span> <span class="n">geometry</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_set_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="p">):</span>
         <span class="c1"># This check is included in the original geopandas. Note that this prevents assigning a str to the property</span>
@@ -1098,7 +1137,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-        <span class="n">geo_column_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span>
+        <span class="n">previous_geometry_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span>
+        <span class="n">geo_column_name</span> <span class="o">=</span> <span class="n">previous_geometry_name</span>
         <span class="n">new_series</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">if</span> <span class="n">geo_column_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1180,7 +1220,6 @@
         <span class="k">if</span> <span class="n">new_series</span><span class="p">:</span>
             <span class="c1"># Note: This casts GeoSeries back into pspd.Series, so we lose any metadata that&#39;s not serialized.</span>
             <span class="n">frame</span><span class="p">[</span><span class="n">geo_column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">level</span>
-            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s2">&quot;_empty_crs_source&quot;</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">inplace</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">frame</span></div>
@@ -1300,7 +1339,14 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">pd_df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">_to_pandas</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">pd_df</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
+            <span class="n">pd_df</span><span class="p">,</span>
+            <span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span><span class="p">,</span>
+            <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">result</span>
 
 <div class="viewcode-block" id="GeoDataFrame.to_spark_pandas"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_spark_pandas">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_spark_pandas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1334,9 +1380,10 @@
 <span class="sd">        0  POINT (1 1)       2       3</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Note: The deep parameter is a dummy parameter just as it is in PySpark pandas.</span>
-        <span class="k">return</span> <span class="n">GeoDataFrame</span><span class="p">(</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="p">(</span>
             <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">copy</span><span class="p">()),</span> <span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">active_geometry_name</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_safe_get_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2291,9 +2338,12 @@
                 <span class="o">*</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">aggregated_sdf</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">attribute_output_names</span><span class="p">],</span>
             <span class="p">],</span>
             <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span>
-                <span class="n">InternalField</span><span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">),</span>
-                    <span class="n">aggregated_sdf</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">geometry_output_name</span><span class="p">],</span>
+                <span class="n">copy_crs_metadata</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">InternalField</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">),</span>
+                        <span class="n">aggregated_sdf</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">geometry_output_name</span><span class="p">],</span>
+                    <span class="p">),</span>
                 <span class="p">),</span>
                 <span class="n">InternalField</span><span class="o">.</span><span class="n">from_struct_field</span><span class="p">(</span>
                     <span class="n">aggregated_sdf</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">order_output_spark_name</span><span class="p">]</span>
@@ -2343,7 +2393,6 @@
                 <span class="n">result_labels</span><span class="o">.</span><span class="n">geometry_name</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">aggregated</span><span class="p">,</span> <span class="s2">&quot;_empty_crs_source&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">aggregated</span></div>
 
     <span class="c1"># ============================================================================</span>
