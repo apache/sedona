@@ -1471,6 +1471,35 @@ class geoparquetIOTests extends TestBaseScala with BeforeAndAfterAll {
     }
   }
 
+  describe("GeoParquetMetaData.sridToProjJson") {
+    it("should preserve authoritative polar axis metadata") {
+      implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+      val crs =
+        GeoParquetMetaData.sridToProjJson(32661).getOrElse(fail("EPSG:32661 should resolve"))
+
+      assert((crs \ "id" \ "authority").extract[String] == "EPSG")
+      assert((crs \ "id" \ "code").extract[Int] == 32661)
+
+      val axes = (crs \ "coordinate_system" \ "axis").children
+      assert(axes.map(axis => (axis \ "abbreviation").extract[String]) == List("N", "E"))
+      assert(axes.map(axis => (axis \ "direction").extract[String]) == List("south", "south"))
+      assert(
+        axes.map(axis => (axis \ "meridian" \ "longitude" \ "value").extract[Double]) ==
+          List(180.0, 90.0))
+    }
+
+    it("should generate and recover NAD27 projected CRS metadata") {
+      implicit val formats: org.json4s.Formats = org.json4s.DefaultFormats
+      val crs =
+        GeoParquetMetaData.sridToProjJson(26711).getOrElse(fail("EPSG:26711 should resolve"))
+
+      assert((crs \ "type").extract[String] == "ProjectedCRS")
+      assert((crs \ "id" \ "authority").extract[String] == "EPSG")
+      assert((crs \ "id" \ "code").extract[Int] == 26711)
+      assert(GeoParquetMetaData.extractSridFromCrs(Some(crs)) == 26711)
+    }
+  }
+
   describe("GeoParquetMetaData.extractSridFromCrs") {
     it("should return 4326 when CRS is omitted (None)") {
       assert(GeoParquetMetaData.extractSridFromCrs(None) == 4326)

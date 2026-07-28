@@ -210,7 +210,12 @@ When no `geoparquet.crs` option is explicitly provided, Sedona will automaticall
 * If geometries in a column have mixed SRIDs, the `crs` field defaults to `null`.
 * If an explicit `geoparquet.crs` or `geoparquet.crs.<column_name>` option is provided, it always takes precedence over the SRID-derived CRS.
 
-Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use [`ST_FlipCoordinates`](../../api/sql/Geometry-Editors/ST_FlipCoordinates.md) to swap the axis order of your geometries.
+GeoParquet stores WKB coordinates in `(x, y)` order. Per the GeoParquet 1.1
+specification, this ordering overrides any axis order declared by the CRS. Sedona
+therefore preserves the authoritative CRS axis metadata and does not reorder geometry
+coordinates while reading or writing GeoParquet. You can use
+[`ST_FlipCoordinates`](../../api/sql/Geometry-Editors/ST_FlipCoordinates.md) when the
+coordinates themselves need to be swapped.
 
 ## Save GeoParquet with Covering Metadata
 
