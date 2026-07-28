@@ -25,11 +25,16 @@ import com.google.common.geometry.S2LatLngRect;
 import com.google.common.geometry.S2Loop;
 import com.google.common.geometry.S2Point;
 import org.apache.sedona.common.S2Geography.Geography;
+import org.apache.sedona.common.S2Geography.GeographyWKBSerializer;
 import org.apache.sedona.common.S2Geography.PolygonGeography;
+import org.apache.sedona.common.S2Geography.WKBGeography;
 import org.apache.sedona.common.geography.Constructors;
 import org.apache.sedona.common.geography.Functions;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
@@ -165,6 +170,157 @@ public class FunctionTest {
     assertNull(Functions.y(emptyPoint));
     assertNull(Functions.x(null));
     assertNull(Functions.y(null));
+  }
+
+  @Test
+  public void convexHull_nullAndEmptyPreserveType() throws Exception {
+    assertNull(Functions.convexHull(null));
+
+    for (String wkt : new String[] {"POINT EMPTY", "LINESTRING EMPTY", "POLYGON EMPTY"}) {
+      Geography input = Constructors.geogFromWKT(wkt, 4326);
+      Geography hull = Functions.convexHull(input);
+      assertEquals(wkt, hull.toString());
+      assertEquals(4326, hull.getSRID());
+
+      Geography roundTripped =
+          GeographyWKBSerializer.deserialize(GeographyWKBSerializer.serialize(hull));
+      assertEquals(wkt, roundTripped.toString());
+      assertEquals(4326, roundTripped.getSRID());
+    }
+
+    WKBGeography legacyEmptyLine = WKBGeography.fromWKB(new byte[] {1, 2, 0, 0, 0}, 4326);
+    assertEquals(9, legacyEmptyLine.getWKBBytes().length);
+    Geography legacyHull = Functions.convexHull(legacyEmptyLine);
+    assertEquals("LINESTRING EMPTY", legacyHull.toString());
+    assertEquals(9, ((WKBGeography) legacyHull).getWKBBytes().length);
+  }
+
+  @Test
+  public void convexHull_degenerateInputsReturnPointOrLine() throws ParseException {
+    Geometry coincidentJts = new WKTReader().read("LINESTRING (1 2, 1 2, 1 2)");
+    coincidentJts.setSRID(4326);
+    Geography coincidentLine = WKBGeography.fromJTS(coincidentJts);
+    Geometry pointHull = Constructors.geogToGeometry(Functions.convexHull(coincidentLine));
+    assertTrue(pointHull instanceof Point);
+    assertEquals(1.0, ((Point) pointHull).getX(), EPS);
+    assertEquals(2.0, ((Point) pointHull).getY(), EPS);
+
+    Geography twoPoints = Constructors.geogFromWKT("MULTIPOINT ((0 0), (0 2))", 4326);
+    assertLineEndpoints(Functions.convexHull(twoPoints), 0, 0, 0, 2);
+
+    Geography collinear = Constructors.geogFromWKT("LINESTRING (0 0, 0 1, 0 2, 0 1)", 4326);
+    assertLineEndpoints(Functions.convexHull(collinear), 0, 0, 0, 2);
+
+    Geography fourCollinear =
+        Constructors.geogFromWKT("MULTIPOINT ((0 0), (10 0), (20 0), (30 0))", 4326);
+    assertLineEndpoints(Functions.convexHull(fourCollinear), 0, 0, 30, 0);
+
+    Geography equivalentLongitudes = Constructors.geogFromWKT("MULTIPOINT ((0 0), (360 0))", 4326);
+    assertTrue(
+        Constructors.geogToGeometry(Functions.convexHull(equivalentLongitudes)) instanceof Point);
+
+    Geography equivalentPoles =
+        Constructors.geogFromWKT("MULTIPOINT ((0 90), (120 90), (-45 90))", 4326);
+    assertTrue(Constructors.geogToGeometry(Functions.convexHull(equivalentPoles)) instanceof Point);
+
+    Geography collinearPolygon = Constructors.geogFromWKT("POLYGON ((0 0, 10 0, 20 0, 0 0))", 4326);
+    assertLineEndpoints(Functions.convexHull(collinearPolygon), 0, 0, 20, 0);
+
+    Geography collectionWithCollinearPolygon =
+        Constructors.geogFromWKT(
+            "GEOMETRYCOLLECTION (POLYGON ((0 0, 10 0, 20 0, 0 0)), POINT (30 0))", 4326);
+    assertLineEndpoints(Functions.convexHull(collectionWithCollinearPolygon), 0, 0, 30, 0);
+  }
+
+  @Test
+  public void convexHull_polygonSkipsHolesAndPreservesSrid() throws ParseException {
+    Geography input =
+        Constructors.geogFromWKT(
+            "POLYGON ((0 0, 2 0, 0 2, 0 0), (0.2 0.2, 0.4 0.2, 0.2 0.4, 0.2 0.2))", 4326);
+    Geography hull = Functions.convexHull(input);
+    Geometry jts = Constructors.geogToGeometry(hull);
+
+    assertTrue(jts instanceof Polygon);
+    assertEquals(0, ((Polygon) jts).getNumInteriorRing());
+    assertEquals(4, ((Polygon) jts).getExteriorRing().getNumPoints());
+    assertEquals(4326, hull.getSRID());
+  }
+
+  @Test
+  public void convexHull_collectionAndAntimeridianAreSpherical() throws ParseException {
+    Geography collection =
+        Constructors.geogFromWKT(
+            "GEOMETRYCOLLECTION (POINT (0 0), LINESTRING (1 0, 5 5), "
+                + "POLYGON ((0 1, 0.2 0.2, 1 0, 0 1)))",
+            4326);
+    assertTrue(Constructors.geogToGeometry(Functions.convexHull(collection)) instanceof Polygon);
+
+    Geography acrossDateLine =
+        Constructors.geogFromWKT("MULTIPOINT ((170 -10), (170 10), (-170 10), (-170 -10))", 4326);
+    Geography hull = Functions.convexHull(acrossDateLine);
+    assertTrue(Constructors.geogToGeometry(hull) instanceof Polygon);
+    assertTrue("expected the small antimeridian hull", Functions.area(hull) < 1e14);
+  }
+
+  @Test
+  public void convexHull_fullSphereIsRejected() throws ParseException {
+    Geography input = Constructors.geogFromWKT("MULTIPOINT ((0 0), (120 0), (-120 0))", 4326);
+    try {
+      Functions.convexHull(input);
+      fail("Expected a full-sphere hull to be rejected");
+    } catch (UnsupportedOperationException e) {
+      assertTrue(e.getMessage().contains("full sphere"));
+    }
+
+    Geography largeOrientedPolygon =
+        Constructors.geogFromWKT("POLYGON ((0 0, 0 10, 10 0, 0 0))", 4326);
+    try {
+      Functions.convexHull(largeOrientedPolygon);
+      fail("Expected the hull of a greater-than-hemisphere polygon to be rejected");
+    } catch (UnsupportedOperationException e) {
+      assertTrue(e.getMessage().contains("full sphere"));
+    }
+  }
+
+  @Test
+  public void createMultiGeography_preservesMembersAndFirstSrid() throws ParseException {
+    Geography first = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    Geography duplicate = Constructors.geogFromWKT("POINT (1 2)", 3857);
+    Geography second = Constructors.geogFromWKT("POINT (3 4)", 4326);
+    Geography collected =
+        Functions.createMultiGeography(new Geography[] {first, null, duplicate, second});
+    Geometry jts = Constructors.geogToGeometry(collected);
+
+    assertTrue(jts instanceof MultiPoint);
+    assertEquals(3, jts.getNumGeometries());
+    assertEquals(4326, collected.getSRID());
+
+    Geography line = Constructors.geogFromWKT("LINESTRING (0 0, 1 1)", 4326);
+    Geography mixed = Functions.createMultiGeography(new Geography[] {first, line});
+    assertEquals("GeometryCollection", Constructors.geogToGeometry(mixed).getGeometryType());
+
+    Geography empty = Functions.createMultiGeography(new Geography[] {null});
+    assertEquals("GEOMETRYCOLLECTION EMPTY", Functions.asText(empty));
+  }
+
+  private static void assertLineEndpoints(
+      Geography geography, double x0, double y0, double x1, double y1) {
+    Geometry geometry = Constructors.geogToGeometry(geography);
+    assertTrue(geometry instanceof LineString);
+    LineString line = (LineString) geometry;
+    Coordinate start = line.getCoordinateN(0);
+    Coordinate end = line.getCoordinateN(line.getNumPoints() - 1);
+    boolean forward =
+        Math.abs(start.x - x0) <= EPS
+            && Math.abs(start.y - y0) <= EPS
+            && Math.abs(end.x - x1) <= EPS
+            && Math.abs(end.y - y1) <= EPS;
+    boolean reverse =
+        Math.abs(start.x - x1) <= EPS
+            && Math.abs(start.y - y1) <= EPS
+            && Math.abs(end.x - x0) <= EPS
+            && Math.abs(end.y - y0) <= EPS;
+    assertTrue("Unexpected line endpoints: " + geometry, forward || reverse);
   }
 
   // S2 area-weighted centroids on small polygons differ from planar by an O(d^2/R^2)

@@ -58,6 +58,9 @@ class PreserveSRIDGeographySuite extends TestBaseScala with TableDrivenPropertyC
       ("ST_Buffer(geog1, 0)", 4326),
       ("ST_Buffer(geog1, 100)", 4326),
       ("ST_Buffer(geog1, 100, 'quad_segs=8')", 4326),
+      ("ST_ConvexHull(geog1)", 4326),
+      ("ST_Collect(geog1, geog2)", 4326),
+      ("ST_Collect(array(geog1, geog2))", 4326),
       // Cross-type boundaries. The literal SRID here exercises that any int survives the
       // Geometry↔Geography boundary (no CRS resolution is involved on this code path).
       ("ST_GeomToGeography(ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 1000))", 1000),

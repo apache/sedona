@@ -26,10 +26,12 @@ import com.google.common.geometry.S2Region;
 import com.google.common.geometry.S2Shape;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.List;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBConstants;
 
 /**
  * A Geography implementation that stores WKB bytes as the primary representation, with lazy-parsed
@@ -80,6 +82,14 @@ public class WKBGeography extends Geography {
    */
   public static WKBGeography fromWKB(byte[] wkb, int srid) {
     WKBGeography geog = new WKBGeography(wkb, srid);
+    // Sedona versions before 1.9.1 could emit an empty LineString as only its 5-byte WKB header
+    // (or 9 bytes when an EWKB SRID was present), without the required zero coordinate count.
+    // Normalize that legacy representation at the boundary so it never escapes as malformed WKB.
+    if (wkb.length >= 5
+        && geog.wkbBaseType() == WKBConstants.wkbLineString
+        && wkb.length == geog.wkbPayloadOffset()) {
+      geog = new WKBGeography(Arrays.copyOf(wkb, wkb.length + Integer.BYTES), srid);
+    }
     if (eagerShapeIndex) {
       geog.getShapeIndexGeography();
     }
@@ -243,6 +253,27 @@ public class WKBGeography extends Geography {
   /** Returns true if this WKB represents a single Point (type 1). */
   public boolean isPoint() {
     return wkbBaseType() == 1;
+  }
+
+  /**
+   * Returns true if the top-level WKB is empty without constructing JTS or S2 objects. For
+   * non-point WKB, the first payload integer is the element/ring/vertex count.
+   */
+  public boolean isEmpty() {
+    int type = wkbBaseType();
+    int payloadOffset = wkbPayloadOffset();
+    if (type == 1) {
+      if (wkbBytes.length < payloadOffset + 2 * Double.BYTES) return false;
+      return getPointX() == null;
+    }
+    if (type >= 2 && type <= 7) {
+      if (wkbBytes.length < payloadOffset + Integer.BYTES) return false;
+      boolean le = (wkbBytes[0] == 0x01);
+      ByteBuffer bb =
+          ByteBuffer.wrap(wkbBytes).order(le ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+      return bb.getInt(payloadOffset) == 0;
+    }
+    return false;
   }
 
   /** Returns the X coordinate directly from Point WKB, or null for non-points and empty points. */

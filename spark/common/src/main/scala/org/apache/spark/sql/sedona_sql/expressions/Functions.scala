@@ -152,7 +152,9 @@ private[apache] case class ST_ConcaveHull(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_ConvexHull(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.convexHull _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.convexHull),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.convexHull)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

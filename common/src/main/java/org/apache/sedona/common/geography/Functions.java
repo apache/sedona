@@ -24,10 +24,16 @@ import java.util.List;
 import org.apache.sedona.common.S2Geography.*;
 import org.apache.sedona.common.sphere.Haversine;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 
 public class Functions {
 
   private static final double EPSILON = 1e-9;
+  private static final S1Angle PROJECT_PERPENDICULAR_ERROR =
+      S1Angle.radians((2.0 + 2.0 / Math.sqrt(3.0)) * S2.DBL_ERROR).add(S2.ROBUST_CROSS_PROD_ERROR);
 
   private static boolean nearlyEqual(double a, double b) {
     if (Double.isNaN(a) || Double.isNaN(b)) {
@@ -195,6 +201,197 @@ public class Functions {
     if (g == null) return null;
     if (g instanceof WKBGeography) return ((WKBGeography) g).getPointY();
     return org.apache.sedona.common.Functions.y(toJTS(g));
+  }
+
+  /**
+   * Returns the smallest convex region containing {@code g} on the sphere.
+   *
+   * <p>The result follows the usual convex-hull dimensionality rules: one unique vertex produces a
+   * point, two or more collinear vertices produce a line, and non-collinear vertices produce a
+   * polygon whose edges are geodesics. Empty inputs preserve their input type.
+   *
+   * @throws UnsupportedOperationException when the hull is the full sphere, which cannot be
+   *     represented by OGC WKB
+   */
+  public static Geography convexHull(Geography g) {
+    if (g == null) return null;
+    if (g instanceof WKBGeography && ((WKBGeography) g).isEmpty()) return g;
+    if (!(g instanceof WKBGeography) && g.numShapes() == 0) return g;
+
+    Geography typed = (g instanceof WKBGeography) ? ((WKBGeography) g).getS2Geography() : g;
+    S2ConvexHullQuery query = new S2ConvexHullQuery();
+    List<S2Point> vertices = new ArrayList<>();
+    boolean needsJtsFallback = addPointAndLineVertices(typed, query, vertices);
+    if (needsJtsFallback) {
+      Geometry jts = toJTS(g);
+      if (jts != null) addJtsPointAndLineVertices(jts, query, vertices);
+    }
+    boolean hasPolygon = addPolygonRegions(typed, query, vertices);
+    if (vertices.isEmpty() && !hasPolygon) return g;
+
+    S2Loop loop = query.getConvexHull();
+    if (loop.isFull()) {
+      throw new UnsupportedOperationException(
+          "ST_ConvexHull produced the full sphere, which cannot be represented as OGC WKB");
+    }
+
+    Geography result;
+    S2Point[] degenerateHull = vertices.isEmpty() ? null : getDegenerateHull(vertices);
+    if (degenerateHull != null && degenerateHull.length == 1) {
+      result = new SinglePointGeography(degenerateHull[0]);
+    } else if (degenerateHull != null) {
+      result =
+          new SinglePolylineGeography(
+              new S2Polyline(List.of(degenerateHull[0], degenerateHull[1])));
+    } else {
+      result = new PolygonGeography(new S2Polygon(loop));
+    }
+
+    result.setSRID(g.getSRID());
+    return WKBGeography.fromS2Geography(result);
+  }
+
+  /**
+   * Collects geographies into the corresponding multi-geography or geography collection. Null
+   * elements are ignored, member order and duplicates are retained, and the first non-null input
+   * supplies the output SRID.
+   */
+  public static Geography createMultiGeography(Geography[] geographies) {
+    List<Geometry> geometries = new ArrayList<>();
+    Integer srid = null;
+    for (Geography geography : geographies) {
+      if (geography == null) continue;
+      if (srid == null) srid = geography.getSRID();
+      Geometry geometry = toJTS(geography);
+      if (geometry != null) geometries.add(geometry);
+    }
+
+    Geometry result =
+        org.apache.sedona.common.Functions.createMultiGeometry(geometries.toArray(new Geometry[0]));
+    if (srid != null) result.setSRID(srid);
+    return WKBGeography.fromJTS(result);
+  }
+
+  /**
+   * Adds point and polyline vertices from the S2 representation.
+   *
+   * @return whether an empty S2 polyline needs a JTS fallback to recover coincident source vertices
+   *     that S2Builder collapsed
+   */
+  private static boolean addPointAndLineVertices(
+      Geography geography, S2ConvexHullQuery query, List<S2Point> vertices) {
+    if (geography instanceof PointGeography) {
+      for (S2Point point : ((PointGeography) geography).getPoints()) {
+        query.addPoint(point);
+        vertices.add(point);
+      }
+      return false;
+    }
+    if (geography instanceof PolylineGeography) {
+      List<S2Polyline> polylines = ((PolylineGeography) geography).getPolylines();
+      boolean needsJtsFallback = polylines.isEmpty();
+      for (S2Polyline polyline : polylines) {
+        if (polyline.numVertices() < 2) {
+          needsJtsFallback = true;
+        } else {
+          query.addPolyline(polyline);
+          vertices.addAll(polyline.vertices());
+        }
+      }
+      return needsJtsFallback;
+    }
+    if (geography instanceof GeographyCollection) {
+      boolean needsJtsFallback = false;
+      for (Geography feature : ((GeographyCollection) geography).getFeatures()) {
+        needsJtsFallback |= addPointAndLineVertices(feature, query, vertices);
+      }
+      return needsJtsFallback;
+    }
+    return false;
+  }
+
+  private static void addJtsPointAndLineVertices(
+      Geometry geometry, S2ConvexHullQuery query, List<S2Point> vertices) {
+    if (geometry instanceof Polygon) return;
+    if (geometry instanceof Point || geometry instanceof LineString) {
+      for (org.locationtech.jts.geom.Coordinate coordinate : geometry.getCoordinates()) {
+        S2Point vertex = S2LatLng.fromDegrees(coordinate.getY(), coordinate.getX()).toPoint();
+        query.addPoint(vertex);
+        vertices.add(vertex);
+      }
+      return;
+    }
+    if (geometry instanceof GeometryCollection) {
+      for (int i = 0; i < geometry.getNumGeometries(); i++) {
+        addJtsPointAndLineVertices(geometry.getGeometryN(i), query, vertices);
+      }
+    }
+  }
+
+  /**
+   * Adds polygon regions to the hull query. Polygons must be added as regions rather than as vertex
+   * sets: on the sphere, ring orientation can make a polygon contain more than a hemisphere, whose
+   * hull is the full sphere.
+   *
+   * @return whether a non-empty polygon was added
+   */
+  private static boolean addPolygonRegions(
+      Geography geography, S2ConvexHullQuery query, List<S2Point> vertices) {
+    if (geography instanceof PolygonGeography) {
+      S2Polygon polygon = ((PolygonGeography) geography).polygon;
+      if (polygon.isEmpty()) return false;
+      query.addPolygon(polygon);
+      for (int i = 0; i < polygon.numLoops(); i++) {
+        S2Loop loop = polygon.loop(i);
+        if (loop.depth() == 0 && !loop.isEmptyOrFull()) {
+          vertices.addAll(loop.vertices());
+        }
+      }
+      return true;
+    }
+    if (geography instanceof GeographyCollection) {
+      boolean hasPolygon = false;
+      for (Geography feature : ((GeographyCollection) geography).getFeatures()) {
+        hasPolygon |= addPolygonRegions(feature, query, vertices);
+      }
+      return hasPolygon;
+    }
+    return false;
+  }
+
+  /**
+   * Returns either one point for a point hull, two endpoints for a collinear hull, or {@code null}
+   * for a polygonal hull. The two-pass farthest-point search is linear and finds the endpoints of
+   * any set contained by one geodesic segment.
+   */
+  private static S2Point[] getDegenerateHull(List<S2Point> vertices) {
+    S2Point firstEndpoint = farthestPoint(vertices.get(0), vertices);
+    S2Point secondEndpoint = farthestPoint(firstEndpoint, vertices);
+    S1Angle span = new S1Angle(firstEndpoint, secondEndpoint);
+    if (span.lessOrEquals(PROJECT_PERPENDICULAR_ERROR)) {
+      return new S2Point[] {firstEndpoint};
+    }
+
+    for (S2Point vertex : vertices) {
+      if (S2EdgeUtil.getDistance(vertex, firstEndpoint, secondEndpoint)
+          .greaterThan(PROJECT_PERPENDICULAR_ERROR)) {
+        return null;
+      }
+    }
+    return new S2Point[] {firstEndpoint, secondEndpoint};
+  }
+
+  private static S2Point farthestPoint(S2Point origin, List<S2Point> vertices) {
+    S2Point farthest = origin;
+    S1ChordAngle farthestDistance = S1ChordAngle.ZERO;
+    for (S2Point vertex : vertices) {
+      S1ChordAngle distance = new S1ChordAngle(origin, vertex);
+      if (distance.greaterThan(farthestDistance)) {
+        farthest = vertex;
+        farthestDistance = distance;
+      }
+    }
+    return farthest;
   }
 
   // ─── Level 2: Geodesic metrics ───────────────────────────────────────────
