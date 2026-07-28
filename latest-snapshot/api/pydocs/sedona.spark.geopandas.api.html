@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -6043,6 +6042,79 @@ using the <a class="reference internal" href="#sedona.spark.geopandas.GeoDataFra
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoDataFrame.crs">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">crs</span></span><a class="headerlink" href="#sedona.spark.geopandas.GeoDataFrame.crs" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoDataFrame.dissolve">
+<span class="sig-name descname"><span class="pre">dissolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggfunc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'first'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropna</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'unary'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'coverage'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'disjoint_subset'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'unary'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoDataFrame" title="sedona.spark.geopandas.geodataframe.GeoDataFrame"><span class="pre">GeoDataFrame</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geodataframe.html#GeoDataFrame.dissolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoDataFrame.dissolve" title="Permalink to this definition"></a></dt>
+<dd><p>Dissolve geometries within groups using distributed aggregation.</p>
+<p>Geometry unions are evaluated by Sedona’s <code class="docutils literal notranslate"><span class="pre">ST_Union_Aggr</span></code> aggregate.
+Attribute columns use validated native Spark aggregate expressions and
+therefore remain distributed as well.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>by</strong> (<em>column label</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><em>column labels</em><em>, </em><em>default None</em>) – Columns defining the groups. <code class="docutils literal notranslate"><span class="pre">None</span></code> dissolves all rows into one
+group. Arbitrary driver-side grouping vectors are not supported.</p></li>
+<li><p><strong>aggfunc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>callable</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>default &quot;first&quot;</em>) – Aggregation(s) for non-geometry columns. <code class="docutils literal notranslate"><span class="pre">first</span></code>, <code class="docutils literal notranslate"><span class="pre">last</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">count</span></code> support every Spark data type. <code class="docutils literal notranslate"><span class="pre">nunique</span></code> supports
+numeric, boolean, and string columns. <code class="docutils literal notranslate"><span class="pre">min</span></code>, <code class="docutils literal notranslate"><span class="pre">max</span></code>, <code class="docutils literal notranslate"><span class="pre">sum</span></code>,
+<code class="docutils literal notranslate"><span class="pre">mean</span></code>, <code class="docutils literal notranslate"><span class="pre">median</span></code>, <code class="docutils literal notranslate"><span class="pre">std</span></code>, and <code class="docutils literal notranslate"><span class="pre">var</span></code> support numeric and
+boolean columns. String <code class="docutils literal notranslate"><span class="pre">sum</span></code> and every <code class="docutils literal notranslate"><span class="pre">prod</span></code> aggregation are
+not supported.</p></li>
+<li><p><strong>as_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default True</em>) – Place grouping columns in the result index.</p></li>
+<li><p><strong>level</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>name</em><em>, or </em><em>sequence</em><em>, </em><em>default None</em>) – Group by one or more input index levels. When supplied, <code class="docutils literal notranslate"><span class="pre">level</span></code>
+takes precedence over <code class="docutils literal notranslate"><span class="pre">by</span></code>, matching pandas.</p></li>
+<li><p><strong>sort</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default True</em>) – Sort group keys. With <code class="docutils literal notranslate"><span class="pre">False</span></code>, groups follow first occurrence.
+Preserving that order still requires a distributed sort by each
+group’s first source-row position.</p></li>
+<li><p><strong>observed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default False</em>) – For categorical groupers, <code class="docutils literal notranslate"><span class="pre">True</span></code> returns observed groups.
+Materializing unobserved categorical combinations is unsupported.</p></li>
+<li><p><strong>dropna</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default True</em>) – Drop null grouping keys when true.</p></li>
+<li><p><strong>method</strong> (<em>{&quot;unary&quot;}</em><em>, </em><em>default &quot;unary&quot;</em>) – Union algorithm. Sedona currently supports only the robust unary
+union for this API.</p></li>
+<li><p><strong>grid_size</strong> (<em>None</em><em>, </em><em>default None</em>) – Fixed-precision union is not currently supported.</p></li>
+<li><p><strong>**kwargs</strong> – <code class="docutils literal notranslate"><span class="pre">numeric_only</span></code> is supported for non-dict aggregations.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A distributed GeoDataFrame with one row per group.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoDataFrame" title="sedona.spark.geopandas.GeoDataFrame">GeoDataFrame</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataFrame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gdf</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">{</span>
+<span class="gp">... </span>        <span class="s2">&quot;zone&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">],</span>
+<span class="gp">... </span>        <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+<span class="gp">... </span>        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)],</span>
+<span class="gp">... </span>    <span class="p">},</span>
+<span class="gp">... </span>    <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gdf</span><span class="o">.</span><span class="n">dissolve</span><span class="p">(</span><span class="s2">&quot;zone&quot;</span><span class="p">,</span> <span class="n">aggfunc</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+<span class="go">                          geometry  value</span>
+<span class="go">zone</span>
+<span class="go">a     MULTIPOINT ((0 0), (1 1))      3</span>
+<span class="go">b                   POINT (5 5)      3</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>Python row UDFs are not used. Callable aliases are limited to built-in
+<code class="docutils literal notranslate"><span class="pre">min</span></code>, <code class="docutils literal notranslate"><span class="pre">max</span></code>, and <code class="docutils literal notranslate"><span class="pre">sum</span></code>, plus NumPy <code class="docutils literal notranslate"><span class="pre">amin</span></code>, <code class="docutils literal notranslate"><span class="pre">amax</span></code>, <code class="docutils literal notranslate"><span class="pre">min</span></code>,
+<code class="docutils literal notranslate"><span class="pre">max</span></code>, <code class="docutils literal notranslate"><span class="pre">sum</span></code>, <code class="docutils literal notranslate"><span class="pre">mean</span></code>, <code class="docutils literal notranslate"><span class="pre">median</span></code>, <code class="docutils literal notranslate"><span class="pre">std</span></code>, and <code class="docutils literal notranslate"><span class="pre">var</span></code>.
+<code class="docutils literal notranslate"><span class="pre">first</span></code> and <code class="docutils literal notranslate"><span class="pre">last</span></code> follow source row order and skip null and NaN
+values. Numeric and boolean <code class="docutils literal notranslate"><span class="pre">sum</span></code> use pandas’ zero identity for an
+all-null group; boolean sums are returned as integers and boolean
+statistical aggregations as floating-point values.</p>
+<p>GeoPandas flattens multiple aggregation labels into a one-level object
+index containing tuples. pandas-on-Spark cannot represent tuple-valued
+labels in a one-level column index, so Sedona keeps those results as a
+two-level <code class="docutils literal notranslate"><span class="pre">MultiIndex</span></code> and uses <code class="docutils literal notranslate"><span class="pre">(geometry_name,</span> <span class="pre">&quot;&quot;)</span></code> for the
+active geometry label.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoDataFrame.from_arrow">

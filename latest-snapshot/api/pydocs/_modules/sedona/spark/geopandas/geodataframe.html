@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geodataframe &mdash; Apache Sedona Python Documentation</title>
@@ -226,6 +225,7 @@
 <span class="c1"># under the License.</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">builtins</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
 
@@ -239,10 +239,31 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sgpd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Series</span> <span class="k">as</span> <span class="n">PandasOnSparkSeries</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">PandasOnSparkDataFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.internal</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">InternalField</span><span class="p">,</span>
+    <span class="n">InternalFrame</span><span class="p">,</span>
+    <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">,</span>
+    <span class="n">SPARK_INDEX_NAME_FORMAT</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">scol_for</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">F</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BooleanType</span><span class="p">,</span>
+    <span class="n">ByteType</span><span class="p">,</span>
+    <span class="n">DoubleType</span><span class="p">,</span>
+    <span class="n">FloatType</span><span class="p">,</span>
+    <span class="n">IntegerType</span><span class="p">,</span>
+    <span class="n">LongType</span><span class="p">,</span>
+    <span class="n">NumericType</span><span class="p">,</span>
+    <span class="n">ShortType</span><span class="p">,</span>
+    <span class="n">StringType</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_advice</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoFrame</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_aggregates</span> <span class="k">as</span> <span class="n">sta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_constructors</span> <span class="k">as</span> <span class="n">stc</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas.api.extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_extension_dtype</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">geopandas.geodataframe</span><span class="w"> </span><span class="kn">import</span> <span class="n">crs_mismatch_error</span>
@@ -326,6 +347,359 @@
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">base_message</span> <span class="o">+</span> <span class="n">workaround</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_dissolve_aggfunc</span><span class="p">(</span><span class="n">aggfunc</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Translate explicitly supported callables to native aggregate names.&quot;&quot;&quot;</span>
+
+    <span class="n">supported_names</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;count&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;first&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;last&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;max&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;median&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;min&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nunique&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;std&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;sum&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;var&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">callable_names</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">builtins</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">builtins</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">builtins</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span> <span class="s2">&quot;sum&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span> <span class="s2">&quot;median&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span> <span class="s2">&quot;sum&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">,</span> <span class="s2">&quot;var&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalize_one</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;prod&quot;</span><span class="p">,</span> <span class="s2">&quot;product&quot;</span><span class="p">}:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="s2">&quot;Sedona dissolve does not support the prod aggregation.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_names</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Sedona dissolve does not support the </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2"> aggregation.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">for</span> <span class="n">known_callable</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">callable_names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">known_callable</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Sedona dissolve does not support the prod aggregation.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Sedona dissolve only supports documented aggregation names and &quot;</span>
+            <span class="s2">&quot;known built-in or NumPy aggregation callables.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">aggfunc</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="p">(</span>
+                <span class="p">[</span><span class="n">normalize_one</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span>
+                <span class="k">else</span> <span class="n">normalize_one</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">aggfunc</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">aggfunc</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">normalize_one</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">aggfunc</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">normalize_one</span><span class="p">(</span><span class="n">aggfunc</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_DissolveGroupers</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">NamedTuple</span><span class="p">):</span>
+    <span class="n">expressions</span><span class="p">:</span> <span class="nb">list</span>
+    <span class="n">fields</span><span class="p">:</span> <span class="nb">list</span>
+    <span class="n">index_names</span><span class="p">:</span> <span class="nb">list</span>
+    <span class="n">column_labels</span><span class="p">:</span> <span class="nb">list</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_resolve_dissolve_groupers</span><span class="p">(</span>
+    <span class="n">frame</span><span class="p">,</span>
+    <span class="n">internal</span><span class="p">,</span>
+    <span class="n">geometry_label</span><span class="p">,</span>
+    <span class="n">by</span><span class="p">,</span>
+    <span class="n">level</span><span class="p">,</span>
+    <span class="n">observed</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve dissolve groupers without constructing the aggregation plan.&quot;&quot;&quot;</span>
+
+    <span class="n">group_expressions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">group_fields</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">group_index_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">grouped_column_labels</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="k">else</span> <span class="p">[</span><span class="n">level</span><span class="p">]</span>
+        <span class="n">index_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">level_position</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+                <span class="n">position</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">position</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">position</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">index_names</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">position</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">position</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">index_names</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Too many levels: Index has only </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">index_names</span><span class="p">)</span><span class="si">}</span><span class="s2"> levels&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">return</span> <span class="n">position</span>
+
+            <span class="n">wanted</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">value</span><span class="p">,)</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">position</span> <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index_names</span><span class="p">)</span> <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">wanted</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">matches</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Level </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The name </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> occurs multiple times, use a level number&quot;</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">level_position</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">levels</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
+            <span class="n">group_expressions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">[</span><span class="n">position</span><span class="p">])</span>
+            <span class="n">group_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">index_fields</span><span class="p">[</span><span class="n">position</span><span class="p">])</span>
+            <span class="n">group_index_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">[</span><span class="n">position</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">by</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">group_expressions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;long&quot;</span><span class="p">))</span>
+        <span class="n">group_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">group_index_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">groupers_are_column_labels</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">by</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">):</span>
+            <span class="n">groupers</span> <span class="o">=</span> <span class="p">[</span><span class="n">by</span><span class="p">]</span>
+            <span class="n">groupers_are_column_labels</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">by</span><span class="o">.</span><span class="n">_psdf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">frame</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="s2">&quot;Sedona dissolve requires Series groupers to come from &quot;</span>
+                    <span class="s2">&quot;the GeoDataFrame being dissolved.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">candidate</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">by</span><span class="p">]</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+                <span class="n">candidate</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">):</span>
+                <span class="n">groupers</span> <span class="o">=</span> <span class="p">[</span><span class="n">candidate</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">by</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">groupers</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">by</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">grouper</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                            <span class="s2">&quot;Sedona dissolve supports column labels, not &quot;</span>
+                            <span class="s2">&quot;driver-side grouping vectors.&quot;</span>
+                        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grouper</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Grouper for &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; is not 1-dimensional&quot;</span><span class="p">)</span>
+                    <span class="n">groupers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grouper</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="s2">&quot;Sedona dissolve supports column labels, not driver-side &quot;</span>
+                    <span class="s2">&quot;grouping vectors.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">grouper</span> <span class="ow">in</span> <span class="n">groupers</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">grouper</span><span class="o">.</span><span class="n">_column_label</span> <span class="o">==</span> <span class="n">geometry_label</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="s2">&quot;Grouping by the active geometry column is not supported.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">group_expressions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">spark_column_for</span><span class="p">(</span><span class="n">grouper</span><span class="o">.</span><span class="n">_column_label</span><span class="p">))</span>
+            <span class="n">group_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">field_for</span><span class="p">(</span><span class="n">grouper</span><span class="o">.</span><span class="n">_column_label</span><span class="p">))</span>
+            <span class="n">group_index_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grouper</span><span class="o">.</span><span class="n">_column_label</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">groupers_are_column_labels</span><span class="p">:</span>
+                <span class="n">grouped_column_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grouper</span><span class="o">.</span><span class="n">_column_label</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">group_expressions</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No group keys passed&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">observed</span><span class="p">:</span>
+        <span class="n">categorical_groupers</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">field</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">group_fields</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">CategoricalDtype</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">categorical_groupers</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Sedona dissolve cannot materialize unobserved categorical &quot;</span>
+                <span class="s2">&quot;groups; pass observed=True.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_DissolveGroupers</span><span class="p">(</span>
+        <span class="n">group_expressions</span><span class="p">,</span>
+        <span class="n">group_fields</span><span class="p">,</span>
+        <span class="n">group_index_names</span><span class="p">,</span>
+        <span class="n">grouped_column_labels</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_DissolveResultLabels</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">NamedTuple</span><span class="p">):</span>
+    <span class="n">geometry_label</span><span class="p">:</span> <span class="n">Label</span>
+    <span class="n">attribute_labels</span><span class="p">:</span> <span class="nb">list</span>
+    <span class="n">order_label</span><span class="p">:</span> <span class="n">Label</span>
+    <span class="n">geometry_name</span><span class="p">:</span> <span class="n">Label</span>
+    <span class="n">order_name</span><span class="p">:</span> <span class="n">Label</span>
+    <span class="n">column_label_names</span><span class="p">:</span> <span class="nb">list</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_dissolve_result_labels</span><span class="p">(</span>
+    <span class="n">internal</span><span class="p">,</span>
+    <span class="n">geometry_label</span><span class="p">,</span>
+    <span class="n">aggregation_specs</span><span class="p">,</span>
+    <span class="n">result_column_levels</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build non-colliding output labels for a dissolve result.&quot;&quot;&quot;</span>
+
+    <span class="n">result_geometry_label</span> <span class="o">=</span> <span class="n">geometry_label</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">result_column_levels</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">geometry_label</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">result_attribute_labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">spec</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">aggregation_specs</span><span class="p">]</span>
+    <span class="n">result_order_label_name</span> <span class="o">=</span> <span class="s2">&quot;__dissolve_group_order__&quot;</span>
+    <span class="n">result_order_label</span> <span class="o">=</span> <span class="p">(</span><span class="n">result_order_label_name</span><span class="p">,)</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">result_column_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">result_labels</span> <span class="o">=</span> <span class="p">{</span><span class="n">result_geometry_label</span><span class="p">,</span> <span class="o">*</span><span class="n">result_attribute_labels</span><span class="p">}</span>
+    <span class="n">result_order_suffix</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">result_order_label</span> <span class="ow">in</span> <span class="n">result_labels</span><span class="p">:</span>
+        <span class="n">result_order_suffix</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">result_order_label_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;__dissolve_group_order_</span><span class="si">{</span><span class="n">result_order_suffix</span><span class="si">}</span><span class="s2">__&quot;</span>
+        <span class="n">result_order_label</span> <span class="o">=</span> <span class="p">(</span><span class="n">result_order_label_name</span><span class="p">,)</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">result_column_levels</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="p">)</span>
+
+    <span class="n">result_geometry_name</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">result_geometry_label</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result_geometry_label</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="k">else</span> <span class="n">result_geometry_label</span>
+    <span class="p">)</span>
+    <span class="n">result_order_name</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">result_order_label</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result_order_label</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">result_order_label</span>
+    <span class="p">)</span>
+    <span class="n">result_column_label_names</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">internal</span><span class="o">.</span><span class="n">column_label_names</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">([</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">result_column_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)),</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">_DissolveResultLabels</span><span class="p">(</span>
+        <span class="n">result_geometry_label</span><span class="p">,</span>
+        <span class="n">result_attribute_labels</span><span class="p">,</span>
+        <span class="n">result_order_label</span><span class="p">,</span>
+        <span class="n">result_geometry_name</span><span class="p">,</span>
+        <span class="n">result_order_name</span><span class="p">,</span>
+        <span class="n">result_column_label_names</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_as_geodataframe_with_geometry</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">geometry_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrap a pandas-on-Spark result and restore its active geometry label.&quot;&quot;&quot;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">_geometry_column_name</span> <span class="o">=</span> <span class="n">geometry_name</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dissolve_aggregation_expression</span><span class="p">(</span>
+    <span class="n">column</span><span class="p">,</span>
+    <span class="n">field</span><span class="p">,</span>
+    <span class="n">aggregation</span><span class="p">,</span>
+    <span class="n">natural_order</span><span class="p">,</span>
+    <span class="n">column_label</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a validated native Spark aggregation for one attribute column.&quot;&quot;&quot;</span>
+
+    <span class="n">spark_type</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">spark_type</span>
+    <span class="n">is_categorical</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">CategoricalDtype</span><span class="p">)</span>
+    <span class="n">is_boolean</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">BooleanType</span><span class="p">)</span>
+    <span class="n">is_numeric</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">NumericType</span><span class="p">)</span>
+    <span class="n">is_float</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spark_type</span><span class="p">,</span> <span class="p">(</span><span class="n">FloatType</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">))</span>
+    <span class="n">dtype_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_categorical</span> <span class="k">else</span> <span class="n">spark_type</span><span class="o">.</span><span class="n">simpleString</span><span class="p">()</span>
+
+    <span class="n">clean_column</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">column</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">column</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_float</span> <span class="k">else</span> <span class="n">column</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;first&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">min_by</span><span class="p">(</span>
+            <span class="n">clean_column</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">clean_column</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">(),</span> <span class="n">natural_order</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;last&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">max_by</span><span class="p">(</span>
+            <span class="n">clean_column</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">clean_column</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">(),</span> <span class="n">natural_order</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">clean_column</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;nunique&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_categorical</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="n">is_numeric</span> <span class="ow">or</span> <span class="n">is_boolean</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">StringType</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Sedona dissolve does not support aggregation &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">aggregation</span><span class="si">!r}</span><span class="s2"> for column </span><span class="si">{</span><span class="n">column_label</span><span class="si">!r}</span><span class="s2"> with data &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;type </span><span class="si">{</span><span class="n">dtype_name</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">countDistinct</span><span class="p">(</span><span class="n">clean_column</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_categorical</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">is_numeric</span> <span class="ow">or</span> <span class="n">is_boolean</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Sedona dissolve supports aggregation &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">aggregation</span><span class="si">!r}</span><span class="s2"> only for numeric or boolean columns; &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;column </span><span class="si">{</span><span class="n">column_label</span><span class="si">!r}</span><span class="s2"> has data type </span><span class="si">{</span><span class="n">dtype_name</span><span class="si">!r}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">numeric_column</span> <span class="o">=</span> <span class="n">clean_column</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;double&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_boolean</span> <span class="k">else</span> <span class="n">clean_column</span>
+
+    <span class="k">if</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;sum&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_boolean</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">spark_type</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">ByteType</span><span class="p">,</span> <span class="n">ShortType</span><span class="p">,</span> <span class="n">IntegerType</span><span class="p">,</span> <span class="n">LongType</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">numeric_column</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;long&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;long&quot;</span><span class="p">)</span>
+            <span class="n">identity</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;long&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">FloatType</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">numeric_column</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+            <span class="n">identity</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">numeric_column</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;double&quot;</span><span class="p">)</span>
+            <span class="n">identity</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;double&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">numeric_column</span><span class="p">)</span>
+            <span class="n">identity</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">spark_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">identity</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">avg</span><span class="p">(</span><span class="n">numeric_column</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;median&quot;</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">numeric_column</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;std&quot;</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">stddev_samp</span><span class="p">(</span><span class="n">numeric_column</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;var&quot;</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">var_samp</span><span class="p">(</span><span class="n">numeric_column</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;min&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_boolean</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">clean_column</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;integer&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;boolean&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">clean_column</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">aggregation</span> <span class="o">==</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_boolean</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">clean_column</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;integer&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;boolean&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">clean_column</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected dissolve aggregation: </span><span class="si">{</span><span class="n">aggregation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">FloatType</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
 
 
 <div class="viewcode-block" id="GeoDataFrame"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GeoDataFrame</span><span class="p">(</span><span class="n">GeoFrame</span><span class="p">,</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
@@ -805,6 +1179,7 @@
         <span class="k">if</span> <span class="n">new_series</span><span class="p">:</span>
             <span class="c1"># Note: This casts GeoSeries back into pspd.Series, so we lose any metadata that&#39;s not serialized.</span>
             <span class="n">frame</span><span class="p">[</span><span class="n">geo_column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">level</span>
+            <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s2">&quot;_empty_crs_source&quot;</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">inplace</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">frame</span></div>
@@ -1585,6 +1960,390 @@
 <span class="sd">        &gt;&gt;&gt; df.plot(&quot;BoroName&quot;, cmap=&quot;Set1&quot;)  # doctest: +SKIP</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_geopandas</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeoDataFrame.dissolve"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.dissolve">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">dissolve</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">aggfunc</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">,</span>
+        <span class="n">as_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">level</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">sort</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">observed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">dropna</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;unary&quot;</span><span class="p">,</span> <span class="s2">&quot;coverage&quot;</span><span class="p">,</span> <span class="s2">&quot;disjoint_subset&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;unary&quot;</span><span class="p">,</span>
+        <span class="n">grid_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dissolve geometries within groups using distributed aggregation.</span>
+
+<span class="sd">        Geometry unions are evaluated by Sedona&#39;s ``ST_Union_Aggr`` aggregate.</span>
+<span class="sd">        Attribute columns use validated native Spark aggregate expressions and</span>
+<span class="sd">        therefore remain distributed as well.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        by : column label or list of column labels, default None</span>
+<span class="sd">            Columns defining the groups. ``None`` dissolves all rows into one</span>
+<span class="sd">            group. Arbitrary driver-side grouping vectors are not supported.</span>
+<span class="sd">        aggfunc : str, callable, list, or dict, default &quot;first&quot;</span>
+<span class="sd">            Aggregation(s) for non-geometry columns. ``first``, ``last``, and</span>
+<span class="sd">            ``count`` support every Spark data type. ``nunique`` supports</span>
+<span class="sd">            numeric, boolean, and string columns. ``min``, ``max``, ``sum``,</span>
+<span class="sd">            ``mean``, ``median``, ``std``, and ``var`` support numeric and</span>
+<span class="sd">            boolean columns. String ``sum`` and every ``prod`` aggregation are</span>
+<span class="sd">            not supported.</span>
+<span class="sd">        as_index : bool, default True</span>
+<span class="sd">            Place grouping columns in the result index.</span>
+<span class="sd">        level : int, name, or sequence, default None</span>
+<span class="sd">            Group by one or more input index levels. When supplied, ``level``</span>
+<span class="sd">            takes precedence over ``by``, matching pandas.</span>
+<span class="sd">        sort : bool, default True</span>
+<span class="sd">            Sort group keys. With ``False``, groups follow first occurrence.</span>
+<span class="sd">            Preserving that order still requires a distributed sort by each</span>
+<span class="sd">            group&#39;s first source-row position.</span>
+<span class="sd">        observed : bool, default False</span>
+<span class="sd">            For categorical groupers, ``True`` returns observed groups.</span>
+<span class="sd">            Materializing unobserved categorical combinations is unsupported.</span>
+<span class="sd">        dropna : bool, default True</span>
+<span class="sd">            Drop null grouping keys when true.</span>
+<span class="sd">        method : {&quot;unary&quot;}, default &quot;unary&quot;</span>
+<span class="sd">            Union algorithm. Sedona currently supports only the robust unary</span>
+<span class="sd">            union for this API.</span>
+<span class="sd">        grid_size : None, default None</span>
+<span class="sd">            Fixed-precision union is not currently supported.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            ``numeric_only`` is supported for non-dict aggregations.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        GeoDataFrame</span>
+<span class="sd">            A distributed GeoDataFrame with one row per group.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from sedona.spark.geopandas import GeoDataFrame</span>
+<span class="sd">        &gt;&gt;&gt; from shapely.geometry import Point</span>
+<span class="sd">        &gt;&gt;&gt; gdf = GeoDataFrame(</span>
+<span class="sd">        ...     {</span>
+<span class="sd">        ...         &quot;zone&quot;: [&quot;a&quot;, &quot;a&quot;, &quot;b&quot;],</span>
+<span class="sd">        ...         &quot;value&quot;: [1, 2, 3],</span>
+<span class="sd">        ...         &quot;geometry&quot;: [Point(0, 0), Point(1, 1), Point(5, 5)],</span>
+<span class="sd">        ...     },</span>
+<span class="sd">        ...     crs=&quot;EPSG:4326&quot;,</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; gdf.dissolve(&quot;zone&quot;, aggfunc=&quot;sum&quot;).sort_index()</span>
+<span class="sd">                                  geometry  value</span>
+<span class="sd">        zone</span>
+<span class="sd">        a     MULTIPOINT ((0 0), (1 1))      3</span>
+<span class="sd">        b                   POINT (5 5)      3</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Python row UDFs are not used. Callable aliases are limited to built-in</span>
+<span class="sd">        ``min``, ``max``, and ``sum``, plus NumPy ``amin``, ``amax``, ``min``,</span>
+<span class="sd">        ``max``, ``sum``, ``mean``, ``median``, ``std``, and ``var``.</span>
+<span class="sd">        ``first`` and ``last`` follow source row order and skip null and NaN</span>
+<span class="sd">        values. Numeric and boolean ``sum`` use pandas&#39; zero identity for an</span>
+<span class="sd">        all-null group; boolean sums are returned as integers and boolean</span>
+<span class="sd">        statistical aggregations as floating-point values.</span>
+
+<span class="sd">        GeoPandas flattens multiple aggregation labels into a one-level object</span>
+<span class="sd">        index containing tuples. pandas-on-Spark cannot represent tuple-valued</span>
+<span class="sd">        labels in a one-level column index, so Sedona keeps those results as a</span>
+<span class="sd">        two-level ``MultiIndex`` and uses ``(geometry_name, &quot;&quot;)`` for the</span>
+<span class="sd">        active geometry label.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">!=</span> <span class="s2">&quot;unary&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Sedona dissolve currently supports only method=&#39;unary&#39;.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">grid_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Sedona dissolve does not support the grid_size argument.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">unsupported_kwargs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="s2">&quot;numeric_only&quot;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">unsupported_kwargs</span><span class="p">:</span>
+            <span class="n">unsupported</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">unsupported_kwargs</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Sedona dissolve does not support aggregation keyword(s): </span><span class="si">{</span><span class="n">unsupported</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">numeric_only</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;numeric_only&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">numeric_only</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;numeric_only must be a boolean&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">aggfunc</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;numeric_only&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Sedona dissolve supports numeric_only only with non-dict &quot;</span>
+                <span class="s2">&quot;aggregations.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">internal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
+        <span class="k">if</span> <span class="n">internal</span><span class="o">.</span><span class="n">column_labels_level</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Sedona dissolve does not yet support MultiIndex columns.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">geometry_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">_column_label</span>
+
+        <span class="n">groupers</span> <span class="o">=</span> <span class="n">_resolve_dissolve_groupers</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">internal</span><span class="p">,</span>
+            <span class="n">geometry_label</span><span class="p">,</span>
+            <span class="n">by</span><span class="p">,</span>
+            <span class="n">level</span><span class="p">,</span>
+            <span class="n">observed</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">group_expressions</span> <span class="o">=</span> <span class="n">groupers</span><span class="o">.</span><span class="n">expressions</span>
+        <span class="n">group_fields</span> <span class="o">=</span> <span class="n">groupers</span><span class="o">.</span><span class="n">fields</span>
+        <span class="n">group_index_names</span> <span class="o">=</span> <span class="n">groupers</span><span class="o">.</span><span class="n">index_names</span>
+        <span class="n">grouped_column_labels</span> <span class="o">=</span> <span class="n">groupers</span><span class="o">.</span><span class="n">column_labels</span>
+
+        <span class="n">normalized_aggfunc</span> <span class="o">=</span> <span class="n">_normalize_dissolve_aggfunc</span><span class="p">(</span><span class="n">aggfunc</span><span class="p">)</span>
+        <span class="n">available_attribute_labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">label</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">internal</span><span class="o">.</span><span class="n">column_labels</span> <span class="k">if</span> <span class="n">label</span> <span class="o">!=</span> <span class="n">geometry_label</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">normalized_aggfunc</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">normalized_aggfunc</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No objects to concatenate&quot;</span><span class="p">)</span>
+            <span class="n">missing_keys</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">key</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">normalized_aggfunc</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">key</span><span class="p">,)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_attribute_labels</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="n">missing_keys</span><span class="p">:</span>
+                <span class="n">missing</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">missing_keys</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Column(s) [</span><span class="si">{</span><span class="n">missing</span><span class="si">}</span><span class="s2">] do not exist&quot;</span><span class="p">)</span>
+            <span class="c1"># A grouping column is excluded from a normal aggregation, but a</span>
+            <span class="c1"># dict can request it explicitly, as pandas GroupBy.agg allows.</span>
+            <span class="n">attribute_labels</span> <span class="o">=</span> <span class="n">available_attribute_labels</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">attribute_labels</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">label</span>
+                <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">available_attribute_labels</span>
+                <span class="k">if</span> <span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">grouped_column_labels</span>
+            <span class="p">]</span>
+        <span class="k">if</span> <span class="n">numeric_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">aggfunc</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">attribute_labels</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">label</span>
+                <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">attribute_labels</span>
+                <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">field_for</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="p">]</span>
+
+        <span class="n">aggregation_specs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">normalized_aggfunc</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">result_column_levels</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="mi">2</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
+                    <span class="nb">isinstance</span><span class="p">(</span><span class="n">functions</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">functions</span> <span class="ow">in</span> <span class="n">normalized_aggfunc</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                <span class="p">)</span>
+                <span class="k">else</span> <span class="mi">1</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">functions</span> <span class="ow">in</span> <span class="n">normalized_aggfunc</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">source_label</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span><span class="p">,)</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="n">internal</span><span class="o">.</span><span class="n">field_for</span><span class="p">(</span><span class="n">source_label</span><span class="p">)</span>
+                <span class="n">function_names</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">functions</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">functions</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">functions</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="n">function_names</span><span class="p">:</span>
+                    <span class="n">result_label</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">function_name</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">result_column_levels</span> <span class="o">==</span> <span class="mi">2</span>
+                        <span class="k">else</span> <span class="n">source_label</span>
+                    <span class="p">)</span>
+                    <span class="n">aggregation_specs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">source_label</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">result_label</span><span class="p">)</span>
+                    <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">function_names</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">normalized_aggfunc</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">normalized_aggfunc</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+                <span class="k">else</span> <span class="p">[</span><span class="n">normalized_aggfunc</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">function_names</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No objects to concatenate&quot;</span><span class="p">)</span>
+            <span class="n">result_column_levels</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">normalized_aggfunc</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">source_label</span> <span class="ow">in</span> <span class="n">attribute_labels</span><span class="p">:</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="n">internal</span><span class="o">.</span><span class="n">field_for</span><span class="p">(</span><span class="n">source_label</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="n">function_names</span><span class="p">:</span>
+                    <span class="n">result_label</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="n">source_label</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">function_name</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">result_column_levels</span> <span class="o">==</span> <span class="mi">2</span>
+                        <span class="k">else</span> <span class="n">source_label</span>
+                    <span class="p">)</span>
+                    <span class="n">aggregation_specs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">source_label</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">result_label</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">normalized_aggfunc</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">aggregation_specs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No objects to concatenate&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">normalized_aggfunc</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">aggregation_specs</span><span class="p">:</span>
+            <span class="c1"># GeoPandas treats a non-empty dict containing only empty</span>
+            <span class="c1"># function lists as a geometry-only aggregation.</span>
+            <span class="n">result_column_levels</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">source_sdf</span> <span class="o">=</span> <span class="n">internal</span><span class="o">.</span><span class="n">spark_frame</span>
+        <span class="n">group_column_names</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">SPARK_INDEX_NAME_FORMAT</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">group_expressions</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="n">geometry_input_name</span> <span class="o">=</span> <span class="s2">&quot;__dissolve_geometry_input__&quot;</span>
+        <span class="n">order_input_name</span> <span class="o">=</span> <span class="s2">&quot;__dissolve_order_input__&quot;</span>
+        <span class="n">geometry_output_name</span> <span class="o">=</span> <span class="s2">&quot;__dissolve_geometry_output__&quot;</span>
+        <span class="n">order_output_spark_name</span> <span class="o">=</span> <span class="s2">&quot;__dissolve_group_order__&quot;</span>
+
+        <span class="n">attribute_input_names</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">attribute_input_columns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">source_label</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">aggregation_specs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">source_label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attribute_input_names</span><span class="p">:</span>
+                <span class="n">input_name</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;__dissolve_attribute_input_</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">attribute_input_names</span><span class="p">)</span><span class="si">}</span><span class="s2">__&quot;</span>
+                <span class="p">)</span>
+                <span class="n">attribute_input_names</span><span class="p">[</span><span class="n">source_label</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_name</span>
+                <span class="n">attribute_input_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">internal</span><span class="o">.</span><span class="n">spark_column_for</span><span class="p">(</span><span class="n">source_label</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">input_name</span><span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="n">aggregation_input</span> <span class="o">=</span> <span class="n">source_sdf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="o">*</span><span class="p">[</span>
+                <span class="n">expression</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">group_name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">expression</span><span class="p">,</span> <span class="n">group_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">group_expressions</span><span class="p">,</span>
+                    <span class="n">group_column_names</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">],</span>
+            <span class="n">internal</span><span class="o">.</span><span class="n">spark_column_for</span><span class="p">(</span><span class="n">geometry_label</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">geometry_input_name</span><span class="p">),</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">source_sdf</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">order_input_name</span><span class="p">),</span>
+            <span class="o">*</span><span class="n">attribute_input_columns</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">attribute_output_names</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot;__dissolve_attribute_</span><span class="si">{</span><span class="n">position</span><span class="si">}</span><span class="s2">__&quot;</span>
+            <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">aggregation_specs</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="n">attribute_aggregations</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">_dissolve_aggregation_expression</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">attribute_input_names</span><span class="p">[</span><span class="n">source_label</span><span class="p">]),</span>
+                <span class="n">field</span><span class="p">,</span>
+                <span class="n">function_name</span><span class="p">,</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">order_input_name</span><span class="p">),</span>
+                <span class="n">source_label</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">output_name</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span>
+                <span class="n">source_label</span><span class="p">,</span>
+                <span class="n">field</span><span class="p">,</span>
+                <span class="n">function_name</span><span class="p">,</span>
+                <span class="n">_</span><span class="p">,</span>
+            <span class="p">),</span> <span class="n">output_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">aggregation_specs</span><span class="p">,</span> <span class="n">attribute_output_names</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="c1"># CRS lookup is eager. Keep it after all aggregation validation so</span>
+        <span class="c1"># unsupported function/dtype combinations fail before Spark executes.</span>
+        <span class="n">crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
+        <span class="n">srid</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">geometry_union</span> <span class="o">=</span> <span class="n">sta</span><span class="o">.</span><span class="n">ST_Union_Aggr</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">geometry_input_name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">,</span> <span class="s2">&quot;union_all&quot;</span><span class="p">):</span>
+            <span class="c1"># GeoPandas 1.0 changed an all-null union from None to an empty</span>
+            <span class="c1"># GeometryCollection. Preserve its CRS in that representation.</span>
+            <span class="n">empty_geometry</span> <span class="o">=</span> <span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;GEOMETRYCOLLECTION EMPTY&quot;</span><span class="p">),</span>
+                <span class="n">srid</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">geometry_union</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">geometry_union</span><span class="p">,</span> <span class="n">empty_geometry</span><span class="p">)</span>
+        <span class="n">aggregated_sdf</span> <span class="o">=</span> <span class="n">aggregation_input</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="o">*</span><span class="n">group_column_names</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+            <span class="n">geometry_union</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">geometry_output_name</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">order_input_name</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">order_output_spark_name</span><span class="p">),</span>
+            <span class="o">*</span><span class="n">attribute_aggregations</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">dropna</span><span class="p">:</span>
+            <span class="n">aggregated_sdf</span> <span class="o">=</span> <span class="n">aggregated_sdf</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">group_column_names</span><span class="p">)</span>
+
+        <span class="n">result_labels</span> <span class="o">=</span> <span class="n">_build_dissolve_result_labels</span><span class="p">(</span>
+            <span class="n">internal</span><span class="p">,</span>
+            <span class="n">geometry_label</span><span class="p">,</span>
+            <span class="n">aggregation_specs</span><span class="p">,</span>
+            <span class="n">result_column_levels</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">result_internal</span> <span class="o">=</span> <span class="n">InternalFrame</span><span class="p">(</span>
+            <span class="n">spark_frame</span><span class="o">=</span><span class="n">aggregated_sdf</span><span class="p">,</span>
+            <span class="n">index_spark_columns</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">aggregated_sdf</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">group_column_names</span>
+            <span class="p">],</span>
+            <span class="n">index_names</span><span class="o">=</span><span class="n">group_index_names</span><span class="p">,</span>
+            <span class="n">index_fields</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">(</span>
+                    <span class="n">field</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">field</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="k">else</span> <span class="n">InternalField</span><span class="o">.</span><span class="n">from_struct_field</span><span class="p">(</span><span class="n">aggregated_sdf</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">group_fields</span><span class="p">,</span> <span class="n">group_column_names</span><span class="p">)</span>
+            <span class="p">],</span>
+            <span class="n">column_labels</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">result_labels</span><span class="o">.</span><span class="n">geometry_label</span><span class="p">,</span>
+                <span class="n">result_labels</span><span class="o">.</span><span class="n">order_label</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">result_labels</span><span class="o">.</span><span class="n">attribute_labels</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="n">data_spark_columns</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">aggregated_sdf</span><span class="p">,</span> <span class="n">geometry_output_name</span><span class="p">),</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">aggregated_sdf</span><span class="p">,</span> <span class="n">order_output_spark_name</span><span class="p">),</span>
+                <span class="o">*</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">aggregated_sdf</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">attribute_output_names</span><span class="p">],</span>
+            <span class="p">],</span>
+            <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">InternalField</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">),</span>
+                    <span class="n">aggregated_sdf</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">geometry_output_name</span><span class="p">],</span>
+                <span class="p">),</span>
+                <span class="n">InternalField</span><span class="o">.</span><span class="n">from_struct_field</span><span class="p">(</span>
+                    <span class="n">aggregated_sdf</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">order_output_spark_name</span><span class="p">]</span>
+                <span class="p">),</span>
+                <span class="o">*</span><span class="p">[</span>
+                    <span class="p">(</span>
+                        <span class="n">InternalField</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">aggregated_sdf</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="s2">&quot;last&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">}</span>
+                        <span class="k">else</span> <span class="n">InternalField</span><span class="o">.</span><span class="n">from_struct_field</span><span class="p">(</span>
+                            <span class="n">aggregated_sdf</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="p">(</span>
+                        <span class="n">_</span><span class="p">,</span>
+                        <span class="n">field</span><span class="p">,</span>
+                        <span class="n">function_name</span><span class="p">,</span>
+                        <span class="n">_</span><span class="p">,</span>
+                    <span class="p">),</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">aggregation_specs</span><span class="p">,</span> <span class="n">attribute_output_names</span><span class="p">)</span>
+                <span class="p">],</span>
+            <span class="p">],</span>
+            <span class="n">column_label_names</span><span class="o">=</span><span class="n">result_labels</span><span class="o">.</span><span class="n">column_label_names</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">aggregated</span> <span class="o">=</span> <span class="n">_as_geodataframe_with_geometry</span><span class="p">(</span>
+            <span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">result_internal</span><span class="p">),</span>
+            <span class="n">result_labels</span><span class="o">.</span><span class="n">geometry_name</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">sort</span><span class="p">:</span>
+            <span class="n">aggregated</span> <span class="o">=</span> <span class="n">_as_geodataframe_with_geometry</span><span class="p">(</span>
+                <span class="n">aggregated</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">na_position</span><span class="o">=</span><span class="s2">&quot;last&quot;</span><span class="p">),</span>
+                <span class="n">result_labels</span><span class="o">.</span><span class="n">geometry_name</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">aggregated</span> <span class="o">=</span> <span class="n">_as_geodataframe_with_geometry</span><span class="p">(</span>
+                <span class="n">aggregated</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">result_labels</span><span class="o">.</span><span class="n">order_name</span><span class="p">),</span>
+                <span class="n">result_labels</span><span class="o">.</span><span class="n">geometry_name</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">aggregated</span> <span class="o">=</span> <span class="n">_as_geodataframe_with_geometry</span><span class="p">(</span>
+            <span class="n">aggregated</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">result_labels</span><span class="o">.</span><span class="n">order_name</span><span class="p">]),</span>
+            <span class="n">result_labels</span><span class="o">.</span><span class="n">geometry_name</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">as_index</span><span class="p">:</span>
+            <span class="n">aggregated</span> <span class="o">=</span> <span class="n">_as_geodataframe_with_geometry</span><span class="p">(</span>
+                <span class="n">aggregated</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(),</span>
+                <span class="n">result_labels</span><span class="o">.</span><span class="n">geometry_name</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">aggregated</span><span class="p">,</span> <span class="s2">&quot;_empty_crs_source&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">aggregated</span></div>
 
     <span class="c1"># ============================================================================</span>
     <span class="c1"># SPATIAL OPERATIONS</span>

@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1813,6 +1812,17 @@
     <span class="md-ellipsis">
       
         Spatial Operations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distributed-geometry-aggregation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Distributed Geometry Aggregation
       
     </span>
   </a>
@@ -6230,6 +6240,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#distributed-geometry-aggregation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Distributed Geometry Aggregation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#data-conversion" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -6583,6 +6604,33 @@ matching geometries should also be cut to the mask:</p>
 <li><code>clip()</code> - Distributed geometry clipping</li>
 <li><code>sindex</code> - Spatial indexing (limited functionality)</li>
 </ul>
+<h3 id="distributed-geometry-aggregation">Distributed Geometry Aggregation<a class="headerlink" href="#distributed-geometry-aggregation" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>GeoDataFrame.dissolve()</code> - Group rows and union each group's geometries
+  with Sedona's native distributed aggregate</li>
+<li><code>sedona.spark.geopandas.tools.collect()</code> - Collect a distributed GeoSeries
+  into one geometry, using a homogeneous multipart geometry when needed</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">collect</span>
+
+<span class="n">by_region</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">dissolve</span><span class="p">(</span>
+    <span class="n">by</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">,</span>
+    <span class="n">aggfunc</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;population&quot;</span><span class="p">:</span> <span class="s2">&quot;sum&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;first&quot;</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">all_building_parts</span> <span class="o">=</span> <span class="n">collect</span><span class="p">(</span><span class="n">buildings</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+</code></pre></div>
+<p><code>dissolve</code> supports the <code>unary</code> union method. Fixed-precision <code>grid_size</code>,
+<code>coverage</code>, and <code>disjoint_subset</code> unions are rejected explicitly. Multiple
+attribute aggregations remain a two-level pandas-on-Spark <code>MultiIndex</code>;
+GeoPandas instead represents their tuple labels in a one-level object index.
+Native <code>first</code>, <code>last</code>, and <code>count</code> aggregation supports every attribute type;
+<code>nunique</code> supports numeric, boolean, and string columns; and <code>min</code>, <code>max</code>,
+<code>sum</code>, <code>mean</code>, <code>median</code>, <code>std</code>, and <code>var</code> support numeric and boolean columns.
+String <code>sum</code> and every <code>prod</code> aggregation are rejected explicitly. Callable
+aliases are limited to built-in <code>min</code>, <code>max</code>, and <code>sum</code>, plus NumPy <code>amin</code>,
+<code>amax</code>, <code>min</code>, <code>max</code>, <code>sum</code>, <code>mean</code>, <code>median</code>, <code>std</code>, and <code>var</code>.
+Both operations aggregate input rows on Spark executors. <code>collect</code> transfers
+only aggregate metadata and the API's single geometry result to the driver.</p>
 <h3 id="data-conversion">Data Conversion<a class="headerlink" href="#data-conversion" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>to_geopandas()</code> - Convert to traditional GeoPandas</li>
@@ -6658,7 +6706,7 @@ matching geometries should also be cut to the mask:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 28, 2026 02:46:04 UTC">July 28, 2026 02:46:04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 28, 2026 04:43:28 UTC">July 28, 2026 04:43:28</span>
   </span>
 
     

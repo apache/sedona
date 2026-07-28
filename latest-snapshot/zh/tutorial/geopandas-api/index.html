@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1823,6 +1822,17 @@
   <a href="#_16" class="md-nav__link">
     <span class="md-ellipsis">
       
+        分布式几何聚合
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
         数据转换
       
     </span>
@@ -1836,7 +1846,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_17" class="md-nav__link">
+  <a href="#_18" class="md-nav__link">
     <span class="md-ellipsis">
       
         完整工作流示例
@@ -1847,7 +1857,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_18" class="md-nav__link">
+  <a href="#_19" class="md-nav__link">
     <span class="md-ellipsis">
       
         资源与贡献
@@ -6233,6 +6243,17 @@
   <a href="#_16" class="md-nav__link">
     <span class="md-ellipsis">
       
+        分布式几何聚合
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
         数据转换
       
     </span>
@@ -6246,7 +6267,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_17" class="md-nav__link">
+  <a href="#_18" class="md-nav__link">
     <span class="md-ellipsis">
       
         完整工作流示例
@@ -6257,7 +6278,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_18" class="md-nav__link">
+  <a href="#_19" class="md-nav__link">
     <span class="md-ellipsis">
       
         资源与贡献
@@ -6583,14 +6604,39 @@
 <li><code>clip()</code> —— 分布式几何裁剪</li>
 <li><code>sindex</code> —— 空间索引（功能有限）</li>
 </ul>
-<h3 id="_16">数据转换<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<h3 id="_16">分布式几何聚合<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>GeoDataFrame.dissolve()</code> —— 对行进行分组，并使用 Sedona 原生分布式聚合
+  对每组几何执行并集</li>
+<li><code>sedona.spark.geopandas.tools.collect()</code> —— 将分布式 GeoSeries 聚合为一个
+  几何，并在需要时使用同构多部件几何</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">collect</span>
+
+<span class="n">by_region</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">dissolve</span><span class="p">(</span>
+    <span class="n">by</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">,</span>
+    <span class="n">aggfunc</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;population&quot;</span><span class="p">:</span> <span class="s2">&quot;sum&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;first&quot;</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">all_building_parts</span> <span class="o">=</span> <span class="n">collect</span><span class="p">(</span><span class="n">buildings</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
+</code></pre></div>
+<p><code>dissolve</code> 支持 <code>unary</code> 并集方法，并会明确拒绝定点精度 <code>grid_size</code>、
+<code>coverage</code> 与 <code>disjoint_subset</code> 并集。多个属性聚合会保留为 pandas-on-Spark
+的两级 <code>MultiIndex</code>；GeoPandas 则把对应元组标签放在单级 object 索引中。
+原生 <code>first</code>、<code>last</code> 与 <code>count</code> 聚合支持所有属性类型；<code>nunique</code> 支持数值、
+布尔与字符串列；<code>min</code>、<code>max</code>、<code>sum</code>、<code>mean</code>、<code>median</code>、<code>std</code> 与 <code>var</code>
+支持数值和布尔列。字符串 <code>sum</code> 与所有 <code>prod</code> 聚合都会被明确拒绝。可调用
+聚合仅限 Python 内置的 <code>min</code>、<code>max</code>、<code>sum</code>，以及 NumPy 的 <code>amin</code>、
+<code>amax</code>、<code>min</code>、<code>max</code>、<code>sum</code>、<code>mean</code>、<code>median</code>、<code>std</code> 与 <code>var</code>。
+两个操作都在 Spark executor 上聚合输入行。<code>collect</code> 只会把聚合元数据和
+该 API 所需的单个几何结果传输到 driver。</p>
+<h3 id="_17">数据转换<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>to_geopandas()</code> —— 转换为传统 GeoPandas</li>
 <li><code>to_wkb()</code>、<code>to_wkt()</code> —— 转换为 WKB/WKT</li>
 <li><code>from_xy()</code> —— 通过坐标创建几何</li>
 <li><code>geom_type</code> —— 获取几何类型</li>
 </ul>
-<h2 id="_17">完整工作流示例<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h2>
+<h2 id="_18">完整工作流示例<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaContext</span>
 
@@ -6634,7 +6680,7 @@
 
 <span class="nb">print</span><span class="p">(</span><span class="n">summary</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </code></pre></div>
-<h2 id="_18">资源与贡献<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h2>
+<h2 id="_19">资源与贡献<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h2>
 <p>完整且最新的 API 文档（包含方法签名、参数与示例）请参阅：</p>
 <p><strong>📚 <a href="https://sedona.apache.org/latest/api/pydocs/sedona.spark.geopandas.html">GeoPandas API 文档</a></strong></p>
 <p>Apache Sedona 的 GeoPandas API 是一个开源项目，欢迎参与贡献：可在 <a href="https://github.com/apache/sedona/issues/2230">GitHub issue tracker</a> 报告 bug、提出新需求或贡献代码。更多贡献指南请参阅 <a href="../../community/develop/">贡献者指南</a>。</p>
@@ -6658,7 +6704,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年7月28日 02:46:04 UTC">2026年7月28日 02:46:04</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年7月28日 04:43:28 UTC">2026年7月28日 04:43:28</span>
   </span>
 
     

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -1071,7 +1070,12 @@
 <span class="sd">        Same as `to_geopandas()`, without issuing the advice log for internal usage.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">pd_series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_internal_pandas</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">pd_series</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span>
+            <span class="n">pd_series</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">pd_series</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">pd_series</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="GeoSeries.to_spark_pandas"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.to_spark_pandas">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_spark_pandas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_psdf</span><span class="o">.</span><span class="n">_internal</span><span class="p">))</span></div>
