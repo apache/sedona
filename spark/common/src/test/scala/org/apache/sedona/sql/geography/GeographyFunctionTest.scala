@@ -185,6 +185,54 @@ class GeographyFunctionTest extends TestBaseScala {
       assertEquals("ST_LineString", row.getString(1))
       assertEquals(111195.10, row.getDouble(2), 1.0)
     }
+
+    it("ST_MakeLine preserves coincident and repeated vertices") {
+      val coincident = sparkSession
+        .sql("""
+          WITH source AS (
+            SELECT ST_GeogFromWKT('POINT (0 0)', 4326) AS point
+          ),
+          made AS (
+            SELECT point, ST_MakeLine(point, point) AS line
+            FROM source
+          )
+          SELECT
+            ST_AsText(line) AS wkt,
+            ST_NPoints(line) AS npoints,
+            ST_GeometryType(line) AS geom_type,
+            ST_NumGeometries(line) AS ngeoms,
+            ST_Length(line) AS length,
+            ST_Distance(line, point) AS distance,
+            ST_AsText(
+              ST_MakeLine(line, ST_GeogFromWKT('POINT (1 0)', 4326))
+            ) AS extended
+          FROM made
+        """)
+        .first()
+      assertEquals("LINESTRING (0 0, 0 0)", coincident.getString(0))
+      assertEquals(2, coincident.getInt(1))
+      assertEquals("ST_LineString", coincident.getString(2))
+      assertEquals(1, coincident.getInt(3))
+      assertEquals(0.0, coincident.getDouble(4), 0.0)
+      assertEquals(0.0, coincident.getDouble(5), 0.0)
+      assertEquals("LINESTRING (0 0, 0 0, 1 0)", coincident.getString(6))
+
+      val repeated = sparkSession
+        .sql("""
+          SELECT
+            ST_AsText(line) AS wkt,
+            ST_NPoints(line) AS npoints
+          FROM (
+            SELECT ST_MakeLine(
+              ST_GeogFromWKT('LINESTRING (0 0, 1 0)', 4326),
+              ST_GeogFromWKT('LINESTRING (1 0, 2 0)', 4326)
+            ) AS line
+          )
+        """)
+        .first()
+      assertEquals("LINESTRING (0 0, 1 0, 1 0, 2 0)", repeated.getString(0))
+      assertEquals(4, repeated.getInt(1))
+    }
   }
 
   // ─── Level 2: ST_Length, ST_Area, ST_Distance ──────────────────────────

@@ -26,10 +26,12 @@ import com.google.common.geometry.S2Loop;
 import com.google.common.geometry.S2Point;
 import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.S2Geography.PolygonGeography;
+import org.apache.sedona.common.S2Geography.WKBGeography;
 import org.apache.sedona.common.geography.Constructors;
 import org.apache.sedona.common.geography.Functions;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
@@ -46,6 +48,18 @@ public class FunctionTest {
     S2LatLng ll = new S2LatLng(p).normalized();
     assertDegAlmostEqual(ll.latDegrees(), expLatDeg);
     assertDegAlmostEqual(ll.lngDegrees(), expLngDeg);
+  }
+
+  private static Geography roundTripWKB(Geography geography) {
+    assertTrue(geography instanceof WKBGeography);
+    WKBGeography wkbGeography = (WKBGeography) geography;
+    return WKBGeography.fromWKB(wkbGeography.getWKBBytes(), geography.getSRID());
+  }
+
+  private static Geography geographyFromJTSWKT(String wkt, int srid) throws ParseException {
+    Geometry geometry = new WKTReader().read(wkt);
+    geometry.setSRID(srid);
+    return WKBGeography.fromJTS(geometry);
   }
 
   private static void assertRectLoopVertices(
@@ -173,9 +187,83 @@ public class FunctionTest {
     Geography end = Constructors.geogFromWKT("POINT (1 0)", 4326);
     Geography line = Functions.makeLine(start, end);
 
-    assertEquals("LINESTRING (0 0, 1 0)", line.toString());
+    assertEquals("LINESTRING (0 0, 1 0)", Functions.asText(line));
     assertEquals(4326, line.getSRID());
     assertEquals(111195.10, Functions.length(line), 1.0);
+  }
+
+  @Test
+  public void makeLine_coincidentPointsRemainUsableAfterWKBRoundTrip() throws ParseException {
+    Geography point = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography line = roundTripWKB(Functions.makeLine(point, point));
+
+    assertEquals("LINESTRING (0 0, 0 0)", Functions.asText(line));
+    assertEquals(2, Functions.nPoints(line));
+    assertEquals("ST_LineString", Functions.geometryType(line));
+    assertEquals(1, Functions.numGeometries(line));
+    assertEquals(0.0, Functions.length(line), 0.0);
+    assertEquals(0.0, Functions.distance(line, point), 0.0);
+
+    Geography end = Constructors.geogFromWKT("POINT (1 0)", 4326);
+    Geography extended = roundTripWKB(Functions.makeLine(line, end));
+    assertEquals("LINESTRING (0 0, 0 0, 1 0)", Functions.asText(extended));
+    assertEquals(3, Functions.nPoints(extended));
+  }
+
+  @Test
+  public void makeLine_preservesRepeatedVertices() throws ParseException {
+    Geography first = Constructors.geogFromWKT("LINESTRING (0 0, 1 0)", 4326);
+    Geography second = Constructors.geogFromWKT("LINESTRING (1 0, 2 0)", 4326);
+    Geography stitched = roundTripWKB(Functions.makeLine(first, second));
+    assertEquals("LINESTRING (0 0, 1 0, 1 0, 2 0)", Functions.asText(stitched));
+    assertEquals(4, Functions.nPoints(stitched));
+
+    Geography repeated = geographyFromJTSWKT("LINESTRING (0 0, 0 0, 1 0)", 4326);
+    Geography end = Constructors.geogFromWKT("POINT (2 0)", 4326);
+    Geography appended = roundTripWKB(Functions.makeLine(repeated, end));
+    assertEquals("LINESTRING (0 0, 0 0, 1 0, 2 0)", Functions.asText(appended));
+    assertEquals(4, Functions.nPoints(appended));
+  }
+
+  @Test
+  public void makeLine_multiPointAndLineString() throws ParseException {
+    Geography points = Constructors.geogFromWKT("MULTIPOINT ((0 0), (1 1))", 4326);
+    Geography line = Constructors.geogFromWKT("LINESTRING (2 2, 3 3)", 4326);
+    Geography result = roundTripWKB(Functions.makeLine(points, line));
+
+    Coordinate[] coordinates = Constructors.geogToGeometry(result).getCoordinates();
+    assertEquals(4, coordinates.length);
+    for (int i = 0; i < coordinates.length; i++) {
+      assertDegAlmostEqual(coordinates[i].x, i);
+      assertDegAlmostEqual(coordinates[i].y, i);
+    }
+  }
+
+  @Test
+  public void makeLine_antimeridianUsesGreatCircleLength() throws ParseException {
+    Geography start = Constructors.geogFromWKT("POINT (179 0)", 4326);
+    Geography end = Constructors.geogFromWKT("POINT (-179 0)", 4326);
+    Geography line = Functions.makeLine(start, end);
+
+    assertEquals("LINESTRING (179 0, -179 0)", Functions.asText(line));
+    assertEquals(222390.13, Functions.length(line), 1.0);
+  }
+
+  @Test
+  public void makeLine_usesFirstSRIDWithoutTransformation() throws ParseException {
+    Geography srid4326 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography srid3857 = Constructors.geogFromWKT("POINT (1 0)", 3857);
+    assertEquals(4326, Functions.makeLine(srid4326, srid3857).getSRID());
+
+    Geography srid0 = Constructors.geogFromWKT("POINT (0 0)", 0);
+    assertEquals(0, Functions.makeLine(srid0, srid4326).getSRID());
+  }
+
+  @Test
+  public void makeLine_nullArguments() throws ParseException {
+    Geography point = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    assertNull(Functions.makeLine(null, point));
+    assertNull(Functions.makeLine(point, null));
   }
 
   @Test
@@ -185,9 +273,7 @@ public class FunctionTest {
 
     IllegalArgumentException error =
         assertThrows(IllegalArgumentException.class, () -> Functions.makeLine(point, polygon));
-    assertEquals(
-        "ST_MakeLine only supports Point, MultiPoint and LineString geometries",
-        error.getMessage());
+    assertTrue(error.getMessage().contains("Point, MultiPoint and LineString geographies"));
   }
 
   // S2 area-weighted centroids on small polygons differ from planar by an O(d^2/R^2)

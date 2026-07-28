@@ -29,7 +29,9 @@ Return type: `Geography`
 
 Since: `v1.9.1`
 
-The output preserves the first input's SRID.
+Only the two-argument signature accepts Geography inputs. The array/aggregate form of `ST_MakeLine` remains Geometry-only.
+
+The output copies the first input's SRID without transforming either input or validating that their SRIDs match. If the inputs have different SRIDs, the second input's SRID is ignored. An SRID of `0` on the first input remains `0`.
 
 SQL Example
 
@@ -48,5 +50,5 @@ FROM (
 Output:
 
 ```
-LINESTRING (0 0, 1 0) | 111195.1
+LINESTRING (0 0, 1 0) | 111195.06627089891
 ```

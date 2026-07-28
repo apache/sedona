@@ -24,6 +24,9 @@ import java.util.List;
 import org.apache.sedona.common.S2Geography.*;
 import org.apache.sedona.common.sphere.Haversine;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.Point;
 
 public class Functions {
 
@@ -200,13 +203,32 @@ public class Functions {
   /**
    * Creates a line from two Point, MultiPoint, or LineString geographies. The returned geography
    * preserves the first input's SRID; its edges are interpreted as great-circle arcs by geography
-   * measurement functions.
+   * measurement functions. No CRS transformation or SRID compatibility check is performed; if the
+   * inputs have different SRIDs, the first input's SRID is used.
    */
   public static Geography makeLine(Geography g1, Geography g2) {
     if (g1 == null || g2 == null) return null;
-    Geometry line = org.apache.sedona.common.Functions.makeLine(toJTS(g1), toJTS(g2));
+    Geometry jts1 = toJTS(g1);
+    Geometry jts2 = toJTS(g2);
+    if (jts1 == null || jts2 == null) return null;
+    if (!isMakeLineInput(jts1) || !isMakeLineInput(jts2)) {
+      throw new IllegalArgumentException(
+          "ST_MakeLine only supports Point, MultiPoint and LineString geographies");
+    }
+    Geometry line = org.apache.sedona.common.Functions.makeLine(jts1, jts2);
     line.setSRID(g1.getSRID());
-    return Constructors.geomToGeography(line);
+    // Preserve the JTS coordinate sequence verbatim. Converting through S2 here would collapse
+    // zero-length edges and repeated vertices, changing ST_MakeLine's result and potentially
+    // producing an empty LineString that cannot round-trip through the Geography WKB reader.
+    Geography result = WKBGeography.fromJTS(line);
+    result.setSRID(g1.getSRID());
+    return result;
+  }
+
+  private static boolean isMakeLineInput(Geometry geometry) {
+    return geometry instanceof Point
+        || geometry instanceof MultiPoint
+        || geometry instanceof LineString;
   }
 
   // ─── Level 2: Geodesic metrics ───────────────────────────────────────────
