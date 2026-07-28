@@ -16,7 +16,9 @@
 # under the License.
 
 from .sjoin import sjoin
+from .clip import clip
 
 __all__ = [
+    "clip",
     "sjoin",
 ]

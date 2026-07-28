@@ -181,7 +181,8 @@ nyc_buildings.head()
 
 ### Spatial Filtering
 
-Use spatial indexing and filtering methods. Note that `cx` spatial indexing is not yet implemented in the current version:
+Use `cx` for distributed coordinate-based filtering and `clip` when the
+matching geometries should also be cut to the mask:
 
 ```python
 from shapely.geometry import box
@@ -194,13 +195,14 @@ central_park_bbox = box(
     40.789,  # top-right (longitude, latitude)
 )
 
-# Filter buildings within the bounding box using spatial index
-# Note: This requires collecting data to driver for spatial filtering
-# For large datasets, consider using spatial joins instead
-buildings_sample = nyc_buildings.sample(1000)  # Sample for demonstration
-central_park_buildings = buildings_sample[
-    buildings_sample.geometry.intersects(central_park_bbox)
+# Select features that intersect the coordinate bounds
+central_park_buildings = nyc_buildings.cx[
+    -73.973:-73.951,
+    40.764:40.789,
 ]
+
+# Cut the selected geometries to the exact polygon boundary
+central_park_buildings = central_park_buildings.clip(central_park_bbox)
 
 # Display results
 print(
@@ -296,7 +298,7 @@ buildings_projected["perimeter"] = buildings_projected.geometry.length
 
 ## Supported Operations
 
-The GeoPandas API for Apache Sedona has implemented **39 GeoSeries functions** and **10 GeoDataFrame functions**, covering the most commonly used GeoPandas operations:
+The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries and GeoDataFrame operations:
 
 ### Data I/O
 
@@ -307,6 +309,8 @@ The GeoPandas API for Apache Sedona has implemented **39 GeoSeries functions** a
 ### Spatial Operations
 
 - `sjoin()` - Spatial joins with various predicates
+- `cx` - Coordinate-based spatial filtering
+- `clip()` - Clip geometries with scalar, rectangular, or distributed masks
 - `buffer()` - Geometric buffering
 - `distance()` - Distance calculations
 - `intersects()`, `contains()`, `within()` - Spatial predicates
@@ -333,6 +337,8 @@ The GeoPandas API for Apache Sedona has implemented **39 GeoSeries functions** a
 - `intersects()`, `contains()`, `within()` - Spatial predicates
 - `intersection()` - Geometric intersection
 - `make_valid()` - Geometry validation and repair
+- `cx` - Coordinate-based spatial filtering
+- `clip()` - Distributed geometry clipping
 - `sindex` - Spatial indexing (limited functionality)
 
 ### Data Conversion
