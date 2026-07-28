@@ -21,6 +21,8 @@
 
 Introduction: Returns the grid coordinate of the given world coordinates as a Point.
 
+For the geometry variant, if neither `raster` nor `point` has a defined CRS, their coordinates are used directly. If exactly one input has a defined CRS, the function throws an error. If both inputs have the same CRS, their coordinates are used directly. Otherwise, `point` is transformed to the CRS of `raster`. Numeric world coordinates are always interpreted in the raster's coordinate space.
+
 ![RS_WorldToRasterCoord](../../../image/RS_WorldToRasterCoord/RS_WorldToRasterCoord.svg "RS_WorldToRasterCoord")
 
 Format:
@@ -48,7 +50,7 @@ POINT (1 1)
 SQL Example
 
 ```sql
-SELECT RS_WorldToRasterCoord(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0, 4326), ST_GeomFromText('POINT (-52 51)')) from rasters;
+SELECT RS_WorldToRasterCoord(ST_MakeEmptyRaster(1, 5, 5, -53, 51, 1, -1, 0, 0, 4326), ST_SetSRID(ST_GeomFromText('POINT (-52 51)'), 4326)) from rasters;
 ```
 
 Output:
@@ -58,4 +60,4 @@ POINT (2 1)
 ```
 
 !!!Note
-    If the given geometry point is not in the same CRS as the given raster, the given geometry will be transformed to the given raster's CRS. You can use [ST_Transform](../Spatial-Reference-System/ST_Transform.md) to transform the geometry beforehand.
+    You can use [ST_Transform](../Spatial-Reference-System/ST_Transform.md) to transform the geometry beforehand.

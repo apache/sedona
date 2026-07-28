@@ -37,10 +37,8 @@ import javax.media.jai.RasterFactory;
 import javax.media.jai.RenderedImageAdapter;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.descriptive.rank.Median;
-import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.RasterAccessors;
-import org.apache.sedona.common.raster.RasterEditors;
 import org.geotools.api.coverage.grid.GridEnvelope;
 import org.geotools.api.metadata.spatial.PixelOrientation;
 import org.geotools.api.referencing.FactoryException;
@@ -66,6 +64,9 @@ import org.locationtech.jts.geom.Geometry;
 /** Utility functions for working with GridCoverage2D objects. */
 public class RasterUtils {
   private RasterUtils() {}
+
+  public static final String MISSING_CRS_ERROR_MESSAGE =
+      "Raster operations require both operands to have a CRS or neither operand to have a CRS";
 
   private static final GridCoverageFactory gridCoverageFactory =
       CoverageFactoryFinder.getGridCoverageFactory(null);
@@ -540,62 +541,86 @@ public class RasterUtils {
     }
   }
 
+  /**
+   * Transforms a geometry to a target CRS when both are defined. If neither is defined, the
+   * geometry is returned unchanged. Exactly one defined CRS is rejected.
+   *
+   * @param geometry geometry to transform
+   * @param targetCRS target coordinate reference system
+   * @return the transformed geometry, or the input geometry when neither CRS is defined
+   * @throws IllegalArgumentException if exactly one CRS is defined
+   */
   public static Geometry convertCRSIfNeeded(
       Geometry geometry, CoordinateReferenceSystem targetCRS) {
     int geomSRID = geometry.getSRID();
-    // If the geometry has a SRID, and it is not the same as the raster CRS, we need to transform
-    // the geometry to the raster CRS.
-    // Note that:
-    // In Sedona vector, we do not perform implicit CRS transform. Everything must be done
-    // explicitly via ST_Transform
-    // In Sedona raster, we do implicit CRS transform if the raster has a CRS. If the SRID of
-    // the geometry is 0, we assume it is 4326.
-    if (geomSRID == 0) {
-      geomSRID = 4326;
+    boolean targetHasCRS = hasCRS(targetCRS);
+    boolean geometryHasCRS = geomSRID > 0;
+    ensureMatchingCRSPresence(targetHasCRS, geometryHasCRS);
+
+    if (!targetHasCRS) {
+      return geometry;
     }
-    if (targetCRS != null && !(targetCRS instanceof DefaultEngineeringCRS)) {
-      try {
-        geometry =
-            FunctionsGeoTools.transformToGivenTarget(geometry, "epsg:" + geomSRID, targetCRS, true);
-      } catch (FactoryException | TransformException e) {
-        throw new RuntimeException("Cannot transform CRS of query window", e);
-      }
+
+    try {
+      geometry =
+          FunctionsGeoTools.transformToGivenTarget(geometry, "epsg:" + geomSRID, targetCRS, true);
+    } catch (FactoryException | TransformException e) {
+      throw new RuntimeException("Cannot transform CRS of query window", e);
     }
     return geometry;
   }
 
   /**
-   * If the raster has a CRS, then it transforms the geom to the raster's CRS. If any of the inputs,
-   * raster or geom doesn't have a CRS, it defaults to 4326.
+   * Aligns a geometry with a raster's CRS. If neither input has a CRS, their coordinates are used
+   * directly. If exactly one input has a CRS, this method throws. If both inputs have a CRS and
+   * they differ, the geometry is transformed to the raster's CRS.
    *
    * @param raster
    * @param geom
    * @return
-   * @throws FactoryException
+   * @throws IllegalArgumentException if exactly one input has a CRS
    */
-  public static Pair<GridCoverage2D, Geometry> setDefaultCRSAndTransform(
-      GridCoverage2D raster, Geometry geom) throws FactoryException {
-    int rasterSRID = RasterAccessors.srid(raster);
-    int geomSRID = Functions.getSRID(geom);
-
-    if (rasterSRID == 0) {
-      raster = RasterEditors.setSrid(raster, 4326);
+  public static Pair<GridCoverage2D, Geometry> transformToRasterCRS(
+      GridCoverage2D raster, Geometry geom) {
+    int rasterSRID;
+    try {
       rasterSRID = RasterAccessors.srid(raster);
+    } catch (FactoryException e) {
+      throw new RuntimeException("Cannot determine raster CRS", e);
     }
+    int geomSRID = geom.getSRID();
+    boolean rasterHasCRS = hasCRS(raster.getCoordinateReferenceSystem());
+    boolean geometryHasCRS = geomSRID > 0;
+    ensureMatchingCRSPresence(rasterHasCRS, geometryHasCRS);
 
-    if (geomSRID == 0) {
-      geom = Functions.setSRID(geom, 4326);
-      geomSRID = Functions.getSRID(geom);
-    }
-
-    if (rasterSRID != geomSRID) {
-      // implicitly converting roi geometry CRS to raster CRS
+    if (rasterHasCRS && rasterSRID != geomSRID) {
       geom = convertCRSIfNeeded(geom, raster.getCoordinateReferenceSystem());
-      // have to set the SRID as RasterUtils.convertCRSIfNeeded doesn't set it even though the
-      // geometry is in raster's CRS
-      geom = Functions.setSRID(geom, RasterAccessors.srid(raster));
+      // A transformed geometry is now expressed in the raster's CRS. Custom raster CRSs may not
+      // have an EPSG identifier, in which case the best representable geometry SRID is 0.
+      geom.setSRID(rasterSRID);
     }
     return Pair.of(raster, geom);
+  }
+
+  /**
+   * @deprecated Use {@link #transformToRasterCRS(GridCoverage2D, Geometry)}. Missing CRSs are no
+   *     longer defaulted to WGS84.
+   */
+  @Deprecated
+  public static Pair<GridCoverage2D, Geometry> setDefaultCRSAndTransform(
+      GridCoverage2D raster, Geometry geom) throws FactoryException {
+    return transformToRasterCRS(raster, geom);
+  }
+
+  public static boolean hasCRS(CoordinateReferenceSystem crs) {
+    return crs != null && !(crs instanceof DefaultEngineeringCRS);
+  }
+
+  /** Throws when exactly one of two operands has a defined CRS. */
+  public static void ensureMatchingCRSPresence(boolean leftHasCRS, boolean rightHasCRS) {
+    if (leftHasCRS != rightHasCRS) {
+      throw new IllegalArgumentException(MISSING_CRS_ERROR_MESSAGE);
+    }
   }
 
   /**

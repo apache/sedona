@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.serde.Serde;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -493,6 +494,14 @@ public class RasterBandEditorsTest extends RasterTestBase {
         Constructors.geomFromWKT(
             "POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))",
             0);
+
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterBandEditors.clip(raster, 1, nonIntersectingGeom, false, 200, false));
+    assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
+
+    nonIntersectingGeom.setSRID(4326);
 
     // Throws an exception in non-lenient mode
     // Throws "Geometry does not intersect Raster." instead - emitted by Rasterization.rasterize()

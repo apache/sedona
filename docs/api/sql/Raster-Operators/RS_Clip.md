@@ -29,7 +29,7 @@ The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
 - When false (default), only pixels whose centroid intersects with the geometry will be included.
 
 !!!Note
-    - Since `v1.5.1`, if the coordinate reference system (CRS) of the input `geom` geometry differs from that of the `raster`, then `geom` will be transformed to match the CRS of the `raster`. If the `raster` or `geom` doesn't have a CRS then it will default to `4326/WGS84`.
+    - If neither `raster` nor `geom` has a defined CRS, their coordinates are used directly. If exactly one input has a defined CRS, the function throws an error. If both inputs have the same CRS, their coordinates are used directly. Otherwise, `geom` is transformed to the CRS of `raster`.
     - Since `v1.7.0`, `RS_Clip` function will return `null` if the `raster` and `geometry` geometry do not intersect. If you want to throw an exception in this case, you can set the `lenient` parameter to `false`.
 
 ![RS_Clip](../../../image/RS_Clip/RS_Clip.svg "RS_Clip")
@@ -65,7 +65,7 @@ SQL Example
 ```sql
 SELECT RS_Clip(
         RS_FromGeoTiff(content), 1,
-        ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))'),
+        ST_SetSRID(ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))'), 26918),
         false, 200, true
     )
 ```
@@ -75,7 +75,7 @@ SQL Example
 ```sql
 SELECT RS_Clip(
         RS_FromGeoTiff(content), 1,
-        ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))'),
+        ST_SetSRID(ST_GeomFromWKT('POLYGON ((236722 4204770, 243900 4204770, 243900 4197590, 221170 4197590, 236722 4204770))'), 26918),
         false, 200, false
     )
 ```

@@ -755,7 +755,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val resultDf = df.selectExpr("RS_SetValues(raster, 1, geom, 10, false, false) as result")
 
       var actual = resultDf
-        .selectExpr("RS_Value(result, ST_GeomFromWKT('POINT (-77.9146 37.8916)'))")
+        .selectExpr("RS_Value(result, ST_GeomFromWKT('POINT (-77.9146 37.8916)', 4326))")
         .first()
         .get(0)
       val expected = 10.0
@@ -766,6 +766,34 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .first()
         .get(0)
       assertEquals(expected, actual)
+    }
+
+    it("Reject one-sided CRS in raster-geometry operations") {
+      val df = sparkSession.sql("""
+          |SELECT
+          |  RS_MakeEmptyRaster(1, 5, 5, 0, 5, 1, -1, 0, 0, 4326) AS raster,
+          |  ST_GeomFromWKT('POINT (1 1)') AS geom
+          |""".stripMargin)
+      val expressions = Seq(
+        "RS_AsRaster(geom, raster, 'D')",
+        "RS_Clip(raster, 1, geom)",
+        "RS_SetValues(raster, 1, geom, 1.0)",
+        "RS_Value(raster, geom)",
+        "RS_Values(raster, array(geom))",
+        "RS_ZonalStats(raster, geom, 'count')",
+        "RS_ZonalStatsAll(raster, geom)",
+        "RS_WorldToRasterCoord(raster, geom)",
+        "RS_WorldToRasterCoordX(raster, geom)",
+        "RS_WorldToRasterCoordY(raster, geom)")
+
+      expressions.foreach { expression =>
+        val exception = intercept[Exception] {
+          df.selectExpr(expression).collect()
+        }
+        assert(
+          exception.getMessage.contains(RasterUtils.MISSING_CRS_ERROR_MESSAGE),
+          s"$expression did not report the one-sided CRS error")
+      }
     }
 
     it("Passed RS_SetValues with empty raster") {
@@ -1820,7 +1848,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       // Test with a polygon in EPSG:4326
       actual = df
         .selectExpr(
-          "RS_ZonalStats(raster, ST_GeomFromWKT('POLYGON ((-77.96672569800863073 37.91971182746296876, -77.9688630154902711 37.89620133516485367, -77.93936803424354309 37.90517806858776595, -77.96672569800863073 37.91971182746296876))'), 1, 'mean', false)")
+          "RS_ZonalStats(raster, ST_GeomFromWKT('POLYGON ((-77.96672569800863073 37.91971182746296876, -77.9688630154902711 37.89620133516485367, -77.93936803424354309 37.90517806858776595, -77.96672569800863073 37.91971182746296876))', 4326), 1, 'mean', false)")
         .first()
         .get(0)
       assertNotNull(actual)
@@ -1828,7 +1856,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       // Test with a polygon that does not intersect the raster in lenient mode
       actual = df
         .selectExpr(
-          "RS_ZonalStats(raster, ST_GeomFromWKT('POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))'), 1, 'mean', false)")
+          "RS_ZonalStats(raster, ST_GeomFromWKT('POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))', 4326), 1, 'mean', false)")
         .first()
         .get(0)
       assertNull(actual)
@@ -1885,7 +1913,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       // Test with a polygon that does not intersect the raster in lenient mode
       val actual2 = df
         .selectExpr(
-          "RS_ZonalStatsAll(raster, ST_GeomFromWKT('POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))'), 1, true, false)")
+          "RS_ZonalStatsAll(raster, ST_GeomFromWKT('POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))', 4326), 1, true, false)")
         .first()
         .getStruct(0)
       assertNull(actual2)
@@ -1897,7 +1925,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
         .load(resourceFolder + "raster/raster_with_no_data/test5.tiff")
       df = df.selectExpr(
         "RS_FromGeoTiff(content) as raster",
-        "ST_GeomFromWKT('POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))', 0) as geom")
+        "ST_GeomFromWKT('POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))', 4326) as geom")
       val actual = df
         .selectExpr("RS_ZonalStatsAll(raster, geom, 1, false, true)")
         .first()
@@ -2186,7 +2214,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val results = df
         .selectExpr(
           "ST_AsText(RS_WorldToRasterCoord(raster, ST_GeomFromText('POINT (-13095817.809482181 4021262.7487925636)', 3857)))",
-          "ST_AsText(RS_WorldToRasterCoord(raster, ST_GeomFromText('POINT (-117.64173 33.943833)')))")
+          "ST_AsText(RS_WorldToRasterCoord(raster, ST_GeomFromText('POINT (-117.64173 33.943833)', 4326)))")
         .first()
       val expected = "POINT (1 1)"
       assertEquals(expected, results.getString(0))
@@ -2199,7 +2227,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val results = df
         .selectExpr(
           "RS_WorldToRasterCoordX(raster, ST_GeomFromText('POINT (-13095817.809482181 4021262.7487925636)', 3857))",
-          "RS_WorldToRasterCoordX(raster, ST_GeomFromText('POINT (-117.64173 33.943833)'))")
+          "RS_WorldToRasterCoordX(raster, ST_GeomFromText('POINT (-117.64173 33.943833)', 4326))")
         .first()
       val expected = 1
       assertEquals(expected, results.getInt(0))
@@ -2212,7 +2240,7 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       val results = df
         .selectExpr(
           "RS_WorldToRasterCoordY(raster, ST_GeomFromText('POINT (-13095817.809482181 4021262.7487925636)', 3857))",
-          "RS_WorldToRasterCoordY(raster, ST_GeomFromText('POINT (-117.64173 33.943833)'))")
+          "RS_WorldToRasterCoordY(raster, ST_GeomFromText('POINT (-117.64173 33.943833)', 4326))")
         .first()
       val expected = 1
       assertEquals(expected, results.getInt(0))

@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.Arrays;
 import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
@@ -164,7 +165,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     geom =
         Constructors.geomFromWKT(
             "POLYGON ((-77.96672569800863073 37.91971182746296876, -77.9688630154902711 37.89620133516485367, -77.93936803424354309 37.90517806858776595, -77.96672569800863073 37.91971182746296876))",
-            0);
+            4326);
     Double statValue =
         RasterBandAccessors.getZonalStats(raster, geom, 1, "sum", false, false, true);
     assertNotNull(statValue);
@@ -172,7 +173,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     Geometry nonIntersectingGeom =
         Constructors.geomFromWKT(
             "POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))",
-            0);
+            4326);
     statValue =
         RasterBandAccessors.getZonalStats(
             raster, nonIntersectingGeom, 1, "sum", false, false, true);
@@ -191,6 +192,29 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     actual = RasterBandAccessors.getZonalStats(raster_bottom_up, geom, 2, "mean", false, false);
     expected = 220.7711988936036;
     assertEquals(expected, actual, FP_TOLERANCE);
+  }
+
+  @Test
+  public void testZonalStatsRejectsOneSidedCRS()
+      throws IOException, FactoryException, ParseException {
+    GridCoverage2D raster =
+        rasterFromGeoTiff(resourceFolder + "raster_geotiff_color/FAA_UTM18N_NAD83.tif");
+    Geometry zone =
+        Constructors.geomFromWKT(
+            "POLYGON ((-77.9667 37.9197, -77.9689 37.8962, -77.9394 37.9052, -77.9667 37.9197))",
+            0);
+
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterBandAccessors.getZonalStats(raster, zone, 1, "sum"));
+    assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
+
+    exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterBandAccessors.getZonalStatsAll(raster, zone, 1, false, false));
+    assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -220,8 +244,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     GridCoverage2D raster_bottom_up = flipVerticallyPixelSpace(raster);
     String polygon =
         "POLYGON((-167.750000 87.750000, -155.250000 87.750000, -155.250000 40.250000, -180.250000 40.250000, -167.750000 87.750000))";
-    // Testing implicit CRS transformation
-    Geometry geom = Constructors.geomFromWKT(polygon, 0);
+    Geometry geom = Constructors.geomFromWKT(polygon, RasterAccessors.srid(raster));
 
     double actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "sum", false, true);
     double expected = 3229013.0;
@@ -375,7 +398,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     geom =
         Constructors.geomFromWKT(
             "POLYGON ((-77.96672569800863073 37.91971182746296876, -77.9688630154902711 37.89620133516485367, -77.93936803424354309 37.90517806858776595, -77.96672569800863073 37.91971182746296876))",
-            0);
+            4326);
     actual =
         Arrays.stream(RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, false, false))
             .mapToDouble(Double::doubleValue)
@@ -385,7 +408,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     Geometry nonIntersectingGeom =
         Constructors.geomFromWKT(
             "POLYGON ((-78.22106647832458748 37.76411511479908967, -78.20183062098976734 37.72863564460374874, -78.18088490966962922 37.76753482276972562, -78.22106647832458748 37.76411511479908967))",
-            0);
+            4326);
     Double[] actualNull =
         RasterBandAccessors.getZonalStatsAll(raster, nonIntersectingGeom, 1, false, false, true);
     assertNull(actualNull);
@@ -434,8 +457,7 @@ public class RasterBandAccessorsTest extends RasterTestBase {
         };
     raster = MapAlgebra.addBandFromArray(raster, bandValue, 1);
     raster = RasterBandEditors.setBandNoDataValue(raster, 1, 0d);
-    // Testing implicit CRS transformation
-    Geometry geom = Constructors.geomFromWKT("POLYGON((2 -2, 2 -6, 6 -6, 6 -2, 2 -2))", 0);
+    Geometry geom = Constructors.geomFromWKT("POLYGON((2 -2, 2 -6, 6 -6, 6 -2, 2 -2))", 4326);
 
     double[] actual =
         Arrays.stream(RasterBandAccessors.getZonalStatsAll(raster, geom, 1, false, true))

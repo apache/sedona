@@ -270,7 +270,7 @@ public class PixelFunctions {
       }
 
       Pair<GridCoverage2D, Geometry> pair =
-          RasterUtils.setDefaultCRSAndTransform(rasterGeom, geometries.get(i));
+          RasterUtils.transformToRasterCRS(rasterGeom, geometries.get(i));
 
       geometries.set(i, pair.getRight());
 

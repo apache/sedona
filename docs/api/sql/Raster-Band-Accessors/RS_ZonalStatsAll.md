@@ -39,7 +39,7 @@ The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
 - max: Maximum value of the zone.
 
 !!!note
-    If the coordinate reference system (CRS) of the input `zone` geometry differs from that of the `raster`, then `zone` will be transformed to match the CRS of the `raster` before computation.
+    If neither `raster` nor `zone` has a defined CRS, their coordinates are used directly. If exactly one input has a defined CRS, the function throws an error. If both inputs have the same CRS, their coordinates are used directly. Otherwise, `zone` is transformed to the CRS of `raster`.
 
     The following conditions will throw an `IllegalArgumentException` if they are not met:
 

@@ -40,7 +40,7 @@ import org.locationtech.jts.io.WKTReader;
 
 public class RasterPredicatesTest extends RasterTestBase {
   private static final String MISSING_CRS_ERROR_MESSAGE =
-      "Raster predicates require both operands to have a CRS or neither operand to have a CRS";
+      "Raster operations require both operands to have a CRS or neither operand to have a CRS";
   private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
   private static void assertMissingCrsError(ThrowingRunnable predicate) {

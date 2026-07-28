@@ -101,7 +101,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("Passed RS_AsRaster with empty raster") {
       val df = sparkSession.sql(
-        "SELECT RS_MakeEmptyRaster(2, 255, 255, 3, 215, 2, -2, 0, 0, 4326) as raster, ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))') as geom")
+        "SELECT RS_MakeEmptyRaster(2, 255, 255, 3, 215, 2, -2, 0, 0, 4326) as raster, ST_GeomFromWKT('POLYGON((15 15, 18 20, 15 24, 24 25, 15 15))', 4326) as geom")
       var rasterized =
         df.selectExpr("RS_AsRaster(geom, raster, 'd', false, 255, 0d) as rasterized")
       var actual = rasterized
@@ -136,7 +136,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
 
     it("Passed RS_AsRaster LineString") {
       val df = sparkSession.sql(
-        "SELECT RS_MakeEmptyRaster(2, 255, 255, 3, 215, 2, -2, 0, 0, 4326) as raster, ST_GeomFromWKT('LINESTRING(1 1, 2 1, 10 1)') as geom")
+        "SELECT RS_MakeEmptyRaster(2, 255, 255, 3, 215, 2, -2, 0, 0, 4326) as raster, ST_GeomFromWKT('LINESTRING(1 1, 2 1, 10 1)', 4326) as geom")
       var rasterized =
         df.selectExpr("RS_AsRaster(geom, raster, 'd', false, 255, 0d) as rasterized")
       var actual = rasterized
@@ -148,7 +148,7 @@ class rasterIOTest extends TestBaseScala with BeforeAndAfter with GivenWhenThen 
       assertEquals(expected, actual)
 
       rasterized = df.selectExpr(
-        "RS_AsRaster(ST_GeomFromWKT('LINESTRING(4 1, 4 2, 4 10)'), raster, 'd', false, 255, 0d) as rasterized")
+        "RS_AsRaster(ST_GeomFromWKT('LINESTRING(4 1, 4 2, 4 10)', 4326), raster, 'd', false, 255, 0d) as rasterized")
       actual = rasterized
         .selectExpr("RS_BandAsArray(rasterized, 1)")
         .first()

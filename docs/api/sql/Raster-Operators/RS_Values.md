@@ -25,7 +25,7 @@ RS_Values is similar to RS_Value but operates on an array of points or grid coor
 RS_Values can be significantly faster since a raster only has to be loaded once for several points.
 
 !!!Note
-    Since `v1.5.1`, if the coordinate reference system (CRS) of the input `points` geometries differs from that of the `raster`, then `points` will be transformed to match the CRS of the `raster`. If the `raster` or `points` doesn't have a CRS then it will default to `4326/WGS84`.
+    For the geometry variant, if neither `raster` nor a point has a defined CRS, their coordinates are used directly. If exactly one input has a defined CRS, the function throws an error. If both inputs have the same CRS, their coordinates are used directly. Otherwise, the point is transformed to the CRS of `raster`.
 
 Format:
 

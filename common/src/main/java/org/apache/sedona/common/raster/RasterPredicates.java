@@ -24,6 +24,7 @@ import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.S2Geography.WKBGeography;
 import org.apache.sedona.common.utils.CachedCRSTransformFinder;
 import org.apache.sedona.common.utils.GeomUtils;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.ReferenceIdentifier;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
@@ -42,9 +43,6 @@ import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 
 public class RasterPredicates {
-  private static final String MISSING_CRS_ERROR_MESSAGE =
-      "Raster predicates require both operands to have a CRS or neither operand to have a CRS";
-
   /**
    * Test if a raster intersects a query window. If both the raster and the query window have a CRS,
    * the query window and the envelope of the raster will be transformed to a common CRS before
@@ -249,9 +247,9 @@ public class RasterPredicates {
       GridCoverage2D raster, Geometry queryWindow) {
     CoordinateReferenceSystem rasterCRS = raster.getCoordinateReferenceSystem();
     int queryWindowSRID = queryWindow.getSRID();
-    boolean rasterHasCRS = hasCRS(rasterCRS);
+    boolean rasterHasCRS = RasterUtils.hasCRS(rasterCRS);
     boolean queryWindowHasCRS = queryWindowSRID > 0;
-    ensureMatchingCRSPresence(rasterHasCRS, queryWindowHasCRS);
+    RasterUtils.ensureMatchingCRSPresence(rasterHasCRS, queryWindowHasCRS);
 
     Geometry rasterGeometry;
     try {
@@ -288,9 +286,9 @@ public class RasterPredicates {
       GridCoverage2D left, GridCoverage2D right) {
     CoordinateReferenceSystem leftCRS = left.getCoordinateReferenceSystem();
     CoordinateReferenceSystem rightCRS = right.getCoordinateReferenceSystem();
-    boolean leftHasCRS = hasCRS(leftCRS);
-    boolean rightHasCRS = hasCRS(rightCRS);
-    ensureMatchingCRSPresence(leftHasCRS, rightHasCRS);
+    boolean leftHasCRS = RasterUtils.hasCRS(leftCRS);
+    boolean rightHasCRS = RasterUtils.hasCRS(rightCRS);
+    RasterUtils.ensureMatchingCRSPresence(leftHasCRS, rightHasCRS);
 
     Geometry leftGeometry;
     Geometry rightGeometry;
@@ -316,13 +314,11 @@ public class RasterPredicates {
     return Pair.of(transformedLeftGeometry, transformedRightGeometry);
   }
 
-  private static boolean hasCRS(CoordinateReferenceSystem crs) {
-    return crs != null && !(crs instanceof DefaultEngineeringCRS);
-  }
-
-  private static void ensureMatchingCRSPresence(boolean leftHasCRS, boolean rightHasCRS) {
-    if (leftHasCRS != rightHasCRS) {
-      throw new IllegalArgumentException(MISSING_CRS_ERROR_MESSAGE);
+  static boolean intersectsInRasterCoordinateSpace(GridCoverage2D raster, Geometry queryWindow) {
+    try {
+      return GeometryFunctions.convexHull(raster).intersects(queryWindow);
+    } catch (FactoryException | TransformException e) {
+      throw new RuntimeException("Failed to calculate the convex hull of the raster", e);
     }
   }
 

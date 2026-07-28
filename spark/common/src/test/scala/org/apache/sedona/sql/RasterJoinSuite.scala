@@ -31,7 +31,7 @@ class RasterJoinSuite extends TestBaseScala with TableDrivenPropertyChecks {
 
   private val spatialJoinPartitionSideConfKey = "sedona.join.spatitionside"
   private val missingCrsErrorMessage =
-    "Raster predicates require both operands to have a CRS or neither operand to have a CRS"
+    "Raster operations require both operands to have a CRS or neither operand to have a CRS"
 
   private val rasters: Seq[(GridCoverage2D, Int)] = Seq(
     // Japan
