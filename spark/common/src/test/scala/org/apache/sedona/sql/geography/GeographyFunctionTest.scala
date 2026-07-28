@@ -165,6 +165,26 @@ class GeographyFunctionTest extends TestBaseScala {
       assertTrue(row.isNullAt(0))
       assertTrue(row.isNullAt(1))
     }
+
+    it("ST_MakeLine creates a geography measured in meters") {
+      val row = sparkSession
+        .sql("""
+          SELECT
+            ST_AsText(line) AS wkt,
+            ST_GeometryType(line) AS geom_type,
+            ST_Length(line) AS length
+          FROM (
+            SELECT ST_MakeLine(
+              ST_GeogFromWKT('POINT (0 0)', 4326),
+              ST_GeogFromWKT('POINT (1 0)', 4326)
+            ) AS line
+          )
+        """)
+        .first()
+      assertEquals("LINESTRING (0 0, 1 0)", row.getString(0))
+      assertEquals("ST_LineString", row.getString(1))
+      assertEquals(111195.10, row.getDouble(2), 1.0)
+    }
   }
 
   // ─── Level 2: ST_Length, ST_Area, ST_Distance ──────────────────────────
@@ -557,6 +577,18 @@ class GeographyFunctionTest extends TestBaseScala {
         .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(4326)).as("geog"))
         .select(st_functions.ST_NPoints(col("geog")).as("n"))
       assertEquals(3, df.first().getInt(0))
+    }
+
+    it("ST_MakeLine via DataFrame API") {
+      val df = sparkSession
+        .sql("SELECT 'POINT (0 0)' AS wkt_a, 'POINT (1 0)' AS wkt_b")
+        .select(
+          st_constructors.ST_GeogFromWKT(col("wkt_a"), lit(4326)).as("a"),
+          st_constructors.ST_GeogFromWKT(col("wkt_b"), lit(4326)).as("b"))
+        .select(st_functions.ST_MakeLine(col("a"), col("b")).as("line"))
+      val line = df.first().get(0).asInstanceOf[Geography]
+      assertTrue(line.isInstanceOf[WKBGeography])
+      assertEquals("LINESTRING (0 0, 1 0)", line.toString)
     }
 
     it("ST_Contains via DataFrame API") {

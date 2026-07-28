@@ -197,6 +197,18 @@ public class Functions {
     return org.apache.sedona.common.Functions.y(toJTS(g));
   }
 
+  /**
+   * Creates a line from two Point, MultiPoint, or LineString geographies. The returned geography
+   * preserves the first input's SRID; its edges are interpreted as great-circle arcs by geography
+   * measurement functions.
+   */
+  public static Geography makeLine(Geography g1, Geography g2) {
+    if (g1 == null || g2 == null) return null;
+    Geometry line = org.apache.sedona.common.Functions.makeLine(toJTS(g1), toJTS(g2));
+    line.setSRID(g1.getSRID());
+    return Constructors.geomToGeography(line);
+  }
+
   // ─── Level 2: Geodesic metrics ───────────────────────────────────────────
 
   /**

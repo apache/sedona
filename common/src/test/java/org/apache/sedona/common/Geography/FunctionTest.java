@@ -167,6 +167,29 @@ public class FunctionTest {
     assertNull(Functions.y(null));
   }
 
+  @Test
+  public void makeLine_points() throws ParseException {
+    Geography start = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography end = Constructors.geogFromWKT("POINT (1 0)", 4326);
+    Geography line = Functions.makeLine(start, end);
+
+    assertEquals("LINESTRING (0 0, 1 0)", line.toString());
+    assertEquals(4326, line.getSRID());
+    assertEquals(111195.10, Functions.length(line), 1.0);
+  }
+
+  @Test
+  public void makeLine_rejectsUnsupportedType() throws ParseException {
+    Geography point = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography polygon = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 0))", 4326);
+
+    IllegalArgumentException error =
+        assertThrows(IllegalArgumentException.class, () -> Functions.makeLine(point, polygon));
+    assertEquals(
+        "ST_MakeLine only supports Point, MultiPoint and LineString geometries",
+        error.getMessage());
+  }
+
   // S2 area-weighted centroids on small polygons differ from planar by an O(d^2/R^2)
   // spherical correction. 5e-3 deg (~500 m) is wide enough to absorb that drift on
   // 1°-scale shapes near origin, while still catching any real bug (a planar/JTS centroid

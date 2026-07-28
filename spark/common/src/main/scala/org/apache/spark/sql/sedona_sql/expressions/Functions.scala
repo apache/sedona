@@ -1217,7 +1217,8 @@ private[apache] case class ST_Segmentize(inputExpressions: Seq[Expression])
 private[apache] case class ST_MakeLine(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction2(Functions.makeLine),
-      inferrableFunction1(Functions.makeLine)) {
+      inferrableFunction1(Functions.makeLine),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.makeLine)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
