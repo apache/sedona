@@ -63,13 +63,26 @@ class TestGeoDataFrame(TestGeopandasBase):
 
     def test_construct_from_geopandas(self):
         gpd_df = gpd.GeoDataFrame(
-            {"geometry1": [Point(0, 0)]}, geometry="geometry1", crs="EPSG:3857"
+            {"geometry1": [Point(0, 0), Point(1, 1)]},
+            index=[0, 0],
+            geometry="geometry1",
+            crs="EPSG:3857",
         )
         with ps.option_context("compute.ops_on_diff_frames", True):
             sgpd_df = GeoDataFrame(gpd_df)
         assert sgpd_df.crs == "EPSG:3857"
         assert sgpd_df.geometry.crs == "EPSG:3857"
         assert sgpd_df.geometry.name == "geometry1"
+        assert len(sgpd_df) == len(gpd_df)
+
+        all_null_gpd = gpd.GeoDataFrame(
+            {"geometry": [None]},
+            crs="EPSG:4326",
+        )
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            all_null_sgpd = GeoDataFrame(all_null_gpd)
+        assert all_null_sgpd.crs == "EPSG:4326"
+        assert all_null_sgpd.to_geopandas().crs == "EPSG:4326"
 
     @pytest.mark.parametrize(
         "obj",
@@ -306,6 +319,47 @@ class TestGeoDataFrame(TestGeopandasBase):
         # Ensure set_crs without inplace modifies a copy and not current df
         assert sgpd_df.crs is None
 
+        all_null = sgpd.GeoDataFrame({"geometry": [None], "value": [1]})
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            result = all_null.set_crs(4326)
+        assert result.crs.to_epsg() == 4326
+        assert result.geometry.crs.to_epsg() == 4326
+        assert result.to_geopandas().crs.to_epsg() == 4326
+        assert all_null.crs is None
+
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            result.set_crs(3857, inplace=True, allow_override=True)
+        assert result.crs.to_epsg() == 3857
+
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            result.crs = None
+        assert result.crs is None
+
+        from pyproj import CRS
+
+        custom_crs = CRS.from_proj4(
+            "+proj=aeqd +lat_0=12.345 +lon_0=67.89 " "+datum=WGS84 +units=m +no_defs"
+        )
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            custom_result = all_null.set_crs(custom_crs)
+        assert custom_result.crs == custom_crs
+        assert custom_result.to_geopandas().crs == custom_crs
+
+    def test_crs_metadata_survives_frame_selection(self):
+        source = GeoSeries([None], name="geometry", crs=4326)
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            frame = GeoDataFrame({"value": [1]}).set_geometry(source)
+
+        selected = frame["geometry"]
+        projected = frame[["value", "geometry"]]
+        filtered = frame[frame["value"] > 1]
+
+        assert selected.crs.to_epsg() == 4326
+        assert projected.crs.to_epsg() == 4326
+        assert filtered.crs.to_epsg() == 4326
+        assert len(filtered) == 0
+        assert filtered.to_geopandas().crs.to_epsg() == 4326
+
     def test_to_crs(self):
         from pyproj import CRS
 
@@ -402,6 +456,62 @@ class TestGeoDataFrame(TestGeopandasBase):
 
         assert df.crs == "EPSG:3857"
         assert df.geometry.crs == "EPSG:3857"
+
+        all_null = GeoSeries([None], name="shape", crs="EPSG:4326")
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            df = GeoDataFrame({"value": [1]}).set_geometry(all_null)
+
+        assert df.active_geometry_name == "shape"
+        assert df.crs == "EPSG:4326"
+        assert df.geometry.crs == "EPSG:4326"
+
+        copied = df.copy()
+        reconstructed = GeoDataFrame(df)
+        assert copied.crs == "EPSG:4326"
+        assert reconstructed.crs == "EPSG:4326"
+
+        same_geometry = df.set_geometry("shape")
+        assert same_geometry.crs == "EPSG:4326"
+
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            switchable = GeoDataFrame({"other": [Point(0, 0)]}).set_geometry(all_null)
+
+        switched = switchable.set_geometry("other")
+        assert switched.crs is None
+        assert switchable.crs == "EPSG:4326"
+        assert switched.set_geometry("shape").crs == "EPSG:4326"
+
+        switchable.set_geometry("other", inplace=True)
+        assert switchable.crs is None
+        switchable.set_geometry("shape", inplace=True)
+        assert switchable.crs == "EPSG:4326"
+
+        renamed = df.rename_geometry("renamed")
+        assert renamed.crs == "EPSG:4326"
+        assert renamed.active_geometry_name == "renamed"
+
+        replacement = GeoSeries([None], name="shape", crs="EPSG:3857")
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            df["shape"] = replacement
+        assert df.crs == "EPSG:3857"
+
+        property_replacement = GeoSeries([None], name="shape", crs="EPSG:26909")
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            df.geometry = property_replacement
+        assert df.crs == "EPSG:26909"
+
+        first = GeoSeries([None], name="first", crs="EPSG:4326")
+        second = GeoSeries([None], name="second", crs="EPSG:3857")
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            multi_crs = GeoDataFrame({"value": [1]}).set_geometry(first)
+            multi_crs["second"] = second
+        assert multi_crs.set_geometry("second").crs == "EPSG:3857"
+        assert multi_crs.set_geometry("second").set_geometry("first").crs == "EPSG:4326"
+
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            independent = GeoDataFrame({"value": [1]}).set_geometry(all_null)
+        all_null.set_crs(3857, inplace=True, allow_override=True)
+        assert independent.crs == "EPSG:4326"
 
     def test_active_geometry_name(self):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):

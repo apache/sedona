@@ -4765,6 +4765,8 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_pd_series_equal(df_result, expected)
 
     def test_set_crs(self):
+        from pyproj import CRS
+
         geo_series = sgpd.GeoSeries([Point(0, 0), Point(1, 1)], name="geometry")
         assert geo_series.crs == None
         geo_series = geo_series.set_crs(epsg=4326)
@@ -4790,9 +4792,65 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         geo_series = sgpd.GeoSeries(self.geoseries, crs=4326)
         assert geo_series.crs.to_epsg() == 4326
 
+        all_null = sgpd.GeoSeries([None], name="geometry", crs=4326)
+        assert all_null.crs.to_epsg() == 4326
+        assert all_null.copy(deep=True).crs.to_epsg() == 4326
+
+        without_crs = all_null.set_crs(None, allow_override=True)
+        assert without_crs.crs is None
+        assert all_null.crs.to_epsg() == 4326
+
+        with_other_crs = all_null.set_crs(3857, allow_override=True)
+        assert with_other_crs.crs.to_epsg() == 3857
+        assert all_null.crs.to_epsg() == 4326
+
+        empty_result = sgpd.GeoSeries(
+            [GeometryCollection()],
+            crs=4326,
+        ).explode(ignore_index=True)
+        assert len(empty_result) == 0
+        assert empty_result.crs.to_epsg() == 4326
+        assert empty_result.set_crs(3857, allow_override=True).crs.to_epsg() == 3857
+
+        all_null.set_crs(None, inplace=True, allow_override=True)
+        assert all_null.crs is None
+
+        custom_crs = CRS.from_proj4(
+            "+proj=aeqd +lat_0=12.345 +lon_0=67.89 " "+datum=WGS84 +units=m +no_defs"
+        )
+        assert custom_crs.to_epsg() is None
+        custom_series = sgpd.GeoSeries([Point(0, 0)]).set_crs(custom_crs)
+        assert custom_series.crs == custom_crs
+        assert custom_series.to_geopandas().crs == custom_crs
+        assert (
+            custom_series._internal.spark_frame.select(
+                stf.ST_SRID(custom_series.spark.column).alias("srid")
+            ).first()["srid"]
+            == 0
+        )
+
         # This test errors due to a bug in pyspark.
         # We can uncomment it once the fix is https://github.com/apache/spark/pull/51475 is merged
         # It was tested locally by using the fixed version of pyspark
         # # First element null
         # geo_series = sgpd.GeoSeries([None, None, Point(1, 1)], crs=4326)
         # assert geo_series.crs.to_epsg() == 4326
+
+    def test_crs_metadata_propagation(self):
+        source = sgpd.GeoSeries([None], name="geometry", crs=4326)
+
+        copied = source.copy(deep=True)
+        reconstructed = sgpd.GeoSeries(source)
+        buffered = source.buffer(1)
+        transformed = source.to_crs(3857)
+        frame = source.to_geoframe()
+        round_tripped = GeoDataFrame(frame.to_spark_pandas())
+
+        source.set_crs(3857, inplace=True, allow_override=True)
+
+        assert copied.crs.to_epsg() == 4326
+        assert reconstructed.crs.to_epsg() == 4326
+        assert buffered.crs.to_epsg() == 4326
+        assert frame.crs.to_epsg() == 4326
+        assert round_tripped.crs.to_epsg() == 4326
+        assert transformed.crs.to_epsg() == 3857

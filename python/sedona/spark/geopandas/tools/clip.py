@@ -81,14 +81,10 @@ def _rebuild_like(obj, internal, sdf):
     )
 
     if isinstance(obj, GeoSeries):
-        result = GeoSeries(first_series(PandasOnSparkDataFrame(result_internal)))
-        result._empty_crs_source = obj
-        return result
+        return GeoSeries(first_series(PandasOnSparkDataFrame(result_internal)))
 
     result = GeoDataFrame(PandasOnSparkDataFrame(result_internal))
     result._geometry_column_name = obj.active_geometry_name
-    # Bypass GeoDataFrame.__setattr__, which would interpret this as a new column.
-    object.__setattr__(result, "_empty_crs_source", obj.geometry)
     return result
 
 
