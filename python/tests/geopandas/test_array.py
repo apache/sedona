@@ -28,6 +28,23 @@ from sedona.spark.sql import st_functions as stf
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 
 
+def _assert_geoseries_equal_with_nan_xy(actual, expected, nan_xy):
+    """Compare NaN x/y coordinates without relying on undefined GEOS equality."""
+    assert actual.crs == expected.crs
+    nan_xy = np.asarray(nan_xy, dtype=bool)
+    nan_positions = np.flatnonzero(nan_xy)
+    regular_positions = np.flatnonzero(~nan_xy)
+    pd.testing.assert_series_equal(
+        actual.to_wkt().iloc[nan_positions],
+        expected.to_wkt().iloc[nan_positions],
+    )
+    if regular_positions.size:
+        assert_geoseries_equal(
+            actual.iloc[regular_positions],
+            expected.iloc[regular_positions],
+        )
+
+
 class TestPointsFromXY(TestGeopandasBase):
     def test_points_from_xy_local_matches_geopandas(self):
         index = pd.Index(["first", "first", "third"], name="feature")
@@ -51,11 +68,13 @@ class TestPointsFromXY(TestGeopandasBase):
 
     def test_points_from_xy_local_3d_broadcast_and_empty(self):
         result = sgpd.points_from_xy([1, 2], [3], [4, 5])
-        expected = gpd.GeoSeries(gpd.points_from_xy([1, 2], [3], [4, 5]))
+        # GeoPandas 0.13 does not broadcast its own inputs, so construct the
+        # equivalent oracle from explicitly expanded coordinates.
+        expected = gpd.GeoSeries(gpd.points_from_xy([1, 2], [3, 3], [4, 5]))
         assert_geoseries_equal(result.to_geopandas(), expected)
 
         scalar_result = sgpd.points_from_xy(1, [2, 3], 4)
-        scalar_expected = gpd.GeoSeries(gpd.points_from_xy(1, [2, 3], 4))
+        scalar_expected = gpd.GeoSeries(gpd.points_from_xy([1, 1], [2, 3], [4, 4]))
         assert_geoseries_equal(scalar_result.to_geopandas(), scalar_expected)
 
         empty = sgpd.points_from_xy([], [], crs="EPSG:3857")
@@ -90,7 +109,12 @@ class TestPointsFromXY(TestGeopandasBase):
         )
 
         assert result.crs == "EPSG:4979"
-        assert_geoseries_equal(result.to_geopandas(), expected)
+        nan_xy = pdf[["x", "y"]].isna().any(axis=1).to_numpy()
+        _assert_geoseries_equal_with_nan_xy(
+            result.to_geopandas(),
+            expected,
+            nan_xy,
+        )
         srids = result._internal.spark_frame.select(
             stf.ST_SRID(result.spark.column).alias("srid")
         ).collect()
@@ -105,11 +129,15 @@ class TestPointsFromXY(TestGeopandasBase):
 
         scalar_result = sgpd.points_from_xy(psdf["x"], 10, crs="EPSG:4326")
         scalar_expected = gpd.GeoSeries(
-            gpd.points_from_xy(pdf["x"], 10, crs="EPSG:4326"),
+            gpd.points_from_xy(pdf["x"], [10] * len(pdf), crs="EPSG:4326"),
             index=index,
             crs="EPSG:4326",
         )
-        assert_geoseries_equal(scalar_result.to_geopandas(), scalar_expected)
+        _assert_geoseries_equal_with_nan_xy(
+            scalar_result.to_geopandas(),
+            scalar_expected,
+            pdf["x"].isna().to_numpy(),
+        )
 
     def test_points_from_xy_null_is_nan_coordinate_not_missing_geometry(self):
         psdf = self.spark.createDataFrame(
@@ -124,9 +152,11 @@ class TestPointsFromXY(TestGeopandasBase):
             gpd.points_from_xy([None, 3.0, None], [2.0, None, None]),
             index=pd.Index([0, 1, 2], name="id"),
         )
-        # GEOS equality is undefined when one coordinate is NaN, so compare
-        # their serializations after confirming these are not missing rows.
-        assert result.to_geopandas().to_wkt().tolist() == expected.to_wkt().tolist()
+        _assert_geoseries_equal_with_nan_xy(
+            result.to_geopandas(),
+            expected,
+            np.ones(len(expected), dtype=bool),
+        )
 
     def test_geoseries_from_xy_delegates_to_distributed_constructor(self):
         result = GeoSeries.from_xy(
