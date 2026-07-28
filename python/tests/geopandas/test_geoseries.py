@@ -2471,6 +2471,123 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s.to_geoframe().reverse()
         self.check_sgpd_equals_gpd(df_result, expected)
 
+    def test_sample_points(self):
+        polygon = box(0, 0, 2, 2)
+        multipolygon = MultiPolygon([box(4, 0, 5, 1), box(7, 0, 9, 2)])
+        line = LineString([(0, 0), (2, 0), (2, 2)])
+        multiline = MultiLineString([[(0, 4), (1, 4)], [(3, 4), (3, 7)]])
+        geometries = [
+            polygon,
+            multipolygon,
+            line,
+            multiline,
+            Point(1, 1),
+            MultiPoint([(0, 0), (1, 1)]),
+            GeometryCollection([Point(0, 0)]),
+            Polygon(),
+            LineString(),
+            None,
+        ]
+        index = pd.Index(
+            [
+                "area",
+                "area",
+                "line",
+                "line",
+                "point",
+                "points",
+                "gc",
+                "ep",
+                "el",
+                "null",
+            ],
+            name="feature_id",
+        )
+        source = GeoSeries(geometries, index=index, crs="EPSG:3857")
+
+        result = source.sample_points(4, rng=0)
+        actual = result.to_geopandas()
+        repeated = source.sample_points(4, rng=0).to_geopandas()
+
+        assert isinstance(result, GeoSeries)
+        assert result.name == "sampled_points"
+        assert result.crs == source.crs
+        assert actual.index.equals(index)
+        assert [geometry.wkb for geometry in actual] == [
+            geometry.wkb for geometry in repeated
+        ]
+        for source_geometry, sampled in zip(geometries[:4], actual.iloc[:4]):
+            assert sampled.geom_type == "MultiPoint"
+            assert len(sampled.geoms) == 4
+            assert all(source_geometry.covers(point) for point in sampled.geoms)
+        for sampled in actual.iloc[4:]:
+            assert sampled.geom_type == "MultiPoint"
+            assert sampled.is_empty
+
+        srids = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid")
+        ).collect()
+        assert {row.srid for row in srids} == {3857}
+
+        if hasattr(result._internal.spark_frame, "_jdf"):
+            plan = (
+                result._internal.spark_frame._jdf.queryExecution()
+                .executedPlan()
+                .toString()
+            )
+            assert "BatchEvalPython" not in plan
+            assert "ArrowEvalPython" not in plan
+
+        frame_result = source.to_geoframe().sample_points(4, rng=0)
+        assert isinstance(frame_result, GeoSeries)
+        assert frame_result.name == "sampled_points"
+        assert frame_result.crs == source.crs
+
+        zero = GeoSeries([polygon, line, Point(0, 0)]).sample_points(0, rng=1)
+        zero_types = [geometry.geom_type for geometry in zero.to_geopandas()]
+        assert zero_types == [
+            "GeometryCollection",
+            "GeometryCollection",
+            "MultiPoint",
+        ]
+
+        one = GeoSeries([polygon, line, Point(0, 0)]).sample_points(1, rng=1)
+        one_types = [geometry.geom_type for geometry in one.to_geopandas()]
+        assert one_types == ["Point", "Point", "MultiPoint"]
+
+        multi_index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 2), ("b", 1), ("b", 2)],
+            names=["group", "position"],
+        )
+        distributed_source = GeoSeries(
+            [polygon, multipolygon, line, multiline],
+            index=multi_index,
+            crs="EPSG:3857",
+        )
+        distributed_result = distributed_source.sample_points(
+            ps.Series([1, 2, 3, 4]), rng=7
+        ).to_geopandas()
+        assert distributed_result.index.equals(multi_index)
+        assert [
+            1 if geometry.geom_type == "Point" else len(geometry.geoms)
+            for geometry in distributed_result
+        ] == [1, 2, 3, 4]
+
+        with pytest.raises(TypeError):
+            source.sample_points(True)
+        with pytest.raises(TypeError):
+            source.sample_points(1.5)
+        with pytest.raises(ValueError):
+            source.sample_points(-1)
+        with pytest.raises(NotImplementedError):
+            source.sample_points(1, method="cluster_poisson")
+        with pytest.raises(TypeError):
+            source.sample_points(ps.Series([1.0] * len(source)))
+        with pytest.raises(Exception, match="Length of sample sizes"):
+            source.sample_points([1], rng=1).to_geopandas()
+        with pytest.warns(FutureWarning, match="'seed' keyword is deprecated"):
+            source.sample_points(1, seed=1)
+
     def test_segmentize(self):
         s = GeoSeries(
             [

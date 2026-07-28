@@ -16,6 +16,7 @@
 # under the License.
 
 import sys
+import operator
 import typing
 import warnings
 from typing import Any, Union, Literal, List
@@ -31,7 +32,7 @@ from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalField, InternalFrame
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import scol_for, verify_temp_column_name
-from pyspark.sql.types import NullType
+from pyspark.sql.types import IntegralType, NullType
 from sedona.spark.sql.types import GeometryType
 
 from sedona.spark.sql import st_aggregates as sta
@@ -123,6 +124,108 @@ def _normalize_numeric_scalar(value, error_message: str) -> float:
 def _normalize_affine_scalar(value, error_message: str) -> float:
     """Normalize an operation-wide affine parameter to a Python float."""
     return _normalize_numeric_scalar(value, error_message)
+
+
+def _normalize_sample_size_scalar(size) -> int:
+    """Normalize one sample size without accepting boolean values."""
+    if isinstance(size, (bool, np.bool_)):
+        raise TypeError(
+            f"expected a sequence of integers or a single integer, got {size!r}"
+        )
+    try:
+        size = operator.index(size)
+    except TypeError as exc:
+        raise TypeError(
+            f"expected a sequence of integers or a single integer, got {size!r}"
+        ) from exc
+    if size < 0:
+        raise ValueError("negative dimensions are not allowed")
+    if size > 2_147_483_647:
+        raise ValueError("sample size must be at most 2147483647")
+    return size
+
+
+def _normalize_sample_seed(rng) -> int:
+    """Map a NumPy-compatible RNG argument to Sedona's positive seed range."""
+    generator = np.random.default_rng(rng)
+    return int(generator.integers(1, 2_147_483_647))
+
+
+def _sample_points_expression(
+    geometry: PySparkColumn,
+    size: PySparkColumn,
+    seed: PySparkColumn,
+    fallback_srid: int,
+) -> PySparkColumn:
+    """Build native expressions for uniform polygon and line sampling."""
+    size = size.cast("long")
+    output_srid = F.coalesce(stf.ST_SRID(geometry), F.lit(fallback_srid))
+    empty_multipoint = stc.ST_GeomFromWKT(F.lit("MULTIPOINT EMPTY"), output_srid)
+    empty_collection = stc.ST_GeomFromWKT(
+        F.lit("GEOMETRYCOLLECTION EMPTY"), output_srid
+    )
+    geometry_type = stf.ST_GeometryType(geometry)
+    is_polygonal = geometry_type.isin("ST_Polygon", "ST_MultiPolygon")
+    is_linear = geometry_type.isin("ST_LineString", "ST_MultiLineString")
+
+    polygon_samples = stf.ST_GeneratePoints(
+        geometry, size.cast("int"), seed.cast("int")
+    )
+
+    # Spark's stable hash supplies one uniformly distributed fraction per
+    # ordinal without evaluating Python code on geometry rows.
+    ordinals = F.sequence(F.lit(0), size.cast("int") - F.lit(1))
+    line_samples = F.transform(
+        ordinals,
+        lambda ordinal: stf.ST_LineInterpolatePoint(
+            geometry,
+            F.pmod(
+                F.xxhash64(seed.cast("long"), ordinal.cast("long")),
+                F.lit(9_007_199_254_740_992),
+            ).cast("double")
+            / F.lit(9_007_199_254_740_992.0),
+        ),
+    )
+    collected_line_samples = stf.ST_Collect(line_samples)
+
+    sampled = (
+        F.when(geometry.isNull() | stf.ST_IsEmpty(geometry), empty_multipoint)
+        .when(~(is_polygonal | is_linear), empty_multipoint)
+        .when(size == 0, empty_collection)
+        .when(
+            is_polygonal & (size == 1),
+            stf.ST_GeometryN(polygon_samples, 0),
+        )
+        .when(is_polygonal, polygon_samples)
+        .when(
+            size == 1,
+            stf.ST_LineInterpolatePoint(
+                geometry,
+                F.pmod(
+                    F.xxhash64(seed.cast("long"), F.lit(0)),
+                    F.lit(9_007_199_254_740_992),
+                ).cast("double")
+                / F.lit(9_007_199_254_740_992.0),
+            ),
+        )
+        .otherwise(collected_line_samples)
+    )
+
+    return (
+        F.when(
+            size.isNull(),
+            F.raise_error(F.lit("sample size values must be integers")),
+        )
+        .when(
+            size < 0,
+            F.raise_error(F.lit("negative dimensions are not allowed")),
+        )
+        .when(
+            size > 2_147_483_647,
+            F.raise_error(F.lit("sample size must be at most 2147483647")),
+        )
+        .otherwise(sampled)
+    )
 
 
 def _interpret_origin(geometry: PySparkColumn, origin, with_z: bool):
@@ -1501,6 +1604,130 @@ class GeoSeries(GeoFrame, pspd.Series):
         return self._query_geometry_column(
             spark_expr,
             returns_geom=True,
+        )
+
+    def sample_points(
+        self,
+        size,
+        method="uniform",
+        seed=None,
+        rng=None,
+        **kwargs,
+    ) -> "GeoSeries":
+        if method != "uniform":
+            raise NotImplementedError(
+                "Sedona only supports method='uniform' for distributed sampling"
+            )
+
+        if seed is not None:
+            warnings.warn(
+                "The 'seed' keyword is deprecated. Use 'rng' instead.",
+                FutureWarning,
+                stacklevel=2,
+            )
+            rng = seed
+
+        randomize_per_row = rng is None
+        engine_seed = _normalize_sample_seed(rng)
+
+        has_crs_metadata, metadata_crs = read_crs_metadata(
+            self._internal.data_fields[0]
+        )
+        fallback_srid = (
+            (metadata_crs.to_epsg() or 0)
+            if has_crs_metadata and metadata_crs is not None
+            else 0
+        )
+
+        def seed_column(order_column: PySparkColumn) -> PySparkColumn:
+            if not randomize_per_row:
+                return F.lit(engine_seed)
+            return (
+                F.pmod(
+                    F.xxhash64(F.lit(engine_seed), order_column.cast("long")),
+                    F.lit(2_147_483_646),
+                )
+                + F.lit(1)
+            ).cast("int")
+
+        if isinstance(size, PandasOnSparkSeries):
+            size_series = size
+        elif pd.api.types.is_list_like(size):
+            size_series = pspd.Series(
+                [_normalize_sample_size_scalar(value) for value in size]
+            )
+        else:
+            normalized_size = _normalize_sample_size_scalar(size)
+            source_frame = self._internal.spark_frame
+            spark_expr = _sample_points_expression(
+                self.spark.column,
+                F.lit(normalized_size),
+                seed_column(scol_for(source_frame, NATURAL_ORDER_COLUMN_NAME)),
+                fallback_srid,
+            )
+            return GeoSeries(
+                self._query_geometry_column(
+                    spark_expr,
+                    returns_geom=True,
+                ).rename("sampled_points")
+            )
+
+        if not isinstance(size_series.spark.data_type, IntegralType):
+            raise TypeError("sample size values must be integers")
+
+        position_col = "__sample_points_position__"
+        left_present_col = "__sample_points_left_present__"
+        right_present_col = "__sample_points_right_present__"
+        right_order_col = "__sample_points_right_order__"
+
+        left_frame = self._internal.spark_frame.select(
+            self.spark.column.alias("L"),
+            *[
+                index_col.alias(index_name)
+                for index_col, index_name in zip(
+                    self._internal.index_spark_columns,
+                    self._internal.index_spark_column_names,
+                )
+            ],
+            scol_for(self._internal.spark_frame, NATURAL_ORDER_COLUMN_NAME).alias(
+                NATURAL_ORDER_COLUMN_NAME
+            ),
+            F.lit(True).alias(left_present_col),
+        )
+        right_frame = size_series._internal.spark_frame.select(
+            size_series.spark.column.alias("R"),
+            scol_for(
+                size_series._internal.spark_frame,
+                NATURAL_ORDER_COLUMN_NAME,
+            ).alias(right_order_col),
+            F.lit(True).alias(right_present_col),
+        )
+        left_frame = InternalFrame.attach_distributed_sequence_column(
+            left_frame.orderBy(NATURAL_ORDER_COLUMN_NAME), position_col
+        )
+        right_frame = InternalFrame.attach_distributed_sequence_column(
+            right_frame.orderBy(right_order_col), position_col
+        )
+        aligned_frame = left_frame.join(right_frame, on=position_col, how="outer")
+
+        spark_expr = _sample_points_expression(
+            F.col("L"),
+            F.col("R"),
+            seed_column(F.col(NATURAL_ORDER_COLUMN_NAME)),
+            fallback_srid,
+        )
+        spark_expr = F.when(
+            F.col(left_present_col).isNull() | F.col(right_present_col).isNull(),
+            F.raise_error(
+                F.lit("Length of sample sizes does not match length of GeoSeries")
+            ),
+        ).otherwise(spark_expr)
+        return GeoSeries(
+            self._query_geometry_column(
+                spark_expr,
+                aligned_frame,
+                returns_geom=True,
+            ).rename("sampled_points")
         )
 
     def segmentize(self, max_segment_length):

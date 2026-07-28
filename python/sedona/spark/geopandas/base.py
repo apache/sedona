@@ -1608,6 +1608,74 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("reverse", self)
 
+    def sample_points(
+        self,
+        size,
+        method="uniform",
+        seed=None,
+        rng=None,
+        **kwargs,
+    ):
+        """Sample points from each geometry.
+
+        Polygonal geometries are sampled uniformly by area and linear
+        geometries uniformly by length. Unsupported and empty geometries
+        produce an empty ``MultiPoint``. Sampling is evaluated by native
+        Spark and Sedona expressions and remains distributed.
+
+        Parameters
+        ----------
+        size : int or array-like
+            Number of points to sample from each geometry. An array-like or
+            pandas-on-Spark ``Series`` supplies one positional size per row.
+        method : str, default "uniform"
+            Sampling method. Sedona currently supports only ``"uniform"``.
+        seed : optional
+            Deprecated alias for ``rng``.
+        rng : optional
+            Any seed accepted by ``numpy.random.default_rng``. A supplied seed
+            makes repeated evaluation deterministic.
+        **kwargs
+            Accepted for GeoPandas signature compatibility and ignored for
+            uniform sampling.
+
+        Returns
+        -------
+        GeoSeries
+            Sampled points with the original index and CRS and the name
+            ``"sampled_points"``.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString, Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (2, 0)]),
+        ...     ]
+        ... )
+        >>> s.sample_points(size=3, rng=7).count_geometries()
+        0    3
+        1    3
+        dtype: int64
+
+        Notes
+        -----
+        Sedona and GeoPandas use different random number generators, so the
+        sampled coordinates are not expected to be identical for the same
+        seed.
+        """
+        return _delegate_to_geometry_column(
+            "sample_points",
+            self,
+            size,
+            method=method,
+            seed=seed,
+            rng=rng,
+            **kwargs,
+        )
+
     def segmentize(self, max_segment_length):
         """Returns a ``GeoSeries`` with vertices added to line segments based on
         maximum segment length.
