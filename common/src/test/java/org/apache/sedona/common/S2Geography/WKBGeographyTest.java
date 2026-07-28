@@ -30,6 +30,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.ParseException;
 
@@ -260,6 +261,21 @@ public class WKBGeographyTest {
     assertEquals(expected, deserialized.toString());
     assertEquals("SRID=4326; " + expected, Functions.asEWKT(deserialized));
     assertEquals("SRID=4326; " + expected, deserialized.toEWKT());
+  }
+
+  @Test
+  public void nonRepeatedLineRetainsS2TextNormalization() throws ParseException {
+    org.locationtech.jts.io.WKTReader jtsReader = new org.locationtech.jts.io.WKTReader();
+    Geometry jts =
+        jtsReader.read(
+            "LINESTRING (-2.1047439575195312 -0.354827880859375, "
+                + "-1.49606454372406 -0.6676061153411865)");
+    Geography geography = WKBGeography.fromJTS(jts);
+
+    assertEquals(
+        "LINESTRING (-2.1047439575195317 -0.35482788085937506, "
+            + "-1.4960645437240603 -0.6676061153411864)",
+        geography.toString(new PrecisionModel(1e16)));
   }
 
   @Test
