@@ -22,6 +22,7 @@ import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
 import static org.apache.flink.table.api.Expressions.lit;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -90,14 +91,17 @@ public class GeographyFunctionTest extends TestBase {
   public void testMakeLinePreservesRepeatedVertices() throws Exception {
     Table table =
         tableEnv.sqlQuery(
-            "SELECT ST_MakeLine("
+            "SELECT line, ST_AsEWKT(line) AS ewkt FROM ("
+                + "SELECT ST_MakeLine("
                 + "ST_GeogFromWKT('LINESTRING (0 0, 1 0)', 4326), "
-                + "ST_GeogFromWKT('LINESTRING (1 0, 2 0)', 4326)) AS line");
+                + "ST_GeogFromWKT('LINESTRING (1 0, 2 0)', 4326)) AS line)");
 
-    Geography line = first(table).getFieldAs("line");
+    Row row = first(table);
+    Geography line = row.getFieldAs("line");
     assertEquals(
         "LINESTRING (0 0, 1 0, 1 0, 2 0)",
         org.apache.sedona.common.geography.Functions.asText(line));
+    assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 1 0, 2 0)", row.getFieldAs("ewkt"));
     assertEquals(4, org.apache.sedona.common.geography.Functions.nPoints(line));
     assertEquals(4326, line.getSRID());
   }
@@ -106,16 +110,28 @@ public class GeographyFunctionTest extends TestBase {
   public void testMakeLinePreservesCoincidentPointsAndFirstSRID() throws Exception {
     Table table =
         tableEnv.sqlQuery(
-            "SELECT ST_MakeLine("
-                + "ST_GeogFromWKT('POINT (0 0)', 4326), "
-                + "ST_GeogFromWKT('POINT (0 0)', 3857)) AS line");
+            "SELECT line, ST_AsText(line) AS wkt, ST_AsEWKT(line) AS ewkt, "
+                + "ST_Centroid(line) AS centroid, ST_Envelope(line, FALSE) AS envelope, "
+                + "ST_Envelope(line, TRUE) AS split_envelope FROM ("
+                + "SELECT ST_MakeLine("
+                + "ST_GeogFromWKT('POINT (12 34)', 4326), "
+                + "ST_GeogFromWKT('POINT (12 34)', 3857)) AS line)");
 
-    Geography line = first(table).getFieldAs("line");
-    assertEquals(
-        "LINESTRING (0 0, 0 0)", org.apache.sedona.common.geography.Functions.asText(line));
+    Row row = first(table);
+    Geography line = row.getFieldAs("line");
+    assertEquals("LINESTRING (12 34, 12 34)", row.getFieldAs("wkt"));
+    assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", row.getFieldAs("ewkt"));
+    assertNull(row.getFieldAs("centroid"));
     assertEquals(2, org.apache.sedona.common.geography.Functions.nPoints(line));
     assertEquals(0.0, org.apache.sedona.common.geography.Functions.length(line), 0.0);
     assertEquals(4326, line.getSRID());
+    for (String field : new String[] {"envelope", "split_envelope"}) {
+      Geography envelope = row.getFieldAs(field);
+      assertEquals(4326, envelope.getSRID());
+      assertEquals("ST_Point", org.apache.sedona.common.geography.Functions.geometryType(envelope));
+      assertEquals(12.0, org.apache.sedona.common.geography.Functions.x(envelope), 1e-12);
+      assertEquals(34.0, org.apache.sedona.common.geography.Functions.y(envelope), 1e-12);
+    }
   }
 
   @Test

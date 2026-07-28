@@ -33,7 +33,7 @@ Only the two-argument signature accepts Geography inputs. The array form of `ST_
 
 The output copies the first input's SRID without transforming either input or validating that their SRIDs match. If the inputs have different SRIDs, the second input's SRID is ignored. An SRID of `0` on the first input remains `0`.
 
-SQL Example:
+SQL Example
 
 ```sql
 SELECT

@@ -42,6 +42,7 @@ public class Functions {
   public static Geography getEnvelope(Geography geography, boolean splitAtAntiMeridian) {
     if (geography == null) return null;
     S2LatLngRect rect = geography.region().getRectBound();
+    if (rect.isEmpty()) return null;
     double lngLo = rect.lngLo().degrees();
     double latLo = rect.latLo().degrees();
     double lngHi = rect.lngHi().degrees();
@@ -137,6 +138,7 @@ public class Functions {
     if (g instanceof PolylineGeography) {
       S2Point sum = null;
       for (S2Polyline p : ((PolylineGeography) g).getPolylines()) {
+        if (p.numVertices() < 2) continue;
         sum = addOrInit(sum, p.getCentroid());
       }
       return sum;
@@ -220,9 +222,7 @@ public class Functions {
     // Preserve the JTS coordinate sequence verbatim. Converting through S2 here would collapse
     // zero-length edges and repeated vertices, changing ST_MakeLine's result and potentially
     // producing an empty LineString that cannot round-trip through the Geography WKB reader.
-    Geography result = WKBGeography.fromJTS(line);
-    result.setSRID(g1.getSRID());
-    return result;
+    return WKBGeography.fromJTS(line);
   }
 
   private static boolean isMakeLineInput(Geometry geometry) {

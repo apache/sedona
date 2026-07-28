@@ -341,31 +341,30 @@ public class WKBGeography extends Geography {
 
   @Override
   public String toString() {
-    return getS2Geography().toString();
+    return toText(new PrecisionModel(PrecisionModel.FIXED));
   }
 
   @Override
   public String toString(PrecisionModel precisionModel) {
-    return getS2Geography().toString(precisionModel);
+    return toText(precisionModel);
   }
 
   @Override
   public String toText(PrecisionModel precisionModel) {
-    return getS2Geography().toText(precisionModel);
+    org.locationtech.jts.io.WKTWriter writer = new org.locationtech.jts.io.WKTWriter();
+    writer.setPrecisionModel(precisionModel);
+    return writer.write(getJTSGeometry());
   }
 
   @Override
   public String toEWKT() {
-    Geography s2 = getS2Geography();
-    s2.setSRID(getSRID());
-    return s2.toEWKT();
+    return toEWKT(new PrecisionModel(PrecisionModel.FIXED));
   }
 
   @Override
   public String toEWKT(PrecisionModel precisionModel) {
-    Geography s2 = getS2Geography();
-    s2.setSRID(getSRID());
-    return s2.toEWKT(precisionModel);
+    String text = toText(precisionModel);
+    return getSRID() > 0 ? "SRID=" + getSRID() + "; " + text : text;
   }
 
   @Override

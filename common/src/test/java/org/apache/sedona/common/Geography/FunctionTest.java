@@ -194,19 +194,31 @@ public class FunctionTest {
 
   @Test
   public void makeLine_coincidentPointsRemainUsableAfterWKBRoundTrip() throws ParseException {
-    Geography point = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography point = Constructors.geogFromWKT("POINT (12 34)", 4326);
     Geography line = roundTripWKB(Functions.makeLine(point, point));
 
-    assertEquals("LINESTRING (0 0, 0 0)", Functions.asText(line));
+    assertEquals("LINESTRING (12 34, 12 34)", Functions.asText(line));
+    assertEquals("LINESTRING (12 34, 12 34)", line.toString());
+    assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", Functions.asEWKT(line));
     assertEquals(2, Functions.nPoints(line));
     assertEquals("ST_LineString", Functions.geometryType(line));
     assertEquals(1, Functions.numGeometries(line));
     assertEquals(0.0, Functions.length(line), 0.0);
     assertEquals(0.0, Functions.distance(line, point), 0.0);
+    assertNull(Functions.centroid(line));
 
-    Geography end = Constructors.geogFromWKT("POINT (1 0)", 4326);
+    for (boolean splitAtAntiMeridian : new boolean[] {false, true}) {
+      Geography envelope = Functions.getEnvelope(line, splitAtAntiMeridian);
+      assertNotNull(envelope);
+      assertEquals(4326, envelope.getSRID());
+      assertEquals("ST_Point", Functions.geometryType(envelope));
+      assertEquals(12.0, Functions.x(envelope), 1e-12);
+      assertEquals(34.0, Functions.y(envelope), 1e-12);
+    }
+
+    Geography end = Constructors.geogFromWKT("POINT (13 34)", 4326);
     Geography extended = roundTripWKB(Functions.makeLine(line, end));
-    assertEquals("LINESTRING (0 0, 0 0, 1 0)", Functions.asText(extended));
+    assertEquals("LINESTRING (12 34, 12 34, 13 34)", Functions.asText(extended));
     assertEquals(3, Functions.nPoints(extended));
   }
 
@@ -216,6 +228,7 @@ public class FunctionTest {
     Geography second = Constructors.geogFromWKT("LINESTRING (1 0, 2 0)", 4326);
     Geography stitched = roundTripWKB(Functions.makeLine(first, second));
     assertEquals("LINESTRING (0 0, 1 0, 1 0, 2 0)", Functions.asText(stitched));
+    assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 1 0, 2 0)", Functions.asEWKT(stitched));
     assertEquals(4, Functions.nPoints(stitched));
 
     Geography repeated = geographyFromJTSWKT("LINESTRING (0 0, 0 0, 1 0)", 4326);

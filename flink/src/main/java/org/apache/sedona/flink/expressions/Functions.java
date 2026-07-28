@@ -2300,6 +2300,9 @@ public class Functions {
   }
 
   public static class ST_MakeLine extends ScalarFunction {
+    // Reflection cannot distinguish the Geometry and Geography RAW pair overloads. Explicit
+    // inference also keeps ARRAY<Geometry> type-safe; ARRAY<Geography> is intentionally
+    // unsupported.
     @Override
     public TypeInference getTypeInference(DataTypeFactory typeFactory) {
       DataType geometryType =

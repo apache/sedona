@@ -24,6 +24,7 @@ import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2Point;
 import java.io.IOException;
 import org.apache.sedona.common.geography.Constructors;
+import org.apache.sedona.common.geography.Functions;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -187,6 +188,9 @@ public class WKBGeographyTest {
   public void toEWKT_works() throws ParseException {
     org.locationtech.jts.io.WKTReader jtsReader = new org.locationtech.jts.io.WKTReader();
     Geometry jts = jtsReader.read("POINT (1 1)");
+    WKBGeography geogWithoutSrid = WKBGeography.fromJTS(jts);
+    assertEquals("POINT (1 1)", geogWithoutSrid.toEWKT());
+
     jts.setSRID(4326);
     WKBGeography geog = WKBGeography.fromJTS(jts);
     assertEquals("SRID=4326; POINT (1 1)", geog.toEWKT());
@@ -236,6 +240,26 @@ public class WKBGeographyTest {
     assertTrue(deserialized instanceof WKBGeography);
     assertEquals(
         "GEOMETRYCOLLECTION (POINT (1 2), LINESTRING (3 4, 5 6))", deserialized.toString());
+  }
+
+  @Test
+  public void serialize_deserialize_repeatedLinePreservesStructuralText()
+      throws IOException, ParseException {
+    org.locationtech.jts.io.WKTReader jtsReader = new org.locationtech.jts.io.WKTReader();
+    Geometry jts = jtsReader.read("LINESTRING (0 0, 1 0, 1 0, 2 0)");
+    jts.setSRID(4326);
+
+    Geography deserialized =
+        GeographyWKBSerializer.deserialize(
+            GeographyWKBSerializer.serialize(WKBGeography.fromJTS(jts)));
+    // Populate the normalized operational S2 cache before exercising structural accessors.
+    ((WKBGeography) deserialized).getS2Geography();
+
+    String expected = "LINESTRING (0 0, 1 0, 1 0, 2 0)";
+    assertEquals(expected, Functions.asText(deserialized));
+    assertEquals(expected, deserialized.toString());
+    assertEquals("SRID=4326; " + expected, Functions.asEWKT(deserialized));
+    assertEquals("SRID=4326; " + expected, deserialized.toEWKT());
   }
 
   @Test

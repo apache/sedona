@@ -19,7 +19,7 @@
 
 # ST_MakeLine
 
-Introduction: Creates a LineString containing the coordinates of Point, MultiPoint, or LineString inputs. Other input types cause an error.
+Introduction: Creates a LineString containing the points of Point, MultiPoint, or LineString geometries. Other geometry types cause an error.
 
 ![ST_MakeLine](../../../image/ST_MakeLine/ST_MakeLine.svg "ST_MakeLine")
 
@@ -29,15 +29,11 @@ Format:
 
 `ST_MakeLine(geoms: ARRAY[Geometry])`
 
-`ST_MakeLine(geog1: Geography, geog2: Geography)`
+Return type: `Geometry`
 
-Return type: `Geometry` or `Geography`
+Since: `v1.5.0`
 
-Since: `v1.5.0` (Geometry), `v1.9.1` (Geography)
-
-The Geography overload is available only for the two-argument signature. It preserves repeated coordinates and copies the first input's SRID without transforming either input or validating that their SRIDs match. If the inputs have different SRIDs, the second input's SRID is ignored. Geography measurement functions interpret the result's edges as great-circle arcs.
-
-Geometry example:
+Example:
 
 ```sql
 SELECT ST_AsText( ST_MakeLine(ST_Point(1,2), ST_Point(3,4)) );
@@ -46,34 +42,17 @@ SELECT ST_AsText( ST_MakeLine(ST_Point(1,2), ST_Point(3,4)) );
 Output:
 
 ```
-LINESTRING (1 2, 3 4)
+LINESTRING(1 2,3 4)
 ```
 
-Geometry array example:
+Example:
 
 ```sql
-SELECT ST_AsText( ST_MakeLine(ARRAY[ST_Point(0, 0), ST_Point(1, 1), ST_Point(2, 2)]) );
+SELECT ST_AsText( ST_MakeLine( 'LINESTRING(0 0, 1 1)', 'LINESTRING(2 2, 3 3)' ) );
 ```
 
 Output:
 
 ```
-LINESTRING (0 0, 1 1, 2 2)
-```
-
-Geography example:
-
-```sql
-SELECT ST_AsText(
-  ST_MakeLine(
-    ST_GeogFromWKT('LINESTRING (0 0, 1 0)', 4326),
-    ST_GeogFromWKT('LINESTRING (1 0, 2 0)', 4326)
-  )
-);
-```
-
-Output:
-
-```
-LINESTRING (0 0, 1 0, 1 0, 2 0)
+ LINESTRING(0 0,1 1,2 2,3 3)
 ```
