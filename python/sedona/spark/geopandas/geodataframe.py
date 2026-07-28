@@ -37,10 +37,13 @@ from pyspark.pandas.internal import (
     SPARK_INDEX_NAME_FORMAT,
 )
 from pyspark.pandas.utils import scol_for
+from pyspark.sql.column import Column
 from pyspark.sql import functions as F
 from pyspark.sql.types import (
+    BinaryType,
     BooleanType,
     ByteType,
+    DataType,
     DoubleType,
     FloatType,
     IntegerType,
@@ -57,6 +60,7 @@ from sedona.spark.geopandas.base import GeoFrame
 from sedona.spark.sql import st_aggregates as sta
 from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
+from sedona.spark.sql.types import GeometryType
 
 from pandas.api.extensions import register_extension_dtype
 from geopandas.geodataframe import crs_mismatch_error
@@ -1560,11 +1564,143 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
     ) -> dict:
         raise NotImplementedError("to_geo_dict() is not implemented yet.")
 
-    def to_wkb(self, hex: bool = False, **kwargs) -> pd.DataFrame:
-        raise NotImplementedError("to_wkb() is not implemented yet.")
+    def _serialize_geometry_columns(
+        self,
+        serializer: Callable[[Column], Column],
+        output_type: DataType,
+    ) -> pspd.DataFrame:
+        """Apply a native serializer to every geometry-typed column."""
+        internal = self._internal
+        serialized_columns = []
+        geometry_columns = []
 
-    def to_wkt(self, **kwargs) -> pd.DataFrame:
-        raise NotImplementedError("to_wkt() is not implemented yet.")
+        # Build one projection for the whole frame. Sequential assignment would
+        # align each replacement Series and can multiply duplicate-index rows.
+        for spark_column, spark_name, field in zip(
+            internal.data_spark_columns,
+            internal.data_spark_column_names,
+            internal.data_fields,
+        ):
+            is_geometry = isinstance(field.spark_type, GeometryType)
+            geometry_columns.append(is_geometry)
+            serialized_columns.append(
+                serializer(spark_column).alias(spark_name)
+                if is_geometry
+                else spark_column
+            )
+
+        output_sdf = internal.spark_frame.select(
+            *[
+                scol_for(internal.spark_frame, name)
+                for name in internal.index_spark_column_names
+            ],
+            *serialized_columns,
+            scol_for(internal.spark_frame, NATURAL_ORDER_COLUMN_NAME),
+        )
+        output_schema = output_sdf.schema
+        output_fields = [
+            (
+                field.copy(
+                    dtype=np.dtype("object"),
+                    spark_type=output_type,
+                    nullable=output_schema[spark_name].nullable,
+                    metadata={},
+                )
+                if is_geometry
+                else field
+            )
+            for spark_name, field, is_geometry in zip(
+                internal.data_spark_column_names,
+                internal.data_fields,
+                geometry_columns,
+            )
+        ]
+        result_internal = internal.copy(
+            spark_frame=output_sdf,
+            index_spark_columns=[
+                scol_for(output_sdf, name) for name in internal.index_spark_column_names
+            ],
+            data_spark_columns=[
+                scol_for(output_sdf, name) for name in internal.data_spark_column_names
+            ],
+            data_fields=output_fields,
+        )
+        return PandasOnSparkDataFrame(result_internal)
+
+    @staticmethod
+    def _validate_serialization_kwargs(method_name: str, kwargs: dict) -> None:
+        if kwargs:
+            names = ", ".join(sorted(kwargs))
+            raise NotImplementedError(
+                f"GeoDataFrame.{method_name}() does not support Shapely keyword "
+                f"arguments in distributed execution: {names}"
+            )
+
+    def to_wkb(self, hex: bool = False, **kwargs) -> pspd.DataFrame:
+        """
+        Encode all geometry columns in the GeoDataFrame to WKB.
+
+        Parameters
+        ----------
+        hex : bool, default False
+            If True, export WKB values as hexadecimal strings. By default,
+            values are returned as binary objects.
+        **kwargs
+            Shapely-specific serialization options are not supported by the
+            distributed implementation and raise ``NotImplementedError``.
+
+        Returns
+        -------
+        pyspark.pandas.DataFrame
+            A distributed DataFrame with every geometry-typed column encoded
+            as WKB and all other columns unchanged.
+
+        Notes
+        -----
+        Duplicate column labels remain subject to pandas-on-Spark's DataFrame
+        construction restrictions.
+
+        See Also
+        --------
+        GeoDataFrame.to_wkt
+        GeoSeries.to_wkb
+        """
+        self._validate_serialization_kwargs("to_wkb", kwargs)
+        serializer, output_type = (
+            (lambda geometry: F.hex(stf.ST_AsBinary(geometry)), StringType())
+            if hex
+            else (stf.ST_AsBinary, BinaryType())
+        )
+        return self._serialize_geometry_columns(serializer, output_type)
+
+    def to_wkt(self, **kwargs) -> pspd.DataFrame:
+        """
+        Encode all geometry columns in the GeoDataFrame to WKT.
+
+        Parameters
+        ----------
+        **kwargs
+            Shapely-specific serialization options are not supported by the
+            distributed implementation and raise ``NotImplementedError``.
+
+        Returns
+        -------
+        pyspark.pandas.DataFrame
+            A distributed DataFrame with every geometry-typed column encoded
+            as WKT and all other columns unchanged.
+
+        Notes
+        -----
+        Duplicate column labels remain subject to pandas-on-Spark's DataFrame
+        construction restrictions.
+
+        See Also
+        --------
+        GeoDataFrame.to_wkb
+        GeoSeries.to_wkt
+        """
+        self._validate_serialization_kwargs("to_wkt", kwargs)
+        return self._serialize_geometry_columns(stf.ST_AsText, StringType())
 
     def to_arrow(
         self,
