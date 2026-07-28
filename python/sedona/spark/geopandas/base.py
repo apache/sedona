@@ -79,6 +79,47 @@ class GeoFrame(metaclass=ABCMeta):
         return _delegate_to_geometry_column("sindex", self)
 
     @property
+    def cx(self):
+        """Select geometries that intersect a coordinate bounding box.
+
+        The indexer accepts an x slice followed by a y slice. Slice bounds are
+        inclusive, may be open-ended, and may be written in either order.
+        Non-``None`` slice steps are ignored with a warning, matching
+        GeoPandas.
+
+        Returns
+        -------
+        _CoordinateIndexer
+            Coordinate indexer returning the same distributed type as this
+            object.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point
+        >>> s = GeoSeries([Point(0, 0), Point(1, 1), Point(2, 2)])
+        >>> s.cx[0.5:2, 0.5:1.5]
+        1    POINT (1 1)
+        dtype: geometry
+
+        Open-ended slices are supported:
+
+        >>> s.cx[1:, :]
+        1    POINT (1 1)
+        2    POINT (2 2)
+        dtype: geometry
+
+        Notes
+        -----
+        Selection is evaluated with native Spark and Sedona expressions. Open
+        bounds are derived with a one-row distributed bounds aggregation; no
+        geometry rows are collected to the driver.
+        """
+        from sedona.spark.geopandas.tools.clip import _CoordinateIndexer
+
+        return _CoordinateIndexer(self)
+
+    @property
     def has_sindex(self):
         """Check the existence of the spatial index without generating it.
 
@@ -3794,6 +3835,75 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column(
             "clip_by_rect", self, xmin, ymin, xmax, ymax
+        )
+
+    def clip(self, mask, keep_geom_type=False, sort=False):
+        """Clip geometries to a polygonal or rectangular mask.
+
+        Distributed ``GeoSeries`` and ``GeoDataFrame`` masks are dissolved on
+        the cluster before clipping. A four-value list-like mask is interpreted
+        as ``(minx, miny, maxx, maxy)``. Both distributed layers should use the
+        same Coordinate Reference System (CRS); a mismatch emits a warning.
+
+        Parameters
+        ----------
+        mask : GeoDataFrame, GeoSeries, Polygon, MultiPolygon, or list-like
+            Polygonal mask, or four rectangle bounds. Distributed masks are
+            dissolved into one geometry using ``ST_Union_Aggr``.
+        keep_geom_type : bool, default False
+            If True, retain only the input geometry family when clipping
+            creates lower-dimensional geometries.
+        sort : bool, default False
+            If True, return matching rows in their original positional order.
+
+        Returns
+        -------
+        GeoDataFrame or GeoSeries
+            Clipped data of the same type as the caller. Index values,
+            non-geometry columns, active geometry, CRS, and SRID are preserved.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoDataFrame
+        >>> from shapely.geometry import LineString, Point, box
+        >>> gdf = GeoDataFrame(
+        ...     {
+        ...         "name": ["line", "point"],
+        ...         "geometry": [
+        ...             LineString([(0, 0), (2, 2)]),
+        ...             Point(3, 3),
+        ...         ],
+        ...     }
+        ... )
+        >>> gdf.clip(box(0, 0, 1, 1))
+           name               geometry
+        0  line  LINESTRING (0 0, 1 1)
+
+        Rectangle bounds can be supplied directly:
+
+        >>> gdf.geometry.clip((0, 0, 1, 1))
+        0    LINESTRING (0 0, 1 1)
+        Name: geometry, dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.clip_by_rect
+        geopandas.clip
+
+        Notes
+        -----
+        Sedona does not expose a separate fast ``ClipByBox`` operation.
+        Four-value rectangle masks therefore use native ``ST_MakeEnvelope``
+        and ``ST_Intersection``. Boundary-only intersections can consequently
+        differ from GeoPandas' fast, possibly dirty rectangle path.
+        """
+        from sedona.spark.geopandas.tools.clip import clip
+
+        return clip(
+            self,
+            mask,
+            keep_geom_type=keep_geom_type,
+            sort=sort,
         )
 
     def difference(self, other, align=None):

@@ -45,6 +45,11 @@ from pyspark.sql import functions as F
 import shapely
 from shapely.geometry.base import BaseGeometry
 
+from sedona.spark.geopandas._crs import (
+    NO_CRS_OVERRIDE,
+    read_crs_metadata,
+    with_crs_metadata,
+)
 from sedona.spark.geopandas._typing import Label
 from sedona.spark.geopandas.base import GeoFrame
 from sedona.spark.geopandas.geodataframe import GeoDataFrame
@@ -338,14 +343,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         dtype: geometry
         """
         assert data is not None
+        if crs is None and isinstance(data, gpd.GeoSeries):
+            crs = data.crs
 
         self._anchor: GeoDataFrame
         self._col_label: Label
         self._sindex: SpatialIndex = None
-        self._empty_crs_source: typing.Optional["GeoSeries"] = None
-        # Explicit CRS metadata wins over the lineage fallback below when
-        # geometry rows are empty or carry SRID 0.
-        self._empty_crs_value = None
 
         if isinstance(
             data, (GeoDataFrame, GeoSeries, PandasOnSparkSeries, PandasOnSparkDataFrame)
@@ -415,7 +418,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 f"received data of dtype '{self.spark.data_type.typeName()}'"
             )
 
-        if crs:
+        if crs is not None:
             self.set_crs(crs, inplace=True)
 
     def _is_empty(self) -> bool:
@@ -463,13 +466,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         """
         from pyproj import CRS
 
+        has_crs_metadata, metadata_crs = read_crs_metadata(
+            self._internal.data_fields[0]
+        )
+        if has_crs_metadata:
+            return metadata_crs
+
         if self._is_empty():
-            # Empty data has no SRID to inspect, so explicit CRS metadata wins
-            # over the inherited lineage metadata.
-            if self._empty_crs_value is not None:
-                return self._empty_crs_value
-            if self._empty_crs_source is not None:
-                return self._empty_crs_source.crs
             return None
 
         # F.first is non-deterministic, but it doesn't matter because all non-null values should be the same.
@@ -489,16 +492,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         srid = 0 if np.isnan(srid) else srid
 
         # Sedona returns 0 if SRID doesn't exist.
-        if srid != 0:
-            return CRS.from_user_input(srid)
-        # These fallbacks are metadata rather than a fresh read from geometry
-        # coordinates. Explicit metadata takes precedence over inherited
-        # lineage metadata, including for non-empty geometries with SRID 0.
-        if self._empty_crs_value is not None:
-            return self._empty_crs_value
-        if self._empty_crs_source is not None:
-            return self._empty_crs_source.crs
-        return None
+        return CRS.from_user_input(srid) if srid != 0 else None
 
     @crs.setter
     def crs(self, value: Union["CRS", None]):
@@ -627,19 +621,17 @@ class GeoSeries(GeoFrame, pspd.Series):
                 )
 
         # 0 indicates no SRID in Sedona.
-        new_epsg = crs.to_epsg() if crs else 0
+        new_epsg = (crs.to_epsg() or 0) if crs is not None else 0
 
         spark_col = stf.ST_SetSRID(self.spark.column, new_epsg)
-        result = self._query_geometry_column(spark_col, keep_name=True)
-        result._empty_crs_value = crs
-        if crs is None:
-            result._empty_crs_source = None
+        result = self._query_geometry_column(
+            spark_col,
+            keep_name=True,
+            crs_override=crs,
+        )
 
         if inplace:
             self._update_inplace(result, invalidate_sindex=False)
-            self._empty_crs_value = crs
-            if crs is None:
-                self._empty_crs_source = None
             return None
 
         return result
@@ -655,6 +647,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         returns_geom: bool = True,
         is_aggr: bool = False,
         keep_name: bool = False,
+        crs_override: Any = NO_CRS_OVERRIDE,
     ) -> Union["GeoSeries", pspd.Series]:
         """
         Helper method to query a single geometry column with a specified operation.
@@ -683,7 +676,14 @@ class GeoSeries(GeoFrame, pspd.Series):
         if keep_name and self.name:
             rename = self.name
 
-        col_expr = spark_col.alias(rename)
+        result_field = None
+        if returns_geom:
+            result_field = self._internal.data_fields[0].copy(name=rename)
+            if crs_override is not NO_CRS_OVERRIDE:
+                result_field = with_crs_metadata(result_field, crs_override)
+            col_expr = spark_col.alias(rename, metadata=result_field.metadata)
+        else:
+            col_expr = spark_col.alias(rename)
 
         exprs = [col_expr]
 
@@ -718,6 +718,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         else:
             sdf = df.select(*exprs)
 
+        if result_field is not None:
+            schema_field = sdf.schema[rename]
+            result_field = result_field.copy(
+                spark_type=schema_field.dataType,
+                nullable=schema_field.nullable,
+            )
+
         internal = self._internal.copy(
             spark_frame=sdf,
             index_fields=index_fields,
@@ -727,7 +734,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             data_spark_columns=[scol_for(sdf, rename)],
             data_fields=[
                 (
-                    self._internal.data_fields[0].copy(name=rename)
+                    result_field
                     if returns_geom
                     else InternalField.from_struct_field(sdf.schema[rename])
                 )
@@ -740,8 +747,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         series_name = None if rename == SPARK_DEFAULT_SERIES_NAME else rename
         ps_series = ps_series.rename(series_name)
 
-        result = GeoSeries(ps_series) if returns_geom else ps_series
-        return result
+        return GeoSeries(ps_series) if returns_geom else ps_series
 
     def _expand_geometry_array(
         self,
@@ -861,7 +867,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         Same as `to_geopandas()`, without issuing the advice log for internal usage.
         """
         pd_series = self._to_internal_pandas()
-        return gpd.GeoSeries(pd_series, crs=self.crs)
+        return gpd.GeoSeries(
+            pd_series.array,
+            index=pd_series.index,
+            name=pd_series.name,
+            crs=self.crs,
+        )
 
     def to_spark_pandas(self) -> pspd.Series:
         return pspd.Series(pspd.DataFrame(self._psdf._internal))
@@ -913,10 +924,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         dtype: geometry
         """
         if deep:
-            result = GeoSeries(pspd.Series.copy(self, deep=True))
-            result._empty_crs_value = self._empty_crs_value
-            result._empty_crs_source = self._empty_crs_source
-            return result
+            return GeoSeries(pspd.Series.copy(self, deep=True))
         return self
 
     @property
@@ -3569,15 +3577,14 @@ class GeoSeries(GeoFrame, pspd.Series):
             index_fields=index_fields,
             data_spark_columns=[scol_for(output_sdf, geometry_col)],
             data_fields=[
-                InternalField(np.dtype("object"), output_sdf.schema[geometry_col])
+                self._internal.data_fields[0].copy(
+                    name=geometry_col,
+                    spark_type=output_sdf.schema[geometry_col].dataType,
+                    nullable=output_sdf.schema[geometry_col].nullable,
+                )
             ],
         )
-        result = GeoSeries(first_series(PandasOnSparkDataFrame(result_internal)))
-        # An explode can remove every row even though its input carries an
-        # SRID. Keep a lazy reference to the input so CRS remains available
-        # without eagerly evaluating or collecting the result.
-        result._empty_crs_source = self
-        return result
+        return GeoSeries(first_series(PandasOnSparkDataFrame(result_internal)))
 
     def to_crs(
         self, crs: Union[Any, None] = None, epsg: Union[int, None] = None
@@ -3666,6 +3673,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         return self._query_geometry_column(
             spark_expr,
             keep_name=True,
+            crs_override=crs,
         )
 
     @property
@@ -4055,13 +4063,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             include_z=include_z,
         )
 
-    def clip(self, mask, keep_geom_type: bool = False, sort=False) -> "GeoSeries":
-        raise NotImplementedError(
-            _not_implemented_error(
-                "clip", "Clips geometries to the bounds of a mask geometry."
-            )
-        )
-
     def to_file(
         self,
         path: str,
@@ -4189,6 +4190,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = GeoDataFrame(
             pspd.DataFrame(renamed._internal).to_spark(index_col).pandas_api(index_col)
         )
+        result._geometry_column_name = renamed.name
         result.index.name = self.index.name
         return result
 

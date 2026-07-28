@@ -15,8 +15,12 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from .clip import clip
+from .collect import collect
 from .sjoin import sjoin
 
 __all__ = [
+    "clip",
+    "collect",
     "sjoin",
 ]

@@ -18,40 +18,26 @@
  */
 package org.apache.sedona.sql
 
-import org.apache.sedona.core.utils.SedonaConf
 import org.apache.spark.sql.sedona_sql.expressions.st_functions.{ExpandAddress, ParseAddress}
 import org.apache.spark.sql.{Row, functions => f}
-import org.scalatest.BeforeAndAfterEach
-import org.slf4j.LoggerFactory
+import org.scalatest.{Canceled, Outcome}
 
-import java.nio.file.{Files, Paths}
 import scala.collection.mutable
 
-class AddressProcessingFunctionsTest extends TestBaseScala with BeforeAndAfterEach {
-  private val logger = LoggerFactory.getLogger(getClass)
-  var clearedLibPostal = false
+class AddressProcessingFunctionsTest extends TestBaseScala {
 
-  def clearLibpostalDataDir(): String = {
-    val dir = SedonaConf.fromActiveSession().getLibPostalDataDir
-    if (dir != null && dir.nonEmpty) {
-      try {
-        Files
-          .walk(Paths.get(dir))
-          .sorted(java.util.Comparator.reverseOrder())
-          .forEach(path => Files.deleteIfExists(path))
-      } catch {
-        case e: Exception =>
-          logger.warn(s"Failed to clear libpostal data directory: ${e.getMessage}")
-      }
-    }
-    dir
-  }
+  // These tests need ~1.3 GB of libpostal model data, which jpostal downloads
+  // on first use. CI runs them in a single matrix combination and sets this
+  // variable everywhere else; unset, the tests run as usual.
+  private val skipLibPostalTests =
+    sys.env.get("SEDONA_SKIP_LIBPOSTAL_TESTS").exists(_.equalsIgnoreCase("true"))
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    if (!clearedLibPostal) {
-      clearedLibPostal = true
-      clearLibpostalDataDir()
+  override def withFixture(test: NoArgTest): Outcome = {
+    if (skipLibPostalTests) {
+      Canceled(
+        "Skipping libpostal test - unset SEDONA_SKIP_LIBPOSTAL_TESTS to download the model data and run")
+    } else {
+      super.withFixture(test)
     }
   }
 

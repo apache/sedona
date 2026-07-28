@@ -736,7 +736,9 @@ private[apache] case class ST_Azimuth(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_X(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.x _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.x),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.x)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -744,7 +746,9 @@ private[apache] case class ST_X(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_Y(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.y _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.y),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.y)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
