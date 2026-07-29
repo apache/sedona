@@ -1686,6 +1686,11 @@ class GeoFrame(metaclass=ABCMeta):
         points into a MultiPoint. Unsupported nonempty geometry types produce
         empty MultiPoints without GeoPandas's per-row warning, avoiding an eager
         type scan.
+
+        Sedona follows GeoPandas 1.1.4 and later by always returning a
+        ``MultiPoint``. GeoPandas 1.1.3 and earlier instead return a ``Point``
+        for ``size=1`` and an empty ``GeometryCollection`` for ``size=0``, and
+        may collapse duplicate samples.
         """
         return _delegate_to_geometry_column(
             "sample_points",

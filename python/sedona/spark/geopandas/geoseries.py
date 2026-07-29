@@ -49,14 +49,6 @@ from sedona.spark.sql import st_predicates as stp
 
 from pyspark.sql import Column as PySparkColumn
 from pyspark.sql import functions as F
-from pyspark.sql.window import Window
-
-try:
-    from pyspark.sql.utils import is_remote
-except ImportError:
-
-    def is_remote():
-        return False
 
 
 import shapely
@@ -173,67 +165,12 @@ def _attach_ordered_sequence_column(
     sequence_column: str,
 ):
     """Attach dense positions without a single-partition window over all rows."""
-    if not is_remote():
-        return InternalFrame.attach_distributed_sequence_column(
-            sdf.orderBy(order_column), sequence_column
-        )
-
-    reserved_columns = set(sdf.columns)
-    reserved_columns.add(sequence_column)
-
-    def temp_column_name(base: str) -> str:
-        suffix = 0
-        candidate = f"__sample_points_{base}__"
-        while candidate in reserved_columns:
-            suffix += 1
-            candidate = f"__sample_points_{base}_{suffix}__"
-        reserved_columns.add(candidate)
-        return candidate
-
-    partition_column = temp_column_name("partition")
-    local_position_column = temp_column_name("local_position")
-    partition_size_column = temp_column_name("partition_size")
-    partition_offset_column = temp_column_name("partition_offset")
-
-    # Spark Connect cannot use pandas-on-Spark's JVM-backed distributed
-    # sequence helper. Fixed-width order buckets keep row-number windows
-    # bounded and deterministic. Only the small table of bucket counts is
-    # collected into one window to compute offsets.
-    source_columns = [scol_for(sdf, column) for column in sdf.columns]
-    partitioned = sdf.select(
-        *source_columns,
-        F.shiftrightunsigned(order_column.cast("long"), 20)
-        .cast("long")
-        .alias(partition_column),
-    )
-    local_window = Window.partitionBy(partition_column).orderBy(order_column)
-    numbered = partitioned.withColumn(
-        local_position_column,
-        (F.row_number().over(local_window) - F.lit(1)).cast("long"),
-    )
-    partition_sizes = partitioned.groupBy(partition_column).agg(
-        F.count(F.lit(1)).cast("long").alias(partition_size_column)
-    )
-    offset_window = Window.orderBy(partition_column).rowsBetween(
-        Window.unboundedPreceding, -1
-    )
-    partition_offsets = partition_sizes.select(
-        F.col(partition_column),
-        F.coalesce(
-            F.sum(partition_size_column).over(offset_window),
-            F.lit(0),
-        )
-        .cast("long")
-        .alias(partition_offset_column),
-    )
-    joined = numbered.join(partition_offsets, on=partition_column)
-    # Spark Connect Columns retain relation identity. Rebind the original
-    # names to the joined relation before the final projection.
-    return joined.select(
-        (F.col(partition_offset_column) + F.col(local_position_column)).alias(
-            sequence_column
-        ),
-        *[scol_for(joined, column) for column in sdf.columns],
+    # Spark 3.5+ exposes this through DistributedSequenceID in Connect, while
+    # classic Spark uses its equivalent JVM operator. The native implementation
+    # owns the child materialization lifecycle and avoids duplicate evaluation.
+    return InternalFrame.attach_distributed_sequence_column(
+        sdf.orderBy(order_column),
+        sequence_column,
     )
 
 

@@ -139,6 +139,26 @@ class TestPointsFromXY(TestGeopandasBase):
             pdf["x"].isna().to_numpy(),
         )
 
+    def test_points_from_xy_preserves_pending_expressions(self):
+        frame = ps.DataFrame(
+            {
+                "x": [1.0, 2.0],
+                "y": [3.0, 4.0],
+                "value": [10, 11],
+            }
+        )
+        frame["computed_index"] = frame["value"] + 100
+        frame = frame.set_index("computed_index")
+
+        result = sgpd.points_from_xy(frame["x"] * 2, frame["y"] + 0.5)
+        actual = result.to_geopandas()
+
+        assert actual.index.equals(pd.Index([110, 111], name="computed_index"))
+        assert actual.to_wkt().tolist() == [
+            "POINT (2 3.5)",
+            "POINT (4 4.5)",
+        ]
+
     def test_points_from_xy_null_is_nan_coordinate_not_missing_geometry(self):
         psdf = self.spark.createDataFrame(
             [(0, None, 2.0), (1, 3.0, None), (2, None, None)],

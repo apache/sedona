@@ -22,7 +22,6 @@ import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
 import sedona.spark.geopandas as sgpd
-import sedona.spark.geopandas.geoseries as geoseries_module
 from pyspark.pandas.internal import InternalFrame, NATURAL_ORDER_COLUMN_NAME
 from pyspark.pandas.utils import scol_for
 from pyspark.sql import functions as F
@@ -2669,11 +2668,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         with pytest.warns(FutureWarning, match="'seed' keyword is deprecated"):
             source.sample_points(1, seed=1)
 
-    def test_sample_points_stateful_rng_is_partition_stable(self, monkeypatch):
-        # Exercise the public-expression fallback used by Spark Connect while
-        # retaining the local Spark session used by the test suite.
-        monkeypatch.setattr(geoseries_module, "is_remote", lambda: True)
-
+    def test_sample_points_stateful_rng_is_partition_stable(self):
         line = LineString([(0, 0), (2, 0), (2, 2)])
         identical_source = GeoSeries(
             [line, line, line, line],
