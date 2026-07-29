@@ -87,7 +87,7 @@ public class GeographyFunctionTest extends TestBase {
   }
 
   @Test
-  public void testMakeLinePreservesRepeatedVertices() throws Exception {
+  public void testMakeLineDeduplicatesLineStringSeam() throws Exception {
     Table table =
         tableEnv.sqlQuery(
             "SELECT line, ST_AsEWKT(line) AS ewkt FROM ("
@@ -98,10 +98,9 @@ public class GeographyFunctionTest extends TestBase {
     Row row = first(table);
     Geography line = row.getFieldAs("line");
     assertEquals(
-        "LINESTRING (0 0, 1 0, 1 0, 2 0)",
-        org.apache.sedona.common.geography.Functions.asText(line));
-    assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 1 0, 2 0)", row.getFieldAs("ewkt"));
-    assertEquals(4, org.apache.sedona.common.geography.Functions.nPoints(line));
+        "LINESTRING (0 0, 1 0, 2 0)", org.apache.sedona.common.geography.Functions.asText(line));
+    assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 2 0)", row.getFieldAs("ewkt"));
+    assertEquals(3, org.apache.sedona.common.geography.Functions.nPoints(line));
     assertEquals(4326, line.getSRID());
   }
 
@@ -204,7 +203,7 @@ public class GeographyFunctionTest extends TestBase {
   public void testAsEWKT() throws Exception {
     String wkt = "POINT (-122.4194 37.7749)";
     Object out = eval(wkt, call(Functions.ST_AsEWKT.class.getSimpleName(), $("geog")));
-    assertEquals("SRID=4326; POINT (-122.4 37.8)", out.toString());
+    assertEquals("SRID=4326; POINT (-122.4194 37.7749)", out.toString());
   }
 
   @Test

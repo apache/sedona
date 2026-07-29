@@ -249,22 +249,13 @@ public class WKBWriter {
       throws IOException {
     writeByteOrder(os);
     writeGeometryType(geometryType, polyline, os);
-    List<S2Polyline> s2line = polyline.getPolylines();
-    for (S2Polyline s2 : s2line) {
-      List<S2Point> verts = s2.vertices();
-      writeInt(verts.size(), os);
-      for (S2Point p : verts) {
-        // round to 6 decimal places
-        S2LatLng ll = new S2LatLng(p);
-        double lon = ll.lngDegrees();
-        double lat = ll.latDegrees();
-
-        ByteOrderValues.putDouble(lon, buf, byteOrder);
-        os.write(buf, 8);
-        ByteOrderValues.putDouble(lat, buf, byteOrder);
-        os.write(buf, 8);
-      }
+    List<S2Polyline> lines = polyline.getPolylines();
+    if (lines.isEmpty()) {
+      writeInt(0, os);
+      return;
     }
+
+    writePolylineCoordinates(lines.get(0).vertices(), os);
   }
 
   private void writeMultiPolyline(int geometryType, PolylineGeography polyline, OutStream os)
@@ -289,24 +280,35 @@ public class WKBWriter {
       writeByteOrder(os);
       writeGeometryType(WKBConstants.wkbLineString, polyline, os);
 
-      // 3b) Vertex count
-      writeInt(verts.size(), os);
-
-      // 3c) Coordinates
-      for (S2Point p : verts) {
-        S2LatLng ll = new S2LatLng(p);
-        double lon = ll.lngDegrees();
-        double lat = ll.latDegrees();
-
-        ByteOrderValues.putDouble(lon, buf, byteOrder);
-        os.write(buf, 8);
-        ByteOrderValues.putDouble(lat, buf, byteOrder);
-        os.write(buf, 8);
-      }
+      // 3b) Vertex count and coordinates
+      writePolylineCoordinates(verts, os);
     }
 
     // 4) Restore SRID flag
     this.includeSRID = oldIncludeSRID;
+  }
+
+  /**
+   * Writes an OGC-valid LineString coordinate body. S2 can represent an all-degenerate line as one
+   * vertex, while WKB requires a non-empty LineString to contain at least two points.
+   */
+  private void writePolylineCoordinates(List<S2Point> verts, OutStream os) throws IOException {
+    int outputSize = verts.size() == 1 ? 2 : verts.size();
+    writeInt(outputSize, os);
+    for (S2Point point : verts) {
+      writePolylineCoordinate(point, os);
+    }
+    if (verts.size() == 1) {
+      writePolylineCoordinate(verts.get(0), os);
+    }
+  }
+
+  private void writePolylineCoordinate(S2Point point, OutStream os) throws IOException {
+    S2LatLng ll = new S2LatLng(point);
+    ByteOrderValues.putDouble(ll.lngDegrees(), buf, byteOrder);
+    os.write(buf, 8);
+    ByteOrderValues.putDouble(ll.latDegrees(), buf, byteOrder);
+    os.write(buf, 8);
   }
 
   private void writePolygon(int geometryType, PolygonGeography poly, OutStream os)

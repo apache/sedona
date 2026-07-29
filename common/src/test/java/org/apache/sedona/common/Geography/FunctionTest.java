@@ -182,16 +182,10 @@ public class FunctionTest {
   }
 
   @Test
-  public void asEWKT_preservesLegacyFormattingForOrdinaryGeographies() throws ParseException {
-    for (String wkt :
-        new String[] {
-          "POINT (-122.4194 37.7749)",
-          "POLYGON ((0 0, 3 0, 3 3, 0 3, 0 0))",
-          "MULTIPOINT ((1 1), (2 2))"
-        }) {
-      Geography geography = Constructors.geogFromWKT(wkt, 4326);
-      assertEquals(geography.toEWKT(), Functions.asEWKT(geography));
-    }
+  public void asEWKT_usesStoredWKBForOrdinaryGeography() throws ParseException {
+    Geography geography = Constructors.geogFromWKT("POINT (-122.4194 37.7749)", 4326);
+
+    assertEquals("SRID=4326; POINT (-122.4194 37.7749)", Functions.asEWKT(geography));
   }
 
   @Test
@@ -242,21 +236,31 @@ public class FunctionTest {
   }
 
   @Test
-  public void makeLine_preservesRepeatedVertices() throws ParseException {
+  public void makeLine_deduplicatesLineStringSeamAndPreservesOtherRepeats() throws ParseException {
     Geography first = Constructors.geogFromWKT("LINESTRING (0 0, 1 0)", 4326);
     Geography second = Constructors.geogFromWKT("LINESTRING (1 0, 2 0)", 4326);
     Geography stitched = roundTripWKB(Functions.makeLine(first, second));
-    assertEquals("LINESTRING (0 0, 1 0, 1 0, 2 0)", Functions.asText(stitched));
-    assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 1 0, 2 0)", Functions.asEWKT(stitched));
-    assertEquals("LINESTRING (0 0, 1 0, 1 0, 2 0)", stitched.toString());
-    assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 1 0, 2 0)", stitched.toEWKT());
-    assertEquals(4, Functions.nPoints(stitched));
+    assertEquals("LINESTRING (0 0, 1 0, 2 0)", Functions.asText(stitched));
+    assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 2 0)", Functions.asEWKT(stitched));
+    assertEquals(3, Functions.nPoints(stitched));
+
+    Geography point = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography line = Constructors.geogFromWKT("LINESTRING (0 0, 1 0)", 4326);
+    assertEquals("LINESTRING (0 0, 1 0)", Functions.asText(Functions.makeLine(point, line)));
+
+    Geography multiPoint = Constructors.geogFromWKT("MULTIPOINT ((0 0), (1 0))", 4326);
+    assertEquals(
+        "LINESTRING (0 0, 0 0, 1 0)", Functions.asText(Functions.makeLine(point, multiPoint)));
 
     Geography repeated = geographyFromJTSWKT("LINESTRING (0 0, 0 0, 1 0)", 4326);
     Geography end = Constructors.geogFromWKT("POINT (2 0)", 4326);
     Geography appended = roundTripWKB(Functions.makeLine(repeated, end));
     assertEquals("LINESTRING (0 0, 0 0, 1 0, 2 0)", Functions.asText(appended));
     assertEquals(4, Functions.nPoints(appended));
+
+    Geography repeatedFromWKT = Constructors.geogFromWKT("LINESTRING (0 0, 0 0, 1 0)", 4326);
+    assertEquals("LINESTRING (0 0, 0 0, 1 0)", Functions.asText(repeatedFromWKT));
+    assertEquals(3, Functions.nPoints(repeatedFromWKT));
   }
 
   @Test

@@ -29,7 +29,7 @@ Return type: `Geography`
 
 Since: `v1.9.1`
 
-Only the two-argument signature accepts Geography inputs. The array form of `ST_MakeLine` remains Geometry-only. Repeated and coincident coordinates are preserved.
+Only the two-argument signature accepts Geography inputs. The array form of `ST_MakeLine` remains Geometry-only. Repeated and coincident Point or MultiPoint coordinates are preserved. When the second input is a LineString whose first coordinate matches the current endpoint, that seam coordinate appears only once.
 
 The output copies the first input's SRID without transforming either input or validating that their SRIDs match. If the inputs have different SRIDs, the second input's SRID is ignored. An SRID of `0` on the first input remains `0`.
 

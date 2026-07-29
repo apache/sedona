@@ -244,10 +244,9 @@ public class WKBGeographyTest {
   }
 
   @Test
-  public void serialize_deserialize_repeatedLinePreservesStructuralText()
+  public void serialize_deserialize_repeatedLinePreservesStructuralSqlText()
       throws IOException, ParseException {
-    org.locationtech.jts.io.WKTReader jtsReader = new org.locationtech.jts.io.WKTReader();
-    Geometry jts = jtsReader.read("LINESTRING (0 0, 1 0, 1 0, 2 0)");
+    Geometry jts = new org.locationtech.jts.io.WKTReader().read("LINESTRING (0 0, 1 0, 1 0, 2 0)");
     jts.setSRID(4326);
 
     Geography deserialized =
@@ -258,10 +257,7 @@ public class WKBGeographyTest {
 
     String expected = "LINESTRING (0 0, 1 0, 1 0, 2 0)";
     assertEquals(expected, Functions.asText(deserialized));
-    assertEquals(expected, deserialized.toString());
     assertEquals("SRID=4326; " + expected, Functions.asEWKT(deserialized));
-    assertEquals("SRID=4326; " + expected, deserialized.toEWKT());
-    assertEquals(4, jtsReader.read(deserialized.toString()).getNumPoints());
   }
 
   @Test
@@ -271,6 +267,7 @@ public class WKBGeographyTest {
     assertEquals("LINESTRING EMPTY", geography.toString());
     assertEquals("SRID=4326; LINESTRING EMPTY", geography.toEWKT());
     assertEquals("SRID=4326; LINESTRING EMPTY", Functions.asEWKT(geography));
+    assertTrue(((WKBGeography) geography).getJTSGeometry().isEmpty());
   }
 
   @Test

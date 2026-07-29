@@ -142,11 +142,11 @@ class GeographyFunctionTest extends TestBaseScala {
       assertEquals(2.0, point.getY, 1e-9)
     }
 
-    it("ST_AsEWKT preserves ordinary geography formatting") {
+    it("ST_AsEWKT uses the stored WKB representation") {
       val row = sparkSession
         .sql("SELECT ST_AsEWKT(ST_GeogFromWKT('POINT (-122.4194 37.7749)', 4326)) AS ewkt")
         .first()
-      assertEquals("SRID=4326; POINT (-122.4 37.8)", row.getString(0))
+      assertEquals("SRID=4326; POINT (-122.4194 37.7749)", row.getString(0))
     }
 
     it("ST_X and ST_Y") {
@@ -193,7 +193,7 @@ class GeographyFunctionTest extends TestBaseScala {
       assertEquals(111195.10, row.getDouble(2), 1.0)
     }
 
-    it("ST_MakeLine preserves coincident and repeated vertices") {
+    it("ST_MakeLine preserves coincident points and deduplicates LineString seams") {
       val coincident = sparkSession
         .sql("""
           WITH source AS (
@@ -255,9 +255,9 @@ class GeographyFunctionTest extends TestBaseScala {
           )
         """)
         .first()
-      assertEquals("LINESTRING (0 0, 1 0, 1 0, 2 0)", repeated.getString(0))
-      assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 1 0, 2 0)", repeated.getString(1))
-      assertEquals(4, repeated.getInt(2))
+      assertEquals("LINESTRING (0 0, 1 0, 2 0)", repeated.getString(0))
+      assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 2 0)", repeated.getString(1))
+      assertEquals(3, repeated.getInt(2))
     }
   }
 
