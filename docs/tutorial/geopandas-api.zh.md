@@ -383,6 +383,12 @@ all_building_parts = collect(buildings.geometry)
 惰性的 pandas-on-Spark DataFrame。仅在需要本地 pandas DataFrame 时，才对结果
 调用 `.to_pandas()`。
 
+`points_from_xy()` 会让 pandas-on-Spark 坐标 Series 保持分布式执行。本地
+列表、NumPy 数组和 pandas 对象会先在 driver 上物化，因此大型坐标列应使用
+分布式 Series。类似地，大型逐行 `sample_points()` 数量向量也应使用分布式
+`size` Series。采样输出与逐行中间计算量会随请求的数量增长；当前线采样器会先
+物化该行的采样点，再把它们收集为 MultiPoint。
+
 ## 完整工作流示例
 
 ```python

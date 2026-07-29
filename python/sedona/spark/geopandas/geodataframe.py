@@ -1570,7 +1570,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         output_type: DataType,
     ) -> pspd.DataFrame:
         """Apply a native serializer to every geometry-typed column."""
-        internal = self._internal
+        # Resolve pending index/data expressions onto one Spark frame before
+        # building the serializer projection.
+        internal = self._internal.resolved_copy
         serialized_columns = []
         geometry_columns = []
 

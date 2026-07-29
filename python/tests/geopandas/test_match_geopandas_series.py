@@ -1334,9 +1334,13 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
             gpd_sized = gpd_source.sample_points(sizes, rng=9)
-        assert [geometry.geom_type for geometry in sgpd_sized] == [
-            geometry.geom_type for geometry in gpd_sized
-        ]
+        expected_types = [geometry.geom_type for geometry in gpd_sized]
+        if parse_version(gpd.__version__) < parse_version("1.1.4"):
+            # GeoPandas 1.1.4 stopped applying union_all() to samples and
+            # standardized every supported result, including size 1, as a
+            # MultiPoint. Sedona follows that current return contract.
+            expected_types[0] = "MultiPoint"
+        assert [geometry.geom_type for geometry in sgpd_sized] == expected_types
         assert [
             (1 if geometry.geom_type == "Point" else len(geometry.geoms))
             for geometry in sgpd_sized

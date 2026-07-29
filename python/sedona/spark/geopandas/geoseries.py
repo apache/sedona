@@ -31,7 +31,7 @@ from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalField, InternalFrame
 from pyspark.pandas.series import first_series
-from pyspark.pandas.utils import scol_for, verify_temp_column_name
+from pyspark.pandas.utils import same_anchor, scol_for, verify_temp_column_name
 from pyspark.sql.types import (
     BooleanType,
     IntegralType,
@@ -226,11 +226,14 @@ def _attach_ordered_sequence_column(
         .cast("long")
         .alias(partition_offset_column),
     )
-    return numbered.join(partition_offsets, on=partition_column).select(
+    joined = numbered.join(partition_offsets, on=partition_column)
+    # Spark Connect Columns retain relation identity. Rebind the original
+    # names to the joined relation before the final projection.
+    return joined.select(
         (F.col(partition_offset_column) + F.col(local_position_column)).alias(
             sequence_column
         ),
-        *source_columns,
+        *[scol_for(joined, column) for column in sdf.columns],
     )
 
 
@@ -244,9 +247,6 @@ def _sample_points_expression(
     size = size.cast("long")
     output_srid = F.coalesce(stf.ST_SRID(geometry), F.lit(fallback_srid))
     empty_multipoint = stc.ST_GeomFromWKT(F.lit("MULTIPOINT EMPTY"), output_srid)
-    empty_collection = stc.ST_GeomFromWKT(
-        F.lit("GEOMETRYCOLLECTION EMPTY"), output_srid
-    )
     geometry_type = stf.ST_GeometryType(geometry)
     is_polygonal = geometry_type.isin("ST_Polygon", "ST_MultiPolygon")
     is_linear = geometry_type.isin("ST_LineString", "ST_MultiLineString")
@@ -269,30 +269,13 @@ def _sample_points_expression(
             / F.lit(9_007_199_254_740_992.0),
         ),
     )
-    # GeoPandas unions interpolated points, which collapses duplicates on
-    # zero-length lines and can therefore return a Point for size > 1.
-    collected_line_samples = stf.ST_UnaryUnion(stf.ST_Collect(line_samples))
+    collected_line_samples = stf.ST_Collect(line_samples)
 
     sampled = (
         F.when(geometry.isNull() | stf.ST_IsEmpty(geometry), empty_multipoint)
         .when(~(is_polygonal | is_linear), empty_multipoint)
-        .when(size == 0, empty_collection)
-        .when(
-            is_polygonal & (size == 1),
-            stf.ST_GeometryN(polygon_samples, 0),
-        )
+        .when(size == 0, empty_multipoint)
         .when(is_polygonal, polygon_samples)
-        .when(
-            size == 1,
-            stf.ST_LineInterpolatePoint(
-                geometry,
-                F.pmod(
-                    F.xxhash64(seed.cast("long"), F.lit(0)),
-                    F.lit(9_007_199_254_740_992),
-                ).cast("double")
-                / F.lit(9_007_199_254_740_992.0),
-            ),
-        )
         .otherwise(collected_line_samples)
     )
 
@@ -1795,6 +1778,54 @@ class GeoSeries(GeoFrame, pspd.Series):
         size_value_col = temp_column_name("size", reserved_columns)
         position_col = temp_column_name("position", reserved_columns)
         right_present_col = temp_column_name("right_present", reserved_columns)
+
+        if size_series is not None and same_anchor(self, size_series):
+            source_internal = self._internal
+            source_frame = source_internal.spark_frame.select(
+                self.spark.column.alias(geometry_value_col),
+                size_series.spark.column.alias(size_value_col),
+                *[
+                    index_col.alias(index_name)
+                    for index_col, index_name in zip(
+                        source_internal.index_spark_columns,
+                        source_internal.index_spark_column_names,
+                    )
+                ],
+                scol_for(
+                    source_internal.spark_frame,
+                    NATURAL_ORDER_COLUMN_NAME,
+                ).alias(NATURAL_ORDER_COLUMN_NAME),
+            )
+            row_key = F.col(NATURAL_ORDER_COLUMN_NAME)
+            if stateful_rng:
+                # A dense position keeps stateful RNG results stable across
+                # equivalent partition layouts. Both values already share one
+                # plan, so only the source needs to be sequenced.
+                source_frame = _attach_ordered_sequence_column(
+                    source_frame,
+                    row_key,
+                    position_col,
+                )
+                row_key = F.col(position_col)
+
+            size_value = F.col(size_value_col)
+            if not size_type_is_integral:
+                size_value = F.raise_error(
+                    F.lit("sample size values must be integers")
+                ).cast("long")
+            spark_expr = _sample_points_expression(
+                F.col(geometry_value_col),
+                size_value,
+                seed_column(row_key),
+                fallback_srid,
+            )
+            return GeoSeries(
+                self._query_geometry_column(
+                    spark_expr,
+                    source_frame,
+                    returns_geom=True,
+                ).rename("sampled_points")
+            )
 
         left_frame = self._internal.spark_frame.select(
             self.spark.column.alias(geometry_value_col),

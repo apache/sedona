@@ -243,6 +243,28 @@ class TestGeoDataFrame(TestGeopandasBase):
                 assert "BatchEvalPython" not in plan
                 assert "ArrowEvalPython" not in plan
 
+        computed_index = GeoDataFrame(
+            {
+                "geometry": [Point(0, 0), Point(1, 1)],
+                "value": [10, 11],
+            }
+        )
+        computed_index["computed_index"] = computed_index["value"] + 100
+        computed_index = GeoDataFrame(computed_index.set_index("computed_index"))
+        computed_wkt = computed_index.to_wkt().to_pandas()
+        computed_wkb = computed_index.to_wkb().to_pandas()
+        expected_index = pd.Index([110, 111], name="computed_index")
+        assert computed_wkt.index.equals(expected_index)
+        assert computed_wkb.index.equals(expected_index)
+        assert computed_wkt["geometry"].tolist() == [
+            "POINT (0 0)",
+            "POINT (1 1)",
+        ]
+        assert [
+            shapely.from_wkb(bytes(value))
+            for value in computed_wkb["geometry"].tolist()
+        ] == [Point(0, 0), Point(1, 1)]
+
     def test_geometry_serialization_kwargs_are_explicitly_unsupported(self):
         gdf = GeoDataFrame({"geometry": [Point(1.234567890123, 2.345678901234)]})
 

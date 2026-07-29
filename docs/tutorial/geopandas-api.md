@@ -386,6 +386,14 @@ Unlike GeoPandas, `GeoDataFrame.to_wkb()` and `GeoDataFrame.to_wkt()` return a
 lazy pandas-on-Spark DataFrame. Call `.to_pandas()` on the result only when a
 local pandas DataFrame is required.
 
+`points_from_xy()` keeps pandas-on-Spark coordinate Series distributed.
+Local lists, NumPy arrays, and pandas objects are first materialized on the
+driver, so use distributed Series for large coordinate columns. Likewise, use
+a distributed `size` Series for large per-row `sample_points()` sizes.
+Sampling output and per-row intermediate work grow with the requested size;
+the current line sampler materializes the row's sampled points before
+collecting them into a MultiPoint.
+
 ## Complete Workflow Example
 
 ```python

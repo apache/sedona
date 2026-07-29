@@ -261,8 +261,12 @@ def points_from_xy(x, y, z=None, crs=None):
     does not collect pandas-on-Spark inputs or execute a Python row UDF.
 
     Local coordinates use NumPy broadcasting and are paired positionally, as
-    in GeoPandas. Distributed Series are instead paired within their shared
-    Spark plan and retain that plan's index. Series from unrelated plans are
-    rejected because they have no safe distributed positional relationship.
+    in GeoPandas. Local iterables, NumPy arrays, and pandas objects are
+    materialized on the driver and are intended for bounded inputs. Use
+    pandas-on-Spark Series for large coordinate columns.
+
+    Distributed Series are paired within their shared Spark plan and retain
+    that plan's index. Series from unrelated plans are rejected because they
+    have no safe distributed positional relationship.
     """
     return _points_from_xy(x, y, z=z, crs=crs)

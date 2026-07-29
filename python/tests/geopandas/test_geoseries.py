@@ -2550,15 +2550,11 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         zero = GeoSeries([polygon, line, Point(0, 0)]).sample_points(0, rng=1)
         zero_types = [geometry.geom_type for geometry in zero.to_geopandas()]
-        assert zero_types == [
-            "GeometryCollection",
-            "GeometryCollection",
-            "MultiPoint",
-        ]
+        assert zero_types == ["MultiPoint", "MultiPoint", "MultiPoint"]
 
         one = GeoSeries([polygon, line, Point(0, 0)]).sample_points(1, rng=1)
         one_types = [geometry.geom_type for geometry in one.to_geopandas()]
-        assert one_types == ["Point", "Point", "MultiPoint"]
+        assert one_types == ["MultiPoint", "MultiPoint", "MultiPoint"]
 
         degenerate_lines = GeoSeries(
             [
@@ -2568,11 +2564,13 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         ).sample_points(4, rng=1)
         degenerate_actual = degenerate_lines.to_geopandas()
         assert [geometry.geom_type for geometry in degenerate_actual] == [
-            "Point",
-            "Point",
+            "MultiPoint",
+            "MultiPoint",
         ]
         assert all(
-            geometry.equals(Point(i, i)) for i, geometry in enumerate(degenerate_actual)
+            len(geometry.geoms) == 4
+            and all(point.equals(Point(i, i)) for point in geometry.geoms)
+            for i, geometry in enumerate(degenerate_actual)
         )
 
         multi_index = pd.MultiIndex.from_tuples(
@@ -2600,6 +2598,47 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             1 if geometry.geom_type == "Point" else len(geometry.geoms)
             for geometry in extra_sizes
         ] == [1, 2, 3, 4]
+
+        same_anchor_index = pd.Index(
+            ["duplicate", "duplicate", "other", "other"],
+            name="feature_id",
+        )
+        same_anchor_frame = GeoDataFrame(
+            gpd.GeoDataFrame(
+                {
+                    "geometry": [polygon, multipolygon, line, multiline],
+                    "size": [1, 2, 3, 4],
+                },
+                index=same_anchor_index,
+                crs="EPSG:3857",
+            )
+        )
+        same_anchor_result = same_anchor_frame.geometry.sample_points(
+            same_anchor_frame["size"], rng=7
+        )
+        same_anchor_actual = same_anchor_result.to_geopandas()
+        assert same_anchor_actual.index.equals(same_anchor_index)
+        assert [
+            1 if geometry.geom_type == "Point" else len(geometry.geoms)
+            for geometry in same_anchor_actual
+        ] == [1, 2, 3, 4]
+        if hasattr(same_anchor_result._internal.spark_frame, "_jdf"):
+            plan = (
+                same_anchor_result._internal.spark_frame._jdf.queryExecution()
+                .optimizedPlan()
+                .toString()
+            )
+            assert "Join" not in plan
+            assert "AttachDistributedSequence" not in plan
+
+        # Like GeoPandas, an integer seed restarts the same random stream for
+        # every row, so identical geometries receive identical samples.
+        identical = GeoSeries(
+            [line, line],
+            index=pd.Index(["duplicate", "duplicate"], name="feature_id"),
+        ).sample_points(4, rng=7)
+        identical_actual = identical.to_geopandas()
+        assert identical_actual.iloc[0].wkb == identical_actual.iloc[1].wkb
 
         for sizes in ([], [1, 2, 3]):
             empty_result = GeoSeries([], crs="EPSG:3857").sample_points(sizes, rng=7)

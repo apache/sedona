@@ -1620,21 +1620,27 @@ class GeoFrame(metaclass=ABCMeta):
 
         Polygonal geometries are sampled uniformly by area and linear
         geometries uniformly by length. Unsupported and empty geometries
-        produce an empty ``MultiPoint``. Sampling is evaluated by native
-        Spark and Sedona expressions and remains distributed.
+        produce an empty ``MultiPoint``. Supported geometries also return
+        ``MultiPoint`` for every size, including zero and one. Sampling is
+        evaluated by native Spark and Sedona expressions and remains
+        distributed.
 
         Parameters
         ----------
         size : int or array-like
             Number of points to sample from each geometry. An array-like or
             pandas-on-Spark ``Series`` supplies one positional size per row.
+            Local sequences are materialized on the driver; use a distributed
+            Series for large per-row size vectors.
         method : str, default "uniform"
             Sampling method. Sedona currently supports only ``"uniform"``.
         seed : optional
             Deprecated alias for ``rng``.
         rng : optional
             Any seed accepted by ``numpy.random.default_rng``. Fresh generators
-            initialized with the same seed produce reproducible results.
+            initialized with the same seed produce reproducible results. Passing
+            an existing ``Generator`` or ``BitGenerator`` consumes one draw
+            immediately to derive the engine seed.
         **kwargs
             Accepted for GeoPandas signature compatibility and ignored for
             uniform sampling.
@@ -1664,11 +1670,22 @@ class GeoFrame(metaclass=ABCMeta):
         -----
         Sedona and GeoPandas use different random number generators, so the
         sampled coordinates are not expected to be identical for the same
-        seed. A stateful NumPy ``Generator`` or ``BitGenerator`` is reduced to
-        one engine seed and then varied deterministically by row position, so
-        its state advancement also differs. Unsupported nonempty geometry types
-        produce empty MultiPoints without GeoPandas's per-row warning, avoiding
-        an eager type scan.
+        seed. An integer seed is reused for every row, matching GeoPandas's
+        behavior in which congruent geometries receive the same relative sample
+        positions. With ``rng=None``, no reproducibility guarantee is made.
+
+        A stateful NumPy ``Generator`` or ``BitGenerator`` is reduced to one
+        engine seed and then varied deterministically by row position, so its
+        state advancement also differs. Validation of values in a distributed
+        ``size`` Series is lazy and errors are raised when the result is
+        evaluated.
+
+        Sampling work and per-row intermediate memory grow with ``size``. The
+        current line sampler materializes an array of sampled points and costs
+        roughly ``O(size * vertices)`` per geometry before collecting those
+        points into a MultiPoint. Unsupported nonempty geometry types produce
+        empty MultiPoints without GeoPandas's per-row warning, avoiding an eager
+        type scan.
         """
         return _delegate_to_geometry_column(
             "sample_points",
