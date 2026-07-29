@@ -2454,11 +2454,18 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         ]
         index = pd.Index(["first", "first", "multi", "null"], name="feature_id")
         source = GeoSeries(geoms, index=index, crs="EPSG:3857")
+        # Keep this direct test runnable with GeoPandas < 1.1. The version-gated
+        # parity test compares these results with GeoPandas dynamically.
         expected = gpd.GeoSeries(
-            geoms,
+            [
+                LineString([(0.70703125, 0.29296875), (0.5, 0.5)]),
+                LineString([(0.466796875, 0.259765625), (1, 0.259765625)]),
+                LineString([(1, 1), (0, 1)]),
+                None,
+            ],
             index=index,
             crs="EPSG:3857",
-        ).maximum_inscribed_circle()
+        )
 
         result = source.maximum_inscribed_circle()
         self.check_sgpd_equals_gpd(result, expected)
@@ -2482,11 +2489,14 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         row_wise = frame.geometry.maximum_inscribed_circle(tolerance=frame["tolerance"])
         row_wise_expected = gpd.GeoSeries(
-            geoms,
+            [
+                LineString([(0.70703125, 0.29296875), (0.5, 0.5)]),
+                LineString([(0.375, 0.25), (0, 0)]),
+                LineString([(1, 1), (0, 1)]),
+                None,
+            ],
             index=index,
             crs="EPSG:3857",
-        ).maximum_inscribed_circle(
-            tolerance=pd.Series([0.0, 2.0, 0.5, np.nan], index=index)
         )
         self.check_sgpd_equals_gpd(row_wise, row_wise_expected)
 
@@ -2497,12 +2507,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             pd.Series(local_tolerances, index=index),
         ):
             local_result = source.maximum_inscribed_circle(tolerance=local_tolerance)
-            local_expected = gpd.GeoSeries(
-                geoms,
-                index=index,
-                crs="EPSG:3857",
-            ).maximum_inscribed_circle(tolerance=local_tolerance)
-            self.check_sgpd_equals_gpd(local_result, local_expected)
+            self.check_sgpd_equals_gpd(local_result, row_wise_expected)
 
         self.check_sgpd_equals_gpd(
             source.maximum_inscribed_circle(tolerance=0),
@@ -2526,8 +2531,15 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         self.check_sgpd_equals_gpd(
             frame.maximum_inscribed_circle(tolerance=2.0),
-            gpd.GeoSeries(geoms, index=index, crs="EPSG:3857").maximum_inscribed_circle(
-                tolerance=2.0
+            gpd.GeoSeries(
+                [
+                    LineString([(0.75, 0.5), (0.625, 0.625)]),
+                    LineString([(0.375, 0.25), (0, 0)]),
+                    LineString([(1, 1), (0, 1)]),
+                    None,
+                ],
+                index=index,
+                crs="EPSG:3857",
             ),
         )
 
@@ -2551,9 +2563,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         self.check_sgpd_equals_gpd(
             degenerate,
             gpd.GeoSeries(
-                [Polygon([(0, 0), (0, 0), (0, 0), (0, 0)])],
+                [LineString([(0, 0), (0, 0)])],
                 crs="EPSG:3857",
-            ).maximum_inscribed_circle(),
+            ),
         )
 
         with pytest.raises(ValueError, match="'tolerance' should be positive"):
