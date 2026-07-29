@@ -42,8 +42,16 @@ public class Functions {
 
   public static Geography getEnvelope(Geography geography, boolean splitAtAntiMeridian) {
     if (geography == null) return null;
+    // Empty points are encoded in WKB with NaN ordinates. Avoid constructing an S2PointRegion
+    // from those ordinates; other empty geography types produce an empty rectangle below.
+    if (geography instanceof WKBGeography
+        && ((WKBGeography) geography).isPoint()
+        && ((WKBGeography) geography).getPointX() == null) {
+      return geography;
+    }
     S2LatLngRect rect = geography.region().getRectBound();
-    if (rect.isEmpty()) return null;
+    // Match the Geometry overload by preserving an empty input's type and SRID.
+    if (rect.isEmpty()) return geography;
     double lngLo = rect.lngLo().degrees();
     double latLo = rect.latLo().degrees();
     double lngHi = rect.lngHi().degrees();
