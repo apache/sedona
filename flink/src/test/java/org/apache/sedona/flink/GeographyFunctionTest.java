@@ -138,6 +138,27 @@ public class GeographyFunctionTest extends TestBase {
   }
 
   @Test
+  public void testMakeLineSkipsEmptyGeographyInputs() throws Exception {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT "
+                + "ST_AsText(ST_MakeLine("
+                + "ST_GeogFromWKT('POINT EMPTY', 3857), "
+                + "ST_GeogFromWKT('POINT (12 34)', 4326))) AS empty_first, "
+                + "ST_AsText(ST_MakeLine("
+                + "ST_GeogFromWKT('POINT (12 34)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING EMPTY', 3857))) AS empty_second, "
+                + "ST_AsEWKT(ST_MakeLine("
+                + "ST_GeogFromWKT('POINT EMPTY', 3857), "
+                + "ST_GeogFromWKT('LINESTRING EMPTY', 4326))) AS both_empty");
+
+    Row row = first(table);
+    assertEquals("LINESTRING (12 34, 12 34)", row.getFieldAs("empty_first"));
+    assertEquals("LINESTRING (12 34, 12 34)", row.getFieldAs("empty_second"));
+    assertEquals("SRID=3857; LINESTRING EMPTY", row.getFieldAs("both_empty"));
+  }
+
+  @Test
   public void testDistance() throws Exception {
     String wktA = "POINT (0 0)";
     String wktB = "POINT (0 1)";
