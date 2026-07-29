@@ -323,6 +323,7 @@ def _maximum_inscribed_circle_expression(
     """Build GeoPandas-compatible maximum-inscribed-circle expressions."""
     geometry_type = stf.ST_GeometryType(geometry)
     is_polygonal = geometry_type.isin("ST_Polygon", "ST_MultiPolygon")
+    # Derive a typed NULL from the input so CASE branches retain GeometryType.
     null_geometry = F.when(F.lit(False), geometry)
 
     circle = (
@@ -1331,17 +1332,39 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def dwithin(self, other, distance, align=None):
+        attached_distance_column = None
         if isinstance(other, BaseGeometry):
-            source_internal = self._internal.resolved_copy
+            same_anchor_distance = isinstance(
+                distance, PandasOnSparkSeries
+            ) and same_anchor(self, distance)
+            # Keep the shared source plan when the distance Series comes from the
+            # same frame. A resolved copy of this GeoSeries projects away sibling
+            # columns before the distance expression can be selected.
+            source_internal = (
+                self._internal if same_anchor_distance else self._internal.resolved_copy
+            )
             source_frame = source_internal.spark_frame
             result_index_columns = [
                 f"__index_level_{level}__"
                 for level in range(len(source_internal.index_spark_columns))
             ]
             other_geometry = stc.ST_GeomFromWKB(F.lit(other.wkb))
+            distance_columns = []
+            if same_anchor_distance:
+                distance_data_type = distance.spark.data_type
+                if not isinstance(
+                    distance_data_type,
+                    (BooleanType, IntegralType, FloatType, DoubleType),
+                ):
+                    raise TypeError("distance values must be numeric")
+                attached_distance_name = "__dwithin_same_anchor_distance__"
+                distance_columns.append(
+                    distance.spark.column.cast("double").alias(attached_distance_name)
+                )
             aligned_frame = source_frame.select(
                 source_internal.data_spark_columns[0].alias("L"),
                 other_geometry.alias("R"),
+                *distance_columns,
                 *[
                     index_col.alias(result_index)
                     for index_col, result_index in zip(
@@ -1351,6 +1374,11 @@ class GeoSeries(GeoFrame, pspd.Series):
                 ],
                 scol_for(source_frame, NATURAL_ORDER_COLUMN_NAME),
             )
+            if distance_columns:
+                attached_distance_column = scol_for(
+                    aligned_frame,
+                    attached_distance_name,
+                )
             result_index_fields = source_internal.index_fields
             result_index_names = source_internal.index_names
         else:
@@ -1366,7 +1394,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             ):
                 raise TypeError(
                     "'other' must be a GeoSeries, GeoDataFrame, "
-                    "pandas-on-Spark Series, geometry, or geometry array-like"
+                    "pandas-on-Spark Series, geometry, list, or NumPy array"
                 )
 
             other_series, extended = self._make_series_of_val(other)
@@ -1378,11 +1406,16 @@ class GeoSeries(GeoFrame, pspd.Series):
                 result_index_names,
             ) = self._align_binary_geometry_series(other_series, align)
 
-        (
-            result_frame,
-            distance_column,
-            invalid_distance_shape,
-        ) = self._attach_dwithin_distance(aligned_frame, distance)
+        if attached_distance_column is None:
+            (
+                result_frame,
+                distance_column,
+                invalid_distance_shape,
+            ) = self._attach_dwithin_distance(aligned_frame, distance)
+        else:
+            result_frame = aligned_frame
+            distance_column = attached_distance_column
+            invalid_distance_shape = None
         spark_expr = _dwithin_expression(
             F.col("L"),
             F.col("R"),
@@ -1743,11 +1776,18 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         geometry = self.spark.column
         source_envelope = stf.ST_Envelope(geometry)
-        padding = F.greatest(
-            stf.ST_XMax(geometry) - stf.ST_XMin(geometry),
-            stf.ST_YMax(geometry) - stf.ST_YMin(geometry),
-        )
-        default_extent = stf.ST_Expand(source_envelope, padding)
+        # Bind the source envelope once so its bounds are not recomputed from
+        # the full input geometry for every coordinate accessor.
+        default_extent = F.transform(
+            F.array(source_envelope),
+            lambda envelope: stf.ST_Expand(
+                envelope,
+                F.greatest(
+                    stf.ST_XMax(envelope) - stf.ST_XMin(envelope),
+                    stf.ST_YMax(envelope) - stf.ST_YMin(envelope),
+                ),
+            ),
+        ).getItem(0)
         requested_extent = stc.ST_GeomFromWKB(F.lit(extend_to.envelope.wkb))
         # JTS treats extendTo as a hard clip. GeoPandas only enlarges the
         # default Voronoi extent, so combine both envelopes before calling it.
@@ -2025,7 +2065,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             right_frame,
             on=position_col,
             how="full",
-        )
+        ).orderBy(position_col)
         length_mismatch = (
             F.col(left_present_col).isNull() | F.col(right_present_col).isNull()
         )

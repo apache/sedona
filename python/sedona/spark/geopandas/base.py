@@ -1367,8 +1367,8 @@ class GeoFrame(metaclass=ABCMeta):
         Each result is a two-point LineString from the circle center to the
         nearest point on the polygon boundary. Polygon, MultiPolygon, and
         ``None`` inputs are supported; other geometry types and empty
-        polygonal geometries raise an error when the distributed result is
-        evaluated.
+        polygonal geometries raise an error only when an action evaluates an
+        affected row. Partial actions may not inspect every invalid row.
 
         Parameters
         ----------
@@ -1382,7 +1382,9 @@ class GeoFrame(metaclass=ABCMeta):
             geometry column. Negative values are rejected for scalar and
             row-wise inputs. This is intentionally stricter than GeoPandas,
             whose array path currently bypasses its scalar negative-value
-            validation and emits implementation-dependent results.
+            validation and emits implementation-dependent results. Length and
+            index validation for local row-wise inputs is also lazy: an error
+            is raised only when an action evaluates a mismatched row.
 
         Returns
         -------
@@ -3914,8 +3916,9 @@ class GeoFrame(metaclass=ABCMeta):
 
         The index of a pandas or pandas-on-Spark distance Series is ignored.
         Distance values remain distributed when a pandas-on-Spark Series is
-        provided. Length validation for array-like distances is performed when
-        the result is evaluated.
+        provided. Length validation for non-scalar distances is lazy: an error
+        is raised only when an action evaluates a mismatched row. Partial
+        actions may not detect rows they do not evaluate.
 
         See also
         --------

@@ -1319,11 +1319,6 @@ private[apache] case class ST_MaximumInscribedCircle(children: Seq[Expression])
             throw new IllegalArgumentException(
               s"Tolerance must be numeric, but received ${value.getClass.getSimpleName}")
         }
-        // GEOS returns null for a NaN tolerance, which is also useful for
-        // nullable row-wise tolerances in the GeoPandas API.
-        if (tolerance.isNaN) {
-          return null
-        }
       }
 
       val inscribedCircle: InscribedCircle =
@@ -1332,6 +1327,9 @@ private[apache] case class ST_MaximumInscribedCircle(children: Seq[Expression])
         } else {
           Functions.maximumInscribedCircle(geometry, tolerance)
         }
+      if (inscribedCircle == null) {
+        return null
+      }
 
       val serCenter = GeometrySerializer.serialize(inscribedCircle.center)
       val serNearest = GeometrySerializer.serialize(inscribedCircle.nearest)

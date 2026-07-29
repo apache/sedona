@@ -1205,6 +1205,14 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             same_anchor_frame["distance"],
         )
         self.check_pd_series_equal(same_anchor, expected)
+        if hasattr(same_anchor._internal.spark_frame, "_jdf"):
+            same_anchor_plan = (
+                same_anchor._internal.spark_frame._jdf.queryExecution()
+                .executedPlan()
+                .toString()
+            )
+            assert "AttachDistributedSequence" not in same_anchor_plan
+            assert "Join" not in same_anchor_plan
 
         if hasattr(independent._internal.spark_frame, "_jdf"):
             plan = (
@@ -2559,9 +2567,16 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         degenerate = GeoSeries(
             [Polygon([(0, 0), (0, 0), (0, 0), (0, 0)])],
             crs="EPSG:3857",
-        ).maximum_inscribed_circle()
+        )
         self.check_sgpd_equals_gpd(
-            degenerate,
+            degenerate.maximum_inscribed_circle(),
+            gpd.GeoSeries(
+                [LineString([(0, 0), (0, 0)])],
+                crs="EPSG:3857",
+            ),
+        )
+        self.check_sgpd_equals_gpd(
+            degenerate.maximum_inscribed_circle(tolerance=2.0),
             gpd.GeoSeries(
                 [LineString([(0, 0), (0, 0)])],
                 crs="EPSG:3857",
@@ -2619,6 +2634,30 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             match="Empty input geometry is not supported",
         ):
             GeoSeries([Polygon()]).maximum_inscribed_circle().to_geopandas()
+
+    def test_maximum_inscribed_circle_local_tolerance_preserves_order(self):
+        adaptive_enabled = self.spark.conf.get("spark.sql.adaptive.enabled")
+        shuffle_partitions = self.spark.conf.get("spark.sql.shuffle.partitions")
+        try:
+            self.spark.conf.set("spark.sql.adaptive.enabled", "false")
+            self.spark.conf.set("spark.sql.shuffle.partitions", "8")
+            expected_index = pd.Index(
+                [f"feature-{position:03d}" for position in range(100)],
+                name="feature_id",
+            )
+            source = GeoSeries(
+                [Polygon([(0, 0), (1, 0), (1, 1), (0, 0)])] * 100,
+                index=expected_index,
+            )
+
+            actual = source.maximum_inscribed_circle(
+                tolerance=[2.0] * len(source)
+            ).to_geopandas()
+
+            pd.testing.assert_index_equal(actual.index, expected_index)
+        finally:
+            self.spark.conf.set("spark.sql.adaptive.enabled", adaptive_enabled)
+            self.spark.conf.set("spark.sql.shuffle.partitions", shuffle_partitions)
 
     def test_minimum_bounding_radius(self):
         s = GeoSeries(

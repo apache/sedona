@@ -3732,6 +3732,11 @@ class functionTestScala
         .selectExpr("ST_MaximumInscribedCircle(geom, CAST(NULL AS DOUBLE))")
         .first()
         .isNullAt(0))
+    assertTrue(
+      triangleDf
+        .selectExpr("ST_MaximumInscribedCircle(geom, CAST('NaN' AS DOUBLE))")
+        .first()
+        .isNullAt(0))
   }
 
   it("Should pass ST_IsValidTrajectory") {

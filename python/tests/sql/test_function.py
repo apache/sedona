@@ -493,6 +493,12 @@ class TestPredicateJoin(TestBase):
             ).first()[0]
             is None
         )
+        assert (
+            triangle_df.selectExpr(
+                "ST_MaximumInscribedCircle(geom, CAST('NaN' AS DOUBLE))"
+            ).first()[0]
+            is None
+        )
 
     def test_st_is_valid_detail(self):
         baseDf = self.spark.sql(

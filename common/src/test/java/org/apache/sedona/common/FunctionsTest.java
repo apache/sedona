@@ -5086,6 +5086,7 @@ public class FunctionsTest extends TestBase {
             Constructors.geomFromEWKT("POINT (61.64205411585366 104.55256764481707)"),
             45.18896951053177);
     assertEquals(expected, actual);
+    assertNull(Functions.maximumInscribedCircle(geom, Double.NaN));
 
     geom =
         Constructors.geomFromEWKT(
@@ -5151,6 +5152,7 @@ public class FunctionsTest extends TestBase {
             0.0);
     assertEquals(expected, actual);
     assertEquals(expected, Functions.maximumInscribedCircle(geom, 0.0));
+    assertEquals(expected, Functions.maximumInscribedCircle(geom, 2.0));
 
     Geometry finalGeom = geom;
     IllegalArgumentException error =

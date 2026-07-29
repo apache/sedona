@@ -34,6 +34,7 @@ from shapely.geometry import (
     MultiPolygon,
     GeometryCollection,
     LinearRing,
+    box,
 )
 
 from sedona.spark.geopandas import GeoSeries
@@ -999,6 +1000,19 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             result = GeoSeries(geom).voronoi_polygons()
             collected = result.to_geopandas()
             assert len(collected) == len(geom)
+
+    def test_voronoi_polygons_extend_to(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas voronoi_polygons requires version 1.0.0 or higher")
+
+        geometry = MultiPoint([(0, 0), (1, 0), (0.5, 1)])
+        extent = box(-2, 0, 3, 3)
+        actual = GeoSeries([geometry]).voronoi_polygons(extend_to=extent).to_geopandas()
+        expected = gpd.GeoSeries([geometry]).voronoi_polygons(extend_to=extent)
+
+        # Sedona keeps the cells for each input row in one GeometryCollection,
+        # while GeoPandas returns one row per cell. Compare their combined extent.
+        assert actual.iloc[0].bounds == pytest.approx(expected.union_all().bounds)
 
     def test_envelope(self):
         for geom in self.geoms:

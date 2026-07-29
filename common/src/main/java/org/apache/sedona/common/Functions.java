@@ -1461,6 +1461,9 @@ public class Functions {
   }
 
   public static InscribedCircle maximumInscribedCircle(Geometry geometry, double tolerance) {
+    if (Double.isNaN(tolerance)) {
+      return null;
+    }
     // JTS requires a positive tolerance. A zero value requests the same
     // geometry-dependent default used by GEOS and the one-argument overload.
     if (tolerance == 0.0) {
