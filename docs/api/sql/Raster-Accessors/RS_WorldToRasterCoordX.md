@@ -21,7 +21,7 @@
 
 Introduction: Returns the X coordinate of the grid coordinate of the given world coordinates as an integer.
 
-For the geometry variant, if neither `raster` nor `point` has a defined CRS, their coordinates are used directly. If exactly one input has a defined CRS, the function throws an error. If both inputs have the same CRS, their coordinates are used directly. Otherwise, `point` is transformed to the CRS of `raster`. Numeric world coordinates are always interpreted in the raster's coordinate space.
+For the geometry variant, a raster without a CRS accepts only an SRID-0 point and uses its coordinates directly. An EPSG-addressable raster requires a point SRID and transforms it when needed. A raster with a non-EPSG CRS treats an SRID-0 point as native raster coordinates, or transforms an EPSG-tagged point to the raster CRS. Numeric world coordinates are always interpreted in the raster's coordinate space.
 
 ![RS_WorldToRasterCoordX](../../../image/RS_WorldToRasterCoordX/RS_WorldToRasterCoordX.svg "RS_WorldToRasterCoordX")
 

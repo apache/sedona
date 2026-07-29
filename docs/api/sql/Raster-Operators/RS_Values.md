@@ -25,7 +25,7 @@ RS_Values is similar to RS_Value but operates on an array of points or grid coor
 RS_Values can be significantly faster since a raster only has to be loaded once for several points.
 
 !!!Note
-    For the geometry variant, if neither `raster` nor a point has a defined CRS, their coordinates are used directly. If exactly one input has a defined CRS, the function throws an error. If both inputs have the same CRS, their coordinates are used directly. Otherwise, the point is transformed to the CRS of `raster`.
+    For the geometry variant, a raster without a CRS accepts only SRID-0 points and uses their coordinates directly. An EPSG-addressable raster requires point SRIDs and transforms the points when needed. A raster with a non-EPSG CRS treats SRID-0 points as native raster coordinates, or transforms EPSG-tagged points to the raster CRS.
 
 Format:
 
@@ -46,7 +46,13 @@ SQL Example
 - For Array of Point geometries:
 
 ```sql
-SELECT RS_Values(raster, Array(ST_Point(-1307.5, 400.8), ST_Point(-1403.3, 399.1)))
+SELECT RS_Values(
+    raster,
+    Array(
+        ST_SetSRID(ST_Point(-1307.5, 400.8), RS_SRID(raster)),
+        ST_SetSRID(ST_Point(-1403.3, 399.1), RS_SRID(raster))
+    )
+)
 FROM raster_table
 ```
 

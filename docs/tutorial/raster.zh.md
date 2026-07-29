@@ -326,7 +326,7 @@ parcels = sedona.createDataFrame(
             "-91.095 41.508, -91.095 41.502))",
         ),
     ]
-).selectExpr("parcel_id", "ST_GeomFromText(wkt) AS geom")
+).selectExpr("parcel_id", "ST_SetSRID(ST_GeomFromText(wkt), 4326) AS geom")
 
 parcels.createOrReplaceTempView("parcels")
 
@@ -556,7 +556,13 @@ SELECT RS_AsRaster(
 ```sql
 -- 范围查询：保留与 AOI 相交的 tile
 SELECT rast FROM rasterDf
-WHERE RS_Intersects(rast, ST_GeomFromWKT('POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))'))
+WHERE RS_Intersects(
+    rast,
+    ST_SetSRID(
+        ST_GeomFromWKT('POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))'),
+        RS_SRID(rast)
+    )
+)
 
 -- 空间连接：把每个 tile 与覆盖到它的矢量要素配对
 SELECT r.rast, g.geom
@@ -564,6 +570,7 @@ FROM rasterDf r JOIN geomDf g ON RS_Intersects(r.rast, g.geom)
 ```
 
 [`RS_Intersects`](../api/sql/Raster-Predicates/RS_Intersects.md) 与其他 [栅格谓词](../api/sql/Raster-Functions.md#raster-predicates) 都基于栅格的空间外包做判断。
+将矢量几何与带 EPSG CRS 的栅格比较之前，应先为几何设置其真实 SRID。
 
 ### 分区统计
 

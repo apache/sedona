@@ -26,6 +26,7 @@ import java.util.Arrays;
 import org.apache.sedona.common.Constructors;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
@@ -215,6 +216,17 @@ public class RasterBandAccessorsTest extends RasterTestBase {
             IllegalArgumentException.class,
             () -> RasterBandAccessors.getZonalStatsAll(raster, zone, 1, false, false));
     assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
+  }
+
+  @Test
+  public void testZonalStatsAcceptsNativeGeometryForNonEpsgRaster()
+      throws FactoryException, TransformException {
+    GridCoverage2D raster = makeNonEpsgRaster();
+    Geometry hull = GeometryFunctions.convexHull(raster);
+
+    assertEquals(0, RasterAccessors.srid(raster));
+    assertEquals(0, hull.getSRID());
+    assertNotNull(RasterBandAccessors.getZonalStats(raster, hull, 1, "count"));
   }
 
   @Test

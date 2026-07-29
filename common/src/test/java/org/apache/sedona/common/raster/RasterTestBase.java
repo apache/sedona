@@ -54,6 +54,14 @@ public class RasterTestBase {
 
   protected static final double FP_TOLERANCE = 1E-4;
 
+  protected static GridCoverage2D makeNonEpsgRaster() throws FactoryException {
+    String customLambert =
+        "+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 "
+            + "+x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs";
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 5, -2, 2, 1, -1, 0, 0, 0);
+    return RasterEditors.setCrs(raster, customLambert);
+  }
+
   protected GridCoverage2D oneBandRaster;
   protected GridCoverage2D multiBandRaster;
   byte[] geoTiff;

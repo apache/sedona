@@ -329,7 +329,7 @@ parcels = sedona.createDataFrame(
             "-91.095 41.508, -91.095 41.502))",
         ),
     ]
-).selectExpr("parcel_id", "ST_GeomFromText(wkt) AS geom")
+).selectExpr("parcel_id", "ST_SetSRID(ST_GeomFromText(wkt), 4326) AS geom")
 
 parcels.createOrReplaceTempView("parcels")
 
@@ -589,7 +589,13 @@ Raster predicates work in both `WHERE` clauses and as join conditions:
 ```sql
 -- Range query: keep tiles that touch the AOI
 SELECT rast FROM rasterDf
-WHERE RS_Intersects(rast, ST_GeomFromWKT('POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))'))
+WHERE RS_Intersects(
+    rast,
+    ST_SetSRID(
+        ST_GeomFromWKT('POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))'),
+        RS_SRID(rast)
+    )
+)
 
 -- Spatial join: pair each tile with the vector features that overlap it
 SELECT r.rast, g.geom
@@ -597,6 +603,7 @@ FROM rasterDf r JOIN geomDf g ON RS_Intersects(r.rast, g.geom)
 ```
 
 [`RS_Intersects`](../api/sql/Raster-Predicates/RS_Intersects.md) and the other [raster predicates](../api/sql/Raster-Functions.md#raster-predicates) test against the raster's spatial envelope.
+Tag vector geometries with their real SRID before comparing them with an EPSG-addressable raster.
 
 ### Zonal statistics
 

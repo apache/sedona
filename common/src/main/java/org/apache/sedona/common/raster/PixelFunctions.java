@@ -23,7 +23,6 @@ import java.awt.image.Raster;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.coverage.PointOutsideCoverageException;
 import org.geotools.api.geometry.Position;
@@ -269,14 +268,7 @@ public class PixelFunctions {
         continue;
       }
 
-      Pair<GridCoverage2D, Geometry> pair =
-          RasterUtils.transformToRasterCRS(rasterGeom, geometries.get(i));
-
-      geometries.set(i, pair.getRight());
-
-      if (i == 0) {
-        rasterGeom = pair.getLeft();
-      }
+      geometries.set(i, RasterUtils.transformToRasterCRS(rasterGeom, geometries.get(i)));
     }
 
     int numBands = rasterGeom.getNumSampleDimensions();

@@ -22,7 +22,7 @@
 Introduction: Returns the value at the given point in the raster. If no band number is specified it defaults to 1.
 
 !!!Note
-    For the geometry variant, if neither `raster` nor `point` has a defined CRS, their coordinates are used directly. If exactly one input has a defined CRS, the function throws an error. If both inputs have the same CRS, their coordinates are used directly. Otherwise, `point` is transformed to the CRS of `raster`.
+    For the geometry variant, a raster without a CRS accepts only an SRID-0 point and uses its coordinates directly. An EPSG-addressable raster requires a point SRID and transforms it when needed. A raster with a non-EPSG CRS treats an SRID-0 point as native raster coordinates, or transforms an EPSG-tagged point to the raster CRS.
 
 Format:
 
@@ -41,7 +41,8 @@ Spark SQL Examples:
 - For Point Geometry:
 
 ```sql
-SELECT RS_Value(raster, ST_Point(-13077301.685, 4002565.802)) FROM raster_table
+SELECT RS_Value(raster, ST_SetSRID(ST_Point(-13077301.685, 4002565.802), RS_SRID(raster)))
+FROM raster_table
 ```
 
 - For Grid Coordinates:

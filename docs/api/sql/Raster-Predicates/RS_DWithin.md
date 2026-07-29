@@ -23,7 +23,7 @@ Introduction: Returns true if the raster or geometry on the left side is within 
 
 Rules for testing spatial relationship:
 
-- If the raster or geometry does not have a defined SRID, it is assumed to be in WGS84.
+- Unlike `RS_Intersects`, `RS_Contains`, and `RS_Within`, `RS_DWithin` retains its legacy behavior: if a raster or geometry does not have a defined CRS or SRID, it is assumed to be in WGS84.
 - Both sides are unconditionally projected to WGS84 before the test, so `distance` is **always** measured in meters regardless of the input CRS.
 - The per-row test computes the **minimum geodesic distance** between the two shapes — the raster is represented by its convex hull, and the geodesic distance is measured between the closest pair of points on the two hulls (not centroid-to-centroid). Two raster footprints that overlap or touch therefore satisfy `RS_DWithin(a, b, 0)`, mirroring [`RS_Intersects`](RS_Intersects.md).
 

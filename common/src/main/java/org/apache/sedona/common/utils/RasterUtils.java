@@ -542,64 +542,58 @@ public class RasterUtils {
   }
 
   /**
-   * Transforms a geometry to a target CRS when both are defined. If neither is defined, the
-   * geometry is returned unchanged. Exactly one defined CRS is rejected.
+   * Transforms a geometry to a target raster CRS when possible.
+   *
+   * <p>An EPSG-addressable target CRS requires the geometry to have an SRID. A target CRS without
+   * an EPSG identifier accepts an SRID-0 geometry as already expressed in its coordinate space. A
+   * missing target CRS only accepts an SRID-0 geometry.
    *
    * @param geometry geometry to transform
    * @param targetCRS target coordinate reference system
-   * @return the transformed geometry, or the input geometry when neither CRS is defined
-   * @throws IllegalArgumentException if exactly one CRS is defined
+   * @return the transformed geometry, or the input geometry when no transformation is needed
+   * @throws IllegalArgumentException if the raster and geometry CRS metadata are incompatible
    */
   public static Geometry convertCRSIfNeeded(
       Geometry geometry, CoordinateReferenceSystem targetCRS) {
     int geomSRID = geometry.getSRID();
-    boolean targetHasCRS = hasCRS(targetCRS);
-    boolean geometryHasCRS = geomSRID > 0;
-    ensureMatchingCRSPresence(targetHasCRS, geometryHasCRS);
+    ensureRasterGeometryCRSCompatibility(targetCRS, geomSRID);
 
-    if (!targetHasCRS) {
+    if (!hasCRS(targetCRS) || geomSRID <= 0) {
+      return geometry;
+    }
+
+    int targetSRID = FunctionsGeoTools.crsToSRID(targetCRS);
+    if (targetSRID == geomSRID) {
       return geometry;
     }
 
     try {
-      geometry =
-          FunctionsGeoTools.transformToGivenTarget(geometry, "epsg:" + geomSRID, targetCRS, true);
+      return FunctionsGeoTools.transformToGivenTarget(
+          geometry, "epsg:" + geomSRID, targetCRS, true);
     } catch (FactoryException | TransformException e) {
       throw new RuntimeException("Cannot transform CRS of query window", e);
     }
-    return geometry;
   }
 
   /**
-   * Aligns a geometry with a raster's CRS. If neither input has a CRS, their coordinates are used
-   * directly. If exactly one input has a CRS, this method throws. If both inputs have a CRS and
-   * they differ, the geometry is transformed to the raster's CRS.
+   * Aligns a geometry with a raster's CRS.
    *
-   * @param raster
-   * @param geom
-   * @return
-   * @throws IllegalArgumentException if exactly one input has a CRS
+   * <p>There are three raster CRS states:
+   *
+   * <ul>
+   *   <li>A missing raster CRS accepts only an SRID-0 geometry and compares coordinates directly.
+   *   <li>An EPSG-addressable raster CRS requires a geometry SRID and transforms it when needed.
+   *   <li>A non-EPSG raster CRS treats an SRID-0 geometry as already expressed in the raster's
+   *       coordinate space, and transforms an EPSG-tagged geometry into that CRS.
+   * </ul>
+   *
+   * @param raster raster whose CRS is the target
+   * @param geom geometry to align
+   * @return the geometry in the raster's coordinate space
+   * @throws IllegalArgumentException if the raster and geometry CRS metadata are incompatible
    */
-  public static Pair<GridCoverage2D, Geometry> transformToRasterCRS(
-      GridCoverage2D raster, Geometry geom) {
-    int rasterSRID;
-    try {
-      rasterSRID = RasterAccessors.srid(raster);
-    } catch (FactoryException e) {
-      throw new RuntimeException("Cannot determine raster CRS", e);
-    }
-    int geomSRID = geom.getSRID();
-    boolean rasterHasCRS = hasCRS(raster.getCoordinateReferenceSystem());
-    boolean geometryHasCRS = geomSRID > 0;
-    ensureMatchingCRSPresence(rasterHasCRS, geometryHasCRS);
-
-    if (rasterHasCRS && rasterSRID != geomSRID) {
-      geom = convertCRSIfNeeded(geom, raster.getCoordinateReferenceSystem());
-      // A transformed geometry is now expressed in the raster's CRS. Custom raster CRSs may not
-      // have an EPSG identifier, in which case the best representable geometry SRID is 0.
-      geom.setSRID(rasterSRID);
-    }
-    return Pair.of(raster, geom);
+  public static Geometry transformToRasterCRS(GridCoverage2D raster, Geometry geom) {
+    return convertCRSIfNeeded(geom, raster.getCoordinateReferenceSystem());
   }
 
   /**
@@ -609,11 +603,27 @@ public class RasterUtils {
   @Deprecated
   public static Pair<GridCoverage2D, Geometry> setDefaultCRSAndTransform(
       GridCoverage2D raster, Geometry geom) throws FactoryException {
-    return transformToRasterCRS(raster, geom);
+    return Pair.of(raster, transformToRasterCRS(raster, geom));
   }
 
   public static boolean hasCRS(CoordinateReferenceSystem crs) {
     return crs != null && !(crs instanceof DefaultEngineeringCRS);
+  }
+
+  /**
+   * Validates whether a geometry's integer SRID can be interpreted against a raster CRS.
+   *
+   * <p>A non-EPSG raster CRS is a special case: an SRID-0 geometry is interpreted as native raster
+   * coordinates because JTS has no way to attach the raster's full CRS object to the geometry.
+   */
+  public static void ensureRasterGeometryCRSCompatibility(
+      CoordinateReferenceSystem rasterCRS, int geometrySRID) {
+    boolean rasterHasCRS = hasCRS(rasterCRS);
+    boolean rasterHasEPSG = rasterHasCRS && FunctionsGeoTools.crsToSRID(rasterCRS) > 0;
+    boolean geometryHasSRID = geometrySRID > 0;
+    if ((!rasterHasCRS && geometryHasSRID) || (rasterHasEPSG && !geometryHasSRID)) {
+      throw new IllegalArgumentException(MISSING_CRS_ERROR_MESSAGE);
+    }
   }
 
   /** Throws when exactly one of two operands has a defined CRS. */

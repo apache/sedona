@@ -46,15 +46,15 @@ public class RasterPredicates {
   /**
    * Test if a raster intersects a query window. If both the raster and the query window have a CRS,
    * the query window and the envelope of the raster will be transformed to a common CRS before
-   * testing for intersection. If neither has a CRS, their coordinates are compared directly. If
-   * exactly one has a CRS, the predicate throws rather than assuming a CRS for the other operand.
-   * Please note that the CRS transformation will be lenient, which means that the transformation
-   * may not be accurate.
+   * testing for intersection. An EPSG-addressable raster requires a query-window SRID. A raster
+   * with a non-EPSG CRS accepts an SRID-0 query window as native raster coordinates. A missing
+   * raster CRS only accepts an SRID-0 query window. Please note that the CRS transformation will be
+   * lenient, which means that the transformation may not be accurate.
    *
    * @param raster the raster
    * @param geometry the query window
    * @return true if the raster intersects the query window
-   * @throws IllegalArgumentException if exactly one operand has a CRS
+   * @throws IllegalArgumentException if the raster and query-window CRS metadata are incompatible
    */
   public static boolean rsIntersects(GridCoverage2D raster, Geometry geometry) {
     Pair<Geometry, Geometry> geometries = convertCRSIfNeeded(raster, geometry);
@@ -248,8 +248,7 @@ public class RasterPredicates {
     CoordinateReferenceSystem rasterCRS = raster.getCoordinateReferenceSystem();
     int queryWindowSRID = queryWindow.getSRID();
     boolean rasterHasCRS = RasterUtils.hasCRS(rasterCRS);
-    boolean queryWindowHasCRS = queryWindowSRID > 0;
-    RasterUtils.ensureMatchingCRSPresence(rasterHasCRS, queryWindowHasCRS);
+    RasterUtils.ensureRasterGeometryCRSCompatibility(rasterCRS, queryWindowSRID);
 
     Geometry rasterGeometry;
     try {
@@ -258,7 +257,7 @@ public class RasterPredicates {
       throw new RuntimeException("Failed to calculate the convex hull of the raster", e);
     }
 
-    if (!rasterHasCRS) {
+    if (!rasterHasCRS || queryWindowSRID <= 0) {
       return Pair.of(rasterGeometry, queryWindow);
     }
 

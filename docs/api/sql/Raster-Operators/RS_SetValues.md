@@ -25,7 +25,7 @@ of the rectangular region. The new values to be assigned to the pixels in this r
 to this function.
 
 !!!Note
-    For the geometry variant, if neither `raster` nor `geom` has a defined CRS, their coordinates are used directly. If exactly one input has a defined CRS, the function throws an error. If both inputs have the same CRS, their coordinates are used directly. Otherwise, `geom` is transformed to the CRS of `raster`.
+    For the geometry variant, a raster without a CRS accepts only an SRID-0 geometry and uses its coordinates directly. An EPSG-addressable raster requires a geometry SRID and transforms it when needed. A raster with a non-EPSG CRS treats an SRID-0 geometry as native raster coordinates, or transforms an EPSG-tagged geometry to the raster CRS.
 
 Format without ROI `geom`:
 

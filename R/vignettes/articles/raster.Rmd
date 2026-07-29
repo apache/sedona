@@ -98,7 +98,10 @@ Or getting values at specific points:
 ```{r}
 raster %>%
   mutate(
-    val = RS_Value(raster, ST_Point(-13077301.685, 4002565.802))
+    val = RS_Value(
+      raster,
+      ST_SetSRID(ST_Point(-13077301.685, 4002565.802), RS_SRID(raster))
+    )
   ) %>%
   select(path, val) %>%
   collect() %>%

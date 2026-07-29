@@ -28,10 +28,10 @@ import static org.junit.Assert.assertEquals;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.raster.MapAlgebra;
 import org.apache.sedona.common.raster.RasterAccessors;
 import org.apache.sedona.common.raster.RasterConstructors;
+import org.apache.sedona.common.raster.RasterEditors;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.Category;
@@ -157,10 +157,8 @@ public class RasterUtilsTest {
         RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 5, 1, -1, 0, 0, 0);
     Geometry geometryWithoutCRS = geomFromWKT("POINT (1 1)");
 
-    Pair<GridCoverage2D, Geometry> pair =
-        RasterUtils.transformToRasterCRS(rasterWithoutCRS, geometryWithoutCRS);
-    Assert.assertSame(rasterWithoutCRS, pair.getLeft());
-    Assert.assertSame(geometryWithoutCRS, pair.getRight());
+    Geometry transformed = RasterUtils.transformToRasterCRS(rasterWithoutCRS, geometryWithoutCRS);
+    Assert.assertSame(geometryWithoutCRS, transformed);
 
     GridCoverage2D rasterWithCRS =
         RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 5, 1, -1, 0, 0, 4326);
@@ -177,15 +175,37 @@ public class RasterUtilsTest {
             () -> RasterUtils.transformToRasterCRS(rasterWithoutCRS, geometryWithCRS));
     assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
 
-    pair = RasterUtils.transformToRasterCRS(rasterWithCRS, geometryWithCRS);
-    Assert.assertSame(geometryWithCRS, pair.getRight());
+    transformed = RasterUtils.transformToRasterCRS(rasterWithCRS, geometryWithCRS);
+    Assert.assertSame(geometryWithCRS, transformed);
 
     Geometry webMercatorPoint =
         setSRID(geomFromWKT("POINT (111319.49079327357 111325.1428663851)"), 3857);
-    pair = RasterUtils.transformToRasterCRS(rasterWithCRS, webMercatorPoint);
-    assertEquals(4326, pair.getRight().getSRID());
-    assertEquals(1, pair.getRight().getCoordinate().x, 1e-6);
-    assertEquals(1, pair.getRight().getCoordinate().y, 1e-6);
+    transformed = RasterUtils.transformToRasterCRS(rasterWithCRS, webMercatorPoint);
+    assertEquals(4326, transformed.getSRID());
+    assertEquals(1, transformed.getCoordinate().x, 1e-6);
+    assertEquals(1, transformed.getCoordinate().y, 1e-6);
+  }
+
+  @Test
+  public void testTransformToRasterCRSWithNonEpsgRaster() throws FactoryException {
+    String customLambert =
+        "+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 "
+            + "+x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs";
+    GridCoverage2D raster =
+        RasterEditors.setCrs(
+            RasterConstructors.makeEmptyRaster(1, 5, 5, -2, 2, 1, -1, 0, 0, 0), customLambert);
+    assertEquals(0, RasterAccessors.srid(raster));
+    Assert.assertTrue(RasterUtils.hasCRS(raster.getCoordinateReferenceSystem()));
+
+    Geometry nativePoint = geomFromWKT("POINT (0 0)");
+    Geometry transformed = RasterUtils.transformToRasterCRS(raster, nativePoint);
+    Assert.assertSame(nativePoint, transformed);
+
+    Geometry wgs84Point = setSRID(geomFromWKT("POINT (-100 42.5)"), 4326);
+    transformed = RasterUtils.transformToRasterCRS(raster, wgs84Point);
+    assertEquals(0, transformed.getSRID());
+    assertEquals(0, transformed.getCoordinate().x, 1e-6);
+    assertEquals(0, transformed.getCoordinate().y, 1e-6);
   }
 
   @Test

@@ -31,10 +31,9 @@ Introduction: `RS_AsRaster` converts a vector geometry into a raster dataset by 
 
 CRS handling:
 
-- If neither `raster` nor `geom` has a defined CRS, their coordinates are used directly.
-- If exactly one input has a defined CRS, the function throws an error.
-- If both inputs have the same CRS, their coordinates are used directly.
-- Otherwise, `geom` is transformed to the CRS of `raster`.
+- A raster without a CRS accepts only an SRID-0 geometry; their coordinates are used directly.
+- A raster with an EPSG CRS requires the geometry to have an SRID and transforms it when needed.
+- A raster with a non-EPSG CRS treats an SRID-0 geometry as native raster coordinates. An EPSG-tagged geometry is transformed to the raster CRS.
 
 Format:
 

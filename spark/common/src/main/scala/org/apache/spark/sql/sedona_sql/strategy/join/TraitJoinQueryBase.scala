@@ -101,7 +101,7 @@ trait TraitJoinQueryBase {
       rdd.map { row =>
         val raster =
           RasterSerializer.deserialize(shapeExpression.eval(row).asInstanceOf[Array[Byte]])
-        val shape = JoinedGeometryRaster.rasterToWGS84EnvelopeForRefinement(raster)
+        val shape = JoinedGeometryRaster.rasterToWGS84Envelope(raster)
         shape.setUserData(row.copy)
         shape
       }
@@ -109,7 +109,7 @@ trait TraitJoinQueryBase {
       rdd.map { row =>
         val geom =
           GeometrySerializer.deserialize(shapeExpression.eval(row).asInstanceOf[Array[Byte]])
-        val shape = JoinedGeometryRaster.geometryToWGS84EnvelopeForRefinement(geom)
+        val shape = JoinedGeometryRaster.geometryToWGS84Envelope(geom)
         shape.setUserData(row.copy)
         shape
       }

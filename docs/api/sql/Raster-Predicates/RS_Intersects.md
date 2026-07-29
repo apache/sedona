@@ -26,10 +26,14 @@ The convex hull of the raster is considered in the test.
 
 Rules for testing spatial relationship:
 
-- If neither side has a defined CRS, the relationship test is performed directly without CRS transformation.
-- If exactly one side has a defined CRS, the function throws an error.
-- If both sides are in the same CRS, then perform the relationship test directly.
-- Otherwise, both sides will be transformed to WGS84 before the relationship test.
+- For two rasters, coordinates are compared directly when neither has a CRS. If only one has a CRS, the function throws an error. Rasters with different defined CRSs are transformed to WGS84.
+- A raster without a CRS accepts an SRID-0 geometry as native coordinates and rejects a geometry with an SRID.
+- A raster with an EPSG CRS requires the geometry to have an SRID. Different defined CRSs are transformed to a common CRS.
+- A raster with a non-EPSG CRS accepts an SRID-0 geometry as native raster coordinates. A geometry with an EPSG SRID is transformed before comparison.
+
+These rules apply when an operand pair is evaluated. An optimized spatial join first performs its existing planar envelope filtering and does not preflight CRS metadata across the complete inputs.
+
+Unlike these topological predicates, [`RS_DWithin`](RS_DWithin.md) retains its legacy rule of assuming WGS84 for a missing CRS or SRID.
 
 Format:
 

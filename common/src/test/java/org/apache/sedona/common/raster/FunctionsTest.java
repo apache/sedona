@@ -109,6 +109,17 @@ public class FunctionsTest extends RasterTestBase {
   }
 
   @Test
+  public void valueAcceptsNativePointForNonEpsgRaster()
+      throws FactoryException, TransformException {
+    GridCoverage2D raster = makeNonEpsgRaster();
+    Geometry point = PixelFunctions.getPixelAsPoint(raster, 3, 3);
+
+    assertEquals(0, RasterAccessors.srid(raster));
+    assertEquals(0, point.getSRID());
+    assertNotNull(PixelFunctions.value(raster, point, 1));
+  }
+
+  @Test
   public void valueWithGridCoords() throws TransformException {
     int insideX = 1;
     int insideY = 0;

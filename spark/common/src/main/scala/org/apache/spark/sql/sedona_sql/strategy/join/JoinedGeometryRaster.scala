@@ -28,32 +28,7 @@ import org.geotools.referencing.CRS
 import org.geotools.referencing.crs.{DefaultEngineeringCRS, DefaultGeographicCRS}
 import org.locationtech.jts.geom.{Envelope, Geometry}
 
-import scala.util.control.NonFatal
-
 object JoinedGeometryRaster {
-
-  private val GLOBAL_WGS84_ENVELOPE = new Envelope(-180.0, 180.0, -90.0, 90.0)
-
-  /**
-   * Return a fresh geometry covering the global WGS84 extent.
-   *
-   * Join planning cannot safely place a CRS-less operand in WGS84. Defined empty or out-of-world
-   * operands must also reach scalar refinement so a one-sided CRS mismatch is not hidden by index
-   * pruning. Using the global extent keeps those rows in the coarse candidate set. The geometry
-   * must be fresh because callers attach row-specific user data to it.
-   */
-  private def globalWGS84Envelope(): Geometry =
-    JTS.toGeometry(new Envelope(GLOBAL_WGS84_ENVELOPE))
-
-  private def keepForScalarRefinement(shape: => Geometry): Geometry =
-    try {
-      val candidate = shape
-      if (GLOBAL_WGS84_ENVELOPE.intersects(candidate.getEnvelopeInternal)) candidate
-      else globalWGS84Envelope()
-    } catch {
-      // Coarse conversion must not preempt scalar CRS-presence validation or its stable error.
-      case NonFatal(_) => globalWGS84Envelope()
-    }
 
   /**
    * Convert the given raster to an envelope in WGS84 CRS.
@@ -70,20 +45,6 @@ object JoinedGeometryRaster {
       JTS.toGeometry(envelope.asInstanceOf[BoundingBox])
     } else {
       transformToWGS84Envelope(envelope, crs)
-    }
-  }
-
-  /**
-   * Convert a raster to a conservative WGS84 envelope for a non-distance raster predicate join.
-   * CRS-less and out-of-world rows use the global extent so scalar CRS validation cannot be
-   * hidden by coarse-index pruning.
-   */
-  def rasterToWGS84EnvelopeForRefinement(raster: GridCoverage2D): Geometry = {
-    val crs = raster.getCoordinateReferenceSystem
-    if (crs == null || crs.isInstanceOf[DefaultEngineeringCRS]) {
-      globalWGS84Envelope()
-    } else {
-      keepForScalarRefinement(transformToWGS84Envelope(raster.getEnvelope2D, crs))
     }
   }
 
@@ -105,28 +66,6 @@ object JoinedGeometryRaster {
       val envelope =
         new ReferencedEnvelope(env.getMinX, env.getMaxX, env.getMinY, env.getMaxY, null)
       transformToWGS84Envelope(envelope, crs)
-    }
-  }
-
-  /**
-   * Convert a geometry to a conservative WGS84 envelope for a non-distance raster predicate join.
-   * CRS-less, empty, and out-of-world rows use the global extent so scalar CRS validation cannot
-   * be hidden by coarse-index pruning.
-   */
-  def geometryToWGS84EnvelopeForRefinement(geom: Geometry): Geometry = {
-    val srid = geom.getSRID
-    if (geom.isEmpty || srid <= 0) {
-      globalWGS84Envelope()
-    } else if (srid == 4326) {
-      keepForScalarRefinement(geom)
-    } else {
-      keepForScalarRefinement {
-        val env = geom.getEnvelopeInternal
-        val crs = FunctionsGeoTools.sridToCRS(srid)
-        val envelope =
-          new ReferencedEnvelope(env.getMinX, env.getMaxX, env.getMinY, env.getMaxY, null)
-        transformToWGS84Envelope(envelope, crs)
-      }
     }
   }
 

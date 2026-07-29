@@ -29,7 +29,7 @@ The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
 - When false (default), only pixels whose centroid intersects with the geometry will be included.
 
 !!!Note
-    - If neither `raster` nor `geom` has a defined CRS, their coordinates are used directly. If exactly one input has a defined CRS, the function throws an error. If both inputs have the same CRS, their coordinates are used directly. Otherwise, `geom` is transformed to the CRS of `raster`.
+    - A raster without a CRS accepts only an SRID-0 geometry and uses its coordinates directly. An EPSG-addressable raster requires a geometry SRID and transforms it when needed. A raster with a non-EPSG CRS treats an SRID-0 geometry as native raster coordinates, or transforms an EPSG-tagged geometry to the raster CRS.
     - Since `v1.7.0`, `RS_Clip` function will return `null` if the `raster` and `geometry` geometry do not intersect. If you want to throw an exception in this case, you can set the `lenient` parameter to `false`.
 
 ![RS_Clip](../../../image/RS_Clip/RS_Clip.svg "RS_Clip")

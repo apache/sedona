@@ -25,6 +25,7 @@ The convex hull of the raster is considered in the test.
 ![RS_Contains](../../../image/RS_Contains/RS_Contains.svg "RS_Contains")
 
 The rules for testing spatial relationship is the same as `RS_Intersects`.
+`RS_DWithin` is an exception and continues to assume WGS84 when CRS or SRID metadata is missing.
 
 Format:
 

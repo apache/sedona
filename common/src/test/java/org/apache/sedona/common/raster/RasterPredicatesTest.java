@@ -19,6 +19,7 @@
 package org.apache.sedona.common.raster;
 
 import java.awt.image.DataBuffer;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.geometry.BoundingBox;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
@@ -39,14 +40,12 @@ import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
 public class RasterPredicatesTest extends RasterTestBase {
-  private static final String MISSING_CRS_ERROR_MESSAGE =
-      "Raster operations require both operands to have a CRS or neither operand to have a CRS";
   private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
   private static void assertMissingCrsError(ThrowingRunnable predicate) {
     IllegalArgumentException exception =
         Assert.assertThrows(IllegalArgumentException.class, predicate);
-    Assert.assertEquals(MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
+    Assert.assertEquals(RasterUtils.MISSING_CRS_ERROR_MESSAGE, exception.getMessage());
   }
 
   @Test
@@ -75,6 +74,20 @@ public class RasterPredicatesTest extends RasterTestBase {
     queryWindow.setSRID(3857);
     GridCoverage2D raster = createRandomRaster(DataBuffer.TYPE_BYTE, 10, 10, 0, 10, 1, 1, null);
     assertMissingCrsError(() -> RasterPredicates.rsIntersects(raster, queryWindow));
+  }
+
+  @Test
+  public void testPredicatesWithNonEpsgRasterCrs() throws FactoryException {
+    GridCoverage2D raster = makeNonEpsgRaster();
+
+    Geometry nativePoint = GEOMETRY_FACTORY.createPoint(new Coordinate(0, 0));
+    Assert.assertTrue(RasterPredicates.rsIntersects(raster, nativePoint));
+    Assert.assertTrue(RasterPredicates.rsContains(raster, nativePoint));
+
+    Geometry wgs84Point = GEOMETRY_FACTORY.createPoint(new Coordinate(-100, 42.5));
+    wgs84Point.setSRID(4326);
+    Assert.assertTrue(RasterPredicates.rsIntersects(raster, wgs84Point));
+    Assert.assertTrue(RasterPredicates.rsContains(raster, wgs84Point));
   }
 
   @Test

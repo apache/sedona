@@ -433,6 +433,19 @@ public class RasterConstructorsTest extends RasterTestBase {
   }
 
   @Test
+  public void testAsRasterAcceptsNativeGeometryForNonEpsgRaster()
+      throws FactoryException, TransformException {
+    GridCoverage2D raster = makeNonEpsgRaster();
+    Geometry hull = GeometryFunctions.convexHull(raster);
+
+    assertEquals(0, RasterAccessors.srid(raster));
+    assertEquals(0, hull.getSRID());
+    GridCoverage2D rasterized = RasterConstructors.asRaster(hull, raster, "d");
+    assertEquals(0, RasterAccessors.srid(rasterized));
+    assertEquals(25, MapAlgebra.bandAsArray(rasterized, 1).length);
+  }
+
+  @Test
   public void testAsRasterWithNonSquarePixels() throws FactoryException, ParseException {
     // Pixels are 2 world units wide and 3 tall, so the x-intercept math cannot
     // silently conflate pixel-space and world-space slopes the way square

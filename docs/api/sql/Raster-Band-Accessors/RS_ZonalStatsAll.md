@@ -39,7 +39,7 @@ The `allTouched` parameter (Since `v1.7.1`) determines how pixels are selected:
 - max: Maximum value of the zone.
 
 !!!note
-    If neither `raster` nor `zone` has a defined CRS, their coordinates are used directly. If exactly one input has a defined CRS, the function throws an error. If both inputs have the same CRS, their coordinates are used directly. Otherwise, `zone` is transformed to the CRS of `raster`.
+    A raster without a CRS accepts only an SRID-0 zone and uses its coordinates directly. An EPSG-addressable raster requires a zone SRID and transforms it when needed. A raster with a non-EPSG CRS treats an SRID-0 zone as native raster coordinates, or transforms an EPSG-tagged zone to the raster CRS.
 
     The following conditions will throw an `IllegalArgumentException` if they are not met:
 
