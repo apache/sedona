@@ -1860,6 +1860,83 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         with pytest.raises(NotImplementedError):
             s.voronoi_polygons(only_edges=True)
 
+    def test_voronoi_polygons_extend_to(self):
+        source_geometry = MultiPoint([(0, 0), (1, 0), (0.5, 1)])
+        index = pd.MultiIndex.from_tuples([("group", 7)], names=["group", "feature_id"])
+        source = GeoSeries([source_geometry], index=index, crs="EPSG:3857")
+
+        default = source.voronoi_polygons()
+        extended = source.voronoi_polygons(extend_to=box(-2, 0, 3, 3))
+        contained = source.voronoi_polygons(extend_to=box(0.25, 0.25, 0.75, 0.75))
+        nonrectangular = source.voronoi_polygons(
+            extend_to=Polygon([(-2, 0), (3, 0), (0, 3)])
+        )
+        same_envelope = source.voronoi_polygons(extend_to=box(-2, 0, 3, 3))
+        empty_extent = source.voronoi_polygons(extend_to=GeometryCollection())
+
+        default_geometry = default.to_geopandas().iloc[0]
+        extended_result = extended.to_geopandas()
+        extended_geometry = extended_result.iloc[0]
+        assert extended_result.index.equals(index)
+        assert extended_geometry.bounds == pytest.approx((-2.0, -1.0, 3.0, 3.0))
+        assert contained.to_geopandas().iloc[0].equals(default_geometry)
+        assert (
+            nonrectangular.to_geopandas()
+            .iloc[0]
+            .equals(same_envelope.to_geopandas().iloc[0])
+        )
+        assert empty_extent.to_geopandas().iloc[0].equals(default_geometry)
+        assert extended.crs == source.crs
+
+        srids = extended._internal.spark_frame.select(
+            stf.ST_SRID(extended.spark.column).alias("srid")
+        ).collect()
+        assert [row.srid for row in srids] == [3857]
+
+        frame_source = GeoSeries([source_geometry], crs="EPSG:3857")
+        frame_result = frame_source.to_geoframe().voronoi_polygons(
+            extend_to=box(-2, 0, 3, 3)
+        )
+        frame_expected = gpd.GeoSeries([extended_geometry], crs="EPSG:3857")
+        self.check_sgpd_equals_gpd(frame_result, frame_expected)
+
+        if hasattr(extended._internal.spark_frame, "_jdf"):
+            plan = (
+                extended._internal.spark_frame._jdf.queryExecution()
+                .executedPlan()
+                .toString()
+            )
+            assert "BatchEvalPython" not in plan
+            assert "ArrowEvalPython" not in plan
+
+        for invalid_extent in (
+            [box(0, 0, 1, 1)],
+            "POLYGON ((0 0, 1 0, 1 1, 0 0))",
+            source,
+            ps.Series([1]),
+        ):
+            with pytest.raises(TypeError, match="'extend_to' must be a geometry"):
+                source.voronoi_polygons(extend_to=invalid_extent)
+
+    def test_voronoi_polygons_extend_to_degenerate_inputs(self):
+        source = GeoSeries.from_wkt(
+            [
+                None,
+                "GEOMETRYCOLLECTION EMPTY",
+                "POINT (0 0)",
+                "MULTIPOINT ((0 0), (1 0))",
+            ]
+        )
+        result = source.voronoi_polygons(extend_to=LineString([(-2, 0), (3, 0)]))
+        actual = result.to_geopandas()
+
+        assert actual.iloc[0] is None
+        assert actual.iloc[1].is_empty
+        assert actual.iloc[2].geom_type == "GeometryCollection"
+        assert actual.iloc[2].bounds == pytest.approx((-2.0, 0.0, 3.0, 0.0))
+        assert actual.iloc[3].geom_type == "GeometryCollection"
+        assert actual.iloc[3].bounds == pytest.approx((-2.0, -1.0, 3.0, 1.0))
+
     def test_envelope(self):
         s = sgpd.GeoSeries(
             [

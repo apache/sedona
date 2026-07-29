@@ -1442,11 +1442,29 @@ class GeoSeries(GeoFrame, pspd.Series):
             raise NotImplementedError(
                 "Sedona does not support only_edges=True for voronoi_polygons."
             )
-        if extend_to is not None:
-            raise NotImplementedError(
-                "Sedona does not support extend_to for voronoi_polygons."
+        if extend_to is None:
+            spark_expr = stf.ST_VoronoiPolygons(self.spark.column, tolerance, extend_to)
+            return self._query_geometry_column(
+                spark_expr,
+                returns_geom=True,
             )
-        spark_expr = stf.ST_VoronoiPolygons(self.spark.column, tolerance, extend_to)
+        if not isinstance(extend_to, BaseGeometry):
+            raise TypeError("'extend_to' must be a geometry or None")
+
+        geometry = self.spark.column
+        source_envelope = stf.ST_Envelope(geometry)
+        padding = F.greatest(
+            stf.ST_XMax(geometry) - stf.ST_XMin(geometry),
+            stf.ST_YMax(geometry) - stf.ST_YMin(geometry),
+        )
+        default_extent = stf.ST_Expand(source_envelope, padding)
+        requested_extent = stc.ST_GeomFromWKB(F.lit(extend_to.envelope.wkb))
+        # JTS treats extendTo as a hard clip. GeoPandas only enlarges the
+        # default Voronoi extent, so combine both envelopes before calling it.
+        effective_extent = stf.ST_Envelope(
+            stf.ST_Collect(F.array(default_extent, requested_extent))
+        )
+        spark_expr = stf.ST_VoronoiPolygons(geometry, tolerance, effective_extent)
         return self._query_geometry_column(
             spark_expr,
             returns_geom=True,
