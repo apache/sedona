@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -226,6 +225,7 @@
 <span class="c1"># under the License.</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">List</span>
@@ -240,8 +240,15 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">PandasOnSparkDataFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.internal</span><span class="w"> </span><span class="kn">import</span> <span class="n">InternalField</span><span class="p">,</span> <span class="n">InternalFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">first_series</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">scol_for</span><span class="p">,</span> <span class="n">verify_temp_column_name</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">NullType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">same_anchor</span><span class="p">,</span> <span class="n">scol_for</span><span class="p">,</span> <span class="n">verify_temp_column_name</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BooleanType</span><span class="p">,</span>
+    <span class="n">IntegralType</span><span class="p">,</span>
+    <span class="n">LongType</span><span class="p">,</span>
+    <span class="n">NullType</span><span class="p">,</span>
+    <span class="n">StructField</span><span class="p">,</span>
+    <span class="n">StructType</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_aggregates</span> <span class="k">as</span> <span class="n">sta</span>
@@ -251,6 +258,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">Column</span> <span class="k">as</span> <span class="n">PySparkColumn</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">F</span>
+
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseGeometry</span>
@@ -333,6 +341,104 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_affine_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">error_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalize an operation-wide affine parameter to a Python float.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_normalize_numeric_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">error_message</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_sample_size_scalar</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalize one sample size without accepting boolean values.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;expected a sequence of integers or a single integer, got </span><span class="si">{</span><span class="n">size</span><span class="si">!r}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;expected a sequence of integers or a single integer, got </span><span class="si">{</span><span class="n">size</span><span class="si">!r}</span><span class="s2">&quot;</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;negative dimensions are not allowed&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="mi">2_147_483_647</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sample size must be at most 2147483647&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">size</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_sample_seed</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Map a NumPy-compatible RNG argument to Sedona&#39;s positive seed range.&quot;&quot;&quot;</span>
+    <span class="n">generator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">generator</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2_147_483_647</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_attach_ordered_sequence_column</span><span class="p">(</span>
+    <span class="n">sdf</span><span class="p">,</span>
+    <span class="n">order_column</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
+    <span class="n">sequence_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Attach dense positions without a single-partition window over all rows.&quot;&quot;&quot;</span>
+    <span class="c1"># Use pandas-on-Spark&#39;s native implementation so it owns the child</span>
+    <span class="c1"># materialization lifecycle and avoids duplicate evaluation.</span>
+    <span class="k">return</span> <span class="n">InternalFrame</span><span class="o">.</span><span class="n">attach_distributed_sequence_column</span><span class="p">(</span>
+        <span class="n">sdf</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">order_column</span><span class="p">),</span>
+        <span class="n">sequence_column</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_sample_points_expression</span><span class="p">(</span>
+    <span class="n">geometry</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
+    <span class="n">size</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
+    <span class="n">fallback_srid</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PySparkColumn</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build native expressions for uniform polygon and line sampling.&quot;&quot;&quot;</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">size</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;long&quot;</span><span class="p">)</span>
+    <span class="n">output_srid</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_SRID</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">fallback_srid</span><span class="p">))</span>
+    <span class="n">empty_multipoint</span> <span class="o">=</span> <span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;MULTIPOINT EMPTY&quot;</span><span class="p">),</span> <span class="n">output_srid</span><span class="p">)</span>
+    <span class="n">geometry_type</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_GeometryType</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="n">is_polygonal</span> <span class="o">=</span> <span class="n">geometry_type</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="s2">&quot;ST_Polygon&quot;</span><span class="p">,</span> <span class="s2">&quot;ST_MultiPolygon&quot;</span><span class="p">)</span>
+    <span class="n">is_linear</span> <span class="o">=</span> <span class="n">geometry_type</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="s2">&quot;ST_LineString&quot;</span><span class="p">,</span> <span class="s2">&quot;ST_MultiLineString&quot;</span><span class="p">)</span>
+
+    <span class="n">polygon_samples</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_GeneratePoints</span><span class="p">(</span>
+        <span class="n">geometry</span><span class="p">,</span> <span class="n">size</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;int&quot;</span><span class="p">),</span> <span class="n">seed</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;int&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Spark&#39;s stable hash supplies one uniformly distributed fraction per</span>
+    <span class="c1"># ordinal without evaluating Python code on geometry rows.</span>
+    <span class="n">ordinals</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">sequence</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">size</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;int&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">line_samples</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+        <span class="n">ordinals</span><span class="p">,</span>
+        <span class="k">lambda</span> <span class="n">ordinal</span><span class="p">:</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_LineInterpolatePoint</span><span class="p">(</span>
+            <span class="n">geometry</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">pmod</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">xxhash64</span><span class="p">(</span><span class="n">seed</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;long&quot;</span><span class="p">),</span> <span class="n">ordinal</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;long&quot;</span><span class="p">)),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">9_007_199_254_740_992</span><span class="p">),</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;double&quot;</span><span class="p">)</span>
+            <span class="o">/</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mf">9_007_199_254_740_992.0</span><span class="p">),</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">collected_line_samples</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Collect</span><span class="p">(</span><span class="n">line_samples</span><span class="p">)</span>
+
+    <span class="n">sampled</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">geometry</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span> <span class="o">|</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_IsEmpty</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span> <span class="n">empty_multipoint</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="o">~</span><span class="p">(</span><span class="n">is_polygonal</span> <span class="o">|</span> <span class="n">is_linear</span><span class="p">),</span> <span class="n">empty_multipoint</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">empty_multipoint</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">is_polygonal</span><span class="p">,</span> <span class="n">polygon_samples</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">collected_line_samples</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+            <span class="n">size</span><span class="o">.</span><span class="n">isNull</span><span class="p">(),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">raise_error</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;sample size values must be integers&quot;</span><span class="p">)),</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">when</span><span class="p">(</span>
+            <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">raise_error</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;negative dimensions are not allowed&quot;</span><span class="p">)),</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">when</span><span class="p">(</span>
+            <span class="n">size</span> <span class="o">&gt;</span> <span class="mi">2_147_483_647</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">raise_error</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;sample size must be at most 2147483647&quot;</span><span class="p">)),</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">sampled</span><span class="p">)</span>
+    <span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_interpret_origin</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span> <span class="n">origin</span><span class="p">,</span> <span class="n">with_z</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
@@ -1711,6 +1817,247 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
             <span class="n">spark_expr</span><span class="p">,</span>
             <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeoSeries.sample_points"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.sample_points">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">sample_points</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">!=</span> <span class="s2">&quot;uniform&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Sedona only supports method=&#39;uniform&#39; for distributed sampling&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;The &#39;seed&#39; keyword is deprecated. Use &#39;rng&#39; instead.&quot;</span><span class="p">,</span>
+                <span class="ne">FutureWarning</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">rng</span> <span class="o">=</span> <span class="n">seed</span>
+
+        <span class="n">stateful_rng</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rng</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">BitGenerator</span><span class="p">))</span>
+        <span class="n">randomize_per_row</span> <span class="o">=</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">stateful_rng</span>
+        <span class="n">engine_seed</span> <span class="o">=</span> <span class="n">_normalize_sample_seed</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>
+
+        <span class="n">has_crs_metadata</span><span class="p">,</span> <span class="n">metadata_crs</span> <span class="o">=</span> <span class="n">read_crs_metadata</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">fallback_srid</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">metadata_crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">has_crs_metadata</span> <span class="ow">and</span> <span class="n">metadata_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="mi">0</span>
+        <span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">seed_column</span><span class="p">(</span><span class="n">row_key</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PySparkColumn</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">randomize_per_row</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">engine_seed</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">pmod</span><span class="p">(</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">xxhash64</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">engine_seed</span><span class="p">),</span> <span class="n">row_key</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;long&quot;</span><span class="p">)),</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">2_147_483_646</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="o">+</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;int&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">temp_column_name</span><span class="p">(</span><span class="n">base</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">reserved_columns</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">suffix</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;__sample_points_</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">__&quot;</span>
+            <span class="k">while</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">reserved_columns</span><span class="p">:</span>
+                <span class="n">suffix</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">candidate</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;__sample_points_</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">__&quot;</span>
+            <span class="n">reserved_columns</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">candidate</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">):</span>
+            <span class="n">size_series</span> <span class="o">=</span> <span class="n">size</span>
+            <span class="n">local_sizes</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_list_like</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+            <span class="n">size_series</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">local_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="n">_normalize_sample_size_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">size</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">normalized_size</span> <span class="o">=</span> <span class="n">_normalize_sample_size_scalar</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+            <span class="n">source_internal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
+            <span class="n">source_frame</span> <span class="o">=</span> <span class="n">source_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+            <span class="n">geometry_column</span> <span class="o">=</span> <span class="n">source_internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">row_key</span> <span class="o">=</span> <span class="n">scol_for</span><span class="p">(</span><span class="n">source_frame</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">stateful_rng</span><span class="p">:</span>
+                <span class="c1"># Natural-order IDs encode Spark partition IDs. Compress them</span>
+                <span class="c1"># to row positions so fresh, equivalently seeded stateful RNGs</span>
+                <span class="c1"># remain reproducible when the partition layout changes.</span>
+                <span class="n">reserved_columns</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">source_frame</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+                <span class="n">position_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;position&quot;</span><span class="p">,</span> <span class="n">reserved_columns</span><span class="p">)</span>
+                <span class="n">source_frame</span> <span class="o">=</span> <span class="n">_attach_ordered_sequence_column</span><span class="p">(</span>
+                    <span class="n">source_frame</span><span class="p">,</span>
+                    <span class="n">scol_for</span><span class="p">(</span><span class="n">source_frame</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+                    <span class="n">position_col</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">row_key</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">position_col</span><span class="p">)</span>
+            <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">_sample_points_expression</span><span class="p">(</span>
+                <span class="n">geometry_column</span><span class="p">,</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">normalized_size</span><span class="p">),</span>
+                <span class="n">seed_column</span><span class="p">(</span><span class="n">row_key</span><span class="p">),</span>
+                <span class="n">fallback_srid</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+                    <span class="n">spark_expr</span><span class="p">,</span>
+                    <span class="n">source_frame</span><span class="p">,</span>
+                    <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;sampled_points&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">size_type_is_integral</span> <span class="o">=</span> <span class="n">size_series</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">size_series</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">data_type</span><span class="p">,</span> <span class="n">IntegralType</span>
+        <span class="p">)</span>
+
+        <span class="n">reserved_columns</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size_series</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reserved_columns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">size_series</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+
+        <span class="n">geometry_value_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">reserved_columns</span><span class="p">)</span>
+        <span class="n">size_value_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="n">reserved_columns</span><span class="p">)</span>
+        <span class="n">position_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;position&quot;</span><span class="p">,</span> <span class="n">reserved_columns</span><span class="p">)</span>
+        <span class="n">right_present_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;right_present&quot;</span><span class="p">,</span> <span class="n">reserved_columns</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">size_series</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">same_anchor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size_series</span><span class="p">):</span>
+            <span class="n">source_internal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span>
+            <span class="n">source_frame</span> <span class="o">=</span> <span class="n">source_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">geometry_value_col</span><span class="p">),</span>
+                <span class="n">size_series</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">size_value_col</span><span class="p">),</span>
+                <span class="o">*</span><span class="p">[</span>
+                    <span class="n">index_col</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">index_name</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">index_col</span><span class="p">,</span> <span class="n">index_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                        <span class="n">source_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">,</span>
+                        <span class="n">source_internal</span><span class="o">.</span><span class="n">index_spark_column_names</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">],</span>
+                <span class="n">scol_for</span><span class="p">(</span>
+                    <span class="n">source_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="p">,</span>
+                    <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">,</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">row_key</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">stateful_rng</span><span class="p">:</span>
+                <span class="c1"># A dense position keeps stateful RNG results stable across</span>
+                <span class="c1"># equivalent partition layouts. Both values already share one</span>
+                <span class="c1"># plan, so only the source needs to be sequenced.</span>
+                <span class="n">source_frame</span> <span class="o">=</span> <span class="n">_attach_ordered_sequence_column</span><span class="p">(</span>
+                    <span class="n">source_frame</span><span class="p">,</span>
+                    <span class="n">row_key</span><span class="p">,</span>
+                    <span class="n">position_col</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">row_key</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">position_col</span><span class="p">)</span>
+
+            <span class="n">size_value</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">size_value_col</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">size_type_is_integral</span><span class="p">:</span>
+                <span class="n">size_value</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">raise_error</span><span class="p">(</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;sample size values must be integers&quot;</span><span class="p">)</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;long&quot;</span><span class="p">)</span>
+            <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">_sample_points_expression</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">geometry_value_col</span><span class="p">),</span>
+                <span class="n">size_value</span><span class="p">,</span>
+                <span class="n">seed_column</span><span class="p">(</span><span class="n">row_key</span><span class="p">),</span>
+                <span class="n">fallback_srid</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+                    <span class="n">spark_expr</span><span class="p">,</span>
+                    <span class="n">source_frame</span><span class="p">,</span>
+                    <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;sampled_points&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">left_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">geometry_value_col</span><span class="p">),</span>
+            <span class="o">*</span><span class="p">[</span>
+                <span class="n">index_col</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">index_name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">index_col</span><span class="p">,</span> <span class="n">index_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_column_names</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">],</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
+                <span class="n">NATURAL_ORDER_COLUMN_NAME</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">left_frame</span> <span class="o">=</span> <span class="n">_attach_ordered_sequence_column</span><span class="p">(</span>
+            <span class="n">left_frame</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+            <span class="n">position_col</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">size_series</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">right_order_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;right_order&quot;</span><span class="p">,</span> <span class="n">reserved_columns</span><span class="p">)</span>
+            <span class="n">right_frame</span> <span class="o">=</span> <span class="n">size_series</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="n">size_series</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">size_value_col</span><span class="p">),</span>
+                <span class="n">scol_for</span><span class="p">(</span>
+                    <span class="n">size_series</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="p">,</span>
+                    <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">,</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">right_order_col</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">right_present_col</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">right_frame</span> <span class="o">=</span> <span class="n">_attach_ordered_sequence_column</span><span class="p">(</span>
+                <span class="n">right_frame</span><span class="p">,</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_order_col</span><span class="p">),</span>
+                <span class="n">position_col</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># A local sequence already has a driver-side position. Keep those</span>
+            <span class="c1"># positions as Spark rows instead of sorting a temporary</span>
+            <span class="c1"># pandas-on-Spark Series or embedding a large Catalyst literal.</span>
+            <span class="n">right_schema</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">StructField</span><span class="p">(</span><span class="n">position_col</span><span class="p">,</span> <span class="n">LongType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                    <span class="n">StructField</span><span class="p">(</span><span class="n">size_value_col</span><span class="p">,</span> <span class="n">LongType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                    <span class="n">StructField</span><span class="p">(</span><span class="n">right_present_col</span><span class="p">,</span> <span class="n">BooleanType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="c1"># Materialize the validated values once before constructing the</span>
+            <span class="c1"># explicitly typed Spark DataFrame, including for an empty input.</span>
+            <span class="n">right_rows</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">size_value</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">size_value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">local_sizes</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="n">right_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">sparkSession</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
+                <span class="n">right_rows</span><span class="p">,</span>
+                <span class="n">schema</span><span class="o">=</span><span class="n">right_schema</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="c1"># GeoPandas zips geometries with array-like sizes: missing sizes are an</span>
+        <span class="c1"># error, while extra sizes are ignored (including for an empty source).</span>
+        <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">left_frame</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">right_frame</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">position_col</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">position_col</span><span class="p">)</span>
+
+        <span class="n">size_value</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">size_value_col</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">size_type_is_integral</span><span class="p">:</span>
+            <span class="c1"># Keep validation lazy so an empty source follows GeoPandas and</span>
+            <span class="c1"># returns empty even when the unused size Series has another dtype.</span>
+            <span class="n">size_value</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">raise_error</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;sample size values must be integers&quot;</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;long&quot;</span><span class="p">)</span>
+
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">_sample_points_expression</span><span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">geometry_value_col</span><span class="p">),</span>
+            <span class="n">size_value</span><span class="p">,</span>
+            <span class="n">seed_column</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">position_col</span><span class="p">)),</span>
+            <span class="n">fallback_srid</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present_col</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">(),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">raise_error</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;Length of sample sizes does not match length of GeoSeries&quot;</span><span class="p">)</span>
+            <span class="p">),</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">spark_expr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+                <span class="n">spark_expr</span><span class="p">,</span>
+                <span class="n">aligned_frame</span><span class="p">,</span>
+                <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;sampled_points&quot;</span><span class="p">)</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.segmentize"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.segmentize">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">segmentize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_segment_length</span><span class="p">):</span>
@@ -3360,40 +3707,20 @@
 <span class="sd">        2    POINT (-3 1.5)</span>
 <span class="sd">        dtype: geometry</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructType</span><span class="p">,</span> <span class="n">StructField</span><span class="p">,</span> <span class="n">DoubleType</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.array</span><span class="w"> </span><span class="kn">import</span> <span class="n">_points_from_xy</span>
 
-        <span class="n">schema</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">StructField</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="kc">True</span><span class="p">),</span> <span class="n">StructField</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="kc">True</span><span class="p">)]</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Spark doesn&#39;t automatically cast ints to floats for us</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
-        <span class="n">z</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">z</span><span class="p">]</span> <span class="k">if</span> <span class="n">z</span> <span class="k">else</span> <span class="kc">None</span>
-
-        <span class="k">if</span> <span class="n">z</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span>
-            <span class="n">select</span> <span class="o">=</span> <span class="n">stc</span><span class="o">.</span><span class="n">ST_PointZ</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">))</span>
-            <span class="n">schema</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">StructField</span><span class="p">(</span><span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="kc">True</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
-            <span class="n">select</span> <span class="o">=</span> <span class="n">stc</span><span class="o">.</span><span class="n">ST_Point</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">))</span>
-
-        <span class="n">geoseries</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_create_from_select</span><span class="p">(</span>
-            <span class="n">select</span><span class="p">,</span>
-            <span class="n">data</span><span class="p">,</span>
-            <span class="n">schema</span><span class="p">,</span>
-            <span class="n">index</span><span class="p">,</span>
-            <span class="n">crs</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">crs</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
-
-            <span class="n">geoseries</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span>
-
-        <span class="k">return</span> <span class="n">geoseries</span></div>
+        <span class="n">unsupported</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">unsupported</span><span class="p">:</span>
+            <span class="n">arguments</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">unsupported</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported GeoSeries.from_xy arguments: </span><span class="si">{</span><span class="n">arguments</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_points_from_xy</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span>
+            <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.from_shapely"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.from_shapely">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_shapely</span><span class="p">(</span>

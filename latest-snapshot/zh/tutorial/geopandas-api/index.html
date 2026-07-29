@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6601,6 +6600,7 @@
 <li><code>intersects()</code>、<code>contains()</code>、<code>within()</code> —— 空间谓词</li>
 <li><code>intersection()</code> —— 几何相交</li>
 <li><code>make_valid()</code> —— 几何校验与修复</li>
+<li><code>sample_points()</code> —— 使用原生分布式表达式按面积对多边形采样、按长度对线采样</li>
 <li><code>cx</code> —— 基于坐标范围的空间筛选</li>
 <li><code>clip()</code> —— 分布式几何裁剪</li>
 <li><code>sindex</code> —— 空间索引（功能有限）</li>
@@ -6633,10 +6633,20 @@
 <h3 id="_17">数据转换<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>to_geopandas()</code> —— 转换为传统 GeoPandas</li>
-<li><code>to_wkb()</code>、<code>to_wkt()</code> —— 转换为 WKB/WKT</li>
-<li><code>from_xy()</code> —— 通过坐标创建几何</li>
+<li><code>GeoDataFrame.to_wkb()</code>、<code>GeoDataFrame.to_wkt()</code> —— 在分布式
+  pandas-on-Spark DataFrame 中把所有几何列序列化为 WKB/WKT</li>
+<li><code>points_from_xy()</code>、<code>GeoSeries.from_xy()</code> —— 通过坐标列创建分布式
+  GeoSeries，且不收集分布式输入</li>
 <li><code>geom_type</code> —— 获取几何类型</li>
 </ul>
+<p>与 GeoPandas 不同，<code>GeoDataFrame.to_wkb()</code> 和 <code>GeoDataFrame.to_wkt()</code> 返回
+惰性的 pandas-on-Spark DataFrame。仅在需要本地 pandas DataFrame 时，才对结果
+调用 <code>.to_pandas()</code>。</p>
+<p><code>points_from_xy()</code> 会让 pandas-on-Spark 坐标 Series 保持分布式执行。本地
+列表、NumPy 数组和 pandas 对象会先在 driver 上物化，因此大型坐标列应使用
+分布式 Series。类似地，大型逐行 <code>sample_points()</code> 数量向量也应使用分布式
+<code>size</code> Series。采样输出与逐行中间计算量会随请求的数量增长；当前线采样器会先
+物化该行的采样点，再把它们收集为 MultiPoint。</p>
 <h2 id="_18">完整工作流示例<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaContext</span>
@@ -6705,7 +6715,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年7月28日 04:43:28 UTC">2026年7月28日 04:43:28</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年7月29日 06:34:21 UTC">2026年7月29日 06:34:21</span>
   </span>
 
     

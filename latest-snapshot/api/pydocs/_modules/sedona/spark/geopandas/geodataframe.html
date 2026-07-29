@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geodataframe &mdash; Apache Sedona Python Documentation</title>
@@ -247,10 +246,13 @@
     <span class="n">SPARK_INDEX_NAME_FORMAT</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">scol_for</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.column</span><span class="w"> </span><span class="kn">import</span> <span class="n">Column</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">F</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BinaryType</span><span class="p">,</span>
     <span class="n">BooleanType</span><span class="p">,</span>
     <span class="n">ByteType</span><span class="p">,</span>
+    <span class="n">DataType</span><span class="p">,</span>
     <span class="n">DoubleType</span><span class="p">,</span>
     <span class="n">FloatType</span><span class="p">,</span>
     <span class="n">IntegerType</span><span class="p">,</span>
@@ -267,6 +269,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_aggregates</span> <span class="k">as</span> <span class="n">sta</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_constructors</span> <span class="k">as</span> <span class="n">stc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_functions</span> <span class="k">as</span> <span class="n">stf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeometryType</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas.api.extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_extension_dtype</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">geopandas.geodataframe</span><span class="w"> </span><span class="kn">import</span> <span class="n">crs_mismatch_error</span>
@@ -1770,11 +1773,158 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;to_geo_dict() is not implemented yet.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="GeoDataFrame.to_wkb"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_wkb">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_wkb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">hex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;to_wkb() is not implemented yet.&quot;</span><span class="p">)</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_serialize_geometry_columns</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">serializer</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Column</span><span class="p">],</span> <span class="n">Column</span><span class="p">],</span>
+        <span class="n">output_type</span><span class="p">:</span> <span class="n">DataType</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a native serializer to every geometry-typed column.&quot;&quot;&quot;</span>
+        <span class="c1"># Resolve pending index/data expressions onto one Spark frame before</span>
+        <span class="c1"># building the serializer projection.</span>
+        <span class="n">internal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
+        <span class="n">serialized_columns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">geometry_columns</span> <span class="o">=</span> <span class="p">[]</span>
 
-<div class="viewcode-block" id="GeoDataFrame.to_wkt"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_wkt">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_wkt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;to_wkt() is not implemented yet.&quot;</span><span class="p">)</span></div>
+        <span class="c1"># Build one projection for the whole frame. Sequential assignment would</span>
+        <span class="c1"># align each replacement Series and can multiply duplicate-index rows.</span>
+        <span class="k">for</span> <span class="n">spark_column</span><span class="p">,</span> <span class="n">spark_name</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">,</span>
+            <span class="n">internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="p">,</span>
+            <span class="n">internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">is_geometry</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">spark_type</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">)</span>
+            <span class="n">geometry_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">is_geometry</span><span class="p">)</span>
+            <span class="n">serialized_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">serializer</span><span class="p">(</span><span class="n">spark_column</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">spark_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">is_geometry</span>
+                <span class="k">else</span> <span class="n">spark_column</span>
+            <span class="p">)</span>
+
+        <span class="n">output_sdf</span> <span class="o">=</span> <span class="n">internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="o">*</span><span class="p">[</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">internal</span><span class="o">.</span><span class="n">index_spark_column_names</span>
+            <span class="p">],</span>
+            <span class="o">*</span><span class="n">serialized_columns</span><span class="p">,</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">output_schema</span> <span class="o">=</span> <span class="n">output_sdf</span><span class="o">.</span><span class="n">schema</span>
+        <span class="n">output_fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="n">field</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
+                    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">),</span>
+                    <span class="n">spark_type</span><span class="o">=</span><span class="n">output_type</span><span class="p">,</span>
+                    <span class="n">nullable</span><span class="o">=</span><span class="n">output_schema</span><span class="p">[</span><span class="n">spark_name</span><span class="p">]</span><span class="o">.</span><span class="n">nullable</span><span class="p">,</span>
+                    <span class="n">metadata</span><span class="o">=</span><span class="p">{},</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">is_geometry</span>
+                <span class="k">else</span> <span class="n">field</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">spark_name</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">is_geometry</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="p">,</span>
+                <span class="n">internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">,</span>
+                <span class="n">geometry_columns</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">result_internal</span> <span class="o">=</span> <span class="n">internal</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
+            <span class="n">spark_frame</span><span class="o">=</span><span class="n">output_sdf</span><span class="p">,</span>
+            <span class="n">index_spark_columns</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">output_sdf</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">internal</span><span class="o">.</span><span class="n">index_spark_column_names</span>
+            <span class="p">],</span>
+            <span class="n">data_spark_columns</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">output_sdf</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">internal</span><span class="o">.</span><span class="n">data_spark_column_names</span>
+            <span class="p">],</span>
+            <span class="n">data_fields</span><span class="o">=</span><span class="n">output_fields</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">result_internal</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_serialization_kwargs</span><span class="p">(</span><span class="n">method_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">kwargs</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;GeoDataFrame.</span><span class="si">{</span><span class="n">method_name</span><span class="si">}</span><span class="s2">() does not support Shapely keyword &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;arguments in distributed execution: </span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="GeoDataFrame.to_wkb"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_wkb">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_wkb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">hex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Encode all geometry columns in the GeoDataFrame to WKB.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        hex : bool, default False</span>
+<span class="sd">            If True, export WKB values as hexadecimal strings. By default,</span>
+<span class="sd">            values are returned as binary objects.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Shapely-specific serialization options are not supported by the</span>
+<span class="sd">            distributed implementation and raise ``NotImplementedError``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pyspark.pandas.DataFrame</span>
+<span class="sd">            A distributed DataFrame with every geometry-typed column encoded</span>
+<span class="sd">            as WKB and all other columns unchanged.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Duplicate column labels remain subject to pandas-on-Spark&#39;s DataFrame</span>
+<span class="sd">        construction restrictions.</span>
+
+<span class="sd">        Unlike GeoPandas, this method returns a lazy pandas-on-Spark DataFrame.</span>
+<span class="sd">        Call ``to_pandas()`` on the result to materialize a local pandas</span>
+<span class="sd">        DataFrame.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        GeoDataFrame.to_wkt</span>
+<span class="sd">        GeoSeries.to_wkb</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_serialization_kwargs</span><span class="p">(</span><span class="s2">&quot;to_wkb&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">serializer</span><span class="p">,</span> <span class="n">output_type</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="k">lambda</span> <span class="n">geometry</span><span class="p">:</span> <span class="n">F</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_AsBinary</span><span class="p">(</span><span class="n">geometry</span><span class="p">)),</span> <span class="n">StringType</span><span class="p">())</span>
+            <span class="k">if</span> <span class="nb">hex</span>
+            <span class="k">else</span> <span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_AsBinary</span><span class="p">,</span> <span class="n">BinaryType</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serialize_geometry_columns</span><span class="p">(</span><span class="n">serializer</span><span class="p">,</span> <span class="n">output_type</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeoDataFrame.to_wkt"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_wkt">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_wkt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Encode all geometry columns in the GeoDataFrame to WKT.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Shapely-specific serialization options are not supported by the</span>
+<span class="sd">            distributed implementation and raise ``NotImplementedError``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pyspark.pandas.DataFrame</span>
+<span class="sd">            A distributed DataFrame with every geometry-typed column encoded</span>
+<span class="sd">            as WKT and all other columns unchanged.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Duplicate column labels remain subject to pandas-on-Spark&#39;s DataFrame</span>
+<span class="sd">        construction restrictions.</span>
+
+<span class="sd">        Unlike GeoPandas, this method returns a lazy pandas-on-Spark DataFrame.</span>
+<span class="sd">        Call ``to_pandas()`` on the result to materialize a local pandas</span>
+<span class="sd">        DataFrame.</span>
+
+<span class="sd">        Sedona&#39;s native WKT writer preserves stored coordinate precision.</span>
+<span class="sd">        GeoPandas delegates to Shapely, whose default writer rounds coordinates</span>
+<span class="sd">        to six decimal places. Shapely-specific formatting keyword arguments</span>
+<span class="sd">        are not supported here.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        GeoDataFrame.to_wkb</span>
+<span class="sd">        GeoSeries.to_wkt</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_serialization_kwargs</span><span class="p">(</span><span class="s2">&quot;to_wkt&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serialize_geometry_columns</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_AsText</span><span class="p">,</span> <span class="n">StringType</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="GeoDataFrame.to_arrow"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_arrow">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_arrow</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
