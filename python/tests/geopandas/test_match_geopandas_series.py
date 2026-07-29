@@ -1278,6 +1278,79 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
 
     @pytest.mark.skipif(
         parse_version(gpd.__version__) < parse_version("0.14.0"),
+        reason="geopandas sample_points requires version 0.14.0 or higher",
+    )
+    def test_sample_points(self):
+        geometries = [
+            Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+            MultiPolygon(
+                [
+                    Polygon([(4, 0), (5, 0), (5, 1), (4, 1)]),
+                    Polygon([(7, 0), (9, 0), (9, 2), (7, 2)]),
+                ]
+            ),
+            LineString([(0, 4), (2, 4), (2, 6)]),
+            MultiLineString([[(0, 8), (1, 8)], [(3, 8), (3, 11)]]),
+            Point(0, 0),
+            GeometryCollection([LineString([(0, 0), (1, 1)])]),
+            Polygon(),
+            None,
+        ]
+        index = pd.Index(
+            [
+                "polygon",
+                "multipolygon",
+                "line",
+                "multiline",
+                "point",
+                "gc",
+                "empty",
+                "null",
+            ],
+            name="feature_id",
+        )
+        sgpd_source = GeoSeries(geometries, index=index, crs="EPSG:3857")
+        gpd_source = gpd.GeoSeries(geometries, index=index, crs="EPSG:3857")
+
+        sgpd_result = sgpd_source.sample_points(3, rng=9).to_geopandas()
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            gpd_result = gpd_source.sample_points(3, rng=9)
+
+        assert sgpd_result.name == gpd_result.name == "sampled_points"
+        assert sgpd_result.crs == gpd_result.crs
+        assert sgpd_result.index.equals(gpd_result.index)
+        assert [geometry.geom_type for geometry in sgpd_result] == [
+            geometry.geom_type for geometry in gpd_result
+        ]
+        assert [len(geometry.geoms) for geometry in sgpd_result] == [
+            len(geometry.geoms) for geometry in gpd_result
+        ]
+        for source_geometry, sampled in zip(geometries[:4], sgpd_result.iloc[:4]):
+            assert all(source_geometry.covers(point) for point in sampled.geoms)
+
+        sizes = [1, 2, 3, 4, 5, 6, 7, 8]
+        sgpd_sized = sgpd_source.sample_points(sizes, rng=9).to_geopandas()
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            gpd_sized = gpd_source.sample_points(sizes, rng=9)
+        expected_types = [geometry.geom_type for geometry in gpd_sized]
+        if parse_version(gpd.__version__) < parse_version("1.1.4"):
+            # GeoPandas 1.1.4 stopped applying union_all() to samples and
+            # standardized every supported result, including size 1, as a
+            # MultiPoint. Sedona follows that current return contract.
+            expected_types[0] = "MultiPoint"
+        assert [geometry.geom_type for geometry in sgpd_sized] == expected_types
+        assert [
+            (1 if geometry.geom_type == "Point" else len(geometry.geoms))
+            for geometry in sgpd_sized
+        ] == [
+            (1 if geometry.geom_type == "Point" else len(geometry.geoms))
+            for geometry in gpd_sized
+        ]
+
+    @pytest.mark.skipif(
+        parse_version(gpd.__version__) < parse_version("0.14.0"),
         reason="geopandas segmentize requires version 0.14.0 or higher",
     )
     def test_segmentize(self):

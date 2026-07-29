@@ -337,6 +337,7 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 - `intersects()`、`contains()`、`within()` —— 空间谓词
 - `intersection()` —— 几何相交
 - `make_valid()` —— 几何校验与修复
+- `sample_points()` —— 使用原生分布式表达式按面积对多边形采样、按长度对线采样
 - `cx` —— 基于坐标范围的空间筛选
 - `clip()` —— 分布式几何裁剪
 - `sindex` —— 空间索引（功能有限）
@@ -372,9 +373,21 @@ all_building_parts = collect(buildings.geometry)
 ### 数据转换
 
 - `to_geopandas()` —— 转换为传统 GeoPandas
-- `to_wkb()`、`to_wkt()` —— 转换为 WKB/WKT
-- `from_xy()` —— 通过坐标创建几何
+- `GeoDataFrame.to_wkb()`、`GeoDataFrame.to_wkt()` —— 在分布式
+  pandas-on-Spark DataFrame 中把所有几何列序列化为 WKB/WKT
+- `points_from_xy()`、`GeoSeries.from_xy()` —— 通过坐标列创建分布式
+  GeoSeries，且不收集分布式输入
 - `geom_type` —— 获取几何类型
+
+与 GeoPandas 不同，`GeoDataFrame.to_wkb()` 和 `GeoDataFrame.to_wkt()` 返回
+惰性的 pandas-on-Spark DataFrame。仅在需要本地 pandas DataFrame 时，才对结果
+调用 `.to_pandas()`。
+
+`points_from_xy()` 会让 pandas-on-Spark 坐标 Series 保持分布式执行。本地
+列表、NumPy 数组和 pandas 对象会先在 driver 上物化，因此大型坐标列应使用
+分布式 Series。类似地，大型逐行 `sample_points()` 数量向量也应使用分布式
+`size` Series。采样输出与逐行中间计算量会随请求的数量增长；当前线采样器会先
+物化该行的采样点，再把它们收集为 MultiPoint。
 
 ## 完整工作流示例
 

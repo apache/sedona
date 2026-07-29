@@ -22,6 +22,7 @@
 
 from sedona.spark.geopandas.geoseries import GeoSeries
 from sedona.spark.geopandas.geodataframe import GeoDataFrame
+from sedona.spark.geopandas.array import points_from_xy
 
 from sedona.spark.geopandas.tools import clip, sjoin
 

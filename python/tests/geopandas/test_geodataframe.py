@@ -167,6 +167,116 @@ class TestGeoDataFrame(TestGeopandasBase):
         ps_df = ps.DataFrame(data, index=index)
         assert_frame_equal(result.to_pandas(), ps_df.to_pandas())
 
+    def test_to_wkt_and_wkb_distributed(self):
+        index = pd.MultiIndex.from_tuples(
+            [("group-a", 1), ("group-a", 1), ("group-b", 2)],
+            names=["group", "position"],
+        )
+        primary = ("geometry", "primary")
+        secondary = ("geometry", "secondary")
+        value = ("attribute", "value")
+        gpd_df = gpd.GeoDataFrame(
+            {
+                "primary": gpd.GeoSeries(
+                    [Point(0, 0), Polygon(), None],
+                    index=index,
+                    crs="EPSG:4326",
+                ),
+                "secondary": gpd.GeoSeries(
+                    [LineString([(0, 0), (1, 1)]), None, Point(2, 2)],
+                    index=index,
+                    crs="EPSG:4326",
+                ),
+                "value": [10, 11, 12],
+            },
+            index=index,
+            geometry="primary",
+            crs="EPSG:4326",
+        )
+        gpd_df.columns = pd.MultiIndex.from_tuples(
+            [primary, secondary, value], names=["kind", "name"]
+        )
+        gpd_df = gpd_df.set_geometry(primary)
+        sgpd_df = GeoDataFrame(gpd_df)
+
+        wkt_result = sgpd_df.to_wkt()
+        assert isinstance(wkt_result, ps.DataFrame)
+        assert not isinstance(wkt_result, GeoDataFrame)
+        assert_frame_equal(
+            wkt_result.to_pandas(),
+            pd.DataFrame(
+                {
+                    primary: ["POINT (0 0)", "POLYGON EMPTY", None],
+                    secondary: ["LINESTRING (0 0, 1 1)", None, "POINT (2 2)"],
+                    value: [10, 11, 12],
+                },
+                index=index,
+            ).rename_axis(columns=["kind", "name"]),
+        )
+
+        wkb_result = sgpd_df.to_wkb()
+        hex_result = sgpd_df.to_wkb(hex=True)
+        for result in (wkt_result, wkb_result, hex_result):
+            assert isinstance(result, ps.DataFrame)
+            assert not isinstance(result, GeoDataFrame)
+            assert "geometry" not in result.dtypes.astype(str).tolist()
+        for result in (wkb_result, hex_result):
+            result_pdf = result.to_pandas()
+            assert result_pdf.index.equals(index)
+            assert result_pdf.columns.equals(gpd_df.columns)
+            assert result_pdf[value].tolist() == [10, 11, 12]
+        assert sgpd_df.crs == "EPSG:4326"
+
+        binary_pdf = wkb_result.to_pandas()
+        hex_pdf = hex_result.to_pandas()
+        for column in (primary, secondary):
+            for binary, hexadecimal in zip(binary_pdf[column], hex_pdf[column]):
+                if binary is None:
+                    assert hexadecimal is None
+                else:
+                    assert hexadecimal == binary.hex().upper()
+
+        for result in (wkt_result, wkb_result, hex_result):
+            spark_frame = result._internal.spark_frame
+            if hasattr(spark_frame, "_jdf"):
+                plan = spark_frame._jdf.queryExecution().executedPlan().toString()
+                assert "BatchEvalPython" not in plan
+                assert "ArrowEvalPython" not in plan
+
+        computed_index = GeoDataFrame(
+            {
+                "geometry": [Point(0, 0), Point(1, 1)],
+                "value": [10, 11],
+            }
+        )
+        computed_index["computed_index"] = computed_index["value"] + 100
+        computed_index = GeoDataFrame(computed_index.set_index("computed_index"))
+        computed_wkt = computed_index.to_wkt().to_pandas()
+        computed_wkb = computed_index.to_wkb().to_pandas()
+        expected_index = pd.Index([110, 111], name="computed_index")
+        assert computed_wkt.index.equals(expected_index)
+        assert computed_wkb.index.equals(expected_index)
+        assert computed_wkt["geometry"].tolist() == [
+            "POINT (0 0)",
+            "POINT (1 1)",
+        ]
+        assert [
+            shapely.from_wkb(bytes(value))
+            for value in computed_wkb["geometry"].tolist()
+        ] == [Point(0, 0), Point(1, 1)]
+
+    def test_geometry_serialization_kwargs_are_explicitly_unsupported(self):
+        gdf = GeoDataFrame({"geometry": [Point(1.234567890123, 2.345678901234)]})
+
+        assert gdf.to_wkt().to_pandas()["geometry"].tolist() == [
+            "POINT (1.234567890123 2.345678901234)"
+        ]
+
+        with pytest.raises(NotImplementedError, match="rounding_precision"):
+            gdf.to_wkt(rounding_precision=2)
+        with pytest.raises(NotImplementedError, match="byte_order"):
+            gdf.to_wkb(byte_order=0)
+
     def test_getitem(self):
         geoms = [Point(x, x) for x in range(3)]
         ids = [1, 2, 3]
