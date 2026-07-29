@@ -165,9 +165,8 @@ def _attach_ordered_sequence_column(
     sequence_column: str,
 ):
     """Attach dense positions without a single-partition window over all rows."""
-    # Spark 3.5+ exposes this through DistributedSequenceID in Connect, while
-    # classic Spark uses its equivalent JVM operator. The native implementation
-    # owns the child materialization lifecycle and avoids duplicate evaluation.
+    # Use pandas-on-Spark's native implementation so it owns the child
+    # materialization lifecycle and avoids duplicate evaluation.
     return InternalFrame.attach_distributed_sequence_column(
         sdf.orderBy(order_column),
         sequence_column,
@@ -1808,8 +1807,8 @@ class GeoSeries(GeoFrame, pspd.Series):
                     StructField(right_present_col, BooleanType(), nullable=False),
                 ]
             )
-            # Keep this collection sized: Spark Connect cannot construct an
-            # explicitly typed empty DataFrame from an exhausted generator.
+            # Materialize the validated values once before constructing the
+            # explicitly typed Spark DataFrame, including for an empty input.
             right_rows = [
                 (position, size_value, True)
                 for position, size_value in enumerate(local_sizes)

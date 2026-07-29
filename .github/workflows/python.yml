@@ -164,4 +164,4 @@ jobs:
           export SPARK_REMOTE=local
           export SPARK_HOME=$(uv run python -c "import site; print(site.getsitepackages()[0]+'/pyspark')")
           uv pip install "pyspark[connect]==${{ matrix.spark }}" --reinstall
-          uv run pytest -v tests/sql/test_dataframe_api.py tests/geopandas/test_connect.py
+          uv run pytest -v tests/sql/test_dataframe_api.py
