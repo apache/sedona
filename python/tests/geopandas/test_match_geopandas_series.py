@@ -680,6 +680,19 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
 
+                distances = np.arange(len(geom), dtype=float)
+                sgpd_result = GeoSeries(geom).dwithin(
+                    GeoSeries(geom2),
+                    distance=distances,
+                    align=False,
+                )
+                gpd_result = gpd.GeoSeries(geom).dwithin(
+                    gpd.GeoSeries(geom2),
+                    distance=distances,
+                    align=False,
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
     def test_difference(self):
         for geom, geom2 in self.pairs:
             # Sedona doesn't support difference for GeometryCollections

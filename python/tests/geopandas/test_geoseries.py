@@ -15,6 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from decimal import Decimal
+
 import shapely
 import numpy as np
 import pytest
@@ -1107,6 +1109,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
         result = s.dwithin(s2, distance=1, align=True)
         expected = pd.Series([False, True, False, False, False])
+        self.check_pd_series_equal(result, expected)
 
         result = s.dwithin(s2, distance=1, align=False)
         expected = pd.Series([True, False, False, True])
@@ -1115,6 +1118,203 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         # Check that GeoDataFrame works too
         df_result = s.to_geoframe().dwithin(s2, distance=1, align=False)
         self.check_pd_series_equal(df_result, expected)
+
+    def test_dwithin_array_like_distances(self):
+        index = pd.Index(["a", "b", "c"], name="feature_id")
+        source = GeoSeries(
+            [Point(0, 0), Point(2, 0), Point(5, 0)],
+            index=index,
+        )
+        expected = pd.Series([True, False, True], index=index)
+
+        distances = [
+            [0, 1, 5],
+            (0, 1, 5),
+            np.array([0, 1, 5]),
+            pd.Series([0, 1, 5], index=["unrelated-c", "unrelated-a", "unrelated-b"]),
+        ]
+        for distance in distances:
+            result = source.dwithin(Point(0, 0), distance)
+            self.check_pd_series_equal(result, expected)
+
+        broadcast_expected = pd.Series([True, True, False], index=index)
+        for distance in ([3], (3,), np.array([3]), np.array(3), np.int64(3)):
+            result = source.dwithin(Point(0, 0), distance)
+            self.check_pd_series_equal(result, broadcast_expected)
+
+    def test_dwithin_distances_follow_geometry_alignment(self):
+        index_name = "feature_id"
+        left = GeoSeries(
+            [Point(100, 0), Point(0, 0), Point(0, 0)],
+            index=pd.Index(["b", "a", "c"], name=index_name),
+        )
+        right = GeoSeries(
+            [Point(2, 0), Point(2, 0), Point(9, 0)],
+            index=pd.Index(["c", "a", "d"], name=index_name),
+        )
+
+        aligned_expected = pd.Series(
+            [False, False, True, False],
+            index=pd.Index(["a", "b", "c", "d"], name=index_name),
+        )
+        aligned = left.dwithin(right, [1, 99, 2, 99], align=True)
+        self.check_pd_series_equal(aligned, aligned_expected)
+
+        with pytest.warns(UserWarning, match="indices of the left and right"):
+            default_aligned = left.dwithin(right, [1, 99, 2, 99])
+        self.check_pd_series_equal(default_aligned, aligned_expected)
+
+        positional_expected = pd.Series(
+            [False, True, False],
+            index=pd.Index(["b", "a", "c"], name=index_name),
+        )
+        positional = left.dwithin(right, [1, 99, 2], align=False)
+        self.check_pd_series_equal(positional, positional_expected)
+
+        with pytest.raises(Exception, match="distance array must contain"):
+            left.dwithin(right, [1, 99, 2], align=True).to_pandas()
+        with pytest.raises(Exception, match="distance array must contain"):
+            left.dwithin(right, [1, 99, 2, 99], align=False).to_pandas()
+
+    def test_dwithin_distributed_distance_series(self):
+        index = pd.Index(["a", "a", "b"], name="feature_id")
+        source = GeoSeries(
+            [Point(0, 0), Point(2, 0), Point(5, 0)],
+            index=index,
+        )
+        expected = pd.Series([True, False, True], index=index)
+
+        independent_distance = ps.Series(
+            [0, 1, 5],
+            index=pd.Index(["ignored-c", "ignored-a", "ignored-b"]),
+        )
+        independent = source.dwithin(Point(0, 0), independent_distance)
+        self.check_pd_series_equal(independent, expected)
+
+        same_anchor_frame = GeoDataFrame(
+            gpd.GeoDataFrame(
+                {
+                    "geometry": [Point(0, 0), Point(2, 0), Point(5, 0)],
+                    "distance": [0, 1, 5],
+                },
+                index=index,
+            )
+        )
+        same_anchor = same_anchor_frame.geometry.dwithin(
+            Point(0, 0),
+            same_anchor_frame["distance"],
+        )
+        self.check_pd_series_equal(same_anchor, expected)
+
+        if hasattr(independent._internal.spark_frame, "_jdf"):
+            plan = (
+                independent._internal.spark_frame._jdf.queryExecution()
+                .executedPlan()
+                .toString()
+            )
+            assert "BatchEvalPython" not in plan
+            assert "ArrowEvalPython" not in plan
+            assert "PythonUDF" not in plan
+
+    def test_dwithin_duplicate_multiindex_alignment(self):
+        left_index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 1), ("c", 3)],
+            names=["group", "row"],
+        )
+        right_index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 1), ("b", 2)],
+            names=["group", "row"],
+        )
+        left = GeoSeries(
+            [Point(0, 0), Point(10, 0), Point(50, 0)],
+            index=left_index,
+        )
+        right = GeoSeries(
+            [Point(1, 0), Point(12, 0), Point(60, 0)],
+            index=right_index,
+        )
+
+        result = left.dwithin(
+            right,
+            [1, 11, 9, 1, 100, 100],
+            align=True,
+        )
+        expected_index = pd.MultiIndex.from_tuples(
+            [
+                ("a", 1),
+                ("a", 1),
+                ("a", 1),
+                ("a", 1),
+                ("b", 2),
+                ("c", 3),
+            ],
+            names=["group", "row"],
+        )
+        expected = pd.Series(
+            [True, False, True, False, False, False],
+            index=expected_index,
+        )
+        self.check_pd_series_equal(result, expected)
+
+        scalar_result = left.dwithin(Point(0, 0), [0, 10, 49])
+        scalar_expected = pd.Series([True, True, False], index=left_index)
+        self.check_pd_series_equal(scalar_result, scalar_expected)
+
+    def test_dwithin_special_values_and_distance_validation(self):
+        source = GeoSeries([Point(), None, Point(2, 0), Point(0, 0), Point(0, 0)])
+        result = source.dwithin(
+            Point(0, 0),
+            np.array([np.inf, np.inf, np.inf, np.nan, -1.0]),
+        )
+        self.check_pd_series_equal(
+            result,
+            pd.Series([False, False, True, False, False]),
+        )
+
+        for distances in ([], [1, 2], [1, 2, 3, 4, 5, 6], pd.Series([1])):
+            with pytest.raises(Exception, match="distance array must contain"):
+                source.dwithin(Point(0, 0), distances).to_pandas()
+
+        for distances in (
+            ps.Series([1, 2]),
+            ps.Series([1, 2, 3, 4, 5, 6]),
+        ):
+            with pytest.raises(Exception, match="distance array must contain"):
+                source.dwithin(Point(0, 0), distances).to_pandas()
+
+        with pytest.raises(ValueError, match="one-dimensional"):
+            source.dwithin(Point(0, 0), np.ones((5, 1)))
+        with pytest.raises(TypeError, match="numeric"):
+            source.dwithin(Point(0, 0), ["1", "2", "3", "4", "5"])
+        with pytest.raises(TypeError, match="numeric"):
+            source.dwithin(Point(0, 0), [1, 2, 3, 4, pd.NA])
+        with pytest.raises(TypeError, match="numeric"):
+            source.dwithin(
+                Point(0, 0),
+                pd.Series([1, 2, 3, 4, pd.NA], dtype="Float64"),
+            )
+        with pytest.raises(TypeError, match="numeric"):
+            source.dwithin(Point(0, 0), Decimal("1"))
+        with pytest.raises(TypeError, match="numeric"):
+            source.dwithin(Point(0, 0), [1, 2, 3, 4, Decimal("5")])
+        with pytest.raises(TypeError, match="numeric"):
+            source.dwithin(Point(0, 0), ps.Series(["1"] * 5))
+        with pytest.raises(TypeError, match="numeric"):
+            source.dwithin(Point(0, 0), ps.Series([Decimal("1")] * 5))
+        with pytest.raises(
+            ValueError,
+            match=r"Lengths of inputs do not match\. Left: 1, Right: 2",
+        ):
+            GeoSeries([Point(0, 0)]).dwithin(
+                GeoSeries([Point(0, 0), Point(1, 1)]),
+                1,
+                align=False,
+            )
+
+        empty = GeoSeries([])
+        for distances in ([], np.array([]), ps.Series([], dtype=float)):
+            empty_result = empty.dwithin(Point(0, 0), distances)
+            self.check_pd_series_equal(empty_result, pd.Series([], dtype=bool))
 
     def test_difference(self):
         s = GeoSeries(

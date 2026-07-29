@@ -3771,11 +3771,13 @@ class GeoFrame(metaclass=ABCMeta):
         other : GeoSeries or geometric object
             The GeoSeries (elementwise) or geometric object to test for
             equality.
-        distance : float, np.array, pd.Series
-            Distance(s) to test if each geometry is within. A scalar distance will be
-            applied to all geometries. An array or Series will be applied elementwise.
-            If np.array or pd.Series are used then it must have same length as the
-            GeoSeries.
+        distance : numeric scalar, array-like, pandas Series, or pandas-on-Spark Series
+            Distance(s) to test if each geometry is within. A scalar distance
+            is applied to every geometry. Array-like and Series distances are
+            paired positionally with the geometry rows after ``self`` and
+            ``other`` have been aligned. A one-element non-Series array-like is
+            broadcast; otherwise the distance input must have the same length
+            as the aligned geometries.
         align : bool | None (default None)
             If True, automatically aligns GeoSeries based on their indices.
             If False, the order of elements is preserved. None defaults to True.
@@ -3857,6 +3859,11 @@ class GeoFrame(metaclass=ABCMeta):
         -----
         This method works in a row-wise manner. It does not check if an element
         of one GeoSeries is within the set distance of *any* element of the other one.
+
+        The index of a pandas or pandas-on-Spark distance Series is ignored.
+        Distance values remain distributed when a pandas-on-Spark Series is
+        provided. Length validation for array-like distances is performed when
+        the result is evaluated.
 
         See also
         --------
