@@ -88,6 +88,56 @@ public class GeographyFunctionTest extends TestBase {
   }
 
   @Test
+  public void testMakeLineDeduplicatesLineStringSeam() throws Exception {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT line, ST_AsEWKT(line) AS ewkt FROM ("
+                + "SELECT ST_MakeLine("
+                + "ST_GeogFromWKT('LINESTRING (0 0, 1 0)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (1 0, 2 0)', 4326)) AS line)");
+
+    Row row = first(table);
+    Geography line = row.getFieldAs("line");
+    assertEquals(
+        "LINESTRING (0 0, 1 0, 2 0)", org.apache.sedona.common.geography.Functions.asText(line));
+    assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 2 0)", row.getFieldAs("ewkt"));
+    assertEquals(3, org.apache.sedona.common.geography.Functions.nPoints(line));
+    assertEquals(4326, line.getSRID());
+  }
+
+  @Test
+  public void testMakeLinePreservesCoincidentPointsAndFirstSRID() throws Exception {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT line, ST_AsText(line) AS wkt, ST_AsEWKT(line) AS ewkt, "
+                + "ST_Centroid(line) AS centroid, ST_Envelope(line, FALSE) AS envelope, "
+                + "ST_Envelope(line, TRUE) AS split_envelope FROM ("
+                + "SELECT ST_MakeLine("
+                + "ST_GeogFromWKT('POINT (12 34)', 4326), "
+                + "ST_GeogFromWKT('POINT (12 34)', 3857)) AS line)");
+
+    Row row = first(table);
+    Geography line = row.getFieldAs("line");
+    assertEquals("LINESTRING (12 34, 12 34)", row.getFieldAs("wkt"));
+    assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", row.getFieldAs("ewkt"));
+    Geography centroid = row.getFieldAs("centroid");
+    assertEquals(4326, centroid.getSRID());
+    assertEquals("POINT (12 34)", centroid.toString());
+    assertEquals(2, org.apache.sedona.common.geography.Functions.nPoints(line));
+    assertEquals(0.0, org.apache.sedona.common.geography.Functions.length(line), 0.0);
+    assertEquals(4326, line.getSRID());
+    assertEquals("LINESTRING (12 34, 12 34)", line.toString());
+    assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", line.toEWKT());
+    for (String field : new String[] {"envelope", "split_envelope"}) {
+      Geography envelope = row.getFieldAs(field);
+      assertEquals(4326, envelope.getSRID());
+      assertEquals("ST_Point", org.apache.sedona.common.geography.Functions.geometryType(envelope));
+      assertEquals(12.0, org.apache.sedona.common.geography.Functions.x(envelope), 1e-12);
+      assertEquals(34.0, org.apache.sedona.common.geography.Functions.y(envelope), 1e-12);
+    }
+  }
+
+  @Test
   public void testDistance() throws Exception {
     String wktA = "POINT (0 0)";
     String wktB = "POINT (0 1)";
@@ -169,11 +219,9 @@ public class GeographyFunctionTest extends TestBase {
 
   @Test
   public void testAsEWKT() throws Exception {
-    String wkt = "POINT (1 2)";
+    String wkt = "POINT (-122.4194 37.7749)";
     Object out = eval(wkt, call(Functions.ST_AsEWKT.class.getSimpleName(), $("geog")));
-    assertEquals(
-        org.apache.sedona.common.geography.Functions.asEWKT(Constructors.geogFromWKT(wkt, 4326)),
-        out.toString());
+    assertEquals("SRID=4326; POINT (-122.4194 37.7749)", out.toString());
   }
 
   @Test

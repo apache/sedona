@@ -19,10 +19,21 @@
 package org.apache.sedona.flink.expressions;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.table.annotation.DataTypeHint;
 import org.apache.flink.table.annotation.InputGroup;
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.catalog.DataTypeFactory;
 import org.apache.flink.table.functions.ScalarFunction;
+import org.apache.flink.table.types.DataType;
+import org.apache.flink.table.types.inference.InputTypeStrategies;
+import org.apache.flink.table.types.inference.InputTypeStrategy;
+import org.apache.flink.table.types.inference.TypeInference;
+import org.apache.flink.table.types.inference.TypeStrategies;
+import org.apache.flink.table.types.inference.TypeStrategy;
+import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.flink.Box2DTypeSerializer;
@@ -2309,6 +2320,34 @@ public class Functions {
   }
 
   public static class ST_MakeLine extends ScalarFunction {
+    // Reflection cannot distinguish the Geometry and Geography RAW pair overloads. Explicit
+    // inference also keeps ARRAY<Geometry> type-safe; ARRAY<Geography> is intentionally
+    // unsupported.
+    @Override
+    public TypeInference getTypeInference(DataTypeFactory typeFactory) {
+      DataType geometryType =
+          DataTypes.RAW(Geometry.class, GeometryTypeSerializer.INSTANCE).nullable();
+      DataType geographyType =
+          DataTypes.RAW(Geography.class, GeographyTypeSerializer.INSTANCE).nullable();
+      DataType geometryArrayType =
+          DataTypes.ARRAY(geometryType).bridgedTo(Geometry[].class).nullable();
+
+      InputTypeStrategy geometryPair =
+          InputTypeStrategies.explicitSequence(geometryType, geometryType);
+      InputTypeStrategy geographyPair =
+          InputTypeStrategies.explicitSequence(geographyType, geographyType);
+      InputTypeStrategy geometryArray = InputTypeStrategies.explicitSequence(geometryArrayType);
+      Map<InputTypeStrategy, TypeStrategy> outputs = new LinkedHashMap<>();
+      outputs.put(geometryPair, TypeStrategies.explicit(geometryType));
+      outputs.put(geographyPair, TypeStrategies.explicit(geographyType));
+      outputs.put(geometryArray, TypeStrategies.explicit(geometryType));
+
+      return TypeInference.newBuilder()
+          .inputTypeStrategy(InputTypeStrategies.or(geometryPair, geographyPair, geometryArray))
+          .outputTypeStrategy(TypeStrategies.mapping(outputs))
+          .build();
+    }
+
     @DataTypeHint(
         value = "RAW",
         rawSerializer = GeometryTypeSerializer.class,
@@ -2331,10 +2370,27 @@ public class Functions {
 
     @DataTypeHint(
         value = "RAW",
+        rawSerializer = GeographyTypeSerializer.class,
+        bridgedTo = Geography.class)
+    public Geography eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = Geography.class)
+            Geography geog1,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = Geography.class)
+            Geography geog2) {
+      return org.apache.sedona.common.geography.Functions.makeLine(geog1, geog2);
+    }
+
+    @DataTypeHint(
+        value = "RAW",
         rawSerializer = GeometryTypeSerializer.class,
         bridgedTo = Geometry.class)
-    public Geometry eval(@DataTypeHint(inputGroup = InputGroup.ANY) Object o) {
-      Geometry[] geoms = (Geometry[]) o;
+    public Geometry eval(Geometry[] geoms) {
       return org.apache.sedona.common.Functions.makeLine(geoms);
     }
   }

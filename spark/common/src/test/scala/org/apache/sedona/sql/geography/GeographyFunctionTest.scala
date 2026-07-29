@@ -142,6 +142,13 @@ class GeographyFunctionTest extends TestBaseScala {
       assertEquals(2.0, point.getY, 1e-9)
     }
 
+    it("ST_AsEWKT uses the stored WKB representation") {
+      val row = sparkSession
+        .sql("SELECT ST_AsEWKT(ST_GeogFromWKT('POINT (-122.4194 37.7749)', 4326)) AS ewkt")
+        .first()
+      assertEquals("SRID=4326; POINT (-122.4194 37.7749)", row.getString(0))
+    }
+
     it("ST_X and ST_Y") {
       val row = sparkSession
         .sql("""
@@ -164,6 +171,93 @@ class GeographyFunctionTest extends TestBaseScala {
         .first()
       assertTrue(row.isNullAt(0))
       assertTrue(row.isNullAt(1))
+    }
+
+    it("ST_MakeLine creates a geography measured in meters") {
+      val row = sparkSession
+        .sql("""
+          SELECT
+            ST_AsText(line) AS wkt,
+            ST_GeometryType(line) AS geom_type,
+            ST_Length(line) AS length
+          FROM (
+            SELECT ST_MakeLine(
+              ST_GeogFromWKT('POINT (0 0)', 4326),
+              ST_GeogFromWKT('POINT (1 0)', 4326)
+            ) AS line
+          )
+        """)
+        .first()
+      assertEquals("LINESTRING (0 0, 1 0)", row.getString(0))
+      assertEquals("ST_LineString", row.getString(1))
+      assertEquals(111195.10, row.getDouble(2), 1.0)
+    }
+
+    it("ST_MakeLine preserves coincident points and deduplicates LineString seams") {
+      val coincident = sparkSession
+        .sql("""
+          WITH source AS (
+            SELECT ST_GeogFromWKT('POINT (12 34)', 4326) AS point
+          ),
+          made AS (
+            SELECT point, ST_MakeLine(point, point) AS line
+            FROM source
+          )
+          SELECT
+            ST_AsText(line) AS wkt,
+            ST_AsEWKT(line) AS ewkt,
+            ST_Centroid(line) AS centroid,
+            ST_Envelope(line, false) AS envelope,
+            ST_Envelope(line, true) AS split_envelope,
+            ST_NPoints(line) AS npoints,
+            ST_GeometryType(line) AS geom_type,
+            ST_NumGeometries(line) AS ngeoms,
+            ST_Length(line) AS length,
+            ST_Distance(line, point) AS distance,
+            ST_AsText(
+              ST_MakeLine(line, ST_GeogFromWKT('POINT (13 34)', 4326))
+            ) AS extended,
+            line AS geography
+          FROM made
+        """)
+        .first()
+      assertEquals("LINESTRING (12 34, 12 34)", coincident.getString(0))
+      assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", coincident.getString(1))
+      val centroid = coincident.getAs[Geography](2)
+      assertEquals(4326, centroid.getSRID)
+      assertEquals("POINT (12 34)", centroid.toString)
+      Seq(3, 4).foreach { index =>
+        val envelope = coincident.getAs[Geography](index)
+        assertEquals(4326, envelope.getSRID)
+        assertEquals("POINT (12 34)", envelope.toString)
+      }
+      assertEquals(2, coincident.getInt(5))
+      assertEquals("ST_LineString", coincident.getString(6))
+      assertEquals(1, coincident.getInt(7))
+      assertEquals(0.0, coincident.getDouble(8), 0.0)
+      assertEquals(0.0, coincident.getDouble(9), 0.0)
+      assertEquals("LINESTRING (12 34, 12 34, 13 34)", coincident.getString(10))
+      val geography = coincident.getAs[Geography](11)
+      assertEquals("LINESTRING (12 34, 12 34)", geography.toString)
+      assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", geography.toEWKT)
+
+      val repeated = sparkSession
+        .sql("""
+          SELECT
+            ST_AsText(line) AS wkt,
+            ST_AsEWKT(line) AS ewkt,
+            ST_NPoints(line) AS npoints
+          FROM (
+            SELECT ST_MakeLine(
+              ST_GeogFromWKT('LINESTRING (0 0, 1 0)', 4326),
+              ST_GeogFromWKT('LINESTRING (1 0, 2 0)', 4326)
+            ) AS line
+          )
+        """)
+        .first()
+      assertEquals("LINESTRING (0 0, 1 0, 2 0)", repeated.getString(0))
+      assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 2 0)", repeated.getString(1))
+      assertEquals(3, repeated.getInt(2))
     }
   }
 
@@ -557,6 +651,18 @@ class GeographyFunctionTest extends TestBaseScala {
         .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(4326)).as("geog"))
         .select(st_functions.ST_NPoints(col("geog")).as("n"))
       assertEquals(3, df.first().getInt(0))
+    }
+
+    it("ST_MakeLine via DataFrame API") {
+      val df = sparkSession
+        .sql("SELECT 'POINT (0 0)' AS wkt_a, 'POINT (1 0)' AS wkt_b")
+        .select(
+          st_constructors.ST_GeogFromWKT(col("wkt_a"), lit(4326)).as("a"),
+          st_constructors.ST_GeogFromWKT(col("wkt_b"), lit(4326)).as("b"))
+        .select(st_functions.ST_MakeLine(col("a"), col("b")).as("line"))
+      val line = df.first().get(0).asInstanceOf[Geography]
+      assertTrue(line.isInstanceOf[WKBGeography])
+      assertEquals("LINESTRING (0 0, 1 0)", line.toString)
     }
 
     it("ST_Contains via DataFrame API") {

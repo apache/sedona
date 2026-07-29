@@ -23,7 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.sedona.common.S2Geography.*;
 import org.apache.sedona.common.sphere.Haversine;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.Point;
 
 public class Functions {
 
@@ -39,6 +43,7 @@ public class Functions {
   public static Geography getEnvelope(Geography geography, boolean splitAtAntiMeridian) {
     if (geography == null) return null;
     S2LatLngRect rect = geography.region().getRectBound();
+    if (rect.isEmpty()) return null;
     double lngLo = rect.lngLo().degrees();
     double latLo = rect.latLo().degrees();
     double lngHi = rect.lngHi().degrees();
@@ -92,7 +97,8 @@ public class Functions {
    * <ul>
    *   <li>Polygon / MultiPolygon: area-weighted centroid via {@link S2Polygon#getCentroid()}.
    *   <li>LineString / MultiLineString: length-weighted centroid via {@link
-   *       S2Polyline#getCentroid()}.
+   *       S2Polyline#getCentroid()}; when every edge has zero length, the mean of the remaining
+   *       vertices is used.
    *   <li>Point / MultiPoint: mean of the unit vectors.
    *   <li>GeographyCollection: weighted sum of the children's S2 centroids.
    * </ul>
@@ -133,10 +139,15 @@ public class Functions {
     }
     if (g instanceof PolylineGeography) {
       S2Point sum = null;
+      S2Point degenerateSum = null;
       for (S2Polyline p : ((PolylineGeography) g).getPolylines()) {
-        sum = addOrInit(sum, p.getCentroid());
+        if (p.numVertices() == 1) {
+          degenerateSum = addOrInit(degenerateSum, p.vertex(0));
+        } else if (p.numVertices() >= 2) {
+          sum = addOrInit(sum, p.getCentroid());
+        }
       }
-      return sum;
+      return sum != null ? sum : degenerateSum;
     }
     if (g instanceof PolygonGeography) {
       return ((PolygonGeography) g).polygon.getCentroid();
@@ -177,7 +188,7 @@ public class Functions {
     return "ST_" + toJTS(g).getGeometryType();
   }
 
-  /** Return the WKT text representation of a geography. */
+  /** Return WKT from the geography's structural WKB/JTS representation. */
   public static String asText(Geography g) {
     if (g == null) return null;
     return toJTS(g).toText();
@@ -195,6 +206,58 @@ public class Functions {
     if (g == null) return null;
     if (g instanceof WKBGeography) return ((WKBGeography) g).getPointY();
     return org.apache.sedona.common.Functions.y(toJTS(g));
+  }
+
+  /**
+   * Creates a line from two Point, MultiPoint, or LineString geographies. The returned geography
+   * preserves the first input's SRID; its edges are interpreted as great-circle arcs by geography
+   * measurement functions. No CRS transformation or SRID compatibility check is performed; if the
+   * inputs have different SRIDs, the first input's SRID is used. When the second input is a
+   * LineString whose first coordinate equals the current endpoint, that seam coordinate is added
+   * only once. Point and MultiPoint coordinates are always retained.
+   */
+  public static Geography makeLine(Geography g1, Geography g2) {
+    if (g1 == null || g2 == null) return null;
+    Geometry jts1 = toJTS(g1);
+    Geometry jts2 = toJTS(g2);
+    if (jts1 == null || jts2 == null) return null;
+    if (!isMakeLineInput(jts1) || !isMakeLineInput(jts2)) {
+      throw new IllegalArgumentException(
+          "ST_MakeLine only supports Point, MultiPoint and LineString geographies");
+    }
+    Geometry line = makeLineGeometry(jts1, jts2);
+    line.setSRID(g1.getSRID());
+    // Preserve the JTS coordinate sequence verbatim. Converting through S2 here would collapse
+    // zero-length edges and repeated vertices, changing ST_MakeLine's result and potentially
+    // producing an empty LineString that cannot round-trip through the Geography WKB reader.
+    return WKBGeography.fromJTS(line);
+  }
+
+  private static Geometry makeLineGeometry(Geometry first, Geometry second) {
+    List<Coordinate> coordinates = new ArrayList<>();
+    for (Coordinate coordinate : first.getCoordinates()) {
+      coordinates.add(coordinate);
+    }
+
+    Coordinate[] appended = second.getCoordinates();
+    int start = 0;
+    if (second instanceof LineString
+        && !coordinates.isEmpty()
+        && appended.length > 0
+        && coordinates.get(coordinates.size() - 1).equals2D(appended[0])) {
+      start = 1;
+    }
+    for (int i = start; i < appended.length; i++) {
+      coordinates.add(appended[i]);
+    }
+
+    return first.getFactory().createLineString(coordinates.toArray(new Coordinate[0]));
+  }
+
+  private static boolean isMakeLineInput(Geometry geometry) {
+    return geometry instanceof Point
+        || geometry instanceof MultiPoint
+        || geometry instanceof LineString;
   }
 
   // ─── Level 2: Geodesic metrics ───────────────────────────────────────────
@@ -371,9 +434,11 @@ public class Functions {
     return contains(g2, g1);
   }
 
-  /** Return EWKT for geography object */
+  /** Return EWKT from the geography's structural WKB/JTS representation. */
   public static String asEWKT(Geography geography) {
-    return geography.toEWKT();
+    if (geography == null) return null;
+    String text = asText(geography);
+    return geography.getSRID() > 0 ? "SRID=" + geography.getSRID() + "; " + text : text;
   }
 
   // ─── Level 4: spherical buffer ───────────────────────────────────────────

@@ -301,18 +301,30 @@ public class WKBReader {
       pts.add(S2LatLng.fromDegrees(lat, lon).toPoint());
     }
 
+    // Keep the operational S2 representation valid by removing adjacent duplicates. A non-empty
+    // WKB line that collapses to one point must remain non-empty, though: S2Builder removes its
+    // only degenerate edge and otherwise leaves a zero-vertex polyline whose centroid and bounds
+    // are undefined. The original coordinate sequence remains authoritative in WKBGeography.
+    List<S2Point> canonical = new ArrayList<>(pts.size());
+    for (S2Point point : pts) {
+      if (canonical.isEmpty() || !canonical.get(canonical.size() - 1).equalsPoint(point)) {
+        canonical.add(point);
+      }
+    }
+    if (canonical.size() == 1) {
+      return new SinglePolylineGeography(new S2Polyline(canonical));
+    }
+
     S2Builder builder = new S2Builder.Builder().build();
     S2PolylineLayer layer = new S2PolylineLayer();
     builder.startLayer(layer);
-
-    builder.addPolyline(new S2Polyline(pts));
+    builder.addPolyline(new S2Polyline(canonical));
 
     S2Error error = new S2Error();
     if (!builder.build(error)) {
       throw new IOException("Failed to build S2 polyline: " + error.text());
     }
-    S2Polyline s2poly = layer.getPolyline();
-    return new SinglePolylineGeography(s2poly);
+    return new SinglePolylineGeography(layer.getPolyline());
   }
 
   private PolygonGeography readPolygon(EnumSet<Ordinate> ordinateFlags)

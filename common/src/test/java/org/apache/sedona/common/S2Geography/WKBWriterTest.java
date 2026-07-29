@@ -32,6 +32,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.ParseException;
 
@@ -88,6 +89,22 @@ public class WKBWriterTest {
       assertEquals(origLL.latDegrees(), decLL.latDegrees(), 1e-12);
       assertEquals(origLL.lngDegrees(), decLL.lngDegrees(), 1e-12);
     }
+  }
+
+  @Test
+  public void emptyAndSingletonPolylinesProduceValidWKB() throws ParseException {
+    WKBWriter writer = new WKBWriter(2, ByteOrderValues.LITTLE_ENDIAN);
+    org.locationtech.jts.io.WKBReader jtsReader = new org.locationtech.jts.io.WKBReader();
+
+    Geography empty = new SinglePolylineGeography();
+    Geometry emptyJts = jtsReader.read(writer.write(empty));
+    assertTrue(emptyJts.isEmpty());
+
+    S2Point point = S2LatLng.fromDegrees(34, 12).toPoint();
+    Geography singleton = new SinglePolylineGeography(new S2Polyline(List.of(point)));
+    Geometry singletonJts = jtsReader.read(writer.write(singleton));
+    assertEquals(2, singletonJts.getNumPoints());
+    assertTrue(singletonJts.getCoordinates()[0].equals2D(singletonJts.getCoordinates()[1]));
   }
 
   @Test

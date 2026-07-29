@@ -23,10 +23,10 @@ import java.io.IOException;
 import java.util.*;
 import org.apache.sedona.common.S2Geography.*;
 import org.apache.sedona.common.S2Geography.Geography;
-import org.apache.sedona.common.S2Geography.WKTReader;
 import org.apache.sedona.common.utils.GeoHashDecoder;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 
 public class Constructors {
 
@@ -76,11 +76,19 @@ public class Constructors {
   }
 
   public static Geography geogFromWKT(String wkt, int srid) throws ParseException {
-    // Use S2Geography WKTReader for proper spherical normalization and error messages,
-    // then wrap in WKBGeography for WKB-based storage.
-    Geography s2Geog = new WKTReader().read(wkt);
-    s2Geog.setSRID(srid);
-    return WKBGeography.fromS2Geography(s2Geog);
+    try {
+      // Keep WKB as the structural source of truth. The S2 view is built lazily for spherical
+      // operations and may canonicalize degenerate edges without changing stored coordinates.
+      Geometry geometry = new WKTReader().read(wkt);
+      geometry.setSRID(srid);
+      return WKBGeography.fromJTS(geometry);
+    } catch (ParseException e) {
+      String message = e.getMessage();
+      if (message != null) {
+        message = message.replace("Unknown geometry type", "Unknown geography type");
+      }
+      throw new ParseException(message, e);
+    }
   }
 
   public static Geography geogFromEWKT(String ewkt) throws ParseException {
