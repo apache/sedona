@@ -22,6 +22,7 @@ import com.google.common.geometry.S2CellId;
 import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2Point;
 import com.google.common.geometry.S2PointRegion;
+import com.google.common.geometry.S2Polyline;
 import com.google.common.geometry.S2Region;
 import com.google.common.geometry.S2Shape;
 import java.nio.ByteBuffer;
@@ -341,22 +342,32 @@ public class WKBGeography extends Geography {
 
   @Override
   public String toString() {
-    return getS2Geography().toString();
+    Geography s2 = getS2Geography();
+    return s2PolylineLosesVertices(s2) ? getJTSGeometry().toText() : s2.toString();
   }
 
   @Override
   public String toString(PrecisionModel precisionModel) {
-    return getS2Geography().toString(precisionModel);
+    Geography s2 = getS2Geography();
+    return s2PolylineLosesVertices(s2)
+        ? writeStructuralText(precisionModel)
+        : s2.toString(precisionModel);
   }
 
   @Override
   public String toText(PrecisionModel precisionModel) {
-    return getS2Geography().toText(precisionModel);
+    Geography s2 = getS2Geography();
+    return s2PolylineLosesVertices(s2)
+        ? writeStructuralText(precisionModel)
+        : s2.toText(precisionModel);
   }
 
   @Override
   public String toEWKT() {
     Geography s2 = getS2Geography();
+    if (s2PolylineLosesVertices(s2)) {
+      return addSRID(getJTSGeometry().toText());
+    }
     s2.setSRID(getSRID());
     return s2.toEWKT();
   }
@@ -364,8 +375,48 @@ public class WKBGeography extends Geography {
   @Override
   public String toEWKT(PrecisionModel precisionModel) {
     Geography s2 = getS2Geography();
+    if (s2PolylineLosesVertices(s2)) {
+      return addSRID(writeStructuralText(precisionModel));
+    }
     s2.setSRID(getSRID());
     return s2.toEWKT(precisionModel);
+  }
+
+  private String writeStructuralText(PrecisionModel precisionModel) {
+    org.locationtech.jts.io.WKTWriter writer = new org.locationtech.jts.io.WKTWriter();
+    writer.setPrecisionModel(precisionModel);
+    return writer.write(getJTSGeometry());
+  }
+
+  private String addSRID(String text) {
+    return getSRID() > 0 ? "SRID=" + getSRID() + "; " + text : text;
+  }
+
+  /**
+   * Returns whether converting the stored LineString WKB to its operational S2 representation
+   * removed vertices. Text accessors use the authoritative WKB in that case so they never expose a
+   * one-vertex LineString or hide repeated structural coordinates.
+   */
+  private boolean s2PolylineLosesVertices(Geography s2) {
+    if (wkbBaseType() != 2 || !(s2 instanceof PolylineGeography)) {
+      return false;
+    }
+
+    List<S2Polyline> polylines = ((PolylineGeography) s2).getPolylines();
+    if (polylines.size() != 1) {
+      // A genuinely empty line has no S2 polyline and should retain legacy EMPTY rendering.
+      return false;
+    }
+
+    int payloadOffset = wkbPayloadOffset();
+    if (wkbBytes.length < payloadOffset + Integer.BYTES) {
+      return false;
+    }
+    boolean le = (wkbBytes[0] == 0x01);
+    ByteBuffer bb =
+        ByteBuffer.wrap(wkbBytes).order(le ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+    int wkbPointCount = bb.getInt(payloadOffset);
+    return polylines.get(0).numVertices() != wkbPointCount;
   }
 
   @Override

@@ -149,6 +149,8 @@ public class WKBReaderTest {
         reader.read(jtsWriter.write(jtsReader.read("LINESTRING (12 34, 12 34)")));
     Assert.assertEquals(
         1, ((SinglePolylineGeography) coincident).getPolylines().get(0).numVertices());
+    Assert.assertEquals("LINESTRING (12 34, 12 34)", coincident.toString());
+    Assert.assertEquals(2, jtsReader.read(coincident.toString()).getNumPoints());
 
     Geography repeated =
         reader.read(jtsWriter.write(jtsReader.read("LINESTRING (0 0, 1 0, 1 0, 2 0)")));

@@ -22,7 +22,6 @@ import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
 import static org.apache.flink.table.api.Expressions.lit;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -121,10 +120,14 @@ public class GeographyFunctionTest extends TestBase {
     Geography line = row.getFieldAs("line");
     assertEquals("LINESTRING (12 34, 12 34)", row.getFieldAs("wkt"));
     assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", row.getFieldAs("ewkt"));
-    assertNull(row.getFieldAs("centroid"));
+    Geography centroid = row.getFieldAs("centroid");
+    assertEquals(4326, centroid.getSRID());
+    assertEquals("POINT (12 34)", centroid.toString());
     assertEquals(2, org.apache.sedona.common.geography.Functions.nPoints(line));
     assertEquals(0.0, org.apache.sedona.common.geography.Functions.length(line), 0.0);
     assertEquals(4326, line.getSRID());
+    assertEquals("LINESTRING (12 34, 12 34)", line.toString());
+    assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", line.toEWKT());
     for (String field : new String[] {"envelope", "split_envelope"}) {
       Geography envelope = row.getFieldAs(field);
       assertEquals(4326, envelope.getSRID());
@@ -199,11 +202,9 @@ public class GeographyFunctionTest extends TestBase {
 
   @Test
   public void testAsEWKT() throws Exception {
-    String wkt = "POINT (1 2)";
+    String wkt = "POINT (-122.4194 37.7749)";
     Object out = eval(wkt, call(Functions.ST_AsEWKT.class.getSimpleName(), $("geog")));
-    assertEquals(
-        org.apache.sedona.common.geography.Functions.asEWKT(Constructors.geogFromWKT(wkt, 4326)),
-        out.toString());
+    assertEquals("SRID=4326; POINT (-122.4 37.8)", out.toString());
   }
 
   @Test

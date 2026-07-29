@@ -182,6 +182,19 @@ public class FunctionTest {
   }
 
   @Test
+  public void asEWKT_preservesLegacyFormattingForOrdinaryGeographies() throws ParseException {
+    for (String wkt :
+        new String[] {
+          "POINT (-122.4194 37.7749)",
+          "POLYGON ((0 0, 3 0, 3 3, 0 3, 0 0))",
+          "MULTIPOINT ((1 1), (2 2))"
+        }) {
+      Geography geography = Constructors.geogFromWKT(wkt, 4326);
+      assertEquals(geography.toEWKT(), Functions.asEWKT(geography));
+    }
+  }
+
+  @Test
   public void makeLine_points() throws ParseException {
     Geography start = Constructors.geogFromWKT("POINT (0 0)", 4326);
     Geography end = Constructors.geogFromWKT("POINT (1 0)", 4326);
@@ -199,12 +212,19 @@ public class FunctionTest {
 
     assertEquals("LINESTRING (12 34, 12 34)", Functions.asText(line));
     assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", Functions.asEWKT(line));
+    assertEquals("LINESTRING (12 34, 12 34)", line.toString());
+    assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", line.toEWKT());
+    assertEquals(2, new WKTReader().read(line.toString()).getNumPoints());
     assertEquals(2, Functions.nPoints(line));
     assertEquals("ST_LineString", Functions.geometryType(line));
     assertEquals(1, Functions.numGeometries(line));
     assertEquals(0.0, Functions.length(line), 0.0);
     assertEquals(0.0, Functions.distance(line, point), 0.0);
-    assertNull(Functions.centroid(line));
+    Geography centroid = Functions.centroid(line);
+    assertNotNull(centroid);
+    assertEquals(4326, centroid.getSRID());
+    assertEquals(12.0, Functions.x(centroid), 1e-12);
+    assertEquals(34.0, Functions.y(centroid), 1e-12);
 
     for (boolean splitAtAntiMeridian : new boolean[] {false, true}) {
       Geography envelope = Functions.getEnvelope(line, splitAtAntiMeridian);
@@ -228,6 +248,8 @@ public class FunctionTest {
     Geography stitched = roundTripWKB(Functions.makeLine(first, second));
     assertEquals("LINESTRING (0 0, 1 0, 1 0, 2 0)", Functions.asText(stitched));
     assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 1 0, 2 0)", Functions.asEWKT(stitched));
+    assertEquals("LINESTRING (0 0, 1 0, 1 0, 2 0)", stitched.toString());
+    assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 1 0, 2 0)", stitched.toEWKT());
     assertEquals(4, Functions.nPoints(stitched));
 
     Geography repeated = geographyFromJTSWKT("LINESTRING (0 0, 0 0, 1 0)", 4326);

@@ -96,7 +96,8 @@ public class Functions {
    * <ul>
    *   <li>Polygon / MultiPolygon: area-weighted centroid via {@link S2Polygon#getCentroid()}.
    *   <li>LineString / MultiLineString: length-weighted centroid via {@link
-   *       S2Polyline#getCentroid()}.
+   *       S2Polyline#getCentroid()}; when every edge has zero length, the mean of the remaining
+   *       vertices is used.
    *   <li>Point / MultiPoint: mean of the unit vectors.
    *   <li>GeographyCollection: weighted sum of the children's S2 centroids.
    * </ul>
@@ -137,11 +138,15 @@ public class Functions {
     }
     if (g instanceof PolylineGeography) {
       S2Point sum = null;
+      S2Point degenerateSum = null;
       for (S2Polyline p : ((PolylineGeography) g).getPolylines()) {
-        if (p.numVertices() < 2) continue;
-        sum = addOrInit(sum, p.getCentroid());
+        if (p.numVertices() == 1) {
+          degenerateSum = addOrInit(degenerateSum, p.vertex(0));
+        } else if (p.numVertices() >= 2) {
+          sum = addOrInit(sum, p.getCentroid());
+        }
       }
-      return sum;
+      return sum != null ? sum : degenerateSum;
     }
     if (g instanceof PolygonGeography) {
       return ((PolygonGeography) g).polygon.getCentroid();
@@ -405,11 +410,9 @@ public class Functions {
     return contains(g2, g1);
   }
 
-  /** Return EWKT from the geography's structural WKB/JTS representation. */
+  /** Return EWKT for geography object. */
   public static String asEWKT(Geography geography) {
-    if (geography == null) return null;
-    String text = asText(geography);
-    return geography.getSRID() > 0 ? "SRID=" + geography.getSRID() + "; " + text : text;
+    return geography.toEWKT();
   }
 
   // ─── Level 4: spherical buffer ───────────────────────────────────────────

@@ -142,6 +142,13 @@ class GeographyFunctionTest extends TestBaseScala {
       assertEquals(2.0, point.getY, 1e-9)
     }
 
+    it("ST_AsEWKT preserves ordinary geography formatting") {
+      val row = sparkSession
+        .sql("SELECT ST_AsEWKT(ST_GeogFromWKT('POINT (-122.4194 37.7749)', 4326)) AS ewkt")
+        .first()
+      assertEquals("SRID=4326; POINT (-122.4 37.8)", row.getString(0))
+    }
+
     it("ST_X and ST_Y") {
       val row = sparkSession
         .sql("""
@@ -209,13 +216,16 @@ class GeographyFunctionTest extends TestBaseScala {
             ST_Distance(line, point) AS distance,
             ST_AsText(
               ST_MakeLine(line, ST_GeogFromWKT('POINT (13 34)', 4326))
-            ) AS extended
+            ) AS extended,
+            line AS geography
           FROM made
         """)
         .first()
       assertEquals("LINESTRING (12 34, 12 34)", coincident.getString(0))
       assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", coincident.getString(1))
-      assertTrue(coincident.isNullAt(2))
+      val centroid = coincident.getAs[Geography](2)
+      assertEquals(4326, centroid.getSRID)
+      assertEquals("POINT (12 34)", centroid.toString)
       Seq(3, 4).foreach { index =>
         val envelope = coincident.getAs[Geography](index)
         assertEquals(4326, envelope.getSRID)
@@ -227,6 +237,9 @@ class GeographyFunctionTest extends TestBaseScala {
       assertEquals(0.0, coincident.getDouble(8), 0.0)
       assertEquals(0.0, coincident.getDouble(9), 0.0)
       assertEquals("LINESTRING (12 34, 12 34, 13 34)", coincident.getString(10))
+      val geography = coincident.getAs[Geography](11)
+      assertEquals("LINESTRING (12 34, 12 34)", geography.toString)
+      assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", geography.toEWKT)
 
       val repeated = sparkSession
         .sql("""
