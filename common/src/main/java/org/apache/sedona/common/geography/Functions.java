@@ -42,8 +42,9 @@ public class Functions {
 
   public static Geography getEnvelope(Geography geography, boolean splitAtAntiMeridian) {
     if (geography == null) return null;
-    // Empty points are encoded in WKB with NaN ordinates. Avoid constructing an S2PointRegion
-    // from those ordinates; other empty geography types produce an empty rectangle below.
+    // Empty Point WKB stores NaN ordinates, which getPointX() reports as null. The isPoint() guard
+    // distinguishes that case from non-point inputs, for which getPointX() also returns null.
+    // Avoid constructing an S2PointRegion from the NaN ordinates.
     if (geography instanceof WKBGeography
         && ((WKBGeography) geography).isPoint()
         && ((WKBGeography) geography).getPointX() == null) {

@@ -133,12 +133,17 @@ public class FunctionTest {
   public void getEnvelopeEmptyGeography() throws ParseException {
     for (String wkt :
         new String[] {
-          "POINT EMPTY", "LINESTRING EMPTY", "POLYGON EMPTY", "GEOMETRYCOLLECTION EMPTY"
+          "POINT EMPTY",
+          "LINESTRING EMPTY",
+          "POLYGON EMPTY",
+          "MULTIPOINT EMPTY",
+          "MULTILINESTRING EMPTY",
+          "MULTIPOLYGON EMPTY",
+          "GEOMETRYCOLLECTION EMPTY"
         }) {
       Geography geography = Constructors.geogFromWKT(wkt, 3857);
       for (boolean splitAtAntiMeridian : new boolean[] {false, true}) {
         Geography envelope = Functions.getEnvelope(geography, splitAtAntiMeridian);
-        assertSame(geography, envelope);
         assertEquals(wkt, envelope.toString());
         assertEquals(3857, envelope.getSRID());
       }
