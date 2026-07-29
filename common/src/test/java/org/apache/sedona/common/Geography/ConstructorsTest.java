@@ -46,15 +46,15 @@ public class ConstructorsTest {
 
     Geography geog = Constructors.geogFromEWKT("POINT (1 1)");
     assertEquals(0, geog.getSRID());
-    assertEquals("POINT (1 1)", geog.toString());
+    assertEquals("POINT (1 1)", geog.toString(new PrecisionModel(PrecisionModel.FIXED)));
 
     geog = Constructors.geogFromEWKT("SRID=4269; POINT (1 1)");
     assertEquals(4269, geog.getSRID());
-    assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT());
+    assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT(new PrecisionModel(PrecisionModel.FIXED)));
 
     geog = Constructors.geogFromEWKT("SRID=4269;POINT (1 1)");
     assertEquals(4269, geog.getSRID());
-    assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT());
+    assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT(new PrecisionModel(PrecisionModel.FIXED)));
 
     ParseException invalid =
         assertThrows(ParseException.class, () -> Constructors.geogFromEWKT("not valid"));
@@ -268,7 +268,7 @@ public class ConstructorsTest {
     assertEquals(4326, got.getSRID());
     org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
     wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
-    assertEquals(expected, got.toEWKT());
+    assertEquals(expected, got.toEWKT(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   @Test
@@ -277,13 +277,13 @@ public class ConstructorsTest {
     Geography got = Constructors.geomToGeography(geom);
     org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
     wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
-    assertEquals(geom.toString(), got.toString());
+    assertEquals(geom.toString(), got.toString(new PrecisionModel(PrecisionModel.FIXED)));
 
     geom =
         org.apache.sedona.common.Constructors.geomFromWKT(
             "MULTIPOINT ((10 10), (20 20), (30 30))", 0);
     got = Constructors.geomToGeography(geom);
-    assertEquals(geom.toString(), got.toString());
+    assertEquals(geom.toString(), got.toString(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   @Test
@@ -294,13 +294,17 @@ public class ConstructorsTest {
     Geography got = Constructors.geomToGeography(geom);
     org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
     wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
-    assertEquals("MULTIPOINT ((10 10), (20 20), (30 30))", got.toString());
+    assertEquals(
+        "MULTIPOINT ((10 10), (20 20), (30 30))",
+        got.toString(new PrecisionModel(PrecisionModel.FIXED)));
 
     geom =
         org.apache.sedona.common.Constructors.geomFromWKT(
             "MULTIPOINT ((10 10), (20 20), (30 30), (20 20), (10 10))", 0);
     got = Constructors.geomToGeography(geom);
-    assertEquals("MULTIPOINT ((10 10), (20 20), (30 30))", got.toString());
+    assertEquals(
+        "MULTIPOINT ((10 10), (20 20), (30 30))",
+        got.toString(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   @Test
@@ -310,13 +314,13 @@ public class ConstructorsTest {
     Geography got = Constructors.geomToGeography(geom);
     org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
     wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
-    assertEquals(geom.toString(), got.toString());
+    assertEquals(geom.toString(), got.toString(new PrecisionModel(PrecisionModel.FIXED)));
 
     geom =
         org.apache.sedona.common.Constructors.geomFromWKT(
             "MULTILINESTRING((1 2, 3 4), (4 5, 6 7))", 0);
     got = Constructors.geomToGeography(geom);
-    assertEquals(geom.toString(), got.toString());
+    assertEquals(geom.toString(), got.toString(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   @Test
@@ -326,19 +330,24 @@ public class ConstructorsTest {
     Geography got = Constructors.geomToGeography(geom);
     org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
     wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
-    assertEquals("LINESTRING (1 2, 3 4, 5 6)", got.toString());
+    assertEquals(
+        "LINESTRING (1 2, 3 4, 5 6)", got.toString(new PrecisionModel(PrecisionModel.FIXED)));
 
     geom =
         org.apache.sedona.common.Constructors.geomFromWKT(
             "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7), (1 2, 3 4))", 0);
     got = Constructors.geomToGeography(geom);
-    assertEquals("MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))", got.toString());
+    assertEquals(
+        "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))",
+        got.toString(new PrecisionModel(PrecisionModel.FIXED)));
 
     geom =
         org.apache.sedona.common.Constructors.geomFromWKT(
             "MULTILINESTRING ((1 2, 3 4), EMPTY, (4 5, 6 7), (1 2, 3 4))", 0);
     got = Constructors.geomToGeography(geom);
-    assertEquals("MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))", got.toString());
+    assertEquals(
+        "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))",
+        got.toString(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   @Test
@@ -350,6 +359,6 @@ public class ConstructorsTest {
     Geography got = Constructors.geomToGeography(geom);
     org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
     wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
-    assertEquals(geom.toString(), got.toString());
+    assertEquals(geom.toString(), got.toString(new PrecisionModel(PrecisionModel.FIXED)));
   }
 }
