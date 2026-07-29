@@ -19,6 +19,15 @@
 
 ## Map Algebra
 
+!!!warning
+    `RS_MapAlgebra` is deprecated since `v1.9.1` in favour of [Raster UDFs](Raster-UDF.md), which cover the
+    same per-pixel calculations in Python and additionally reach NumPy, SciPy, scikit-learn, and rasterio.
+    The function continues to work and nothing is removed. The [NDVI example below](#ndvi) is written both
+    ways on the Raster UDF page.
+
+    The array-based functions described on this page — `RS_BandAsArray`, `RS_Add`, `RS_NormalizedDifference`
+    and friends — are not deprecated.
+
 Map algebra is a way to perform raster calculations using mathematical expressions. The expression can be a simple arithmetic operation or a complex combination of multiple operations. The expression can be applied to a single raster band or multiple raster bands. The result of the expression is a new raster.
 
 !!!tip

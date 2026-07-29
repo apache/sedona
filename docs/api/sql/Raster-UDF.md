@@ -37,7 +37,7 @@ the other outright:
 | How you express it | per-pixel script in the [Jiffle](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle) language | whole-array Python over a NumPy view |
 | Libraries | none | anything installed — NumPy, SciPy, scikit-learn, rasterio |
 | Output | raster | raster, or any Spark type |
-| NODATA on the output | explicit `noDataValue` argument | inherited from the input — see [Limits](#limits) |
+| NODATA on the output | explicit `noDataValue` argument | explicit `nodata=` argument, per band if needed |
 | Available from | SQL, so every language binding | Python only |
 
 Reach for `RS_MapAlgebra` when the operation is per-pixel arithmetic that fits in a short expression, and it
@@ -134,6 +134,37 @@ single-band result. The band count and the dtype may both differ from the input 
 multi-band scene into one `float32` band. The returned `SedonaRaster` is serialized back to the JVM
 automatically, so the output column is an ordinary raster column that every `RS_` function accepts.
 
+#### Setting NODATA on the output
+
+By default each output band inherits NODATA from the input band in the same position, and bands beyond the
+input's band count inherit it from the input's last band. That is usually wrong for a derived raster, because
+the output means something different from the scene it came from: a 0/1 mask built from a band whose NODATA is
+`0` would have every unset pixel treated as NODATA by [`RS_ZonalStats`](Raster-Band-Accessors/RS_ZonalStats.md),
+[`RS_Count`](Raster-Band-Accessors/RS_Count.md), and every other function that respects it.
+
+Pass `nodata=` to say what the output means. This is the equivalent of `RS_MapAlgebra`'s `noDataValue`
+argument:
+
+```python
+@udf(returnType=RasterType())
+def mask_udf(raster):
+    band1 = raster.as_numpy()[0]
+    mask = (band1 < 1400).astype(np.float32)
+    return raster.with_bands(mask, nodata=-9999.0)
+```
+
+A scalar applies to every output band; pass a sequence to set them individually, one entry per band. Use
+`float("nan")` for a band that should have no NODATA at all.
+
+```python
+return raster.with_bands(stacked, nodata=[-9999.0, float("nan")])
+```
+
+!!!note
+    Support for `nodata=` is new in `v1.9.1`. Before that the value was always inherited and had to be
+    corrected afterwards with
+    [`RS_SetBandNoDataValue`](Raster-Operators/RS_SetBandNoDataValue.md), which also still works.
+
 ### NDVI, as map algebra and as a UDF
 
 The same computation written both ways. With `RS_MapAlgebra`:
@@ -221,38 +252,6 @@ or [`RS_Clip`](Raster-Operators/RS_Clip.md) before or after the UDF instead, or 
 [in Scala](#scala-and-java), where this restriction does not apply.
 
 `RS_MapAlgebra` is grid-preserving in the same way, so this is not a difference between the two.
-
-#### NODATA is inherited from the input
-
-Unlike `RS_MapAlgebra`, which takes an explicit `noDataValue`, a UDF has no way to set the NODATA value of
-the raster it returns. Each output band inherits NODATA from the input band in the same position; bands added
-beyond the input's band count inherit it from the input's *last* band.
-
-This is worth being careful about, because a mask usually means something different from the scene it came
-from. If the input's first band has NODATA `0`, the 0/1 mask returned by `mask_udf` above also has NODATA `0`
-— so every unset pixel in the mask is invisible to the functions that respect NODATA, and the two counts
-below disagree:
-
-```python
-df.select(mask_udf(col("rast")).alias("mask_rast")).selectExpr(
-    "RS_Count(mask_rast, 1, true) AS set_pixels",  # zeros skipped as NODATA
-    "RS_Count(mask_rast, 1, false) AS all_pixels",
-)
-```
-
-Set the value explicitly after the UDF whenever the output's NODATA differs from the input's:
-
-```python
-df.select(mask_udf(col("rast")).alias("mask_rast")).selectExpr(
-    "RS_SetBandNoDataValue(mask_rast, 1, -9999) AS mask_rast"
-)
-```
-
-!!!note
-    For bands added beyond the input's band count, `raster.bands_meta[i].nodata` inside Python reports `NaN`
-    while [`RS_BandNoDataValue`](Raster-Band-Accessors/RS_BandNoDataValue.md) reports the inherited value on
-    the JVM side. Widening a 4-band raster whose band 4 has NODATA `-1` to 8 bands gives Python
-    `[nan, nan, nan, -1.0, nan, nan, nan, nan]` and SQL `-1.0` for bands 4 through 8. Trust the SQL function.
 
 #### Not every NumPy dtype survives
 

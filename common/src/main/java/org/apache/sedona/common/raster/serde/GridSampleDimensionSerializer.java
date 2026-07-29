@@ -67,9 +67,37 @@ public class GridSampleDimensionSerializer extends Serializer<GridSampleDimensio
     String description = KryoUtil.readUTF8String(input);
     double offset = input.readDouble();
     double scale = input.readDouble();
-    input.readDouble(); // noDataValue is included in categories, so we just skip it
+    double noDataValue = input.readDouble();
     input.readInt(); // skip the length of the next object
     Category[] categories = kryo.readObject(input, Category[].class);
-    return new GridSampleDimension(description, categories, offset, scale);
+    GridSampleDimension sampleDimension =
+        new GridSampleDimension(description, categories, offset, scale);
+    return reconcileNoDataValue(sampleDimension, noDataValue);
+  }
+
+  /**
+   * Reconcile the declared nodata value with the one implied by the categories. Python writers
+   * (InDbSedonaRaster.with_bands) replay category blobs taken from a source raster, so the
+   * categories may still describe the source's nodata while the declared value is the one the
+   * caller asked for. The declared value wins.
+   *
+   * <p>The JVM writer emits {@link RasterUtils#getNoDataValue}, which is derived from the
+   * categories it also writes, so the two always agree for JVM-to-JVM round trips.
+   * createSampleDimensionWithNoDataValue returns its argument unchanged in that case, making this a
+   * no-op there.
+   *
+   * @param sampleDimension the sample dimension rebuilt from the serialized categories
+   * @param noDataValue the nodata value declared on the wire, or NaN when none was declared
+   * @return the original sample dimension, or a new one carrying the declared nodata value
+   */
+  private static GridSampleDimension reconcileNoDataValue(
+      GridSampleDimension sampleDimension, double noDataValue) {
+    if (Double.isNaN(noDataValue)) {
+      // No nodata declared, so there is nothing to reconcile against. Leave whatever the categories
+      // say: NaN cannot be expressed as a nodata category, and this is also the path taken by
+      // rasters serialized before the declared value was honored.
+      return sampleDimension;
+    }
+    return RasterUtils.createSampleDimensionWithNoDataValue(sampleDimension, noDataValue);
   }
 }

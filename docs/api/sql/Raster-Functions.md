@@ -153,7 +153,7 @@ These functions convert between raster bands and arrays for map algebra operatio
 | :--- | :--- | :--- | :--- |
 | [RS_AddBandFromArray](Raster-Map-Algebra-Operators/RS_AddBandFromArray.md) | Raster | Add a band to a raster from an array of doubles. | v1.5.0 |
 | [RS_BandAsArray](Raster-Map-Algebra-Operators/RS_BandAsArray.md) | `Array<Double>` | Extract a band from a raster as an array of doubles. | v1.4.1 |
-| [RS_MapAlgebra](Raster-Map-Algebra-Operators/RS_MapAlgebra.md) | Raster | Apply a map algebra script on a raster. | v1.5.0 |
+| [RS_MapAlgebra](Raster-Map-Algebra-Operators/RS_MapAlgebra.md) | Raster | Apply a map algebra script on a raster. **Deprecated since v1.9.1** — use a [Raster UDF](Raster-UDF.md). | v1.5.0 |
 
 ## Map Algebra Operators
 

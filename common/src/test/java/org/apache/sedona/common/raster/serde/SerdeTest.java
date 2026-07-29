@@ -22,6 +22,8 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
+import org.apache.sedona.common.raster.RasterBandAccessors;
+import org.apache.sedona.common.raster.RasterBandEditors;
 import org.apache.sedona.common.raster.RasterConstructors;
 import org.apache.sedona.common.raster.RasterConstructorsForTesting;
 import org.apache.sedona.common.raster.RasterTestBase;
@@ -162,6 +164,84 @@ public class SerdeTest extends RasterTestBase {
     deserialized.dispose(true);
     raster4band.dispose(true);
     raster1band.dispose(true);
+  }
+
+  @Test
+  public void testDeclaredNoDataValueOverridesCategories() throws Exception {
+    // Simulate what Python UDFs produce: InDbSedonaRaster.with_bands() replays the source
+    // raster's Kryo category blobs while declaring a different nodata value in the sample
+    // dimension header. Before the reconciliation fix in GridSampleDimensionSerializer.read()
+    // the declared value was discarded, so a Python UDF could not set the nodata of the
+    // raster it returned.
+    GridCoverage2D raster =
+        RasterConstructorsForTesting.makeRasterForTesting(
+            1, "D", "BandedSampleModel", 4, 3, 100, 100, 10, -10, 0, 0, 3857);
+    raster = RasterBandEditors.setBandNoDataValue(raster, 1, 0.0);
+    Assert.assertEquals(0.0, RasterBandAccessors.getBandNoDataValue(raster, 1), 1e-9);
+
+    byte[] bytes = Serde.serialize(raster);
+
+    // Sanity check: an untouched round trip keeps the categories' value, so the JVM-to-JVM
+    // path is unaffected by the reconciliation.
+    GridCoverage2D unpatched = Serde.deserialize(bytes);
+    Assert.assertEquals(0.0, RasterBandAccessors.getBandNoDataValue(unpatched, 1), 1e-9);
+    unpatched.dispose(true);
+
+    // Overwrite only the declared double for band 0, leaving the categories describing 0.0.
+    byte[] patched = bytes.clone();
+    int noDataOffset = findNoDataValueOffset(patched);
+    // Kryo's UnsafeOutput writes doubles in native byte order, which is what lets Python's
+    // struct.pack("=ddd", ...) interoperate with this format.
+    java.nio.ByteBuffer.wrap(patched)
+        .order(java.nio.ByteOrder.nativeOrder())
+        .putDouble(noDataOffset, -9999.0);
+
+    GridCoverage2D deserialized = Serde.deserialize(patched);
+    assertNotNull(deserialized);
+    Assert.assertEquals(-9999.0, RasterBandAccessors.getBandNoDataValue(deserialized, 1), 1e-9);
+
+    // The reconciled sample dimension must survive another round trip.
+    GridCoverage2D reDeserialized = Serde.deserialize(Serde.serialize(deserialized));
+    Assert.assertEquals(-9999.0, RasterBandAccessors.getBandNoDataValue(reDeserialized, 1), 1e-9);
+
+    reDeserialized.dispose(true);
+    deserialized.dispose(true);
+    raster.dispose(true);
+  }
+
+  @Test
+  public void testRasterWithoutNoDataStillHasNone() throws Exception {
+    // A raster with no nodata declares NaN, which must not be turned into a nodata category.
+    GridCoverage2D raster =
+        RasterConstructorsForTesting.makeRasterForTesting(
+            1, "D", "BandedSampleModel", 4, 3, 100, 100, 10, -10, 0, 0, 3857);
+    Assert.assertNull(RasterBandAccessors.getBandNoDataValue(raster, 1));
+
+    GridCoverage2D roundTrip = Serde.deserialize(Serde.serialize(raster));
+    Assert.assertNull(RasterBandAccessors.getBandNoDataValue(roundTrip, 1));
+
+    roundTrip.dispose(true);
+    raster.dispose(true);
+  }
+
+  /**
+   * Find the byte offset of band 0's declared noDataValue double in a serialized IN_DB raster. The
+   * per-band layout written by {@link GridSampleDimensionSerializer#write} is description, offset,
+   * scale, noDataValue, categories.
+   */
+  private int findNoDataValueOffset(byte[] bytes) {
+    try (com.esotericsoftware.kryo.io.UnsafeInput in =
+        new com.esotericsoftware.kryo.io.UnsafeInput(bytes)) {
+      in.readByte(); // rasterType
+      KryoUtil.skipUTF8String(in); // name
+      in.skip(16); // gridEnvelope2D
+      in.skip(48); // affine transform
+      in.skip(in.readInt()); // CRS
+      in.readInt(); // bandCount
+      KryoUtil.skipUTF8String(in); // band 0 description
+      in.skip(16); // band 0 offset + scale
+      return in.position();
+    }
   }
 
   /**

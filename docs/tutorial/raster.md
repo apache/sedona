@@ -282,9 +282,12 @@ ndviDf.createOrReplaceTempView("ndviDf")
 
 Map algebra is the most general processing primitive — clipping, masking, thresholding, and arithmetic between bands or between rasters all fit the same `RS_MapAlgebra(rast, pixelType, script)` (or two-raster) shape. See [Map algebra](../api/sql/Raster-map-algebra.md) for the script syntax and [Raster processing](#raster-processing-reference) below for alternatives (`RS_Clip`, `RS_Resample`, `RS_SetValues`).
 
-The same NDVI can be written as a Python UDF over NumPy instead, which is the better option once the
-calculation needs a library or looks at more than one pixel at a time — see
-[Raster UDFs](../api/sql/Raster-UDF.md) for both versions side by side.
+!!!warning
+    `RS_MapAlgebra` is deprecated since `v1.9.1` in favour of [Raster UDFs](../api/sql/Raster-UDF.md), which
+    express the same per-pixel calculations in Python and additionally reach NumPy, SciPy, scikit-learn, and
+    rasterio. The function continues to work, so this walkthrough still runs as written; see
+    [NDVI as map algebra and as a UDF](../api/sql/Raster-UDF.md#ndvi-as-map-algebra-and-as-a-udf) for the
+    same calculation written both ways.
 
 ### 6. Visualize the processed raster
 
@@ -780,8 +783,14 @@ df_raster.withColumn("mask_rast", expr("mask_udf(rast)")).show()
 
 `with_bands()` accepts a NumPy array in CHW order (bands × height × width), or HW order (height × width) for single-band output. The returned `SedonaRaster` is serialized back to the JVM automatically when the UDF returns, so the output is an ordinary raster column.
 
+Output NODATA is inherited from the input band unless you say otherwise, which is rarely what a derived raster wants — pass `nodata=` to set it:
+
+```python
+return raster.with_bands(mask, nodata=-9999.0)
+```
+
 !!!note
-    The result always sits on the input's grid — `with_bands()` requires the same height and width and reuses the input's CRS and affine transform, so reprojection and resampling can't be done inside a UDF. Output NODATA is inherited from the input band rather than set by you; call [`RS_SetBandNoDataValue`](../api/sql/Raster-Operators/RS_SetBandNoDataValue.md) afterwards if the result means something different. See [Raster UDFs](../api/sql/Raster-UDF.md#limits) for the details.
+    The result always sits on the input's grid — `with_bands()` requires the same height and width and reuses the input's CRS and affine transform, so reprojection and resampling can't be done inside a Python UDF. See [Raster UDFs](../api/sql/Raster-UDF.md#limits) for that and the dtype caveats.
 
 ### Using rasterio inside a UDF
 

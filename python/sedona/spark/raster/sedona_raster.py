@@ -16,7 +16,7 @@
 # under the License.
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Sequence, Union
 import json
 from xml.etree.ElementTree import Element, SubElement, tostring  # nosec B405
 
@@ -253,7 +253,11 @@ class SedonaRaster(ABC):
         """
         raise NotImplementedError()
 
-    def with_bands(self, new_data: np.ndarray) -> "SedonaRaster":
+    def with_bands(
+        self,
+        new_data: np.ndarray,
+        nodata: Optional[Union[float, Sequence[float]]] = None,
+    ) -> "SedonaRaster":
         """Replace pixel data, preserving spatial metadata.
 
         Only supported on InDbSedonaRaster.
@@ -382,7 +386,11 @@ class InDbSedonaRaster(SedonaRaster):
         dataset.mem_data_array = data_array
         return dataset
 
-    def with_bands(self, new_data: np.ndarray) -> "InDbSedonaRaster":
+    def with_bands(
+        self,
+        new_data: np.ndarray,
+        nodata: Optional[Union[float, Sequence[float]]] = None,
+    ) -> "InDbSedonaRaster":
         """Create a new InDbSedonaRaster with replaced pixel data but same spatial metadata.
 
         The spatial metadata (CRS, affine transform, name) and cached opaque blobs
@@ -406,6 +414,17 @@ class InDbSedonaRaster(SedonaRaster):
               - (bands, height, width) — CHW layout
             Height and width must match the source raster.
             Band count and dtype may differ from source.
+        nodata : float or sequence of float, optional
+            NODATA value for the output bands. A scalar applies to every band; a
+            sequence must have one entry per output band. Use ``float('nan')`` for
+            a band that should have no NODATA.
+
+            When omitted, each output band inherits NODATA from the source band in
+            the same position, and bands beyond the source's band count inherit it
+            from the source's last band. Pass this whenever the output means
+            something different from the input — a 0/1 mask derived from a scene
+            whose band has NODATA ``0`` would otherwise treat every unset pixel as
+            NODATA.
 
         Returns
         -------
@@ -415,7 +434,8 @@ class InDbSedonaRaster(SedonaRaster):
         Raises
         ------
         ValueError
-            If spatial dimensions don't match.
+            If spatial dimensions don't match, or if ``nodata`` is a sequence whose
+            length differs from the output band count.
         RuntimeError
             If the source raster has no cached blobs (cannot be serialized).
         """
@@ -459,20 +479,27 @@ class InDbSedonaRaster(SedonaRaster):
             for _ in range(n_bands - source_n_bands):
                 category_blobs.append(last_blob)
 
-        # Adjust band metadata for new band count
+        # Adjust band metadata for new band count. Bands beyond the source's band count
+        # replay the source's last category blob (above), so they inherit its nodata on
+        # the JVM side — record that here rather than NaN, otherwise bands_meta and
+        # RS_BandNoDataValue disagree about the same band.
         if n_bands <= source_n_bands:
             bands_meta = list(self._bands_meta[:n_bands])
         else:
             bands_meta = list(self._bands_meta)
+            last_meta = self._bands_meta[-1]
             for _ in range(n_bands - source_n_bands):
                 bands_meta.append(
                     SampleDimension(
                         description="",
                         offset=0.0,
                         scale=1.0,
-                        nodata=float("nan"),
+                        nodata=last_meta.nodata,
                     )
                 )
+
+        if nodata is not None:
+            bands_meta = self._override_nodata(bands_meta, nodata)
 
         # Build BandedSampleModel (TYPE_BANDED = 1)
         # ComponentSampleModel.__init__() sets TYPE_COMPONENT, so we must
@@ -507,6 +534,31 @@ class InDbSedonaRaster(SedonaRaster):
         result._properties_blob = self._properties_blob
         result._color_model_blob = self._color_model_blob  # replay unchanged
         return result
+
+    @staticmethod
+    def _override_nodata(
+        bands_meta: List[SampleDimension],
+        nodata: Union[float, Sequence[float]],
+    ) -> List[SampleDimension]:
+        """Return bands_meta with NODATA replaced by the requested value(s)."""
+        if isinstance(nodata, (int, float)) and not isinstance(nodata, bool):
+            values = [float(nodata)] * len(bands_meta)
+        else:
+            values = [float(v) for v in nodata]
+            if len(values) != len(bands_meta):
+                raise ValueError(
+                    f"nodata has {len(values)} entries but the output has "
+                    f"{len(bands_meta)} band(s)"
+                )
+        return [
+            SampleDimension(
+                description=bm.description,
+                offset=bm.offset,
+                scale=bm.scale,
+                nodata=value,
+            )
+            for bm, value in zip(bands_meta, values)
+        ]
 
     def close(self):
         if self.rasterio_dataset_reader is not None:

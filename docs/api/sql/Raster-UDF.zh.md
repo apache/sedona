@@ -35,7 +35,7 @@ Python UDF 接收栅格**输入**从 `v1.6.0` 起支持；从 UDF **返回**栅�
 | 表达方式 | 用 [Jiffle](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle) 语言编写逐像素脚本 | 在 NumPy 视图上编写整数组运算的 Python 代码 |
 | 可用库 | 无 | 环境中安装的任意库 —— NumPy、SciPy、scikit-learn、rasterio |
 | 输出 | 栅格 | 栅格，或任意 Spark 类型 |
-| 输出的 NODATA | 由 `noDataValue` 参数显式指定 | 继承自输入 —— 参见[限制](#limits) |
+| 输出的 NODATA | 由 `noDataValue` 参数显式指定 | 由 `nodata=` 参数显式指定，可逐波段设置 |
 | 可用范围 | SQL，因此所有语言绑定都能用 | 仅 Python |
 
 如果运算是能用一小段表达式写完的逐像素算术，就用 `RS_MapAlgebra`：此时数据不离开 JVM，代价更低。如果需要用到
@@ -126,7 +126,40 @@ df.select(mask_udf(col("rast")).alias("mask_rast"))
 dtype 都可以与输入不同 —— 上面的例子就把一个多波段场景变成了单个 `float32` 波段。返回的 `SedonaRaster`
 会自动序列化回 JVM 端，因此输出列就是一个普通栅格列，所有 `RS_` 函数都能接收。
 
-### NDVI：地图代数写法与 UDF 写法
+#### 设置输出的 NODATA
+
+默认情况下，输出的每个波段都会从相同位置的输入波段继承 NODATA，超出输入波段数的波段则继承输入最后一个波段的
+NODATA。对派生栅格来说这通常并不合适，因为输出的含义与它所来自的场景不同：如果某个波段的 NODATA 是 `0`，那么
+由它得到的 0/1 掩膜中所有未置位的像素，都会被
+[`RS_ZonalStats`](Raster-Band-Accessors/RS_ZonalStats.md)、
+[`RS_Count`](Raster-Band-Accessors/RS_Count.md) 以及其他遵循 NODATA 的函数当作 NODATA 跳过。
+
+用 `nodata=` 明确表达输出的含义。它等价于 `RS_MapAlgebra` 的 `noDataValue` 参数：
+
+```python
+@udf(returnType=RasterType())
+def mask_udf(raster):
+    band1 = raster.as_numpy()[0]
+    mask = (band1 < 1400).astype(np.float32)
+    return raster.with_bands(mask, nodata=-9999.0)
+```
+
+传入标量会作用于所有输出波段；传入序列则可逐个设置，每个波段一项。若某个波段不应有 NODATA，用
+`float("nan")`。
+
+```python
+return raster.with_bands(stacked, nodata=[-9999.0, float("nan")])
+```
+
+!!!note
+    `nodata=` 是 `v1.9.1` 新增的。在此之前该值只能继承，需要事后用
+    [`RS_SetBandNoDataValue`](Raster-Operators/RS_SetBandNoDataValue.md) 修正 —— 该方式目前依然可用。
+
+{% raw %}
+
+### NDVI：地图代数写法与 UDF 写法 {#ndvi-as-map-algebra-and-as-a-udf}
+
+{% endraw %}
 
 同一个计算的两种写法。用 `RS_MapAlgebra`：
 
@@ -211,36 +244,6 @@ ValueError: Spatial dimensions (2, 2) don't match raster (3, 4)
 [`RS_Clip`](Raster-Operators/RS_Clip.md)，或者用 [Scala](#scala-and-java) 编写 UDF —— 该限制对 Scala 不适用。
 
 `RS_MapAlgebra` 同样是保持网格不变的，所以这一点并不是两者之间的差异。
-
-#### NODATA 继承自输入
-
-`RS_MapAlgebra` 可以通过 `noDataValue` 显式指定 NODATA，而 UDF 无法设置它所返回栅格的 NODATA 值。输出的每个
-波段都会从相同位置的输入波段继承 NODATA；超出输入波段数的新增波段则继承输入**最后一个**波段的 NODATA。
-
-这一点需要留意，因为掩膜的含义通常与它所来自的场景不同。如果输入的第一个波段的 NODATA 是 `0`，那么上面
-`mask_udf` 返回的 0/1 掩膜的 NODATA 也是 `0` —— 于是掩膜中所有未置位的像素对那些遵循 NODATA 的函数而言都是
-不可见的，下面两个计数会不一致：
-
-```python
-df.select(mask_udf(col("rast")).alias("mask_rast")).selectExpr(
-    "RS_Count(mask_rast, 1, true) AS set_pixels",  # 零值被当作 NODATA 跳过
-    "RS_Count(mask_rast, 1, false) AS all_pixels",
-)
-```
-
-只要输出的 NODATA 与输入不同，就在 UDF 之后显式设置：
-
-```python
-df.select(mask_udf(col("rast")).alias("mask_rast")).selectExpr(
-    "RS_SetBandNoDataValue(mask_rast, 1, -9999) AS mask_rast"
-)
-```
-
-!!!note
-    对于超出输入波段数的新增波段，Python 侧的 `raster.bands_meta[i].nodata` 报告 `NaN`，而 JVM 侧的
-    [`RS_BandNoDataValue`](Raster-Band-Accessors/RS_BandNoDataValue.md) 报告继承来的值。把一个第 4 波段
-    NODATA 为 `-1` 的 4 波段栅格扩展到 8 个波段，Python 得到
-    `[nan, nan, nan, -1.0, nan, nan, nan, nan]`，而 SQL 对第 4 到第 8 波段都返回 `-1.0`。请以 SQL 函数为准。
 
 #### 并非所有 NumPy dtype 都能保留
 

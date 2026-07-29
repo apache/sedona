@@ -279,7 +279,11 @@ ndviDf.createOrReplaceTempView("ndviDf")
 
 Map algebra 是最通用的处理原语 —— 裁剪、遮罩、阈值过滤、不同波段或不同栅格之间的算术运算，都可以用同样的 `RS_MapAlgebra(rast, pixelType, script)`（或双栅格版本）写出来。脚本语法见 [Map algebra](../api/sql/Raster-map-algebra.md)；其他备选算子（`RS_Clip`、`RS_Resample`、`RS_SetValues`）见下文的 [栅格处理参考](#raster-processing-reference)。
 
-同样的 NDVI 也可以写成基于 NumPy 的 Python UDF。一旦计算需要用到某个库，或者需要同时读取多个像素，UDF 就是更好的选择 —— 两种写法的对照见 [栅格 UDF](../api/sql/Raster-UDF.md)。
+!!!warning
+    `RS_MapAlgebra` 自 `v1.9.1` 起弃用，推荐改用[栅格 UDF](../api/sql/Raster-UDF.md)：它用 Python 表达同样的
+    逐像素计算，而且还能直接使用 NumPy、SciPy、scikit-learn 与 rasterio。该函数仍然可用，所以本教程照原样运行
+    没有问题；两种写法的对照见
+    [NDVI：地图代数写法与 UDF 写法](../api/sql/Raster-UDF.md#ndvi-as-map-algebra-and-as-a-udf)。
 
 ### 6. 可视化处理结果
 
@@ -753,8 +757,14 @@ df_raster.withColumn("mask_rast", expr("mask_udf(rast)")).show()
 
 `with_bands()` 接受 NumPy 数组：CHW 顺序（波段 × 高 × 宽），或单波段输出时的 HW 顺序（高 × 宽）。返回的 `SedonaRaster` 在 UDF 返回时会自动序列化回 JVM 端，因此输出就是一个普通栅格列。
 
+除非另行指定，输出的 NODATA 会继承自输入波段，而这通常不是派生栅格想要的 —— 用 `nodata=` 明确设置：
+
+```python
+return raster.with_bands(mask, nodata=-9999.0)
+```
+
 !!!note
-    结果始终位于输入的网格上 —— `with_bands()` 要求高、宽一致，并沿用输入的 CRS 与仿射变换，因此重投影和重采样无法在 UDF 内部完成。输出的 NODATA 继承自输入波段，而不是由你指定；如果结果的含义与输入不同，请在之后调用 [`RS_SetBandNoDataValue`](../api/sql/Raster-Operators/RS_SetBandNoDataValue.md)。详情见 [栅格 UDF](../api/sql/Raster-UDF.md#limits)。
+    结果始终位于输入的网格上 —— `with_bands()` 要求高、宽一致，并沿用输入的 CRS 与仿射变换，因此重投影和重采样无法在 Python UDF 内部完成。这一点以及 dtype 相关的注意事项见 [栅格 UDF](../api/sql/Raster-UDF.md#limits)。
 
 ### 在 UDF 中使用 rasterio
 
