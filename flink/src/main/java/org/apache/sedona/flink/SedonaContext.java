@@ -19,6 +19,7 @@
 package org.apache.sedona.flink;
 
 import java.util.Arrays;
+import org.apache.flink.api.common.serialization.SerializerConfigImpl;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.sedona.common.geometryObjects.Circle;
@@ -49,17 +50,22 @@ public class SedonaContext {
     TelemetryCollector.send("flink", "java");
     GeometrySerde serializer = new GeometrySerde();
     SpatialIndexSerde indexSerializer = new SpatialIndexSerde(serializer);
-    env.getConfig().registerTypeWithKryoSerializer(Point.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(LineString.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(Polygon.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(MultiPoint.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(MultiLineString.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(MultiPolygon.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(GeometryCollection.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(Circle.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(Envelope.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(Quadtree.class, indexSerializer);
-    env.getConfig().registerTypeWithKryoSerializer(STRtree.class, indexSerializer);
+    // ExecutionConfig.registerTypeWithKryoSerializer was removed; the registration methods
+    // now live only on the SerializerConfigImpl returned by getSerializerConfig() (the
+    // SerializerConfig interface itself exposes read-only getters).
+    SerializerConfigImpl serializerConfig =
+        (SerializerConfigImpl) env.getConfig().getSerializerConfig();
+    serializerConfig.registerTypeWithKryoSerializer(Point.class, serializer);
+    serializerConfig.registerTypeWithKryoSerializer(LineString.class, serializer);
+    serializerConfig.registerTypeWithKryoSerializer(Polygon.class, serializer);
+    serializerConfig.registerTypeWithKryoSerializer(MultiPoint.class, serializer);
+    serializerConfig.registerTypeWithKryoSerializer(MultiLineString.class, serializer);
+    serializerConfig.registerTypeWithKryoSerializer(MultiPolygon.class, serializer);
+    serializerConfig.registerTypeWithKryoSerializer(GeometryCollection.class, serializer);
+    serializerConfig.registerTypeWithKryoSerializer(Circle.class, serializer);
+    serializerConfig.registerTypeWithKryoSerializer(Envelope.class, serializer);
+    serializerConfig.registerTypeWithKryoSerializer(Quadtree.class, indexSerializer);
+    serializerConfig.registerTypeWithKryoSerializer(STRtree.class, indexSerializer);
 
     Arrays.stream(Catalog.getFuncs())
         .forEach(

@@ -170,8 +170,8 @@ public class Box3DTypeSerializer extends TypeSerializer<Box3D> {
 
     @Override
     public TypeSerializerSchemaCompatibility<Box3D> resolveSchemaCompatibility(
-        TypeSerializer<Box3D> newSerializer) {
-      if (newSerializer instanceof Box3DTypeSerializer) {
+        TypeSerializerSnapshot<Box3D> oldSerializerSnapshot) {
+      if (oldSerializerSnapshot instanceof Box3DSerializerSnapshot) {
         return TypeSerializerSchemaCompatibility.compatibleAsIs();
       } else {
         return TypeSerializerSchemaCompatibility.incompatible();

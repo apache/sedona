@@ -156,8 +156,8 @@ public class GeographyTypeSerializer extends TypeSerializer<Geography> {
 
     @Override
     public TypeSerializerSchemaCompatibility<Geography> resolveSchemaCompatibility(
-        TypeSerializer<Geography> newSerializer) {
-      if (newSerializer instanceof GeographyTypeSerializer) {
+        TypeSerializerSnapshot<Geography> oldSerializerSnapshot) {
+      if (oldSerializerSnapshot instanceof GeographySerializerSnapshot) {
         return TypeSerializerSchemaCompatibility.compatibleAsIs();
       } else {
         return TypeSerializerSchemaCompatibility.incompatible();
