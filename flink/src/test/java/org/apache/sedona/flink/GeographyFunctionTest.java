@@ -52,6 +52,10 @@ public class GeographyFunctionTest extends TestBase {
    * A single-row table whose column "geog" is the geography parsed from {@code wkt} (SRID 4326).
    */
   private Table geogTable(String wkt) {
+    return geogTable(wkt, 4326);
+  }
+
+  private Table geogTable(String wkt, int srid) {
     RowTypeInfo ti =
         new RowTypeInfo(
             new TypeInformation<?>[] {BasicTypeInfo.STRING_TYPE_INFO}, new String[] {"v"});
@@ -59,12 +63,16 @@ public class GeographyFunctionTest extends TestBase {
     return tableEnv
         .fromDataStream(ds)
         .select(
-            call(GeographyConstructors.ST_GeogFromWKT.class.getSimpleName(), $("v"), lit(4326))
+            call(GeographyConstructors.ST_GeogFromWKT.class.getSimpleName(), $("v"), lit(srid))
                 .as("geog"));
   }
 
   private Object eval(String wkt, ApiExpression call) {
     return first(geogTable(wkt).select(call.as("o"))).getFieldAs("o");
+  }
+
+  private Object eval(String wkt, int srid, ApiExpression call) {
+    return first(geogTable(wkt, srid).select(call.as("o"))).getFieldAs("o");
   }
 
   @Test
@@ -276,6 +284,28 @@ public class GeographyFunctionTest extends TestBase {
             Constructors.geogFromWKT(wkt, 4326), true);
     assertEquals(expected.toEWKT(), ((Geography) out).toEWKT());
     assertTrue(expected.toEWKT().contains("MULTIPOLYGON"));
+  }
+
+  @Test
+  public void testEnvelopePreservesEmptyGeography() {
+    for (String wkt :
+        new String[] {
+          "POINT EMPTY", "LINESTRING EMPTY", "POLYGON EMPTY", "GEOMETRYCOLLECTION EMPTY"
+        }) {
+      for (boolean splitAtAntiMeridian : new boolean[] {false, true}) {
+        Geography out =
+            (Geography)
+                eval(
+                    wkt,
+                    3857,
+                    call(
+                        Functions.ST_Envelope.class.getSimpleName(),
+                        $("geog"),
+                        lit(splitAtAntiMeridian)));
+        assertEquals(wkt, out.toString());
+        assertEquals(3857, out.getSRID());
+      }
+    }
   }
 
   @Test
