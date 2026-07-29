@@ -164,7 +164,7 @@ class ConstructorsTest extends TestBaseScala {
     val geography =
       sparkSession.sql("SELECT ST_GeogFromEWKB(rawWKBTable.wkb) as countyshape from rawWKBTable")
     val expectedGeog = {
-      "SRID=4326; LINESTRING (-2.1 -0.4, -1.5 -0.7)"
+      "SRID=4326; LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)"
     }
     assert(geography.first().getAs[Geography](0).getSRID == 4326)
     assert(geography.first().getAs[Geography](0).toEWKT().equals(expectedGeog))
@@ -243,6 +243,6 @@ class ConstructorsTest extends TestBaseScala {
         ST_GeomToGeography(ST_GeomFromWKT('$wkt')) AS geog
         """)
     var geog = df.first().getAs[Geography](0)
-    assertEquals(wkt, geog.toString)
+    assertEquals(wkt, geog.toString(precisionModel))
   }
 }
