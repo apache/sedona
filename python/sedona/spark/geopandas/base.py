@@ -1361,6 +1361,55 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("minimum_bounding_circle", self)
 
+    def maximum_inscribed_circle(self, *, tolerance=None):
+        """Return radius lines for the largest circles within polygonal geometries.
+
+        Each result is a two-point LineString from the circle center to the
+        nearest point on the polygon boundary. Polygon, MultiPolygon, and
+        ``None`` inputs are supported; other geometry types and empty
+        polygonal geometries raise an error when the distributed result is
+        evaluated.
+
+        Parameters
+        ----------
+        tolerance : float, array-like, pandas Series, or pandas-on-Spark Series, optional
+            Stop refining when the search area is smaller than this distance.
+            By default, each geometry uses
+            ``max(width, height) / 1000``. A one-value local array-like is
+            broadcast; otherwise it must have the same length as the
+            GeoSeries. A pandas Series must also have the same index. A
+            distributed Series must share the same frame and index as the
+            geometry column.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 0), (1, 1), (0, 0)]),
+        ...         Polygon([(0, 0), (0.5, -1), (1, 0), (1, 1), (-0.5, 0.5)]),
+        ...     ]
+        ... )
+        >>> s.maximum_inscribed_circle()
+        0    LINESTRING (0.70703 0.29297, 0.5 0.5)
+        1    LINESTRING (0.4668 0.25977, 1 0.25977)
+        dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.minimum_bounding_circle : minimum enclosing circle geometry
+        """
+        return _delegate_to_geometry_column(
+            "maximum_inscribed_circle",
+            self,
+            tolerance=tolerance,
+        )
+
     def minimum_bounding_radius(self):
         """Return a `Series` of the radii of the minimum bounding circles
         that enclose each geometry.

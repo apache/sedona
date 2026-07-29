@@ -5128,6 +5128,26 @@ public class FunctionsTest extends TestBase {
             Constructors.geomFromEWKT("POINT (67.4 14.8)"),
             2.2681911662992174);
     assertTrue(expected.equals(actual));
+
+    geom = Constructors.geomFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 0))", 3857);
+    actual = Functions.maximumInscribedCircle(geom, 2.0);
+    expected =
+        new InscribedCircle(
+            Constructors.geomFromWKT("POINT (0.75 0.5)", 3857),
+            Constructors.geomFromWKT("POINT (0.625 0.625)", 3857),
+            0.1767766952966369);
+    assertEquals(expected, actual);
+    assertEquals(3857, actual.center.getSRID());
+    assertEquals(3857, actual.nearest.getSRID());
+    assertEquals(
+        Functions.maximumInscribedCircle(geom), Functions.maximumInscribedCircle(geom, 0.0));
+
+    Geometry finalGeom = geom;
+    IllegalArgumentException error =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> Functions.maximumInscribedCircle(finalGeom, -1.0));
+    assertEquals("Tolerance must be positive", error.getMessage());
   }
 
   @Test

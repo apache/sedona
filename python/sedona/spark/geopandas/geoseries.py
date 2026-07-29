@@ -174,6 +174,16 @@ def _normalize_dwithin_distance_sequence(distance) -> List[float]:
     return [_normalize_dwithin_numeric_scalar(value) for value in values]
 
 
+def _normalize_circle_tolerance_scalar(value, error_message: str) -> float:
+    """Normalize the scalar types accepted by Shapely's tolerance ufunc."""
+    if not isinstance(
+        value,
+        (bool, int, float, np.bool_, np.integer, np.floating),
+    ):
+        raise TypeError(error_message)
+    return float(value)
+
+
 def _normalize_affine_scalar(value, error_message: str) -> float:
     """Normalize an operation-wide affine parameter to a Python float."""
     return _normalize_numeric_scalar(value, error_message)
@@ -303,6 +313,54 @@ def _sample_points_expression(
             F.raise_error(F.lit("sample size must be at most 2147483647")),
         )
         .otherwise(sampled)
+    )
+
+
+def _maximum_inscribed_circle_expression(
+    geometry: PySparkColumn,
+    tolerance: typing.Optional[PySparkColumn],
+) -> PySparkColumn:
+    """Build GeoPandas-compatible maximum-inscribed-circle expressions."""
+    geometry_type = stf.ST_GeometryType(geometry)
+    is_polygonal = geometry_type.isin("ST_Polygon", "ST_MultiPolygon")
+    null_geometry = F.when(F.lit(False), geometry)
+
+    circle = (
+        stf.ST_MaximumInscribedCircle(geometry)
+        if tolerance is None
+        else stf.ST_MaximumInscribedCircle(geometry, tolerance)
+    )
+    # Extracting center and nearest directly from the same struct expression
+    # duplicates this expensive CodegenFallback operation. Bind the struct as
+    # a one-element array value so the circle search runs once per row.
+    radius_line = F.transform(
+        F.array(circle),
+        lambda result: stf.ST_MakeLine(
+            result.getField("center"),
+            result.getField("nearest"),
+        ),
+    ).getItem(0)
+
+    result = F.when(geometry.isNull(), null_geometry)
+    if tolerance is not None:
+        result = result.when(
+            tolerance.isNull() | F.isnan(tolerance),
+            null_geometry,
+        ).when(
+            tolerance < 0,
+            F.raise_error(F.lit("'tolerance' should be positive")),
+        )
+
+    return (
+        result.when(
+            ~is_polygonal,
+            F.raise_error(F.lit("Input geometry must be a Polygon or MultiPolygon")),
+        )
+        .when(
+            stf.ST_IsEmpty(geometry),
+            F.raise_error(F.lit("Empty input geometry is not supported")),
+        )
+        .otherwise(radius_line)
     )
 
 
@@ -1789,6 +1847,213 @@ class GeoSeries(GeoFrame, pspd.Series):
         spark_expr = stf.ST_MinimumBoundingCircle(self.spark.column)
         return self._query_geometry_column(
             spark_expr,
+            returns_geom=True,
+        )
+
+    def maximum_inscribed_circle(self, *, tolerance=None) -> "GeoSeries":
+        tolerance_error = (
+            "tolerance must be a numeric scalar, array-like, pandas Series, "
+            "or same-frame pandas-on-Spark Series"
+        )
+        tolerance_column = None
+        if isinstance(tolerance, PandasOnSparkSeries):
+            if not same_anchor(self, tolerance):
+                raise ValueError(
+                    "A distributed tolerance Series must share the same frame "
+                    "and index as the GeoSeries; align both columns in one "
+                    "DataFrame before calling maximum_inscribed_circle"
+                )
+            spark_type = tolerance.spark.data_type
+            if not isinstance(
+                spark_type,
+                (BooleanType, IntegralType, FloatType, DoubleType, NullType),
+            ):
+                raise TypeError(tolerance_error)
+            tolerance_column = tolerance.spark.column.cast("double")
+        elif isinstance(tolerance, pd.Series) or (
+            tolerance is not None and pd.api.types.is_list_like(tolerance)
+        ):
+            return self._maximum_inscribed_circle_with_local_tolerance(
+                tolerance,
+                tolerance_error,
+            )
+        elif tolerance is not None:
+            if isinstance(tolerance, np.ndarray) and tolerance.ndim == 0:
+                tolerance = tolerance.item()
+            normalized_tolerance = _normalize_circle_tolerance_scalar(
+                tolerance,
+                tolerance_error,
+            )
+            if normalized_tolerance < 0:
+                raise ValueError("'tolerance' should be positive")
+            tolerance_column = F.lit(normalized_tolerance)
+
+        spark_expr = _maximum_inscribed_circle_expression(
+            self.spark.column,
+            tolerance_column,
+        )
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
+
+    def _maximum_inscribed_circle_with_local_tolerance(
+        self,
+        tolerance,
+        tolerance_error: str,
+    ) -> "GeoSeries":
+        """Positionally align a local tolerance vector without collecting rows."""
+        normalized_values = None
+        if not isinstance(tolerance, pd.Series):
+            normalized_values = [
+                _normalize_circle_tolerance_scalar(value, tolerance_error)
+                for value in list(tolerance)
+            ]
+            if len(normalized_values) == 1:
+                spark_expr = _maximum_inscribed_circle_expression(
+                    self.spark.column,
+                    F.lit(normalized_values[0]),
+                )
+                return self._query_geometry_column(
+                    spark_expr,
+                    returns_geom=True,
+                )
+
+        source_internal = self._internal.resolved_copy
+        source_sdf = source_internal.spark_frame
+        reserved_names = set(source_sdf.columns)
+
+        def temp_column_name(base: str) -> str:
+            suffix = 0
+            candidate = f"__maximum_inscribed_circle_{base}__"
+            while candidate in reserved_names:
+                suffix += 1
+                candidate = f"__maximum_inscribed_circle_{base}_{suffix}__"
+            reserved_names.add(candidate)
+            return typing.cast(
+                str,
+                verify_temp_column_name(source_sdf, candidate),
+            )
+
+        geometry_col = temp_column_name("geometry")
+        tolerance_col = temp_column_name("tolerance")
+        position_col = temp_column_name("position")
+        left_present_col = temp_column_name("left_present")
+        right_present_col = temp_column_name("right_present")
+        left_order_col = temp_column_name("left_order")
+
+        left_frame = source_sdf.select(
+            source_internal.data_spark_columns[0].alias(geometry_col),
+            *[
+                scol_for(source_sdf, name)
+                for name in source_internal.index_spark_column_names
+            ],
+            scol_for(source_sdf, NATURAL_ORDER_COLUMN_NAME).alias(left_order_col),
+            F.lit(True).alias(left_present_col),
+        )
+        left_frame = _attach_ordered_sequence_column(
+            left_frame,
+            F.col(left_order_col),
+            position_col,
+        ).withColumnRenamed(left_order_col, NATURAL_ORDER_COLUMN_NAME)
+
+        if isinstance(tolerance, pd.Series):
+            if not (
+                pd.api.types.is_bool_dtype(tolerance.dtype)
+                or pd.api.types.is_integer_dtype(tolerance.dtype)
+                or pd.api.types.is_float_dtype(tolerance.dtype)
+            ):
+                raise TypeError(tolerance_error)
+
+            local_series = pspd.Series(tolerance)
+            right_internal = local_series._internal.resolved_copy
+            right_sdf = right_internal.spark_frame
+            right_order_col = temp_column_name("right_order")
+            right_index_cols = [
+                temp_column_name(f"right_index_{level}")
+                for level in range(len(right_internal.index_spark_column_names))
+            ]
+            right_frame = right_sdf.select(
+                right_internal.data_spark_columns[0]
+                .cast("double")
+                .alias(tolerance_col),
+                *[
+                    scol_for(right_sdf, name).alias(alias)
+                    for name, alias in zip(
+                        right_internal.index_spark_column_names,
+                        right_index_cols,
+                    )
+                ],
+                scol_for(right_sdf, NATURAL_ORDER_COLUMN_NAME).alias(right_order_col),
+                F.lit(True).alias(right_present_col),
+            )
+            right_frame = _attach_ordered_sequence_column(
+                right_frame,
+                F.col(right_order_col),
+                position_col,
+            )
+
+            if len(right_index_cols) == len(source_internal.index_spark_column_names):
+                index_mismatch = F.lit(False)
+                for left_index, right_index in zip(
+                    source_internal.index_spark_column_names,
+                    right_index_cols,
+                ):
+                    index_mismatch = index_mismatch | ~F.col(left_index).eqNullSafe(
+                        F.col(right_index)
+                    )
+            else:
+                index_mismatch = F.lit(True)
+        else:
+            right_schema = StructType(
+                [
+                    StructField(position_col, LongType(), nullable=False),
+                    StructField(tolerance_col, DoubleType(), nullable=False),
+                    StructField(right_present_col, BooleanType(), nullable=False),
+                ]
+            )
+            right_frame = source_sdf.sparkSession.createDataFrame(
+                [
+                    (position, value, True)
+                    for position, value in enumerate(normalized_values)
+                ],
+                schema=right_schema,
+            )
+            index_mismatch = F.lit(False)
+
+        aligned_frame = left_frame.join(
+            right_frame,
+            on=position_col,
+            how="full",
+        )
+        length_mismatch = (
+            F.col(left_present_col).isNull() | F.col(right_present_col).isNull()
+        )
+        radius_line = _maximum_inscribed_circle_expression(
+            F.col(geometry_col),
+            F.col(tolerance_col),
+        )
+        spark_expr = (
+            F.when(
+                length_mismatch,
+                F.raise_error(
+                    F.lit("Length of tolerance does not match length of GeoSeries")
+                ),
+            )
+            .when(
+                index_mismatch,
+                F.raise_error(
+                    F.lit(
+                        "Index of the Series passed as 'tolerance' does not "
+                        "match index of the GeoSeries"
+                    )
+                ),
+            )
+            .otherwise(radius_line)
+        )
+        return self._query_geometry_column(
+            spark_expr,
+            aligned_frame,
             returns_geom=True,
         )
 

@@ -1142,6 +1142,45 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(geom).minimum_bounding_circle()
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result, tolerance=0.5)
 
+    def test_maximum_inscribed_circle(self):
+        if parse_version(gpd.__version__) < parse_version("1.1.0"):
+            pytest.skip(
+                "geopandas maximum_inscribed_circle requires version 1.1.0 or higher"
+            )
+        if parse_version(shapely.__version__) < parse_version("2.1.0"):
+            pytest.skip(
+                "geopandas maximum_inscribed_circle requires shapely 2.1.0 or higher"
+            )
+
+        geoms = [
+            Polygon([(0, 0), (1, 0), (1, 1), (0, 0)]),
+            Polygon([(0, 0), (0.5, -1), (1, 0), (1, 1), (-0.5, 0.5)]),
+            MultiPolygon(
+                [
+                    Polygon([(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]),
+                    Polygon([(10, 0), (10, 1), (11, 1), (11, 0), (10, 0)]),
+                ]
+            ),
+            None,
+        ]
+        for tolerance in (None, 2.0):
+            sgpd_result = GeoSeries(geoms).maximum_inscribed_circle(tolerance=tolerance)
+            gpd_result = gpd.GeoSeries(geoms).maximum_inscribed_circle(
+                tolerance=tolerance
+            )
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # GeoPandas' own compatibility test uses row-wise zero and coarse
+        # tolerances, including zero as the per-geometry automatic tolerance.
+        local_tolerance = np.array([0, 10])
+        sgpd_result = GeoSeries(geoms[:2]).maximum_inscribed_circle(
+            tolerance=local_tolerance
+        )
+        gpd_result = gpd.GeoSeries(geoms[:2]).maximum_inscribed_circle(
+            tolerance=local_tolerance
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_minimum_bounding_radius(self):
         for geom in self.geoms:
             sgpd_result = GeoSeries(geom).minimum_bounding_radius()

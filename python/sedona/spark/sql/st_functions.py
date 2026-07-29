@@ -1660,15 +1660,22 @@ def ST_MakeValid(
 
 
 @validate_argument_types
-def ST_MaximumInscribedCircle(geometry: ColumnOrName) -> Column:
+def ST_MaximumInscribedCircle(
+    geometry: ColumnOrName,
+    tolerance: Optional[ColumnOrNameOrNumber] = None,
+) -> Column:
     """Finds the largest circle that is contained within a geometry, or which does not overlap any lines and points
 
-    :param geometry:
+    :param geometry: Input geometry column.
     :type geometry: ColumnOrName
+    :param tolerance: Optional search tolerance. Zero uses the per-geometry
+        default of ``max(width, height) / 1000``.
+    :type tolerance: Optional[ColumnOrNameOrNumber]
     :return: Row of center point, nearest point and radius
     :rtype: Column
     """
-    return _call_st_function("ST_MaximumInscribedCircle", geometry)
+    args = (geometry,) if tolerance is None else (geometry, tolerance)
+    return _call_st_function("ST_MaximumInscribedCircle", args)
 
 
 @validate_argument_types

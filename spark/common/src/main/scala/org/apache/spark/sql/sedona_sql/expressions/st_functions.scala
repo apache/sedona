@@ -533,6 +533,10 @@ object st_functions {
     wrapExpression[ST_MaximumInscribedCircle](geometry)
   def ST_MaximumInscribedCircle(geometry: String): Column =
     wrapExpression[ST_MaximumInscribedCircle](geometry)
+  def ST_MaximumInscribedCircle(geometry: Column, tolerance: Column): Column =
+    wrapExpression[ST_MaximumInscribedCircle](geometry, tolerance)
+  def ST_MaximumInscribedCircle(geometry: String, tolerance: Double): Column =
+    wrapExpression[ST_MaximumInscribedCircle](geometry, tolerance)
 
   def ST_MaxDistance(geom1: Column, geom2: Column): Column =
     wrapExpression[ST_MaxDistance](geom1, geom2)

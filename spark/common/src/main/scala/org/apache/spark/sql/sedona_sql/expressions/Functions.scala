@@ -1291,13 +1291,47 @@ private[apache] case class ST_MakePolygon(inputExpressions: Seq[Expression])
 
 private[apache] case class ST_MaximumInscribedCircle(children: Seq[Expression])
     extends Expression
+    with ImplicitCastInputTypes
     with CodegenFallback {
+
+  private val nArgs = children.length
+
+  override def inputTypes: Seq[AbstractDataType] = nArgs match {
+    case 1 => Seq(GeometryUDT())
+    case 2 => Seq(GeometryUDT(), DoubleType)
+    case _ =>
+      throw new IllegalArgumentException("ST_MaximumInscribedCircle expects one or two arguments")
+  }
 
   override def eval(input: InternalRow): Any = {
     val geometry = children.head.toGeometry(input)
+    var tolerance: java.lang.Double = null
     try {
-      var inscribedCircle: InscribedCircle = null
-      inscribedCircle = Functions.maximumInscribedCircle(geometry)
+      if (geometry == null) {
+        return null
+      }
+
+      if (nArgs == 2) {
+        tolerance = children(1).eval(input) match {
+          case null => return null
+          case value: Number => value.doubleValue()
+          case value =>
+            throw new IllegalArgumentException(
+              s"Tolerance must be numeric, but received ${value.getClass.getSimpleName}")
+        }
+        // GEOS returns null for a NaN tolerance, which is also useful for
+        // nullable row-wise tolerances in the GeoPandas API.
+        if (tolerance.isNaN) {
+          return null
+        }
+      }
+
+      val inscribedCircle: InscribedCircle =
+        if (tolerance == null) {
+          Functions.maximumInscribedCircle(geometry)
+        } else {
+          Functions.maximumInscribedCircle(geometry, tolerance)
+        }
 
       val serCenter = GeometrySerializer.serialize(inscribedCircle.center)
       val serNearest = GeometrySerializer.serialize(inscribedCircle.nearest)
@@ -1306,7 +1340,7 @@ private[apache] case class ST_MaximumInscribedCircle(children: Seq[Expression])
       case e: Exception =>
         InferredExpression.throwExpressionInferenceException(
           getClass.getSimpleName,
-          Seq(geometry),
+          if (nArgs == 1) Seq(geometry) else Seq(geometry, tolerance),
           e)
     }
   }

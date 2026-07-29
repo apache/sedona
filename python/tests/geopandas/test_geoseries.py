@@ -2440,6 +2440,152 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = gdf.minimum_bounding_circle()
         self.check_sgpd_equals_gpd(df_result, expected)
 
+    def test_maximum_inscribed_circle(self):
+        geoms = [
+            Polygon([(0, 0), (1, 0), (1, 1), (0, 0)]),
+            Polygon([(0, 0), (0.5, -1), (1, 0), (1, 1), (-0.5, 0.5)]),
+            MultiPolygon(
+                [
+                    Polygon([(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]),
+                    Polygon([(10, 0), (10, 1), (11, 1), (11, 0), (10, 0)]),
+                ]
+            ),
+            None,
+        ]
+        index = pd.Index(["first", "first", "multi", "null"], name="feature_id")
+        source = GeoSeries(geoms, index=index, crs="EPSG:3857")
+        expected = gpd.GeoSeries(
+            geoms,
+            index=index,
+            crs="EPSG:3857",
+        ).maximum_inscribed_circle()
+
+        result = source.maximum_inscribed_circle()
+        self.check_sgpd_equals_gpd(result, expected)
+        assert result.name is None
+        assert result.crs == source.crs
+        srids = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid")
+        ).collect()
+        assert {row.srid for row in srids if row.srid is not None} == {3857}
+
+        frame = GeoDataFrame(
+            gpd.GeoDataFrame(
+                {
+                    "geometry": geoms,
+                    "tolerance": [0.0, 2.0, 0.5, np.nan],
+                    "label": ["a", "b", "c", "d"],
+                },
+                index=index,
+                crs="EPSG:3857",
+            )
+        )
+        row_wise = frame.geometry.maximum_inscribed_circle(tolerance=frame["tolerance"])
+        row_wise_expected = gpd.GeoSeries(
+            geoms,
+            index=index,
+            crs="EPSG:3857",
+        ).maximum_inscribed_circle(
+            tolerance=pd.Series([0.0, 2.0, 0.5, np.nan], index=index)
+        )
+        self.check_sgpd_equals_gpd(row_wise, row_wise_expected)
+
+        local_tolerances = [0.0, 2.0, 0.5, np.nan]
+        for local_tolerance in (
+            local_tolerances,
+            np.asarray(local_tolerances),
+            pd.Series(local_tolerances, index=index),
+        ):
+            local_result = source.maximum_inscribed_circle(tolerance=local_tolerance)
+            local_expected = gpd.GeoSeries(
+                geoms,
+                index=index,
+                crs="EPSG:3857",
+            ).maximum_inscribed_circle(tolerance=local_tolerance)
+            self.check_sgpd_equals_gpd(local_result, local_expected)
+
+        self.check_sgpd_equals_gpd(
+            source.maximum_inscribed_circle(tolerance=0),
+            expected,
+        )
+        self.check_sgpd_equals_gpd(
+            source.maximum_inscribed_circle(tolerance=np.asarray(0)),
+            expected,
+        )
+        self.check_sgpd_equals_gpd(
+            source.maximum_inscribed_circle(tolerance=[0]),
+            expected,
+        )
+        assert (
+            len(
+                GeoSeries([], crs="EPSG:3857").maximum_inscribed_circle(
+                    tolerance=np.array([0])
+                )
+            )
+            == 0
+        )
+        self.check_sgpd_equals_gpd(
+            frame.maximum_inscribed_circle(tolerance=2.0),
+            gpd.GeoSeries(geoms, index=index, crs="EPSG:3857").maximum_inscribed_circle(
+                tolerance=2.0
+            ),
+        )
+
+        spark_frame = row_wise._internal.spark_frame
+        if hasattr(spark_frame, "_jdf"):
+            optimized_plan = (
+                spark_frame._jdf.queryExecution().optimizedPlan().toString()
+            )
+            assert optimized_plan.lower().count("st_maximuminscribedcircle") == 1
+            assert "BatchEvalPython" not in optimized_plan
+            assert "ArrowEvalPython" not in optimized_plan
+            assert "PythonUDF" not in optimized_plan
+
+        nan_result = source.maximum_inscribed_circle(tolerance=np.nan).to_geopandas()
+        assert nan_result.isna().all()
+
+        with pytest.raises(ValueError, match="'tolerance' should be positive"):
+            source.maximum_inscribed_circle(tolerance=-1)
+        with pytest.raises(ValueError, match="must share the same frame"):
+            source.maximum_inscribed_circle(tolerance=ps.Series([0.1] * len(source)))
+        with pytest.raises(TypeError, match="numeric scalar"):
+            frame.geometry.maximum_inscribed_circle(tolerance=frame["label"])
+        with pytest.raises(TypeError, match="numeric scalar"):
+            source.maximum_inscribed_circle(tolerance=["0.1"] * len(source))
+        with pytest.raises(TypeError, match="numeric scalar"):
+            source.maximum_inscribed_circle(tolerance=Decimal("0.1"))
+        with pytest.raises(TypeError, match="numeric scalar"):
+            source.maximum_inscribed_circle(tolerance=[Decimal("0.1")] * len(source))
+        for mismatched_tolerance in (
+            [0.1] * (len(source) - 1),
+            [0.1] * (len(source) + 1),
+        ):
+            with pytest.raises(Exception, match="Length of tolerance"):
+                source.maximum_inscribed_circle(
+                    tolerance=mismatched_tolerance
+                ).to_geopandas()
+        with pytest.raises(Exception, match="Index of the Series"):
+            source.maximum_inscribed_circle(
+                tolerance=pd.Series(
+                    local_tolerances,
+                    index=pd.Index(
+                        ["first", "multi", "first", "null"],
+                        name="feature_id",
+                    ),
+                )
+            ).to_geopandas()
+
+        with pytest.raises(
+            Exception,
+            match="Input geometry must be a Polygon or MultiPolygon",
+        ):
+            GeoSeries([Point(0, 0)]).maximum_inscribed_circle().to_geopandas()
+        with pytest.raises(
+            Exception,
+            match="Empty input geometry is not supported",
+        ):
+            GeoSeries([Polygon()]).maximum_inscribed_circle().to_geopandas()
+
     def test_minimum_bounding_radius(self):
         s = GeoSeries(
             [
