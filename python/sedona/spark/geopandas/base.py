@@ -1379,7 +1379,10 @@ class GeoFrame(metaclass=ABCMeta):
             broadcast; otherwise it must have the same length as the
             GeoSeries. A pandas Series must also have the same index. A
             distributed Series must share the same frame and index as the
-            geometry column.
+            geometry column. Negative values are rejected for scalar and
+            row-wise inputs. This is intentionally stricter than GeoPandas,
+            whose array path currently bypasses its scalar negative-value
+            validation and emits implementation-dependent results.
 
         Returns
         -------

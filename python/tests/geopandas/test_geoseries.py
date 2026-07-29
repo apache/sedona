@@ -2544,8 +2544,30 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         nan_result = source.maximum_inscribed_circle(tolerance=np.nan).to_geopandas()
         assert nan_result.isna().all()
 
+        degenerate = GeoSeries(
+            [Polygon([(0, 0), (0, 0), (0, 0), (0, 0)])],
+            crs="EPSG:3857",
+        ).maximum_inscribed_circle()
+        self.check_sgpd_equals_gpd(
+            degenerate,
+            gpd.GeoSeries(
+                [Polygon([(0, 0), (0, 0), (0, 0), (0, 0)])],
+                crs="EPSG:3857",
+            ).maximum_inscribed_circle(),
+        )
+
         with pytest.raises(ValueError, match="'tolerance' should be positive"):
             source.maximum_inscribed_circle(tolerance=-1)
+        with pytest.raises(ValueError, match="'tolerance' should be positive"):
+            source.maximum_inscribed_circle(tolerance=np.array(-1.0))
+        with pytest.raises(Exception, match="'tolerance' should be positive"):
+            source.maximum_inscribed_circle(
+                tolerance=[-1.0] * len(source)
+            ).to_geopandas()
+        with pytest.raises(Exception, match="'tolerance' should be positive"):
+            frame.geometry.maximum_inscribed_circle(
+                tolerance=frame["tolerance"] - 3.0
+            ).to_geopandas()
         with pytest.raises(ValueError, match="must share the same frame"):
             source.maximum_inscribed_circle(tolerance=ps.Series([0.1] * len(source)))
         with pytest.raises(TypeError, match="numeric scalar"):

@@ -1466,6 +1466,13 @@ public class Functions {
     if (tolerance == 0.0) {
       tolerance = defaultMaximumInscribedCircleTolerance(geometry);
     }
+    // A non-empty zero-extent geometry has no positive automatic tolerance.
+    // GEOS returns the coincident center and boundary point for this case,
+    // while JTS rejects a zero tolerance before evaluating the geometry.
+    if (tolerance == 0.0 && !geometry.isEmpty()) {
+      Point point = geometry.getFactory().createPoint(geometry.getCoordinate());
+      return new InscribedCircle(point, point.copy(), 0.0);
+    }
     Geometry center, nearest;
     double radius;
 

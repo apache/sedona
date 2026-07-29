@@ -5142,6 +5142,16 @@ public class FunctionsTest extends TestBase {
     assertEquals(
         Functions.maximumInscribedCircle(geom), Functions.maximumInscribedCircle(geom, 0.0));
 
+    geom = Constructors.geomFromWKT("POLYGON ((0 0, 0 0, 0 0, 0 0))", 3857);
+    actual = Functions.maximumInscribedCircle(geom);
+    expected =
+        new InscribedCircle(
+            Constructors.geomFromWKT("POINT (0 0)", 3857),
+            Constructors.geomFromWKT("POINT (0 0)", 3857),
+            0.0);
+    assertEquals(expected, actual);
+    assertEquals(expected, Functions.maximumInscribedCircle(geom, 0.0));
+
     Geometry finalGeom = geom;
     IllegalArgumentException error =
         assertThrows(
