@@ -282,6 +282,10 @@ ndviDf.createOrReplaceTempView("ndviDf")
 
 Map algebra is the most general processing primitive — clipping, masking, thresholding, and arithmetic between bands or between rasters all fit the same `RS_MapAlgebra(rast, pixelType, script)` (or two-raster) shape. See [Map algebra](../api/sql/Raster-map-algebra.md) for the script syntax and [Raster processing](#raster-processing-reference) below for alternatives (`RS_Clip`, `RS_Resample`, `RS_SetValues`).
 
+The same NDVI can be written as a Python UDF over NumPy instead, which is the better option once the
+calculation needs a library or looks at more than one pixel at a time — see
+[Raster UDFs](../api/sql/Raster-UDF.md) for both versions side by side.
+
 ### 6. Visualize the processed raster
 
 The NDVI raster makes the vegetated field obvious: green pixels where NDVI is high, washed-out red elsewhere.
@@ -721,7 +725,7 @@ band1 = ds.read(1)
 
 ## Python UDFs over rasters
 
-Python UDFs receive raster data, process it with NumPy / SciPy / scikit-learn / etc., and return either a scalar value or a new raster.
+Python UDFs receive raster data, process it with NumPy / SciPy / scikit-learn / etc., and return either a scalar value or a new raster. This section is an introduction; see [Raster UDFs](../api/sql/Raster-UDF.md) for the full treatment, including when to prefer a UDF over `RS_MapAlgebra`, two-raster UDFs, and the limits to be aware of.
 
 ### Raster to scalar
 
@@ -749,7 +753,7 @@ df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
 
 ### Raster to raster
 
-UDFs can also return raster objects. Use `SedonaRaster.with_bands()` to replace pixel data while preserving all spatial metadata (CRS, affine transform, NODATA, etc.). Band count and dtype can change freely.
+Since `v1.9.1`, UDFs can also return raster objects. Use `SedonaRaster.with_bands()` to replace pixel data while carrying over the source raster's CRS and affine transform. Band count and dtype can change freely.
 
 ```python
 import numpy as np
@@ -759,7 +763,7 @@ from sedona.spark.sql.types import RasterType
 def mask_udf(raster):
     band1 = raster.as_numpy()[0, :, :]
     mask = (band1 < 1400).astype(np.float32)
-    return raster.with_bands(mask)  # 1 band, preserves CRS/affine/nodata
+    return raster.with_bands(mask)  # 1 band, on the input's grid
 
 
 sedona.udf.register("mask_udf", mask_udf, RasterType())
@@ -774,7 +778,30 @@ df_raster.withColumn("mask_rast", expr("mask_udf(rast)")).show()
 +--------------------+--------------------+
 ```
 
-`with_bands()` accepts a NumPy array in CHW order (bands × height × width), or HW order (height × width) for single-band output. The returned `SedonaRaster` carries all the original metadata and is serialized back to the JVM automatically when the UDF returns.
+`with_bands()` accepts a NumPy array in CHW order (bands × height × width), or HW order (height × width) for single-band output. The returned `SedonaRaster` is serialized back to the JVM automatically when the UDF returns, so the output is an ordinary raster column.
+
+!!!note
+    The result always sits on the input's grid — `with_bands()` requires the same height and width and reuses the input's CRS and affine transform, so reprojection and resampling can't be done inside a UDF. Output NODATA is inherited from the input band rather than set by you; call [`RS_SetBandNoDataValue`](../api/sql/Raster-Operators/RS_SetBandNoDataValue.md) afterwards if the result means something different. See [Raster UDFs](../api/sql/Raster-UDF.md#limits) for the details.
+
+### Using rasterio inside a UDF
+
+`as_rasterio()` works inside a UDF too, so rasterio and GDAL algorithms apply to raster columns directly. The dataset is read-only — to return a raster, pass the resulting array through `with_bands()`:
+
+```python
+import rasterio.fill
+
+
+def fill_udf(raster):
+    with raster.as_rasterio() as src:
+        filled = rasterio.fill.fillnodata(src.read(1), mask=src.read_masks(1))
+    return raster.with_bands(filled)
+
+
+sedona.udf.register("fill_udf", fill_udf, RasterType())
+df_raster.withColumn("filled", expr("fill_udf(rast)")).show()
+```
+
+This works for any rasterio operation that leaves the grid unchanged. Warping and reprojection change the grid and so can't be returned this way — use [`RS_Resample`](../api/sql/Raster-Operators/RS_Resample.md) or [`RS_ReprojectMatch`](../api/sql/Raster-Operators/RS_ReprojectMatch.md) instead.
 
 ## Performance
 

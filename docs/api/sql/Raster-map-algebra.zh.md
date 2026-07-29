@@ -29,6 +29,9 @@ Apache Sedona 提供了两种执行地图代数运算的方法：
 1. 使用 `RS_MapAlgebra` 函数。
 2. 使用 `RS_BandAsArray` 及基于数组的地图代数函数，例如 `RS_Add`、`RS_Multiply` 等。
 
+如果计算需要用到 Python 库（NumPy、SciPy、scikit-learn、rasterio），或者需要同时读取多个像素，那么
+[栅格 UDF](Raster-UDF.md) 更合适。该页面用两种写法分别实现了下面的 NDVI 示例。
+
 一般来说，`RS_MapAlgebra` 函数更灵活，可用于执行更复杂的运算。该函数接收 3 到 4 个参数：
 
 ```sql
@@ -142,4 +145,5 @@ FROM raster_table) t
 ### 延伸阅读
 
 * [Jiffle language summary](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary)
+* [栅格 UDF](Raster-UDF.md) —— 用 Python、NumPy 与 rasterio 实现同样的运算
 * [Raster operators](Raster-Functions.md#raster-operators)

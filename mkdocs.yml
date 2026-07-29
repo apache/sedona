@@ -91,6 +91,7 @@ nav:
               - Raster data:
                   - Raster Functions: api/sql/Raster-Functions.md
                   - Raster map algebra: api/sql/Raster-map-algebra.md
+                  - Raster UDFs: api/sql/Raster-UDF.md
                   - Raster affine transformation: api/sql/Raster-affine-transformation.md
               - Parameter: api/sql/Parameter.md
           - RDD (core):
@@ -330,6 +331,7 @@ plugins:
             Raster data: 栅格数据
             Raster Functions: 栅格函数
             Raster map algebra: 栅格地图代数
+            Raster UDFs: 栅格 UDF
             Raster affine transformation: 栅格仿射变换
             Parameter: 参数
             RDD (core): RDD（核心）
