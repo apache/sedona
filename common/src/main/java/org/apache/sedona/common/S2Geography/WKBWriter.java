@@ -250,6 +250,10 @@ public class WKBWriter {
     writeByteOrder(os);
     writeGeometryType(geometryType, polyline, os);
     List<S2Polyline> s2line = polyline.getPolylines();
+    if (s2line.isEmpty()) {
+      writeInt(0, os);
+      return;
+    }
     for (S2Polyline s2 : s2line) {
       List<S2Point> verts = s2.vertices();
       writeInt(verts.size(), os);

@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.ParseException;
@@ -135,6 +136,19 @@ public class WKBGeographyTest {
     // S2 should be cached from construction
     Geography roundTrip = geog.getS2Geography();
     assertSame(s2Geog, roundTrip);
+  }
+
+  @Test
+  public void fromS2Geography_emptyLineString_roundTripsToJTS() {
+    Geography s2Geog = new SinglePolylineGeography();
+    s2Geog.setSRID(4326);
+
+    WKBGeography geog = WKBGeography.fromS2Geography(s2Geog);
+    Geometry jts = geog.getJTSGeometry();
+
+    assertTrue(jts instanceof LineString);
+    assertTrue(jts.isEmpty());
+    assertEquals(4326, jts.getSRID());
   }
 
   // ─── Lazy S2 delegation ──────────────────────────────────────────────────

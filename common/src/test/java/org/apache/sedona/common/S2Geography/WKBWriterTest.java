@@ -91,6 +91,18 @@ public class WKBWriterTest {
   }
 
   @Test
+  public void EmptySinglePolylineWritesValidWKB() throws IOException, ParseException {
+    Geography inputLine = new SinglePolylineGeography();
+
+    byte[] wkb = new WKBWriter(2, ByteOrderValues.LITTLE_ENDIAN, false).write(inputLine);
+
+    assertEquals("010200000000000000", WKBWriter.toHex(wkb));
+    Geography outputLine = new WKBReader().read(wkb);
+    assertTrue(outputLine instanceof SinglePolylineGeography);
+    assertEquals(0, outputLine.numShapes());
+  }
+
+  @Test
   public void MultiPointTest() throws ParseException, IOException {
     String wkt = "MULTIPOINT ((10 40), (40 30))";
     WKTReader reader = new WKTReader();
