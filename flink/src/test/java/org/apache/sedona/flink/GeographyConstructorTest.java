@@ -160,8 +160,25 @@ public class GeographyConstructorTest extends TestBase {
             call(GeographyConstructors.ST_GeomToGeography.class.getSimpleName(), $("geom"))
                 .as("geog"));
     Geography result = first(out).getFieldAs("geog");
-    Geometry point = new WKTReader().read("POINT (1 2)");
-    assertEquals(Constructors.geomToGeography(point).toEWKT(), result.toEWKT());
+    assertEquals("POINT (1 2)", result.toString());
+  }
+
+  @Test
+  public void testGeomToGeographyEmptyPolygon() {
+    Table src = sourceTable("wkt", "POLYGON EMPTY", BasicTypeInfo.STRING_TYPE_INFO);
+    Table geomTable =
+        src.select(
+            call(
+                    org.apache.sedona.flink.expressions.Constructors.ST_GeomFromWKT.class
+                        .getSimpleName(),
+                    $("wkt"))
+                .as("geom"));
+    Table out =
+        geomTable.select(
+            call(GeographyConstructors.ST_GeomToGeography.class.getSimpleName(), $("geom"))
+                .as("geog"));
+    Geography result = first(out).getFieldAs("geog");
+    assertEquals("POLYGON EMPTY", result.toString());
   }
 
   @Test

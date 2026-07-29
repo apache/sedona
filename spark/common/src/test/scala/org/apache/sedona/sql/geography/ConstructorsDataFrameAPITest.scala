@@ -135,7 +135,7 @@ class ConstructorsDataFrameAPITest extends TestBaseScala {
       .select(st_constructors.ST_GeomFromWKT(col("wkt")).as("geom"))
       .select(st_constructors.ST_GeomToGeography(col("geom")).as("geog"))
     val geog = df.head().getAs[Geography]("geog")
-    assertEquals(wkt, geog.toString(new PrecisionModel(PrecisionModel.FIXED)))
+    assertEquals(wkt, geog.toString)
   }
 
   it("passed ST_GeogFromText with srid") {

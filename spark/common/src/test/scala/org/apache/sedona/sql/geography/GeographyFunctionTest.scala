@@ -23,7 +23,7 @@ import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.sedona_sql.expressions.{st_constructors, st_functions, st_predicates}
 import org.junit.Assert.{assertEquals, assertNotNull, assertTrue}
-import org.locationtech.jts.geom.{Point, PrecisionModel}
+import org.locationtech.jts.geom.Point
 import org.locationtech.jts.io.WKTReader
 
 /**
@@ -75,6 +75,20 @@ class GeographyFunctionTest extends TestBaseScala {
         .first()
       val wkt = row.getString(0)
       assertTrue(wkt.contains("POLYGON"))
+    }
+
+    it("ST_GeomToGeography preserves exact coordinates and empty polygons") {
+      val row = sparkSession
+        .sql("""
+          SELECT
+            ST_GeomToGeography(ST_GeomFromWKT('POINT (1 2)', 4326)) AS point,
+            ST_GeomToGeography(ST_GeomFromWKT('POLYGON EMPTY', 4326)) AS empty_polygon
+        """)
+        .first()
+      val point = row.getAs[Geography](0)
+      val emptyPolygon = row.getAs[Geography](1)
+      assertEquals("SRID=4326; POINT (1 2)", point.toEWKT)
+      assertEquals("SRID=4326; POLYGON EMPTY", emptyPolygon.toEWKT)
     }
   }
 
@@ -225,11 +239,11 @@ class GeographyFunctionTest extends TestBaseScala {
       assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", coincident.getString(1))
       val centroid = coincident.getAs[Geography](2)
       assertEquals(4326, centroid.getSRID)
-      assertEquals("POINT (12 34)", centroid.toString(new PrecisionModel(PrecisionModel.FIXED)))
+      assertEquals("POINT (12 34)", centroid.toString)
       Seq(3, 4).foreach { index =>
         val envelope = coincident.getAs[Geography](index)
         assertEquals(4326, envelope.getSRID)
-        assertEquals("POINT (12 34)", envelope.toString(new PrecisionModel(PrecisionModel.FIXED)))
+        assertEquals("POINT (12 34)", envelope.toString)
       }
       assertEquals(2, coincident.getInt(5))
       assertEquals("ST_LineString", coincident.getString(6))

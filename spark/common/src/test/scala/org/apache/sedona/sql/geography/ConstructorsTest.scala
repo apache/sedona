@@ -243,6 +243,6 @@ class ConstructorsTest extends TestBaseScala {
         ST_GeomToGeography(ST_GeomFromWKT('$wkt')) AS geog
         """)
     var geog = df.first().getAs[Geography](0)
-    assertEquals(wkt, geog.toString(precisionModel))
+    assertEquals(wkt, geog.toString)
   }
 }
