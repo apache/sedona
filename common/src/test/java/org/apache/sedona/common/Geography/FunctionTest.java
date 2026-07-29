@@ -198,7 +198,6 @@ public class FunctionTest {
     Geography line = roundTripWKB(Functions.makeLine(point, point));
 
     assertEquals("LINESTRING (12 34, 12 34)", Functions.asText(line));
-    assertEquals("LINESTRING (12 34, 12 34)", line.toString());
     assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", Functions.asEWKT(line));
     assertEquals(2, Functions.nPoints(line));
     assertEquals("ST_LineString", Functions.geometryType(line));

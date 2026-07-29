@@ -405,9 +405,11 @@ public class Functions {
     return contains(g2, g1);
   }
 
-  /** Return EWKT for geography object */
+  /** Return EWKT from the geography's structural WKB/JTS representation. */
   public static String asEWKT(Geography geography) {
-    return geography.toEWKT();
+    if (geography == null) return null;
+    String text = asText(geography);
+    return geography.getSRID() > 0 ? "SRID=" + geography.getSRID() + "; " + text : text;
   }
 
   // ─── Level 4: spherical buffer ───────────────────────────────────────────

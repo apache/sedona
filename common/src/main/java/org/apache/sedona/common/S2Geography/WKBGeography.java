@@ -22,7 +22,6 @@ import com.google.common.geometry.S2CellId;
 import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2Point;
 import com.google.common.geometry.S2PointRegion;
-import com.google.common.geometry.S2Polyline;
 import com.google.common.geometry.S2Region;
 import com.google.common.geometry.S2Shape;
 import java.nio.ByteBuffer;
@@ -341,52 +340,32 @@ public class WKBGeography extends Geography {
   }
 
   @Override
+  public String toString() {
+    return getS2Geography().toString();
+  }
+
+  @Override
+  public String toString(PrecisionModel precisionModel) {
+    return getS2Geography().toString(precisionModel);
+  }
+
+  @Override
   public String toText(PrecisionModel precisionModel) {
+    return getS2Geography().toText(precisionModel);
+  }
+
+  @Override
+  public String toEWKT() {
     Geography s2 = getS2Geography();
-    if (!s2PolylineLosesVertices(s2)) {
-      return s2.toText(precisionModel);
-    }
-    return writeStructuralText(precisionModel);
-  }
-
-  private String writeStructuralText(PrecisionModel precisionModel) {
-    org.locationtech.jts.io.WKTWriter writer = new org.locationtech.jts.io.WKTWriter();
-    writer.setPrecisionModel(precisionModel);
-    return writer.write(getJTSGeometry());
-  }
-
-  /**
-   * Returns whether S2 canonicalization changed a LineString's structural vertex count. Spherical
-   * operations should use the valid normalized S2 polyline, but text output must use the original
-   * WKB when normalization removed repeated or coincident vertices.
-   */
-  private boolean s2PolylineLosesVertices(Geography s2) {
-    if (wkbBaseType() != 2 || !(s2 instanceof PolylineGeography)) {
-      return false;
-    }
-
-    List<S2Polyline> polylines = ((PolylineGeography) s2).getPolylines();
-    if (polylines.size() != 1) {
-      return true;
-    }
-
-    boolean le = (wkbBytes[0] == 0x01);
-    ByteBuffer bb =
-        ByteBuffer.wrap(wkbBytes).order(le ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
-    int wkbPointCount = bb.getInt(wkbPayloadOffset());
-    return polylines.get(0).numVertices() != wkbPointCount;
+    s2.setSRID(getSRID());
+    return s2.toEWKT();
   }
 
   @Override
   public String toEWKT(PrecisionModel precisionModel) {
     Geography s2 = getS2Geography();
-    if (!s2PolylineLosesVertices(s2)) {
-      s2.setSRID(getSRID());
-      return s2.toEWKT(precisionModel);
-    }
-
-    String structuralText = writeStructuralText(precisionModel);
-    return getSRID() > 0 ? "SRID=" + getSRID() + "; " + structuralText : structuralText;
+    s2.setSRID(getSRID());
+    return s2.toEWKT(precisionModel);
   }
 
   @Override
