@@ -236,6 +236,33 @@ public class FunctionTest {
   }
 
   @Test
+  public void makeLine_skipsEmptyInputsAndNormalizesSingleCoordinate() throws ParseException {
+    Geography emptyPoint = Constructors.geogFromWKT("POINT EMPTY", 3857);
+    Geography emptyLine = Constructors.geogFromWKT("LINESTRING EMPTY", 4326);
+    Geography emptyMultiPoint = Constructors.geogFromWKT("MULTIPOINT EMPTY", 4326);
+    Geography point = Constructors.geogFromWKT("POINT (12 34)", 4326);
+
+    Geography onlySecond = roundTripWKB(Functions.makeLine(emptyPoint, point));
+    assertEquals("LINESTRING (12 34, 12 34)", Functions.asText(onlySecond));
+    assertEquals(2, Functions.nPoints(onlySecond));
+    assertEquals(3857, onlySecond.getSRID());
+
+    Geography onlyFirst = roundTripWKB(Functions.makeLine(point, emptyLine));
+    assertEquals("LINESTRING (12 34, 12 34)", Functions.asText(onlyFirst));
+    assertEquals(2, Functions.nPoints(onlyFirst));
+    assertEquals(4326, onlyFirst.getSRID());
+
+    Geography afterEmptyMultiPoint = roundTripWKB(Functions.makeLine(emptyMultiPoint, point));
+    assertEquals("LINESTRING (12 34, 12 34)", Functions.asText(afterEmptyMultiPoint));
+    assertEquals(2, Functions.nPoints(afterEmptyMultiPoint));
+
+    Geography noCoordinates = roundTripWKB(Functions.makeLine(emptyPoint, emptyLine));
+    assertEquals("LINESTRING EMPTY", Functions.asText(noCoordinates));
+    assertEquals(0, Functions.nPoints(noCoordinates));
+    assertEquals(3857, noCoordinates.getSRID());
+  }
+
+  @Test
   public void makeLine_deduplicatesLineStringSeamAndPreservesOtherRepeats() throws ParseException {
     Geography first = Constructors.geogFromWKT("LINESTRING (0 0, 1 0)", 4326);
     Geography second = Constructors.geogFromWKT("LINESTRING (1 0, 2 0)", 4326);
