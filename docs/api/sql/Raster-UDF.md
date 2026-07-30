@@ -160,14 +160,26 @@ A UDF takes as many raster columns as you need, which covers what the five-argum
 grid the result belongs to:
 
 ```python
+NODATA = -9999.0
+
+
 @udf(returnType=RasterType())
 def delta(after, before):
-    diff = after.as_numpy()[0] - before.as_numpy()[0]
-    return after.with_bands(diff)
+    # as_numpy_masked() substitutes NaN for NODATA, so invalid pixels stay invalid
+    # through the arithmetic instead of contributing their sentinel value.
+    diff = after.as_numpy_masked()[0] - before.as_numpy_masked()[0]
+    return after.with_bands(np.where(np.isnan(diff), NODATA, diff), nodata=NODATA)
 
 
 df.select(delta(col("after"), col("before")).alias("delta"))
 ```
+
+!!!warning
+    Use [`as_numpy_masked()`](#reading-pixel-data), not `as_numpy()`, whenever more than one raster feeds an
+    arithmetic expression. `as_numpy()` hands back the raw NODATA sentinels, so a hole in one input becomes a
+    large bogus difference, and a hole in *both* inputs cancels out into a plausible zero. `nodata=` only
+    labels the output — it does not mark which pixels are invalid, so the sentinel has to be written into the
+    array as well, as `np.where` does above.
 
 Both rasters must already be on the same grid — see [Limits](#limits). Use
 [`RS_ReprojectMatch`](Raster-Operators/RS_ReprojectMatch.md) beforehand if they aren't.
@@ -188,7 +200,9 @@ def fill_udf(raster):
     valid = ~np.isnan(raster.as_numpy_masked()[0])
     with raster.as_rasterio() as src:
         filled = rasterio.fill.fillnodata(src.read(1), mask=valid.astype(np.uint8))
-    return raster.with_bands(filled)
+    # Every hole is now filled, so the output has no NODATA. Without nodata= it would
+    # inherit the input's, and pixels that happen to equal it would read as invalid.
+    return raster.with_bands(filled, nodata=float("nan"))
 
 
 df.select(fill_udf(col("rast")).alias("filled"))

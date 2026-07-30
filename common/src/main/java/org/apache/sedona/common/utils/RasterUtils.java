@@ -335,6 +335,13 @@ public class RasterUtils {
     // Copy existing categories. If the category contains noDataValue, split it into two categories.
     List<Category> newCategories = new ArrayList<>(categories.size());
     for (Category category : categories) {
+      if (category.getName().equals(Category.NODATA.getName())) {
+        // The existing no data category is being replaced wholesale, so drop it. This has to
+        // happen before the split below: a range-valued no data category that contains the new
+        // value would otherwise be split into no data-named fragments, and getNoDataValue() reads
+        // the first such category, reporting the fragment's minimum instead of the value asked for.
+        continue;
+      }
       NumberRange<? extends Number> range = category.getRange();
       if (range.contains((Number) noDataValue)) {
         // Split this range to two ranges, one is [min, noDataValue), the other is (noDataValue,
@@ -361,7 +368,7 @@ public class RasterUtils {
                   new NumberRange(clazz, nodata, false, max, range.isMaxIncluded()));
           newCategories.add(rightCategory);
         }
-      } else if (!category.getName().equals(Category.NODATA.getName())) {
+      } else {
         // This category does not contain no data value, just keep it as is.
         newCategories.add(category);
       }

@@ -154,14 +154,25 @@ UDF 可以接收任意多个栅格列，这覆盖了 `RS_MapAlgebra` 五参数�
 栅格提供，因此要选结果所属网格对应的那一个：
 
 ```python
+NODATA = -9999.0
+
+
 @udf(returnType=RasterType())
 def delta(after, before):
-    diff = after.as_numpy()[0] - before.as_numpy()[0]
-    return after.with_bands(diff)
+    # as_numpy_masked() 会把 NODATA 替换为 NaN，因此无效像素在参与运算后仍然保持无效，
+    # 而不会把哨兵值带进计算结果。
+    diff = after.as_numpy_masked()[0] - before.as_numpy_masked()[0]
+    return after.with_bands(np.where(np.isnan(diff), NODATA, diff), nodata=NODATA)
 
 
 df.select(delta(col("after"), col("before")).alias("delta"))
 ```
+
+!!!warning
+    只要有多个栅格参与同一个算术表达式，就应使用 [`as_numpy_masked()`](#reading-pixel-data) 而不是
+    `as_numpy()`。`as_numpy()` 返回的是原始的 NODATA 哨兵值：某个输入上的空洞会变成一个很大的虚假差值，而两个
+    输入上同时存在的空洞则会相互抵消、得到一个看似合理的 0。`nodata=` 只是给输出打标签，并不会标记哪些像素
+    无效，因此还需要像上面的 `np.where` 那样把哨兵值真正写进数组。
 
 两个栅格必须已经位于同一网格上 —— 参见[限制](#limits)。如果不是，先用
 [`RS_ReprojectMatch`](Raster-Operators/RS_ReprojectMatch.md) 对齐。
@@ -181,7 +192,9 @@ def fill_udf(raster):
     valid = ~np.isnan(raster.as_numpy_masked()[0])
     with raster.as_rasterio() as src:
         filled = rasterio.fill.fillnodata(src.read(1), mask=valid.astype(np.uint8))
-    return raster.with_bands(filled)
+    # 所有空洞都已填充，因此输出不再需要 NODATA。若不传 nodata=，输出会继承输入的值，
+    # 那些恰好等于该值的像素就会被误判为无效。
+    return raster.with_bands(filled, nodata=float("nan"))
 
 
 df.select(fill_udf(col("rast")).alias("filled"))

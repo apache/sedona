@@ -262,4 +262,39 @@ public class RasterUtilsTest {
           1e-6f);
     }
   }
+
+  @Test
+  public void testCreateSampleDimensionWithNoDataValueReplacesRangeValuedNoData() {
+    // A no data category can span a range rather than a single value. Replacing it has to
+    // drop the whole category: splitting it around the new value used to leave no data-named
+    // fragments behind, and getNoDataValue() reads the first of those, reporting the
+    // fragment's minimum instead of the value that was asked for.
+    Category nodataRange =
+        new Category(
+            Category.NODATA.getName(),
+            new Color(0, 0, 0, 0),
+            NumberRange.create(0, true, 10, true));
+    Category data =
+        new Category("data", new Color[] {Color.BLACK}, NumberRange.create(11, true, 100, true));
+    GridSampleDimension dim =
+        new GridSampleDimension("band", new Category[] {nodataRange, data}, 0.0, 1.0);
+    assertEquals(0.0, RasterUtils.getNoDataValue(dim), 1e-9);
+
+    GridSampleDimension replaced = RasterUtils.createSampleDimensionWithNoDataValue(dim, 5.0);
+    assertEquals(5.0, RasterUtils.getNoDataValue(replaced), 1e-9);
+
+    long nodataCategories =
+        replaced.getCategories().stream()
+            .filter(c -> c.getName().equals(Category.NODATA.getName()))
+            .count();
+    assertEquals("exactly one no data category should remain", 1, nodataCategories);
+  }
+
+  @Test
+  public void testCreateSampleDimensionWithNoDataValueReplacesSingleValuedNoData() {
+    GridSampleDimension dim = RasterUtils.createSampleDimensionWithNoDataValue("band", 0.0);
+    assertEquals(0.0, RasterUtils.getNoDataValue(dim), 1e-9);
+    GridSampleDimension replaced = RasterUtils.createSampleDimensionWithNoDataValue(dim, -9999.0);
+    assertEquals(-9999.0, RasterUtils.getNoDataValue(replaced), 1e-9);
+  }
 }

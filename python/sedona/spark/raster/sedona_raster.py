@@ -499,7 +499,7 @@ class InDbSedonaRaster(SedonaRaster):
                 )
 
         if nodata is not None:
-            bands_meta = self._override_nodata(bands_meta, nodata)
+            bands_meta = self._override_nodata(bands_meta, nodata, new_data.dtype)
 
         # Build BandedSampleModel (TYPE_BANDED = 1)
         # ComponentSampleModel.__init__() sets TYPE_COMPONENT, so we must
@@ -536,23 +536,63 @@ class InDbSedonaRaster(SedonaRaster):
         return result
 
     @staticmethod
+    def _as_nodata_scalar(value) -> Optional[float]:
+        """Return value as a float if it is a real scalar, else None.
+
+        np.float32(-9999) and friends are not Python floats but are scalars, so they
+        have to be recognised here rather than falling through to the sequence branch.
+        Complex numbers are rejected rather than silently losing their imaginary part,
+        and bool is rejected because True as a NODATA value is almost certainly a
+        mistake. 0-d arrays are unwrapped, since they are scalars that happen not to be
+        instances of np.number.
+        """
+        if isinstance(value, bool) or isinstance(value, np.bool_):
+            return None
+        if isinstance(value, (int, float, np.floating, np.integer)):
+            return float(value)
+        if isinstance(value, np.ndarray) and value.ndim == 0:
+            if np.issubdtype(value.dtype, np.floating) or np.issubdtype(
+                value.dtype, np.integer
+            ):
+                return float(value)
+        return None
+
+    @staticmethod
     def _override_nodata(
         bands_meta: List[SampleDimension],
         nodata: Union[float, Sequence[float]],
+        dtype: np.dtype,
     ) -> List[SampleDimension]:
         """Return bands_meta with NODATA replaced by the requested value(s)."""
-        # np.float32(-9999) and friends are not Python floats, but they are scalars and
-        # not iterable, so they have to be recognised here rather than falling through to
-        # the sequence branch.
-        if isinstance(nodata, (int, float, np.number)) and not isinstance(nodata, bool):
-            values = [float(nodata)] * len(bands_meta)
+        scalar = InDbSedonaRaster._as_nodata_scalar(nodata)
+        if scalar is not None:
+            values = [scalar] * len(bands_meta)
         else:
-            values = [float(v) for v in nodata]
+            try:
+                entries = list(nodata)
+            except TypeError:
+                raise ValueError(
+                    f"nodata must be a real number or a sequence of real numbers, "
+                    f"got {type(nodata).__name__}"
+                ) from None
+            values = []
+            for entry in entries:
+                value = InDbSedonaRaster._as_nodata_scalar(entry)
+                if value is None:
+                    raise ValueError(
+                        f"nodata entries must be real numbers, got "
+                        f"{type(entry).__name__}"
+                    )
+                values.append(value)
             if len(values) != len(bands_meta):
                 raise ValueError(
                     f"nodata has {len(values)} entries but the output has "
                     f"{len(bands_meta)} band(s)"
                 )
+
+        for value in values:
+            InDbSedonaRaster._check_nodata_fits_dtype(value, dtype)
+
         return [
             SampleDimension(
                 description=bm.description,
@@ -562,6 +602,30 @@ class InDbSedonaRaster(SedonaRaster):
             )
             for bm, value in zip(bands_meta, values)
         ]
+
+    @staticmethod
+    def _check_nodata_fits_dtype(value: float, dtype: np.dtype) -> None:
+        """Reject a NODATA value the output band's dtype cannot represent.
+
+        The JVM encodes the value as a Number of the band's sample dimension type, so a
+        fractional or out-of-range value on an integral band produces a sample dimension
+        that later fails to read back. Catching it here gives a usable error instead.
+        """
+        if np.isnan(value):
+            return
+        if np.issubdtype(dtype, np.integer):
+            if value != int(value):
+                raise ValueError(
+                    f"nodata={value} is not representable in an integral output of dtype "
+                    f"{dtype}; use a whole number, or cast the band data to a floating "
+                    f"dtype first"
+                )
+            info = np.iinfo(dtype)
+            if not (info.min <= value <= info.max):
+                raise ValueError(
+                    f"nodata={value} is outside the range of dtype {dtype} "
+                    f"[{info.min}, {info.max}]"
+                )
 
     def close(self):
         if self.rasterio_dataset_reader is not None:
