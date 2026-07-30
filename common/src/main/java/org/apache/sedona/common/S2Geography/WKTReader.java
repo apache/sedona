@@ -821,14 +821,16 @@ public class WKTReader {
       return new PolygonGeography();
     }
 
-    List<S2Loop> holes = new ArrayList<S2Loop>();
+    List<S2Loop> loops = new ArrayList<S2Loop>();
 
     S2Loop shell = readLoopText(tokenizer, ordinateFlags);
-    holes.add(shell);
+    normalizePolygonLoop(shell, false);
+    loops.add(shell);
     nextToken = getNextCloserOrComma(tokenizer);
     while (nextToken.equals(COMMA)) {
       S2Loop hole = readLoopText(tokenizer, ordinateFlags);
-      holes.add(hole);
+      normalizePolygonLoop(hole, true);
+      loops.add(hole);
       nextToken = getNextCloserOrComma(tokenizer);
     }
 
@@ -838,7 +840,7 @@ public class WKTReader {
     builder.startLayer(polyLayer);
 
     // add shell + holes
-    for (S2Loop loop : holes) {
+    for (S2Loop loop : loops) {
       builder.addLoop(loop);
     }
 
@@ -853,6 +855,18 @@ public class WKTReader {
 
     // wrap in your PolygonGeography
     return new PolygonGeography(s2poly);
+  }
+
+  /**
+   * Normalizes an operational S2 loop using its simple-features ring role. Structural WKT callers
+   * use {@link org.apache.sedona.common.geography.Constructors}, which keeps the submitted
+   * coordinate order in WKBGeography; this reader produces only the derived S2 representation.
+   */
+  private static void normalizePolygonLoop(S2Loop loop, boolean isHole) {
+    boolean isClockwise = loop.getTurningAngle() < 0;
+    if (isHole != isClockwise) {
+      loop.invert();
+    }
   }
 
   /**

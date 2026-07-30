@@ -279,13 +279,36 @@ public class TestHelper {
       assertEquals(
           String.format("Vertex count in loop[%d]", li), loop1.numVertices(), loop2.numVertices());
 
-      // compare each vertex
+      // A closed S2Loop has no distinguished first vertex. Readers and builders may preserve the
+      // same directed loop while cyclically rotating its stored vertex sequence.
+      int rotation = findLoopRotation(loop1, loop2);
+      assertTrue(String.format("No matching rotation for loop[%d]", li), rotation >= 0);
       for (int vi = 0; vi < loop1.numVertices(); vi++) {
         S2Point v1 = loop1.vertex(vi);
-        S2Point v2 = loop2.vertex(vi);
+        S2Point v2 = loop2.vertex((rotation + vi) % loop2.numVertices());
         assertPointEquals(v1, v2);
       }
     }
+  }
+
+  private static int findLoopRotation(S2Loop expected, S2Loop actual) {
+    int size = expected.numVertices();
+    if (size == 0) {
+      return 0;
+    }
+    for (int rotation = 0; rotation < size; rotation++) {
+      boolean matches = true;
+      for (int i = 0; i < size; i++) {
+        if (expected.vertex(i).angle(actual.vertex((rotation + i) % size)) > Math.toRadians(EPS)) {
+          matches = false;
+          break;
+        }
+      }
+      if (matches) {
+        return rotation;
+      }
+    }
+    return -1;
   }
 
   private static void assertPointEquals(S2Point p1, S2Point p2) {

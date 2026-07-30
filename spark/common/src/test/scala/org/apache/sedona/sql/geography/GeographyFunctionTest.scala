@@ -22,7 +22,7 @@ import org.apache.sedona.common.S2Geography.{Geography, WKBGeography}
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.sedona_sql.expressions.{st_constructors, st_functions, st_predicates}
-import org.junit.Assert.{assertEquals, assertNotNull, assertTrue}
+import org.junit.Assert.{assertEquals, assertFalse, assertNotNull, assertTrue}
 import org.locationtech.jts.geom.Point
 import org.locationtech.jts.io.WKTReader
 
@@ -75,6 +75,20 @@ class GeographyFunctionTest extends TestBaseScala {
         .first()
       val wkt = row.getString(0)
       assertTrue(wkt.contains("POLYGON"))
+    }
+
+    it("ST_GeomToGeography preserves exact coordinates and empty polygons") {
+      val row = sparkSession
+        .sql("""
+          SELECT
+            ST_GeomToGeography(ST_GeomFromWKT('POINT (1 2)', 4326)) AS point,
+            ST_GeomToGeography(ST_GeomFromWKT('POLYGON EMPTY', 4326)) AS empty_polygon
+        """)
+        .first()
+      val point = row.getAs[Geography](0)
+      val emptyPolygon = row.getAs[Geography](1)
+      assertEquals("SRID=4326; POINT (1 2)", point.toEWKT)
+      assertEquals("SRID=4326; POLYGON EMPTY", emptyPolygon.toEWKT)
     }
   }
 
@@ -370,6 +384,42 @@ class GeographyFunctionTest extends TestBaseScala {
         """)
         .first()
       assertTrue(!row.getBoolean(0))
+    }
+
+    it("ST_GeomToGeography uses polygon ring roles regardless of winding") {
+      val row = sparkSession
+        .sql("""
+          WITH polygons AS (
+            SELECT
+              ST_GeomToGeography(ST_GeomFromWKT(
+                'POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))', 4326
+              )) AS clockwise,
+              ST_GeomToGeography(ST_GeomFromWKT(
+                'POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))', 4326
+              )) AS counterclockwise
+          ),
+          points AS (
+            SELECT
+              ST_GeogFromWKT('POINT (0.5 0.5)', 4326) AS inside,
+              ST_GeogFromWKT('POINT (5 5)', 4326) AS outside
+          )
+          SELECT
+            ST_Contains(clockwise, inside) AS cw_inside,
+            ST_Contains(clockwise, outside) AS cw_outside,
+            ST_Contains(counterclockwise, inside) AS ccw_inside,
+            ST_Contains(counterclockwise, outside) AS ccw_outside,
+            ST_AsText(clockwise) AS cw_text,
+            ST_AsText(counterclockwise) AS ccw_text
+          FROM polygons CROSS JOIN points
+        """)
+        .first()
+
+      assertTrue(row.getBoolean(0))
+      assertFalse(row.getBoolean(1))
+      assertTrue(row.getBoolean(2))
+      assertFalse(row.getBoolean(3))
+      assertEquals("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))", row.getString(4))
+      assertEquals("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", row.getString(5))
     }
 
     it("ST_DWithin true when within threshold") {

@@ -164,7 +164,7 @@ class ConstructorsTest extends TestBaseScala {
     val geography =
       sparkSession.sql("SELECT ST_GeogFromEWKB(rawWKBTable.wkb) as countyshape from rawWKBTable")
     val expectedGeog = {
-      "SRID=4326; LINESTRING (-2.1 -0.4, -1.5 -0.7)"
+      "SRID=4326; LINESTRING (-2.1047439575195312 -0.354827880859375, -1.49606454372406 -0.6676061153411865)"
     }
     assert(geography.first().getAs[Geography](0).getSRID == 4326)
     assert(geography.first().getAs[Geography](0).toEWKT().equals(expectedGeog))
@@ -178,7 +178,7 @@ class ConstructorsTest extends TestBaseScala {
         ST_GeogToGeometry(ST_GeogFromWKT('$wkt')) AS geom
         """)
     val geom = df.first().getAs[Geometry](0)
-    // S2 normalizes polygon loop orientation, so hole winding may differ from input
+    // WKB-backed conversion preserves the submitted shell and hole coordinate order.
     val expected =
       "POLYGON ((0 0, 95 20, 95 85, 10 85, 0 0), " + "(20 30, 35 25, 30 40, 20 30), " + "(50 50, 65 50, 65 65, 50 65, 50 50), " + "(25 60, 35 58, 38 66, 30 72, 22 66, 25 60))"
     assert(geom.getGeometryType == "Polygon")
@@ -198,7 +198,7 @@ class ConstructorsTest extends TestBaseScala {
         ST_GeogToGeometry(ST_GeogFromWKT('$wkt', 4326)) AS geom
         """)
     val geom = df.first().getAs[Geometry](0)
-    // S2 normalizes polygon loop orientation, so hole winding may differ from input
+    // WKB-backed conversion preserves the submitted shell and hole coordinate order.
     val expected = "MULTIPOLYGON (((10 10, 70 10, 70 70, 10 70, 10 10), " +
       "(20 20, 60 20, 60 60, 20 60, 20 20)), " + "((30 30, 50 30, 50 50, 30 50, 30 30), " +
       "(36 36, 44 36, 44 44, 36 44, 36 36)))";

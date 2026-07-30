@@ -25,13 +25,19 @@ import org.apache.sedona.common.S2Geography.*;
 import org.apache.sedona.common.sphere.Haversine;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.PrecisionModel;
 
 public class Functions {
 
   private static final double EPSILON = 1e-9;
+  // S2 expands conservative rectangle bounds by a few floating-point ulps. Snap only those tiny
+  // expansions back to a source ordinate; genuine great-circle extrema remain unchanged.
+  private static final double BOUND_ORDINATE_SNAP_TOLERANCE_DEGREES = 1e-12;
 
   private static boolean nearlyEqual(double a, double b) {
     if (Double.isNaN(a) || Double.isNaN(b)) {
@@ -50,6 +56,7 @@ public class Functions {
         && ((WKBGeography) geography).getPointX() == null) {
       return geography;
     }
+    Geometry sourceGeometry = toJTS(geography);
     S2LatLngRect rect = geography.region().getRectBound();
     // Match the Geometry overload by preserving an empty input's type and SRID.
     if (rect.isEmpty()) return geography;
@@ -57,28 +64,51 @@ public class Functions {
     double latLo = rect.latLo().degrees();
     double lngHi = rect.lngHi().degrees();
     double latHi = rect.latHi().degrees();
+    Coordinate[] sourceCoordinates = sourceGeometry.getCoordinates();
+    lngLo = snapToSourceOrdinate(lngLo, sourceCoordinates, true);
+    latLo = snapToSourceOrdinate(latLo, sourceCoordinates, false);
+    lngHi = snapToSourceOrdinate(lngHi, sourceCoordinates, true);
+    latHi = snapToSourceOrdinate(latHi, sourceCoordinates, false);
+    GeometryFactory geometryFactory =
+        new GeometryFactory(new PrecisionModel(), geography.getSRID());
 
     if (nearlyEqual(latLo, latHi) && nearlyEqual(lngLo, lngHi)) {
-      S2Point point = S2LatLng.fromDegrees(latLo, lngLo).toPoint();
-      Geography pointGeo = new SinglePointGeography(point);
-      pointGeo.setSRID(geography.getSRID());
-      return pointGeo;
+      if (sourceGeometry instanceof Point && !sourceGeometry.isEmpty()) {
+        Coordinate coordinate = sourceGeometry.getCoordinate();
+        return WKBGeography.fromJTS(
+            geometryFactory.createPoint(new Coordinate(coordinate.x, coordinate.y)));
+      }
+      return WKBGeography.fromJTS(geometryFactory.createPoint(new Coordinate(lngLo, latLo)));
     }
 
-    Geography envelope;
+    Geometry envelope;
     if (splitAtAntiMeridian && rect.lng().isInverted()) {
-      S2Polygon left = rectToPolygon(lngLo, latLo, 180.0, latHi);
-      S2Polygon right = rectToPolygon(-180.0, latLo, lngHi, latHi);
-      envelope =
-          new MultiPolygonGeography(Geography.GeographyKind.MULTIPOLYGON, List.of(left, right));
+      Polygon left = rectToPolygon(geometryFactory, lngLo, latLo, 180.0, latHi);
+      Polygon right = rectToPolygon(geometryFactory, -180.0, latLo, lngHi, latHi);
+      envelope = geometryFactory.createMultiPolygon(new Polygon[] {left, right});
     } else {
-      envelope = new PolygonGeography(rectToPolygon(lngLo, latLo, lngHi, latHi));
+      envelope = rectToPolygon(geometryFactory, lngLo, latLo, lngHi, latHi);
     }
-    envelope.setSRID(geography.getSRID());
-    return envelope;
+    return WKBGeography.fromJTS(envelope);
   }
 
-  private static S2Polygon rectToPolygon(double lngLo, double latLo, double lngHi, double latHi) {
+  private static double snapToSourceOrdinate(
+      double bound, Coordinate[] sourceCoordinates, boolean longitude) {
+    double closest = bound;
+    double closestDifference = BOUND_ORDINATE_SNAP_TOLERANCE_DEGREES;
+    for (Coordinate coordinate : sourceCoordinates) {
+      double candidate = longitude ? coordinate.x : coordinate.y;
+      double difference = Math.abs(bound - candidate);
+      if (difference <= closestDifference) {
+        closest = candidate;
+        closestDifference = difference;
+      }
+    }
+    return closest;
+  }
+
+  private static Polygon rectToPolygon(
+      GeometryFactory geometryFactory, double lngLo, double latLo, double lngHi, double latHi) {
     ArrayList<S2Point> v = new ArrayList<>(4);
     v.add(S2LatLng.fromDegrees(latLo, lngLo).toPoint());
     v.add(S2LatLng.fromDegrees(latLo, lngHi).toPoint());
@@ -86,9 +116,29 @@ public class Functions {
     v.add(S2LatLng.fromDegrees(latHi, lngLo).toPoint());
 
     S2Loop loop = new S2Loop(v);
-    loop.normalize();
-
-    return new S2Polygon(loop);
+    Coordinate[] coordinates;
+    if (loop.isNormalized()) {
+      coordinates =
+          new Coordinate[] {
+            new Coordinate(lngLo, latLo),
+            new Coordinate(lngHi, latLo),
+            new Coordinate(lngHi, latHi),
+            new Coordinate(lngLo, latHi),
+            new Coordinate(lngLo, latLo)
+          };
+    } else {
+      // S2Loop.normalize() reverses all four vertices when the rectangle covers more than a
+      // hemisphere. Mirror that ordering while retaining the exact rectangle ordinates in WKB.
+      coordinates =
+          new Coordinate[] {
+            new Coordinate(lngLo, latHi),
+            new Coordinate(lngHi, latHi),
+            new Coordinate(lngHi, latLo),
+            new Coordinate(lngLo, latLo),
+            new Coordinate(lngLo, latHi)
+          };
+    }
+    return geometryFactory.createPolygon(coordinates);
   }
 
   // ─── Level 1: JTS-only structural operations ─────────────────────────────
@@ -320,10 +370,9 @@ public class Functions {
     if (g == null) return 0.0;
     Geography typed = (g instanceof WKBGeography) ? ((WKBGeography) g).getS2Geography() : g;
     double steradians = sphericalArea(typed);
-    // S2 polygons can be wound either CCW (interior is the small side) or CW (interior is the
-    // complement on the sphere). Some WKT inputs land in the latter form after parsing, which
-    // makes S2 report the entire sphere minus the visible polygon. Always return the smaller
-    // of the two regions so the answer is bounded by half the surface of the sphere.
+    // Public Geography readers normalize polygon shells to at most one hemisphere, but callers can
+    // still supply a directed S2 Geography whose interior is the complementary large region.
+    // Preserve ST_Area's small-side contract for both representations.
     if (steradians > 2.0 * Math.PI) {
       steradians = 4.0 * Math.PI - steradians;
     }
@@ -498,7 +547,10 @@ public class Functions {
     Geometry buffered =
         org.apache.sedona.common.Functions.buffer(jts, radiusMeters, true, parameters);
     if (buffered == null) return null;
-    Geography result = Constructors.geomToGeography(buffered);
+    // JTS buffer shells are commonly wound for planar geometry semantics. Normalize them through
+    // S2 before storing the computed result so the geography keeps the same spherical interior it
+    // had before geomToGeography began preserving caller-provided WKB verbatim.
+    Geography result = WKBGeography.fromS2Geography(Constructors.geomToS2Geography(buffered));
     result.setSRID(srid);
     return result;
   }

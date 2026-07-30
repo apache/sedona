@@ -320,10 +320,10 @@ public class Constructors {
     if (geom == null) {
       return null;
     }
-    // Build S2 Geography first for proper spherical normalization (e.g., deduplication),
-    // then wrap in WKBGeography for WKB-based storage.
-    Geography s2geog = geomToS2Geography(geom);
-    return WKBGeography.fromS2Geography(s2geog);
+    // Keep the input WKB as the structural source of truth. S2 is derived lazily when a spherical
+    // operation needs it; converting through S2 here would alter coordinates, collapse repeated
+    // vertices, and fail to serialize empty polygons.
+    return WKBGeography.fromJTS(geom);
   }
 
   /**

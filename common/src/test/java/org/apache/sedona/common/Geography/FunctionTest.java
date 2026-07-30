@@ -34,6 +34,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
@@ -77,7 +78,8 @@ public class FunctionTest {
   public void envelope_noSplit_antimeridian() throws Exception {
     String wkt = "MULTIPOINT ((-179 0), (179 1), (-180 10))";
     Geography g = Constructors.geogFromWKT(wkt, 4326);
-    PolygonGeography env = (PolygonGeography) Functions.getEnvelope(g, false);
+    Geography env = Functions.getEnvelope(g, false);
+    assertTrue(env instanceof WKBGeography);
 
     S2LatLngRect r = g.region().getRectBound();
     assertTrue(r.lng().isInverted());
@@ -86,7 +88,8 @@ public class FunctionTest {
     assertDegAlmostEqual(r.lngLo().degrees(), 179.0);
     assertDegAlmostEqual(r.lngHi().degrees(), -179.0);
 
-    S2Loop loop = env.polygon.getLoops().get(0);
+    PolygonGeography s2Envelope = (PolygonGeography) ((WKBGeography) env).getS2Geography();
+    S2Loop loop = s2Envelope.polygon.getLoops().get(0);
     assertRectLoopVertices(loop, 0, 179, 10, -179);
   }
 
@@ -97,7 +100,7 @@ public class FunctionTest {
     Geography g = Constructors.geogFromWKT(nl, 4326);
     Geography env = Functions.getEnvelope(g, true);
     String expectedWKT = "POLYGON ((3.3 50.8, 7.1 50.8, 7.1 53.5, 3.3 53.5, 3.3 50.8))";
-    assertEquals(expectedWKT, env.toString());
+    assertEquals(expectedWKT, env.toString(new PrecisionModel(PrecisionModel.FIXED)));
     assertEquals(4326, env.getSRID());
   }
 
@@ -113,12 +116,12 @@ public class FunctionTest {
     String expectedWKT =
         "MULTIPOLYGON (((177.3 -18.3, 180 -18.3, 180 -16, 177.3 -16, 177.3 -18.3)), "
             + "((-180 -18.3, -179.8 -18.3, -179.8 -16, -180 -16, -180 -18.3)))";
-    assertEquals(expectedWKT, env.toString());
+    assertEquals(expectedWKT, env.toString(new PrecisionModel(PrecisionModel.FIXED)));
 
     String expectedWKT2 =
         "POLYGON ((177.3 -18.3, -179.8 -18.3, -179.8 -16, 177.3 -16, 177.3 -18.3))";
     env = Functions.getEnvelope(g, false);
-    assertEquals(expectedWKT2, env.toString());
+    assertEquals(expectedWKT2, env.toString(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   @Test
@@ -126,7 +129,23 @@ public class FunctionTest {
     String wkt = "POINT (-180 10)";
     Geography geography = Constructors.geogFromWKT(wkt, 0);
     Geography envelope = Functions.getEnvelope(geography, false);
-    assertEquals("POINT (180 10)", envelope.toString());
+    assertEquals("POINT (-180 10)", envelope.toString());
+  }
+
+  @Test
+  public void envelope_preservesExactEndpointBoundsAcrossWKBRoundTrip() throws ParseException {
+    Geography line = Constructors.geogFromWKT("LINESTRING (0 0, 2 3)", 4326);
+    Geography envelope = Functions.getEnvelope(line, false);
+    assertEquals("SRID=4326; POLYGON ((0 0, 2 0, 2 3, 0 3, 0 0))", envelope.toEWKT());
+    assertEquals(envelope.toEWKT(), roundTripWKB(envelope).toEWKT());
+
+    Geography antiMeridianLine = Constructors.geogFromWKT("LINESTRING (170 10, -170 20)", 4326);
+    Geography splitEnvelope = Functions.getEnvelope(antiMeridianLine, true);
+    assertEquals(
+        "SRID=4326; MULTIPOLYGON (((170 10, 180 10, 180 20, 170 20, 170 10)), "
+            + "((-180 10, -170 10, -170 20, -180 20, -180 10)))",
+        splitEnvelope.toEWKT());
+    assertEquals(splitEnvelope.toEWKT(), roundTripWKB(splitEnvelope).toEWKT());
   }
 
   @Test
@@ -157,7 +176,7 @@ public class FunctionTest {
     Geography env = Functions.getEnvelope(g, true);
 
     String expectedWKT = "POLYGON ((-180 -63.3, 180 -63.3, 180 -90, -180 -90, -180 -63.3))";
-    assertEquals((expectedWKT), (env.toString()));
+    assertEquals(expectedWKT, env.toString(new PrecisionModel(PrecisionModel.FIXED)));
 
     String multiCountry =
         "MULTIPOLYGON (((-180 -90, -180 -63.27066, 180 -63.27066, 180 -90, -180 -90)),"
@@ -166,7 +185,7 @@ public class FunctionTest {
     env = Functions.getEnvelope(g, true);
 
     String expectedWKT2 = "POLYGON ((-180 53.5, 180 53.5, 180 -90, -180 -90, -180 53.5))";
-    assertEquals((expectedWKT2), (env.toString()));
+    assertEquals(expectedWKT2, env.toString(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   // ─── Level 1: ST_NPoints ─────────────────────────────────────────────────

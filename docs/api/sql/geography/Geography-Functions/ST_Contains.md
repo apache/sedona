@@ -21,6 +21,10 @@
 
 Introduction: Tests whether geography A fully contains geography B using S2 spherical boolean operations. Returns true if every point of B is inside or on the boundary of A.
 
+Polygon ring roles follow the simple-features structure: the first ring is a shell and subsequent rings are holes, regardless of input winding. Sedona preserves the submitted coordinate order for structural output such as `ST_AsText`, while normalizing only the S2-facing traversal used by spherical operations.
+
+Each Geography polygon shell is normalized to an area of at most one hemisphere. A shell intended to represent more than half the sphere is therefore interpreted as its complement; reversing the ring's coordinate sequence does not select the larger region.
+
 ![ST_Contains returning true](../../../../image/ST_Contains_geography/ST_Contains_geography_true.svg "ST_Contains returning true")
 ![ST_Contains returning false](../../../../image/ST_Contains_geography/ST_Contains_geography_false.svg "ST_Contains returning false")
 

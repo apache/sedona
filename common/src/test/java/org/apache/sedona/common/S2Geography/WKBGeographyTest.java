@@ -197,6 +197,40 @@ public class WKBGeographyTest {
     assertEquals("SRID=4326; POINT (1 1)", geog.toEWKT());
   }
 
+  @Test
+  public void defaultTextRendering_preservesStoredCoordinatesAndSRID() throws ParseException {
+    org.locationtech.jts.io.WKTReader jtsReader = new org.locationtech.jts.io.WKTReader();
+    Geometry jts = jtsReader.read("POINT (-122.4194 37.7749)");
+    byte[] wkb = new org.locationtech.jts.io.WKBWriter().write(jts);
+    WKBGeography geog = WKBGeography.fromWKB(wkb, 4326);
+
+    assertEquals("POINT (-122.4194 37.7749)", geog.toString());
+    assertEquals("SRID=4326; POINT (-122.4194 37.7749)", geog.toEWKT());
+  }
+
+  @Test
+  public void defaultTextRendering_preservesRepeatedCoordinates() throws ParseException {
+    org.locationtech.jts.io.WKTReader jtsReader = new org.locationtech.jts.io.WKTReader();
+    Geometry jts = jtsReader.read("LINESTRING (0 0, 1.25 2.5, 1.25 2.5, 3 4)");
+    byte[] wkb = new org.locationtech.jts.io.WKBWriter().write(jts);
+    WKBGeography geog = WKBGeography.fromWKB(wkb, 4326);
+
+    assertEquals("LINESTRING (0 0, 1.25 2.5, 1.25 2.5, 3 4)", geog.toString());
+    assertEquals("SRID=4326; LINESTRING (0 0, 1.25 2.5, 1.25 2.5, 3 4)", geog.toEWKT());
+  }
+
+  @Test
+  public void explicitPrecisionRendering_usesRequestedS2Formatting() throws ParseException {
+    org.locationtech.jts.io.WKTReader jtsReader = new org.locationtech.jts.io.WKTReader();
+    Geometry jts = jtsReader.read("POINT (-122.4194 37.7749)");
+    byte[] wkb = new org.locationtech.jts.io.WKBWriter().write(jts);
+    WKBGeography geog = WKBGeography.fromWKB(wkb, 4326);
+    PrecisionModel fixed = new PrecisionModel(PrecisionModel.FIXED);
+
+    assertEquals("POINT (-122.4 37.8)", geog.toString(fixed));
+    assertEquals("SRID=4326; POINT (-122.4 37.8)", geog.toEWKT(fixed));
+  }
+
   // ─── Serializer round-trip ───────────────────────────────────────────────
 
   @Test
@@ -313,7 +347,7 @@ public class WKBGeographyTest {
     Geography deserialized = GeographyWKBSerializer.deserialize(bytes);
     assertTrue(deserialized instanceof WKBGeography);
     assertEquals(4326, deserialized.getSRID());
-    assertEquals("POINT (30 10)", deserialized.toString());
+    assertEquals("POINT (30 10)", deserialized.toString(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   // ─── SRID preservation ───────────────────────────────────────────────────
@@ -363,7 +397,7 @@ public class WKBGeographyTest {
     Geography geog = Constructors.geogFromWKT("POINT (1 1)", 4326);
     assertTrue(geog instanceof WKBGeography);
     assertEquals(4326, geog.getSRID());
-    assertEquals("POINT (1 1)", geog.toString());
+    assertEquals("POINT (1 1)", geog.toString(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   @Test
@@ -396,7 +430,7 @@ public class WKBGeographyTest {
     Geography geog = Constructors.geogFromEWKT("SRID=4269; POINT (1 1)");
     assertTrue(geog instanceof WKBGeography);
     assertEquals(4269, geog.getSRID());
-    assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT());
+    assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   // ─── Eager ShapeIndex mode ───────────────────────────────────────────────
