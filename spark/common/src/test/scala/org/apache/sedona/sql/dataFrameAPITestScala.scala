@@ -2499,6 +2499,20 @@ class dataFrameAPITestScala extends TestBaseScala {
         "POINT (61.64205411585366 104.55256764481707)",
         actual.getAs[Geometry](1))
       assertEquals(45.18896951053177, actual.getDouble(2), 1e-6)
+
+      val triangleDf =
+        sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS geom")
+      val coarse: Row =
+        triangleDf.select(ST_MaximumInscribedCircle("geom", 2.0)).first().getAs[Row](0)
+      assertGeometryEquals("POINT (0.75 0.5)", coarse.getAs[Geometry](0))
+      assertGeometryEquals("POINT (0.625 0.625)", coarse.getAs[Geometry](1))
+      assertEquals(0.1767766952966369, coarse.getDouble(2), 1e-12)
+
+      val explicitDefault: Row =
+        triangleDf.select(ST_MaximumInscribedCircle("geom", 0.0)).first().getAs[Row](0)
+      val implicitDefault: Row =
+        triangleDf.select(ST_MaximumInscribedCircle("geom")).first().getAs[Row](0)
+      assertEquals(implicitDefault, explicitDefault)
     }
 
     it("Should pass ST_IsValidTrajectory") {

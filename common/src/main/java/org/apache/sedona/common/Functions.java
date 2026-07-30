@@ -1451,12 +1451,31 @@ public class Functions {
   }
 
   public static InscribedCircle maximumInscribedCircle(Geometry geometry) {
-    // Calculating the tolerance
-    Envelope envelope = geometry.getEnvelopeInternal();
-    double width = envelope.getWidth(), height = envelope.getHeight(), size, tolerance;
-    size = Math.max(width, height);
-    tolerance = size / 1000.0;
+    return maximumInscribedCircle(geometry, defaultMaximumInscribedCircleTolerance(geometry));
+  }
 
+  private static double defaultMaximumInscribedCircleTolerance(Geometry geometry) {
+    Envelope envelope = geometry.getEnvelopeInternal();
+    double size = Math.max(envelope.getWidth(), envelope.getHeight());
+    return size / 1000.0;
+  }
+
+  public static InscribedCircle maximumInscribedCircle(Geometry geometry, double tolerance) {
+    if (Double.isNaN(tolerance)) {
+      return null;
+    }
+    // JTS requires a positive tolerance. A zero value requests the same
+    // geometry-dependent default used by GEOS and the one-argument overload.
+    if (tolerance == 0.0) {
+      tolerance = defaultMaximumInscribedCircleTolerance(geometry);
+    }
+    // A non-empty zero-extent geometry has no positive automatic tolerance.
+    // GEOS returns the coincident center and boundary point for this case,
+    // while JTS rejects a zero tolerance before evaluating the geometry.
+    if (tolerance == 0.0 && !geometry.isEmpty()) {
+      Point point = geometry.getFactory().createPoint(geometry.getCoordinate());
+      return new InscribedCircle(point, point.copy(), 0.0);
+    }
     Geometry center, nearest;
     double radius;
 
