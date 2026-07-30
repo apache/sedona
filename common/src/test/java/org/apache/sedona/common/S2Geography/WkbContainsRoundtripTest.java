@@ -191,6 +191,24 @@ public class WkbContainsRoundtripTest {
   }
 
   @Test
+  public void shellsLargerThanAHemisphereUseComplementRegardlessOfWinding() throws Exception {
+    Geography forward =
+        Constructors.geogFromWKT("POLYGON ((0 -80, 120 -80, -120 -80, 0 -80))", 4326);
+    Geography reversed =
+        Constructors.geogFromWKT("POLYGON ((0 -80, -120 -80, 120 -80, 0 -80))", 4326);
+    Geography equator = Constructors.geogFromWKT("POINT (0 0)", 4326);
+
+    for (Geography polygon : new Geography[] {forward, reversed}) {
+      assertFalse(Functions.contains(polygon, equator));
+      assertFalse(Functions.intersects(polygon, equator));
+      assertFalse(Functions.within(equator, polygon));
+      double area = Functions.area(polygon);
+      assertTrue(area > 1.0e12 && area < 2.0e12);
+    }
+    assertEquals(Functions.area(forward), Functions.area(reversed), 1.0);
+  }
+
+  @Test
   public void multipolygonFallbackNormalizesEachShellAndHole() throws Exception {
     String wkt =
         "MULTIPOLYGON (((0 0, 0 2, 2 2, 2 0, 0 0), "

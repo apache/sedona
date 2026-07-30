@@ -370,10 +370,9 @@ public class Functions {
     if (g == null) return 0.0;
     Geography typed = (g instanceof WKBGeography) ? ((WKBGeography) g).getS2Geography() : g;
     double steradians = sphericalArea(typed);
-    // S2 polygons can be wound either CCW (interior is the small side) or CW (interior is the
-    // complement on the sphere). Some WKT inputs land in the latter form after parsing, which
-    // makes S2 report the entire sphere minus the visible polygon. Always return the smaller
-    // of the two regions so the answer is bounded by half the surface of the sphere.
+    // Public Geography readers normalize polygon shells to at most one hemisphere, but callers can
+    // still supply a directed S2 Geography whose interior is the complementary large region.
+    // Preserve ST_Area's small-side contract for both representations.
     if (steradians > 2.0 * Math.PI) {
       steradians = 4.0 * Math.PI - steradians;
     }
