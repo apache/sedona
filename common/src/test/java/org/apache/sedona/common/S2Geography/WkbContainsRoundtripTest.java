@@ -131,6 +131,30 @@ public class WkbContainsRoundtripTest {
   }
 
   @Test
+  public void directedShapeFactoryPreservesComplementaryInterior() throws Exception {
+    org.locationtech.jts.geom.Geometry polygon =
+        new org.locationtech.jts.io.WKTReader().read("POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))");
+    byte[] wkb = new org.locationtech.jts.io.WKBWriter().write(polygon);
+    WkbS2Shape normalized = new WkbS2Shape(wkb);
+    WkbS2Shape directed = WkbS2Shape.withPreservedLoopOrientation(wkb);
+    com.google.common.geometry.S2Point inside = S2LatLng.fromDegrees(0.5, 0.5).toPoint();
+    com.google.common.geometry.S2Point outside = S2LatLng.fromDegrees(5, 5).toPoint();
+
+    assertTrue(S2ShapeUtil.containsBruteForce(normalized, inside));
+    assertFalse(S2ShapeUtil.containsBruteForce(normalized, outside));
+    assertFalse(S2ShapeUtil.containsBruteForce(directed, inside));
+    assertTrue(S2ShapeUtil.containsBruteForce(directed, outside));
+  }
+
+  @Test
+  public void singleRingFastPathHandlesRepeatedVertex() throws Exception {
+    Geography polygon = Constructors.geogFromWKT("POLYGON ((0 0, 0 0, 0 1, 1 1, 1 0, 0 0))", 4326);
+
+    assertTrue(Functions.contains(polygon, Constructors.geogFromWKT("POINT (0.5 0.5)", 4326)));
+    assertFalse(Functions.contains(polygon, Constructors.geogFromWKT("POINT (5 5)", 4326)));
+  }
+
+  @Test
   public void polygonRingRolesOverrideInputWinding() throws Exception {
     String[] shells = {
       "0 0, 4 0, 4 4, 0 4, 0 0", // counter-clockwise
