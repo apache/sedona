@@ -34,6 +34,8 @@ from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import same_anchor, scol_for, verify_temp_column_name
 from pyspark.sql.types import (
     BooleanType,
+    DoubleType,
+    FloatType,
     IntegralType,
     LongType,
     NullType,
@@ -129,6 +131,59 @@ def _normalize_numeric_scalar(value, error_message: str) -> float:
         raise TypeError(error_message) from exc
 
 
+def _is_dwithin_numeric_scalar(value) -> bool:
+    """Return whether Shapely treats a distance value as a numeric scalar."""
+    if isinstance(value, np.ndarray):
+        return value.ndim == 0 and value.dtype.kind in "biuf"
+    return isinstance(
+        value,
+        (bool, int, float, np.bool_, np.integer, np.floating),
+    )
+
+
+def _normalize_dwithin_numeric_scalar(value) -> float:
+    """Normalize one dwithin threshold to the SQL engine's double type."""
+    if not _is_dwithin_numeric_scalar(value):
+        raise TypeError(
+            "'distance' must be a numeric scalar or a one-dimensional "
+            "numeric array-like"
+        )
+    try:
+        return float(value)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise TypeError(
+            "'distance' must be a numeric scalar or a one-dimensional "
+            "numeric array-like"
+        ) from exc
+
+
+def _normalize_dwithin_distance_sequence(distance) -> List[float]:
+    """Materialize and validate a local one-dimensional distance sequence."""
+    if isinstance(distance, np.ndarray) and distance.ndim != 1:
+        raise ValueError("'distance' must be one-dimensional")
+    if isinstance(distance, (dict, set, frozenset)):
+        raise TypeError("'distance' must be an ordered numeric array-like")
+    try:
+        values = list(distance)
+    except TypeError as exc:
+        raise TypeError(
+            "'distance' must be a numeric scalar or a one-dimensional "
+            "numeric array-like"
+        ) from exc
+
+    return [_normalize_dwithin_numeric_scalar(value) for value in values]
+
+
+def _normalize_circle_tolerance_scalar(value, error_message: str) -> float:
+    """Normalize the scalar types accepted by Shapely's tolerance ufunc."""
+    if not isinstance(
+        value,
+        (bool, int, float, np.bool_, np.integer, np.floating),
+    ):
+        raise TypeError(error_message)
+    return float(value)
+
+
 def _normalize_affine_scalar(value, error_message: str) -> float:
     """Normalize an operation-wide affine parameter to a Python float."""
     return _normalize_numeric_scalar(value, error_message)
@@ -171,6 +226,35 @@ def _attach_ordered_sequence_column(
         sdf.orderBy(order_column),
         sequence_column,
     )
+
+
+def _dwithin_expression(
+    left: PySparkColumn,
+    right: PySparkColumn,
+    distance: PySparkColumn,
+    invalid_distance_shape: PySparkColumn = None,
+) -> PySparkColumn:
+    """Build a null-safe native dwithin expression."""
+    geometry_is_missing_or_empty = (
+        left.isNull()
+        | right.isNull()
+        | F.coalesce(stf.ST_IsEmpty(left), F.lit(False))
+        | F.coalesce(stf.ST_IsEmpty(right), F.lit(False))
+    )
+    result = F.when(geometry_is_missing_or_empty, F.lit(False)).otherwise(
+        F.coalesce(stp.ST_DWithin(left, right, distance), F.lit(False))
+    )
+    if invalid_distance_shape is not None:
+        result = F.when(
+            invalid_distance_shape,
+            F.raise_error(
+                F.lit(
+                    "The distance array must contain one value per geometry "
+                    "after alignment."
+                )
+            ).cast("boolean"),
+        ).otherwise(result)
+    return result
 
 
 def _sample_points_expression(
@@ -229,6 +313,55 @@ def _sample_points_expression(
             F.raise_error(F.lit("sample size must be at most 2147483647")),
         )
         .otherwise(sampled)
+    )
+
+
+def _maximum_inscribed_circle_expression(
+    geometry: PySparkColumn,
+    tolerance: typing.Optional[PySparkColumn],
+) -> PySparkColumn:
+    """Build GeoPandas-compatible maximum-inscribed-circle expressions."""
+    geometry_type = stf.ST_GeometryType(geometry)
+    is_polygonal = geometry_type.isin("ST_Polygon", "ST_MultiPolygon")
+    # Derive a typed NULL from the input so CASE branches retain GeometryType.
+    null_geometry = F.when(F.lit(False), geometry)
+
+    circle = (
+        stf.ST_MaximumInscribedCircle(geometry)
+        if tolerance is None
+        else stf.ST_MaximumInscribedCircle(geometry, tolerance)
+    )
+    # Extracting center and nearest directly from the same struct expression
+    # duplicates this expensive CodegenFallback operation. Bind the struct as
+    # a one-element array value so the circle search runs once per row.
+    radius_line = F.transform(
+        F.array(circle),
+        lambda result: stf.ST_MakeLine(
+            result.getField("center"),
+            result.getField("nearest"),
+        ),
+    ).getItem(0)
+
+    result = F.when(geometry.isNull(), null_geometry)
+    if tolerance is not None:
+        result = result.when(
+            tolerance.isNull() | F.isnan(tolerance),
+            null_geometry,
+        ).when(
+            tolerance < 0,
+            F.raise_error(F.lit("'tolerance' should be positive")),
+        )
+
+    return (
+        result.when(
+            ~is_polygonal,
+            F.raise_error(F.lit("Input geometry must be a Polygon or MultiPolygon")),
+        )
+        .when(
+            stf.ST_IsEmpty(geometry),
+            F.raise_error(F.lit("Empty input geometry is not supported")),
+        )
+        .otherwise(radius_line)
     )
 
 
@@ -1199,22 +1332,212 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
 
     def dwithin(self, other, distance, align=None):
-        if not isinstance(distance, (float, int)):
-            raise NotImplementedError(
-                "Array-like distance for dwithin not implemented yet."
+        attached_distance_column = None
+        if isinstance(other, BaseGeometry):
+            same_anchor_distance = isinstance(
+                distance, PandasOnSparkSeries
+            ) and same_anchor(self, distance)
+            # Keep the shared source plan when the distance Series comes from the
+            # same frame. A resolved copy of this GeoSeries projects away sibling
+            # columns before the distance expression can be selected.
+            source_internal = (
+                self._internal if same_anchor_distance else self._internal.resolved_copy
+            )
+            source_frame = source_internal.spark_frame
+            result_index_columns = [
+                f"__index_level_{level}__"
+                for level in range(len(source_internal.index_spark_columns))
+            ]
+            other_geometry = stc.ST_GeomFromWKB(F.lit(other.wkb))
+            distance_columns = []
+            if same_anchor_distance:
+                distance_data_type = distance.spark.data_type
+                if not isinstance(
+                    distance_data_type,
+                    (BooleanType, IntegralType, FloatType, DoubleType),
+                ):
+                    raise TypeError("distance values must be numeric")
+                attached_distance_name = "__dwithin_same_anchor_distance__"
+                distance_columns.append(
+                    distance.spark.column.cast("double").alias(attached_distance_name)
+                )
+            aligned_frame = source_frame.select(
+                source_internal.data_spark_columns[0].alias("L"),
+                other_geometry.alias("R"),
+                *distance_columns,
+                *[
+                    index_col.alias(result_index)
+                    for index_col, result_index in zip(
+                        source_internal.index_spark_columns,
+                        result_index_columns,
+                    )
+                ],
+                scol_for(source_frame, NATURAL_ORDER_COLUMN_NAME),
+            )
+            if distance_columns:
+                attached_distance_column = scol_for(
+                    aligned_frame,
+                    attached_distance_name,
+                )
+            result_index_fields = source_internal.index_fields
+            result_index_names = source_internal.index_names
+        else:
+            if not isinstance(
+                other,
+                (
+                    GeoSeries,
+                    GeoDataFrame,
+                    PandasOnSparkSeries,
+                    list,
+                    np.ndarray,
+                ),
+            ):
+                raise TypeError(
+                    "'other' must be a GeoSeries, GeoDataFrame, "
+                    "pandas-on-Spark Series, geometry, list, or NumPy array"
+                )
+
+            other_series, extended = self._make_series_of_val(other)
+            align = False if extended else align
+            (
+                aligned_frame,
+                result_index_columns,
+                result_index_fields,
+                result_index_names,
+            ) = self._align_binary_geometry_series(other_series, align)
+
+        if attached_distance_column is None:
+            (
+                result_frame,
+                distance_column,
+                invalid_distance_shape,
+            ) = self._attach_dwithin_distance(aligned_frame, distance)
+        else:
+            result_frame = aligned_frame
+            distance_column = attached_distance_column
+            invalid_distance_shape = None
+        spark_expr = _dwithin_expression(
+            F.col("L"),
+            F.col("R"),
+            distance_column,
+            invalid_distance_shape,
+        )
+        result = self._boolean_result_preserving_index(
+            spark_expr,
+            result_frame,
+            [scol_for(result_frame, name) for name in result_index_columns],
+            result_index_fields,
+            result_index_names,
+        )
+        return _to_bool(result)
+
+    def _attach_dwithin_distance(self, aligned_frame, distance):
+        """Attach a distance array to already-aligned geometry rows by position."""
+        if _is_dwithin_numeric_scalar(distance):
+            return (
+                aligned_frame,
+                F.lit(_normalize_dwithin_numeric_scalar(distance)),
+                None,
             )
 
-        other_series, extended = self._make_series_of_val(other)
-        align = False if extended else align
+        distance_is_series = isinstance(distance, (pd.Series, PandasOnSparkSeries))
+        if isinstance(distance, PandasOnSparkSeries):
+            distance_data_type = distance.spark.data_type
+            if not isinstance(
+                distance_data_type,
+                (BooleanType, IntegralType, FloatType, DoubleType),
+            ):
+                raise TypeError("distance values must be numeric")
+            local_distances = None
+        else:
+            if not pd.api.types.is_list_like(distance):
+                raise TypeError(
+                    "'distance' must be a numeric scalar or a one-dimensional "
+                    "numeric array-like"
+                )
+            local_distances = _normalize_dwithin_distance_sequence(distance)
+            if len(local_distances) == 1 and not distance_is_series:
+                return aligned_frame, F.lit(local_distances[0]), None
 
-        spark_expr = stp.ST_DWithin(F.col("L"), F.col("R"), F.lit(distance))
-        return self._row_wise_operation(
-            spark_expr,
-            other_series,
-            align=align,
-            returns_geom=False,
-            default_val=False,
+        position_col = "__dwithin_position__"
+        geometry_present_col = "__dwithin_geometry_present__"
+        distance_value_col = "__dwithin_distance__"
+        distance_present_col = "__dwithin_distance_present__"
+
+        geometry_with_position = _attach_ordered_sequence_column(
+            aligned_frame,
+            scol_for(aligned_frame, NATURAL_ORDER_COLUMN_NAME),
+            position_col,
         )
+        geometry_frame = geometry_with_position.select(
+            *[
+                scol_for(geometry_with_position, name)
+                for name in aligned_frame.columns
+                if name != NATURAL_ORDER_COLUMN_NAME
+            ],
+            scol_for(geometry_with_position, position_col),
+            F.lit(True).alias(geometry_present_col),
+        )
+
+        if isinstance(distance, PandasOnSparkSeries):
+            distance_internal = distance._internal.resolved_copy
+            distance_source = distance_internal.spark_frame
+            distance_order_col = "__dwithin_distance_order__"
+            distance_frame = distance_source.select(
+                distance_internal.data_spark_columns[0]
+                .cast("double")
+                .alias(distance_value_col),
+                scol_for(distance_source, NATURAL_ORDER_COLUMN_NAME).alias(
+                    distance_order_col
+                ),
+                F.lit(True).alias(distance_present_col),
+            )
+            distance_frame = _attach_ordered_sequence_column(
+                distance_frame,
+                F.col(distance_order_col),
+                position_col,
+            ).select(
+                F.col(position_col),
+                F.col(distance_value_col),
+                F.col(distance_present_col),
+            )
+        else:
+            distance_schema = StructType(
+                [
+                    StructField(position_col, LongType(), nullable=False),
+                    StructField(distance_value_col, DoubleType(), nullable=True),
+                    StructField(distance_present_col, BooleanType(), nullable=False),
+                ]
+            )
+            distance_rows = [
+                (position, distance_value, True)
+                for position, distance_value in enumerate(local_distances)
+            ]
+            distance_frame = aligned_frame.sparkSession.createDataFrame(
+                distance_rows,
+                schema=distance_schema,
+            )
+
+        joined_frame = geometry_frame.join(
+            distance_frame,
+            on=position_col,
+            how="full",
+        ).orderBy(position_col)
+        result_frame = joined_frame.select(
+            *[
+                F.col(name)
+                for name in aligned_frame.columns
+                if name != NATURAL_ORDER_COLUMN_NAME
+            ],
+            F.col(distance_value_col),
+            F.col(geometry_present_col),
+            F.col(distance_present_col),
+            F.col(position_col).alias(NATURAL_ORDER_COLUMN_NAME),
+        )
+        invalid_distance_shape = (
+            F.col(geometry_present_col).isNull() | F.col(distance_present_col).isNull()
+        )
+        return result_frame, F.col(distance_value_col), invalid_distance_shape
 
     def clip_by_rect(self, xmin, ymin, xmax, ymax) -> "GeoSeries":
         if not all(
@@ -1442,11 +1765,36 @@ class GeoSeries(GeoFrame, pspd.Series):
             raise NotImplementedError(
                 "Sedona does not support only_edges=True for voronoi_polygons."
             )
-        if extend_to is not None:
-            raise NotImplementedError(
-                "Sedona does not support extend_to for voronoi_polygons."
+        if extend_to is None:
+            spark_expr = stf.ST_VoronoiPolygons(self.spark.column, tolerance, extend_to)
+            return self._query_geometry_column(
+                spark_expr,
+                returns_geom=True,
             )
-        spark_expr = stf.ST_VoronoiPolygons(self.spark.column, tolerance, extend_to)
+        if not isinstance(extend_to, BaseGeometry):
+            raise TypeError("'extend_to' must be a geometry or None")
+
+        geometry = self.spark.column
+        source_envelope = stf.ST_Envelope(geometry)
+        # Bind the source envelope once so its bounds are not recomputed from
+        # the full input geometry for every coordinate accessor.
+        default_extent = F.transform(
+            F.array(source_envelope),
+            lambda envelope: stf.ST_Expand(
+                envelope,
+                F.greatest(
+                    stf.ST_XMax(envelope) - stf.ST_XMin(envelope),
+                    stf.ST_YMax(envelope) - stf.ST_YMin(envelope),
+                ),
+            ),
+        ).getItem(0)
+        requested_extent = stc.ST_GeomFromWKB(F.lit(extend_to.envelope.wkb))
+        # JTS treats extendTo as a hard clip. GeoPandas only enlarges the
+        # default Voronoi extent, so combine both envelopes before calling it.
+        effective_extent = stf.ST_Envelope(
+            stf.ST_Collect(F.array(default_extent, requested_extent))
+        )
+        spark_expr = stf.ST_VoronoiPolygons(geometry, tolerance, effective_extent)
         return self._query_geometry_column(
             spark_expr,
             returns_geom=True,
@@ -1539,6 +1887,213 @@ class GeoSeries(GeoFrame, pspd.Series):
         spark_expr = stf.ST_MinimumBoundingCircle(self.spark.column)
         return self._query_geometry_column(
             spark_expr,
+            returns_geom=True,
+        )
+
+    def maximum_inscribed_circle(self, *, tolerance=None) -> "GeoSeries":
+        tolerance_error = (
+            "tolerance must be a numeric scalar, array-like, pandas Series, "
+            "or same-frame pandas-on-Spark Series"
+        )
+        tolerance_column = None
+        if isinstance(tolerance, PandasOnSparkSeries):
+            if not same_anchor(self, tolerance):
+                raise ValueError(
+                    "A distributed tolerance Series must share the same frame "
+                    "and index as the GeoSeries; align both columns in one "
+                    "DataFrame before calling maximum_inscribed_circle"
+                )
+            spark_type = tolerance.spark.data_type
+            if not isinstance(
+                spark_type,
+                (BooleanType, IntegralType, FloatType, DoubleType, NullType),
+            ):
+                raise TypeError(tolerance_error)
+            tolerance_column = tolerance.spark.column.cast("double")
+        elif isinstance(tolerance, pd.Series) or (
+            tolerance is not None and pd.api.types.is_list_like(tolerance)
+        ):
+            return self._maximum_inscribed_circle_with_local_tolerance(
+                tolerance,
+                tolerance_error,
+            )
+        elif tolerance is not None:
+            if isinstance(tolerance, np.ndarray) and tolerance.ndim == 0:
+                tolerance = tolerance.item()
+            normalized_tolerance = _normalize_circle_tolerance_scalar(
+                tolerance,
+                tolerance_error,
+            )
+            if normalized_tolerance < 0:
+                raise ValueError("'tolerance' should be positive")
+            tolerance_column = F.lit(normalized_tolerance)
+
+        spark_expr = _maximum_inscribed_circle_expression(
+            self.spark.column,
+            tolerance_column,
+        )
+        return self._query_geometry_column(
+            spark_expr,
+            returns_geom=True,
+        )
+
+    def _maximum_inscribed_circle_with_local_tolerance(
+        self,
+        tolerance,
+        tolerance_error: str,
+    ) -> "GeoSeries":
+        """Positionally align a local tolerance vector without collecting rows."""
+        normalized_values = None
+        if not isinstance(tolerance, pd.Series):
+            normalized_values = [
+                _normalize_circle_tolerance_scalar(value, tolerance_error)
+                for value in list(tolerance)
+            ]
+            if len(normalized_values) == 1:
+                spark_expr = _maximum_inscribed_circle_expression(
+                    self.spark.column,
+                    F.lit(normalized_values[0]),
+                )
+                return self._query_geometry_column(
+                    spark_expr,
+                    returns_geom=True,
+                )
+
+        source_internal = self._internal.resolved_copy
+        source_sdf = source_internal.spark_frame
+        reserved_names = set(source_sdf.columns)
+
+        def temp_column_name(base: str) -> str:
+            suffix = 0
+            candidate = f"__maximum_inscribed_circle_{base}__"
+            while candidate in reserved_names:
+                suffix += 1
+                candidate = f"__maximum_inscribed_circle_{base}_{suffix}__"
+            reserved_names.add(candidate)
+            return typing.cast(
+                str,
+                verify_temp_column_name(source_sdf, candidate),
+            )
+
+        geometry_col = temp_column_name("geometry")
+        tolerance_col = temp_column_name("tolerance")
+        position_col = temp_column_name("position")
+        left_present_col = temp_column_name("left_present")
+        right_present_col = temp_column_name("right_present")
+        left_order_col = temp_column_name("left_order")
+
+        left_frame = source_sdf.select(
+            source_internal.data_spark_columns[0].alias(geometry_col),
+            *[
+                scol_for(source_sdf, name)
+                for name in source_internal.index_spark_column_names
+            ],
+            scol_for(source_sdf, NATURAL_ORDER_COLUMN_NAME).alias(left_order_col),
+            F.lit(True).alias(left_present_col),
+        )
+        left_frame = _attach_ordered_sequence_column(
+            left_frame,
+            F.col(left_order_col),
+            position_col,
+        ).withColumnRenamed(left_order_col, NATURAL_ORDER_COLUMN_NAME)
+
+        if isinstance(tolerance, pd.Series):
+            if not (
+                pd.api.types.is_bool_dtype(tolerance.dtype)
+                or pd.api.types.is_integer_dtype(tolerance.dtype)
+                or pd.api.types.is_float_dtype(tolerance.dtype)
+            ):
+                raise TypeError(tolerance_error)
+
+            local_series = pspd.Series(tolerance)
+            right_internal = local_series._internal.resolved_copy
+            right_sdf = right_internal.spark_frame
+            right_order_col = temp_column_name("right_order")
+            right_index_cols = [
+                temp_column_name(f"right_index_{level}")
+                for level in range(len(right_internal.index_spark_column_names))
+            ]
+            right_frame = right_sdf.select(
+                right_internal.data_spark_columns[0]
+                .cast("double")
+                .alias(tolerance_col),
+                *[
+                    scol_for(right_sdf, name).alias(alias)
+                    for name, alias in zip(
+                        right_internal.index_spark_column_names,
+                        right_index_cols,
+                    )
+                ],
+                scol_for(right_sdf, NATURAL_ORDER_COLUMN_NAME).alias(right_order_col),
+                F.lit(True).alias(right_present_col),
+            )
+            right_frame = _attach_ordered_sequence_column(
+                right_frame,
+                F.col(right_order_col),
+                position_col,
+            )
+
+            if len(right_index_cols) == len(source_internal.index_spark_column_names):
+                index_mismatch = F.lit(False)
+                for left_index, right_index in zip(
+                    source_internal.index_spark_column_names,
+                    right_index_cols,
+                ):
+                    index_mismatch = index_mismatch | ~F.col(left_index).eqNullSafe(
+                        F.col(right_index)
+                    )
+            else:
+                index_mismatch = F.lit(True)
+        else:
+            right_schema = StructType(
+                [
+                    StructField(position_col, LongType(), nullable=False),
+                    StructField(tolerance_col, DoubleType(), nullable=False),
+                    StructField(right_present_col, BooleanType(), nullable=False),
+                ]
+            )
+            right_frame = source_sdf.sparkSession.createDataFrame(
+                [
+                    (position, value, True)
+                    for position, value in enumerate(normalized_values)
+                ],
+                schema=right_schema,
+            )
+            index_mismatch = F.lit(False)
+
+        aligned_frame = left_frame.join(
+            right_frame,
+            on=position_col,
+            how="full",
+        ).orderBy(position_col)
+        length_mismatch = (
+            F.col(left_present_col).isNull() | F.col(right_present_col).isNull()
+        )
+        radius_line = _maximum_inscribed_circle_expression(
+            F.col(geometry_col),
+            F.col(tolerance_col),
+        )
+        spark_expr = (
+            F.when(
+                length_mismatch,
+                F.raise_error(
+                    F.lit("Length of tolerance does not match length of GeoSeries")
+                ),
+            )
+            .when(
+                index_mismatch,
+                F.raise_error(
+                    F.lit(
+                        "Index of the Series passed as 'tolerance' does not "
+                        "match index of the GeoSeries"
+                    )
+                ),
+            )
+            .otherwise(radius_line)
+        )
+        return self._query_geometry_column(
+            spark_expr,
+            aligned_frame,
             returns_geom=True,
         )
 
@@ -2534,25 +3089,24 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         return first_series(PandasOnSparkDataFrame(internal)).rename(None)
 
-    def _geom_equals_exact_series(
+    def _align_binary_geometry_series(
         self,
         other: pspd.Series,
-        tolerance: float,
         align: Union[bool, None],
-    ) -> pspd.Series:
-        """Execute exact equality with GeoPandas-compatible row alignment."""
-        position_col = "__geom_equals_exact_position__"
-        left_present_col = "__geom_equals_exact_left_present__"
-        right_present_col = "__geom_equals_exact_right_present__"
-        left_order_col = "__geom_equals_exact_left_order__"
-        right_order_col = "__geom_equals_exact_right_order__"
+    ):
+        """Align two geometry Series and preserve every resulting index level."""
+        position_col = "__binary_geometry_position__"
+        left_present_col = "__binary_geometry_left_present__"
+        right_present_col = "__binary_geometry_right_present__"
+        left_order_col = "__binary_geometry_left_order__"
+        right_order_col = "__binary_geometry_right_order__"
 
         left_index_aliases = [
-            f"__geom_equals_exact_left_index_{level}__"
+            f"__binary_geometry_left_index_{level}__"
             for level in range(len(self._internal.index_spark_columns))
         ]
         right_index_aliases = [
-            f"__geom_equals_exact_right_index_{level}__"
+            f"__binary_geometry_right_index_{level}__"
             for level in range(len(other._internal.index_spark_columns))
         ]
 
@@ -2860,6 +3414,27 @@ class GeoSeries(GeoFrame, pspd.Series):
                 InternalField.from_struct_field(aligned_schema[result_index])
                 for result_index in result_index_columns
             ]
+
+        return (
+            aligned_frame,
+            result_index_columns,
+            result_index_fields,
+            result_index_names,
+        )
+
+    def _geom_equals_exact_series(
+        self,
+        other: pspd.Series,
+        tolerance: float,
+        align: Union[bool, None],
+    ) -> pspd.Series:
+        """Execute exact equality with GeoPandas-compatible row alignment."""
+        (
+            aligned_frame,
+            result_index_columns,
+            result_index_fields,
+            result_index_names,
+        ) = self._align_binary_geometry_series(other, align)
 
         spark_expr = stp.ST_EqualsExact(F.col("L"), F.col("R"), tolerance)
         result = self._boolean_result_preserving_index(

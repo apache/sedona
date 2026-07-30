@@ -34,6 +34,7 @@ from shapely.geometry import (
     MultiPolygon,
     GeometryCollection,
     LinearRing,
+    box,
 )
 
 from sedona.spark.geopandas import GeoSeries
@@ -680,6 +681,19 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
 
+                distances = np.arange(len(geom), dtype=float)
+                sgpd_result = GeoSeries(geom).dwithin(
+                    GeoSeries(geom2),
+                    distance=distances,
+                    align=False,
+                )
+                gpd_result = gpd.GeoSeries(geom).dwithin(
+                    gpd.GeoSeries(geom2),
+                    distance=distances,
+                    align=False,
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
     def test_difference(self):
         for geom, geom2 in self.pairs:
             # Sedona doesn't support difference for GeometryCollections
@@ -987,6 +1001,19 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             collected = result.to_geopandas()
             assert len(collected) == len(geom)
 
+    def test_voronoi_polygons_extend_to(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas voronoi_polygons requires version 1.0.0 or higher")
+
+        geometry = MultiPoint([(0, 0), (1, 0), (0.5, 1)])
+        extent = box(-2, 0, 3, 3)
+        actual = GeoSeries([geometry]).voronoi_polygons(extend_to=extent).to_geopandas()
+        expected = gpd.GeoSeries([geometry]).voronoi_polygons(extend_to=extent)
+
+        # Sedona keeps the cells for each input row in one GeometryCollection,
+        # while GeoPandas returns one row per cell. Compare their combined extent.
+        assert actual.iloc[0].bounds == pytest.approx(expected.union_all().bounds)
+
     def test_envelope(self):
         for geom in self.geoms:
             sgpd_result = GeoSeries(geom).envelope
@@ -1128,6 +1155,45 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             sgpd_result = GeoSeries(geom).minimum_bounding_circle()
             gpd_result = gpd.GeoSeries(geom).minimum_bounding_circle()
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result, tolerance=0.5)
+
+    def test_maximum_inscribed_circle(self):
+        if parse_version(gpd.__version__) < parse_version("1.1.0"):
+            pytest.skip(
+                "geopandas maximum_inscribed_circle requires version 1.1.0 or higher"
+            )
+        if parse_version(shapely.__version__) < parse_version("2.1.0"):
+            pytest.skip(
+                "geopandas maximum_inscribed_circle requires shapely 2.1.0 or higher"
+            )
+
+        geoms = [
+            Polygon([(0, 0), (1, 0), (1, 1), (0, 0)]),
+            Polygon([(0, 0), (0.5, -1), (1, 0), (1, 1), (-0.5, 0.5)]),
+            MultiPolygon(
+                [
+                    Polygon([(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]),
+                    Polygon([(10, 0), (10, 1), (11, 1), (11, 0), (10, 0)]),
+                ]
+            ),
+            None,
+        ]
+        for tolerance in (None, 2.0):
+            sgpd_result = GeoSeries(geoms).maximum_inscribed_circle(tolerance=tolerance)
+            gpd_result = gpd.GeoSeries(geoms).maximum_inscribed_circle(
+                tolerance=tolerance
+            )
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # GeoPandas' own compatibility test uses row-wise zero and coarse
+        # tolerances, including zero as the per-geometry automatic tolerance.
+        local_tolerance = np.array([0, 10])
+        sgpd_result = GeoSeries(geoms[:2]).maximum_inscribed_circle(
+            tolerance=local_tolerance
+        )
+        gpd_result = gpd.GeoSeries(geoms[:2]).maximum_inscribed_circle(
+            tolerance=local_tolerance
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_minimum_bounding_radius(self):
         for geom in self.geoms:
