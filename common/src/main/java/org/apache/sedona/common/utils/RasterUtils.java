@@ -41,6 +41,7 @@ import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.RasterAccessors;
 import org.apache.sedona.common.raster.RasterEditors;
+import org.geotools.api.coverage.SampleDimensionType;
 import org.geotools.api.coverage.grid.GridEnvelope;
 import org.geotools.api.metadata.spatial.PixelOrientation;
 import org.geotools.api.referencing.FactoryException;
@@ -59,7 +60,6 @@ import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.Position2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
-import org.geotools.util.ClassChanger;
 import org.geotools.util.NumberRange;
 import org.locationtech.jts.geom.Geometry;
 
@@ -294,14 +294,48 @@ public class RasterUtils {
    * @param noDataValue The no data value.
    * @return A new sample dimension with the given no data value.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
   public static GridSampleDimension createSampleDimensionWithNoDataValue(
       GridSampleDimension sampleDimension, double noDataValue) {
-    // if noDataValues contain noDataValue, then return the original sample dimension
-    double existingNoDataValue = getNoDataValue(sampleDimension);
-    if (Double.compare(existingNoDataValue, noDataValue) == 0) {
+    return createSampleDimensionWithNoDataValue(
+        sampleDimension, noDataValue, sampleDimension.getSampleDimensionType());
+  }
+
+  /**
+   * Create a sample dimension using a given sampleDimension as template, with the given no data
+   * value encoded for an explicit sample dimension type.
+   *
+   * <p>The type matters because the no data value is wrapped into a {@link Number} of that type. It
+   * is only worth passing explicitly when the template's own type does not describe the pixels the
+   * sample dimension will end up attached to — deserializing a raster whose band data was replaced
+   * by a Python UDF, for instance, where the template comes from the source raster but the pixels
+   * may have a wider type.
+   *
+   * @param sampleDimension The sample dimension to be used as template.
+   * @param noDataValue The no data value.
+   * @param sampleDimensionType The type to encode the no data value for.
+   * @return A new sample dimension with the given no data value.
+   */
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public static GridSampleDimension createSampleDimensionWithNoDataValue(
+      GridSampleDimension sampleDimension,
+      double noDataValue,
+      SampleDimensionType sampleDimensionType) {
+    // Encode the value for the sample dimension type first: a float band stores 99.2 as
+    // 99.19999694824219, and the split ranges and new category must agree on the encoded value,
+    // not the requested one.
+    Number wrappedNoData = TypeMap.wrapSample(noDataValue, sampleDimensionType, false);
+    double effectiveNoDataValue = wrappedNoData.doubleValue();
+
+    // Preserve the existing categories when their declared scalar already agrees. In particular,
+    // callers that copy an existing range-valued NODATA category pass its minimum here and expect
+    // the range to remain intact. Wire-level authoritative overrides remove that category before
+    // calling this shared helper.
+    if (Double.compare(getNoDataValue(sampleDimension), effectiveNoDataValue) == 0) {
       return sampleDimension;
     }
+
+    NumberRange noDataRange =
+        new NumberRange(wrappedNoData.getClass(), wrappedNoData, wrappedNoData);
 
     String description = sampleDimension.getDescription().toString();
     List<Category> categories = sampleDimension.getCategories();
@@ -311,49 +345,41 @@ public class RasterUtils {
     // Copy existing categories. If the category contains noDataValue, split it into two categories.
     List<Category> newCategories = new ArrayList<>(categories.size());
     for (Category category : categories) {
+      if (category.getName().equals(Category.NODATA.getName())) {
+        // The existing no data category is being replaced wholesale, so drop it. This has to
+        // happen before the split below: a range-valued no data category that contains the new
+        // value would otherwise be split into no data-named fragments, and getNoDataValue() reads
+        // the first such category, reporting the fragment's minimum instead of the value asked for.
+        continue;
+      }
       NumberRange<? extends Number> range = category.getRange();
-      if (range.contains((Number) noDataValue)) {
-        // Split this range to two ranges, one is [min, noDataValue), the other is (noDataValue,
-        // max]
-        Number min = range.getMinValue();
-        Number max = range.getMaxValue();
-        final Class<? extends Number> clazz = ClassChanger.getWidestClass(min, max);
-        min = ClassChanger.cast(min, clazz);
-        max = ClassChanger.cast(max, clazz);
-        Number nodata = ClassChanger.cast(noDataValue, clazz);
-        if (min.doubleValue() < noDataValue) {
-          Category leftCategory =
-              new Category(
-                  category.getName(),
-                  category.getColors(),
-                  new NumberRange(clazz, min, range.isMinIncluded(), nodata, false));
-          newCategories.add(leftCategory);
+      if (range.contains(wrappedNoData)) {
+        // NumberRange performs the split in the widest operand type, so a float output retains
+        // Float fragments while a byte category widened to double can represent a fractional
+        // NODATA value. It can return representationally empty fragments at exclusive boundaries;
+        // compare their effective included endpoints before constructing a Category.
+        for (NumberRange<?> fragment : range.subtract(noDataRange)) {
+          if (fragment.getMinimum(true) <= fragment.getMaximum(true)) {
+            newCategories.add(
+                new Category(
+                    category.getName(), category.getColors(), fragment, category.isQuantitative()));
+          }
         }
-        if (max.doubleValue() > noDataValue) {
-          Category rightCategory =
-              new Category(
-                  category.getName(),
-                  category.getColors(),
-                  new NumberRange(clazz, nodata, false, max, range.isMaxIncluded()));
-          newCategories.add(rightCategory);
-        }
-      } else if (!category.getName().equals(Category.NODATA.getName())) {
+      } else {
         // This category does not contain no data value, just keep it as is.
         newCategories.add(category);
       }
     }
 
     // Add the no data value as a new category
-    Number nodata =
-        TypeMap.wrapSample(noDataValue, sampleDimension.getSampleDimensionType(), false);
     newCategories.add(
         new Category(
             Category.NODATA.getName(),
             new Color(0, 0, 0, 0),
-            new NumberRange(nodata.getClass(), nodata, nodata)));
+            new NumberRange(wrappedNoData.getClass(), wrappedNoData, wrappedNoData)));
 
     return new GridSampleDimension(
-        description, newCategories.toArray(new Category[0]), offset, scale);
+        description, newCategories.toArray(new Category[0]), scale, offset);
   }
 
   public static GridSampleDimension createSampleDimensionWithNoDataValue(
@@ -393,7 +419,7 @@ public class RasterUtils {
     double offset = sampleDimension.getOffset();
     double scale = sampleDimension.getScale();
     return new GridSampleDimension(
-        description, newCategories.toArray(new Category[0]), offset, scale);
+        description, newCategories.toArray(new Category[0]), scale, offset);
   }
 
   /**

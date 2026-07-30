@@ -274,3 +274,141 @@ class TestFlexibleBands(TestBase):
         assert abs(result["scale_x"] - 10.0) < 0.001
         assert abs(result["scale_y"] - (-10.0)) < 0.001
         assert result["srid"] == 3857
+
+    @pytest.mark.skipif(
+        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
+    )
+    def test_nodata_defaults_to_inherited(self):
+        """Without nodata=, each output band inherits it from the input band."""
+        spark = self.spark
+
+        @udf(returnType=RasterType())
+        def reduce_to_1(raster):
+            return raster.with_bands(raster.as_numpy()[0].astype(np.float64))
+
+        df = spark.range(1).withColumn(
+            "rast",
+            expr(
+                "RS_SetBandNoDataValue(RS_MakeRasterForTesting("
+                "4, 'D', 'BandedSampleModel', 4, 3, 100, 100, 10, -10, 0, 0, 3857), 1, 0.0)"
+            ),
+        )
+        result = (
+            df.select(reduce_to_1(col("rast")).alias("rast2"))
+            .selectExpr("RS_BandNoDataValue(rast2, 1) as nodata")
+            .first()
+        )
+        assert result["nodata"] == 0.0
+
+    @pytest.mark.skipif(
+        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
+    )
+    def test_nodata_scalar_overrides_inherited(self):
+        """A scalar nodata= reaches the JVM instead of the inherited value."""
+        spark = self.spark
+
+        @udf(returnType=RasterType())
+        def mask(raster):
+            band1 = raster.as_numpy()[0]
+            return raster.with_bands((band1 < 6).astype(np.float64), nodata=-9999.0)
+
+        df = spark.range(1).withColumn(
+            "rast",
+            expr(
+                "RS_SetBandNoDataValue(RS_MakeRasterForTesting("
+                "4, 'D', 'BandedSampleModel', 4, 3, 100, 100, 10, -10, 0, 0, 3857), 1, 0.0)"
+            ),
+        )
+        result = (
+            df.select(mask(col("rast")).alias("rast2"))
+            .selectExpr(
+                "RS_BandNoDataValue(rast2, 1) as nodata",
+                "RS_Count(rast2, 1, true) as counted",
+                "RS_Count(rast2, 1, false) as total",
+            )
+            .first()
+        )
+        # -9999 replaces the inherited 0, so the mask's zeros are real data again.
+        assert result["nodata"] == -9999.0
+        assert result["counted"] == 12
+        assert result["total"] == 12
+
+    @pytest.mark.skipif(
+        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
+    )
+    def test_nodata_per_band_sequence(self):
+        """A sequence nodata= assigns a different value to each output band."""
+        spark = self.spark
+
+        @udf(returnType=RasterType())
+        def widen(raster):
+            arr = raster.as_numpy().astype(np.float64)
+            return raster.with_bands(
+                np.concatenate([arr, arr], axis=0), nodata=[-1.0, -2.0, -3.0, -4.0] * 2
+            )
+
+        df = spark.range(1).withColumn(
+            "rast",
+            expr(
+                "RS_MakeRasterForTesting(4, 'D', 'BandedSampleModel', "
+                "4, 3, 100, 100, 10, -10, 0, 0, 3857)"
+            ),
+        )
+        result = (
+            df.select(widen(col("rast")).alias("rast2"))
+            .selectExpr(
+                "RS_NumBands(rast2) as num_bands",
+                *[f"RS_BandNoDataValue(rast2, {b}) as nodata{b}" for b in range(1, 9)],
+            )
+            .first()
+        )
+        assert result["num_bands"] == 8
+        for band, expected in enumerate([-1.0, -2.0, -3.0, -4.0] * 2, start=1):
+            assert result[f"nodata{band}"] == expected, f"band {band}"
+
+    @pytest.mark.skipif(
+        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
+    )
+    def test_nodata_agrees_between_python_and_jvm_when_widening(self):
+        """bands_meta and RS_BandNoDataValue report the same value for added bands."""
+        spark = self.spark
+
+        @udf(returnType="string")
+        def python_view(raster):
+            arr = raster.as_numpy().astype(np.float64)
+            out = raster.with_bands(np.concatenate([arr, arr], axis=0))
+            return ",".join(str(bm.nodata) for bm in out.bands_meta)
+
+        @udf(returnType=RasterType())
+        def widen(raster):
+            arr = raster.as_numpy().astype(np.float64)
+            return raster.with_bands(np.concatenate([arr, arr], axis=0))
+
+        df = spark.range(1).withColumn(
+            "rast",
+            expr(
+                "RS_SetBandNoDataValue(RS_MakeRasterForTesting("
+                "4, 'D', 'BandedSampleModel', 4, 3, 100, 100, 10, -10, 0, 0, 3857), 4, -1.0)"
+            ),
+        )
+        python_nodata = df.select(python_view(col("rast")).alias("v")).first()["v"]
+        jvm = (
+            df.select(widen(col("rast")).alias("rast2"))
+            .selectExpr(
+                *[f"RS_BandNoDataValue(rast2, {b}) as nodata{b}" for b in range(1, 9)]
+            )
+            .first()
+        )
+        # Bands 4-8 all replay band 4's category blob, which carries -1.0.
+        assert python_nodata.split(",")[3:] == ["-1.0"] * 5
+        for band in range(4, 9):
+            assert jvm[f"nodata{band}"] == -1.0, f"band {band}"
+
+    def test_nodata_sequence_length_is_validated(self):
+        """A nodata= sequence of the wrong length is rejected."""
+        raster = self.spark.sql(
+            "SELECT RS_MakeRasterForTesting(4, 'D', 'BandedSampleModel', "
+            "4, 3, 100, 100, 10, -10, 0, 0, 3857) AS rast"
+        ).first()["rast"]
+        with pytest.raises(ValueError, match="nodata has 2 entries"):
+            raster.with_bands(np.zeros((3, 4), dtype=np.float64), nodata=[1.0, 2.0])
