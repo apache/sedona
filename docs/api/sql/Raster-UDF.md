@@ -37,12 +37,23 @@ forms to help with migrating.
 
 ```python
 raster.as_numpy()  # ndarray in CHW order (bands, height, width)
-raster.as_numpy_masked()  # same, with NODATA replaced by NaN
-raster.as_rasterio()  # rasterio.DatasetReader (read-only)
+raster.as_numpy_masked()  # regular ndarray, with NODATA pixels replaced by NaN
+raster.as_rasterio()  # read-only rasterio.DatasetReader; NODATA is not attached
 ```
 
 Metadata is available as attributes — `raster.width`, `raster.height`, `raster.crs_wkt`,
-`raster.affine_trans`, and `raster.bands_meta`.
+`raster.affine_trans`, and `raster.bands_meta`. The canonical NODATA declaration for Python band index
+`i` is `raster.bands_meta[i].nodata`. Index `0` refers to channel `0` in either NumPy array and to band
+`1` in rasterio and Sedona SQL functions. A metadata value of `NaN` means that the band has no declared
+NODATA.
+
+The returned views do not all retain that declaration:
+
+| Accessor | NODATA behavior |
+| --- | --- |
+| `as_numpy()` | The ndarray has no NODATA metadata. Pixels keep their raw sentinel values; read the declaration from `raster.bands_meta`. |
+| `as_numpy_masked()` | This is a regular ndarray, not a `numpy.ma.MaskedArray`. NODATA pixels become `NaN`, but the original sentinel is not attached to the result; integer data may therefore be promoted to a floating dtype. |
+| `as_rasterio()` | The reader does not carry Sedona's NODATA metadata: `src.nodata` is `None` and `src.read_masks()` reports every pixel as valid. Keep using `raster.bands_meta`, and pass a value or mask to rasterio explicitly. |
 
 !!!warning
     `as_numpy()` returns NODATA pixels as their raw sentinel values, so arithmetic and comparisons treat

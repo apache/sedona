@@ -38,12 +38,22 @@ Python UDF 接收栅格**输入**从 `v1.6.0` 起支持；从 UDF **返回**栅�
 
 ```python
 raster.as_numpy()  # CHW 顺序的 ndarray（波段、高、宽）
-raster.as_numpy_masked()  # 同上，但 NODATA 会被替换为 NaN
-raster.as_rasterio()  # rasterio.DatasetReader（只读）
+raster.as_numpy_masked()  # 普通 ndarray，但 NODATA 像素会被替换为 NaN
+raster.as_rasterio()  # 只读 rasterio.DatasetReader；不附带 NODATA
 ```
 
 元数据以属性形式提供 —— `raster.width`、`raster.height`、`raster.crs_wkt`、`raster.affine_trans`
-以及 `raster.bands_meta`。
+以及 `raster.bands_meta`。Python 波段索引 `i` 的权威 NODATA 声明是
+`raster.bands_meta[i].nodata`。索引 `0` 对应两个 NumPy 数组中的通道 `0`，也对应 rasterio 和
+Sedona SQL 函数中的波段 `1`。元数据值为 `NaN` 表示该波段没有声明 NODATA。
+
+这三种访问方式返回的结果并不会都保留该声明：
+
+| 访问方式 | NODATA 行为 |
+| --- | --- |
+| `as_numpy()` | `ndarray` 本身不携带 NODATA 元数据。像素仍保留原始哨兵值；请从 `raster.bands_meta` 读取声明。 |
+| `as_numpy_masked()` | 返回普通 `ndarray`，而不是 `numpy.ma.MaskedArray`。NODATA 像素会变为 `NaN`，但结果中不附带原始哨兵值；因此整数数据可能被提升为浮点 dtype。 |
+| `as_rasterio()` | reader 不携带 Sedona 的 NODATA 元数据：`src.nodata` 为 `None`，`src.read_masks()` 会把所有像素报告为有效。请继续以 `raster.bands_meta` 为准，并将值或掩码显式传给 rasterio。 |
 
 !!!warning
     `as_numpy()` 会把 NODATA 像素按原始哨兵值返回，算术与比较会把空洞当作普通数字 —— 例如 `band < 1400`
