@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -244,6 +243,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">same_anchor</span><span class="p">,</span> <span class="n">scol_for</span><span class="p">,</span> <span class="n">verify_temp_column_name</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BooleanType</span><span class="p">,</span>
+    <span class="n">DoubleType</span><span class="p">,</span>
+    <span class="n">FloatType</span><span class="p">,</span>
     <span class="n">IntegralType</span><span class="p">,</span>
     <span class="n">LongType</span><span class="p">,</span>
     <span class="n">NullType</span><span class="p">,</span>
@@ -339,6 +340,59 @@
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_dwithin_numeric_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return whether Shapely treats a distance value as a numeric scalar.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="ow">in</span> <span class="s2">&quot;biuf&quot;</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span>
+        <span class="n">value</span><span class="p">,</span>
+        <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">),</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_dwithin_numeric_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalize one dwithin threshold to the SQL engine&#39;s double type.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_dwithin_numeric_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;&#39;distance&#39; must be a numeric scalar or a one-dimensional &quot;</span>
+            <span class="s2">&quot;numeric array-like&quot;</span>
+        <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">OverflowError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;&#39;distance&#39; must be a numeric scalar or a one-dimensional &quot;</span>
+            <span class="s2">&quot;numeric array-like&quot;</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_dwithin_distance_sequence</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Materialize and validate a local one-dimensional distance sequence.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">distance</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;distance&#39; must be one-dimensional&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;distance&#39; must be an ordered numeric array-like&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;&#39;distance&#39; must be a numeric scalar or a one-dimensional &quot;</span>
+            <span class="s2">&quot;numeric array-like&quot;</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">_normalize_dwithin_numeric_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_normalize_circle_tolerance_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">error_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalize the scalar types accepted by Shapely&#39;s tolerance ufunc.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+        <span class="n">value</span><span class="p">,</span>
+        <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">),</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_affine_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">error_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalize an operation-wide affine parameter to a Python float.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_normalize_numeric_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">error_message</span><span class="p">)</span>
@@ -381,6 +435,35 @@
         <span class="n">sdf</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">order_column</span><span class="p">),</span>
         <span class="n">sequence_column</span><span class="p">,</span>
     <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dwithin_expression</span><span class="p">(</span>
+    <span class="n">left</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
+    <span class="n">right</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
+    <span class="n">distance</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
+    <span class="n">invalid_distance_shape</span><span class="p">:</span> <span class="n">PySparkColumn</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PySparkColumn</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a null-safe native dwithin expression.&quot;&quot;&quot;</span>
+    <span class="n">geometry_is_missing_or_empty</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">left</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span>
+        <span class="o">|</span> <span class="n">right</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span>
+        <span class="o">|</span> <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_IsEmpty</span><span class="p">(</span><span class="n">left</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">))</span>
+        <span class="o">|</span> <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_IsEmpty</span><span class="p">(</span><span class="n">right</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">geometry_is_missing_or_empty</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">))</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">stp</span><span class="o">.</span><span class="n">ST_DWithin</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">distance</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">invalid_distance_shape</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+            <span class="n">invalid_distance_shape</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">raise_error</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span>
+                    <span class="s2">&quot;The distance array must contain one value per geometry &quot;</span>
+                    <span class="s2">&quot;after alignment.&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;boolean&quot;</span><span class="p">),</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_sample_points_expression</span><span class="p">(</span>
@@ -439,6 +522,55 @@
             <span class="n">F</span><span class="o">.</span><span class="n">raise_error</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;sample size must be at most 2147483647&quot;</span><span class="p">)),</span>
         <span class="p">)</span>
         <span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">sampled</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_maximum_inscribed_circle_expression</span><span class="p">(</span>
+    <span class="n">geometry</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">PySparkColumn</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PySparkColumn</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build GeoPandas-compatible maximum-inscribed-circle expressions.&quot;&quot;&quot;</span>
+    <span class="n">geometry_type</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_GeometryType</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="n">is_polygonal</span> <span class="o">=</span> <span class="n">geometry_type</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="s2">&quot;ST_Polygon&quot;</span><span class="p">,</span> <span class="s2">&quot;ST_MultiPolygon&quot;</span><span class="p">)</span>
+    <span class="c1"># Derive a typed NULL from the input so CASE branches retain GeometryType.</span>
+    <span class="n">null_geometry</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span> <span class="n">geometry</span><span class="p">)</span>
+
+    <span class="n">circle</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">stf</span><span class="o">.</span><span class="n">ST_MaximumInscribedCircle</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tolerance</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_MaximumInscribedCircle</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="c1"># Extracting center and nearest directly from the same struct expression</span>
+    <span class="c1"># duplicates this expensive CodegenFallback operation. Bind the struct as</span>
+    <span class="c1"># a one-element array value so the circle search runs once per row.</span>
+    <span class="n">radius_line</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">circle</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">result</span><span class="p">:</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_MakeLine</span><span class="p">(</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">getField</span><span class="p">(</span><span class="s2">&quot;center&quot;</span><span class="p">),</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">getField</span><span class="p">(</span><span class="s2">&quot;nearest&quot;</span><span class="p">),</span>
+        <span class="p">),</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">geometry</span><span class="o">.</span><span class="n">isNull</span><span class="p">(),</span> <span class="n">null_geometry</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tolerance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+            <span class="n">tolerance</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span> <span class="o">|</span> <span class="n">F</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">tolerance</span><span class="p">),</span>
+            <span class="n">null_geometry</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+            <span class="n">tolerance</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">raise_error</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;&#39;tolerance&#39; should be positive&quot;</span><span class="p">)),</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+            <span class="o">~</span><span class="n">is_polygonal</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">raise_error</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;Input geometry must be a Polygon or MultiPolygon&quot;</span><span class="p">)),</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">when</span><span class="p">(</span>
+            <span class="n">stf</span><span class="o">.</span><span class="n">ST_IsEmpty</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">raise_error</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;Empty input geometry is not supported&quot;</span><span class="p">)),</span>
+        <span class="p">)</span>
+        <span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">radius_line</span><span class="p">)</span>
     <span class="p">)</span>
 
 
@@ -1409,22 +1541,212 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.dwithin"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.dwithin">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">dwithin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;Array-like distance for dwithin not implemented yet.&quot;</span>
+        <span class="n">attached_distance_column</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
+            <span class="n">same_anchor_distance</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">distance</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span>
+            <span class="p">)</span> <span class="ow">and</span> <span class="n">same_anchor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance</span><span class="p">)</span>
+            <span class="c1"># Keep the shared source plan when the distance Series comes from the</span>
+            <span class="c1"># same frame. A resolved copy of this GeoSeries projects away sibling</span>
+            <span class="c1"># columns before the distance expression can be selected.</span>
+            <span class="n">source_internal</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span> <span class="k">if</span> <span class="n">same_anchor_distance</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
+            <span class="p">)</span>
+            <span class="n">source_frame</span> <span class="o">=</span> <span class="n">source_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+            <span class="n">result_index_columns</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="sa">f</span><span class="s2">&quot;__index_level_</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">__&quot;</span>
+                <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">source_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">))</span>
+            <span class="p">]</span>
+            <span class="n">other_geometry</span> <span class="o">=</span> <span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromWKB</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">wkb</span><span class="p">))</span>
+            <span class="n">distance_columns</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">same_anchor_distance</span><span class="p">:</span>
+                <span class="n">distance_data_type</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">data_type</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">distance_data_type</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">BooleanType</span><span class="p">,</span> <span class="n">IntegralType</span><span class="p">,</span> <span class="n">FloatType</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">),</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;distance values must be numeric&quot;</span><span class="p">)</span>
+                <span class="n">attached_distance_name</span> <span class="o">=</span> <span class="s2">&quot;__dwithin_same_anchor_distance__&quot;</span>
+                <span class="n">distance_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">distance</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;double&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">attached_distance_name</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">source_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="n">source_internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span>
+                <span class="n">other_geometry</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">),</span>
+                <span class="o">*</span><span class="n">distance_columns</span><span class="p">,</span>
+                <span class="o">*</span><span class="p">[</span>
+                    <span class="n">index_col</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">result_index</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">index_col</span><span class="p">,</span> <span class="n">result_index</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                        <span class="n">source_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">,</span>
+                        <span class="n">result_index_columns</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">],</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">source_frame</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">distance_columns</span><span class="p">:</span>
+                <span class="n">attached_distance_column</span> <span class="o">=</span> <span class="n">scol_for</span><span class="p">(</span>
+                    <span class="n">aligned_frame</span><span class="p">,</span>
+                    <span class="n">attached_distance_name</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">result_index_fields</span> <span class="o">=</span> <span class="n">source_internal</span><span class="o">.</span><span class="n">index_fields</span>
+            <span class="n">result_index_names</span> <span class="o">=</span> <span class="n">source_internal</span><span class="o">.</span><span class="n">index_names</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">other</span><span class="p">,</span>
+                <span class="p">(</span>
+                    <span class="n">GeoSeries</span><span class="p">,</span>
+                    <span class="n">GeoDataFrame</span><span class="p">,</span>
+                    <span class="n">PandasOnSparkSeries</span><span class="p">,</span>
+                    <span class="nb">list</span><span class="p">,</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;&#39;other&#39; must be a GeoSeries, GeoDataFrame, &quot;</span>
+                    <span class="s2">&quot;pandas-on-Spark Series, geometry, list, or NumPy array&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">other_series</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+            <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
+            <span class="p">(</span>
+                <span class="n">aligned_frame</span><span class="p">,</span>
+                <span class="n">result_index_columns</span><span class="p">,</span>
+                <span class="n">result_index_fields</span><span class="p">,</span>
+                <span class="n">result_index_names</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_binary_geometry_series</span><span class="p">(</span><span class="n">other_series</span><span class="p">,</span> <span class="n">align</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">attached_distance_column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="p">(</span>
+                <span class="n">result_frame</span><span class="p">,</span>
+                <span class="n">distance_column</span><span class="p">,</span>
+                <span class="n">invalid_distance_shape</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attach_dwithin_distance</span><span class="p">(</span><span class="n">aligned_frame</span><span class="p">,</span> <span class="n">distance</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result_frame</span> <span class="o">=</span> <span class="n">aligned_frame</span>
+            <span class="n">distance_column</span> <span class="o">=</span> <span class="n">attached_distance_column</span>
+            <span class="n">invalid_distance_shape</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">_dwithin_expression</span><span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">),</span>
+            <span class="n">distance_column</span><span class="p">,</span>
+            <span class="n">invalid_distance_shape</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boolean_result_preserving_index</span><span class="p">(</span>
+            <span class="n">spark_expr</span><span class="p">,</span>
+            <span class="n">result_frame</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">result_frame</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">result_index_columns</span><span class="p">],</span>
+            <span class="n">result_index_fields</span><span class="p">,</span>
+            <span class="n">result_index_names</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">_to_bool</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_attach_dwithin_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aligned_frame</span><span class="p">,</span> <span class="n">distance</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Attach a distance array to already-aligned geometry rows by position.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">_is_dwithin_numeric_scalar</span><span class="p">(</span><span class="n">distance</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">aligned_frame</span><span class="p">,</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">_normalize_dwithin_numeric_scalar</span><span class="p">(</span><span class="n">distance</span><span class="p">)),</span>
+                <span class="kc">None</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="n">other_series</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-        <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
+        <span class="n">distance_is_series</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">):</span>
+            <span class="n">distance_data_type</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">data_type</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">distance_data_type</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">BooleanType</span><span class="p">,</span> <span class="n">IntegralType</span><span class="p">,</span> <span class="n">FloatType</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">),</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;distance values must be numeric&quot;</span><span class="p">)</span>
+            <span class="n">local_distances</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_list_like</span><span class="p">(</span><span class="n">distance</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;&#39;distance&#39; must be a numeric scalar or a one-dimensional &quot;</span>
+                    <span class="s2">&quot;numeric array-like&quot;</span>
+                <span class="p">)</span>
+            <span class="n">local_distances</span> <span class="o">=</span> <span class="n">_normalize_dwithin_distance_sequence</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">local_distances</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">distance_is_series</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">aligned_frame</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">local_distances</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="kc">None</span>
 
-        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stp</span><span class="o">.</span><span class="n">ST_DWithin</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">distance</span><span class="p">))</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
-            <span class="n">spark_expr</span><span class="p">,</span>
-            <span class="n">other_series</span><span class="p">,</span>
-            <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">,</span>
-            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">default_val</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="n">position_col</span> <span class="o">=</span> <span class="s2">&quot;__dwithin_position__&quot;</span>
+        <span class="n">geometry_present_col</span> <span class="o">=</span> <span class="s2">&quot;__dwithin_geometry_present__&quot;</span>
+        <span class="n">distance_value_col</span> <span class="o">=</span> <span class="s2">&quot;__dwithin_distance__&quot;</span>
+        <span class="n">distance_present_col</span> <span class="o">=</span> <span class="s2">&quot;__dwithin_distance_present__&quot;</span>
+
+        <span class="n">geometry_with_position</span> <span class="o">=</span> <span class="n">_attach_ordered_sequence_column</span><span class="p">(</span>
+            <span class="n">aligned_frame</span><span class="p">,</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">aligned_frame</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+            <span class="n">position_col</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">geometry_frame</span> <span class="o">=</span> <span class="n">geometry_with_position</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="o">*</span><span class="p">[</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">geometry_with_position</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">aligned_frame</span><span class="o">.</span><span class="n">columns</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span>
+            <span class="p">],</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">geometry_with_position</span><span class="p">,</span> <span class="n">position_col</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">geometry_present_col</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">):</span>
+            <span class="n">distance_internal</span> <span class="o">=</span> <span class="n">distance</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
+            <span class="n">distance_source</span> <span class="o">=</span> <span class="n">distance_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+            <span class="n">distance_order_col</span> <span class="o">=</span> <span class="s2">&quot;__dwithin_distance_order__&quot;</span>
+            <span class="n">distance_frame</span> <span class="o">=</span> <span class="n">distance_source</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="n">distance_internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;double&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">distance_value_col</span><span class="p">),</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">distance_source</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
+                    <span class="n">distance_order_col</span>
+                <span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">distance_present_col</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">distance_frame</span> <span class="o">=</span> <span class="n">_attach_ordered_sequence_column</span><span class="p">(</span>
+                <span class="n">distance_frame</span><span class="p">,</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">distance_order_col</span><span class="p">),</span>
+                <span class="n">position_col</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">position_col</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">distance_value_col</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">distance_present_col</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">distance_schema</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">StructField</span><span class="p">(</span><span class="n">position_col</span><span class="p">,</span> <span class="n">LongType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                    <span class="n">StructField</span><span class="p">(</span><span class="n">distance_value_col</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                    <span class="n">StructField</span><span class="p">(</span><span class="n">distance_present_col</span><span class="p">,</span> <span class="n">BooleanType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">distance_rows</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">distance_value</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">distance_value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">local_distances</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="n">distance_frame</span> <span class="o">=</span> <span class="n">aligned_frame</span><span class="o">.</span><span class="n">sparkSession</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
+                <span class="n">distance_rows</span><span class="p">,</span>
+                <span class="n">schema</span><span class="o">=</span><span class="n">distance_schema</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">joined_frame</span> <span class="o">=</span> <span class="n">geometry_frame</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">distance_frame</span><span class="p">,</span>
+            <span class="n">on</span><span class="o">=</span><span class="n">position_col</span><span class="p">,</span>
+            <span class="n">how</span><span class="o">=</span><span class="s2">&quot;full&quot;</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">position_col</span><span class="p">)</span>
+        <span class="n">result_frame</span> <span class="o">=</span> <span class="n">joined_frame</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="o">*</span><span class="p">[</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">aligned_frame</span><span class="o">.</span><span class="n">columns</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span>
+            <span class="p">],</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">distance_value_col</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">geometry_present_col</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">distance_present_col</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">position_col</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">invalid_distance_shape</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">geometry_present_col</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span> <span class="o">|</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">distance_present_col</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result_frame</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">distance_value_col</span><span class="p">),</span> <span class="n">invalid_distance_shape</span>
 
 <div class="viewcode-block" id="GeoSeries.clip_by_rect"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.clip_by_rect">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">clip_by_rect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
@@ -1652,11 +1974,36 @@
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">&quot;Sedona does not support only_edges=True for voronoi_polygons.&quot;</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">extend_to</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;Sedona does not support extend_to for voronoi_polygons.&quot;</span>
+        <span class="k">if</span> <span class="n">extend_to</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_VoronoiPolygons</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">extend_to</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+                <span class="n">spark_expr</span><span class="p">,</span>
+                <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_VoronoiPolygons</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">extend_to</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">extend_to</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;extend_to&#39; must be a geometry or None&quot;</span><span class="p">)</span>
+
+        <span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span>
+        <span class="n">source_envelope</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Envelope</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="c1"># Bind the source envelope once so its bounds are not recomputed from</span>
+        <span class="c1"># the full input geometry for every coordinate accessor.</span>
+        <span class="n">default_extent</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">source_envelope</span><span class="p">),</span>
+            <span class="k">lambda</span> <span class="n">envelope</span><span class="p">:</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Expand</span><span class="p">(</span>
+                <span class="n">envelope</span><span class="p">,</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">greatest</span><span class="p">(</span>
+                    <span class="n">stf</span><span class="o">.</span><span class="n">ST_XMax</span><span class="p">(</span><span class="n">envelope</span><span class="p">)</span> <span class="o">-</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_XMin</span><span class="p">(</span><span class="n">envelope</span><span class="p">),</span>
+                    <span class="n">stf</span><span class="o">.</span><span class="n">ST_YMax</span><span class="p">(</span><span class="n">envelope</span><span class="p">)</span> <span class="o">-</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_YMin</span><span class="p">(</span><span class="n">envelope</span><span class="p">),</span>
+                <span class="p">),</span>
+            <span class="p">),</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">requested_extent</span> <span class="o">=</span> <span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromWKB</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">extend_to</span><span class="o">.</span><span class="n">envelope</span><span class="o">.</span><span class="n">wkb</span><span class="p">))</span>
+        <span class="c1"># JTS treats extendTo as a hard clip. GeoPandas only enlarges the</span>
+        <span class="c1"># default Voronoi extent, so combine both envelopes before calling it.</span>
+        <span class="n">effective_extent</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Envelope</span><span class="p">(</span>
+            <span class="n">stf</span><span class="o">.</span><span class="n">ST_Collect</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">default_extent</span><span class="p">,</span> <span class="n">requested_extent</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_VoronoiPolygons</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">effective_extent</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
             <span class="n">spark_expr</span><span class="p">,</span>
             <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -1751,6 +2098,213 @@
             <span class="n">spark_expr</span><span class="p">,</span>
             <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeoSeries.maximum_inscribed_circle"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.maximum_inscribed_circle">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">maximum_inscribed_circle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
+        <span class="n">tolerance_error</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;tolerance must be a numeric scalar, array-like, pandas Series, &quot;</span>
+            <span class="s2">&quot;or same-frame pandas-on-Spark Series&quot;</span>
+        <span class="p">)</span>
+        <span class="n">tolerance_column</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tolerance</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">same_anchor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;A distributed tolerance Series must share the same frame &quot;</span>
+                    <span class="s2">&quot;and index as the GeoSeries; align both columns in one &quot;</span>
+                    <span class="s2">&quot;DataFrame before calling maximum_inscribed_circle&quot;</span>
+                <span class="p">)</span>
+            <span class="n">spark_type</span> <span class="o">=</span> <span class="n">tolerance</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">data_type</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">spark_type</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">BooleanType</span><span class="p">,</span> <span class="n">IntegralType</span><span class="p">,</span> <span class="n">FloatType</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">,</span> <span class="n">NullType</span><span class="p">),</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">tolerance_error</span><span class="p">)</span>
+            <span class="n">tolerance_column</span> <span class="o">=</span> <span class="n">tolerance</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;double&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tolerance</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="n">tolerance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_list_like</span><span class="p">(</span><span class="n">tolerance</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maximum_inscribed_circle_with_local_tolerance</span><span class="p">(</span>
+                <span class="n">tolerance</span><span class="p">,</span>
+                <span class="n">tolerance_error</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">tolerance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tolerance</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">tolerance</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">tolerance</span> <span class="o">=</span> <span class="n">tolerance</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="n">normalized_tolerance</span> <span class="o">=</span> <span class="n">_normalize_circle_tolerance_scalar</span><span class="p">(</span>
+                <span class="n">tolerance</span><span class="p">,</span>
+                <span class="n">tolerance_error</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">normalized_tolerance</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&#39;tolerance&#39; should be positive&quot;</span><span class="p">)</span>
+            <span class="n">tolerance_column</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">normalized_tolerance</span><span class="p">)</span>
+
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">_maximum_inscribed_circle_expression</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span>
+            <span class="n">tolerance_column</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+            <span class="n">spark_expr</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_maximum_inscribed_circle_with_local_tolerance</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="p">,</span>
+        <span class="n">tolerance_error</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Positionally align a local tolerance vector without collecting rows.&quot;&quot;&quot;</span>
+        <span class="n">normalized_values</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tolerance</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+            <span class="n">normalized_values</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">_normalize_circle_tolerance_scalar</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tolerance_error</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">tolerance</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">normalized_values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">_maximum_inscribed_circle_expression</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">normalized_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+                    <span class="n">spark_expr</span><span class="p">,</span>
+                    <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="n">source_internal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
+        <span class="n">source_sdf</span> <span class="o">=</span> <span class="n">source_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+        <span class="n">reserved_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">source_sdf</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">temp_column_name</span><span class="p">(</span><span class="n">base</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">suffix</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;__maximum_inscribed_circle_</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">__&quot;</span>
+            <span class="k">while</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">reserved_names</span><span class="p">:</span>
+                <span class="n">suffix</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">candidate</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;__maximum_inscribed_circle_</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">__&quot;</span>
+            <span class="n">reserved_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">typing</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">,</span>
+                <span class="n">verify_temp_column_name</span><span class="p">(</span><span class="n">source_sdf</span><span class="p">,</span> <span class="n">candidate</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="n">geometry_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
+        <span class="n">tolerance_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;tolerance&quot;</span><span class="p">)</span>
+        <span class="n">position_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;position&quot;</span><span class="p">)</span>
+        <span class="n">left_present_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;left_present&quot;</span><span class="p">)</span>
+        <span class="n">right_present_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;right_present&quot;</span><span class="p">)</span>
+        <span class="n">left_order_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;left_order&quot;</span><span class="p">)</span>
+
+        <span class="n">left_frame</span> <span class="o">=</span> <span class="n">source_sdf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="n">source_internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">geometry_col</span><span class="p">),</span>
+            <span class="o">*</span><span class="p">[</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">source_sdf</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">source_internal</span><span class="o">.</span><span class="n">index_spark_column_names</span>
+            <span class="p">],</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">source_sdf</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">left_order_col</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">left_present_col</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">left_frame</span> <span class="o">=</span> <span class="n">_attach_ordered_sequence_column</span><span class="p">(</span>
+            <span class="n">left_frame</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_order_col</span><span class="p">),</span>
+            <span class="n">position_col</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span><span class="n">left_order_col</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tolerance</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_bool_dtype</span><span class="p">(</span><span class="n">tolerance</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_integer_dtype</span><span class="p">(</span><span class="n">tolerance</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_float_dtype</span><span class="p">(</span><span class="n">tolerance</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">tolerance_error</span><span class="p">)</span>
+
+            <span class="n">local_series</span> <span class="o">=</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">tolerance</span><span class="p">)</span>
+            <span class="n">right_internal</span> <span class="o">=</span> <span class="n">local_series</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
+            <span class="n">right_sdf</span> <span class="o">=</span> <span class="n">right_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+            <span class="n">right_order_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;right_order&quot;</span><span class="p">)</span>
+            <span class="n">right_index_cols</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">temp_column_name</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;right_index_</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">right_internal</span><span class="o">.</span><span class="n">index_spark_column_names</span><span class="p">))</span>
+            <span class="p">]</span>
+            <span class="n">right_frame</span> <span class="o">=</span> <span class="n">right_sdf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="n">right_internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;double&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">tolerance_col</span><span class="p">),</span>
+                <span class="o">*</span><span class="p">[</span>
+                    <span class="n">scol_for</span><span class="p">(</span><span class="n">right_sdf</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">alias</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">alias</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                        <span class="n">right_internal</span><span class="o">.</span><span class="n">index_spark_column_names</span><span class="p">,</span>
+                        <span class="n">right_index_cols</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">],</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">right_sdf</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">right_order_col</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">right_present_col</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">right_frame</span> <span class="o">=</span> <span class="n">_attach_ordered_sequence_column</span><span class="p">(</span>
+                <span class="n">right_frame</span><span class="p">,</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_order_col</span><span class="p">),</span>
+                <span class="n">position_col</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_index_cols</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">source_internal</span><span class="o">.</span><span class="n">index_spark_column_names</span><span class="p">):</span>
+                <span class="n">index_mismatch</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">left_index</span><span class="p">,</span> <span class="n">right_index</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">source_internal</span><span class="o">.</span><span class="n">index_spark_column_names</span><span class="p">,</span>
+                    <span class="n">right_index_cols</span><span class="p">,</span>
+                <span class="p">):</span>
+                    <span class="n">index_mismatch</span> <span class="o">=</span> <span class="n">index_mismatch</span> <span class="o">|</span> <span class="o">~</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_index</span><span class="p">)</span><span class="o">.</span><span class="n">eqNullSafe</span><span class="p">(</span>
+                        <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_index</span><span class="p">)</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index_mismatch</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">right_schema</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">StructField</span><span class="p">(</span><span class="n">position_col</span><span class="p">,</span> <span class="n">LongType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                    <span class="n">StructField</span><span class="p">(</span><span class="n">tolerance_col</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                    <span class="n">StructField</span><span class="p">(</span><span class="n">right_present_col</span><span class="p">,</span> <span class="n">BooleanType</span><span class="p">(),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">right_frame</span> <span class="o">=</span> <span class="n">source_sdf</span><span class="o">.</span><span class="n">sparkSession</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">normalized_values</span><span class="p">)</span>
+                <span class="p">],</span>
+                <span class="n">schema</span><span class="o">=</span><span class="n">right_schema</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">index_mismatch</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">left_frame</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">right_frame</span><span class="p">,</span>
+            <span class="n">on</span><span class="o">=</span><span class="n">position_col</span><span class="p">,</span>
+            <span class="n">how</span><span class="o">=</span><span class="s2">&quot;full&quot;</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">position_col</span><span class="p">)</span>
+        <span class="n">length_mismatch</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_present_col</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span> <span class="o">|</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present_col</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="n">radius_line</span> <span class="o">=</span> <span class="n">_maximum_inscribed_circle_expression</span><span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">geometry_col</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">tolerance_col</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+                <span class="n">length_mismatch</span><span class="p">,</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">raise_error</span><span class="p">(</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="s2">&quot;Length of tolerance does not match length of GeoSeries&quot;</span><span class="p">)</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">when</span><span class="p">(</span>
+                <span class="n">index_mismatch</span><span class="p">,</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">raise_error</span><span class="p">(</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span>
+                        <span class="s2">&quot;Index of the Series passed as &#39;tolerance&#39; does not &quot;</span>
+                        <span class="s2">&quot;match index of the GeoSeries&quot;</span>
+                    <span class="p">)</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">radius_line</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+            <span class="n">spark_expr</span><span class="p">,</span>
+            <span class="n">aligned_frame</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
 
 <div class="viewcode-block" id="GeoSeries.minimum_bounding_radius"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.minimum_bounding_radius">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">minimum_bounding_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
         <span class="n">spark_struct</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_MinimumBoundingRadius</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
@@ -2744,25 +3298,24 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">first_series</span><span class="p">(</span><span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">))</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_geom_equals_exact_series</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_align_binary_geometry_series</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">other</span><span class="p">:</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
-        <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">align</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute exact equality with GeoPandas-compatible row alignment.&quot;&quot;&quot;</span>
-        <span class="n">position_col</span> <span class="o">=</span> <span class="s2">&quot;__geom_equals_exact_position__&quot;</span>
-        <span class="n">left_present_col</span> <span class="o">=</span> <span class="s2">&quot;__geom_equals_exact_left_present__&quot;</span>
-        <span class="n">right_present_col</span> <span class="o">=</span> <span class="s2">&quot;__geom_equals_exact_right_present__&quot;</span>
-        <span class="n">left_order_col</span> <span class="o">=</span> <span class="s2">&quot;__geom_equals_exact_left_order__&quot;</span>
-        <span class="n">right_order_col</span> <span class="o">=</span> <span class="s2">&quot;__geom_equals_exact_right_order__&quot;</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Align two geometry Series and preserve every resulting index level.&quot;&quot;&quot;</span>
+        <span class="n">position_col</span> <span class="o">=</span> <span class="s2">&quot;__binary_geometry_position__&quot;</span>
+        <span class="n">left_present_col</span> <span class="o">=</span> <span class="s2">&quot;__binary_geometry_left_present__&quot;</span>
+        <span class="n">right_present_col</span> <span class="o">=</span> <span class="s2">&quot;__binary_geometry_right_present__&quot;</span>
+        <span class="n">left_order_col</span> <span class="o">=</span> <span class="s2">&quot;__binary_geometry_left_order__&quot;</span>
+        <span class="n">right_order_col</span> <span class="o">=</span> <span class="s2">&quot;__binary_geometry_right_order__&quot;</span>
 
         <span class="n">left_index_aliases</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="sa">f</span><span class="s2">&quot;__geom_equals_exact_left_index_</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">__&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;__binary_geometry_left_index_</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">__&quot;</span>
             <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">))</span>
         <span class="p">]</span>
         <span class="n">right_index_aliases</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="sa">f</span><span class="s2">&quot;__geom_equals_exact_right_index_</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">__&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;__binary_geometry_right_index_</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">__&quot;</span>
             <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">))</span>
         <span class="p">]</span>
 
@@ -3070,6 +3623,27 @@
                 <span class="n">InternalField</span><span class="o">.</span><span class="n">from_struct_field</span><span class="p">(</span><span class="n">aligned_schema</span><span class="p">[</span><span class="n">result_index</span><span class="p">])</span>
                 <span class="k">for</span> <span class="n">result_index</span> <span class="ow">in</span> <span class="n">result_index_columns</span>
             <span class="p">]</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">aligned_frame</span><span class="p">,</span>
+            <span class="n">result_index_columns</span><span class="p">,</span>
+            <span class="n">result_index_fields</span><span class="p">,</span>
+            <span class="n">result_index_names</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_geom_equals_exact_series</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">other</span><span class="p">:</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">align</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute exact equality with GeoPandas-compatible row alignment.&quot;&quot;&quot;</span>
+        <span class="p">(</span>
+            <span class="n">aligned_frame</span><span class="p">,</span>
+            <span class="n">result_index_columns</span><span class="p">,</span>
+            <span class="n">result_index_fields</span><span class="p">,</span>
+            <span class="n">result_index_names</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_binary_geometry_series</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="p">)</span>
 
         <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stp</span><span class="o">.</span><span class="n">ST_EqualsExact</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">),</span> <span class="n">tolerance</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boolean_result_preserving_index</span><span class="p">(</span>

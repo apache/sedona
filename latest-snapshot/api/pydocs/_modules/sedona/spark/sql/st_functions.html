@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_functions &mdash; Apache Sedona Python Documentation</title>
@@ -1870,15 +1869,22 @@
 
 
 <div class="viewcode-block" id="ST_MaximumInscribedCircle"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_MaximumInscribedCircle">[docs]</a><span class="nd">@validate_argument_types</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">ST_MaximumInscribedCircle</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_MaximumInscribedCircle</span><span class="p">(</span>
+    <span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ColumnOrNameOrNumber</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds the largest circle that is contained within a geometry, or which does not overlap any lines and points</span>
 
-<span class="sd">    :param geometry:</span>
+<span class="sd">    :param geometry: Input geometry column.</span>
 <span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :param tolerance: Optional search tolerance. Zero uses the per-geometry</span>
+<span class="sd">        default of ``max(width, height) / 1000``.</span>
+<span class="sd">    :type tolerance: Optional[ColumnOrNameOrNumber]</span>
 <span class="sd">    :return: Row of center point, nearest point and radius</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_MaximumInscribedCircle&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">geometry</span><span class="p">,)</span> <span class="k">if</span> <span class="n">tolerance</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_MaximumInscribedCircle&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ST_MaxDistance"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_MaxDistance">[docs]</a><span class="nd">@validate_argument_types</span>

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -1691,10 +1690,12 @@ each aligned geometry that is within a set distance from <code class="docutils l
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>other</strong> (<a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries"><em>GeoSeries</em></a><em> or </em><em>geometric object</em>) – The GeoSeries (elementwise) or geometric object to test for
 equality.</p></li>
-<li><p><strong>distance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>np.array</em><em>, </em><em>pd.Series</em>) – Distance(s) to test if each geometry is within. A scalar distance will be
-applied to all geometries. An array or Series will be applied elementwise.
-If np.array or pd.Series are used then it must have same length as the
-GeoSeries.</p></li>
+<li><p><strong>distance</strong> (<em>numeric scalar</em><em>, </em><em>array-like</em><em>, </em><em>pandas Series</em><em>, or </em><em>pandas-on-Spark Series</em>) – Distance(s) to test if each geometry is within. A scalar distance
+is applied to every geometry. Array-like and Series distances are
+paired positionally with the geometry rows after <code class="docutils literal notranslate"><span class="pre">self</span></code> and
+<code class="docutils literal notranslate"><span class="pre">other</span></code> have been aligned. A one-element non-Series array-like is
+broadcast; otherwise the distance input must have the same length
+as the aligned geometries.</p></li>
 <li><p><strong>align</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em> | </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – If True, automatically aligns GeoSeries based on their indices.
 If False, the order of elements is preserved. None defaults to True.</p></li>
 </ul>
@@ -1778,6 +1779,11 @@ order using <code class="docutils literal notranslate"><span class="pre">align=F
 <p class="rubric">Notes</p>
 <p>This method works in a row-wise manner. It does not check if an element
 of one GeoSeries is within the set distance of <em>any</em> element of the other one.</p>
+<p>The index of a pandas or pandas-on-Spark distance Series is ignored.
+Distance values remain distributed when a pandas-on-Spark Series is
+provided. Length validation for non-scalar distances is lazy: an error
+is raised only when an action evaluates a mismatched row. Partial
+actions may not detect rows they do not evaluate.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.within" title="sedona.spark.geopandas.GeoSeries.within"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.within</span></code></a></p>
@@ -3585,6 +3591,58 @@ collapsing to a line, or a line collapsing to a point.</p></li>
 <span class="go">2                           LINESTRING (0 0, 1 1, 1 0)</span>
 <span class="go">dtype: geometry</span>
 </pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.maximum_inscribed_circle">
+<span class="sig-name descname"><span class="pre">maximum_inscribed_circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.maximum_inscribed_circle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.maximum_inscribed_circle" title="Permalink to this definition"></a></dt>
+<dd><p>Return radius lines for the largest circles within polygonal geometries.</p>
+<p>Each result is a two-point LineString from the circle center to the
+nearest point on the polygon boundary. Polygon, MultiPolygon, and
+<code class="docutils literal notranslate"><span class="pre">None</span></code> inputs are supported; other geometry types and empty
+polygonal geometries raise an error only when an action evaluates an
+affected row. Partial actions may not inspect every invalid row.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tolerance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>array-like</em><em>, </em><em>pandas Series</em><em>, or </em><em>pandas-on-Spark Series</em><em>, </em><em>optional</em>) – Stop refining when the search area is smaller than this distance.
+By default, each geometry uses
+<code class="docutils literal notranslate"><span class="pre">max(width,</span> <span class="pre">height)</span> <span class="pre">/</span> <span class="pre">1000</span></code>. A one-value local array-like is
+broadcast; otherwise it must have the same length as the
+GeoSeries. A pandas Series must also have the same index. A
+distributed Series must share the same frame and index as the
+geometry column. Negative values are rejected for scalar and
+row-wise inputs. This is intentionally stricter than GeoPandas,
+whose array path currently bypasses its scalar negative-value
+validation and emits implementation-dependent results. Length and
+index validation for local row-wise inputs is also lazy: an error
+is raised only when an action evaluates a mismatched row.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)]),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">maximum_inscribed_circle</span><span class="p">()</span>
+<span class="go">0    LINESTRING (0.70703 0.29297, 0.5 0.5)</span>
+<span class="go">1    LINESTRING (0.4668 0.25977, 1 0.25977)</span>
+<span class="go">dtype: geometry</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.minimum_bounding_circle" title="sedona.spark.geopandas.GeoSeries.minimum_bounding_circle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.minimum_bounding_circle</span></code></a></dt><dd><p>minimum enclosing circle geometry</p>
+</dd>
+</dl>
 </div>
 </dd></dl>
 
@@ -5757,8 +5815,9 @@ The output GeoSeries has the same length as the input.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>tolerance</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default 0.0</em>) – Snapping tolerance for vertices to be considered equal.</p></li>
-<li><p><strong>extend_to</strong> (<em>Geometry</em><em>, </em><em>default None</em>) – Not supported. Passing a non-None value will raise
-<code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code>.</p></li>
+<li><p><strong>extend_to</strong> (<em>Geometry</em><em>, </em><em>default None</em>) – A local geometry whose envelope enlarges the default extent of
+every row’s Voronoi diagram. Distributed and array-like extents
+are not supported.</p></li>
 <li><p><strong>only_edges</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default False</em>) – Only <code class="docutils literal notranslate"><span class="pre">only_edges=False</span></code> is supported. Passing <code class="docutils literal notranslate"><span class="pre">only_edges=True</span></code>
 will raise <code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code>.</p></li>
 </ul>
