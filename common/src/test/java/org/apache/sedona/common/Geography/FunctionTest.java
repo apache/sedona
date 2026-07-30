@@ -130,6 +130,27 @@ public class FunctionTest {
   }
 
   @Test
+  public void getEnvelopeEmptyGeography() throws ParseException {
+    for (String wkt :
+        new String[] {
+          "POINT EMPTY",
+          "LINESTRING EMPTY",
+          "POLYGON EMPTY",
+          "MULTIPOINT EMPTY",
+          "MULTILINESTRING EMPTY",
+          "MULTIPOLYGON EMPTY",
+          "GEOMETRYCOLLECTION EMPTY"
+        }) {
+      Geography geography = Constructors.geogFromWKT(wkt, 3857);
+      for (boolean splitAtAntiMeridian : new boolean[] {false, true}) {
+        Geography envelope = Functions.getEnvelope(geography, splitAtAntiMeridian);
+        assertEquals(wkt, envelope.toString());
+        assertEquals(3857, envelope.getSRID());
+      }
+    }
+  }
+
+  @Test
   public void testEnvelopeWKTCompare() throws Exception {
     String antarctica = "POLYGON ((-180 -90, -180 -63.27066, 180 -63.27066, 180 -90, -180 -90))";
     Geography g = Constructors.geogFromWKT(antarctica, 4326);
@@ -233,6 +254,33 @@ public class FunctionTest {
     Geography extended = roundTripWKB(Functions.makeLine(line, end));
     assertEquals("LINESTRING (12 34, 12 34, 13 34)", Functions.asText(extended));
     assertEquals(3, Functions.nPoints(extended));
+  }
+
+  @Test
+  public void makeLine_skipsEmptyInputsAndNormalizesSingleCoordinate() throws ParseException {
+    Geography emptyPoint = Constructors.geogFromWKT("POINT EMPTY", 3857);
+    Geography emptyLine = Constructors.geogFromWKT("LINESTRING EMPTY", 4326);
+    Geography emptyMultiPoint = Constructors.geogFromWKT("MULTIPOINT EMPTY", 4326);
+    Geography point = Constructors.geogFromWKT("POINT (12 34)", 4326);
+
+    Geography onlySecond = roundTripWKB(Functions.makeLine(emptyPoint, point));
+    assertEquals("LINESTRING (12 34, 12 34)", Functions.asText(onlySecond));
+    assertEquals(2, Functions.nPoints(onlySecond));
+    assertEquals(3857, onlySecond.getSRID());
+
+    Geography onlyFirst = roundTripWKB(Functions.makeLine(point, emptyLine));
+    assertEquals("LINESTRING (12 34, 12 34)", Functions.asText(onlyFirst));
+    assertEquals(2, Functions.nPoints(onlyFirst));
+    assertEquals(4326, onlyFirst.getSRID());
+
+    Geography afterEmptyMultiPoint = roundTripWKB(Functions.makeLine(emptyMultiPoint, point));
+    assertEquals("LINESTRING (12 34, 12 34)", Functions.asText(afterEmptyMultiPoint));
+    assertEquals(2, Functions.nPoints(afterEmptyMultiPoint));
+
+    Geography noCoordinates = roundTripWKB(Functions.makeLine(emptyPoint, emptyLine));
+    assertEquals("LINESTRING EMPTY", Functions.asText(noCoordinates));
+    assertEquals(0, Functions.nPoints(noCoordinates));
+    assertEquals(3857, noCoordinates.getSRID());
   }
 
   @Test
