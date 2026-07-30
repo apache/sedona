@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -17,7 +16,7 @@
         <link rel="prev" href="../Raster-Functions/">
       
       
-        <link rel="next" href="../Raster-affine-transformation/">
+        <link rel="next" href="../Raster-UDF/">
       
       
         
@@ -3054,6 +3053,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../Raster-UDF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    栅格 UDF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../Raster-affine-transformation/" class="md-nav__link">
         
   
@@ -5705,6 +5732,13 @@
  -->
 
 <h2 id="map-algebra">地图代数（Map Algebra）<a class="headerlink" href="#map-algebra" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code>RS_MapAlgebra</code> 自 <code>v1.9.1</code> 起弃用，并将在**未来版本中移除**，请改用<a href="../Raster-UDF/">栅格 UDF</a>：它同样能
+完成这些逐像素计算，而且还能直接使用 NumPy、SciPy、scikit-learn 与 rasterio。该函数目前仍然可用，但已有
+脚本应尽早迁移。下面的 <a href="#ndvi">NDVI 示例</a>在栅格 UDF 页面上给出了两种写法的对照。</p>
+<p>本页介绍的基于数组的函数 —— <code>RS_BandAsArray</code>、<code>RS_Add</code>、<code>RS_NormalizedDifference</code> 等 —— 未被弃用。</p>
+</div>
 <p>地图代数是一种使用数学表达式来执行栅格计算的方法。表达式可以是简单的算术运算，也可以是多种运算的复杂组合。该表达式可以作用在单个栅格波段，也可以作用在多个栅格波段上。表达式的结果是一个新的栅格。</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
@@ -5798,6 +5832,7 @@
 <h3 id="_1">延伸阅读<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><a href="https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary">Jiffle language summary</a></li>
+<li><a href="../Raster-UDF/">栅格 UDF</a> —— 用 Python、NumPy 与 rasterio 实现同样的运算</li>
 <li><a href="../Raster-Functions/#raster-operators">Raster operators</a></li>
 </ul>
 
@@ -5820,7 +5855,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年5月11日 04:13:31 UTC">2026年5月11日 04:13:31</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年7月30日 20:24:40 UTC">2026年7月30日 20:24:40</span>
   </span>
 
     

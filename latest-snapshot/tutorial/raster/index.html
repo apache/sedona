@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1698,10 +1697,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#map-algebra" class="md-nav__link">
+  <a href="#per-pixel-calculations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Map algebra
+        Per-pixel calculations
       
     </span>
   </a>
@@ -1824,6 +1823,17 @@
     <span class="md-ellipsis">
       
         Raster to raster
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-rasterio-inside-a-udf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using rasterio inside a UDF
       
     </span>
   </a>
@@ -3384,6 +3394,34 @@
     
   
     Raster map algebra
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Raster-UDF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Raster UDFs
   
 
     
@@ -6211,10 +6249,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#map-algebra" class="md-nav__link">
+  <a href="#per-pixel-calculations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Map algebra
+        Per-pixel calculations
       
     </span>
   </a>
@@ -6337,6 +6375,17 @@
     <span class="md-ellipsis">
       
         Raster to raster
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-rasterio-inside-a-udf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using rasterio inside a UDF
       
     </span>
   </a>
@@ -6651,6 +6700,15 @@ directory globs, and non-GeoTIFF formats such as NetCDF and Arc Grid.</p>
 </code></pre></div>
 <p><img alt="NDVI map-algebra detail" src="../../image/raster-tutorial/ndvi-math.svg" /></p>
 <p>Map algebra is the most general processing primitive — clipping, masking, thresholding, and arithmetic between bands or between rasters all fit the same <code>RS_MapAlgebra(rast, pixelType, script)</code> (or two-raster) shape. See <a href="../../api/sql/Raster-map-algebra/">Map algebra</a> for the script syntax and <a href="#raster-processing-reference">Raster processing</a> below for alternatives (<code>RS_Clip</code>, <code>RS_Resample</code>, <code>RS_SetValues</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code>RS_MapAlgebra</code> is deprecated since <code>v1.9.1</code> and <strong>will be removed in a future version</strong>, in favour of
+<a href="../../api/sql/Raster-UDF/">Raster UDFs</a>, which express the same per-pixel calculations in Python and
+additionally reach NumPy, SciPy, scikit-learn, and rasterio. It still works, so this walkthrough runs as
+written, but new code should use a UDF — see
+<a href="../../api/sql/Raster-UDF/#ndvi-as-map-algebra-and-as-a-udf">NDVI as map algebra and as a UDF</a> for the
+same calculation written both ways.</p>
+</div>
 <h3 id="6-visualize-the-processed-raster">6. Visualize the processed raster<a class="headerlink" href="#6-visualize-the-processed-raster" title="Permanent link">&para;</a></h3>
 <p>The NDVI raster makes the vegetated field obvious: green pixels where NDVI is high, washed-out red elsewhere.</p>
 <div class="highlight"><pre><span></span><code><span class="n">SedonaUtils</span><span class="o">.</span><span class="n">display_image</span><span class="p">(</span><span class="n">ndviDf</span><span class="p">)</span>
@@ -6962,17 +7020,35 @@ expressed without collecting a large path list.</p>
 <li><a href="../../api/sql/Raster-Operators/RS_ReprojectMatch/"><code>RS_ReprojectMatch</code></a> — resample one raster onto another raster's grid and CRS:</li>
 </ul>
 <p><img alt="Reproject match" src="../../image/RS_ReprojectMatch/RS_ReprojectMatch.svg" /></p>
-<h3 id="map-algebra">Map algebra<a class="headerlink" href="#map-algebra" title="Permanent link">&para;</a></h3>
-<p><a href="../../api/sql/Raster-map-algebra/"><code>RS_MapAlgebra</code></a> has two shapes:</p>
-<ul>
-<li><strong>Single-raster</strong> — <code>RS_MapAlgebra(rast, pixelType, script)</code>. Per-pixel script over bands of one raster. Used in the walkthrough.</li>
-<li><strong>Two-raster</strong> — <code>RS_MapAlgebra(rast0, rast1, pixelType, script, noDataValue)</code>. Per-pixel script across two rasters. Common for difference rasters and change detection.</li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="c1">-- Two-raster: subtract one NDVI raster from another</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span>
-<span class="w">                     </span><span class="s1">&#39;out[0] = rast0[0] - rast1[0];&#39;</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">9999</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">delta</span>
-<span class="k">FROM</span><span class="w"> </span><span class="n">ndvi_after</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">ndvi_before</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">y</span>
+<h3 id="per-pixel-calculations">Per-pixel calculations<a class="headerlink" href="#per-pixel-calculations" title="Permanent link">&para;</a></h3>
+<p>Use a <a href="../../api/sql/Raster-UDF/">Raster UDF</a>. A UDF takes one raster column or several, so both shapes of the
+deprecated <code>RS_MapAlgebra</code> have a direct equivalent — here is the two-raster change-detection case:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">udf</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">RasterType</span>
+
+<span class="n">NODATA</span> <span class="o">=</span> <span class="o">-</span><span class="mf">9999.0</span>
+
+
+<span class="nd">@udf</span><span class="p">(</span><span class="n">returnType</span><span class="o">=</span><span class="n">RasterType</span><span class="p">())</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">delta</span><span class="p">(</span><span class="n">after</span><span class="p">,</span> <span class="n">before</span><span class="p">):</span>
+    <span class="c1"># as_numpy_masked(), not as_numpy(): NODATA becomes NaN and stays invalid through</span>
+    <span class="c1"># the subtraction instead of contributing its sentinel value.</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">after</span><span class="o">.</span><span class="n">as_numpy_masked</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">before</span><span class="o">.</span><span class="n">as_numpy_masked</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">after</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">diff</span><span class="p">),</span> <span class="n">NODATA</span><span class="p">,</span> <span class="n">diff</span><span class="p">),</span> <span class="n">nodata</span><span class="o">=</span><span class="n">NODATA</span><span class="p">)</span>
+
+
+<span class="c1"># ndvi_after and ndvi_before are NDVI rasters for two dates, tiled on the same grid,</span>
+<span class="c1"># each with the x and y tile-index columns the raster data source adds.</span>
+<span class="p">(</span>
+    <span class="n">ndvi_after</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ndvi_before</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;before&quot;</span><span class="p">),</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">])</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">delta</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;after.rast&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;before.rast&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;delta&quot;</span><span class="p">))</span>
+<span class="p">)</span>
 </code></pre></div>
+<p>See <a href="../../api/sql/Raster-UDF/">Raster UDFs</a> for the single-raster form, NDVI written both ways, and the
+limits to be aware of.</p>
 <h2 id="rastervector-interop">Raster–vector interop<a class="headerlink" href="#rastervector-interop" title="Permanent link">&para;</a></h2>
 <h3 id="rasterize-a-geometry">Rasterize a geometry<a class="headerlink" href="#rasterize-a-geometry" title="Permanent link">&para;</a></h3>
 <p><a href="../../api/sql/Raster-Operators/RS_AsRaster/"><code>RS_AsRaster</code></a> renders a vector geometry into a raster grid:</p>
@@ -7140,7 +7216,7 @@ expressed without collecting a large path list.</p>
 <span class="n">band1</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="python-udfs-over-rasters">Python UDFs over rasters<a class="headerlink" href="#python-udfs-over-rasters" title="Permanent link">&para;</a></h2>
-<p>Python UDFs receive raster data, process it with NumPy / SciPy / scikit-learn / etc., and return either a scalar value or a new raster.</p>
+<p>Python UDFs receive raster data, process it with NumPy / SciPy / scikit-learn / etc., and return either a scalar value or a new raster. This section is an introduction; see <a href="../../api/sql/Raster-UDF/">Raster UDFs</a> for the full treatment, including when to prefer a UDF over <code>RS_MapAlgebra</code>, two-raster UDFs, and the limits to be aware of.</p>
 <h3 id="raster-to-scalar">Raster to scalar<a class="headerlink" href="#raster-to-scalar" title="Permanent link">&para;</a></h3>
 <p>UDFs can take <code>SedonaRaster</code> inputs and return any Spark data type. Mean of a raster:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoubleType</span>
@@ -7160,15 +7236,17 @@ expressed without collecting a large path list.</p>
 +--------------------+------------------+
 </code></pre></div>
 <h3 id="raster-to-raster">Raster to raster<a class="headerlink" href="#raster-to-raster" title="Permanent link">&para;</a></h3>
-<p>UDFs can also return raster objects. Use <code>SedonaRaster.with_bands()</code> to replace pixel data while preserving all spatial metadata (CRS, affine transform, NODATA, etc.). Band count and dtype can change freely.</p>
+<p>Since <code>v1.9.1</code>, UDFs can also return raster objects. Use <code>SedonaRaster.with_bands()</code> to replace pixel data while carrying over the source raster's CRS and affine transform. Band count and dtype can change freely.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">RasterType</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">mask_udf</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
+    <span class="c1"># assumes a hole-free scene; use as_numpy_masked() if it may carry NODATA —</span>
+    <span class="c1"># see the Raster UDF page</span>
     <span class="n">band1</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">band1</span> <span class="o">&lt;</span> <span class="mi">1400</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>  <span class="c1"># 1 band, preserves CRS/affine/nodata</span>
+    <span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>  <span class="c1"># 1 band, on the input&#39;s grid</span>
 
 
 <span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mask_udf&quot;</span><span class="p">,</span> <span class="n">mask_udf</span><span class="p">,</span> <span class="n">RasterType</span><span class="p">())</span>
@@ -7180,7 +7258,36 @@ expressed without collecting a large path list.</p>
 |GridCoverage2D[&quot;g...|GridCoverage2D[&quot;g...|
 +--------------------+--------------------+
 </code></pre></div>
-<p><code>with_bands()</code> accepts a NumPy array in CHW order (bands × height × width), or HW order (height × width) for single-band output. The returned <code>SedonaRaster</code> carries all the original metadata and is serialized back to the JVM automatically when the UDF returns.</p>
+<p><code>with_bands()</code> accepts a NumPy array in CHW order (bands × height × width), or HW order (height × width) for single-band output. The returned <code>SedonaRaster</code> is serialized back to the JVM automatically when the UDF returns, so the output is an ordinary raster column.</p>
+<p>Output NODATA is inherited from the input band unless you say otherwise, which is rarely what a derived raster wants — pass <code>nodata=</code> to set it:</p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=-</span><span class="mf">9999.0</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The result always sits on the input's grid — <code>with_bands()</code> requires the same height and width and reuses the input's CRS and affine transform, so reprojection and resampling can't be done inside a Python UDF. See <a href="../../api/sql/Raster-UDF/#limits">Raster UDFs</a> for that and the dtype caveats.</p>
+</div>
+<h3 id="using-rasterio-inside-a-udf">Using rasterio inside a UDF<a class="headerlink" href="#using-rasterio-inside-a-udf" title="Permanent link">&para;</a></h3>
+<p><code>as_rasterio()</code> works inside a UDF too, so rasterio and GDAL algorithms apply to raster columns directly. The dataset is read-only — to return a raster, pass the resulting array through <code>with_bands()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">rasterio.fill</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fill_udf</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
+    <span class="c1"># The GDAL dataset does not carry Sedona&#39;s NODATA, so build the mask from the</span>
+    <span class="c1"># SedonaRaster instead — as_numpy_masked() substitutes NaN for NODATA.</span>
+    <span class="n">nodata</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">bands_meta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nodata</span>
+    <span class="n">valid</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">raster</span><span class="o">.</span><span class="n">as_numpy_masked</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">with</span> <span class="n">raster</span><span class="o">.</span><span class="n">as_rasterio</span><span class="p">()</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
+        <span class="n">filled</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">fill</span><span class="o">.</span><span class="n">fillnodata</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">))</span>
+    <span class="c1"># fillnodata only reaches max_search_distance (100 px) from valid data; deeper</span>
+    <span class="c1"># cells keep the sentinel, so keep the NODATA declared. Use nodata=float(&quot;nan&quot;)</span>
+    <span class="c1"># only when every hole is small enough to be filled completely.</span>
+    <span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">filled</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">)</span>
+
+
+<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;fill_udf&quot;</span><span class="p">,</span> <span class="n">fill_udf</span><span class="p">,</span> <span class="n">RasterType</span><span class="p">())</span>
+<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;filled&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;fill_udf(rast)&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p>This works for any rasterio operation that leaves the grid unchanged. Warping and reprojection change the grid and so can't be returned this way — use <a href="../../api/sql/Raster-Operators/RS_Resample/"><code>RS_Resample</code></a> or <a href="../../api/sql/Raster-Operators/RS_ReprojectMatch/"><code>RS_ReprojectMatch</code></a> instead.</p>
 <h2 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h2>
 <p>For large raster datasets, see <a href="../storing-blobs-in-parquet/">storing raster geometries in Parquet format</a> for recommendations on partitioning and persistence.</p>
 
@@ -7203,7 +7310,7 @@ expressed without collecting a large path list.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 28, 2026 19:05:19 UTC">July 28, 2026 19:05:19</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 30, 2026 20:24:40 UTC">July 30, 2026 20:24:40</span>
   </span>
 
     

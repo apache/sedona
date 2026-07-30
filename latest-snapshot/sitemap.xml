@@ -3417,6 +3417,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Raster-Functions/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/api/sql/Raster-UDF/</loc>
+        <lastmod>2026-07-30</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/Raster-UDF/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Raster-UDF/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/api/sql/Raster-affine-transformation/</loc>
         <lastmod>2026-07-30</lastmod>
         <changefreq>daily</changefreq>
@@ -10205,6 +10212,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/Raster-Functions/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Raster-Functions/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/Raster-UDF/</loc>
+        <lastmod>2026-07-30</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/Raster-UDF/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Raster-UDF/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/api/sql/Raster-affine-transformation/</loc>
