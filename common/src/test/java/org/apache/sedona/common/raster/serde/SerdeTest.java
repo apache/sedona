@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import org.apache.sedona.common.raster.RasterBandAccessors;
 import org.apache.sedona.common.raster.RasterBandEditors;
 import org.apache.sedona.common.raster.RasterConstructors;
@@ -210,10 +211,57 @@ public class SerdeTest extends RasterTestBase {
   }
 
   @Test
-  public void testReconcileCollapsesRangeValuedNoDataAtItsMinimum() {
-    // A no data category can span a range. The declared value on the wire is the range's
-    // minimum (that is what the writer emits), so the early-return on "values agree" used to
-    // keep the whole range flagged when a Python writer asked for exactly that single value.
+  public void testJvmRoundTripPreservesRangeNoDataAndScaleOffset() throws Exception {
+    GridCoverage2D raster = makeRangeNoDataRaster(2.0, 7.0);
+
+    GridCoverage2D roundTrip = Serde.deserialize(Serde.serialize(raster));
+    assertNoDataRangeAndTransform(roundTrip, 0.0, 10.0, 2.0, 7.0);
+
+    GridCoverage2D secondRoundTrip = Serde.deserialize(Serde.serialize(roundTrip));
+    assertNoDataRangeAndTransform(secondRoundTrip, 0.0, 10.0, 2.0, 7.0);
+
+    secondRoundTrip.dispose(true);
+    roundTrip.dispose(true);
+    raster.dispose(true);
+  }
+
+  @Test
+  public void testMarkedOverrideAtRangeMinimumCreatesSingleton() throws Exception {
+    GridCoverage2D raster = makeRangeNoDataRaster(2.0, 7.0);
+    byte[] marked =
+        appendNoDataOverrideTrailer(
+            Serde.serialize(raster), GridSampleDimensionSerializer.NO_DATA_VALUE_OVERRIDE);
+
+    GridCoverage2D deserialized = Serde.deserialize(marked);
+    assertNoDataRangeAndTransform(deserialized, 0.0, 0.0, 2.0, 7.0);
+    Assert.assertEquals(
+        org.geotools.api.coverage.SampleDimensionType.REAL_64BITS,
+        deserialized.getSampleDimension(0).getSampleDimensionType());
+
+    deserialized.dispose(true);
+    raster.dispose(true);
+  }
+
+  @Test
+  public void testMarkedNaNClearsRangeNoData() throws Exception {
+    GridCoverage2D raster = makeRangeNoDataRaster(2.0, 7.0);
+    byte[] bytes = Serde.serialize(raster);
+    java.nio.ByteBuffer.wrap(bytes)
+        .order(java.nio.ByteOrder.nativeOrder())
+        .putDouble(findNoDataValueOffset(bytes), Double.NaN);
+    byte[] marked =
+        appendNoDataOverrideTrailer(bytes, GridSampleDimensionSerializer.NO_DATA_VALUE_OVERRIDE);
+
+    GridCoverage2D deserialized = Serde.deserialize(marked);
+    Assert.assertNull(RasterBandAccessors.getBandNoDataValue(deserialized, 1));
+    Assert.assertEquals(2.0, deserialized.getSampleDimension(0).getScale(), 0.0);
+    Assert.assertEquals(7.0, deserialized.getSampleDimension(0).getOffset(), 0.0);
+
+    deserialized.dispose(true);
+    raster.dispose(true);
+  }
+
+  private GridCoverage2D makeRangeNoDataRaster(double scale, double offset) {
     org.geotools.coverage.Category nodataRange =
         new org.geotools.coverage.Category(
             org.geotools.coverage.Category.NODATA.getName(),
@@ -226,20 +274,44 @@ public class SerdeTest extends RasterTestBase {
             org.geotools.util.NumberRange.create(11, true, 100, true));
     org.geotools.coverage.GridSampleDimension dim =
         new org.geotools.coverage.GridSampleDimension(
-            "band", new org.geotools.coverage.Category[] {nodataRange, data}, 0.0, 1.0);
+            "band", new org.geotools.coverage.Category[] {nodataRange, data}, scale, offset);
+    GridCoverage2D pixels =
+        RasterConstructorsForTesting.makeRasterForTesting(
+            1, "D", "BandedSampleModel", 4, 3, 100, 100, 10, -10, 0, 0, 3857);
+    return RasterUtils.create(
+        pixels.getRenderedImage(),
+        pixels.getGridGeometry(),
+        new org.geotools.coverage.GridSampleDimension[] {dim},
+        null);
+  }
 
-    org.geotools.coverage.GridSampleDimension reconciled =
-        GridSampleDimensionSerializer.reconcileNoDataValue(
-            new GridSampleDimensionSerializer.DeclaredSampleDimension(dim, 0.0),
-            org.geotools.api.coverage.SampleDimensionType.REAL_64BITS);
-
-    Assert.assertEquals(0.0, RasterUtils.getNoDataValue(reconciled), 1e-9);
-    for (org.geotools.coverage.Category category : reconciled.getCategories()) {
+  private void assertNoDataRangeAndTransform(
+      GridCoverage2D raster,
+      double expectedMinimum,
+      double expectedMaximum,
+      double expectedScale,
+      double expectedOffset) {
+    org.geotools.coverage.GridSampleDimension dimension = raster.getSampleDimension(0);
+    Assert.assertEquals(expectedScale, dimension.getScale(), 0.0);
+    Assert.assertEquals(expectedOffset, dimension.getOffset(), 0.0);
+    for (org.geotools.coverage.Category category : dimension.getCategories()) {
       if (category.getName().equals(org.geotools.coverage.Category.NODATA.getName())) {
-        Assert.assertEquals(0.0, category.getRange().getMinimum(), 1e-9);
-        Assert.assertEquals(0.0, category.getRange().getMaximum(), 1e-9);
+        Assert.assertEquals(expectedMinimum, category.getRange().getMinimum(), 0.0);
+        Assert.assertEquals(expectedMaximum, category.getRange().getMaximum(), 0.0);
+        return;
       }
     }
+    Assert.fail("Expected a NODATA category");
+  }
+
+  private byte[] appendNoDataOverrideTrailer(byte[] bytes, int... flags) {
+    byte[] trailerMagic = {'N', 'D', 'O', '1'};
+    byte[] marked = Arrays.copyOf(bytes, bytes.length + trailerMagic.length + flags.length);
+    System.arraycopy(trailerMagic, 0, marked, bytes.length, trailerMagic.length);
+    for (int i = 0; i < flags.length; i++) {
+      marked[bytes.length + trailerMagic.length + i] = (byte) flags[i];
+    }
+    return marked;
   }
 
   @Test
@@ -252,6 +324,54 @@ public class SerdeTest extends RasterTestBase {
             new GridSampleDimensionSerializer.DeclaredSampleDimension(dim, -9999.0),
             org.geotools.api.coverage.SampleDimensionType.REAL_64BITS);
     Assert.assertSame(dim, reconciled);
+  }
+
+  @Test
+  public void testNoDataOverridePreservesNarrowDataCategories() {
+    org.geotools.coverage.Category data =
+        new org.geotools.coverage.Category(
+            "source-category",
+            (java.awt.Color[]) null,
+            org.geotools.util.NumberRange.create(0, true, 15, true),
+            true);
+    org.geotools.coverage.GridSampleDimension dim =
+        new org.geotools.coverage.GridSampleDimension(
+            "band", new org.geotools.coverage.Category[] {data}, 1.0, 0.0);
+
+    org.geotools.coverage.GridSampleDimension reconciled =
+        GridSampleDimensionSerializer.reconcileNoDataValue(
+            new GridSampleDimensionSerializer.DeclaredSampleDimension(
+                dim, 20.0, GridSampleDimensionSerializer.NO_DATA_VALUE_OVERRIDE),
+            org.geotools.api.coverage.SampleDimensionType.UNSIGNED_8BITS);
+
+    Assert.assertEquals("source-category", reconciled.getCategory(10).getName().toString());
+    Assert.assertEquals(
+        org.geotools.coverage.Category.NODATA.getName(), reconciled.getCategory(20).getName());
+    Assert.assertNull(reconciled.getCategory(200));
+  }
+
+  @Test
+  public void testSampleTypeOverrideRetypesEvenWhenCategoryTypeMatches() {
+    org.geotools.coverage.Category data =
+        new org.geotools.coverage.Category(
+            "source-category",
+            (java.awt.Color[]) null,
+            org.geotools.util.NumberRange.create(0, true, 255, true),
+            true);
+    org.geotools.coverage.GridSampleDimension dim =
+        new org.geotools.coverage.GridSampleDimension(
+            "band", new org.geotools.coverage.Category[] {data}, 1.0, 0.0);
+    Assert.assertEquals(
+        org.geotools.api.coverage.SampleDimensionType.UNSIGNED_8BITS, dim.getSampleDimensionType());
+
+    org.geotools.coverage.GridSampleDimension reconciled =
+        GridSampleDimensionSerializer.reconcileNoDataValue(
+            new GridSampleDimensionSerializer.DeclaredSampleDimension(
+                dim, Double.NaN, GridSampleDimensionSerializer.SAMPLE_TYPE_OVERRIDE),
+            org.geotools.api.coverage.SampleDimensionType.UNSIGNED_8BITS);
+
+    Assert.assertNotSame(dim, reconciled);
+    Assert.assertEquals("band", reconciled.getCategory(200).getName().toString());
   }
 
   @Test

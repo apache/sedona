@@ -46,6 +46,8 @@ import org.objenesis.strategy.StdInstantiatorStrategy;
 public class Serde {
   private Serde() {}
 
+  private static final byte[] SAMPLE_DIMENSION_OVERRIDE_TRAILER_MAGIC = {'N', 'D', 'O', '1'};
+
   /** URIs are not serializable. We need to provide a custom serializer */
   private static class URISerializer extends Serializer<java.net.URI> {
     public URISerializer() {
@@ -146,6 +148,7 @@ public class Serde {
       image = new DeepCopiedRenderedImage();
       image.read(kryo, input);
 
+      int[] metadataOverrideFlags = readSampleDimensionOverrideTrailer(input, bandCount);
       // The nodata value each band declares can only be encoded once the pixels it describes are
       // known, since it has to be wrapped as a Number of their type. Python writers replay the
       // source raster's category blobs while declaring a different nodata, and may also widen the
@@ -154,8 +157,38 @@ public class Serde {
       for (int i = 0; i < bandCount; i++) {
         SampleDimensionType type =
             TypeMap.getSampleDimensionType(sampleModel, Math.min(i, sampleModel.getNumBands() - 1));
-        bands[i] = GridSampleDimensionSerializer.reconcileNoDataValue(declaredBands[i], type);
+        GridSampleDimensionSerializer.DeclaredSampleDimension declared = declaredBands[i];
+        if (metadataOverrideFlags[i] != 0) {
+          declared =
+              new GridSampleDimensionSerializer.DeclaredSampleDimension(
+                  declared.sampleDimension, declared.noDataValue, metadataOverrideFlags[i]);
+        }
+        bands[i] = GridSampleDimensionSerializer.reconcileNoDataValue(declared, type);
       }
+    }
+
+    /**
+     * Read the optional Python sample-dimension provenance trailer. Existing JVM and Python readers
+     * stop after the image, so appending this marker keeps the raster's established byte layout
+     * compatible in both directions.
+     */
+    private static int[] readSampleDimensionOverrideTrailer(Input input, int bandCount) {
+      int[] metadataOverrideFlags = new int[bandCount];
+      int trailerStart = input.position();
+      if (input.limit() - trailerStart
+          < SAMPLE_DIMENSION_OVERRIDE_TRAILER_MAGIC.length + bandCount) {
+        return metadataOverrideFlags;
+      }
+      for (byte expected : SAMPLE_DIMENSION_OVERRIDE_TRAILER_MAGIC) {
+        if (input.readByte() != expected) {
+          input.setPosition(trailerStart);
+          return metadataOverrideFlags;
+        }
+      }
+      for (int i = 0; i < bandCount; i++) {
+        metadataOverrideFlags[i] = input.readByte() & 0xFF;
+      }
+      return metadataOverrideFlags;
     }
   }
 

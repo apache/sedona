@@ -22,17 +22,22 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import java.awt.Color;
 import java.util.List;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.coverage.SampleDimensionType;
 import org.geotools.coverage.Category;
 import org.geotools.coverage.GridSampleDimension;
+import org.geotools.coverage.TypeMap;
 
 /**
  * GridSampleDimension and RenderedSampleDimension are not serializable. We need to provide a custom
  * serializer
  */
 public class GridSampleDimensionSerializer extends Serializer<GridSampleDimension> {
+  static final int NO_DATA_VALUE_OVERRIDE = 1;
+  static final int SAMPLE_TYPE_OVERRIDE = 1 << 1;
+
   @Override
   public void write(Kryo kryo, Output output, GridSampleDimension sampleDimension) {
     String description = sampleDimension.getDescription().toString();
@@ -86,17 +91,17 @@ public class GridSampleDimensionSerializer extends Serializer<GridSampleDimensio
     input.readInt(); // skip the length of the next object
     Category[] categories = kryo.readObject(input, Category[].class);
     return new DeclaredSampleDimension(
-        new GridSampleDimension(description, categories, offset, scale), noDataValue);
+        new GridSampleDimension(description, categories, scale, offset), noDataValue);
   }
 
   /**
-   * Reconcile the nodata value declared on the wire with the one implied by the categories. The
-   * declared value wins: it is what the writer asked for, whereas the categories may have been
-   * replayed unchanged from a different raster.
+   * Reconcile the nodata value declared on the wire with the one implied by the categories.
    *
    * <p>The JVM writer emits {@link RasterUtils#getNoDataValue}, which is derived from the
-   * categories it also writes, so the two always agree for JVM-to-JVM round trips and both branches
-   * below return the argument unchanged.
+   * categories it also writes. Python writers replay opaque category blobs from the source raster;
+   * an optional trailer marks metadata that must be rebuilt because {@code nodata=} or the output
+   * storage type changed. Without that marker, a scalar equal to the minimum of a range-valued
+   * NODATA category must be treated as an ordinary JVM round trip and preserve the range.
    *
    * @param declared the sample dimension and the nodata value declared alongside it
    * @param sampleDimensionType the type of the pixels this sample dimension describes, used to
@@ -107,8 +112,17 @@ public class GridSampleDimensionSerializer extends Serializer<GridSampleDimensio
   public static GridSampleDimension reconcileNoDataValue(
       DeclaredSampleDimension declared, SampleDimensionType sampleDimensionType) {
     GridSampleDimension sampleDimension = declared.sampleDimension;
+    boolean noDataValueOverride = (declared.metadataOverrideFlags & NO_DATA_VALUE_OVERRIDE) != 0;
+    boolean sampleTypeOverride = (declared.metadataOverrideFlags & SAMPLE_TYPE_OVERRIDE) != 0;
+    if (sampleTypeOverride) {
+      // with_bands() changed the Java storage type. Its opaque source categories no longer
+      // describe the output pixels, so replace them with the standard full range for that type
+      // before applying the output's NODATA declaration.
+      sampleDimension = retypeSampleDimension(sampleDimension, sampleDimensionType);
+    }
+    double categoryNoDataValue = RasterUtils.getNoDataValue(sampleDimension);
     if (Double.isNaN(declared.noDataValue)) {
-      if (Double.isNaN(RasterUtils.getNoDataValue(sampleDimension))) {
+      if (Double.isNaN(categoryNoDataValue)) {
         // Neither side declares a nodata value; nothing to do. This is the path for rasters
         // serialized before the declared value was honored.
         return sampleDimension;
@@ -118,40 +132,49 @@ public class GridSampleDimensionSerializer extends Serializer<GridSampleDimensio
       // the category, otherwise the source's value silently survives into the output.
       return RasterUtils.removeNoDataValue(sampleDimension);
     }
-    if (hasSingleValuedNoData(sampleDimension, declared.noDataValue)) {
-      // The categories already say exactly what was declared; keep them untouched. This is the
-      // JVM-to-JVM round-trip path.
+    if (!noDataValueOverride
+        && !sampleTypeOverride
+        && Double.compare(categoryNoDataValue, declared.noDataValue) == 0) {
+      // The unmarked scalar was written from these categories by the JVM. In particular, it is
+      // only the minimum of a range-valued NODATA category, not a request to collapse that range.
       return sampleDimension;
     }
-    // Strip any existing no data category before rebuilding. createSampleDimensionWithNoDataValue
-    // returns its argument unchanged whenever getNoDataValue() matches the declared value, and
-    // getNoDataValue() reads the *minimum* of the category — so a range-valued no data category
-    // whose minimum equals the declared value would otherwise survive as-is, keeping the whole
-    // range flagged when a single value was asked for.
+    // The shared RasterUtils helper is intentionally idempotent when the scalar matches an
+    // existing range-valued NODATA category. Strip that category here so an authoritative Python
+    // override, or any genuine wire/category mismatch, is rebuilt as the declared singleton.
     GridSampleDimension stripped = RasterUtils.removeNoDataValue(sampleDimension);
     return RasterUtils.createSampleDimensionWithNoDataValue(
         stripped, declared.noDataValue, sampleDimensionType);
   }
 
-  /** Whether the sample dimension's no data category is exactly the single given value. */
-  private static boolean hasSingleValuedNoData(GridSampleDimension sampleDimension, double value) {
-    for (Category category : sampleDimension.getCategories()) {
-      if (category.getName().equals(Category.NODATA.getName())) {
-        return category.getRange().getMinimum() == value
-            && category.getRange().getMaximum() == value;
-      }
-    }
-    return false;
+  /** Rebuild a source sample dimension with a default quantitative category for the output type. */
+  private static GridSampleDimension retypeSampleDimension(
+      GridSampleDimension sampleDimension, SampleDimensionType sampleDimensionType) {
+    String description = sampleDimension.getDescription().toString();
+    Category data =
+        new Category(description, (Color[]) null, TypeMap.getRange(sampleDimensionType), true);
+    return new GridSampleDimension(
+        description,
+        new Category[] {data},
+        sampleDimension.getScale(),
+        sampleDimension.getOffset());
   }
 
   /** A deserialized sample dimension together with the nodata value declared on the wire. */
   public static final class DeclaredSampleDimension {
     public final GridSampleDimension sampleDimension;
     public final double noDataValue;
+    public final int metadataOverrideFlags;
 
     DeclaredSampleDimension(GridSampleDimension sampleDimension, double noDataValue) {
+      this(sampleDimension, noDataValue, 0);
+    }
+
+    DeclaredSampleDimension(
+        GridSampleDimension sampleDimension, double noDataValue, int metadataOverrideFlags) {
       this.sampleDimension = sampleDimension;
       this.noDataValue = noDataValue;
+      this.metadataOverrideFlags = metadataOverrideFlags;
     }
   }
 }

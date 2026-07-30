@@ -60,7 +60,6 @@ import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.Position2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
-import org.geotools.util.ClassChanger;
 import org.geotools.util.NumberRange;
 import org.locationtech.jts.geom.Geometry;
 
@@ -322,17 +321,21 @@ public class RasterUtils {
       double noDataValue,
       SampleDimensionType sampleDimensionType) {
     // Encode the value for the sample dimension type first: a float band stores 99.2 as
-    // 99.19999694824219, and everything below — the early return, the split boundaries and the
-    // new category — must agree on the encoded value, not the requested one, or the split
-    // boundaries end up on the wrong side of the category they are supposed to bracket.
+    // 99.19999694824219, and the split ranges and new category must agree on the encoded value,
+    // not the requested one.
     Number wrappedNoData = TypeMap.wrapSample(noDataValue, sampleDimensionType, false);
-    final double effectiveNoDataValue = wrappedNoData.doubleValue();
+    double effectiveNoDataValue = wrappedNoData.doubleValue();
 
-    // if noDataValues contain noDataValue, then return the original sample dimension
-    double existingNoDataValue = getNoDataValue(sampleDimension);
-    if (Double.compare(existingNoDataValue, effectiveNoDataValue) == 0) {
+    // Preserve the existing categories when their declared scalar already agrees. In particular,
+    // callers that copy an existing range-valued NODATA category pass its minimum here and expect
+    // the range to remain intact. Wire-level authoritative overrides remove that category before
+    // calling this shared helper.
+    if (Double.compare(getNoDataValue(sampleDimension), effectiveNoDataValue) == 0) {
       return sampleDimension;
     }
+
+    NumberRange noDataRange =
+        new NumberRange(wrappedNoData.getClass(), wrappedNoData, wrappedNoData);
 
     String description = sampleDimension.getDescription().toString();
     List<Category> categories = sampleDimension.getCategories();
@@ -350,60 +353,16 @@ public class RasterUtils {
         continue;
       }
       NumberRange<? extends Number> range = category.getRange();
-      if (range.contains((Number) effectiveNoDataValue)) {
-        // Split this range to two ranges, one below the no data value and one above it.
-        Number min = range.getMinValue();
-        Number max = range.getMaxValue();
-        final Class<? extends Number> clazz = ClassChanger.getWidestClass(min, max);
-        if (clazz == Float.class
-            || clazz == Double.class
-            || effectiveNoDataValue != Math.floor(effectiveNoDataValue)) {
-          // Real-valued split. Exclusive bounds touching the no data value are not reliable
-          // here: they can be reported as overlapping the single-valued no data category by
-          // GridSampleDimension, and a fractional value cannot be cast to an integral range
-          // class at all (it used to be truncated, leaving the boundary value uncategorized).
-          // Adjacent doubles give closed, non-touching ranges instead.
-          if (min.doubleValue() < effectiveNoDataValue) {
+      if (range.contains(wrappedNoData)) {
+        // NumberRange performs the split in the widest operand type, so a float output retains
+        // Float fragments while a byte category widened to double can represent a fractional
+        // NODATA value. It can return representationally empty fragments at exclusive boundaries;
+        // compare their effective included endpoints before constructing a Category.
+        for (NumberRange<?> fragment : range.subtract(noDataRange)) {
+          if (fragment.getMinimum(true) <= fragment.getMaximum(true)) {
             newCategories.add(
                 new Category(
-                    category.getName(),
-                    category.getColors(),
-                    NumberRange.create(
-                        min.doubleValue(),
-                        range.isMinIncluded(),
-                        Math.nextDown(effectiveNoDataValue),
-                        true)));
-          }
-          if (max.doubleValue() > effectiveNoDataValue) {
-            newCategories.add(
-                new Category(
-                    category.getName(),
-                    category.getColors(),
-                    NumberRange.create(
-                        Math.nextUp(effectiveNoDataValue),
-                        true,
-                        max.doubleValue(),
-                        range.isMaxIncluded())));
-          }
-        } else {
-          min = ClassChanger.cast(min, clazz);
-          max = ClassChanger.cast(max, clazz);
-          Number nodata = ClassChanger.cast(effectiveNoDataValue, clazz);
-          if (min.doubleValue() < effectiveNoDataValue) {
-            Category leftCategory =
-                new Category(
-                    category.getName(),
-                    category.getColors(),
-                    new NumberRange(clazz, min, range.isMinIncluded(), nodata, false));
-            newCategories.add(leftCategory);
-          }
-          if (max.doubleValue() > effectiveNoDataValue) {
-            Category rightCategory =
-                new Category(
-                    category.getName(),
-                    category.getColors(),
-                    new NumberRange(clazz, nodata, false, max, range.isMaxIncluded()));
-            newCategories.add(rightCategory);
+                    category.getName(), category.getColors(), fragment, category.isQuantitative()));
           }
         }
       } else {
@@ -420,7 +379,7 @@ public class RasterUtils {
             new NumberRange(wrappedNoData.getClass(), wrappedNoData, wrappedNoData)));
 
     return new GridSampleDimension(
-        description, newCategories.toArray(new Category[0]), offset, scale);
+        description, newCategories.toArray(new Category[0]), scale, offset);
   }
 
   public static GridSampleDimension createSampleDimensionWithNoDataValue(
@@ -460,7 +419,7 @@ public class RasterUtils {
     double offset = sampleDimension.getOffset();
     double scale = sampleDimension.getScale();
     return new GridSampleDimension(
-        description, newCategories.toArray(new Category[0]), offset, scale);
+        description, newCategories.toArray(new Category[0]), scale, offset);
   }
 
   /**

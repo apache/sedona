@@ -94,11 +94,13 @@ class TestRasterUdfDocExamples(TestBase):
             .selectExpr(
                 "RS_NumBands(mask_rast) AS num_bands",
                 "RS_BandAsArray(mask_rast, 1) AS band",
+                "RS_BandPixelType(mask_rast, 1) AS pixel_type",
                 "RS_SRID(mask_rast) AS srid",
             )
             .first()
         )
         assert result["num_bands"] == 1
+        assert result["pixel_type"] == "REAL_32BITS"
         assert result["srid"] == 3857
         # Every band-0 value is below 1400, so the whole mask is set.
         assert all(value == 1.0 for value in result["band"])
@@ -106,20 +108,33 @@ class TestRasterUdfDocExamples(TestBase):
     @requires_spark_34
     def test_raster_to_raster_with_nodata(self):
         """The nodata= form from 'Setting NODATA on the output'."""
-        df = self._four_band_df()
+        NODATA = -9999.0
+        df = self._four_band_df().selectExpr(
+            "RS_SetBandNoDataValue(rast, 1, 0.0) AS rast"
+        )
 
         @udf(returnType=RasterType())
         def mask_udf(raster):
-            band1 = raster.as_numpy()[0]
+            band1 = raster.as_numpy_masked()[0]
             mask = (band1 < 1400).astype(np.float32)
-            return raster.with_bands(mask, nodata=-9999.0)
+            return raster.with_bands(
+                np.where(np.isnan(band1), NODATA, mask), nodata=NODATA
+            )
 
         result = (
             df.select(mask_udf(col("rast")).alias("mask_rast"))
-            .selectExpr("RS_BandNoDataValue(mask_rast, 1) AS nodata")
+            .selectExpr(
+                "RS_BandAsArray(mask_rast, 1) AS band",
+                "RS_BandNoDataValue(mask_rast, 1) AS nodata",
+                "RS_Count(mask_rast, 1, true) AS counted",
+            )
             .first()
         )
-        assert result["nodata"] == -9999.0
+        band = list(result["band"])
+        assert band[0] == NODATA
+        assert all(value == 1.0 for value in band[1:])
+        assert result["nodata"] == NODATA
+        assert result["counted"] == 11
 
     @requires_spark_34
     def test_per_band_nodata_sequence(self):
@@ -444,6 +459,34 @@ class TestRasterUdfDocExamples(TestBase):
         )
         assert result["nodata"] == -99999.0
 
+    @requires_spark_34
+    def test_inherited_nodata_is_retyped_with_output_pixels(self):
+        """Inherited NODATA must not leave byte metadata on a float64 output."""
+        df = self.spark.range(1).withColumn(
+            "rast",
+            expr(
+                "RS_SetBandNoDataValue("
+                "RS_MakeRasterForTesting(1, 'B', 'BandedSampleModel', "
+                "4, 3, 100, 100, 10, -10, 0, 0, 3857), 1, 0.0)"
+            ),
+        )
+
+        @udf(returnType=RasterType())
+        def widen(raster):
+            arr = raster.as_numpy()[0].astype(np.float64)
+            return raster.with_bands(arr)
+
+        result = (
+            df.select(widen(col("rast")).alias("out"))
+            .selectExpr(
+                "RS_BandNoDataValue(out, 1) AS nodata",
+                "RS_BandPixelType(out, 1) AS pixel_type",
+            )
+            .first()
+        )
+        assert result["nodata"] == 0.0
+        assert result["pixel_type"] == "REAL_64BITS"
+
     # ---- "Limits" ---------------------------------------------------------
 
     def test_output_must_match_input_grid(self):
@@ -475,6 +518,36 @@ class TestRasterUdfDocExamples(TestBase):
         ):
             out = raster.with_bands(np.zeros((3, 4), dtype=dtype))
             assert out.as_numpy().dtype == np.dtype(dtype)
+
+    @pytest.mark.parametrize(
+        ("dtype", "pixel_nodata", "requested_nodata", "wire_nodata"),
+        [
+            pytest.param(np.int8, -2, -2.0, 254.0, id="int8"),
+            pytest.param(
+                np.uint32,
+                2**32 - 1,
+                2**32 - 1,
+                -1.0,
+                id="uint32",
+            ),
+        ],
+    )
+    def test_reinterpreted_nodata_is_masked_before_serialization(
+        self, dtype, pixel_nodata, requested_nodata, wire_nodata
+    ):
+        raster = self.spark.sql(f"SELECT {FOUR_BAND} AS rast").first()["rast"]
+        arr = np.full((raster.height, raster.width), 7, dtype=dtype)
+        arr[0, 0] = pixel_nodata
+
+        out = raster.with_bands(arr, nodata=requested_nodata)
+
+        assert out.bands_meta[0].nodata == wire_nodata
+        assert out.as_numpy().dtype == np.dtype(dtype)
+        np.testing.assert_array_equal(out.as_numpy()[0], arr)
+        masked = out.as_numpy_masked()[0]
+        assert np.isnan(masked[0, 0])
+        assert np.count_nonzero(np.isnan(masked)) == 1
+        assert np.all(masked[~np.isnan(masked)] == 7)
 
     @requires_spark_34
     def test_int8_negative_values_are_reinterpreted(self):

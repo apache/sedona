@@ -37,9 +37,17 @@ except:
 from .awt_raster import AWTRaster
 from .data_buffer import DataBuffer
 from .meta import AffineTransform, SampleDimension
-from .sample_model import ComponentSampleModel, SampleModel
+from .sample_model import (
+    ComponentSampleModel,
+    MultiPixelPackedSampleModel,
+    SampleModel,
+    SinglePixelPackedSampleModel,
+)
 
 GDAL_VERSION = rasterio.env.GDALVersion.runtime()
+
+_SAMPLE_DIMENSION_NO_DATA_VALUE_OVERRIDE = 0x01
+_SAMPLE_DIMENSION_SAMPLE_TYPE_OVERRIDE = 0x02
 
 
 def _has_env_with_gdal_mem_enabled():
@@ -116,6 +124,26 @@ def _numpy_dtype_to_data_buffer_type(dtype: np.dtype) -> int:
             f"negative values will be reinterpreted."
         )
     return mapping[dtype]
+
+
+def _sample_model_band_size(sample_model: SampleModel, band: int) -> int:
+    """Return the number of bits Java exposes for one band of a SampleModel."""
+    storage_sizes = {
+        DataBuffer.TYPE_BYTE: 8,
+        DataBuffer.TYPE_USHORT: 16,
+        DataBuffer.TYPE_SHORT: 16,
+        DataBuffer.TYPE_INT: 32,
+        DataBuffer.TYPE_FLOAT: 32,
+        DataBuffer.TYPE_DOUBLE: 64,
+    }
+    storage_size = storage_sizes[sample_model.data_type]
+    if isinstance(sample_model, SinglePixelPackedSampleModel):
+        source_band = min(band, len(sample_model.bit_masks) - 1)
+        mask = sample_model.bit_masks[source_band] & ((1 << storage_size) - 1)
+        return bin(mask).count("1")
+    if isinstance(sample_model, MultiPixelPackedSampleModel):
+        return sample_model.num_bits
+    return storage_size
 
 
 def _generate_vrt_xml(
@@ -234,9 +262,18 @@ class SedonaRaster(ABC):
 
         """
         arr = self.as_numpy()
+        # Java stores int8 pixels in an unsigned byte buffer and uint32 pixels in a signed
+        # int buffer. with_bands() keeps the caller's NumPy dtype until serialization while
+        # bands_meta carries the Java-facing NODATA value, so compare through a storage view.
+        # Keep arr for the result so valid samples retain their original signedness.
+        storage_arr = arr
+        if arr.dtype == np.dtype(np.int8):
+            storage_arr = arr.view(np.uint8)
+        elif arr.dtype == np.dtype(np.uint32):
+            storage_arr = arr.view(np.int32)
         nodata_values = np.array([bm.nodata for bm in self._bands_meta])
         nodata_values_reshaped = nodata_values[:, None, None]
-        mask = arr == nodata_values_reshaped
+        mask = storage_arr == nodata_values_reshaped
         masked_arr = np.where(mask, np.nan, arr)
         return masked_arr
 
@@ -298,6 +335,9 @@ class InDbSedonaRaster(SedonaRaster):
         # If None, the raster cannot be serialized.
         self._name: str = ""
         self._category_blobs: Optional[List[bytes]] = None
+        # An optional wire trailer marks why a band's Python output metadata must override
+        # replayed source categories: bit 0 for NODATA and bit 1 for sample type.
+        self._sample_dimension_override_flags: List[int] = [0] * len(bands_meta)
         self._properties_blob: Optional[bytes] = None
         self._color_model_blob: Optional[bytes] = None
 
@@ -470,14 +510,30 @@ class InDbSedonaRaster(SedonaRaster):
 
         # Adjust category blobs for new band count
         source_n_bands = len(self._bands_meta)
+        output_sample_size = np.dtype(new_data.dtype).itemsize * 8
+        source_sample_model = self.awt_raster.sample_model
+        sample_type_changed = [
+            data_type != source_sample_model.data_type
+            or output_sample_size
+            != _sample_model_band_size(
+                source_sample_model, min(band, source_n_bands - 1)
+            )
+            for band in range(n_bands)
+        ]
         if n_bands <= source_n_bands:
             category_blobs = list(self._category_blobs[:n_bands])
+            metadata_override_flags = list(
+                self._sample_dimension_override_flags[:n_bands]
+            )
         else:
             category_blobs = list(self._category_blobs)
+            metadata_override_flags = list(self._sample_dimension_override_flags)
             # Replicate last source category blob for new bands
             last_blob = self._category_blobs[-1]
+            last_metadata_override_flags = self._sample_dimension_override_flags[-1]
             for _ in range(n_bands - source_n_bands):
                 category_blobs.append(last_blob)
+                metadata_override_flags.append(last_metadata_override_flags)
 
         # Adjust band metadata for new band count. Bands beyond the source's band count
         # replay the source's last category blob (above), so they inherit its nodata on
@@ -500,8 +556,37 @@ class InDbSedonaRaster(SedonaRaster):
 
         if nodata is not None:
             bands_meta = self._override_nodata(bands_meta, nodata, new_data.dtype)
+            metadata_override_flags = [
+                flags
+                | _SAMPLE_DIMENSION_NO_DATA_VALUE_OVERRIDE
+                | (_SAMPLE_DIMENSION_SAMPLE_TYPE_OVERRIDE if type_changed else 0)
+                for flags, type_changed in zip(
+                    metadata_override_flags, sample_type_changed
+                )
+            ]
         else:
-            bands_meta = self._normalize_inherited_nodata(bands_meta, new_data.dtype)
+            inherited_meta = bands_meta
+            bands_meta = self._normalize_inherited_nodata(
+                inherited_meta, new_data.dtype
+            )
+            metadata_override_flags = [
+                flags
+                | (_SAMPLE_DIMENSION_SAMPLE_TYPE_OVERRIDE if type_changed else 0)
+                | (
+                    _SAMPLE_DIMENSION_NO_DATA_VALUE_OVERRIDE
+                    if (
+                        not (np.isnan(before.nodata) and np.isnan(after.nodata))
+                        and before.nodata != after.nodata
+                    )
+                    else 0
+                )
+                for before, after, flags, type_changed in zip(
+                    inherited_meta,
+                    bands_meta,
+                    metadata_override_flags,
+                    sample_type_changed,
+                )
+            ]
 
         # Build BandedSampleModel (TYPE_BANDED = 1)
         # ComponentSampleModel.__init__() sets TYPE_COMPONENT, so we must
@@ -533,6 +618,7 @@ class InDbSedonaRaster(SedonaRaster):
         )
         result._name = self._name
         result._category_blobs = category_blobs
+        result._sample_dimension_override_flags = metadata_override_flags
         result._properties_blob = self._properties_blob
         result._color_model_blob = self._color_model_blob  # replay unchanged
         return result

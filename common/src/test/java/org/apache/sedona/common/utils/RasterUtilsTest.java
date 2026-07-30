@@ -31,6 +31,7 @@ import java.util.List;
 import org.apache.sedona.common.raster.MapAlgebra;
 import org.apache.sedona.common.raster.RasterAccessors;
 import org.apache.sedona.common.raster.RasterConstructors;
+import org.geotools.api.coverage.SampleDimensionType;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.Category;
@@ -277,7 +278,7 @@ public class RasterUtilsTest {
     Category data =
         new Category("data", new Color[] {Color.BLACK}, NumberRange.create(11, true, 100, true));
     GridSampleDimension dim =
-        new GridSampleDimension("band", new Category[] {nodataRange, data}, 0.0, 1.0);
+        new GridSampleDimension("band", new Category[] {nodataRange, data}, 1.0, 0.0);
     assertEquals(0.0, RasterUtils.getNoDataValue(dim), 1e-9);
 
     GridSampleDimension replaced = RasterUtils.createSampleDimensionWithNoDataValue(dim, 5.0);
@@ -288,6 +289,32 @@ public class RasterUtilsTest {
             .filter(c -> c.getName().equals(Category.NODATA.getName()))
             .count();
     assertEquals("exactly one no data category should remain", 1, nodataCategories);
+  }
+
+  @Test
+  public void testCreateSampleDimensionWithNoDataValuePreservesRangeAtItsMinimum() {
+    Category nodataRange =
+        new Category(
+            Category.NODATA.getName(),
+            new Color(0, 0, 0, 0),
+            NumberRange.create(0, true, 10, true));
+    Category data =
+        new Category("data", new Color[] {Color.BLACK}, NumberRange.create(11, true, 100, true));
+    GridSampleDimension dim =
+        new GridSampleDimension("band", new Category[] {nodataRange, data}, 1.0, 0.0);
+
+    GridSampleDimension replaced =
+        RasterUtils.createSampleDimensionWithNoDataValue(
+            dim, 0.0, SampleDimensionType.SIGNED_32BITS);
+
+    Assert.assertSame(dim, replaced);
+    Category noDataCategory =
+        replaced.getCategories().stream()
+            .filter(c -> c.getName().equals(Category.NODATA.getName()))
+            .findFirst()
+            .orElseThrow(AssertionError::new);
+    assertEquals(0.0, noDataCategory.getRange().getMinimum(), 0.0);
+    assertEquals(10.0, noDataCategory.getRange().getMaximum(), 0.0);
   }
 
   @Test
@@ -305,7 +332,7 @@ public class RasterUtilsTest {
     // rejects as overlapping ("Ranges [v..MAX] and [v..v] overlap").
     Category data =
         new Category("data", new Color[] {Color.BLACK}, NumberRange.create(0.0, true, 100.0, true));
-    GridSampleDimension dim = new GridSampleDimension("band", new Category[] {data}, 0.0, 1.0);
+    GridSampleDimension dim = new GridSampleDimension("band", new Category[] {data}, 1.0, 0.0);
 
     GridSampleDimension replaced = RasterUtils.createSampleDimensionWithNoDataValue(dim, 5.5);
     assertEquals(5.5, RasterUtils.getNoDataValue(replaced), 1e-12);
@@ -324,7 +351,7 @@ public class RasterUtilsTest {
     Category data =
         new Category(
             "data", new Color[] {Color.BLACK}, NumberRange.create((byte) 0, true, (byte) 20, true));
-    GridSampleDimension dim = new GridSampleDimension("band", new Category[] {data}, 0.0, 1.0);
+    GridSampleDimension dim = new GridSampleDimension("band", new Category[] {data}, 1.0, 0.0);
 
     GridSampleDimension replaced =
         RasterUtils.createSampleDimensionWithNoDataValue(
@@ -332,5 +359,82 @@ public class RasterUtilsTest {
     assertEquals(5.5, RasterUtils.getNoDataValue(replaced), 1e-12);
     Assert.assertNotNull(replaced.getCategory(5.0));
     Assert.assertEquals("data", replaced.getCategory(5.0).getName().toString());
+  }
+
+  @Test
+  public void testFloatSplitPreservesReal32AndQuantitativeCategory() {
+    Category data =
+        new Category(
+            "data", new Color[] {Color.BLACK}, NumberRange.create(0.0f, true, 200.0f, true), true);
+    GridSampleDimension dim = new GridSampleDimension("band", new Category[] {data}, 1.0, 0.0);
+
+    GridSampleDimension replaced =
+        RasterUtils.createSampleDimensionWithNoDataValue(
+            dim, 99.2, SampleDimensionType.REAL_32BITS);
+
+    assertEquals(SampleDimensionType.REAL_32BITS, replaced.getSampleDimensionType());
+    assertEquals((double) 99.2f, RasterUtils.getNoDataValue(replaced), 0.0);
+    for (Category category : replaced.getCategories()) {
+      assertEquals(Float.class, category.getRange().getElementClass());
+      if (category.getName().toString().equals("data")) {
+        Assert.assertTrue(category.isQuantitative());
+      }
+    }
+  }
+
+  @Test
+  public void testRealSplitSkipsEmptyFragmentAtExclusiveLowerBound() {
+    Category data =
+        new Category(
+            "data", new Color[] {Color.BLACK}, NumberRange.create(0.0, false, 1.0, true), true);
+    GridSampleDimension dim = new GridSampleDimension("band", new Category[] {data}, 1.0, 0.0);
+
+    GridSampleDimension replaced =
+        RasterUtils.createSampleDimensionWithNoDataValue(
+            dim, Double.MIN_VALUE, SampleDimensionType.REAL_64BITS);
+
+    assertEquals(Category.NODATA.getName(), replaced.getCategory(Double.MIN_VALUE).getName());
+    assertEquals("data", replaced.getCategory(Math.nextUp(Double.MIN_VALUE)).getName().toString());
+    assertNoEmptyCategories(replaced);
+  }
+
+  @Test
+  public void testRealSplitSkipsEmptyFragmentAtExclusiveUpperBound() {
+    double noDataValue = Math.nextDown(1.0);
+    Category data =
+        new Category(
+            "data", new Color[] {Color.BLACK}, NumberRange.create(0.0, true, 1.0, false), true);
+    GridSampleDimension dim = new GridSampleDimension("band", new Category[] {data}, 1.0, 0.0);
+
+    GridSampleDimension replaced =
+        RasterUtils.createSampleDimensionWithNoDataValue(
+            dim, noDataValue, SampleDimensionType.REAL_64BITS);
+
+    assertEquals(Category.NODATA.getName(), replaced.getCategory(noDataValue).getName());
+    assertEquals("data", replaced.getCategory(Math.nextDown(noDataValue)).getName().toString());
+    assertNoEmptyCategories(replaced);
+  }
+
+  @Test
+  public void testNoDataRebuildPreservesScaleAndOffset() {
+    Category data = new Category("data", new Color[] {Color.BLACK}, NumberRange.create(0.0, 100.0));
+    GridSampleDimension dim = new GridSampleDimension("band", new Category[] {data}, 2.0, 7.0);
+
+    GridSampleDimension withNoData =
+        RasterUtils.createSampleDimensionWithNoDataValue(
+            dim, -9999.0, SampleDimensionType.REAL_64BITS);
+    assertEquals(2.0, withNoData.getScale(), 0.0);
+    assertEquals(7.0, withNoData.getOffset(), 0.0);
+
+    GridSampleDimension withoutNoData = RasterUtils.removeNoDataValue(withNoData);
+    assertEquals(2.0, withoutNoData.getScale(), 0.0);
+    assertEquals(7.0, withoutNoData.getOffset(), 0.0);
+  }
+
+  private static void assertNoEmptyCategories(GridSampleDimension dimension) {
+    for (Category category : dimension.getCategories()) {
+      Assert.assertTrue(
+          category.getRange().getMinimum(true) <= category.getRange().getMaximum(true));
+    }
   }
 }
