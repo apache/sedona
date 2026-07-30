@@ -219,7 +219,10 @@ public class ConstructorsTest {
     org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
     wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
     String gotGeom = wktWriter.write(got);
-    assertEquals(expected, gotGeom);
+    // S2 loops have no distinguished first vertex, so conversion may cyclically rotate a ring.
+    assertPolygonRingsEqual(
+        new org.locationtech.jts.io.WKTReader().read(expected),
+        new org.locationtech.jts.io.WKTReader().read(gotGeom));
   }
 
   @Test
@@ -244,7 +247,8 @@ public class ConstructorsTest {
     Geometry got =
         Constructors.geogToGeometry(
             g, new GeometryFactory(new PrecisionModel(PrecisionModel.FIXED)));
-    assertEquals(expected, got.toString());
+    // S2 loops have no distinguished first vertex, so conversion may cyclically rotate a ring.
+    assertPolygonRingsEqual(new org.locationtech.jts.io.WKTReader().read(expected), got);
     assertEquals(0, got.getSRID());
   }
 
@@ -266,9 +270,7 @@ public class ConstructorsTest {
     Geography got = Constructors.geomToGeography(g);
     String expected = "SRID=4326; " + wkt;
     assertEquals(4326, got.getSRID());
-    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
-    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
-    assertEquals(expected, got.toEWKT(new PrecisionModel(PrecisionModel.FIXED)));
+    assertEquals(expected, got.toEWKT());
   }
 
   @Test
@@ -363,5 +365,52 @@ public class ConstructorsTest {
     org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
     wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
     assertEquals(geom.toString(), got.toString(new PrecisionModel(PrecisionModel.FIXED)));
+  }
+
+  private static void assertPolygonRingsEqual(Geometry expected, Geometry actual) {
+    assertEquals(expected.getGeometryType(), actual.getGeometryType());
+    assertEquals(expected.getNumGeometries(), actual.getNumGeometries());
+    for (int i = 0; i < expected.getNumGeometries(); i++) {
+      org.locationtech.jts.geom.Polygon expectedPolygon =
+          (org.locationtech.jts.geom.Polygon) expected.getGeometryN(i);
+      org.locationtech.jts.geom.Polygon actualPolygon =
+          (org.locationtech.jts.geom.Polygon) actual.getGeometryN(i);
+      assertRingEqualUpToRotation(
+          expectedPolygon.getExteriorRing().getCoordinates(),
+          actualPolygon.getExteriorRing().getCoordinates());
+      assertEquals(expectedPolygon.getNumInteriorRing(), actualPolygon.getNumInteriorRing());
+      for (int j = 0; j < expectedPolygon.getNumInteriorRing(); j++) {
+        assertRingEqualUpToRotation(
+            expectedPolygon.getInteriorRingN(j).getCoordinates(),
+            actualPolygon.getInteriorRingN(j).getCoordinates());
+      }
+    }
+  }
+
+  private static void assertRingEqualUpToRotation(
+      org.locationtech.jts.geom.Coordinate[] expected,
+      org.locationtech.jts.geom.Coordinate[] actual) {
+    assertEquals(expected.length, actual.length);
+    int numVertices = expected.length - 1;
+    for (int offset = 0; offset < numVertices; offset++) {
+      boolean matches = true;
+      for (int i = 0; i < numVertices; i++) {
+        org.locationtech.jts.geom.Coordinate expectedCoordinate = expected[i];
+        org.locationtech.jts.geom.Coordinate actualCoordinate = actual[(offset + i) % numVertices];
+        if (Math.abs(expectedCoordinate.x - actualCoordinate.x) > 1e-12
+            || Math.abs(expectedCoordinate.y - actualCoordinate.y) > 1e-12) {
+          matches = false;
+          break;
+        }
+      }
+      if (matches) {
+        return;
+      }
+    }
+    fail(
+        "Expected a cyclic rotation of "
+            + java.util.Arrays.toString(expected)
+            + " but got "
+            + java.util.Arrays.toString(actual));
   }
 }
