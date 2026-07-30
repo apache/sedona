@@ -531,12 +531,19 @@ FROM rawdf
 形式都有直接对应的写法 —— 下面是双栅格的变化检测场景：
 
 ```python
+from pyspark.sql.functions import col, udf
+
+from sedona.spark.sql.types import RasterType
+
+
 @udf(returnType=RasterType())
 def delta(after, before):
     diff = after.as_numpy()[0] - before.as_numpy()[0]
     return after.with_bands(diff, nodata=-9999.0)
 
 
+# ndvi_after 与 ndvi_before 是两个日期的 NDVI 栅格，位于同一网格上，
+# 并各自带有 raster 数据源生成的 x、y tile 索引列。
 (
     ndvi_after.alias("after")
     .join(ndvi_before.alias("before"), ["x", "y"])
@@ -782,8 +789,11 @@ import rasterio.fill
 
 
 def fill_udf(raster):
+    # GDAL dataset 不携带 Sedona 的 NODATA，因此要从 SedonaRaster 构造掩膜 ——
+    # as_numpy_masked() 会把 NODATA 替换为 NaN。
+    valid = ~np.isnan(raster.as_numpy_masked()[0])
     with raster.as_rasterio() as src:
-        filled = rasterio.fill.fillnodata(src.read(1), mask=src.read_masks(1))
+        filled = rasterio.fill.fillnodata(src.read(1), mask=valid.astype(np.uint8))
     return raster.with_bands(filled)
 
 

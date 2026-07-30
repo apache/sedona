@@ -209,12 +209,18 @@ class TestRasterUdfDocExamples(TestBase):
 
     @requires_spark_34
     def test_rasterio_inside_udf(self):
-        df = self._four_band_df()
+        """fillnodata must actually fill: band 1 value 5 is NODATA and gets interpolated."""
+        df = self.spark.range(1).withColumn(
+            "rast", expr(f"RS_SetBandNoDataValue({FOUR_BAND}, 1, 5.0)")
+        )
 
         @udf(returnType=RasterType())
         def fill_udf(raster):
+            valid = ~np.isnan(raster.as_numpy_masked()[0])
             with raster.as_rasterio() as src:
-                filled = rasterio.fill.fillnodata(src.read(1), mask=src.read_masks(1))
+                filled = rasterio.fill.fillnodata(
+                    src.read(1), mask=valid.astype(np.uint8)
+                )
             return raster.with_bands(filled)
 
         result = (
@@ -230,8 +236,94 @@ class TestRasterUdfDocExamples(TestBase):
         assert result["num_bands"] == 1
         assert result["srid"] == 3857
         assert result["scale_x"] == pytest.approx(10.0)
-        # Nothing is masked, so fillnodata returns band 1 unchanged: 0..11.
-        assert list(result["band"]) == [float(v) for v in range(12)]
+        # Band 1 is 0..11 with 5 marked NODATA. Every other value must survive, and the
+        # hole at index 5 must have been replaced by an interpolated value.
+        band = list(result["band"])
+        for index, value in enumerate(band):
+            if index != 5:
+                assert value == pytest.approx(float(index)), f"index {index}"
+        assert band[5] == pytest.approx(5.0, abs=2.0)
+
+    @requires_spark_34
+    def test_as_rasterio_does_not_carry_nodata(self):
+        """Pins the documented gap: GDAL cannot see Sedona's NODATA."""
+        df = self.spark.range(1).withColumn(
+            "rast", expr(f"RS_SetBandNoDataValue({FOUR_BAND}, 1, 5.0)")
+        )
+
+        @udf(returnType="string")
+        def probe(raster):
+            with raster.as_rasterio() as src:
+                masks = src.read_masks(1)
+                return "{}|{}|{}".format(
+                    src.nodata,
+                    sorted(set(masks.flatten().tolist())),
+                    raster.bands_meta[0].nodata,
+                )
+
+        gdal_nodata, mask_values, sedona_nodata = (
+            df.select(probe(col("rast")).alias("v")).first()["v"].split("|")
+        )
+        assert gdal_nodata == "None"
+        assert mask_values == "[255]"  # everything reported valid
+        assert sedona_nodata == "5.0"  # the raster itself knows
+
+    @requires_spark_34
+    def test_numpy_scalar_nodata_accepted(self):
+        """nodata= accepts NumPy scalars, not just Python floats."""
+        raster = self.spark.sql(f"SELECT {FOUR_BAND} AS rast").first()["rast"]
+        arr = raster.as_numpy()[0].astype(np.float64)
+        for value in (np.float32(-9999), np.float64(-9999), np.int32(-9999)):
+            out = raster.with_bands(arr, nodata=value)
+            assert out.bands_meta[0].nodata == pytest.approx(-9999.0), type(
+                value
+            ).__name__
+
+    @requires_spark_34
+    def test_nodata_nan_clears_inherited_value(self):
+        """float('nan') must clear a NODATA the source has, not silently inherit it."""
+        df = self.spark.range(1).withColumn(
+            "rast", expr(f"RS_SetBandNoDataValue({FOUR_BAND}, 1, 0.0)")
+        )
+
+        @udf(returnType=RasterType())
+        def clear_nodata(raster):
+            arr = raster.as_numpy()[0].astype(np.float64)
+            return raster.with_bands(arr, nodata=float("nan"))
+
+        result = (
+            df.select(clear_nodata(col("rast")).alias("out"))
+            .selectExpr(
+                "RS_BandNoDataValue(out, 1) AS nodata",
+                "RS_Count(out, 1, true) AS counted",
+            )
+            .first()
+        )
+        assert result["nodata"] is None
+        assert result["counted"] == 12  # no pixel is skipped
+
+    @requires_spark_34
+    def test_nodata_wider_than_source_dtype(self):
+        """A byte source widened to float64 may carry a nodata a byte could not hold."""
+        df = self.spark.range(1).withColumn(
+            "rast",
+            expr(
+                "RS_MakeRasterForTesting(1, 'B', 'BandedSampleModel', "
+                "4, 3, 100, 100, 10, -10, 0, 0, 3857)"
+            ),
+        )
+
+        @udf(returnType=RasterType())
+        def widen(raster):
+            arr = raster.as_numpy()[0].astype(np.float64)
+            return raster.with_bands(arr, nodata=-99999.0)
+
+        result = (
+            df.select(widen(col("rast")).alias("out"))
+            .selectExpr("RS_BandNoDataValue(out, 1) AS nodata")
+            .first()
+        )
+        assert result["nodata"] == -99999.0
 
     # ---- "Limits" ---------------------------------------------------------
 

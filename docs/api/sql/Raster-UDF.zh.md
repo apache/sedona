@@ -177,13 +177,21 @@ import rasterio.fill
 
 @udf(returnType=RasterType())
 def fill_udf(raster):
+    # NODATA 必须来自 SedonaRaster，而不是 GDAL dataset —— 见下面的提示。
+    valid = ~np.isnan(raster.as_numpy_masked()[0])
     with raster.as_rasterio() as src:
-        filled = rasterio.fill.fillnodata(src.read(1), mask=src.read_masks(1))
+        filled = rasterio.fill.fillnodata(src.read(1), mask=valid.astype(np.uint8))
     return raster.with_bands(filled)
 
 
 df.select(fill_udf(col("rast")).alias("filled"))
 ```
+
+!!!warning
+    `as_rasterio()` 返回的 dataset **不会**携带栅格的 NODATA 值：`src.nodata` 始终为 `None`，
+    `src.read_masks()` 也会把所有像素都报告为有效。因此，任何依据 dataset 自身 NODATA 来决定行为的 rasterio
+    调用，都会把无效区域当成正常数据。请改为从 `SedonaRaster` 获取该值 —— 用 `raster.bands_meta[i].nodata`，
+    或用会把无效值替换为 `NaN` 的 `raster.as_numpy_masked()` —— 并像上面的 `mask=` 参数那样显式传给 rasterio。
 
 这一模式适用于任何不改变网格的 rasterio 运算 —— `fillnodata`、`sieve`、在已有网格上栅格化等。改变 CRS、
 分辨率或范围的运算无法这样返回，参见[限制](#limits)。

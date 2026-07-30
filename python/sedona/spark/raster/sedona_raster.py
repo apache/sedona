@@ -541,7 +541,10 @@ class InDbSedonaRaster(SedonaRaster):
         nodata: Union[float, Sequence[float]],
     ) -> List[SampleDimension]:
         """Return bands_meta with NODATA replaced by the requested value(s)."""
-        if isinstance(nodata, (int, float)) and not isinstance(nodata, bool):
+        # np.float32(-9999) and friends are not Python floats, but they are scalars and
+        # not iterable, so they have to be recognised here rather than falling through to
+        # the sequence branch.
+        if isinstance(nodata, (int, float, np.number)) and not isinstance(nodata, bool):
             values = [float(nodata)] * len(bands_meta)
         else:
             values = [float(v) for v in nodata]

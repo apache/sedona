@@ -184,13 +184,22 @@ import rasterio.fill
 
 @udf(returnType=RasterType())
 def fill_udf(raster):
+    # NODATA has to come from the SedonaRaster, not from the GDAL dataset — see the note below.
+    valid = ~np.isnan(raster.as_numpy_masked()[0])
     with raster.as_rasterio() as src:
-        filled = rasterio.fill.fillnodata(src.read(1), mask=src.read_masks(1))
+        filled = rasterio.fill.fillnodata(src.read(1), mask=valid.astype(np.uint8))
     return raster.with_bands(filled)
 
 
 df.select(fill_udf(col("rast")).alias("filled"))
 ```
+
+!!!warning
+    The dataset `as_rasterio()` returns does **not** carry the raster's NODATA value. `src.nodata` is always
+    `None` and `src.read_masks()` reports every pixel as valid, so any rasterio call that decides what to do
+    from the dataset's own NODATA will silently treat holes as data. Take the value from the `SedonaRaster`
+    instead — `raster.bands_meta[i].nodata`, or `raster.as_numpy_masked()` which substitutes `NaN` — and pass
+    it to the rasterio call explicitly, as the `mask=` argument does above.
 
 This pattern works for any rasterio operation that keeps the grid unchanged — `fillnodata`, `sieve`,
 rasterizing onto the existing grid. Operations that change the CRS, resolution, or extent cannot be returned;

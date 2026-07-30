@@ -41,6 +41,7 @@ import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.RasterAccessors;
 import org.apache.sedona.common.raster.RasterEditors;
+import org.geotools.api.coverage.SampleDimensionType;
 import org.geotools.api.coverage.grid.GridEnvelope;
 import org.geotools.api.metadata.spatial.PixelOrientation;
 import org.geotools.api.referencing.FactoryException;
@@ -294,9 +295,32 @@ public class RasterUtils {
    * @param noDataValue The no data value.
    * @return A new sample dimension with the given no data value.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
   public static GridSampleDimension createSampleDimensionWithNoDataValue(
       GridSampleDimension sampleDimension, double noDataValue) {
+    return createSampleDimensionWithNoDataValue(
+        sampleDimension, noDataValue, sampleDimension.getSampleDimensionType());
+  }
+
+  /**
+   * Create a sample dimension using a given sampleDimension as template, with the given no data
+   * value encoded for an explicit sample dimension type.
+   *
+   * <p>The type matters because the no data value is wrapped into a {@link Number} of that type. It
+   * is only worth passing explicitly when the template's own type does not describe the pixels the
+   * sample dimension will end up attached to — deserializing a raster whose band data was replaced
+   * by a Python UDF, for instance, where the template comes from the source raster but the pixels
+   * may have a wider type.
+   *
+   * @param sampleDimension The sample dimension to be used as template.
+   * @param noDataValue The no data value.
+   * @param sampleDimensionType The type to encode the no data value for.
+   * @return A new sample dimension with the given no data value.
+   */
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public static GridSampleDimension createSampleDimensionWithNoDataValue(
+      GridSampleDimension sampleDimension,
+      double noDataValue,
+      SampleDimensionType sampleDimensionType) {
     // if noDataValues contain noDataValue, then return the original sample dimension
     double existingNoDataValue = getNoDataValue(sampleDimension);
     if (Double.compare(existingNoDataValue, noDataValue) == 0) {
@@ -344,8 +368,7 @@ public class RasterUtils {
     }
 
     // Add the no data value as a new category
-    Number nodata =
-        TypeMap.wrapSample(noDataValue, sampleDimension.getSampleDimensionType(), false);
+    Number nodata = TypeMap.wrapSample(noDataValue, sampleDimensionType, false);
     newCategories.add(
         new Category(
             Category.NODATA.getName(),

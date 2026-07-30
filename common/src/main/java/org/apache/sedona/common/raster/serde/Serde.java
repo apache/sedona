@@ -26,13 +26,16 @@ import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.io.UnsafeInput;
 import com.esotericsoftware.kryo.io.UnsafeOutput;
 import java.awt.image.RenderedImage;
+import java.awt.image.SampleModel;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import javax.media.jai.RenderedImageAdapter;
 import org.apache.sedona.common.raster.DeepCopiedRenderedImage;
+import org.geotools.api.coverage.SampleDimensionType;
 import org.geotools.api.referencing.operation.MathTransform;
 import org.geotools.coverage.GridSampleDimension;
+import org.geotools.coverage.TypeMap;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridEnvelope2D;
@@ -134,11 +137,25 @@ public class Serde {
       serializedCRS = input.readBytes(serializedCRSLength);
       int bandCount = input.readInt();
       bands = new GridSampleDimension[bandCount];
+      GridSampleDimensionSerializer.DeclaredSampleDimension[] declaredBands =
+          new GridSampleDimensionSerializer.DeclaredSampleDimension[bandCount];
       for (int i = 0; i < bandCount; i++) {
-        bands[i] = gridSampleDimensionSerializer.read(kryo, input, GridSampleDimension.class);
+        declaredBands[i] = GridSampleDimensionSerializer.readWithDeclaredNoDataValue(kryo, input);
+        bands[i] = declaredBands[i].sampleDimension;
       }
       image = new DeepCopiedRenderedImage();
       image.read(kryo, input);
+
+      // The nodata value each band declares can only be encoded once the pixels it describes are
+      // known, since it has to be wrapped as a Number of their type. Python writers replay the
+      // source raster's category blobs while declaring a different nodata, and may also widen the
+      // data type, so this has to happen after the image is read rather than inside the band loop.
+      SampleModel sampleModel = image.getSampleModel();
+      for (int i = 0; i < bandCount; i++) {
+        SampleDimensionType type =
+            TypeMap.getSampleDimensionType(sampleModel, Math.min(i, sampleModel.getNumBands() - 1));
+        bands[i] = GridSampleDimensionSerializer.reconcileNoDataValue(declaredBands[i], type);
+      }
     }
   }
 

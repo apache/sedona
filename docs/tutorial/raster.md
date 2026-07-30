@@ -566,12 +566,19 @@ Use a [Raster UDF](../api/sql/Raster-UDF.md). A UDF takes one raster column or s
 deprecated `RS_MapAlgebra` have a direct equivalent — here is the two-raster change-detection case:
 
 ```python
+from pyspark.sql.functions import col, udf
+
+from sedona.spark.sql.types import RasterType
+
+
 @udf(returnType=RasterType())
 def delta(after, before):
     diff = after.as_numpy()[0] - before.as_numpy()[0]
     return after.with_bands(diff, nodata=-9999.0)
 
 
+# ndvi_after and ndvi_before are NDVI rasters for two dates, tiled on the same grid,
+# each with the x and y tile-index columns the raster data source adds.
 (
     ndvi_after.alias("after")
     .join(ndvi_before.alias("before"), ["x", "y"])
@@ -810,8 +817,11 @@ import rasterio.fill
 
 
 def fill_udf(raster):
+    # The GDAL dataset does not carry Sedona's NODATA, so build the mask from the
+    # SedonaRaster instead — as_numpy_masked() substitutes NaN for NODATA.
+    valid = ~np.isnan(raster.as_numpy_masked()[0])
     with raster.as_rasterio() as src:
-        filled = rasterio.fill.fillnodata(src.read(1), mask=src.read_masks(1))
+        filled = rasterio.fill.fillnodata(src.read(1), mask=valid.astype(np.uint8))
     return raster.with_bands(filled)
 
 
