@@ -48,9 +48,18 @@ public class Functions {
 
   public static Geography getEnvelope(Geography geography, boolean splitAtAntiMeridian) {
     if (geography == null) return null;
+    // Empty Point WKB stores NaN ordinates, which getPointX() reports as null. The isPoint() guard
+    // distinguishes that case from non-point inputs, for which getPointX() also returns null.
+    // Avoid constructing an S2PointRegion from the NaN ordinates.
+    if (geography instanceof WKBGeography
+        && ((WKBGeography) geography).isPoint()
+        && ((WKBGeography) geography).getPointX() == null) {
+      return geography;
+    }
     Geometry sourceGeometry = toJTS(geography);
     S2LatLngRect rect = geography.region().getRectBound();
-    if (rect.isEmpty()) return null;
+    // Match the Geometry overload by preserving an empty input's type and SRID.
+    if (rect.isEmpty()) return geography;
     double lngLo = rect.lngLo().degrees();
     double latLo = rect.latLo().degrees();
     double lngHi = rect.lngHi().degrees();
@@ -264,7 +273,8 @@ public class Functions {
    * measurement functions. No CRS transformation or SRID compatibility check is performed; if the
    * inputs have different SRIDs, the first input's SRID is used. When the second input is a
    * LineString whose first coordinate equals the current endpoint, that seam coordinate is added
-   * only once. Point and MultiPoint coordinates are always retained.
+   * only once. Point and MultiPoint coordinates are always retained. Empty inputs contribute no
+   * coordinates; when exactly one coordinate remains, it is repeated to form a valid LineString.
    */
   public static Geography makeLine(Geography g1, Geography g2) {
     if (g1 == null || g2 == null) return null;
@@ -301,6 +311,11 @@ public class Functions {
       coordinates.add(appended[i]);
     }
 
+    // PostGIS and SedonaDB skip empty components. JTS cannot represent their one-coordinate
+    // LineString result, so repeat that coordinate while preserving the same point set.
+    if (coordinates.size() == 1) {
+      coordinates.add(new Coordinate(coordinates.get(0)));
+    }
     return first.getFactory().createLineString(coordinates.toArray(new Coordinate[0]));
   }
 

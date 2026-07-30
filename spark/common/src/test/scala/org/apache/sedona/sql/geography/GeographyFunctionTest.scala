@@ -273,6 +273,30 @@ class GeographyFunctionTest extends TestBaseScala {
       assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 2 0)", repeated.getString(1))
       assertEquals(3, repeated.getInt(2))
     }
+
+    it("ST_MakeLine skips empty geography inputs") {
+      val row = sparkSession
+        .sql("""
+          SELECT
+            ST_AsText(ST_MakeLine(
+              ST_GeogFromWKT('POINT EMPTY', 3857),
+              ST_GeogFromWKT('POINT (12 34)', 4326)
+            )) AS empty_first,
+            ST_AsText(ST_MakeLine(
+              ST_GeogFromWKT('POINT (12 34)', 4326),
+              ST_GeogFromWKT('LINESTRING EMPTY', 3857)
+            )) AS empty_second,
+            ST_AsEWKT(ST_MakeLine(
+              ST_GeogFromWKT('POINT EMPTY', 3857),
+              ST_GeogFromWKT('LINESTRING EMPTY', 4326)
+            )) AS both_empty
+        """)
+        .first()
+
+      assertEquals("LINESTRING (12 34, 12 34)", row.getString(0))
+      assertEquals("LINESTRING (12 34, 12 34)", row.getString(1))
+      assertEquals("SRID=3857; LINESTRING EMPTY", row.getString(2))
+    }
   }
 
   // ─── Level 2: ST_Length, ST_Area, ST_Distance ──────────────────────────

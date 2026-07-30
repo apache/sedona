@@ -57,6 +57,8 @@ These functions edit, measure, or format geography objects. Measurements are com
 | [ST_MakeLine](Geography-Functions/ST_MakeLine.md) | Geography | Create a geography LineString from two Point, MultiPoint, or LineString geographies. | v1.9.1 |
 | [ST_NPoints](Geography-Functions/ST_NPoints.md) | Integer | Return the number of points (vertices) in a geography. | v1.9.1 |
 | [ST_NumGeometries](Geography-Functions/ST_NumGeometries.md) | Integer | Return the number of sub-geometries in a geography. | v1.9.1 |
+| [ST_X](Geography-Functions/ST_X.md) | Double | Return the longitude (X coordinate) of a point geography. | v1.9.1 |
+| [ST_Y](Geography-Functions/ST_Y.md) | Double | Return the latitude (Y coordinate) of a point geography. | v1.9.1 |
 
 ## Geography Predicates
 

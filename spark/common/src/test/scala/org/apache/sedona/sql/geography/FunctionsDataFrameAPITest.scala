@@ -60,6 +60,22 @@ class FunctionsDataFrameAPITest extends TestBaseScala {
     assertEquals(expectedWKT, env.toString(new PrecisionModel(PrecisionModel.FIXED)))
   }
 
+  it("ST_Envelope preserves empty Geography") {
+    Seq("POINT EMPTY", "LINESTRING EMPTY", "POLYGON EMPTY", "GEOMETRYCOLLECTION EMPTY").foreach {
+      wkt =>
+        Seq(false, true).foreach { split =>
+          val df = sparkSession
+            .sql(s"SELECT '$wkt' AS wkt")
+            .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(3857)).as("geog"))
+            .select(st_functions.ST_Envelope(col("geog"), split).as("env"))
+
+          val env = df.first().getAs[Geography]("env")
+          assertEquals(wkt, env.toString)
+          assertEquals(3857, env.getSRID)
+        }
+    }
+  }
+
   it("Passed ST_AsEWKT") {
     val wkt = "LINESTRING (1 2, 3 4, 5 6)"
     val wktExpected = "SRID=4326; LINESTRING (1 2, 3 4, 5 6)"
