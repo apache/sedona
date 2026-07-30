@@ -145,9 +145,10 @@ These functions split rasters into tiles.
 
 ## Raster Map Algebra Operators
 
-These functions convert between raster bands and arrays for map algebra operations. See
-[Map algebra](Raster-map-algebra.md) for the `RS_MapAlgebra` script syntax, or
-[Raster UDFs](Raster-UDF.md) to write the same calculation in Python.
+These functions convert between raster bands and arrays for map algebra operations. Note that
+`RS_MapAlgebra` is deprecated — see [Raster UDFs](Raster-UDF.md) for the recommended way to process
+rasters, and [Map algebra](Raster-map-algebra.md) for the array-based functions, which are not
+deprecated.
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |

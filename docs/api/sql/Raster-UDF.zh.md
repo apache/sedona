@@ -25,21 +25,8 @@ Python UDF 可以接收栅格列作为输入，并返回普通的 Spark 值或�
 
 Python UDF 接收栅格**输入**从 `v1.6.0` 起支持；从 UDF **返回**栅格从 `v1.9.1` 起支持。
 
-### 何时该用 UDF 而不是地图代数
-
-[`RS_MapAlgebra`](Raster-map-algebra.md) 与 Python UDF 解决的问题有重叠，两者并不互相取代：
-
-| | `RS_MapAlgebra` | Python UDF |
-|---|---|---|
-| 运行位置 | JVM；Jiffle 脚本会被编译为字节码 | Python worker；像素需要跨进程传输 |
-| 表达方式 | 用 [Jiffle](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle) 语言编写逐像素脚本 | 在 NumPy 视图上编写整数组运算的 Python 代码 |
-| 可用库 | 无 | 环境中安装的任意库 —— NumPy、SciPy、scikit-learn、rasterio |
-| 输出 | 栅格 | 栅格，或任意 Spark 类型 |
-| 输出的 NODATA | 由 `noDataValue` 参数显式指定 | 由 `nodata=` 参数显式指定，可逐波段设置 |
-| 可用范围 | SQL，因此所有语言绑定都能用 | 仅 Python |
-
-如果运算是能用一小段表达式写完的逐像素算术，就用 `RS_MapAlgebra`：此时数据不离开 JVM，代价更低。如果需要用到
-某个库、算法需要同时读取多个像素（卷积、分类、形态学运算），或者结果根本不是栅格，就用 UDF。
+在 Sedona 中处理栅格，推荐使用 UDF。[`RS_MapAlgebra`](Raster-map-algebra.md) 自 `v1.9.1` 起弃用，并将在未来
+版本中移除；[下面的 NDVI 示例](#ndvi-as-map-algebra-and-as-a-udf)给出了两种写法的对照，便于迁移。
 
 ### 读取像素数据
 

@@ -38,10 +38,6 @@ Apache Sedona provides two ways to perform map algebra operations:
 1. Using the `RS_MapAlgebra` function.
 2. Using `RS_BandAsArray` and array based map algebra functions, such as `RS_Add`, `RS_Multiply`, etc.
 
-If the calculation needs a Python library — NumPy, SciPy, scikit-learn, rasterio — or looks at more than one
-pixel at a time, a [Raster UDF](Raster-UDF.md) is the better fit. That page includes the NDVI example below
-written both ways.
-
 Generally, the `RS_MapAlgebra` function is more flexible and can be used to perform more complex operations. The function takes three to four arguments:
 
 ```sql

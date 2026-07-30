@@ -560,19 +560,27 @@ The walkthrough used `RS_MapAlgebra` for NDVI. The full operator surface:
 
 ![Reproject match](../image/RS_ReprojectMatch/RS_ReprojectMatch.svg)
 
-### Map algebra
+### Per-pixel calculations
 
-[`RS_MapAlgebra`](../api/sql/Raster-map-algebra.md) has two shapes:
+Use a [Raster UDF](../api/sql/Raster-UDF.md). A UDF takes one raster column or several, so both shapes of the
+deprecated `RS_MapAlgebra` have a direct equivalent — here is the two-raster change-detection case:
 
-- **Single-raster** — `RS_MapAlgebra(rast, pixelType, script)`. Per-pixel script over bands of one raster. Used in the walkthrough.
-- **Two-raster** — `RS_MapAlgebra(rast0, rast1, pixelType, script, noDataValue)`. Per-pixel script across two rasters. Common for difference rasters and change detection.
+```python
+@udf(returnType=RasterType())
+def delta(after, before):
+    diff = after.as_numpy()[0] - before.as_numpy()[0]
+    return after.with_bands(diff, nodata=-9999.0)
 
-```sql
--- Two-raster: subtract one NDVI raster from another
-SELECT RS_MapAlgebra(a.rast, b.rast, 'D',
-                     'out[0] = rast0[0] - rast1[0];', -9999.0) AS delta
-FROM ndvi_after a JOIN ndvi_before b ON a.x = b.x AND a.y = b.y
+
+(
+    ndvi_after.alias("after")
+    .join(ndvi_before.alias("before"), ["x", "y"])
+    .select(delta(col("after.rast"), col("before.rast")).alias("delta"))
+)
 ```
+
+See [Raster UDFs](../api/sql/Raster-UDF.md) for the single-raster form, NDVI written both ways, and the
+limits to be aware of.
 
 ## Raster–vector interop
 

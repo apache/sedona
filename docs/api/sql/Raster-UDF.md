@@ -26,24 +26,10 @@ scikit-learn, rasterio, or any other library in your Python environment.
 Raster **input** to Python UDFs has been supported since `v1.6.0`. Returning a raster **from** a UDF is
 supported since `v1.9.1`.
 
-### When to use a UDF instead of map algebra
-
-[`RS_MapAlgebra`](Raster-map-algebra.md) and Python UDFs solve overlapping problems, and neither replaces
-the other outright:
-
-| | `RS_MapAlgebra` | Python UDF |
-|---|---|---|
-| Where it runs | JVM; the Jiffle script is compiled to bytecode | Python worker; pixels cross the process boundary |
-| How you express it | per-pixel script in the [Jiffle](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle) language | whole-array Python over a NumPy view |
-| Libraries | none | anything installed — NumPy, SciPy, scikit-learn, rasterio |
-| Output | raster | raster, or any Spark type |
-| NODATA on the output | explicit `noDataValue` argument | explicit `nodata=` argument, per band if needed |
-| Available from | SQL, so every language binding | Python only |
-
-Reach for `RS_MapAlgebra` when the operation is per-pixel arithmetic that fits in a short expression, and it
-is the cheaper option there because nothing leaves the JVM. Reach for a UDF when you need a library, when
-the algorithm looks at more than one pixel at a time (convolution, classification, morphology), or when the
-result isn't a raster at all.
+UDFs are the recommended way to process rasters in Sedona.
+[`RS_MapAlgebra`](Raster-map-algebra.md) is deprecated since `v1.9.1` and will be removed in a future
+version; [the NDVI example below](#ndvi-as-map-algebra-and-as-a-udf) shows the same calculation in both
+forms to help with migrating.
 
 ### Reading pixel data
 

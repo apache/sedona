@@ -525,19 +525,26 @@ FROM rawdf
 
 ![Reproject match](../image/RS_ReprojectMatch/RS_ReprojectMatch.svg)
 
-### Map algebra
+### 逐像素计算
 
-[`RS_MapAlgebra`](../api/sql/Raster-map-algebra.md) 有两种形式：
+请使用[栅格 UDF](../api/sql/Raster-UDF.md)。UDF 可以接收一个或多个栅格列，因此已弃用的 `RS_MapAlgebra` 的两种
+形式都有直接对应的写法 —— 下面是双栅格的变化检测场景：
 
-- **单栅格** —— `RS_MapAlgebra(rast, pixelType, script)`。对单个栅格的多个波段按像素运行脚本。教程主线即使用此形式。
-- **双栅格** —— `RS_MapAlgebra(rast0, rast1, pixelType, script, noDataValue)`。对两个栅格按像素运行脚本，常用于差分栅格与变化检测。
+```python
+@udf(returnType=RasterType())
+def delta(after, before):
+    diff = after.as_numpy()[0] - before.as_numpy()[0]
+    return after.with_bands(diff, nodata=-9999.0)
 
-```sql
--- 双栅格：用一个 NDVI 减去另一个
-SELECT RS_MapAlgebra(a.rast, b.rast, 'D',
-                     'out[0] = rast0[0] - rast1[0];', -9999.0) AS delta
-FROM ndvi_after a JOIN ndvi_before b ON a.x = b.x AND a.y = b.y
+
+(
+    ndvi_after.alias("after")
+    .join(ndvi_before.alias("before"), ["x", "y"])
+    .select(delta(col("after.rast"), col("before.rast")).alias("delta"))
+)
 ```
+
+单栅格写法、NDVI 的两种写法对照，以及需要注意的限制，见[栅格 UDF](../api/sql/Raster-UDF.md)。
 
 ## 栅格与矢量互通
 
