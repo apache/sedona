@@ -283,9 +283,10 @@ ndviDf.createOrReplaceTempView("ndviDf")
 Map algebra is the most general processing primitive — clipping, masking, thresholding, and arithmetic between bands or between rasters all fit the same `RS_MapAlgebra(rast, pixelType, script)` (or two-raster) shape. See [Map algebra](../api/sql/Raster-map-algebra.md) for the script syntax and [Raster processing](#raster-processing-reference) below for alternatives (`RS_Clip`, `RS_Resample`, `RS_SetValues`).
 
 !!!warning
-    `RS_MapAlgebra` is deprecated since `v1.9.1` in favour of [Raster UDFs](../api/sql/Raster-UDF.md), which
-    express the same per-pixel calculations in Python and additionally reach NumPy, SciPy, scikit-learn, and
-    rasterio. The function continues to work, so this walkthrough still runs as written; see
+    `RS_MapAlgebra` is deprecated since `v1.9.1` and **will be removed in a future version**, in favour of
+    [Raster UDFs](../api/sql/Raster-UDF.md), which express the same per-pixel calculations in Python and
+    additionally reach NumPy, SciPy, scikit-learn, and rasterio. It still works, so this walkthrough runs as
+    written, but new code should use a UDF — see
     [NDVI as map algebra and as a UDF](../api/sql/Raster-UDF.md#ndvi-as-map-algebra-and-as-a-udf) for the
     same calculation written both ways.
 

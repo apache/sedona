@@ -45,30 +45,6 @@ is the cheaper option there because nothing leaves the JVM. Reach for a UDF when
 the algorithm looks at more than one pixel at a time (convolution, classification, morphology), or when the
 result isn't a raster at all.
 
-For heavy workloads, a [`pandas_udf`](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.functions.pandas_udf.html)
-amortizes the Python round trip across a batch of rows. It receives the serialized bytes rather than
-`SedonaRaster` objects, so you deserialize them yourself:
-
-```python
-import pandas as pd
-from pyspark.sql.functions import pandas_udf
-from pyspark.sql.types import DoubleType
-
-from sedona.spark.raster import raster_serde
-
-
-@pandas_udf(DoubleType())
-def mean_batch(s: pd.Series) -> pd.Series:
-    def one(buf):
-        with raster_serde.deserialize(buf) as raster:
-            return float(raster.as_numpy().mean())
-
-    return s.apply(one)
-
-
-df.select(mean_batch(col("rast")).alias("mean"))
-```
-
 ### Reading pixel data
 
 `SedonaRaster` gives you three views of the same pixels:

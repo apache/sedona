@@ -280,10 +280,10 @@ ndviDf.createOrReplaceTempView("ndviDf")
 Map algebra 是最通用的处理原语 —— 裁剪、遮罩、阈值过滤、不同波段或不同栅格之间的算术运算，都可以用同样的 `RS_MapAlgebra(rast, pixelType, script)`（或双栅格版本）写出来。脚本语法见 [Map algebra](../api/sql/Raster-map-algebra.md)；其他备选算子（`RS_Clip`、`RS_Resample`、`RS_SetValues`）见下文的 [栅格处理参考](#raster-processing-reference)。
 
 !!!warning
-    `RS_MapAlgebra` 自 `v1.9.1` 起弃用，推荐改用[栅格 UDF](../api/sql/Raster-UDF.md)：它用 Python 表达同样的
-    逐像素计算，而且还能直接使用 NumPy、SciPy、scikit-learn 与 rasterio。该函数仍然可用，所以本教程照原样运行
-    没有问题；两种写法的对照见
-    [NDVI：地图代数写法与 UDF 写法](../api/sql/Raster-UDF.md#ndvi-as-map-algebra-and-as-a-udf)。
+    `RS_MapAlgebra` 自 `v1.9.1` 起弃用，并将在**未来版本中移除**，请改用
+    [栅格 UDF](../api/sql/Raster-UDF.md)：它用 Python 表达同样的逐像素计算，而且还能直接使用 NumPy、SciPy、
+    scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原样运行没有问题，但新代码应改用 UDF；两种写法的
+    对照见 [NDVI：地图代数写法与 UDF 写法](../api/sql/Raster-UDF.md#ndvi-as-map-algebra-and-as-a-udf)。
 
 ### 6. 可视化处理结果
 

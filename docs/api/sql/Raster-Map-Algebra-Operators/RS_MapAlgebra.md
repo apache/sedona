@@ -22,11 +22,11 @@
 Introduction: Apply a map algebra script on a raster.
 
 !!!warning
-    `RS_MapAlgebra` is deprecated since `v1.9.1`. Use a [Raster UDF](../Raster-UDF.md) instead, which
-    expresses the same per-pixel calculations in Python and additionally reaches NumPy, SciPy,
-    scikit-learn, and rasterio. The function continues to work and nothing is removed; see the
+    `RS_MapAlgebra` is deprecated since `v1.9.1` and **will be removed in a future version**. Use a
+    [Raster UDF](../Raster-UDF.md) instead, which expresses the same per-pixel calculations in Python
+    and additionally reaches NumPy, SciPy, scikit-learn, and rasterio. See the
     [Raster UDF page](../Raster-UDF.md#ndvi-as-map-algebra-and-as-a-udf) for the same NDVI example
-    written both ways.
+    written both ways, and migrate existing scripts.
 
 ![RS_MapAlgebra](../../../image/RS_MapAlgebra/RS_MapAlgebra.svg "RS_MapAlgebra")
 

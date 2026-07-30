@@ -41,29 +41,6 @@ Python UDF 接收栅格**输入**从 `v1.6.0` 起支持；从 UDF **返回**栅�
 如果运算是能用一小段表达式写完的逐像素算术，就用 `RS_MapAlgebra`：此时数据不离开 JVM，代价更低。如果需要用到
 某个库、算法需要同时读取多个像素（卷积、分类、形态学运算），或者结果根本不是栅格，就用 UDF。
 
-对于较重的负载，[`pandas_udf`](https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.functions.pandas_udf.html)
-可以把 Python 往返开销摊薄到一批行上。它接收的是序列化后的字节，而不是 `SedonaRaster` 对象，因此需要自行反序列化：
-
-```python
-import pandas as pd
-from pyspark.sql.functions import pandas_udf
-from pyspark.sql.types import DoubleType
-
-from sedona.spark.raster import raster_serde
-
-
-@pandas_udf(DoubleType())
-def mean_batch(s: pd.Series) -> pd.Series:
-    def one(buf):
-        with raster_serde.deserialize(buf) as raster:
-            return float(raster.as_numpy().mean())
-
-    return s.apply(one)
-
-
-df.select(mean_batch(col("rast")).alias("mean"))
-```
-
 ### 读取像素数据
 
 `SedonaRaster` 提供三种方式访问同一份像素数据：

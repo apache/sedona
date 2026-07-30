@@ -130,7 +130,7 @@ public class MapAlgebra {
    * @return The result of the map algebra script
    * @deprecated since 1.9.1, in favour of Python UDFs over rasters, which express the same
    *     per-pixel calculations and additionally reach NumPy, SciPy, scikit-learn and rasterio. This
-   *     method still works and is not scheduled for removal. See
+   *     method will be removed in a future version. See
    *     https://sedona.apache.org/latest/api/sql/Raster-UDF/
    */
   @Deprecated
@@ -200,7 +200,7 @@ public class MapAlgebra {
   /**
    * @deprecated since 1.9.1, in favour of Python UDFs over rasters, which express the same
    *     per-pixel calculations and additionally reach NumPy, SciPy, scikit-learn and rasterio. This
-   *     method still works and is not scheduled for removal. See
+   *     method will be removed in a future version. See
    *     https://sedona.apache.org/latest/api/sql/Raster-UDF/
    */
   @Deprecated
@@ -221,7 +221,7 @@ public class MapAlgebra {
   /**
    * @deprecated since 1.9.1, in favour of Python UDFs over rasters, which express the same
    *     per-pixel calculations and additionally reach NumPy, SciPy, scikit-learn and rasterio. This
-   *     method still works and is not scheduled for removal. See
+   *     method will be removed in a future version. See
    *     https://sedona.apache.org/latest/api/sql/Raster-UDF/
    */
   @Deprecated

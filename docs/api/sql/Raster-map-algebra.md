@@ -20,10 +20,10 @@
 ## Map Algebra
 
 !!!warning
-    `RS_MapAlgebra` is deprecated since `v1.9.1` in favour of [Raster UDFs](Raster-UDF.md), which cover the
-    same per-pixel calculations in Python and additionally reach NumPy, SciPy, scikit-learn, and rasterio.
-    The function continues to work and nothing is removed. The [NDVI example below](#ndvi) is written both
-    ways on the Raster UDF page.
+    `RS_MapAlgebra` is deprecated since `v1.9.1` and **will be removed in a future version**, in favour of
+    [Raster UDFs](Raster-UDF.md), which cover the same per-pixel calculations in Python and additionally
+    reach NumPy, SciPy, scikit-learn, and rasterio. It still works for now, but existing scripts should be
+    migrated. The [NDVI example below](#ndvi) is written both ways on the Raster UDF page.
 
     The array-based functions described on this page — `RS_BandAsArray`, `RS_Add`, `RS_NormalizedDifference`
     and friends — are not deprecated.

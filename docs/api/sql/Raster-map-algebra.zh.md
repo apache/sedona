@@ -20,9 +20,9 @@
 ## 地图代数（Map Algebra）
 
 !!!warning
-    `RS_MapAlgebra` 自 `v1.9.1` 起弃用，推荐改用[栅格 UDF](Raster-UDF.md)：它同样能完成这些逐像素计算，而且
-    还能直接使用 NumPy、SciPy、scikit-learn 与 rasterio。该函数仍然可用，也不会被移除。下面的
-    [NDVI 示例](#ndvi)在栅格 UDF 页面上给出了两种写法的对照。
+    `RS_MapAlgebra` 自 `v1.9.1` 起弃用，并将在**未来版本中移除**，请改用[栅格 UDF](Raster-UDF.md)：它同样能
+    完成这些逐像素计算，而且还能直接使用 NumPy、SciPy、scikit-learn 与 rasterio。该函数目前仍然可用，但已有
+    脚本应尽早迁移。下面的 [NDVI 示例](#ndvi)在栅格 UDF 页面上给出了两种写法的对照。
 
     本页介绍的基于数组的函数 —— `RS_BandAsArray`、`RS_Add`、`RS_NormalizedDifference` 等 —— 未被弃用。
 
