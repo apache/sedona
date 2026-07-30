@@ -29,7 +29,16 @@ Introduction: Finds the largest circle that is contained within a (multi)polygon
 
 For polygonal geometries, the function inscribes the circle within the boundary rings, treating internal rings as additional constraints. When processing linear and point inputs, the algorithm inscribes the circle within the convex hull of the input, utilizing the input lines and points as additional boundary constraints.
 
-Format: `ST_MaximumInscribedCircle(geometry: Geometry)`
+Formats:
+
+- `ST_MaximumInscribedCircle(geometry: Geometry)`
+- `ST_MaximumInscribedCircle(geometry: Geometry, tolerance: Double)`
+
+The optional `tolerance` controls when the circle-center search stops
+refining. A value of `0` uses the geometry-dependent default
+`max(width, height) / 1000`, which is also used by the one-argument form.
+The tolerance must otherwise be positive.
+The two-argument overload was added in `v1.9.1`.
 
 Return type: `Struct<center: Geometry, nearest: Geometry, radius: Double>`
 

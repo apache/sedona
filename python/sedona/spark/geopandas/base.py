@@ -1047,8 +1047,9 @@ class GeoFrame(metaclass=ABCMeta):
         tolerance : float, default 0.0
             Snapping tolerance for vertices to be considered equal.
         extend_to : Geometry, default None
-            Not supported. Passing a non-None value will raise
-            ``NotImplementedError``.
+            A local geometry whose envelope enlarges the default extent of
+            every row's Voronoi diagram. Distributed and array-like extents
+            are not supported.
         only_edges : bool, default False
             Only ``only_edges=False`` is supported. Passing ``only_edges=True``
             will raise ``NotImplementedError``.
@@ -1360,6 +1361,60 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("minimum_bounding_circle", self)
 
+    def maximum_inscribed_circle(self, *, tolerance=None):
+        """Return radius lines for the largest circles within polygonal geometries.
+
+        Each result is a two-point LineString from the circle center to the
+        nearest point on the polygon boundary. Polygon, MultiPolygon, and
+        ``None`` inputs are supported; other geometry types and empty
+        polygonal geometries raise an error only when an action evaluates an
+        affected row. Partial actions may not inspect every invalid row.
+
+        Parameters
+        ----------
+        tolerance : float, array-like, pandas Series, or pandas-on-Spark Series, optional
+            Stop refining when the search area is smaller than this distance.
+            By default, each geometry uses
+            ``max(width, height) / 1000``. A one-value local array-like is
+            broadcast; otherwise it must have the same length as the
+            GeoSeries. A pandas Series must also have the same index. A
+            distributed Series must share the same frame and index as the
+            geometry column. Negative values are rejected for scalar and
+            row-wise inputs. This is intentionally stricter than GeoPandas,
+            whose array path currently bypasses its scalar negative-value
+            validation and emits implementation-dependent results. Length and
+            index validation for local row-wise inputs is also lazy: an error
+            is raised only when an action evaluates a mismatched row.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 0), (1, 1), (0, 0)]),
+        ...         Polygon([(0, 0), (0.5, -1), (1, 0), (1, 1), (-0.5, 0.5)]),
+        ...     ]
+        ... )
+        >>> s.maximum_inscribed_circle()
+        0    LINESTRING (0.70703 0.29297, 0.5 0.5)
+        1    LINESTRING (0.4668 0.25977, 1 0.25977)
+        dtype: geometry
+
+        See Also
+        --------
+        GeoSeries.minimum_bounding_circle : minimum enclosing circle geometry
+        """
+        return _delegate_to_geometry_column(
+            "maximum_inscribed_circle",
+            self,
+            tolerance=tolerance,
+        )
+
     def minimum_bounding_radius(self):
         """Return a `Series` of the radii of the minimum bounding circles
         that enclose each geometry.
@@ -1607,6 +1662,100 @@ class GeoFrame(metaclass=ABCMeta):
 
         """
         return _delegate_to_geometry_column("reverse", self)
+
+    def sample_points(
+        self,
+        size,
+        method="uniform",
+        seed=None,
+        rng=None,
+        **kwargs,
+    ):
+        """Sample points from each geometry.
+
+        Polygonal geometries are sampled uniformly by area and linear
+        geometries uniformly by length. Unsupported and empty geometries
+        produce an empty ``MultiPoint``. Supported geometries also return
+        ``MultiPoint`` for every size, including zero and one. Sampling is
+        evaluated by native Spark and Sedona expressions and remains
+        distributed.
+
+        Parameters
+        ----------
+        size : int or array-like
+            Number of points to sample from each geometry. An array-like or
+            pandas-on-Spark ``Series`` supplies one positional size per row.
+            Local sequences are materialized on the driver; use a distributed
+            Series for large per-row size vectors.
+        method : str, default "uniform"
+            Sampling method. Sedona currently supports only ``"uniform"``.
+        seed : optional
+            Deprecated alias for ``rng``.
+        rng : optional
+            Any seed accepted by ``numpy.random.default_rng``. Fresh generators
+            initialized with the same seed produce reproducible results. Passing
+            an existing ``Generator`` or ``BitGenerator`` consumes one draw
+            immediately to derive the engine seed.
+        **kwargs
+            Accepted for GeoPandas signature compatibility and ignored for
+            uniform sampling.
+
+        Returns
+        -------
+        GeoSeries
+            Sampled points with the original index and CRS and the name
+            ``"sampled_points"``.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString, Polygon
+        >>> s = GeoSeries(
+        ...     [
+        ...         Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+        ...         LineString([(0, 0), (2, 0)]),
+        ...     ]
+        ... )
+        >>> s.sample_points(size=3, rng=7).count_geometries()
+        0    3
+        1    3
+        dtype: int64
+
+        Notes
+        -----
+        Sedona and GeoPandas use different random number generators, so the
+        sampled coordinates are not expected to be identical for the same
+        seed. An integer seed is reused for every row, matching GeoPandas's
+        behavior in which congruent geometries receive the same relative sample
+        positions. With ``rng=None``, no reproducibility guarantee is made.
+
+        A stateful NumPy ``Generator`` or ``BitGenerator`` is reduced to one
+        engine seed and then varied deterministically by row position, so its
+        state advancement also differs. Validation of values in a distributed
+        ``size`` Series is lazy and errors are raised when the result is
+        evaluated.
+
+        Sampling work and per-row intermediate memory grow with ``size``. The
+        current line sampler materializes an array of sampled points and costs
+        roughly ``O(size * vertices)`` per geometry before collecting those
+        points into a MultiPoint. Unsupported nonempty geometry types produce
+        empty MultiPoints without GeoPandas's per-row warning, avoiding an eager
+        type scan.
+
+        Sedona follows GeoPandas 1.1.4 and later by always returning a
+        ``MultiPoint``. GeoPandas 1.1.3 and earlier instead return a ``Point``
+        for ``size=1`` and an empty ``GeometryCollection`` for ``size=0``, and
+        may collapse duplicate samples.
+        """
+        return _delegate_to_geometry_column(
+            "sample_points",
+            self,
+            size,
+            method=method,
+            seed=seed,
+            rng=rng,
+            **kwargs,
+        )
 
     def segmentize(self, max_segment_length):
         """Returns a ``GeoSeries`` with vertices added to line segments based on
@@ -3676,11 +3825,13 @@ class GeoFrame(metaclass=ABCMeta):
         other : GeoSeries or geometric object
             The GeoSeries (elementwise) or geometric object to test for
             equality.
-        distance : float, np.array, pd.Series
-            Distance(s) to test if each geometry is within. A scalar distance will be
-            applied to all geometries. An array or Series will be applied elementwise.
-            If np.array or pd.Series are used then it must have same length as the
-            GeoSeries.
+        distance : numeric scalar, array-like, pandas Series, or pandas-on-Spark Series
+            Distance(s) to test if each geometry is within. A scalar distance
+            is applied to every geometry. Array-like and Series distances are
+            paired positionally with the geometry rows after ``self`` and
+            ``other`` have been aligned. A one-element non-Series array-like is
+            broadcast; otherwise the distance input must have the same length
+            as the aligned geometries.
         align : bool | None (default None)
             If True, automatically aligns GeoSeries based on their indices.
             If False, the order of elements is preserved. None defaults to True.
@@ -3762,6 +3913,12 @@ class GeoFrame(metaclass=ABCMeta):
         -----
         This method works in a row-wise manner. It does not check if an element
         of one GeoSeries is within the set distance of *any* element of the other one.
+
+        The index of a pandas or pandas-on-Spark distance Series is ignored.
+        Distance values remain distributed when a pandas-on-Spark Series is
+        provided. Length validation for non-scalar distances is lazy: an error
+        is raised only when an action evaluates a mismatched row. Partial
+        actions may not detect rows they do not evaluate.
 
         See also
         --------

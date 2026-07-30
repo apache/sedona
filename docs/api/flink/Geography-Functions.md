@@ -21,7 +21,7 @@
 
 The `Geography` type in Sedona represents spatial objects on a spherical (geodesic) model of the Earth. Unlike the planar [Geometry](Geometry-Functions.md) type, distance, area, and other measurements performed on `Geography` objects account for the curvature of the Earth and return results in real-world units (e.g., meters).
 
-SedonaFlink exposes geography constructors, measurement and output functions, and spatial predicates. Constructors build `Geography` values and convert between `Geometry` and `Geography`; the functions and predicates operate on `Geography` columns directly. These functions share the same names as their `Geometry` counterparts — SedonaFlink resolves the geography variant from the column type.
+SedonaFlink exposes geography constructors, editors, measurement and output functions, and spatial predicates. Constructors build `Geography` values and convert between `Geometry` and `Geography`; the functions and predicates operate on `Geography` columns directly. These functions share the same names as their `Geometry` counterparts — SedonaFlink resolves the geography variant from the column type.
 
 ## Geography Constructors
 
@@ -56,8 +56,11 @@ These functions process, collect, measure, or format geography objects. Measurem
 | [ST_Envelope](Geography-Functions/ST_Envelope.md) | Geography | Return the bounding box of a geography. Supports antimeridian splitting. | v1.9.1 |
 | [ST_GeometryType](Geography-Functions/ST_GeometryType.md) | String | Return the type of a geography as a string. | v1.9.1 |
 | [ST_Length](Geography-Functions/ST_Length.md) | Double | Return the spherical length of a geography in meters. | v1.9.1 |
+| [ST_MakeLine](Geography-Functions/ST_MakeLine.md) | Geography | Create a geography LineString from two Point, MultiPoint, or LineString geographies. | v1.9.1 |
 | [ST_NPoints](Geography-Functions/ST_NPoints.md) | Integer | Return the number of points (vertices) in a geography. | v1.9.1 |
 | [ST_NumGeometries](Geography-Functions/ST_NumGeometries.md) | Integer | Return the number of sub-geometries in a geography. | v1.9.1 |
+| [ST_X](Geography-Functions/ST_X.md) | Double | Return the longitude (X coordinate) of a point geography. | v1.9.1 |
+| [ST_Y](Geography-Functions/ST_Y.md) | Double | Return the latitude (Y coordinate) of a point geography. | v1.9.1 |
 
 ## Geography Aggregate Functions
 

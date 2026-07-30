@@ -372,11 +372,14 @@ public class WKBGeography extends Geography {
 
   @Override
   public String toString() {
-    return getS2Geography().toString();
+    // WKB is the structural source of truth. Rendering the derived S2 view here would both
+    // canonicalize repeated vertices and apply Geography's default fixed-precision formatting.
+    return getJTSGeometry().toText();
   }
 
   @Override
   public String toString(PrecisionModel precisionModel) {
+    // Keep the S2 writer available to callers that explicitly request precision-controlled text.
     return getS2Geography().toString(precisionModel);
   }
 
@@ -387,9 +390,8 @@ public class WKBGeography extends Geography {
 
   @Override
   public String toEWKT() {
-    Geography s2 = getS2Geography();
-    s2.setSRID(getSRID());
-    return s2.toEWKT();
+    String wkt = toString();
+    return getSRID() > 0 ? "SRID=" + getSRID() + "; " + wkt : wkt;
   }
 
   @Override

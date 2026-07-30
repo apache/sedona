@@ -33,8 +33,10 @@ from shapely.geometry import (
 from packaging.version import parse as parse_version
 from sedona.spark.geopandas import GeoDataFrame, GeoSeries
 import geopandas as gpd
+import pandas as pd
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps
+from pandas.testing import assert_frame_equal
 
 
 @pytest.mark.skipif(
@@ -224,6 +226,45 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
                 sgpd_result = GeoDataFrame(data, crs="EPSG:3857").to_json(**kwargs)
             gpd_result = gpd.GeoDataFrame(data, crs="EPSG:3857").to_json(**kwargs)
             assert sgpd_result == gpd_result
+
+    def test_to_wkt_and_to_wkb(self):
+        index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 1), ("b", 2)],
+            names=["group", "position"],
+        )
+        primary = ("geometry", "primary")
+        secondary = ("geometry", "secondary")
+        value = ("attribute", "value")
+        gpd_df = gpd.GeoDataFrame(
+            {
+                "primary": gpd.GeoSeries(
+                    [Point(0, 0), Polygon(), None],
+                    index=index,
+                    crs="EPSG:4326",
+                ),
+                "secondary": gpd.GeoSeries(
+                    [LineString([(0, 0), (1, 1)]), None, Point(2, 2)],
+                    index=index,
+                    crs="EPSG:4326",
+                ),
+                "value": [1, 2, 3],
+            },
+            index=index,
+            geometry="primary",
+            crs="EPSG:4326",
+        )
+        gpd_df.columns = pd.MultiIndex.from_tuples(
+            [primary, secondary, value], names=["kind", "name"]
+        )
+        gpd_df = gpd_df.set_geometry(primary)
+        sgpd_df = GeoDataFrame(gpd_df)
+
+        assert_frame_equal(sgpd_df.to_wkt().to_pandas(), gpd_df.to_wkt())
+        assert_frame_equal(sgpd_df.to_wkb().to_pandas(), gpd_df.to_wkb())
+        assert_frame_equal(
+            sgpd_df.to_wkb(hex=True).to_pandas(),
+            gpd_df.to_wkb(hex=True),
+        )
 
     def test_from_arrow(self):
         if parse_version(gpd.__version__) < parse_version("1.0.0"):

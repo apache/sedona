@@ -40,9 +40,8 @@ import org.junit.Test;
 
 public class GeographyPredicateTest extends TestBase {
 
-  // Geography polygons follow the spherical right-hand rule: a CCW ring's interior is the enclosed
-  // region. The polygons below are CCW so containment matches the intuitive (planar) expectation; a
-  // CW ring would denote the complementary region on the sphere.
+  // Geography predicates use simple-features ring roles: the first polygon ring is a shell and
+  // subsequent rings are holes regardless of their input winding.
 
   @BeforeClass
   public static void onceExecutedBeforeAll() {
@@ -93,11 +92,37 @@ public class GeographyPredicateTest extends TestBase {
 
   @Test
   public void testContains() {
+    String[] polygons = {
+      "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))", "POLYGON ((0 0, 0 2, 2 2, 2 0, 0 0))"
+    };
+    for (String polygon : polygons) {
+      assertTrue(
+          (Boolean)
+              eval(
+                  polygon,
+                  "POINT (1 1)",
+                  (a, b) -> call(Predicates.ST_Contains.class.getSimpleName(), a, b)));
+      assertFalse(
+          (Boolean)
+              eval(
+                  polygon,
+                  "POINT (5 5)",
+                  (a, b) -> call(Predicates.ST_Contains.class.getSimpleName(), a, b)));
+    }
+
+    String sameWindingShellAndHole =
+        "POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0), (1 1, 3 1, 3 3, 1 3, 1 1))";
     assertTrue(
         (Boolean)
             eval(
-                "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))",
-                "POINT (1 1)",
+                sameWindingShellAndHole,
+                "POINT (0.5 0.5)",
+                (a, b) -> call(Predicates.ST_Contains.class.getSimpleName(), a, b)));
+    assertFalse(
+        (Boolean)
+            eval(
+                sameWindingShellAndHole,
+                "POINT (2 2)",
                 (a, b) -> call(Predicates.ST_Contains.class.getSimpleName(), a, b)));
   }
 

@@ -576,7 +576,7 @@ FROM ndvi_after a JOIN ndvi_before b ON a.x = b.x AND a.y = b.y
 SELECT RS_AsRaster(
     ST_GeomFromWKT('POLYGON((150 150, 220 260, 190 300, 300 220, 150 150))'),
     RS_MakeEmptyRaster(1, 'b', 4, 6, 1, -1, 1),
-    'b', 230
+    'b', false, 230, 0
 )
 ```
 

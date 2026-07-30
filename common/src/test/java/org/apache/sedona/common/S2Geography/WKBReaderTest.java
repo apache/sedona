@@ -140,6 +140,25 @@ public class WKBReaderTest {
   }
 
   @Test
+  public void repeatedPolylineVerticesRemainNonEmptyAfterCanonicalization() throws ParseException {
+    org.locationtech.jts.io.WKTReader jtsReader = new org.locationtech.jts.io.WKTReader();
+    org.locationtech.jts.io.WKBWriter jtsWriter = new org.locationtech.jts.io.WKBWriter();
+    WKBReader reader = new WKBReader();
+
+    Geography coincident =
+        reader.read(jtsWriter.write(jtsReader.read("LINESTRING (12 34, 12 34)")));
+    Assert.assertEquals(
+        1, ((SinglePolylineGeography) coincident).getPolylines().get(0).numVertices());
+    Assert.assertEquals("LINESTRING (12 34, 12 34)", coincident.toString());
+    Assert.assertEquals(2, jtsReader.read(coincident.toString()).getNumPoints());
+
+    Geography repeated =
+        reader.read(jtsWriter.write(jtsReader.read("LINESTRING (0 0, 1 0, 1 0, 2 0)")));
+    Assert.assertEquals(
+        3, ((SinglePolylineGeography) repeated).getPolylines().get(0).numVertices());
+  }
+
+  @Test
   public void PolygonGeographyTest() throws ParseException {
     // WKB for POLYGON ((35 10,45 45,15 40,10 20,35 10),(20 30,35 35,30 20,20 30)), little-endian
     byte[] wkb =

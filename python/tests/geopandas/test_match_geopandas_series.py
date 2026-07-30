@@ -34,6 +34,7 @@ from shapely.geometry import (
     MultiPolygon,
     GeometryCollection,
     LinearRing,
+    box,
 )
 
 from sedona.spark.geopandas import GeoSeries
@@ -680,6 +681,19 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 )
                 self.check_pd_series_equal(sgpd_result, gpd_result)
 
+                distances = np.arange(len(geom), dtype=float)
+                sgpd_result = GeoSeries(geom).dwithin(
+                    GeoSeries(geom2),
+                    distance=distances,
+                    align=False,
+                )
+                gpd_result = gpd.GeoSeries(geom).dwithin(
+                    gpd.GeoSeries(geom2),
+                    distance=distances,
+                    align=False,
+                )
+                self.check_pd_series_equal(sgpd_result, gpd_result)
+
     def test_difference(self):
         for geom, geom2 in self.pairs:
             # Sedona doesn't support difference for GeometryCollections
@@ -987,6 +1001,19 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             collected = result.to_geopandas()
             assert len(collected) == len(geom)
 
+    def test_voronoi_polygons_extend_to(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas voronoi_polygons requires version 1.0.0 or higher")
+
+        geometry = MultiPoint([(0, 0), (1, 0), (0.5, 1)])
+        extent = box(-2, 0, 3, 3)
+        actual = GeoSeries([geometry]).voronoi_polygons(extend_to=extent).to_geopandas()
+        expected = gpd.GeoSeries([geometry]).voronoi_polygons(extend_to=extent)
+
+        # Sedona keeps the cells for each input row in one GeometryCollection,
+        # while GeoPandas returns one row per cell. Compare their combined extent.
+        assert actual.iloc[0].bounds == pytest.approx(expected.union_all().bounds)
+
     def test_envelope(self):
         for geom in self.geoms:
             sgpd_result = GeoSeries(geom).envelope
@@ -1128,6 +1155,45 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             sgpd_result = GeoSeries(geom).minimum_bounding_circle()
             gpd_result = gpd.GeoSeries(geom).minimum_bounding_circle()
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result, tolerance=0.5)
+
+    def test_maximum_inscribed_circle(self):
+        if parse_version(gpd.__version__) < parse_version("1.1.0"):
+            pytest.skip(
+                "geopandas maximum_inscribed_circle requires version 1.1.0 or higher"
+            )
+        if parse_version(shapely.__version__) < parse_version("2.1.0"):
+            pytest.skip(
+                "geopandas maximum_inscribed_circle requires shapely 2.1.0 or higher"
+            )
+
+        geoms = [
+            Polygon([(0, 0), (1, 0), (1, 1), (0, 0)]),
+            Polygon([(0, 0), (0.5, -1), (1, 0), (1, 1), (-0.5, 0.5)]),
+            MultiPolygon(
+                [
+                    Polygon([(0, 0), (0, 2), (2, 2), (2, 0), (0, 0)]),
+                    Polygon([(10, 0), (10, 1), (11, 1), (11, 0), (10, 0)]),
+                ]
+            ),
+            None,
+        ]
+        for tolerance in (None, 2.0):
+            sgpd_result = GeoSeries(geoms).maximum_inscribed_circle(tolerance=tolerance)
+            gpd_result = gpd.GeoSeries(geoms).maximum_inscribed_circle(
+                tolerance=tolerance
+            )
+            self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        # GeoPandas' own compatibility test uses row-wise zero and coarse
+        # tolerances, including zero as the per-geometry automatic tolerance.
+        local_tolerance = np.array([0, 10])
+        sgpd_result = GeoSeries(geoms[:2]).maximum_inscribed_circle(
+            tolerance=local_tolerance
+        )
+        gpd_result = gpd.GeoSeries(geoms[:2]).maximum_inscribed_circle(
+            tolerance=local_tolerance
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
     def test_minimum_bounding_radius(self):
         for geom in self.geoms:
@@ -1275,6 +1341,79 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             sgpd_result = GeoSeries(geom).reverse()
             gpd_result = gpd.GeoSeries(geom).reverse()
             self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+    @pytest.mark.skipif(
+        parse_version(gpd.__version__) < parse_version("0.14.0"),
+        reason="geopandas sample_points requires version 0.14.0 or higher",
+    )
+    def test_sample_points(self):
+        geometries = [
+            Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]),
+            MultiPolygon(
+                [
+                    Polygon([(4, 0), (5, 0), (5, 1), (4, 1)]),
+                    Polygon([(7, 0), (9, 0), (9, 2), (7, 2)]),
+                ]
+            ),
+            LineString([(0, 4), (2, 4), (2, 6)]),
+            MultiLineString([[(0, 8), (1, 8)], [(3, 8), (3, 11)]]),
+            Point(0, 0),
+            GeometryCollection([LineString([(0, 0), (1, 1)])]),
+            Polygon(),
+            None,
+        ]
+        index = pd.Index(
+            [
+                "polygon",
+                "multipolygon",
+                "line",
+                "multiline",
+                "point",
+                "gc",
+                "empty",
+                "null",
+            ],
+            name="feature_id",
+        )
+        sgpd_source = GeoSeries(geometries, index=index, crs="EPSG:3857")
+        gpd_source = gpd.GeoSeries(geometries, index=index, crs="EPSG:3857")
+
+        sgpd_result = sgpd_source.sample_points(3, rng=9).to_geopandas()
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            gpd_result = gpd_source.sample_points(3, rng=9)
+
+        assert sgpd_result.name == gpd_result.name == "sampled_points"
+        assert sgpd_result.crs == gpd_result.crs
+        assert sgpd_result.index.equals(gpd_result.index)
+        assert [geometry.geom_type for geometry in sgpd_result] == [
+            geometry.geom_type for geometry in gpd_result
+        ]
+        assert [len(geometry.geoms) for geometry in sgpd_result] == [
+            len(geometry.geoms) for geometry in gpd_result
+        ]
+        for source_geometry, sampled in zip(geometries[:4], sgpd_result.iloc[:4]):
+            assert all(source_geometry.covers(point) for point in sampled.geoms)
+
+        sizes = [1, 2, 3, 4, 5, 6, 7, 8]
+        sgpd_sized = sgpd_source.sample_points(sizes, rng=9).to_geopandas()
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            gpd_sized = gpd_source.sample_points(sizes, rng=9)
+        expected_types = [geometry.geom_type for geometry in gpd_sized]
+        if parse_version(gpd.__version__) < parse_version("1.1.4"):
+            # GeoPandas 1.1.4 stopped applying union_all() to samples and
+            # standardized every supported result, including size 1, as a
+            # MultiPoint. Sedona follows that current return contract.
+            expected_types[0] = "MultiPoint"
+        assert [geometry.geom_type for geometry in sgpd_sized] == expected_types
+        assert [
+            (1 if geometry.geom_type == "Point" else len(geometry.geoms))
+            for geometry in sgpd_sized
+        ] == [
+            (1 if geometry.geom_type == "Point" else len(geometry.geoms))
+            for geometry in gpd_sized
+        ]
 
     @pytest.mark.skipif(
         parse_version(gpd.__version__) < parse_version("0.14.0"),

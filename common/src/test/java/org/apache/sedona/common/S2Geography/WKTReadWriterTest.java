@@ -20,6 +20,10 @@ package org.apache.sedona.common.S2Geography;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.geometry.S2LatLng;
+import com.google.common.geometry.S2Point;
+import com.google.common.geometry.S2Polyline;
+import java.util.Collections;
 import org.junit.Test;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
@@ -52,6 +56,20 @@ public class WKTReadWriterTest {
     String wkt = "LINESTRING (30 10, 10 30, 40 40)";
     Geography g = reader.read(wkt);
     assertEquals(wkt, writeWithPrecision(g, new PrecisionModel(PrecisionModel.FIXED)));
+  }
+
+  @Test
+  public void singletonPolylineWritesValidLineString() {
+    S2Point point = S2LatLng.fromDegrees(34, 12).toPoint();
+    S2Polyline polyline = new S2Polyline(Collections.singletonList(point));
+    PrecisionModel fixed = new PrecisionModel(PrecisionModel.FIXED);
+
+    assertEquals(
+        "LINESTRING (12 34, 12 34)",
+        writeWithPrecision(new SinglePolylineGeography(polyline), fixed));
+    assertEquals(
+        "MULTILINESTRING ((12 34, 12 34))",
+        writeWithPrecision(new PolylineGeography(Collections.singletonList(polyline)), fixed));
   }
 
   @Test

@@ -37,6 +37,7 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
@@ -51,6 +52,18 @@ public class FunctionTest {
     S2LatLng ll = new S2LatLng(p).normalized();
     assertDegAlmostEqual(ll.latDegrees(), expLatDeg);
     assertDegAlmostEqual(ll.lngDegrees(), expLngDeg);
+  }
+
+  private static Geography roundTripWKB(Geography geography) {
+    assertTrue(geography instanceof WKBGeography);
+    WKBGeography wkbGeography = (WKBGeography) geography;
+    return WKBGeography.fromWKB(wkbGeography.getWKBBytes(), geography.getSRID());
+  }
+
+  private static Geography geographyFromJTSWKT(String wkt, int srid) throws ParseException {
+    Geometry geometry = new WKTReader().read(wkt);
+    geometry.setSRID(srid);
+    return WKBGeography.fromJTS(geometry);
   }
 
   private static void assertRectLoopVertices(
@@ -68,7 +81,8 @@ public class FunctionTest {
   public void envelope_noSplit_antimeridian() throws Exception {
     String wkt = "MULTIPOINT ((-179 0), (179 1), (-180 10))";
     Geography g = Constructors.geogFromWKT(wkt, 4326);
-    PolygonGeography env = (PolygonGeography) Functions.getEnvelope(g, false);
+    Geography env = Functions.getEnvelope(g, false);
+    assertTrue(env instanceof WKBGeography);
 
     S2LatLngRect r = g.region().getRectBound();
     assertTrue(r.lng().isInverted());
@@ -77,7 +91,8 @@ public class FunctionTest {
     assertDegAlmostEqual(r.lngLo().degrees(), 179.0);
     assertDegAlmostEqual(r.lngHi().degrees(), -179.0);
 
-    S2Loop loop = env.polygon.getLoops().get(0);
+    PolygonGeography s2Envelope = (PolygonGeography) ((WKBGeography) env).getS2Geography();
+    S2Loop loop = s2Envelope.polygon.getLoops().get(0);
     assertRectLoopVertices(loop, 0, 179, 10, -179);
   }
 
@@ -88,7 +103,7 @@ public class FunctionTest {
     Geography g = Constructors.geogFromWKT(nl, 4326);
     Geography env = Functions.getEnvelope(g, true);
     String expectedWKT = "POLYGON ((3.3 50.8, 7.1 50.8, 7.1 53.5, 3.3 53.5, 3.3 50.8))";
-    assertEquals(expectedWKT, env.toString());
+    assertEquals(expectedWKT, env.toString(new PrecisionModel(PrecisionModel.FIXED)));
     assertEquals(4326, env.getSRID());
   }
 
@@ -104,12 +119,12 @@ public class FunctionTest {
     String expectedWKT =
         "MULTIPOLYGON (((177.3 -18.3, 180 -18.3, 180 -16, 177.3 -16, 177.3 -18.3)), "
             + "((-180 -18.3, -179.8 -18.3, -179.8 -16, -180 -16, -180 -18.3)))";
-    assertEquals(expectedWKT, env.toString());
+    assertEquals(expectedWKT, env.toString(new PrecisionModel(PrecisionModel.FIXED)));
 
     String expectedWKT2 =
         "POLYGON ((177.3 -18.3, -179.8 -18.3, -179.8 -16, 177.3 -16, 177.3 -18.3))";
     env = Functions.getEnvelope(g, false);
-    assertEquals(expectedWKT2, env.toString());
+    assertEquals(expectedWKT2, env.toString(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   @Test
@@ -117,7 +132,44 @@ public class FunctionTest {
     String wkt = "POINT (-180 10)";
     Geography geography = Constructors.geogFromWKT(wkt, 0);
     Geography envelope = Functions.getEnvelope(geography, false);
-    assertEquals("POINT (180 10)", envelope.toString());
+    assertEquals("POINT (-180 10)", envelope.toString());
+  }
+
+  @Test
+  public void envelope_preservesExactEndpointBoundsAcrossWKBRoundTrip() throws ParseException {
+    Geography line = Constructors.geogFromWKT("LINESTRING (0 0, 2 3)", 4326);
+    Geography envelope = Functions.getEnvelope(line, false);
+    assertEquals("SRID=4326; POLYGON ((0 0, 2 0, 2 3, 0 3, 0 0))", envelope.toEWKT());
+    assertEquals(envelope.toEWKT(), roundTripWKB(envelope).toEWKT());
+
+    Geography antiMeridianLine = Constructors.geogFromWKT("LINESTRING (170 10, -170 20)", 4326);
+    Geography splitEnvelope = Functions.getEnvelope(antiMeridianLine, true);
+    assertEquals(
+        "SRID=4326; MULTIPOLYGON (((170 10, 180 10, 180 20, 170 20, 170 10)), "
+            + "((-180 10, -170 10, -170 20, -180 20, -180 10)))",
+        splitEnvelope.toEWKT());
+    assertEquals(splitEnvelope.toEWKT(), roundTripWKB(splitEnvelope).toEWKT());
+  }
+
+  @Test
+  public void getEnvelopeEmptyGeography() throws ParseException {
+    for (String wkt :
+        new String[] {
+          "POINT EMPTY",
+          "LINESTRING EMPTY",
+          "POLYGON EMPTY",
+          "MULTIPOINT EMPTY",
+          "MULTILINESTRING EMPTY",
+          "MULTIPOLYGON EMPTY",
+          "GEOMETRYCOLLECTION EMPTY"
+        }) {
+      Geography geography = Constructors.geogFromWKT(wkt, 3857);
+      for (boolean splitAtAntiMeridian : new boolean[] {false, true}) {
+        Geography envelope = Functions.getEnvelope(geography, splitAtAntiMeridian);
+        assertEquals(wkt, envelope.toString());
+        assertEquals(3857, envelope.getSRID());
+      }
+    }
   }
 
   @Test
@@ -127,7 +179,7 @@ public class FunctionTest {
     Geography env = Functions.getEnvelope(g, true);
 
     String expectedWKT = "POLYGON ((-180 -63.3, 180 -63.3, 180 -90, -180 -90, -180 -63.3))";
-    assertEquals((expectedWKT), (env.toString()));
+    assertEquals(expectedWKT, env.toString(new PrecisionModel(PrecisionModel.FIXED)));
 
     String multiCountry =
         "MULTIPOLYGON (((-180 -90, -180 -63.27066, 180 -63.27066, 180 -90, -180 -90)),"
@@ -136,7 +188,7 @@ public class FunctionTest {
     env = Functions.getEnvelope(g, true);
 
     String expectedWKT2 = "POLYGON ((-180 53.5, 180 53.5, 180 -90, -180 -90, -180 53.5))";
-    assertEquals((expectedWKT2), (env.toString()));
+    assertEquals(expectedWKT2, env.toString(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   // ─── Level 1: ST_NPoints ─────────────────────────────────────────────────
@@ -202,11 +254,16 @@ public class FunctionTest {
     Geography coincidentLine = WKBGeography.fromJTS(coincidentJts);
     Geometry pointHull = Constructors.geogToGeometry(Functions.convexHull(coincidentLine));
     assertTrue(pointHull instanceof Point);
-    assertEquals(1.0, ((Point) pointHull).getX(), EPS);
-    assertEquals(2.0, ((Point) pointHull).getY(), EPS);
+    assertEquals(1.0, ((Point) pointHull).getX(), 0.0);
+    assertEquals(2.0, ((Point) pointHull).getY(), 0.0);
 
     Geography twoPoints = Constructors.geogFromWKT("MULTIPOINT ((0 0), (0 2))", 4326);
     assertLineEndpoints(Functions.convexHull(twoPoints), 0, 0, 0, 2);
+
+    Geography preciseTwoPoints =
+        Constructors.geogFromWKT("MULTIPOINT ((-73.9857 40.7484), (-122.4194 37.7749))", 4326);
+    assertLineEndpoints(
+        Functions.convexHull(preciseTwoPoints), -73.9857, 40.7484, -122.4194, 37.7749, 0.0);
 
     Geography collinear = Constructors.geogFromWKT("LINESTRING (0 0, 0 1, 0 2, 0 1)", 4326);
     assertLineEndpoints(Functions.convexHull(collinear), 0, 0, 0, 2);
@@ -271,14 +328,139 @@ public class FunctionTest {
     } catch (UnsupportedOperationException e) {
       assertTrue(e.getMessage().contains("full sphere"));
     }
+  }
 
-    Geography largeOrientedPolygon =
-        Constructors.geogFromWKT("POLYGON ((0 0, 0 10, 10 0, 0 0))", 4326);
-    try {
-      Functions.convexHull(largeOrientedPolygon);
-      fail("Expected the hull of a greater-than-hemisphere polygon to be rejected");
-    } catch (UnsupportedOperationException e) {
-      assertTrue(e.getMessage().contains("full sphere"));
+  @Test
+  public void convexHull_publicPolygonUsesNormalizedShellInterior() throws ParseException {
+    Geography polygon = Constructors.geogFromWKT("POLYGON ((0 0, 0 10, 10 0, 0 0))", 4326);
+    Geography hull = Functions.convexHull(polygon);
+
+    assertEquals("ST_Polygon", Functions.geometryType(hull));
+    assertTrue(Functions.area(hull) < 1.0e13);
+    assertTrue(Functions.contains(hull, Constructors.geogFromWKT("POINT (1 1)", 4326)));
+    assertFalse(Functions.contains(hull, Constructors.geogFromWKT("POINT (20 20)", 4326)));
+  }
+
+  @Test
+  public void asEWKT_usesStoredWKBForOrdinaryGeography() throws ParseException {
+    Geography geography = Constructors.geogFromWKT("POINT (-122.4194 37.7749)", 4326);
+
+    assertEquals("SRID=4326; POINT (-122.4194 37.7749)", Functions.asEWKT(geography));
+  }
+
+  @Test
+  public void makeLine_points() throws ParseException {
+    Geography start = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography end = Constructors.geogFromWKT("POINT (1 0)", 4326);
+    Geography line = Functions.makeLine(start, end);
+
+    assertEquals("LINESTRING (0 0, 1 0)", Functions.asText(line));
+    assertEquals(4326, line.getSRID());
+    assertEquals(111195.10, Functions.length(line), 1.0);
+  }
+
+  @Test
+  public void makeLine_coincidentPointsRemainUsableAfterWKBRoundTrip() throws ParseException {
+    Geography point = Constructors.geogFromWKT("POINT (12 34)", 4326);
+    Geography line = roundTripWKB(Functions.makeLine(point, point));
+
+    assertEquals("LINESTRING (12 34, 12 34)", Functions.asText(line));
+    assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", Functions.asEWKT(line));
+    assertEquals("LINESTRING (12 34, 12 34)", line.toString());
+    assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", line.toEWKT());
+    assertEquals(2, new WKTReader().read(line.toString()).getNumPoints());
+    assertEquals(2, Functions.nPoints(line));
+    assertEquals("ST_LineString", Functions.geometryType(line));
+    assertEquals(1, Functions.numGeometries(line));
+    assertEquals(0.0, Functions.length(line), 0.0);
+    assertEquals(0.0, Functions.distance(line, point), 0.0);
+    Geography centroid = Functions.centroid(line);
+    assertNotNull(centroid);
+    assertEquals(4326, centroid.getSRID());
+    assertEquals(12.0, Functions.x(centroid), 1e-12);
+    assertEquals(34.0, Functions.y(centroid), 1e-12);
+
+    for (boolean splitAtAntiMeridian : new boolean[] {false, true}) {
+      Geography envelope = Functions.getEnvelope(line, splitAtAntiMeridian);
+      assertNotNull(envelope);
+      assertEquals(4326, envelope.getSRID());
+      assertEquals("ST_Point", Functions.geometryType(envelope));
+      assertEquals(12.0, Functions.x(envelope), 1e-12);
+      assertEquals(34.0, Functions.y(envelope), 1e-12);
+    }
+
+    Geography end = Constructors.geogFromWKT("POINT (13 34)", 4326);
+    Geography extended = roundTripWKB(Functions.makeLine(line, end));
+    assertEquals("LINESTRING (12 34, 12 34, 13 34)", Functions.asText(extended));
+    assertEquals(3, Functions.nPoints(extended));
+  }
+
+  @Test
+  public void makeLine_skipsEmptyInputsAndNormalizesSingleCoordinate() throws ParseException {
+    Geography emptyPoint = Constructors.geogFromWKT("POINT EMPTY", 3857);
+    Geography emptyLine = Constructors.geogFromWKT("LINESTRING EMPTY", 4326);
+    Geography emptyMultiPoint = Constructors.geogFromWKT("MULTIPOINT EMPTY", 4326);
+    Geography point = Constructors.geogFromWKT("POINT (12 34)", 4326);
+
+    Geography onlySecond = roundTripWKB(Functions.makeLine(emptyPoint, point));
+    assertEquals("LINESTRING (12 34, 12 34)", Functions.asText(onlySecond));
+    assertEquals(2, Functions.nPoints(onlySecond));
+    assertEquals(3857, onlySecond.getSRID());
+
+    Geography onlyFirst = roundTripWKB(Functions.makeLine(point, emptyLine));
+    assertEquals("LINESTRING (12 34, 12 34)", Functions.asText(onlyFirst));
+    assertEquals(2, Functions.nPoints(onlyFirst));
+    assertEquals(4326, onlyFirst.getSRID());
+
+    Geography afterEmptyMultiPoint = roundTripWKB(Functions.makeLine(emptyMultiPoint, point));
+    assertEquals("LINESTRING (12 34, 12 34)", Functions.asText(afterEmptyMultiPoint));
+    assertEquals(2, Functions.nPoints(afterEmptyMultiPoint));
+
+    Geography noCoordinates = roundTripWKB(Functions.makeLine(emptyPoint, emptyLine));
+    assertEquals("LINESTRING EMPTY", Functions.asText(noCoordinates));
+    assertEquals(0, Functions.nPoints(noCoordinates));
+    assertEquals(3857, noCoordinates.getSRID());
+  }
+
+  @Test
+  public void makeLine_deduplicatesLineStringSeamAndPreservesOtherRepeats() throws ParseException {
+    Geography first = Constructors.geogFromWKT("LINESTRING (0 0, 1 0)", 4326);
+    Geography second = Constructors.geogFromWKT("LINESTRING (1 0, 2 0)", 4326);
+    Geography stitched = roundTripWKB(Functions.makeLine(first, second));
+    assertEquals("LINESTRING (0 0, 1 0, 2 0)", Functions.asText(stitched));
+    assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 2 0)", Functions.asEWKT(stitched));
+    assertEquals(3, Functions.nPoints(stitched));
+
+    Geography point = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography line = Constructors.geogFromWKT("LINESTRING (0 0, 1 0)", 4326);
+    assertEquals("LINESTRING (0 0, 1 0)", Functions.asText(Functions.makeLine(point, line)));
+
+    Geography multiPoint = Constructors.geogFromWKT("MULTIPOINT ((0 0), (1 0))", 4326);
+    assertEquals(
+        "LINESTRING (0 0, 0 0, 1 0)", Functions.asText(Functions.makeLine(point, multiPoint)));
+
+    Geography repeated = geographyFromJTSWKT("LINESTRING (0 0, 0 0, 1 0)", 4326);
+    Geography end = Constructors.geogFromWKT("POINT (2 0)", 4326);
+    Geography appended = roundTripWKB(Functions.makeLine(repeated, end));
+    assertEquals("LINESTRING (0 0, 0 0, 1 0, 2 0)", Functions.asText(appended));
+    assertEquals(4, Functions.nPoints(appended));
+
+    Geography repeatedFromWKT = Constructors.geogFromWKT("LINESTRING (0 0, 0 0, 1 0)", 4326);
+    assertEquals("LINESTRING (0 0, 0 0, 1 0)", Functions.asText(repeatedFromWKT));
+    assertEquals(3, Functions.nPoints(repeatedFromWKT));
+  }
+
+  @Test
+  public void makeLine_multiPointAndLineString() throws ParseException {
+    Geography points = Constructors.geogFromWKT("MULTIPOINT ((0 0), (1 1))", 4326);
+    Geography line = Constructors.geogFromWKT("LINESTRING (2 2, 3 3)", 4326);
+    Geography result = roundTripWKB(Functions.makeLine(points, line));
+
+    Coordinate[] coordinates = Constructors.geogToGeometry(result).getCoordinates();
+    assertEquals(4, coordinates.length);
+    for (int i = 0; i < coordinates.length; i++) {
+      assertDegAlmostEqual(coordinates[i].x, i);
+      assertDegAlmostEqual(coordinates[i].y, i);
     }
   }
 
@@ -305,22 +487,64 @@ public class FunctionTest {
 
   private static void assertLineEndpoints(
       Geography geography, double x0, double y0, double x1, double y1) {
+    assertLineEndpoints(geography, x0, y0, x1, y1, EPS);
+  }
+
+  private static void assertLineEndpoints(
+      Geography geography, double x0, double y0, double x1, double y1, double tolerance) {
     Geometry geometry = Constructors.geogToGeometry(geography);
     assertTrue(geometry instanceof LineString);
     LineString line = (LineString) geometry;
     Coordinate start = line.getCoordinateN(0);
     Coordinate end = line.getCoordinateN(line.getNumPoints() - 1);
     boolean forward =
-        Math.abs(start.x - x0) <= EPS
-            && Math.abs(start.y - y0) <= EPS
-            && Math.abs(end.x - x1) <= EPS
-            && Math.abs(end.y - y1) <= EPS;
+        Math.abs(start.x - x0) <= tolerance
+            && Math.abs(start.y - y0) <= tolerance
+            && Math.abs(end.x - x1) <= tolerance
+            && Math.abs(end.y - y1) <= tolerance;
     boolean reverse =
-        Math.abs(start.x - x1) <= EPS
-            && Math.abs(start.y - y1) <= EPS
-            && Math.abs(end.x - x0) <= EPS
-            && Math.abs(end.y - y0) <= EPS;
+        Math.abs(start.x - x1) <= tolerance
+            && Math.abs(start.y - y1) <= tolerance
+            && Math.abs(end.x - x0) <= tolerance
+            && Math.abs(end.y - y0) <= tolerance;
     assertTrue("Unexpected line endpoints: " + geometry, forward || reverse);
+  }
+
+  @Test
+  public void makeLine_antimeridianUsesGreatCircleLength() throws ParseException {
+    Geography start = Constructors.geogFromWKT("POINT (179 0)", 4326);
+    Geography end = Constructors.geogFromWKT("POINT (-179 0)", 4326);
+    Geography line = Functions.makeLine(start, end);
+
+    assertEquals("LINESTRING (179 0, -179 0)", Functions.asText(line));
+    assertEquals(222390.13, Functions.length(line), 1.0);
+  }
+
+  @Test
+  public void makeLine_usesFirstSRIDWithoutTransformation() throws ParseException {
+    Geography srid4326 = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography srid3857 = Constructors.geogFromWKT("POINT (1 0)", 3857);
+    assertEquals(4326, Functions.makeLine(srid4326, srid3857).getSRID());
+
+    Geography srid0 = Constructors.geogFromWKT("POINT (0 0)", 0);
+    assertEquals(0, Functions.makeLine(srid0, srid4326).getSRID());
+  }
+
+  @Test
+  public void makeLine_nullArguments() throws ParseException {
+    Geography point = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    assertNull(Functions.makeLine(null, point));
+    assertNull(Functions.makeLine(point, null));
+  }
+
+  @Test
+  public void makeLine_rejectsUnsupportedType() throws ParseException {
+    Geography point = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    Geography polygon = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 0))", 4326);
+
+    IllegalArgumentException error =
+        assertThrows(IllegalArgumentException.class, () -> Functions.makeLine(point, polygon));
+    assertTrue(error.getMessage().contains("Point, MultiPoint and LineString geographies"));
   }
 
   // S2 area-weighted centroids on small polygons differ from planar by an O(d^2/R^2)

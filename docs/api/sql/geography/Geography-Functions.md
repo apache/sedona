@@ -51,6 +51,7 @@ These functions operate on geography type objects.
 | [ST_ConvexHull](../Geometry-Processing/ST_ConvexHull.md) | Geography | Return the spherical convex hull with geodesic edges. Full-sphere hulls are not supported because they cannot be represented by OGC WKB. | v1.9.1 |
 | [ST_Envelope](Geography-Functions/ST_Envelope.md) | Geography | Return the bounding box (envelope) of a geography. Supports anti-meridian splitting. | v1.8.0 |
 | [ST_GeometryType](Geography-Functions/ST_GeometryType.md) | String | Return the type of a geography as a string (e.g., "ST_Point", "ST_Polygon"). | v1.9.1 |
+| [ST_MakeLine](Geography-Functions/ST_MakeLine.md) | Geography | Create a geography LineString from two Point, MultiPoint, or LineString geographies. | v1.9.1 |
 | [ST_NPoints](Geography-Functions/ST_NPoints.md) | Integer | Return the number of points (vertices) in a geography. | v1.9.0 |
 | [ST_NumGeometries](Geography-Functions/ST_NumGeometries.md) | Integer | Return the number of sub-geometries in a geography (1 for single geometries). | v1.9.1 |
 | [ST_Distance](Geography-Functions/ST_Distance.md) | Double | Return the minimum geodesic distance between two geographies in meters. | v1.9.0 |

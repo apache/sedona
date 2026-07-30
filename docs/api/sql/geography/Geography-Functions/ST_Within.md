@@ -21,7 +21,11 @@
 
 Introduction: Tests whether geography `A` is fully within geography `B` using S2 spherical boolean operations. Returns true when every point of `A`'s interior lies in `B`'s interior. By OGC convention, `ST_Within(A, B)` is equivalent to `ST_Contains(B, A)`, and shares the same boundary semantics.
 
-Boundary semantics on the sphere are inherited from S2's boolean operations and depend on each ring's vertex orientation: along an edge that is "owned" by `B`'s boundary the test returns true, and along the opposite edge it returns false. Do not rely on a specific result for points that lie exactly on `B`'s boundary; for predictable behavior, use a strict interior point or expand `B` slightly with `ST_Buffer` before testing.
+Polygon ring roles follow the simple-features structure: the first ring is a shell and subsequent rings are holes, regardless of input winding. Sedona preserves the submitted coordinate order for structural output such as `ST_AsText`, while normalizing only the S2-facing traversal used by spherical operations.
+
+Each Geography polygon shell is normalized to an area of at most one hemisphere. A shell intended to represent more than half the sphere is therefore interpreted as its complement; reversing the ring's coordinate sequence does not select the larger region.
+
+Boundary semantics on the sphere are inherited from S2's boolean operations and depend on the normalized S2 edge orientation: along an edge that is "owned" by `B`'s boundary the test returns true, and along the opposite edge it returns false. Do not rely on a specific result for points that lie exactly on `B`'s boundary; for predictable behavior, use a strict interior point or expand `B` slightly with `ST_Buffer` before testing.
 
 ![ST_Within returning true](../../../../image/ST_Within_geography/ST_Within_geography_true.svg "ST_Within returning true")
 ![ST_Within returning false](../../../../image/ST_Within_geography/ST_Within_geography_false.svg "ST_Within returning false")
