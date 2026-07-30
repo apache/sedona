@@ -210,6 +210,51 @@ public class SerdeTest extends RasterTestBase {
   }
 
   @Test
+  public void testReconcileCollapsesRangeValuedNoDataAtItsMinimum() {
+    // A no data category can span a range. The declared value on the wire is the range's
+    // minimum (that is what the writer emits), so the early-return on "values agree" used to
+    // keep the whole range flagged when a Python writer asked for exactly that single value.
+    org.geotools.coverage.Category nodataRange =
+        new org.geotools.coverage.Category(
+            org.geotools.coverage.Category.NODATA.getName(),
+            new java.awt.Color(0, 0, 0, 0),
+            org.geotools.util.NumberRange.create(0, true, 10, true));
+    org.geotools.coverage.Category data =
+        new org.geotools.coverage.Category(
+            "data",
+            new java.awt.Color[] {java.awt.Color.BLACK},
+            org.geotools.util.NumberRange.create(11, true, 100, true));
+    org.geotools.coverage.GridSampleDimension dim =
+        new org.geotools.coverage.GridSampleDimension(
+            "band", new org.geotools.coverage.Category[] {nodataRange, data}, 0.0, 1.0);
+
+    org.geotools.coverage.GridSampleDimension reconciled =
+        GridSampleDimensionSerializer.reconcileNoDataValue(
+            new GridSampleDimensionSerializer.DeclaredSampleDimension(dim, 0.0),
+            org.geotools.api.coverage.SampleDimensionType.REAL_64BITS);
+
+    Assert.assertEquals(0.0, RasterUtils.getNoDataValue(reconciled), 1e-9);
+    for (org.geotools.coverage.Category category : reconciled.getCategories()) {
+      if (category.getName().equals(org.geotools.coverage.Category.NODATA.getName())) {
+        Assert.assertEquals(0.0, category.getRange().getMinimum(), 1e-9);
+        Assert.assertEquals(0.0, category.getRange().getMaximum(), 1e-9);
+      }
+    }
+  }
+
+  @Test
+  public void testReconcileKeepsExactSingleValuedNoData() {
+    // The JVM-to-JVM path: declared value matches a single-valued category, untouched.
+    org.geotools.coverage.GridSampleDimension dim =
+        RasterUtils.createSampleDimensionWithNoDataValue("band", -9999.0);
+    org.geotools.coverage.GridSampleDimension reconciled =
+        GridSampleDimensionSerializer.reconcileNoDataValue(
+            new GridSampleDimensionSerializer.DeclaredSampleDimension(dim, -9999.0),
+            org.geotools.api.coverage.SampleDimensionType.REAL_64BITS);
+    Assert.assertSame(dim, reconciled);
+  }
+
+  @Test
   public void testRasterWithoutNoDataStillHasNone() throws Exception {
     // A raster with no nodata declares NaN, which must not be turned into a nodata category.
     GridCoverage2D raster =

@@ -297,4 +297,40 @@ public class RasterUtilsTest {
     GridSampleDimension replaced = RasterUtils.createSampleDimensionWithNoDataValue(dim, -9999.0);
     assertEquals(-9999.0, RasterUtils.getNoDataValue(replaced), 1e-9);
   }
+
+  @Test
+  public void testFractionalNoDataInsideRealValuedCategory() {
+    // Splitting a real-valued data category around an interior no data value used to build
+    // ranges with exclusive bounds touching the no data category, which GridSampleDimension
+    // rejects as overlapping ("Ranges [v..MAX] and [v..v] overlap").
+    Category data =
+        new Category("data", new Color[] {Color.BLACK}, NumberRange.create(0.0, true, 100.0, true));
+    GridSampleDimension dim = new GridSampleDimension("band", new Category[] {data}, 0.0, 1.0);
+
+    GridSampleDimension replaced = RasterUtils.createSampleDimensionWithNoDataValue(dim, 5.5);
+    assertEquals(5.5, RasterUtils.getNoDataValue(replaced), 1e-12);
+    // Values on either side of the no data value are still categorized as data.
+    Assert.assertNotNull(replaced.getCategory(5.0));
+    Assert.assertNotNull(replaced.getCategory(6.0));
+    Assert.assertEquals("data", replaced.getCategory(5.0).getName().toString());
+    Assert.assertEquals("data", replaced.getCategory(6.0).getName().toString());
+  }
+
+  @Test
+  public void testFractionalNoDataInsideIntegralCategoryWidensTheSplit() {
+    // A byte-typed data category on a band whose pixels were widened to double: splitting
+    // around 5.5 used to truncate the boundary to the category's integral class, leaving 5.0
+    // uncategorized.
+    Category data =
+        new Category(
+            "data", new Color[] {Color.BLACK}, NumberRange.create((byte) 0, true, (byte) 20, true));
+    GridSampleDimension dim = new GridSampleDimension("band", new Category[] {data}, 0.0, 1.0);
+
+    GridSampleDimension replaced =
+        RasterUtils.createSampleDimensionWithNoDataValue(
+            dim, 5.5, org.geotools.api.coverage.SampleDimensionType.REAL_64BITS);
+    assertEquals(5.5, RasterUtils.getNoDataValue(replaced), 1e-12);
+    Assert.assertNotNull(replaced.getCategory(5.0));
+    Assert.assertEquals("data", replaced.getCategory(5.0).getName().toString());
+  }
 }

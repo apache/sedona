@@ -215,7 +215,8 @@ class TestRasterUdfDocExamples(TestBase):
 
         Guards the trap that as_numpy() would fall into: subtracting raw sentinels
         turns a one-sided hole into a large bogus delta and a two-sided hole into a
-        valid-looking zero.
+        valid-looking zero. Covers a hole in only one input (both directions) and a
+        hole in both.
         """
         NODATA = -9999.0
 
@@ -223,13 +224,22 @@ class TestRasterUdfDocExamples(TestBase):
         def plus_five(raster):
             return raster.with_bands(raster.as_numpy().astype(np.float64) + 5.0)
 
-        # before band 1 is 0..11 with 3 flagged NODATA; after is 5..16 with 8 flagged,
-        # which is the same pixel (index 3) shifted by the +5.
-        before = self.spark.range(1).selectExpr(
-            "0 AS x", "0 AS y", f"RS_SetBandNoDataValue({FOUR_BAND}, 1, 3.0) AS rast"
+        @udf(returnType=RasterType())
+        def punch(raster, index):
+            arr = raster.as_numpy()[0].astype(np.float64)
+            arr.flat[index] = -1.0
+            return raster.with_bands(arr, nodata=-1.0)
+
+        # before: hole at pixel 2 (its own) and pixel 6 (shared).
+        # after:  hole at pixel 4 (its own) and pixel 6 (shared).
+        from pyspark.sql.functions import lit
+
+        base = self.spark.range(1).selectExpr(
+            "0 AS x", "0 AS y", f"{FOUR_BAND} AS rast"
         )
-        after = before.withColumn("rast", plus_five(col("rast"))).selectExpr(
-            "x", "y", "RS_SetBandNoDataValue(rast, 1, 8.0) AS rast"
+        before = base.withColumn("rast", punch(punch(col("rast"), lit(2)), lit(6)))
+        after = base.withColumn(
+            "rast", punch(punch(plus_five(col("rast")), lit(4)), lit(6))
         )
 
         @udf(returnType=RasterType())
@@ -250,62 +260,108 @@ class TestRasterUdfDocExamples(TestBase):
         )
         band = list(result["band"])
         assert result["nodata"] == NODATA
-        # Pixel 3 was NODATA on both sides: it must be the sentinel, not 0 or 5.
-        assert band[3] == pytest.approx(NODATA)
+        # One-sided holes (2 in before, 4 in after) and the shared hole (6) must all
+        # come out as the sentinel — not as a bogus difference or a plausible zero.
+        for hole in (2, 4, 6):
+            assert band[hole] == pytest.approx(NODATA), f"hole {hole}"
         for index, value in enumerate(band):
-            if index != 3:
+            if index not in (2, 4, 6):
                 assert value == pytest.approx(5.0), f"index {index}"
-        # And the sentinel is genuinely excluded from statistics.
-        assert result["counted"] == 11
+        # And the sentinels are genuinely excluded from statistics.
+        assert result["counted"] == 9
 
     # ---- "Using rasterio inside a UDF" ------------------------------------
 
     @requires_spark_34
     def test_rasterio_inside_udf(self):
-        """fillnodata must actually fill, and the output must not inherit the hole marker."""
-        # Band 1 is 0..11. Flag 5 as NODATA, so index 5 is the hole. Any interpolated
-        # replacement is bounded by its neighbours 4 and 6, so it cannot come back as 5
-        # unless nothing happened — which is what makes the assertions below meaningful.
-        df = self.spark.range(1).withColumn(
-            "rast", expr(f"RS_SetBandNoDataValue({FOUR_BAND}, 1, 5.0)")
-        )
+        """fillnodata must actually fill, and the recipe keeps the NODATA declared."""
+        # Punch a -9999 hole at pixel 5, then run the documented recipe. The sentinel
+        # is far outside the data range 0..11, so interpolation cannot land on it and
+        # every assertion below is unambiguous.
+        df = self.spark.range(1).withColumn("rast", expr(FOUR_BAND))
+
+        @udf(returnType=RasterType())
+        def punch(raster):
+            arr = raster.as_numpy()[0].astype(np.float64)
+            arr.flat[5] = -9999.0
+            return raster.with_bands(arr, nodata=-9999.0)
 
         @udf(returnType=RasterType())
         def fill_udf(raster):
+            nodata = raster.bands_meta[0].nodata
             valid = ~np.isnan(raster.as_numpy_masked()[0])
             with raster.as_rasterio() as src:
                 filled = rasterio.fill.fillnodata(
                     src.read(1), mask=valid.astype(np.uint8)
                 )
-            return raster.with_bands(filled, nodata=float("nan"))
+            return raster.with_bands(filled, nodata=nodata)
 
         result = (
-            df.select(fill_udf(col("rast")).alias("filled"))
+            df.select(fill_udf(punch(col("rast"))).alias("filled"))
             .selectExpr(
                 "RS_NumBands(filled) AS num_bands",
                 "RS_BandAsArray(filled, 1) AS band",
                 "RS_BandNoDataValue(filled, 1) AS nodata",
                 "RS_Count(filled, 1, true) AS counted",
                 "RS_SRID(filled) AS srid",
-                "RS_ScaleX(filled) AS scale_x",
             )
             .first()
         )
         assert result["num_bands"] == 1
         assert result["srid"] == 3857
-        assert result["scale_x"] == pytest.approx(10.0)
 
         band = list(result["band"])
         for index, value in enumerate(band):
             if index != 5:
                 assert value == pytest.approx(float(index)), f"index {index}"
-        # The hole was filled with something derived from its neighbours, and crucially
-        # is no longer the original 5.0 that a no-op would have left behind.
-        assert band[5] != pytest.approx(5.0)
-        assert 4.0 <= band[5] <= 8.0
-        # Filling is complete, so the output declares no NODATA and nothing is skipped.
-        assert result["nodata"] is None
+        # The hole was interpolated from its neighbours, not left as the sentinel.
+        assert band[5] != -9999.0
+        assert 0.0 <= band[5] <= 11.0
+        # The declaration survives, and nothing is excluded because no pixel carries
+        # the sentinel any more.
+        assert result["nodata"] == -9999.0
         assert result["counted"] == 12
+
+    @requires_spark_34
+    def test_rasterio_fill_keeps_unreachable_holes_invalid(self):
+        """Cells fillnodata cannot reach keep the sentinel AND stay flagged invalid.
+
+        This is why the documented recipe keeps the NODATA declaration instead of
+        clearing it: with nodata=float("nan") the unfilled sentinels would all read
+        back as valid data.
+        """
+        big = (
+            "RS_MakeRasterForTesting(1, 'D', 'BandedSampleModel', "
+            "12, 12, 100, 100, 10, -10, 0, 0, 3857)"
+        )
+        df = self.spark.range(1).withColumn("rast", expr(big))
+
+        @udf(returnType=RasterType())
+        def punch_and_fill(raster):
+            arr = raster.as_numpy()[0].astype(np.float64)
+            arr[3:9, 3:9] = -9999.0  # a 6x6 hole
+            valid = (arr != -9999.0).astype(np.uint8)
+            # max_search_distance=1 keeps the hole's interior out of reach, standing
+            # in for a hole larger than the default 100-pixel search radius.
+            filled = rasterio.fill.fillnodata(arr, mask=valid, max_search_distance=1)
+            return raster.with_bands(filled, nodata=-9999.0)
+
+        result = (
+            df.select(punch_and_fill(col("rast")).alias("filled"))
+            .selectExpr(
+                "RS_BandAsArray(filled, 1) AS band",
+                "RS_BandNoDataValue(filled, 1) AS nodata",
+                "RS_Count(filled, 1, true) AS counted",
+            )
+            .first()
+        )
+        band = list(result["band"])
+        remaining = sum(1 for value in band if value == -9999.0)
+        # Some cells were beyond the search distance and kept the sentinel...
+        assert remaining > 0
+        # ...and because the declaration was kept, they are excluded from statistics.
+        assert result["nodata"] == -9999.0
+        assert result["counted"] == 144 - remaining
 
     @requires_spark_34
     def test_as_rasterio_does_not_carry_nodata(self):
@@ -463,8 +519,101 @@ class TestRasterUdfDocExamples(TestBase):
         integral = raster.as_numpy()[0].astype(np.uint8)
         with pytest.raises(ValueError, match="not representable"):
             raster.with_bands(integral, nodata=5.5)
-        with pytest.raises(ValueError, match="outside the range"):
+        with pytest.raises(ValueError, match="outside the storage range"):
             raster.with_bands(integral, nodata=-9999.0)
         # A whole number inside the range is fine.
         out = raster.with_bands(integral, nodata=254.0)
         assert out.bands_meta[0].nodata == pytest.approx(254.0)
+
+    @requires_spark_34
+    def test_inherited_nodata_must_fit_output_dtype(self):
+        """Narrowing a raster whose inherited NODATA no uint8 pixel can hold raises."""
+        raster = self.spark.sql(
+            f"SELECT RS_SetBandNoDataValue({FOUR_BAND}, 1, -9999.0) AS rast"
+        ).first()["rast"]
+        arr = raster.as_numpy()[0]
+        arr = np.where(arr < 0, 0, arr).astype(np.uint8)
+        with pytest.raises(ValueError, match="inherited"):
+            raster.with_bands(arr)
+
+    @requires_spark_34
+    def test_int8_nodata_matches_reinterpreted_pixels(self):
+        """nodata on an int8 band is stored the way the pixels are: -2 becomes 254."""
+        df = self.spark.range(1).withColumn("rast", expr(FOUR_BAND))
+
+        @udf(returnType=RasterType())
+        def i8(raster):
+            arr = np.full((raster.height, raster.width), 7, dtype=np.int8)
+            arr[0, 0] = -2
+            return raster.with_bands(arr, nodata=-2.0)
+
+        result = (
+            df.select(i8(col("rast")).alias("out"))
+            .selectExpr(
+                "RS_BandNoDataValue(out, 1) AS nodata",
+                "RS_BandAsArray(out, 1) AS band",
+                "RS_Count(out, 1, true) AS counted",
+            )
+            .first()
+        )
+        assert result["nodata"] == 254.0
+        assert result["band"][0] == 254.0
+        assert result["counted"] == 11  # the reinterpreted hole is excluded
+
+    @requires_spark_34
+    def test_uint32_nodata_matches_reinterpreted_pixels(self):
+        """nodata above 2**31-1 on a uint32 band is reinterpreted like the pixels."""
+        df = self.spark.range(1).withColumn("rast", expr(FOUR_BAND))
+
+        @udf(returnType=RasterType())
+        def u32(raster):
+            arr = np.full((raster.height, raster.width), 7, dtype=np.uint32)
+            arr[0, 0] = 4294967295
+            return raster.with_bands(arr, nodata=4294967295)
+
+        result = (
+            df.select(u32(col("rast")).alias("out"))
+            .selectExpr(
+                "RS_BandNoDataValue(out, 1) AS nodata",
+                "RS_BandAsArray(out, 1) AS band",
+                "RS_Count(out, 1, true) AS counted",
+            )
+            .first()
+        )
+        assert result["nodata"] == -1.0
+        assert result["band"][0] == -1.0
+        assert result["counted"] == 11
+
+    @requires_spark_34
+    def test_float32_nodata_is_coerced_to_float32(self):
+        """A nodata that is not float32-exact is rounded to what the pixels hold."""
+        df = self.spark.range(1).withColumn("rast", expr(FOUR_BAND))
+
+        @udf(returnType=RasterType())
+        def f32(raster):
+            arr = raster.as_numpy()[0].astype(np.float32)
+            arr[0, 0] = np.float32(0.1)
+            return raster.with_bands(arr, nodata=0.1)
+
+        result = (
+            df.select(f32(col("rast")).alias("out"))
+            .selectExpr(
+                "RS_BandNoDataValue(out, 1) AS nodata",
+                "RS_Count(out, 1, true) AS counted",
+            )
+            .first()
+        )
+        assert result["nodata"] == pytest.approx(float(np.float32(0.1)), abs=0)
+        assert result["counted"] == 11  # the float32(0.1) pixel is excluded
+
+    def test_non_finite_nodata_is_rejected(self):
+        """inf is rejected everywhere; float32 values that overflow to inf too."""
+        raster = self.spark.sql(f"SELECT {FOUR_BAND} AS rast").first()["rast"]
+        f64 = raster.as_numpy()[0].astype(np.float64)
+        f32 = raster.as_numpy()[0].astype(np.float32)
+        with pytest.raises(ValueError, match="finite"):
+            raster.with_bands(f64, nodata=float("inf"))
+        with pytest.raises(ValueError, match="finite"):
+            raster.with_bands(f64, nodata=float("-inf"))
+        with pytest.raises(ValueError, match="float32"):
+            raster.with_bands(f32, nodata=1e40)

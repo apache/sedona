@@ -118,8 +118,30 @@ public class GridSampleDimensionSerializer extends Serializer<GridSampleDimensio
       // the category, otherwise the source's value silently survives into the output.
       return RasterUtils.removeNoDataValue(sampleDimension);
     }
+    if (hasSingleValuedNoData(sampleDimension, declared.noDataValue)) {
+      // The categories already say exactly what was declared; keep them untouched. This is the
+      // JVM-to-JVM round-trip path.
+      return sampleDimension;
+    }
+    // Strip any existing no data category before rebuilding. createSampleDimensionWithNoDataValue
+    // returns its argument unchanged whenever getNoDataValue() matches the declared value, and
+    // getNoDataValue() reads the *minimum* of the category — so a range-valued no data category
+    // whose minimum equals the declared value would otherwise survive as-is, keeping the whole
+    // range flagged when a single value was asked for.
+    GridSampleDimension stripped = RasterUtils.removeNoDataValue(sampleDimension);
     return RasterUtils.createSampleDimensionWithNoDataValue(
-        sampleDimension, declared.noDataValue, sampleDimensionType);
+        stripped, declared.noDataValue, sampleDimensionType);
+  }
+
+  /** Whether the sample dimension's no data category is exactly the single given value. */
+  private static boolean hasSingleValuedNoData(GridSampleDimension sampleDimension, double value) {
+    for (Category category : sampleDimension.getCategories()) {
+      if (category.getName().equals(Category.NODATA.getName())) {
+        return category.getRange().getMinimum() == value
+            && category.getRange().getMaximum() == value;
+      }
+    }
+    return false;
   }
 
   /** A deserialized sample dimension together with the nodata value declared on the wire. */

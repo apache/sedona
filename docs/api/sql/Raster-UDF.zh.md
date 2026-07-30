@@ -28,7 +28,11 @@ Python UDF 接收栅格**输入**从 `v1.6.0` 起支持；从 UDF **返回**栅�
 在 Sedona 中处理栅格，推荐使用 UDF。[`RS_MapAlgebra`](Raster-map-algebra.md) 自 `v1.9.1` 起弃用，并将在未来
 版本中移除；[下面的 NDVI 示例](#ndvi-as-map-algebra-and-as-a-udf)给出了两种写法的对照，便于迁移。
 
-### 读取像素数据
+{% raw %}
+
+### 读取像素数据 {#reading-pixel-data}
+
+{% endraw %}
 
 `SedonaRaster` 提供三种方式访问同一份像素数据：
 
@@ -40,6 +44,12 @@ raster.as_rasterio()  # rasterio.DatasetReader（只读）
 
 元数据以属性形式提供 —— `raster.width`、`raster.height`、`raster.crs_wkt`、`raster.affine_trans`
 以及 `raster.bands_meta`。
+
+!!!warning
+    `as_numpy()` 会把 NODATA 像素按原始哨兵值返回，算术与比较会把空洞当作普通数字 —— 例如 `band < 1400`
+    这样的阈值判断会把 `-9999` 的空洞也归为陆地。只要输入可能携带 NODATA，就应通过 `as_numpy_masked()`
+    读取，并在输出时重新标记空洞；具体写法见[双栅格](#two-rasters)。本页中使用 `as_numpy()` 的示例均假定
+    输入不含空洞。
 
 ### 栅格 → 标量
 
@@ -101,11 +111,14 @@ NODATA。对派生栅格来说这通常并不合适，因为输出的含义与�
 用 `nodata=` 明确表达输出的含义。它等价于 `RS_MapAlgebra` 的 `noDataValue` 参数：
 
 ```python
+NODATA = -9999.0
+
+
 @udf(returnType=RasterType())
 def mask_udf(raster):
-    band1 = raster.as_numpy()[0]
+    band1 = raster.as_numpy_masked()[0]  # 输入为 NODATA 处为 NaN
     mask = (band1 < 1400).astype(np.float32)
-    return raster.with_bands(mask, nodata=-9999.0)
+    return raster.with_bands(np.where(np.isnan(band1), NODATA, mask), nodata=NODATA)
 ```
 
 传入标量会作用于所有输出波段；传入序列则可逐个设置，每个波段一项。若某个波段不应有 NODATA，用
@@ -114,6 +127,10 @@ def mask_udf(raster):
 ```python
 return raster.with_bands(stacked, nodata=[-9999.0, float("nan")])
 ```
+
+如果输出的 dtype 无法表示继承来的值 —— 比如把 NODATA 为 `-9999` 的 float64 场景收窄为 `uint8` ——
+`with_bands()` 会直接抛错，而不是产出任何像素都永远无法匹配的元数据。这种情况请显式传入 `nodata=`，
+或在转换 dtype 之前先清理掉空洞。
 
 !!!note
     `nodata=` 是 `v1.9.1` 新增的。在此之前该值只能继承，需要事后用
@@ -137,6 +154,8 @@ FROM raster_table
 ```python
 @udf(returnType=RasterType())
 def ndvi(raster):
+    # 和上面的 Jiffle 脚本一样读取原始值。如果场景携带 NODATA，
+    # 请改用 as_numpy_masked() 并重新标记空洞 —— 见下文"双栅格"。
     a = raster.as_numpy().astype(np.float64)
     red, nir = a[0], a[3]
     return raster.with_bands((nir - red) / (nir + red + 1e-10))
@@ -148,7 +167,11 @@ df.select(ndvi(col("rast")).alias("ndvi"))
 两者都会在输入的网格上产生一个单波段 `double` 栅格。注意波段下标的差异：Jiffle 的 `rast[0]` 和 NumPy 的
 `a[0]` 都表示第一个波段，但消费结果的 SQL 函数（`RS_BandAsArray`、`RS_BandNoDataValue` 等）的波段编号从 1 开始。
 
-### 双栅格
+{% raw %}
+
+### 双栅格 {#two-rasters}
+
+{% endraw %}
 
 UDF 可以接收任意多个栅格列，这覆盖了 `RS_MapAlgebra` 五参数形式的用途。元数据由你调用 `with_bands()` 的那个
 栅格提供，因此要选结果所属网格对应的那一个：
@@ -169,8 +192,8 @@ df.select(delta(col("after"), col("before")).alias("delta"))
 ```
 
 !!!warning
-    只要有多个栅格参与同一个算术表达式，就应使用 [`as_numpy_masked()`](#reading-pixel-data) 而不是
-    `as_numpy()`。`as_numpy()` 返回的是原始的 NODATA 哨兵值：某个输入上的空洞会变成一个很大的虚假差值，而两个
+    只要可能携带 NODATA 的栅格参与算术或比较 —— 无论一个输入还是多个 —— 就应使用
+    [`as_numpy_masked()`](#reading-pixel-data) 而不是 `as_numpy()`。`as_numpy()` 返回的是原始的 NODATA 哨兵值：某个输入上的空洞会变成一个很大的虚假差值，而两个
     输入上同时存在的空洞则会相互抵消、得到一个看似合理的 0。`nodata=` 只是给输出打标签，并不会标记哪些像素
     无效，因此还需要像上面的 `np.where` 那样把哨兵值真正写进数组。
 
@@ -189,12 +212,14 @@ import rasterio.fill
 @udf(returnType=RasterType())
 def fill_udf(raster):
     # NODATA 必须来自 SedonaRaster，而不是 GDAL dataset —— 见下面的提示。
+    nodata = raster.bands_meta[0].nodata
     valid = ~np.isnan(raster.as_numpy_masked()[0])
     with raster.as_rasterio() as src:
         filled = rasterio.fill.fillnodata(src.read(1), mask=valid.astype(np.uint8))
-    # 所有空洞都已填充，因此输出不再需要 NODATA。若不传 nodata=，输出会继承输入的值，
-    # 那些恰好等于该值的像素就会被误判为无效。
-    return raster.with_bands(filled, nodata=float("nan"))
+    # fillnodata 只在距有效数据 max_search_distance（默认 100 像素）范围内插值 ——
+    # 空洞更深处的像素仍保留哨兵值。保留 NODATA 声明可以让这些像素继续保持无效。
+    # 只有当确定所有空洞都足够小、能被完全填充时，才改用 nodata=float("nan")。
+    return raster.with_bands(filled, nodata=nodata)
 
 
 df.select(fill_udf(col("rast")).alias("filled"))
@@ -242,6 +267,11 @@ ValueError: Spatial dimensions (2, 2) don't match raster (3, 4)
 | `int64`、`uint64` | 抛出 `ValueError` 拒绝 |
 
 不确定时，转成 `float64`。
+
+`nodata=` 的取值遵循同样的存储规则：在 `int8` 波段上，`nodata=-2` 会以 `254` 存储 —— 并由
+[`RS_BandNoDataValue`](Raster-Band-Accessors/RS_BandNoDataValue.md) 报告为 `254`，与像素一致；在 `uint32`
+波段上，超过 2<sup>31</sup>−1 的值会以其带符号的重解释形式报告；在 `float32` 波段上，该值会被舍入到最接近的
+float32，因为像素本身持有的就是 float32。
 
 {% raw %}
 

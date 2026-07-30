@@ -785,6 +785,8 @@ from sedona.spark.sql.types import RasterType
 
 
 def mask_udf(raster):
+    # assumes a hole-free scene; use as_numpy_masked() if it may carry NODATA —
+    # see the Raster UDF page
     band1 = raster.as_numpy()[0, :, :]
     mask = (band1 < 1400).astype(np.float32)
     return raster.with_bands(mask)  # 1 band, on the input's grid
@@ -824,10 +826,14 @@ import rasterio.fill
 def fill_udf(raster):
     # The GDAL dataset does not carry Sedona's NODATA, so build the mask from the
     # SedonaRaster instead — as_numpy_masked() substitutes NaN for NODATA.
+    nodata = raster.bands_meta[0].nodata
     valid = ~np.isnan(raster.as_numpy_masked()[0])
     with raster.as_rasterio() as src:
         filled = rasterio.fill.fillnodata(src.read(1), mask=valid.astype(np.uint8))
-    return raster.with_bands(filled, nodata=float("nan"))
+    # fillnodata only reaches max_search_distance (100 px) from valid data; deeper
+    # cells keep the sentinel, so keep the NODATA declared. Use nodata=float("nan")
+    # only when every hole is small enough to be filled completely.
+    return raster.with_bands(filled, nodata=nodata)
 
 
 sedona.udf.register("fill_udf", fill_udf, RasterType())

@@ -44,6 +44,13 @@ raster.as_rasterio()  # rasterio.DatasetReader (read-only)
 Metadata is available as attributes — `raster.width`, `raster.height`, `raster.crs_wkt`,
 `raster.affine_trans`, and `raster.bands_meta`.
 
+!!!warning
+    `as_numpy()` returns NODATA pixels as their raw sentinel values, so arithmetic and comparisons treat
+    holes as ordinary numbers — a threshold like `band < 1400` happily classifies a `-9999` hole as land.
+    Whenever the input may carry NODATA, read through `as_numpy_masked()` and re-mark the holes on the way
+    out; [Two rasters](#two-rasters) shows the pattern. Examples on this page that read `as_numpy()` assume a
+    hole-free input.
+
 ### Raster to scalar
 
 Any Spark return type works. Declare it on the `@udf` decorator and apply the UDF like any other function:
@@ -108,11 +115,14 @@ Pass `nodata=` to say what the output means. This is the equivalent of `RS_MapAl
 argument:
 
 ```python
+NODATA = -9999.0
+
+
 @udf(returnType=RasterType())
 def mask_udf(raster):
-    band1 = raster.as_numpy()[0]
+    band1 = raster.as_numpy_masked()[0]  # NaN where the input is NODATA
     mask = (band1 < 1400).astype(np.float32)
-    return raster.with_bands(mask, nodata=-9999.0)
+    return raster.with_bands(np.where(np.isnan(band1), NODATA, mask), nodata=NODATA)
 ```
 
 A scalar applies to every output band; pass a sequence to set them individually, one entry per band. Use
@@ -121,6 +131,10 @@ A scalar applies to every output band; pass a sequence to set them individually,
 ```python
 return raster.with_bands(stacked, nodata=[-9999.0, float("nan")])
 ```
+
+If the output dtype cannot represent the inherited value — say a float64 scene with NODATA `-9999` narrowed
+to `uint8` — `with_bands()` raises rather than producing metadata that no pixel of the output can ever match.
+Pass `nodata=` explicitly in that case, or clean the holes out of the pixel data before casting.
 
 !!!note
     Support for `nodata=` is new in `v1.9.1`. Before that the value was always inherited and had to be
@@ -141,6 +155,8 @@ As a UDF:
 ```python
 @udf(returnType=RasterType())
 def ndvi(raster):
+    # Reads raw values, exactly like the Jiffle script above. If the scene carries
+    # NODATA, use as_numpy_masked() and re-mark the holes — see "Two rasters" below.
     a = raster.as_numpy().astype(np.float64)
     red, nir = a[0], a[3]
     return raster.with_bands((nir - red) / (nir + red + 1e-10))
@@ -175,9 +191,10 @@ df.select(delta(col("after"), col("before")).alias("delta"))
 ```
 
 !!!warning
-    Use [`as_numpy_masked()`](#reading-pixel-data), not `as_numpy()`, whenever more than one raster feeds an
-    arithmetic expression. `as_numpy()` hands back the raw NODATA sentinels, so a hole in one input becomes a
-    large bogus difference, and a hole in *both* inputs cancels out into a plausible zero. `nodata=` only
+    Use [`as_numpy_masked()`](#reading-pixel-data), not `as_numpy()`, whenever a raster that may carry NODATA
+    feeds arithmetic or a comparison — with one input or several. `as_numpy()` hands back the raw NODATA
+    sentinels, so a hole in one input becomes a large bogus difference, and a hole in *both* inputs cancels
+    out into a plausible zero. `nodata=` only
     labels the output — it does not mark which pixels are invalid, so the sentinel has to be written into the
     array as well, as `np.where` does above.
 
@@ -197,12 +214,15 @@ import rasterio.fill
 @udf(returnType=RasterType())
 def fill_udf(raster):
     # NODATA has to come from the SedonaRaster, not from the GDAL dataset — see the note below.
+    nodata = raster.bands_meta[0].nodata
     valid = ~np.isnan(raster.as_numpy_masked()[0])
     with raster.as_rasterio() as src:
         filled = rasterio.fill.fillnodata(src.read(1), mask=valid.astype(np.uint8))
-    # Every hole is now filled, so the output has no NODATA. Without nodata= it would
-    # inherit the input's, and pixels that happen to equal it would read as invalid.
-    return raster.with_bands(filled, nodata=float("nan"))
+    # fillnodata only interpolates within max_search_distance (100 pixels by default)
+    # of valid data — cells deeper inside a hole keep their sentinel value. Keeping
+    # the NODATA declaration leaves those cells invalid. Only switch to
+    # nodata=float("nan") when every hole is small enough to be filled completely.
+    return raster.with_bands(filled, nodata=nodata)
 
 
 df.select(fill_udf(col("rast")).alias("filled"))
@@ -250,6 +270,11 @@ The array you hand to `with_bands()` is mapped onto a Java data buffer type, and
 | `int64`, `uint64` | rejected with `ValueError` |
 
 Cast to `float64` when in doubt.
+
+`nodata=` values follow the same storage rules: on an `int8` band `nodata=-2` is stored — and reported by
+[`RS_BandNoDataValue`](Raster-Band-Accessors/RS_BandNoDataValue.md) — as `254`, matching the pixels; on a
+`uint32` band a value above 2<sup>31</sup>−1 is reported as its signed reinterpretation; on a `float32` band
+the value is rounded to the nearest float32, since that is what the pixels themselves hold.
 
 ### Scala and Java
 

@@ -500,6 +500,8 @@ class InDbSedonaRaster(SedonaRaster):
 
         if nodata is not None:
             bands_meta = self._override_nodata(bands_meta, nodata, new_data.dtype)
+        else:
+            bands_meta = self._normalize_inherited_nodata(bands_meta, new_data.dtype)
 
         # Build BandedSampleModel (TYPE_BANDED = 1)
         # ComponentSampleModel.__init__() sets TYPE_COMPONENT, so we must
@@ -590,8 +592,10 @@ class InDbSedonaRaster(SedonaRaster):
                     f"{len(bands_meta)} band(s)"
                 )
 
-        for value in values:
-            InDbSedonaRaster._check_nodata_fits_dtype(value, dtype)
+        values = [
+            InDbSedonaRaster._normalize_nodata_for_dtype(value, dtype, inherited=False)
+            for value in values
+        ]
 
         return [
             SampleDimension(
@@ -604,28 +608,105 @@ class InDbSedonaRaster(SedonaRaster):
         ]
 
     @staticmethod
-    def _check_nodata_fits_dtype(value: float, dtype: np.dtype) -> None:
-        """Reject a NODATA value the output band's dtype cannot represent.
+    def _normalize_inherited_nodata(
+        bands_meta: List[SampleDimension], dtype: np.dtype
+    ) -> List[SampleDimension]:
+        """Validate inherited NODATA against the output dtype.
 
-        The JVM encodes the value as a Number of the band's sample dimension type, so a
-        fractional or out-of-range value on an integral band produces a sample dimension
-        that later fails to read back. Catching it here gives a usable error instead.
+        Without this, narrowing the dtype silently invalidates the metadata: a float64
+        source whose NODATA is -9999 narrowed to uint8 output would keep declaring
+        -9999, a value no uint8 pixel can hold, so every hole would read as valid data.
+        """
+        normalized_meta = []
+        for bm in bands_meta:
+            value = bm.nodata
+            if np.isnan(value):
+                normalized_meta.append(bm)
+                continue
+            normalized = InDbSedonaRaster._normalize_nodata_for_dtype(
+                value, dtype, inherited=True
+            )
+            if normalized == value:
+                normalized_meta.append(bm)
+            else:
+                normalized_meta.append(
+                    SampleDimension(
+                        description=bm.description,
+                        offset=bm.offset,
+                        scale=bm.scale,
+                        nodata=normalized,
+                    )
+                )
+        return normalized_meta
+
+    # NODATA is stored using the JVM data buffer type, which does not always match the
+    # NumPy dtype: int8 is stored as an unsigned byte and uint32 as a signed int (see
+    # _numpy_dtype_to_data_buffer_type). Ranges are the JVM storage ranges.
+    _NODATA_STORAGE_RANGES = {
+        np.dtype(np.uint8): (0, 255),
+        np.dtype(np.int8): (0, 255),
+        np.dtype(np.int16): (-(2**15), 2**15 - 1),
+        np.dtype(np.uint16): (0, 2**16 - 1),
+        np.dtype(np.int32): (-(2**31), 2**31 - 1),
+        np.dtype(np.uint32): (-(2**31), 2**31 - 1),
+    }
+
+    @staticmethod
+    def _normalize_nodata_for_dtype(
+        value: float, dtype: np.dtype, inherited: bool
+    ) -> float:
+        """Map a NODATA value onto what the JVM will actually store for this dtype.
+
+        Integral bands reject fractional and out-of-range values, and reinterpret the
+        two documented storage mismatches the same way the pixel data is reinterpreted:
+        int8 negatives as unsigned bytes (-2 -> 254) and uint32 values above 2**31 - 1
+        as their signed equivalent. float32 values are rounded to the nearest float32,
+        since that is what the pixels themselves hold. Non-finite values other than NaN
+        are rejected for every dtype.
         """
         if np.isnan(value):
-            return
+            return value
+        dtype = np.dtype(dtype)
+        hint = (
+            " (inherited from the source raster; pass nodata= explicitly, or clean the"
+            " pixel data before changing its dtype)"
+            if inherited
+            else ""
+        )
         if np.issubdtype(dtype, np.integer):
-            if value != int(value):
+            if not np.isfinite(value) or value != int(value):
                 raise ValueError(
-                    f"nodata={value} is not representable in an integral output of dtype "
-                    f"{dtype}; use a whole number, or cast the band data to a floating "
-                    f"dtype first"
+                    f"nodata={value} is not representable in an integral output of "
+                    f"dtype {dtype}{hint}; use a whole number, or cast the band data "
+                    f"to a floating dtype first"
                 )
-            info = np.iinfo(dtype)
-            if not (info.min <= value <= info.max):
+            if dtype == np.dtype(np.int8) and -128 <= value < 0:
+                # int8 pixels are stored as unsigned bytes, so -2 reads back as 254.
+                # Reinterpret the nodata value the same way so it still marks the holes.
+                value = value + 256
+            elif dtype == np.dtype(np.uint32) and 2**31 <= value <= 2**32 - 1:
+                # uint32 pixels are stored as signed ints, so 4294967295 reads back
+                # as -1. Same reinterpretation.
+                value = value - 2**32
+            lo, hi = InDbSedonaRaster._NODATA_STORAGE_RANGES[dtype]
+            if not (lo <= value <= hi):
                 raise ValueError(
-                    f"nodata={value} is outside the range of dtype {dtype} "
-                    f"[{info.min}, {info.max}]"
+                    f"nodata={value} is outside the storage range of dtype {dtype} "
+                    f"[{lo}, {hi}]{hint}"
                 )
+            return float(value)
+        if dtype == np.dtype(np.float32):
+            # Pixels hold float32 values, so the declared nodata has to be one too —
+            # 0.1 would otherwise never equal the float32 0.1 the pixels carry.
+            coerced = float(np.float32(value))
+            if not np.isfinite(coerced):
+                raise ValueError(
+                    f"nodata={value} is not representable as float32{hint}"
+                )
+            return coerced
+        if not np.isfinite(value):
+            raise ValueError(f"nodata={value} must be finite or NaN{hint}")
+        return float(value)
 
     def close(self):
         if self.rasterio_dataset_reader is not None:

@@ -757,6 +757,7 @@ from sedona.spark.sql.types import RasterType
 
 
 def mask_udf(raster):
+    # 假定场景没有空洞；若可能携带 NODATA，请改用 as_numpy_masked() —— 见栅格 UDF 页面
     band1 = raster.as_numpy()[0, :, :]
     mask = (band1 < 1400).astype(np.float32)
     return raster.with_bands(mask)  # 1 个波段，位于输入的网格上
@@ -796,10 +797,14 @@ import rasterio.fill
 def fill_udf(raster):
     # GDAL dataset 不携带 Sedona 的 NODATA，因此要从 SedonaRaster 构造掩膜 ——
     # as_numpy_masked() 会把 NODATA 替换为 NaN。
+    nodata = raster.bands_meta[0].nodata
     valid = ~np.isnan(raster.as_numpy_masked()[0])
     with raster.as_rasterio() as src:
         filled = rasterio.fill.fillnodata(src.read(1), mask=valid.astype(np.uint8))
-    return raster.with_bands(filled, nodata=float("nan"))
+    # fillnodata 只在距有效数据 max_search_distance（默认 100 像素）内插值，更深处
+    # 的像素仍保留哨兵值，因此保留 NODATA 声明。只有确定所有空洞都能被完全填充时，
+    # 才改用 nodata=float("nan")。
+    return raster.with_bands(filled, nodata=nodata)
 
 
 sedona.udf.register("fill_udf", fill_udf, RasterType())

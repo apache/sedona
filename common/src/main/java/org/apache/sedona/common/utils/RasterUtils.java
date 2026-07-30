@@ -321,9 +321,16 @@ public class RasterUtils {
       GridSampleDimension sampleDimension,
       double noDataValue,
       SampleDimensionType sampleDimensionType) {
+    // Encode the value for the sample dimension type first: a float band stores 99.2 as
+    // 99.19999694824219, and everything below — the early return, the split boundaries and the
+    // new category — must agree on the encoded value, not the requested one, or the split
+    // boundaries end up on the wrong side of the category they are supposed to bracket.
+    Number wrappedNoData = TypeMap.wrapSample(noDataValue, sampleDimensionType, false);
+    final double effectiveNoDataValue = wrappedNoData.doubleValue();
+
     // if noDataValues contain noDataValue, then return the original sample dimension
     double existingNoDataValue = getNoDataValue(sampleDimension);
-    if (Double.compare(existingNoDataValue, noDataValue) == 0) {
+    if (Double.compare(existingNoDataValue, effectiveNoDataValue) == 0) {
       return sampleDimension;
     }
 
@@ -343,30 +350,61 @@ public class RasterUtils {
         continue;
       }
       NumberRange<? extends Number> range = category.getRange();
-      if (range.contains((Number) noDataValue)) {
-        // Split this range to two ranges, one is [min, noDataValue), the other is (noDataValue,
-        // max]
+      if (range.contains((Number) effectiveNoDataValue)) {
+        // Split this range to two ranges, one below the no data value and one above it.
         Number min = range.getMinValue();
         Number max = range.getMaxValue();
         final Class<? extends Number> clazz = ClassChanger.getWidestClass(min, max);
-        min = ClassChanger.cast(min, clazz);
-        max = ClassChanger.cast(max, clazz);
-        Number nodata = ClassChanger.cast(noDataValue, clazz);
-        if (min.doubleValue() < noDataValue) {
-          Category leftCategory =
-              new Category(
-                  category.getName(),
-                  category.getColors(),
-                  new NumberRange(clazz, min, range.isMinIncluded(), nodata, false));
-          newCategories.add(leftCategory);
-        }
-        if (max.doubleValue() > noDataValue) {
-          Category rightCategory =
-              new Category(
-                  category.getName(),
-                  category.getColors(),
-                  new NumberRange(clazz, nodata, false, max, range.isMaxIncluded()));
-          newCategories.add(rightCategory);
+        if (clazz == Float.class
+            || clazz == Double.class
+            || effectiveNoDataValue != Math.floor(effectiveNoDataValue)) {
+          // Real-valued split. Exclusive bounds touching the no data value are not reliable
+          // here: they can be reported as overlapping the single-valued no data category by
+          // GridSampleDimension, and a fractional value cannot be cast to an integral range
+          // class at all (it used to be truncated, leaving the boundary value uncategorized).
+          // Adjacent doubles give closed, non-touching ranges instead.
+          if (min.doubleValue() < effectiveNoDataValue) {
+            newCategories.add(
+                new Category(
+                    category.getName(),
+                    category.getColors(),
+                    NumberRange.create(
+                        min.doubleValue(),
+                        range.isMinIncluded(),
+                        Math.nextDown(effectiveNoDataValue),
+                        true)));
+          }
+          if (max.doubleValue() > effectiveNoDataValue) {
+            newCategories.add(
+                new Category(
+                    category.getName(),
+                    category.getColors(),
+                    NumberRange.create(
+                        Math.nextUp(effectiveNoDataValue),
+                        true,
+                        max.doubleValue(),
+                        range.isMaxIncluded())));
+          }
+        } else {
+          min = ClassChanger.cast(min, clazz);
+          max = ClassChanger.cast(max, clazz);
+          Number nodata = ClassChanger.cast(effectiveNoDataValue, clazz);
+          if (min.doubleValue() < effectiveNoDataValue) {
+            Category leftCategory =
+                new Category(
+                    category.getName(),
+                    category.getColors(),
+                    new NumberRange(clazz, min, range.isMinIncluded(), nodata, false));
+            newCategories.add(leftCategory);
+          }
+          if (max.doubleValue() > effectiveNoDataValue) {
+            Category rightCategory =
+                new Category(
+                    category.getName(),
+                    category.getColors(),
+                    new NumberRange(clazz, nodata, false, max, range.isMaxIncluded()));
+            newCategories.add(rightCategory);
+          }
         }
       } else {
         // This category does not contain no data value, just keep it as is.
@@ -375,12 +413,11 @@ public class RasterUtils {
     }
 
     // Add the no data value as a new category
-    Number nodata = TypeMap.wrapSample(noDataValue, sampleDimensionType, false);
     newCategories.add(
         new Category(
             Category.NODATA.getName(),
             new Color(0, 0, 0, 0),
-            new NumberRange(nodata.getClass(), nodata, nodata)));
+            new NumberRange(wrappedNoData.getClass(), wrappedNoData, wrappedNoData)));
 
     return new GridSampleDimension(
         description, newCategories.toArray(new Category[0]), offset, scale);
