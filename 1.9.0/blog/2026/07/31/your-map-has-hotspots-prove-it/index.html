@@ -5596,7 +5596,7 @@
 <!-- more -->
 
 <p>Sedona ships a spatial statistics module — <code>sedona.stats</code> — that answers those questions as DataFrame operations: <strong>Moran's I</strong> for global autocorrelation, <strong>Getis-Ord Gi*</strong> for hotspot significance, <strong>DBSCAN</strong> for density clustering, and <strong>Local Outlier Factor</strong> for spatial anomalies. The classic exploratory-spatial-analysis toolkit, running distributed.</p>
-<p>This post works through all four as one investigation, on a dataset that ships in the Sedona repo: <strong>12,873 OpenStreetMap points of interest</strong> from western Poland (the Lubusz region), loaded straight from the bundled shapefile:</p>
+<p>This post works through all four as one investigation, on a dataset that ships in the Sedona repo: <strong>12,873 OpenStreetMap points of interest</strong> from western Poland's Lubusz region. (Poland is the home country of Sedona PMC member Pawel — which is how a slice of it became the project's sample data.) Loaded straight from the bundled shapefile:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaContext</span>
 
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">&quot;local[*]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">())</span>
@@ -5674,8 +5674,8 @@
 |motel        |Motel Europa    |29.69|
 +-------------+----------------+-----+
 </code></pre></div>
-<p><img alt="The ten highest-LOF points highlighted against the dimmed dataset — isolated ruins, hunting stands, and one famous lone pine tree" src="../../../../spatial-stats-outliers.png" /></p>
-<p>The algorithm has no idea what these features are — and it independently surfaced ruins in the forest, hunting stands, a roadside motel, and <strong>„Sosna Waligóra", a monumental pine tree famous precisely for standing alone</strong>. When your outlier detector rediscovers a landmark whose claim to fame is isolation, it's working.</p>
+<p><img alt="The ten highest-LOF points highlighted against the dimmed dataset — isolated ruins, hunting stands, and one celebrity pine" src="../../../../spatial-stats-outliers.png" /></p>
+<p>The algorithm has no idea what these features are — and it independently surfaced ruins in the forest, hunting stands, a roadside motel, and <strong>Sosna Waligóra</strong>: a celebrity pine near Sulechów with a six-metre waistline, long billed as the thickest in Poland, holding court entirely alone beside a country road. The detector's verdict, in effect: <em>this tree has no neighbors</em>. Correct — and when your outlier detector independently rediscovers a beloved national monument whose whole scene is standing alone, it's working.</p>
 <h2 id="the-same-code-at-any-scale">The same code at any scale<a class="headerlink" href="#the-same-code-at-any-scale" title="Permanent link">&para;</a></h2>
 <p>Everything above is a DataFrame in, a DataFrame out. The neighborhood weights are built with distributed distance joins, DBSCAN's connectivity resolves through connected components across partitions, and LOF's neighbor search rides Sedona's <code>ST_KNN</code> join — so the identical four snippets run on 12 thousand points from a bundled shapefile or on hundreds of millions of GPS pings on a cluster. No sampling step, no "export to a stats package," no single machine holding all the points.</p>
 <p>So next time someone squints at a dot map and says "looks clustered" — prove it, with a z-score, at scale.</p>
@@ -5707,7 +5707,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 31, 2026 09:32:46 UTC">July 31, 2026 09:32:46</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="July 31, 2026 14:32:26 UTC">July 31, 2026 14:32:26</span>
   </span>
 
     
