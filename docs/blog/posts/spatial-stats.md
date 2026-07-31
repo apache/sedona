@@ -19,7 +19,7 @@ Anyone can look at a map and see clumps. The interesting questions are the ones 
 
 Sedona ships a spatial statistics module — `sedona.stats` — that answers those questions as DataFrame operations: **Moran's I** for global autocorrelation, **Getis-Ord Gi\*** for hotspot significance, **DBSCAN** for density clustering, and **Local Outlier Factor** for spatial anomalies. The classic exploratory-spatial-analysis toolkit, running distributed.
 
-This post works through all four as one investigation, on a dataset that ships in the Sedona repo: **12,873 OpenStreetMap points of interest** from western Poland (the Lubusz region), loaded straight from the bundled shapefile:
+This post works through all four as one investigation, on a dataset that ships in the Sedona repo: **12,873 OpenStreetMap points of interest** from western Poland's Lubusz region. (Poland is the home country of Sedona PMC member Pawel — which is how a slice of it became the project's sample data.) Loaded straight from the bundled shapefile:
 
 ```python
 from sedona.spark import SedonaContext
@@ -129,9 +129,9 @@ lof.orderBy("lof", ascending=False).select("fclass", "name", "lof").show(5)
 +-------------+----------------+-----+
 ```
 
-![The ten highest-LOF points highlighted against the dimmed dataset — isolated ruins, hunting stands, and one famous lone pine tree](spatial-stats-outliers.png)
+![The ten highest-LOF points highlighted against the dimmed dataset — isolated ruins, hunting stands, and one celebrity pine](spatial-stats-outliers.png)
 
-The algorithm has no idea what these features are — and it independently surfaced ruins in the forest, hunting stands, a roadside motel, and **„Sosna Waligóra", a monumental pine tree famous precisely for standing alone**. When your outlier detector rediscovers a landmark whose claim to fame is isolation, it's working.
+The algorithm has no idea what these features are — and it independently surfaced ruins in the forest, hunting stands, a roadside motel, and **Sosna Waligóra**: a celebrity pine near Sulechów with a six-metre waistline, long billed as the thickest in Poland, holding court entirely alone beside a country road. The detector's verdict, in effect: *this tree has no neighbors*. Correct — and when your outlier detector independently rediscovers a beloved national monument whose whole scene is standing alone, it's working.
 
 ## The same code at any scale
 
