@@ -41,6 +41,7 @@ import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.RasterAccessors;
 import org.apache.sedona.common.raster.RasterEditors;
+import org.apache.sedona.common.raster.RasterPredicates;
 import org.geotools.api.coverage.SampleDimensionType;
 import org.geotools.api.coverage.grid.GridEnvelope;
 import org.geotools.api.metadata.spatial.PixelOrientation;
@@ -603,6 +604,14 @@ public class RasterUtils {
     CoordinateReferenceSystem targetCRS = raster.getCoordinateReferenceSystem();
     if (targetCRS == null || targetCRS instanceof DefaultEngineeringCRS) {
       targetCRS = DefaultGeographicCRS.WGS84;
+    }
+    int geometrySRID = geometry.getSRID();
+    if (geometrySRID == 0) {
+      geometrySRID = 4326;
+    }
+    if (RasterPredicates.isCRSMatchesSRID(targetCRS, geometrySRID)) {
+      // Preserve the identifier-only fast path for the common matched-CRS case.
+      return geometry;
     }
     return convertCRSIfNeeded(geometry, targetCRS);
   }
