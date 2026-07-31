@@ -59,6 +59,7 @@ import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.Position2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.util.NumberRange;
 import org.locationtech.jts.geom.Geometry;
@@ -588,6 +589,22 @@ public class RasterUtils {
       }
     }
     return geometry;
+  }
+
+  /**
+   * Transforms a geometry into a raster's coordinate space. Missing raster CRS metadata is
+   * interpreted as WGS84, matching the existing raster predicate policy.
+   *
+   * @param raster raster whose coordinate space is the target
+   * @param geometry geometry to transform
+   * @return geometry expressed in the raster's coordinate space
+   */
+  public static Geometry transformToRasterCRS(GridCoverage2D raster, Geometry geometry) {
+    CoordinateReferenceSystem targetCRS = raster.getCoordinateReferenceSystem();
+    if (targetCRS == null || targetCRS instanceof DefaultEngineeringCRS) {
+      targetCRS = DefaultGeographicCRS.WGS84;
+    }
+    return convertCRSIfNeeded(geometry, targetCRS);
   }
 
   /**

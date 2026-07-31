@@ -353,6 +353,20 @@ public class RasterPredicates {
   }
 
   /**
+   * Tests intersection without CRS conversion.
+   *
+   * @param raster raster defining the coordinate space
+   * @param queryWindow geometry already transformed into the raster's coordinate space
+   */
+  static boolean intersectsInRasterCoordinateSpace(GridCoverage2D raster, Geometry queryWindow) {
+    try {
+      return GeometryFunctions.convexHull(raster).intersects(queryWindow);
+    } catch (FactoryException | TransformException e) {
+      throw new RuntimeException("Failed to calculate the convex hull of the raster", e);
+    }
+  }
+
+  /**
    * Test if crs matches the EPSG code. This method tries to avoid the expensive CRS.decode and
    * CRS.equalsIgnoreMetadata calls. If the crs has an identifier matching the EPSG code, we assume
    * that the crs matches the EPSG code.

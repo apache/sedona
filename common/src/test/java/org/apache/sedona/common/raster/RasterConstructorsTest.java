@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.coverage.SampleDimensionType;
 import org.geotools.api.geometry.Position;
@@ -392,6 +393,29 @@ public class RasterConstructorsTest extends RasterTestBase {
     rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 1d, null);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     assertArrayEquals(expected, actual, 0.1d);
+  }
+
+  @Test
+  public void testAsRasterTransformsGeometryToRasterCRS()
+      throws FactoryException, ParseException, TransformException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 5, 1, -1, 0, 0, 4326);
+    Geometry geometry4326 =
+        Constructors.geomFromWKT("POLYGON ((1.2 1.2, 1.2 2.8, 2.8 2.8, 2.8 1.2, 1.2 1.2))", 4326);
+    Geometry geometry3857 = FunctionsGeoTools.transform(geometry4326, "EPSG:4326", "EPSG:3857");
+    geometry3857.setSRID(3857);
+
+    for (boolean useGeometryExtent : new boolean[] {false, true}) {
+      GridCoverage2D expected =
+          RasterConstructors.asRaster(geometry4326, raster, "d", false, 7, 0d, useGeometryExtent);
+      GridCoverage2D actual =
+          RasterConstructors.asRaster(geometry3857, raster, "d", false, 7, 0d, useGeometryExtent);
+
+      double[] expectedPixels = MapAlgebra.bandAsArray(expected, 1);
+      double[] actualPixels = MapAlgebra.bandAsArray(actual, 1);
+      Assert.assertTrue(Arrays.stream(expectedPixels).anyMatch(pixel -> pixel == 7));
+      assertEquals(expected.getEnvelope2D(), actual.getEnvelope2D());
+      assertArrayEquals(expectedPixels, actualPixels, 0d);
+    }
   }
 
   @Test
