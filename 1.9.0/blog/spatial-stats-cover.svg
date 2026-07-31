@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="On a light map canvas, a field of grid cells with one glowing statistically significant hotspot, above the title: Your map has hotspots. Prove it.">
+<defs>
+<linearGradient id="paper" x1="0" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#faf7f0"/><stop offset="1" stop-color="#f3ede0"/></linearGradient>
+<radialGradient id="hotglow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ff7a3d" stop-opacity="0.35"/><stop offset="1" stop-color="#ff7a3d" stop-opacity="0"/></radialGradient>
+</defs>
+
+<rect width="1280" height="720" fill="url(#paper)"/>
+
+<!-- ===== TOP: the hotspot field (visual only, no text overlay) ===== -->
+<!-- graticule -->
+<g stroke="#b9c2d8" stroke-opacity="0.45" stroke-width="1">
+<line x1="160" y1="0" x2="160" y2="470"/><line x1="320" y1="0" x2="320" y2="470"/><line x1="480" y1="0" x2="480" y2="470"/><line x1="640" y1="0" x2="640" y2="470"/><line x1="800" y1="0" x2="800" y2="470"/><line x1="960" y1="0" x2="960" y2="470"/><line x1="1120" y1="0" x2="1120" y2="470"/>
+<line x1="0" y1="120" x2="1280" y2="120"/><line x1="0" y1="240" x2="1280" y2="240"/><line x1="0" y1="360" x2="1280" y2="360"/></g>
+
+<!-- glow under the hot cluster -->
+<ellipse cx="855" cy="225" rx="240" ry="185" fill="url(#hotglow)"/>
+
+<!-- cool/neutral cells (z <= 0) -->
+<g>
+<rect x="86" y="66" width="24" height="24" rx="5" fill="#2a6fd4" opacity="0.75"/>
+<rect x="150" y="120" width="24" height="24" rx="5" fill="#2a6fd4" opacity="0.9"/>
+<rect x="212" y="70" width="24" height="24" rx="5" fill="#5a7fbf" opacity="0.7"/>
+<rect x="120" y="212" width="24" height="24" rx="5" fill="#2a6fd4" opacity="0.8"/>
+<rect x="238" y="170" width="24" height="24" rx="5" fill="#8a8ea0" opacity="0.75"/>
+<rect x="300" y="120" width="24" height="24" rx="5" fill="#2a6fd4" opacity="0.95"/>
+<rect x="332" y="230" width="24" height="24" rx="5" fill="#8a8ea0" opacity="0.7"/>
+<rect x="196" y="300" width="24" height="24" rx="5" fill="#2a6fd4" opacity="0.85"/>
+<rect x="88" y="352" width="24" height="24" rx="5" fill="#5a7fbf" opacity="0.7"/>
+<rect x="278" y="368" width="24" height="24" rx="5" fill="#2a6fd4" opacity="0.8"/>
+<rect x="388" y="60" width="24" height="24" rx="5" fill="#8a8ea0" opacity="0.7"/>
+<rect x="420" y="168" width="24" height="24" rx="5" fill="#2a6fd4" opacity="0.9"/>
+<rect x="452" y="300" width="24" height="24" rx="5" fill="#8a8ea0" opacity="0.75"/>
+<rect x="392" y="392" width="24" height="24" rx="5" fill="#2a6fd4" opacity="0.75"/>
+<rect x="520" y="96" width="24" height="24" rx="5" fill="#2a6fd4" opacity="0.8"/>
+<rect x="560" y="220" width="24" height="24" rx="5" fill="#8a8ea0" opacity="0.8"/>
+<rect x="510" y="330" width="24" height="24" rx="5" fill="#5a7fbf" opacity="0.75"/>
+<rect x="610" y="380" width="24" height="24" rx="5" fill="#2a6fd4" opacity="0.8"/>
+<rect x="648" y="120" width="24" height="24" rx="5" fill="#8a8ea0" opacity="0.7"/>
+<rect x="688" y="270" width="24" height="24" rx="5" fill="#8a8ea0" opacity="0.85"/>
+<rect x="1120" y="90" width="24" height="24" rx="5" fill="#2a6fd4" opacity="0.8"/>
+<rect x="1160" y="210" width="24" height="24" rx="5" fill="#8a8ea0" opacity="0.75"/>
+<rect x="1108" y="330" width="24" height="24" rx="5" fill="#2a6fd4" opacity="0.9"/>
+<rect x="1190" y="400" width="24" height="24" rx="5" fill="#5a7fbf" opacity="0.7"/>
+<rect x="1052" y="420" width="24" height="24" rx="5" fill="#8a8ea0" opacity="0.75"/>
+</g>
+
+<!-- warm shoulder cells -->
+<g>
+<rect x="742" y="145" width="26" height="26" rx="5" fill="#e8804d" opacity="0.85"/>
+<rect x="920" y="135" width="26" height="26" rx="5" fill="#e8804d" opacity="0.8"/>
+<rect x="962" y="245" width="26" height="26" rx="5" fill="#e2683a" opacity="0.9"/>
+<rect x="736" y="285" width="26" height="26" rx="5" fill="#e2683a" opacity="0.85"/>
+<rect x="806" y="345" width="26" height="26" rx="5" fill="#e8804d" opacity="0.8"/>
+<rect x="920" y="325" width="26" height="26" rx="5" fill="#e8804d" opacity="0.75"/>
+</g>
+
+<!-- significant hotspot core -->
+<g stroke="#fffdf6" stroke-width="2.5">
+<rect x="794" y="172" width="38" height="38" rx="6" fill="#d64518"/>
+<rect x="838" y="168" width="38" height="38" rx="6" fill="#ef5a24"/>
+<rect x="884" y="180" width="38" height="38" rx="6" fill="#d64518"/>
+<rect x="804" y="216" width="38" height="38" rx="6" fill="#f0662e"/>
+<rect x="850" y="212" width="38" height="38" rx="6" fill="#e04a15"/>
+<rect x="894" y="226" width="38" height="38" rx="6" fill="#d64518"/>
+<rect x="826" y="260" width="38" height="38" rx="6" fill="#d64518"/>
+<rect x="870" y="268" width="38" height="38" rx="6" fill="#ef5a24"/>
+</g>
+
+<!-- z-score callout -->
+<circle cx="866" cy="232" r="92" fill="none" stroke="#7a4a28" stroke-width="1.6" stroke-dasharray="7 6" opacity="0.75"/>
+<line x1="950" y1="172" x2="984" y2="140" stroke="#7a4a28" stroke-width="1.4"/>
+<text x="996" y="130" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="26" font-weight="700" fill="#3a2418">z = 14.9</text>
+<text x="996" y="164" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="20" fill="#7a5c48">p &#8776; 0 &#183; not luck</text>
+
+<!-- legend strip -->
+<g font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="21">
+<rect x="88" y="420" width="24" height="24" rx="5" fill="#2a6fd4"/><text x="122" y="440" fill="#3a3648">cold</text>
+<rect x="206" y="420" width="24" height="24" rx="5" fill="#8a8ea0"/><text x="240" y="440" fill="#3a3648">noise</text>
+<rect x="342" y="420" width="24" height="24" rx="5" fill="#d64518"/><text x="376" y="440" fill="#3a3648">hotspot &#183; 99% significant</text>
+</g>
+
+<!-- ===== BOTTOM: title band ===== -->
+<rect x="0" y="470" width="1280" height="250" fill="#fffdf6"/>
+<line x1="0" y1="470" x2="1280" y2="470" stroke="#ddd2bd" stroke-width="1.5"/>
+
+<text x="72" y="530" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="700" letter-spacing="5" fill="#c05a10">APACHE SEDONA · SPATIAL STATISTICS</text>
+<text x="70" y="596" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="60" font-weight="800" fill="#241a20">Your map has hotspots. <tspan fill="#e04a15">Prove it.</tspan></text>
+<text x="72" y="642" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="24" font-weight="500" fill="#5a4e5c">Moran&#8217;s I &#183; Getis-Ord Gi* &#183; DBSCAN &#183; Local Outlier Factor — distributed, as Sedona DataFrames.</text>
+
+<g font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="19">
+<rect x="72" y="662" width="486" height="46" rx="9" fill="#f4eddd" stroke="#d9cdb4" stroke-width="1.4"/>
+<text x="92" y="693" fill="#0f766e">from sedona.spark.stats <tspan fill="#7c3aed">import</tspan> <tspan fill="#b45309">*</tspan></text>
+</g>
+<text x="592" y="693" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="17" fill="#6e6276">clusters &#183; hotspots &#183; outliers &#183; autocorrelation — at any scale</text>
+</svg>
