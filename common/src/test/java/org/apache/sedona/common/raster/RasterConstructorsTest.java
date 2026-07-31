@@ -400,7 +400,7 @@ public class RasterConstructorsTest extends RasterTestBase {
       throws FactoryException, ParseException, TransformException {
     GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 5, 1, -1, 0, 0, 4326);
     Geometry geometry4326 =
-        Constructors.geomFromWKT("POLYGON ((1.2 1.2, 1.2 2.8, 2.8 2.8, 2.8 1.2, 1.2 1.2))", 4326);
+        Constructors.geomFromWKT("POLYGON ((1.2 1.2, 1.2 2.8, 3.6 2.8, 3.6 1.2, 1.2 1.2))", 4326);
     Geometry geometry3857 = FunctionsGeoTools.transform(geometry4326, "EPSG:4326", "EPSG:3857");
     geometry3857.setSRID(3857);
 
