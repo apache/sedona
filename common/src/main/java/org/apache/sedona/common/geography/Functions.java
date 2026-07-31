@@ -20,7 +20,9 @@ package org.apache.sedona.common.geography;
 
 import com.google.common.geometry.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.sedona.common.S2Geography.*;
 import org.apache.sedona.common.sphere.Haversine;
 import org.locationtech.jts.geom.Coordinate;
@@ -466,14 +468,14 @@ public class Functions {
    */
   private static Geography createDegenerateHull(
       Geometry sourceGeometry, S2Point[] endpoints, int srid) {
-    Coordinate[] sourceCoordinates = sourceGeometry.getCoordinates();
+    SourceCoordinateIndex sourceIndex = new SourceCoordinateIndex(sourceGeometry.getCoordinates());
     GeometryFactory factory = new GeometryFactory(new PrecisionModel(), srid);
-    Coordinate first = nearestSourceCoordinate(endpoints[0], sourceCoordinates);
+    Coordinate first = sourceIndex.resolve(endpoints[0]);
     Geometry result;
     if (endpoints.length == 1) {
       result = factory.createPoint(first);
     } else {
-      Coordinate second = nearestSourceCoordinate(endpoints[1], sourceCoordinates);
+      Coordinate second = sourceIndex.resolve(endpoints[1]);
       result = factory.createLineString(new Coordinate[] {first, second});
     }
     return WKBGeography.fromJTS(result);
@@ -485,15 +487,44 @@ public class Functions {
    * be rounded back to longitude/latitude.
    */
   private static Geography createPolygonHull(Geometry sourceGeometry, S2Loop loop, int srid) {
-    Coordinate[] sourceCoordinates = sourceGeometry.getCoordinates();
+    SourceCoordinateIndex sourceIndex = new SourceCoordinateIndex(sourceGeometry.getCoordinates());
     Coordinate[] hullCoordinates = new Coordinate[loop.numVertices() + 1];
     for (int i = 0; i < loop.numVertices(); i++) {
-      hullCoordinates[i] = nearestSourceCoordinate(loop.vertex(i), sourceCoordinates);
+      hullCoordinates[i] = sourceIndex.resolve(loop.vertex(i));
     }
     hullCoordinates[loop.numVertices()] = new Coordinate(hullCoordinates[0]);
 
     GeometryFactory factory = new GeometryFactory(new PrecisionModel(), srid);
     return WKBGeography.fromJTS(factory.createPolygon(hullCoordinates));
+  }
+
+  /**
+   * Resolves the S2 vertices selected by the convex-hull query to their exact source coordinates.
+   * S2ConvexHullQuery retains input vertices for non-degenerate hulls, so the normal path is an
+   * exact hash lookup. The nearest-coordinate fallback covers directly constructed S2 Geography
+   * values whose JTS conversion may not reproduce the same S2Point bits.
+   */
+  private static final class SourceCoordinateIndex {
+    private final Coordinate[] sourceCoordinates;
+    private final Map<S2Point, Coordinate> exactCoordinates = new HashMap<>();
+
+    SourceCoordinateIndex(Coordinate[] sourceCoordinates) {
+      this.sourceCoordinates = sourceCoordinates;
+      for (Coordinate coordinate : sourceCoordinates) {
+        if (!Double.isFinite(coordinate.x) || !Double.isFinite(coordinate.y)) continue;
+        S2Point point = S2LatLng.fromDegrees(coordinate.y, coordinate.x).toPoint();
+        // Keep the first source spelling when equivalent coordinates map to the same S2 point.
+        exactCoordinates.putIfAbsent(point, new Coordinate(coordinate.x, coordinate.y));
+      }
+    }
+
+    Coordinate resolve(S2Point point) {
+      Coordinate coordinate = exactCoordinates.get(point);
+      if (coordinate != null) {
+        return new Coordinate(coordinate.x, coordinate.y);
+      }
+      return nearestSourceCoordinate(point, sourceCoordinates);
+    }
   }
 
   private static Coordinate nearestSourceCoordinate(
