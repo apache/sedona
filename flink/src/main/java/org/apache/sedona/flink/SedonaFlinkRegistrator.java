@@ -19,15 +19,8 @@
 package org.apache.sedona.flink;
 
 import java.util.Arrays;
-import org.apache.flink.api.common.serialization.SerializerConfigImpl;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.sedona.common.geometryObjects.Circle;
-import org.apache.sedona.common.geometrySerde.GeometrySerde;
-import org.apache.sedona.common.geometrySerde.SpatialIndexSerde;
-import org.locationtech.jts.geom.*;
-import org.locationtech.jts.index.quadtree.Quadtree;
-import org.locationtech.jts.index.strtree.STRtree;
 
 public class SedonaFlinkRegistrator {
 
@@ -50,20 +43,6 @@ public class SedonaFlinkRegistrator {
    */
   @Deprecated
   public static void registerType(StreamExecutionEnvironment env) {
-    GeometrySerde serializer = new GeometrySerde();
-    SpatialIndexSerde indexSerializer = new SpatialIndexSerde(serializer);
-    SerializerConfigImpl serializerConfig =
-        (SerializerConfigImpl) env.getConfig().getSerializerConfig();
-    serializerConfig.registerTypeWithKryoSerializer(Point.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(LineString.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(Polygon.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(MultiPoint.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(MultiLineString.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(MultiPolygon.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(GeometryCollection.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(Circle.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(Envelope.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(Quadtree.class, indexSerializer);
-    serializerConfig.registerTypeWithKryoSerializer(STRtree.class, indexSerializer);
+    SedonaContext.registerGeometryKryoSerializers(env);
   }
 }

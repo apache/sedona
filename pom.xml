@@ -767,18 +767,6 @@
             </properties>
         </profile>
         <profile>
-            <id>sedona-flink-2.2</id>
-            <activation>
-                <property>
-                    <name>flink</name>
-                    <value>2.2</value>
-                </property>
-            </activation>
-            <properties>
-                <flink.version>2.2.1</flink.version>
-            </properties>
-        </profile>
-        <profile>
             <id>sedona-spark-4.1</id>
             <activation>
                 <property>

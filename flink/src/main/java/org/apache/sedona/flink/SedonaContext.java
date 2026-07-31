@@ -19,7 +19,9 @@
 package org.apache.sedona.flink;
 
 import java.util.Arrays;
-import org.apache.flink.api.common.serialization.SerializerConfigImpl;
+import java.util.List;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.sedona.common.geometryObjects.Circle;
@@ -48,24 +50,7 @@ public class SedonaContext {
   public static StreamTableEnvironment create(
       StreamExecutionEnvironment env, StreamTableEnvironment tblEnv) {
     TelemetryCollector.send("flink", "java");
-    GeometrySerde serializer = new GeometrySerde();
-    SpatialIndexSerde indexSerializer = new SpatialIndexSerde(serializer);
-    // ExecutionConfig.registerTypeWithKryoSerializer was removed; the registration methods
-    // now live only on the SerializerConfigImpl returned by getSerializerConfig() (the
-    // SerializerConfig interface itself exposes read-only getters).
-    SerializerConfigImpl serializerConfig =
-        (SerializerConfigImpl) env.getConfig().getSerializerConfig();
-    serializerConfig.registerTypeWithKryoSerializer(Point.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(LineString.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(Polygon.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(MultiPoint.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(MultiLineString.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(MultiPolygon.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(GeometryCollection.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(Circle.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(Envelope.class, serializer);
-    serializerConfig.registerTypeWithKryoSerializer(Quadtree.class, indexSerializer);
-    serializerConfig.registerTypeWithKryoSerializer(STRtree.class, indexSerializer);
+    registerGeometryKryoSerializers(env);
 
     Arrays.stream(Catalog.getFuncs())
         .forEach(
@@ -74,5 +59,41 @@ public class SedonaContext {
         .forEach(
             func -> tblEnv.createTemporarySystemFunction(func.getClass().getSimpleName(), func));
     return tblEnv;
+  }
+
+  /**
+   * ExecutionConfig.registerTypeWithKryoSerializer was removed; Flink 1.19+'s public replacement is
+   * the declarative pipeline.serialization-config option (FLIP-398), applied here via the
+   * SerializerConfig interface's own configure(ReadableConfig, ClassLoader) — no cast to the
+   * internal SerializerConfigImpl needed. Flink instantiates GeometrySerde/SpatialIndexSerde itself
+   * via their no-arg constructors, so only the class names are registered here.
+   */
+  static void registerGeometryKryoSerializers(StreamExecutionEnvironment env) {
+    List<String> kryoRegistrations =
+        Arrays.asList(
+            kryoRegistration(Point.class, GeometrySerde.class),
+            kryoRegistration(LineString.class, GeometrySerde.class),
+            kryoRegistration(Polygon.class, GeometrySerde.class),
+            kryoRegistration(MultiPoint.class, GeometrySerde.class),
+            kryoRegistration(MultiLineString.class, GeometrySerde.class),
+            kryoRegistration(MultiPolygon.class, GeometrySerde.class),
+            kryoRegistration(GeometryCollection.class, GeometrySerde.class),
+            kryoRegistration(Circle.class, GeometrySerde.class),
+            kryoRegistration(Envelope.class, GeometrySerde.class),
+            kryoRegistration(Quadtree.class, SpatialIndexSerde.class),
+            kryoRegistration(STRtree.class, SpatialIndexSerde.class));
+
+    Configuration configuration = new Configuration();
+    configuration.set(PipelineOptions.SERIALIZATION_CONFIG, kryoRegistrations);
+    env.getConfig()
+        .getSerializerConfig()
+        .configure(configuration, Thread.currentThread().getContextClassLoader());
+  }
+
+  private static String kryoRegistration(Class<?> type, Class<?> serializer) {
+    return type.getName()
+        + ": {type: kryo, kryo-type: registered, class: "
+        + serializer.getName()
+        + "}";
   }
 }

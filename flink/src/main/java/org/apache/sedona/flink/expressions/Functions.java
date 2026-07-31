@@ -2628,6 +2628,9 @@ public class Functions {
     // automatically; under Flink 2.2.1 that path throws a ValidationException during type
     // inference. Every other RAW hint in this file avoids that by providing an explicit
     // serializer, so this does the same instead of depending on Flink's auto-derivation.
+    // NOTE: this changed the wire format from the old auto-derived Kryo serializer (Sedona 2.0.0)
+    // — stateful Table/SQL jobs with this result in their state cannot restore from a checkpoint
+    // or savepoint taken before this change. See release notes for Sedona 2.0.0.
     @DataTypeHint(
         value = "RAW",
         rawSerializer = GeometryDoublePairTypeSerializer.class,
