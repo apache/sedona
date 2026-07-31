@@ -24,9 +24,11 @@ import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2LatLngRect;
 import com.google.common.geometry.S2Loop;
 import com.google.common.geometry.S2Point;
+import com.google.common.geometry.S2Polyline;
 import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.S2Geography.GeographyWKBSerializer;
 import org.apache.sedona.common.S2Geography.PolygonGeography;
+import org.apache.sedona.common.S2Geography.SinglePolylineGeography;
 import org.apache.sedona.common.S2Geography.WKBGeography;
 import org.apache.sedona.common.geography.Constructors;
 import org.apache.sedona.common.geography.Functions;
@@ -1043,6 +1045,42 @@ public class FunctionTest {
       Geography right = Constructors.geogFromWKT(testCase[1], 4326);
       assertEquals(testCase[2], Functions.asText(Functions.intersection(left, right)));
     }
+  }
+
+  @Test
+  public void intersection_preservesVerticesInheritedFromEitherInput() throws ParseException {
+    Geography point = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    assertEquals("POINT (1 2)", Functions.asText(Functions.intersection(point, point)));
+
+    Geography polygon = Constructors.geogFromWKT("POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))", 4326);
+    Geometry polygonIdentity =
+        Constructors.geogToGeometry(Functions.intersection(polygon, polygon));
+    assertTrue(polygonIdentity.toText(), polygonIdentity instanceof Polygon);
+    for (Coordinate coordinate : polygonIdentity.getCoordinates()) {
+      assertEquals(Math.rint(coordinate.x), coordinate.x, 0.0);
+      assertEquals(Math.rint(coordinate.y), coordinate.y, 0.0);
+    }
+
+    Geometry containedPoint = Constructors.geogToGeometry(Functions.intersection(polygon, point));
+    assertTrue(containedPoint.toText(), containedPoint instanceof Point);
+    assertEquals(1.0, containedPoint.getCoordinate().x, 0.0);
+    assertEquals(2.0, containedPoint.getCoordinate().y, 0.0);
+
+    Geography vertical = Constructors.geogFromWKT("LINESTRING (0 0, 0 10)", 4326);
+    Geography touching = Constructors.geogFromWKT("LINESTRING (0 5, 5 5)", 4326);
+    assertEquals("POINT (0 5)", Functions.asText(Functions.intersection(vertical, touching)));
+  }
+
+  @Test
+  public void intersection_acceptsNativeSingleVertexPolyline() {
+    S2Point vertex = S2LatLng.fromDegrees(2, 1).toPoint();
+    Geography polyline =
+        new SinglePolylineGeography(new S2Polyline(java.util.Collections.singletonList(vertex)));
+
+    Geometry result = Constructors.geogToGeometry(Functions.intersection(polyline, polyline));
+    assertTrue(result.toText(), result instanceof Point);
+    assertEquals(1.0, result.getCoordinate().x, EPS);
+    assertEquals(2.0, result.getCoordinate().y, EPS);
   }
 
   @Test

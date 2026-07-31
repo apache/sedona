@@ -536,12 +536,28 @@ public class Functions {
       }
     }
 
+    SourceCoordinateIndex(Coordinate[] first, Coordinate[] second) {
+      this(concatenateCoordinates(first, second));
+    }
+
+    private static Coordinate[] concatenateCoordinates(Coordinate[] first, Coordinate[] second) {
+      Coordinate[] coordinates = new Coordinate[first.length + second.length];
+      System.arraycopy(first, 0, coordinates, 0, first.length);
+      System.arraycopy(second, 0, coordinates, first.length, second.length);
+      return coordinates;
+    }
+
     Coordinate resolve(S2Point point) {
       Coordinate coordinate = exactCoordinates.get(point);
       if (coordinate != null) {
         return new Coordinate(coordinate.x, coordinate.y);
       }
       return nearestSourceCoordinate(point, sourceCoordinates);
+    }
+
+    Coordinate resolveExact(S2Point point) {
+      Coordinate coordinate = exactCoordinates.get(point);
+      return coordinate == null ? null : new Coordinate(coordinate.x, coordinate.y);
     }
   }
 
@@ -860,14 +876,45 @@ public class Functions {
           "Failed to compute Geography intersection: " + error.text());
     }
 
+    List<S2Point> resultPoints = pointLayer.getPointVector();
+    List<S2Polyline> resultPolylines = polylineLayer.getPolylines();
+    S2Polygon resultPolygon = polygonLayer.getPolygon();
+    SourceCoordinateIndex sourceCoordinates =
+        resultPoints.isEmpty() && resultPolylines.isEmpty() && resultPolygon.isEmpty()
+            ? null
+            : intersectionSourceCoordinates(g1, g2);
     Geometry result =
         intersectionResult(
-            pointLayer.getPointVector(),
-            polylineLayer.getPolylines(),
-            polygonLayer.getPolygon(),
+            resultPoints,
+            resultPolylines,
+            resultPolygon,
             Math.min(input1.dimension, input2.dimension),
-            geometryFactory);
+            geometryFactory,
+            sourceCoordinates);
     return WKBGeography.fromJTS(result);
+  }
+
+  /**
+   * Indexes original coordinate spelling only for WKB-backed inputs. Native S2 Geography values
+   * have already lost that spelling, and converting them to JTS here can reject valid S2
+   * degeneracies such as a one-vertex polyline.
+   */
+  private static SourceCoordinateIndex intersectionSourceCoordinates(
+      Geography first, Geography second) {
+    Coordinate[] firstCoordinates =
+        first instanceof WKBGeography
+            ? ((WKBGeography) first).getJTSGeometry().getCoordinates()
+            : null;
+    Coordinate[] secondCoordinates =
+        second instanceof WKBGeography
+            ? ((WKBGeography) second).getJTSGeometry().getCoordinates()
+            : null;
+    if (firstCoordinates == null) {
+      return secondCoordinates == null ? null : new SourceCoordinateIndex(secondCoordinates);
+    }
+    return secondCoordinates == null
+        ? new SourceCoordinateIndex(firstCoordinates)
+        : new SourceCoordinateIndex(firstCoordinates, secondCoordinates);
   }
 
   private static IntersectionInput intersectionInput(Geography geography) {
@@ -1021,7 +1068,8 @@ public class Functions {
       List<S2Polyline> polylines,
       S2Polygon polygon,
       int emptyDimension,
-      GeometryFactory geometryFactory) {
+      GeometryFactory geometryFactory,
+      SourceCoordinateIndex sourceCoordinates) {
     List<S2Point> outputPoints = new ArrayList<>(points);
     List<LineString> outputLines = new ArrayList<>(polylines.size());
     for (S2Polyline polyline : polylines) {
@@ -1033,7 +1081,7 @@ public class Functions {
       }
       Coordinate[] coordinates = new Coordinate[polyline.numVertices()];
       for (int i = 0; i < polyline.numVertices(); i++) {
-        coordinates[i] = toCoordinate(polyline.vertex(i));
+        coordinates[i] = intersectionCoordinate(polyline.vertex(i), sourceCoordinates);
       }
       outputLines.add(geometryFactory.createLineString(coordinates));
     }
@@ -1042,7 +1090,7 @@ public class Functions {
     if (!outputPoints.isEmpty()) {
       Coordinate[] coordinates = new Coordinate[outputPoints.size()];
       for (int i = 0; i < outputPoints.size(); i++) {
-        coordinates[i] = toCoordinate(outputPoints.get(i));
+        coordinates[i] = intersectionCoordinate(outputPoints.get(i), sourceCoordinates);
       }
       components.add(
           coordinates.length == 1
@@ -1059,7 +1107,8 @@ public class Functions {
 
     if (!polygon.isEmpty()) {
       Geometry polygonGeometry =
-          Constructors.geogToGeometry(new PolygonGeography(polygon), geometryFactory);
+          Constructors.s2PolygonToGeometry(
+              polygon, geometryFactory, point -> intersectionCoordinate(point, sourceCoordinates));
       if (!polygonGeometry.isEmpty()) components.add(polygonGeometry);
     }
 
@@ -1077,6 +1126,15 @@ public class Functions {
     }
     if (components.size() == 1) return components.get(0);
     return geometryFactory.createGeometryCollection(components.toArray(new Geometry[0]));
+  }
+
+  private static Coordinate intersectionCoordinate(
+      S2Point point, SourceCoordinateIndex sourceCoordinates) {
+    if (sourceCoordinates != null) {
+      Coordinate source = sourceCoordinates.resolveExact(point);
+      if (source != null) return source;
+    }
+    return toCoordinate(point);
   }
 
   private static Coordinate toCoordinate(S2Point point) {
