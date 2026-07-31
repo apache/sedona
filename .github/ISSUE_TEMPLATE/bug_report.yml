@@ -41,6 +41,7 @@ body:
     attributes:
       label: Steps to reproduce
       description: Provide a minimal example or the exact steps that reproduce the problem.
+      render: shell
     validations:
       required: true
   - type: input
@@ -68,6 +69,8 @@ body:
         - Scala
         - Java
         - Python
+        - SQL
+        - R
         - Other
     validations:
       required: true
@@ -94,3 +97,10 @@ body:
       placeholder: e.g. Standalone, AWS EC2, EMR, Azure, or Databricks
     validations:
       required: true
+  - type: checkboxes
+    id: existing-issues
+    attributes:
+      label: Existing issues
+      options:
+        - label: I searched the existing issues and did not find a duplicate.
+          required: true
