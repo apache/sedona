@@ -577,8 +577,8 @@ public class RasterUtils {
     // In Sedona vector, we do not perform implicit CRS transform. Everything must be done
     // explicitly via ST_Transform
     // In Sedona raster, we do implicit CRS transform if the raster has a CRS. If the SRID of
-    // the geometry is 0, we assume it is 4326.
-    if (geomSRID == 0) {
+    // the geometry is not positive, we assume it is 4326.
+    if (geomSRID <= 0) {
       geomSRID = 4326;
     }
     if (targetCRS != null && !(targetCRS instanceof DefaultEngineeringCRS)) {
@@ -606,7 +606,7 @@ public class RasterUtils {
       targetCRS = DefaultGeographicCRS.WGS84;
     }
     int geometrySRID = geometry.getSRID();
-    if (geometrySRID == 0) {
+    if (geometrySRID <= 0) {
       geometrySRID = 4326;
     }
     if (RasterPredicates.isCRSMatchesSRID(targetCRS, geometrySRID)) {
