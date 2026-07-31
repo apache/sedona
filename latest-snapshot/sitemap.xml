@@ -6770,6 +6770,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/01/08/spatial-query-benchmarking-databricks/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/blog/2026/07/31/your-map-has-hotspots-prove-it/</loc>
+        <lastmod>2026-07-31</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/2026/07/31/your-map-has-hotspots-prove-it/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/07/31/your-map-has-hotspots-prove-it/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/blog/2025/10/21/managing-spatial-tables-in-data-lakehouses-with-iceberg/</loc>
         <lastmod>2026-07-31</lastmod>
         <changefreq>daily</changefreq>
@@ -13572,6 +13579,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/2026/01/08/spatial-query-benchmarking-databricks/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/01/08/spatial-query-benchmarking-databricks/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/2026/07/31/your-map-has-hotspots-prove-it/</loc>
+        <lastmod>2026-07-31</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/2026/07/31/your-map-has-hotspots-prove-it/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/07/31/your-map-has-hotspots-prove-it/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/blog/2025/10/21/managing-spatial-tables-in-data-lakehouses-with-iceberg/</loc>
