@@ -311,9 +311,8 @@ public class Functions {
       return createDegenerateHull(sourceGeometry, degenerateHull, g.getSRID());
     }
 
-    Geography result = new PolygonGeography(new S2Polygon(loop));
-    result.setSRID(g.getSRID());
-    return WKBGeography.fromS2Geography(result);
+    if (sourceGeometry == null) sourceGeometry = toJTS(g);
+    return createPolygonHull(sourceGeometry, loop, g.getSRID());
   }
 
   /**
@@ -478,6 +477,23 @@ public class Functions {
       result = factory.createLineString(new Coordinate[] {first, second});
     }
     return WKBGeography.fromJTS(result);
+  }
+
+  /**
+   * Writes a polygonal hull from the exact source coordinates selected by S2. For a non-degenerate
+   * hull, S2ConvexHullQuery returns a subset of its input vertices, so no computed vertex needs to
+   * be rounded back to longitude/latitude.
+   */
+  private static Geography createPolygonHull(Geometry sourceGeometry, S2Loop loop, int srid) {
+    Coordinate[] sourceCoordinates = sourceGeometry.getCoordinates();
+    Coordinate[] hullCoordinates = new Coordinate[loop.numVertices() + 1];
+    for (int i = 0; i < loop.numVertices(); i++) {
+      hullCoordinates[i] = nearestSourceCoordinate(loop.vertex(i), sourceCoordinates);
+    }
+    hullCoordinates[loop.numVertices()] = new Coordinate(hullCoordinates[0]);
+
+    GeometryFactory factory = new GeometryFactory(new PrecisionModel(), srid);
+    return WKBGeography.fromJTS(factory.createPolygon(hullCoordinates));
   }
 
   private static Coordinate nearestSourceCoordinate(

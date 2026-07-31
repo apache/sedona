@@ -304,6 +304,25 @@ public class FunctionTest {
   }
 
   @Test
+  public void convexHull_polygonPreservesExactSourceCoordinates() throws ParseException {
+    Geography input =
+        Constructors.geogFromWKT("MULTIPOINT ((0 0), (10 0), (10 10), (0 10), (5 5))", 4326);
+    Geometry hull = Constructors.geogToGeometry(Functions.convexHull(input));
+
+    assertTrue(hull instanceof Polygon);
+    assertEquals(5, hull.getNumPoints());
+    for (Coordinate coordinate : hull.getCoordinates()) {
+      boolean isExactSourceVertex =
+          (coordinate.x == 0.0 && coordinate.y == 0.0)
+              || (coordinate.x == 10.0 && coordinate.y == 0.0)
+              || (coordinate.x == 10.0 && coordinate.y == 10.0)
+              || (coordinate.x == 0.0 && coordinate.y == 10.0);
+      assertTrue(
+          "Hull vertex drifted from its source coordinate: " + coordinate, isExactSourceVertex);
+    }
+  }
+
+  @Test
   public void convexHull_collectionAndAntimeridianAreSpherical() throws ParseException {
     Geography collection =
         Constructors.geogFromWKT(
