@@ -40,8 +40,8 @@ import org.locationtech.jts.io.WKBConstants;
  *
  * <p>Key optimizations (per paleolimbot's review): - dimension() reads WKB type byte directly (no
  * S2 parse) - region()/getCellUnionBound() for points read coordinates from WKB (no S2 parse) -
- * shape()/numShapes() use WkbS2Shape for simple types (no S2Polygon construction) - ShapeIndex is
- * built from WkbS2Shape directly (skips Geography layer)
+ * shape()/numShapes() use WkbS2Shape for simple XY types (no S2Polygon construction) - ShapeIndex
+ * is built from WkbS2Shape directly when the stored WKB is XY (skips Geography layer)
  */
 public class WKBGeography extends Geography {
 
@@ -144,9 +144,10 @@ public class WKBGeography extends Geography {
   }
 
   /**
-   * Returns a ShapeIndexGeography, lazily built on first access. For simple types (Point,
+   * Returns a ShapeIndexGeography, lazily built on first access. For simple XY types (Point,
    * LineString, Polygon), builds the index directly from WkbS2Shape — no S2 Geography construction
-   * needed.
+   * needed. Higher-dimensional WKB is read through the full reader, which consumes and ignores Z/M
+   * ordinates for spherical operations.
    */
   public ShapeIndexGeography getShapeIndexGeography() {
     ShapeIndexGeography result = shapeIndexGeography;
@@ -155,13 +156,14 @@ public class WKBGeography extends Geography {
         result = shapeIndexGeography;
         if (result == null) {
           int type = wkbBaseType();
-          if (type >= 1 && type <= 3) {
+          if (type >= 1 && type <= 3 && !wkbHasZOrM()) {
             // Point/LineString/Polygon: build ShapeIndex from WkbS2Shape
             // Avoids S2Loop/S2Polygon internal index builds
             result = new ShapeIndexGeography();
             result.shapeIndex.add(new WkbS2Shape(wkbBytes));
           } else {
-            // Multi-types and collections fall back to full S2 parse
+            // Multi-types, collections, and higher-dimensional WKB fall back to the full reader.
+            // WkbS2Shape is deliberately XY-only, while WKBReader consumes and ignores Z/M.
             result = new ShapeIndexGeography(getS2Geography());
           }
           shapeIndexGeography = result;
@@ -238,15 +240,21 @@ public class WKBGeography extends Geography {
     return wkbHasSRID() ? 9 : 5;
   }
 
-  /** Throws if the stored WKB uses Z or M dimensions (EWKB flag or ISO type {@code >= 1000}). */
-  private void requireXYOnly() {
+  /** Returns whether the stored WKB uses Z or M dimensions (EWKB flags or ISO type offsets). */
+  private boolean wkbHasZOrM() {
     int raw = wkbRawType();
     boolean ewkbZ = (raw & EWKB_Z_FLAG) != 0;
     boolean ewkbM = (raw & EWKB_M_FLAG) != 0;
     boolean isoZM = (raw & 0xffff) >= 1000;
-    if (ewkbZ || ewkbM || isoZM) {
+    return ewkbZ || ewkbM || isoZM;
+  }
+
+  /** Throws if the stored WKB uses Z or M dimensions (EWKB flag or ISO type {@code >= 1000}). */
+  private void requireXYOnly() {
+    if (wkbHasZOrM()) {
       throw new UnsupportedOperationException(
-          "WKBGeography only supports 2D WKB; got Z/M type: 0x" + Integer.toHexString(raw));
+          "Direct S2Point extraction only supports 2D WKB; got Z/M type: 0x"
+              + Integer.toHexString(wkbRawType()));
     }
   }
 
@@ -347,7 +355,7 @@ public class WKBGeography extends Geography {
   @Override
   public S2Shape shape(int id) {
     int type = wkbBaseType();
-    if (type >= 1 && type <= 3) {
+    if (type >= 1 && type <= 3 && !wkbHasZOrM()) {
       return new WkbS2Shape(wkbBytes);
     }
     return getS2Geography().shape(id);
@@ -355,7 +363,7 @@ public class WKBGeography extends Geography {
 
   @Override
   public S2Region region() {
-    if (isPoint()) {
+    if (isPoint() && !wkbHasZOrM()) {
       return new S2PointRegion(extractPoint());
     }
     return getS2Geography().region();
@@ -363,7 +371,7 @@ public class WKBGeography extends Geography {
 
   @Override
   public void getCellUnionBound(List<S2CellId> cellIds) {
-    if (isPoint()) {
+    if (isPoint() && !wkbHasZOrM()) {
       cellIds.add(S2CellId.fromPoint(extractPoint()));
       return;
     }

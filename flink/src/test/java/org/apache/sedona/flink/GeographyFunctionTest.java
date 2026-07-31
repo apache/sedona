@@ -167,6 +167,49 @@ public class GeographyFunctionTest extends TestBase {
   }
 
   @Test
+  public void testIntersectionReturnsGeographyAndPreservesFirstSRID() throws Exception {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT overlap, ST_GeometryType(overlap) AS overlap_type, "
+                + "ST_Area(overlap) AS overlap_area FROM ("
+                + "SELECT ST_Intersection("
+                + "ST_GeogFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))', 3857), "
+                + "ST_GeogFromWKT('POLYGON ((5 5, 15 5, 15 15, 5 15, 5 5))', 4326)) "
+                + "AS overlap)");
+
+    Row row = first(table);
+    Geography overlap = row.getFieldAs("overlap");
+    assertEquals(3857, overlap.getSRID());
+    assertEquals("ST_Polygon", row.getFieldAs("overlap_type"));
+    assertEquals(3.071055126726233e11, (Double) row.getFieldAs("overlap_area"), 1e5);
+  }
+
+  @Test
+  public void testIntersectionUsesClosedSetBoundarySemantics() throws Exception {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT "
+                + "ST_AsText(ST_Intersection("
+                + "ST_GeogFromWKT('LINESTRING (0 -5, 0 5)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (-5 0, 5 0)', 4326))) AS crossing, "
+                + "ST_AsText(ST_Intersection("
+                + "ST_GeogFromWKT('LINESTRING (0 0, 1 0)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (0 1, 1 1)', 4326))) AS disjoint, "
+                + "ST_GeometryType(ST_Intersection("
+                + "ST_GeogFromWKT('LINESTRING (0 0, 0 20)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (0 5, 0 15)', 4326))) AS partial_overlap_type, "
+                + "ST_Length(ST_Intersection("
+                + "ST_GeogFromWKT('LINESTRING (0 0, 0 20)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (0 5, 0 15)', 4326))) AS partial_overlap_length");
+
+    Row row = first(table);
+    assertEquals("POINT (0 0)", row.getFieldAs("crossing"));
+    assertEquals("LINESTRING EMPTY", row.getFieldAs("disjoint"));
+    assertEquals("ST_LineString", row.getFieldAs("partial_overlap_type"));
+    assertTrue((Double) row.getFieldAs("partial_overlap_length") > 1000000.0);
+  }
+
+  @Test
   public void testDistance() throws Exception {
     String wktA = "POINT (0 0)";
     String wktB = "POINT (0 1)";

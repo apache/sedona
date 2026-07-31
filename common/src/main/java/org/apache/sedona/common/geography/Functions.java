@@ -21,6 +21,7 @@ package org.apache.sedona.common.geography;
 import com.google.common.geometry.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.apache.sedona.common.S2Geography.*;
@@ -40,6 +41,23 @@ public class Functions {
   private static final double EPSILON = 1e-9;
   private static final S1Angle PROJECT_PERPENDICULAR_ERROR =
       S1Angle.radians((2.0 + 2.0 / Math.sqrt(3.0)) * S2.DBL_ERROR).add(S2.ROBUST_CROSS_PROD_ERROR);
+  // A tiny positive snap radius activates S2Builder's forced edge/site processing. Every input
+  // vertex is forced below, so vertices cannot move; the radius is many orders below double
+  // precision at unit scale. Double.MIN_VALUE underflows in the chord-angle calculations.
+  private static final S2BuilderSnapFunctions.IdentitySnapFunction
+      INTERSECTION_ALIGNMENT_SNAP_FUNCTION =
+          new S2BuilderSnapFunctions.IdentitySnapFunction(
+              S1Angle.radians(S2.DBL_EPSILON * S2.DBL_EPSILON));
+  // S2Builder considers a forced site up to maxEdgeDeviation (1.1r) plus the snap function's
+  // minimum edge/vertex separation. Keep the fast-path detector in sync so it can never skip a
+  // vertex that the alignment builder would insert into the other input.
+  private static final S1Angle INTERSECTION_EDGE_SITE_RADIUS =
+      INTERSECTION_ALIGNMENT_SNAP_FUNCTION
+          .snapRadius()
+          .mul(1.1)
+          .add(INTERSECTION_ALIGNMENT_SNAP_FUNCTION.minEdgeVertexSeparation());
+  private static final double INTERSECTION_EDGE_SITE_RADIUS_LENGTH_2 =
+      S1ChordAngle.fromS1Angle(INTERSECTION_EDGE_SITE_RADIUS).getLength2();
   // S2 expands conservative rectangle bounds by a few floating-point ulps. Snap only those tiny
   // expansions back to a source ordinate; genuine great-circle extrema remain unchanged.
   private static final double BOUND_ORDINATE_SNAP_TOLERANCE_DEGREES = 1e-12;
@@ -782,6 +800,288 @@ public class Functions {
     if (geography == null) return null;
     String text = asText(geography);
     return geography.getSRID() > 0 ? "SRID=" + geography.getSRID() + "; " + text : text;
+  }
+
+  /**
+   * Returns the closed-set spherical intersection of two geographies. The overlay is evaluated by
+   * S2 on geodesic edges and encoded as a two-dimensional OGC geography. When several output
+   * dimensions are present, the result is a geometry collection ordered by increasing dimension.
+   * The SRID of the first input is preserved without transforming either input.
+   */
+  public static Geography intersection(Geography g1, Geography g2) {
+    if (g1 == null || g2 == null) return null;
+
+    GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), g1.getSRID());
+
+    // Match SedonaDB: an explicitly empty input produces GEOMETRYCOLLECTION EMPTY, while an empty
+    // result from two non-empty inputs retains the minimum input dimension.
+    IntersectionInput input1 = intersectionInput(g1);
+    if (input1.empty) {
+      return WKBGeography.fromJTS(geometryFactory.createGeometryCollection());
+    }
+    IntersectionInput input2 = intersectionInput(g2);
+    if (input2.empty) {
+      return WKBGeography.fromJTS(geometryFactory.createGeometryCollection());
+    }
+
+    S2PointVectorLayer pointLayer = new S2PointVectorLayer();
+    S2PolylineVectorLayer.Options polylineOptions =
+        new S2PolylineVectorLayer.Options()
+            .setEdgeType(S2Builder.EdgeType.UNDIRECTED)
+            .setPolylineType(S2BuilderGraph.PolylineType.WALK)
+            .setDuplicateEdges(S2Builder.GraphOptions.DuplicateEdges.MERGE);
+    S2PolylineVectorLayer polylineLayer = new S2PolylineVectorLayer(polylineOptions);
+    S2PolygonLayer polygonLayer = new S2PolygonLayer();
+
+    // A closed-set normalizer assigns boundary-only intersections to the lowest dimension that
+    // represents them (for example, two crossing lines intersect in a Point rather than a
+    // degenerate LineString) and suppresses lower-dimensional output that duplicates a
+    // higher-dimensional vertex or edge.
+    S2ClosedSetNormalizer normalizer =
+        new S2ClosedSetNormalizer(pointLayer, polylineLayer, polygonLayer);
+    S2BooleanOperation operation =
+        new S2BooleanOperation.Builder()
+            .setPolygonModel(S2BooleanOperation.PolygonModel.CLOSED)
+            .setPolylineModel(S2BooleanOperation.PolylineModel.CLOSED)
+            .build(
+                S2BooleanOperation.OpType.INTERSECTION,
+                normalizer.pointLayer(),
+                normalizer.lineLayer(),
+                normalizer.polygonLayer());
+
+    S2ShapeIndex[] inputs =
+        (input1.dimension > 0 || input2.dimension > 0)
+                && needsIntersectionAlignment(input1.shapeIndex, input2.shapeIndex)
+            ? alignIntersectionInputs(input1.shapeIndex, input2.shapeIndex)
+            : new S2ShapeIndex[] {input1.shapeIndex, input2.shapeIndex};
+    S2Error error = new S2Error();
+    if (!operation.build(inputs[0], inputs[1], error)) {
+      throw new IllegalArgumentException(
+          "Failed to compute Geography intersection: " + error.text());
+    }
+
+    Geometry result =
+        intersectionResult(
+            pointLayer.getPointVector(),
+            polylineLayer.getPolylines(),
+            polygonLayer.getPolygon(),
+            Math.min(input1.dimension, input2.dimension),
+            geometryFactory);
+    return WKBGeography.fromJTS(result);
+  }
+
+  private static IntersectionInput intersectionInput(Geography geography) {
+    int dimension = geography.dimension();
+    if (geography instanceof WKBGeography && ((WKBGeography) geography).isEmpty()) {
+      return new IntersectionInput(null, dimension, true);
+    }
+
+    S2ShapeIndex shapeIndex = toShapeIndex(geography).shapeIndex;
+    boolean empty = true;
+    int maximumShapeDimension = -1;
+    for (S2Shape shape : shapeIndex.getShapes()) {
+      empty &= shape.isEmpty();
+      maximumShapeDimension = Math.max(maximumShapeDimension, shape.dimension());
+    }
+    if (dimension < 0) dimension = maximumShapeDimension;
+    return new IntersectionInput(shapeIndex, dimension, empty);
+  }
+
+  private static final class IntersectionInput {
+    private final S2ShapeIndex shapeIndex;
+    private final int dimension;
+    private final boolean empty;
+
+    private IntersectionInput(S2ShapeIndex shapeIndex, int dimension, boolean empty) {
+      this.shapeIndex = shapeIndex;
+      this.dimension = dimension;
+      this.empty = empty;
+    }
+  }
+
+  /**
+   * Returns whether either input has a vertex in the interior of an edge from the other input.
+   * Proper edge crossings are split by {@link S2BooleanOperation} itself, while shared endpoints
+   * are already explicit in both indexes. Avoiding a full {@link S2Builder} pass for those common
+   * cases keeps ordinary polygon overlays close to the native boolean-operation cost.
+   */
+  private static boolean needsIntersectionAlignment(S2ShapeIndex input1, S2ShapeIndex input2) {
+    return hasVertexInEdgeInterior(input1, input2) || hasVertexInEdgeInterior(input2, input1);
+  }
+
+  private static boolean hasVertexInEdgeInterior(S2ShapeIndex vertexIndex, S2ShapeIndex edgeIndex) {
+    HashSet<S2Point> vertices = new HashSet<>();
+    S2Shape.MutableEdge edge = new S2Shape.MutableEdge();
+    for (S2Shape shape : vertexIndex.getShapes()) {
+      for (int edgeId = 0; edgeId < shape.numEdges(); edgeId++) {
+        shape.getEdge(edgeId, edge);
+        vertices.add(edge.a);
+        vertices.add(edge.b);
+      }
+    }
+    if (vertices.isEmpty()) return false;
+
+    S2ClosestEdgeQuery.Query query =
+        S2ClosestEdgeQuery.builder()
+            .setConservativeMaxDistance(INTERSECTION_EDGE_SITE_RADIUS)
+            .setIncludeInteriors(false)
+            .build(edgeIndex);
+    List<S2Shape> edgeShapes = edgeIndex.getShapes();
+    S2Shape.MutableEdge candidate = new S2Shape.MutableEdge();
+    boolean[] found = new boolean[1];
+    for (S2Point vertex : vertices) {
+      found[0] = false;
+      // Visit every edge inside the conservative radius. One may share this endpoint while another
+      // has the same vertex in its interior, as happens at a T-junction within a collection.
+      query.findClosestEdges(
+          new S2ClosestEdgeQuery.PointTarget<S1ChordAngle>(vertex),
+          (distance, shapeId, edgeId) -> {
+            S2Shape shape = edgeShapes.get(shapeId);
+            if (shape.dimension() == 0) return true;
+            shape.getEdge(edgeId, candidate);
+            if (vertex.equalsPoint(candidate.a) || vertex.equalsPoint(candidate.b)) return true;
+            if (S2Predicates.compareEdgeDistance(
+                    vertex, candidate.a, candidate.b, INTERSECTION_EDGE_SITE_RADIUS_LENGTH_2)
+                <= 0) {
+              found[0] = true;
+              return false;
+            }
+            return true;
+          });
+      if (found[0]) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Rebuilds both inputs with one shared {@link S2Builder}. S2BooleanOperation splits proper edge
+   * crossings, but it does not split an edge at a point or vertex in the other input. Sharing the
+   * builder's sites makes those T-vertices explicit in both indexes, so point-on-edge and
+   * collinear-overlap results retain their complete closed set.
+   */
+  private static S2ShapeIndex[] alignIntersectionInputs(S2ShapeIndex input1, S2ShapeIndex input2) {
+    S2ShapeIndex output1 = new S2ShapeIndex();
+    S2ShapeIndex output2 = new S2ShapeIndex();
+    S2Builder builder = new S2Builder.Builder(INTERSECTION_ALIGNMENT_SNAP_FUNCTION).build();
+
+    forceIntersectionInputVertices(builder, input1);
+    forceIntersectionInputVertices(builder, input2);
+    addIntersectionInputLayers(builder, input1, output1);
+    addIntersectionInputLayers(builder, input2, output2);
+
+    S2Error error = new S2Error();
+    if (!builder.build(error)) {
+      throw new IllegalArgumentException(
+          "Failed to align Geography intersection inputs: " + error.text());
+    }
+    return new S2ShapeIndex[] {output1, output2};
+  }
+
+  private static void forceIntersectionInputVertices(S2Builder builder, S2ShapeIndex input) {
+    S2Shape.MutableEdge edge = new S2Shape.MutableEdge();
+    for (S2Shape shape : input.getShapes()) {
+      for (int edgeId = 0; edgeId < shape.numEdges(); edgeId++) {
+        shape.getEdge(edgeId, edge);
+        builder.forceVertex(edge.a);
+        builder.forceVertex(edge.b);
+      }
+    }
+  }
+
+  private static void addIntersectionInputLayers(
+      S2Builder builder, S2ShapeIndex input, S2ShapeIndex output) {
+    for (S2Shape shape : input.getShapes()) {
+      S2BuilderShapesLayer layer;
+      switch (shape.dimension()) {
+        case 0:
+          layer = new S2PointVectorLayer();
+          break;
+        case 1:
+          layer = new S2PolylineVectorLayer();
+          break;
+        case 2:
+          // Keep degenerate polygon boundaries so the closed-set normalizer can demote them to
+          // their point or line set instead of silently dropping them during input alignment.
+          layer = new S2LaxPolygonLayer();
+          break;
+        default:
+          throw new IllegalArgumentException(
+              "Unsupported Geography dimension for intersection: " + shape.dimension());
+      }
+      builder.startLayer(new S2BuilderUtil.IndexedLayer<>(output, layer));
+      if (shape.dimension() == 2) {
+        builder.addIsFullPolygonPredicate(S2Builder.isFullPolygon(shape.isFull()));
+      }
+      builder.addShape(shape);
+    }
+  }
+
+  private static Geometry intersectionResult(
+      List<S2Point> points,
+      List<S2Polyline> polylines,
+      S2Polygon polygon,
+      int emptyDimension,
+      GeometryFactory geometryFactory) {
+    List<S2Point> outputPoints = new ArrayList<>(points);
+    List<LineString> outputLines = new ArrayList<>(polylines.size());
+    for (S2Polyline polyline : polylines) {
+      if (polyline.numVertices() == 1) {
+        // The closed-set normalizer normally routes degeneracies to the point layer. Preserve the
+        // set correctly if an output-layer option ever leaves one here.
+        outputPoints.add(polyline.vertex(0));
+        continue;
+      }
+      Coordinate[] coordinates = new Coordinate[polyline.numVertices()];
+      for (int i = 0; i < polyline.numVertices(); i++) {
+        coordinates[i] = toCoordinate(polyline.vertex(i));
+      }
+      outputLines.add(geometryFactory.createLineString(coordinates));
+    }
+
+    List<Geometry> components = new ArrayList<>(3);
+    if (!outputPoints.isEmpty()) {
+      Coordinate[] coordinates = new Coordinate[outputPoints.size()];
+      for (int i = 0; i < outputPoints.size(); i++) {
+        coordinates[i] = toCoordinate(outputPoints.get(i));
+      }
+      components.add(
+          coordinates.length == 1
+              ? geometryFactory.createPoint(coordinates[0])
+              : geometryFactory.createMultiPointFromCoords(coordinates));
+    }
+
+    if (!outputLines.isEmpty()) {
+      components.add(
+          outputLines.size() == 1
+              ? outputLines.get(0)
+              : geometryFactory.createMultiLineString(outputLines.toArray(new LineString[0])));
+    }
+
+    if (!polygon.isEmpty()) {
+      Geometry polygonGeometry =
+          Constructors.geogToGeometry(new PolygonGeography(polygon), geometryFactory);
+      if (!polygonGeometry.isEmpty()) components.add(polygonGeometry);
+    }
+
+    if (components.isEmpty()) {
+      switch (emptyDimension) {
+        case 0:
+          return geometryFactory.createPoint();
+        case 1:
+          return geometryFactory.createLineString();
+        case 2:
+          return geometryFactory.createPolygon();
+        default:
+          return geometryFactory.createGeometryCollection();
+      }
+    }
+    if (components.size() == 1) return components.get(0);
+    return geometryFactory.createGeometryCollection(components.toArray(new Geometry[0]));
+  }
+
+  private static Coordinate toCoordinate(S2Point point) {
+    S2LatLng latLng = S2LatLng.fromPoint(point).normalized();
+    return new Coordinate(latLng.lngDegrees(), latLng.latDegrees());
   }
 
   // ─── Level 4: spherical buffer ───────────────────────────────────────────

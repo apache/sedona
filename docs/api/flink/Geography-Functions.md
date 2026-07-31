@@ -55,6 +55,7 @@ These functions process, collect, measure, or format geography objects. Measurem
 | [ST_Distance](Geography-Functions/ST_Distance.md) | Double | Return the minimum geodesic distance between two geographies in meters. | v1.9.1 |
 | [ST_Envelope](Geography-Functions/ST_Envelope.md) | Geography | Return the bounding box of a geography. Supports antimeridian splitting. | v1.9.1 |
 | [ST_GeometryType](Geography-Functions/ST_GeometryType.md) | String | Return the type of a geography as a string. | v1.9.1 |
+| [ST_Intersection](Overlay-Functions/ST_Intersection.md) | Geography | Return the closed-set spherical intersection of two geographies with geodesic edges. | v1.9.1 |
 | [ST_Length](Geography-Functions/ST_Length.md) | Double | Return the spherical length of a geography in meters. | v1.9.1 |
 | [ST_MakeLine](Geography-Functions/ST_MakeLine.md) | Geography | Create a geography LineString from two Point, MultiPoint, or LineString geographies. | v1.9.1 |
 | [ST_NPoints](Geography-Functions/ST_NPoints.md) | Integer | Return the number of points (vertices) in a geography. | v1.9.1 |
