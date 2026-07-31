@@ -151,7 +151,7 @@ The optional GeoTools library is required if you want to use raster operators. V
 
 !!! abstract "Sedona with Apache Flink"
 
-	=== "Flink 1.12+ and Scala 2.12"
+	=== "Flink 1.19+ and Scala 2.12"
 
 		```xml
 		<dependency>
@@ -297,7 +297,7 @@ The optional GeoTools library is required if you want to use raster operators. V
 
 !!! abstract "Sedona with Apache Flink"
 
-	=== "Flink 1.12+ and Scala 2.12"
+	=== "Flink 1.19+ and Scala 2.12"
 
 		```xml
 		<dependency>

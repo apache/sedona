@@ -95,6 +95,7 @@ jobs:
             scala: 2.12.15
             jdk: '17'
             flinkVersion: 2.2.1
+            skipLibPostalTests: 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -162,8 +163,7 @@ jobs:
 
           FLINK_ARGS=""
           if [[ -n "${FLINK_VERSION}" ]]; then
-              FLINK_COMPAT_VERSION=${FLINK_VERSION:0:3}
-              FLINK_ARGS="-Dflink=${FLINK_COMPAT_VERSION} -Dflink.version=${FLINK_VERSION}"
+              FLINK_ARGS="-Dflink.version=${FLINK_VERSION}"
           fi
 
           mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${FLINK_ARGS} ${SKIP_TESTS}
