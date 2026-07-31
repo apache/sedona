@@ -19,7 +19,7 @@ Anyone can look at a map and see clumps. The interesting questions are the ones 
 
 Sedona ships a spatial statistics module — `sedona.stats` — that answers those questions as DataFrame operations: **Moran's I** for global autocorrelation, **Getis-Ord Gi\*** for hotspot significance, **DBSCAN** for density clustering, and **Local Outlier Factor** for spatial anomalies. The classic exploratory-spatial-analysis toolkit, running distributed.
 
-This post works through all four as one investigation, on a dataset that ships in the Sedona repo: **12,873 OpenStreetMap points of interest** from western Poland's Lubusz region — the hometown region of Sedona PMC member Pawel, which is how a slice of Poland became the project's sample data. Loaded straight from the bundled shapefile:
+This post works through all four as one investigation, on a dataset that ships in the Sedona repo: **12,873 OpenStreetMap points of interest** from western Poland's Lubusz region. (Poland is the home country of Sedona PMC member Pawel — which is how a slice of it became the project's sample data.) Loaded straight from the bundled shapefile:
 
 ```python
 from sedona.spark import SedonaContext
