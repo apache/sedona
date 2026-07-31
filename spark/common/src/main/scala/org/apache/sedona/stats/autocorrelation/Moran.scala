@@ -44,7 +44,10 @@ object Moran {
     val spark = dataframe.sparkSession
     import spark.implicits._
 
-    val data = dataframe
+    val doubleValueDataframe =
+      dataframe.withColumn(valueColumnName, col(valueColumnName).cast("double"))
+
+    val data = doubleValueDataframe
       .selectExpr(s"avg($valueColumnName)", "count(*)")
       .as[(Double, Long)]
       .head()
@@ -81,7 +84,7 @@ object Moran {
 
     val s1 = sStats._1
 
-    val inumData = dataframe
+    val inumData = doubleValueDataframe
       .selectExpr(
         s"$idColumn AS id",
         s"$valueColumnName AS value",
