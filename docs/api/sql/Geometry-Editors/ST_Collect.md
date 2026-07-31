@@ -19,7 +19,9 @@
 
 # ST_Collect
 
-Introduction: Returns MultiGeometry object based on geometry column/s or array with geometries
+Introduction: Collects spatial values into a multi-object or collection without dissolving their
+boundaries. Homogeneous `Point`, `LineString`, or `Polygon` inputs produce the corresponding
+multi-object; mixed input types produce the OGC/WKT `GeometryCollection` type.
 
 ![ST_Collect](../../../image/ST_Collect/ST_Collect.svg "ST_Collect")
 
@@ -29,9 +31,18 @@ Format:
 
 `ST_Collect(geom: ARRAY[Geometry])`
 
-Return type: `Geometry`
+`ST_Collect(*geog: Geography)`
 
-Since: `v1.2.0`
+`ST_Collect(geog: ARRAY[Geography])`
+
+Return type: `Geometry` or `Geography`, matching the input type
+
+Since: `v1.2.0` (`Geometry`), `v1.9.1` (`Geography`)
+
+Null elements are ignored. Member values and duplicates are preserved. For `Geography` inputs,
+the first non-null input supplies the output SRID; later inputs are not required to have the same
+SRID. In contrast, [`ST_Collect_Agg`](../Aggregate-Functions/ST_Collect_Agg.md) rejects a group
+containing mixed Geography SRIDs.
 
 SQL Example
 
@@ -50,6 +61,21 @@ Result:
 +---------------------------------------------------------------+
 |MULTIPOINT ((21.427834 52.042576573), (45.342524 56.342354355))|
 +---------------------------------------------------------------+
+```
+
+Geography SQL Example with GROUP BY
+
+```sql
+WITH observations AS (
+    SELECT 'west' AS region, ST_GeogFromWKT('POINT(-122.4 37.8)', 4326) AS geog
+    UNION ALL
+    SELECT 'west' AS region, ST_GeogFromWKT('POINT(-122.5 37.7)', 4326) AS geog
+    UNION ALL
+    SELECT 'east' AS region, ST_GeogFromWKT('POINT(-73.9 40.7)', 4326) AS geog
+)
+SELECT region, ST_Collect(ARRAY_AGG(geog)) AS geographies
+FROM observations
+GROUP BY region
 ```
 
 SQL Example

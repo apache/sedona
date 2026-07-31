@@ -46,6 +46,9 @@ These functions operate on geography type objects.
 | [ST_AsText](Geography-Functions/ST_AsText.md) | String | Return the Well-Known Text (WKT) representation of a geography. | v1.9.1 |
 | [ST_Centroid](Geography-Functions/ST_Centroid.md) | Geography | Return the planar centroid of a geography as a Geography point (computed in projected lon/lat space). | v1.9.1 |
 | [ST_Buffer](Geography-Functions/ST_Buffer.md) | Geography | Return the metric ε-buffer of a geography. Distance is always interpreted as meters along the spheroid. | v1.9.1 |
+| [ST_Collect](../Geometry-Editors/ST_Collect.md) | Geography | Collect Geography values without dissolving boundaries, returning a `MultiPoint`, `MultiLineString`, `MultiPolygon`, or OGC/WKT `GeometryCollection`. The first non-null input supplies the output SRID. | v1.9.1 |
+| [ST_Collect_Agg](../Aggregate-Functions/ST_Collect_Agg.md) | Geography | Aggregate Geography values without dissolving boundaries. All non-null values in a group must have the same SRID. | v1.9.1 |
+| [ST_ConvexHull](../Geometry-Processing/ST_ConvexHull.md) | Geography | Return the spherical convex hull with geodesic edges. Full-sphere hulls are not supported because they cannot be represented by OGC WKB. | v1.9.1 |
 | [ST_Envelope](Geography-Functions/ST_Envelope.md) | Geography | Return the bounding box (envelope) of a geography. Supports anti-meridian splitting. | v1.8.0 |
 | [ST_GeometryType](Geography-Functions/ST_GeometryType.md) | String | Return the type of a geography as a string (e.g., "ST_Point", "ST_Polygon"). | v1.9.1 |
 | [ST_MakeLine](Geography-Functions/ST_MakeLine.md) | Geography | Create a geography LineString from two Point, MultiPoint, or LineString geographies. | v1.9.1 |

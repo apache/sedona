@@ -41,7 +41,7 @@ These functions create geography objects from various formats, or convert betwee
 
 ## Geography Functions
 
-These functions edit, measure, or format geography objects. Measurements are computed on a spherical model of the Earth (radius `R = 6 371 008 m`, the mean Earth radius), not the WGS84 ellipsoid — areas in square meters and lengths/distances in meters. (`ST_Buffer` is the exception: it is computed on the WGS84 spheroid.)
+These functions process, collect, measure, or format geography objects. Measurements are computed on a spherical model of the Earth (radius `R = 6 371 008 m`, the mean Earth radius), not the WGS84 ellipsoid — areas in square meters and lengths/distances in meters. (`ST_Buffer` is the exception: it is computed on the WGS84 spheroid.)
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
@@ -50,6 +50,8 @@ These functions edit, measure, or format geography objects. Measurements are com
 | [ST_AsText](Geography-Functions/ST_AsText.md) | String | Return the WKT representation of a geography. | v1.9.1 |
 | [ST_Buffer](Geography-Functions/ST_Buffer.md) | Geography | Return the geodesic buffer of a geography (distance in meters). | v1.9.1 |
 | [ST_Centroid](Geography-Functions/ST_Centroid.md) | Geography | Return the centroid of a geography as a Geography point. | v1.9.1 |
+| [ST_Collect](Geometry-Editors/ST_Collect.md) | Geography | Collect two geographies or an array of geographies into a multi-object or collection without dissolving boundaries. | v1.9.1 |
+| [ST_ConvexHull](Geometry-Processing/ST_ConvexHull.md) | Geography | Return the spherical convex hull of a geography with geodesic edges. | v1.9.1 |
 | [ST_Distance](Geography-Functions/ST_Distance.md) | Double | Return the minimum geodesic distance between two geographies in meters. | v1.9.1 |
 | [ST_Envelope](Geography-Functions/ST_Envelope.md) | Geography | Return the bounding box of a geography. Supports antimeridian splitting. | v1.9.1 |
 | [ST_GeometryType](Geography-Functions/ST_GeometryType.md) | String | Return the type of a geography as a string. | v1.9.1 |
@@ -59,6 +61,14 @@ These functions edit, measure, or format geography objects. Measurements are com
 | [ST_NumGeometries](Geography-Functions/ST_NumGeometries.md) | Integer | Return the number of sub-geometries in a geography. | v1.9.1 |
 | [ST_X](Geography-Functions/ST_X.md) | Double | Return the longitude (X coordinate) of a point geography. | v1.9.1 |
 | [ST_Y](Geography-Functions/ST_Y.md) | Double | Return the latitude (Y coordinate) of a point geography. | v1.9.1 |
+
+## Geography Aggregate Functions
+
+These functions aggregate groups of geography values.
+
+| Function | Return type | Description | Since |
+| :--- | :--- | :--- | :--- |
+| [ST_Collect_Agg](Aggregate-Functions/ST_Collect_Agg.md) | Geography | Collect all non-null geographies in a group without dissolving boundaries. All inputs must have the same SRID. | v1.9.1 |
 
 ## Geography Predicates
 

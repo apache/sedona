@@ -21,9 +21,13 @@ package org.apache.sedona.flink;
 import static org.apache.flink.table.api.Expressions.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.apache.flink.table.api.*;
 import org.apache.flink.types.Row;
+import org.apache.sedona.common.S2Geography.Geography;
+import org.apache.sedona.common.geography.Constructors;
 import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.flink.expressions.Functions;
@@ -201,5 +205,90 @@ public class AggregatorTest extends TestBase {
     Table result = polygonTable.select(call("ST_Union_Agg", $(polygonColNames[0])));
     Row last = last(result);
     assertEquals(1001, ((Polygon) last.getField(0)).getArea(), 0);
+  }
+
+  @Test
+  public void testCollect_Aggr_GeometryAndAlias() {
+    tableEnv.executeSql(
+        "CREATE OR REPLACE TEMPORARY VIEW collect_geom_view AS "
+            + "SELECT ST_GeomFromWKT(wkt) AS geom FROM ("
+            + "VALUES ('POINT (1 2)'), (CAST(NULL AS STRING)), "
+            + "('POINT (1 2)'), ('POINT (3 4)')) AS t(wkt)");
+    Row result =
+        last(
+            tableEnv.sqlQuery(
+                "SELECT ST_Collect_Aggr(geom), ST_Collect_Agg(geom) FROM collect_geom_view"));
+    assertEquals("MULTIPOINT ((1 2), (1 2), (3 4))", result.getField(0).toString());
+    assertEquals(result.getField(0).toString(), result.getField(1).toString());
+  }
+
+  @Test
+  public void testCollect_Agg_GeographyFeedsConvexHull() throws Exception {
+    tableEnv.executeSql(
+        "CREATE OR REPLACE TEMPORARY VIEW collect_geog_view AS "
+            + "SELECT CASE WHEN wkt IS NULL THEN NULL "
+            + "ELSE ST_GeogFromWKT(wkt, 4326) END AS geog FROM ("
+            + "VALUES ('POINT (170 10)'), (CAST(NULL AS STRING)), "
+            + "('POINT (-170 10)'), ('POINT (180 30)'), ('POINT (170 10)')) AS t(wkt)");
+
+    Row result =
+        last(
+            tableEnv.sqlQuery(
+                "SELECT ST_Collect_Aggr(geog), ST_Collect_Agg(geog), "
+                    + "ST_ConvexHull(ST_Collect_Agg(geog)) FROM collect_geog_view"));
+    Geography expectedCollection =
+        org.apache.sedona.common.geography.Functions.createMultiGeography(
+            new Geography[] {
+              Constructors.geogFromWKT("POINT (170 10)", 4326),
+              Constructors.geogFromWKT("POINT (-170 10)", 4326),
+              Constructors.geogFromWKT("POINT (180 30)", 4326),
+              Constructors.geogFromWKT("POINT (170 10)", 4326)
+            });
+    Geography expectedHull =
+        org.apache.sedona.common.geography.Functions.convexHull(expectedCollection);
+
+    assertTrue(
+        Constructors.geogToGeometry(expectedCollection)
+            .equalsNorm(Constructors.geogToGeometry((Geography) result.getField(0))));
+    assertTrue(
+        Constructors.geogToGeometry(expectedCollection)
+            .equalsNorm(Constructors.geogToGeometry((Geography) result.getField(1))));
+    assertEquals(expectedHull.toEWKT(), ((Geography) result.getField(2)).toEWKT());
+  }
+
+  @Test
+  public void testCollect_Agg_AllNullReturnsNull() {
+    tableEnv.executeSql(
+        "CREATE OR REPLACE TEMPORARY VIEW collect_null_geog_view AS "
+            + "SELECT CASE WHEN wkt IS NULL THEN NULL "
+            + "ELSE ST_GeogFromWKT(wkt, 4326) END AS geog FROM ("
+            + "VALUES (CAST(NULL AS STRING)), (CAST(NULL AS STRING))) AS t(wkt)");
+    Row result = last(tableEnv.sqlQuery("SELECT ST_Collect_Agg(geog) FROM collect_null_geog_view"));
+    assertNull(result.getField(0));
+  }
+
+  @Test
+  public void testCollect_Agg_RejectsMixedGeographySrids() {
+    tableEnv.executeSql(
+        "CREATE OR REPLACE TEMPORARY VIEW collect_mixed_srid_view AS "
+            + "SELECT ST_GeogFromWKT(wkt, srid) AS geog FROM ("
+            + "VALUES ('POINT (1 2)', 4326), ('POINT (3 4)', 3857)) AS t(wkt, srid)");
+    try {
+      last(tableEnv.sqlQuery("SELECT ST_Collect_Agg(geog) FROM collect_mixed_srid_view"));
+      fail("Expected ST_Collect_Agg to reject mixed Geography SRIDs");
+    } catch (Exception e) {
+      String messages = messageChain(e);
+      assertTrue(
+          "Expected a mixed-SRID error, got: " + messages,
+          messages.contains("requires all Geography values to have the same SRID"));
+    }
+  }
+
+  private static String messageChain(Throwable t) {
+    StringBuilder sb = new StringBuilder();
+    for (Throwable c = t; c != null; c = c.getCause()) {
+      sb.append(c.getMessage()).append(" | ");
+    }
+    return sb.toString();
   }
 }

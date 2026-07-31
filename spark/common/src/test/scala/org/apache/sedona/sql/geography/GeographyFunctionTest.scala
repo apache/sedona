@@ -21,6 +21,7 @@ package org.apache.sedona.sql.geography
 import org.apache.sedona.common.S2Geography.{Geography, WKBGeography}
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.functions.{col, lit}
+import org.apache.spark.sql.sedona_sql.UDT.GeographyUDT
 import org.apache.spark.sql.sedona_sql.expressions.{st_constructors, st_functions, st_predicates}
 import org.junit.Assert.{assertEquals, assertFalse, assertNotNull, assertTrue}
 import org.locationtech.jts.geom.Point
@@ -185,6 +186,188 @@ class GeographyFunctionTest extends TestBaseScala {
         .first()
       assertTrue(row.isNullAt(0))
       assertTrue(row.isNullAt(1))
+    }
+
+    it("ST_ConvexHull uses spherical Geography semantics") {
+      val pointHull = sparkSession
+        .sql("SELECT ST_ConvexHull(ST_GeogFromWKT('MULTIPOINT ((1 2), (1 2))', 4326)) AS hull")
+      assertTrue(pointHull.schema("hull").dataType.isInstanceOf[GeographyUDT])
+      assertEquals("POINT (1 2)", pointHull.first().getAs[Geography](0).toString)
+
+      val lineHull = sparkSession
+        .sql("SELECT ST_ConvexHull(ST_GeogFromWKT('LINESTRING (0 0, 0 1, 0 2)', 4326)) AS hull")
+        .first()
+        .getAs[Geography](0)
+      assertEquals(
+        "ST_LineString",
+        org.apache.sedona.common.geography.Functions.geometryType(lineHull))
+      assertEquals(4326, lineHull.getSRID)
+
+      val polygonHull = sparkSession
+        .sql("""
+          SELECT ST_ConvexHull(
+            ST_GeogFromWKT(
+              'MULTIPOINT ((170 -10), (170 10), (-170 10), (-170 -10))',
+              4326
+            )
+          ) AS hull
+        """)
+        .first()
+        .getAs[Geography](0)
+      assertEquals(
+        "ST_Polygon",
+        org.apache.sedona.common.geography.Functions.geometryType(polygonHull))
+      assertTrue(org.apache.sedona.common.geography.Functions.area(polygonHull) < 1e14)
+
+      val emptyLineHull = sparkSession
+        .sql("SELECT ST_ConvexHull(ST_GeogFromWKT('LINESTRING EMPTY', 4326)) AS hull")
+        .first()
+        .getAs[Geography](0)
+      assertEquals("LINESTRING EMPTY", emptyLineHull.toString)
+      assertEquals(4326, emptyLineHull.getSRID)
+    }
+
+    it("ST_Collect accepts Geography arrays and scalar arguments") {
+      val arrayResult = sparkSession.sql("""
+        SELECT ST_Collect(array(
+          ST_GeogFromWKT('POINT (1 2)', 4326),
+          ST_GeogFromWKT(NULL, 4326),
+          ST_GeogFromWKT('POINT (3 4)', 4326)
+        )) AS collected
+      """)
+      assertTrue(arrayResult.schema("collected").dataType.isInstanceOf[GeographyUDT])
+      assertEquals("MULTIPOINT ((1 2), (3 4))", arrayResult.first().getAs[Geography](0).toString)
+
+      val mixedShapeResult = sparkSession
+        .sql("""
+          SELECT ST_Collect(
+            ST_GeogFromWKT('POINT (1 2)', 4326),
+            ST_GeogFromWKT('LINESTRING (0 0, 1 1)', 4326)
+          ) AS collected
+        """)
+        .first()
+        .getAs[Geography](0)
+      assertEquals(
+        "ST_GeometryCollection",
+        org.apache.sedona.common.geography.Functions.geometryType(mixedShapeResult))
+      assertEquals(4326, mixedShapeResult.getSRID)
+
+      val withEmptyLine = sparkSession
+        .sql("""
+          SELECT ST_Collect(array(
+            ST_GeogFromWKT('LINESTRING EMPTY', 4326),
+            ST_GeogFromWKT('LINESTRING (0 0, 1 1)', 4326)
+          )) AS collected
+        """)
+        .first()
+        .getAs[Geography](0)
+      assertEquals(2, org.apache.sedona.common.geography.Functions.numGeometries(withEmptyLine))
+    }
+
+    it("ST_Collect rejects mixed scalar and array arguments") {
+      val error = intercept[org.apache.spark.sql.AnalysisException] {
+        sparkSession
+          .sql("""
+            SELECT ST_Collect(
+              ST_GeogFromWKT('POINT (1 2)', 4326),
+              array(ST_GeogFromWKT('POINT (3 4)', 4326))
+            )
+          """)
+          .collect()
+      }
+      assertTrue(error.getMessage.contains("either one array or one or more scalar values"))
+
+      val nestedArrayError = intercept[org.apache.spark.sql.AnalysisException] {
+        sparkSession
+          .sql("""
+            SELECT ST_Collect(
+              array(array(ST_GeogFromWKT('POINT (1 2)', 4326)))
+            )
+          """)
+          .collect()
+      }
+      assertTrue(nestedArrayError.getMessage.contains("expects Geometry or Geography values"))
+    }
+
+    it("computes the grouped Geography hull from ARRAY_AGG") {
+      val result = sparkSession
+        .sql("""
+          WITH dropoffs AS (
+            SELECT * FROM VALUES
+              (1, ST_GeogFromWKT('POINT (0 0)', 4326)),
+              (1, ST_GeogFromWKT('POINT (1 0)', 4326)),
+              (1, ST_GeogFromWKT('POINT (0 1)', 4326))
+            AS dropoffs(customer_id, geog)
+          )
+          SELECT
+            ST_GeometryType(ST_ConvexHull(ST_Collect(ARRAY_AGG(geog)))) AS hull_type,
+            ST_Area(ST_ConvexHull(ST_Collect(ARRAY_AGG(geog)))) AS area
+          FROM dropoffs
+          GROUP BY customer_id
+        """)
+        .first()
+
+      assertEquals("ST_Polygon", result.getString(0))
+      assertTrue(result.getDouble(1) > 6e9)
+    }
+
+    it("ST_Collect_Agg accepts Geography and feeds ST_ConvexHull") {
+      val aggregate = sparkSession.sql("""
+        WITH dropoffs AS (
+          SELECT * FROM VALUES
+            (1, ST_GeogFromWKT('POINT (0 0)', 4326)),
+            (1, ST_GeogFromWKT('POINT (1 0)', 4326)),
+            (1, ST_GeogFromWKT('POINT (0 1)', 4326))
+          AS dropoffs(customer_id, geog)
+        )
+        SELECT
+          ST_Collect_Agg(geog) AS collected,
+          ST_Area(ST_ConvexHull(ST_Collect_Agg(geog))) AS hull_area
+        FROM dropoffs
+        GROUP BY customer_id
+      """)
+
+      assertTrue(aggregate.schema("collected").dataType.isInstanceOf[GeographyUDT])
+      val row = aggregate.first()
+      val collected = row.getAs[Geography]("collected")
+      assertEquals(3, org.apache.sedona.common.geography.Functions.numGeometries(collected))
+      assertEquals(4326, collected.getSRID)
+      assertTrue(row.getAs[Double]("hull_area") > 6e9)
+
+      val allNull = sparkSession.sql("""
+        SELECT ST_Collect_Agg(geog) AS collected
+        FROM (
+          SELECT ST_GeogFromWKT(NULL, 4326) AS geog
+          UNION ALL
+          SELECT ST_GeogFromWKT(NULL, 4326) AS geog
+        )
+      """)
+      assertTrue(allNull.schema("collected").dataType.isInstanceOf[GeographyUDT])
+      assertTrue(allNull.first().isNullAt(0))
+    }
+
+    it("ST_Collect_Agg rejects mixed Geography SRIDs") {
+      val error = intercept[Exception] {
+        sparkSession
+          .sql("""
+            SELECT ST_Collect_Agg(geog)
+            FROM (
+              SELECT ST_GeogFromWKT('POINT (0 0)', 4326) AS geog
+              UNION ALL
+              SELECT ST_GeogFromWKT('POINT (1 1)', 3857) AS geog
+            )
+          """)
+          .collect()
+      }
+
+      var cause: Throwable = error
+      var hasExpectedMessage = false
+      while (cause != null) {
+        hasExpectedMessage ||= Option(cause.getMessage)
+          .exists(_.contains("same SRID"))
+        cause = cause.getCause
+      }
+      assertTrue(hasExpectedMessage)
     }
 
     it("ST_MakeLine creates a geography measured in meters") {

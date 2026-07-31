@@ -360,6 +360,74 @@ public class GeographyFunctionTest extends TestBase {
   }
 
   @Test
+  public void testConvexHull() throws Exception {
+    String wkt = "MULTIPOINT ((170 10), (-170 10), (180 30), (175 15))";
+    Object out = eval(wkt, call(Functions.ST_ConvexHull.class.getSimpleName(), $("geog")));
+    Geography expected =
+        org.apache.sedona.common.geography.Functions.convexHull(
+            Constructors.geogFromWKT(wkt, 4326));
+    assertEquals(expected.toEWKT(), ((Geography) out).toEWKT());
+    assertEquals(4326, ((Geography) out).getSRID());
+
+    Object empty =
+        eval("LINESTRING EMPTY", call(Functions.ST_ConvexHull.class.getSimpleName(), $("geog")));
+    assertEquals("LINESTRING EMPTY", ((Geography) empty).toString());
+    assertEquals(4326, ((Geography) empty).getSRID());
+  }
+
+  @Test
+  public void testCollectWithTwoInputs() throws Exception {
+    Table geographies =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeogFromWKT('POINT (1 2)', 4326) AS g1, "
+                + "ST_GeogFromWKT('POINT (-2 3)', 4326) AS g2");
+    Geography actual =
+        (Geography)
+            first(
+                    geographies.select(
+                        call(Functions.ST_Collect.class.getSimpleName(), $("g1"), $("g2"))))
+                .getField(0);
+    Geography expected =
+        org.apache.sedona.common.geography.Functions.createMultiGeography(
+            new Geography[] {
+              Constructors.geogFromWKT("POINT (1 2)", 4326),
+              Constructors.geogFromWKT("POINT (-2 3)", 4326)
+            });
+    assertEquals(expected.toEWKT(), actual.toEWKT());
+  }
+
+  @Test
+  public void testCollectWithArray() throws Exception {
+    Table geographies =
+        tableEnv.sqlQuery(
+            "SELECT ARRAY["
+                + "ST_GeogFromWKT('LINESTRING (1 2, 3 4)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (3 4, 4 5)', 4326)] AS geogs");
+    Geography actual =
+        (Geography)
+            first(geographies.select(call(Functions.ST_Collect.class.getSimpleName(), $("geogs"))))
+                .getField(0);
+    Geography expected =
+        org.apache.sedona.common.geography.Functions.createMultiGeography(
+            new Geography[] {
+              Constructors.geogFromWKT("LINESTRING (1 2, 3 4)", 4326),
+              Constructors.geogFromWKT("LINESTRING (3 4, 4 5)", 4326)
+            });
+    assertEquals(expected.toEWKT(), actual.toEWKT());
+
+    Table withEmpty =
+        tableEnv.sqlQuery(
+            "SELECT ARRAY["
+                + "ST_GeogFromWKT('LINESTRING EMPTY', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (3 4, 4 5)', 4326)] AS geogs");
+    Geography actualWithEmpty =
+        (Geography)
+            first(withEmpty.select(call(Functions.ST_Collect.class.getSimpleName(), $("geogs"))))
+                .getField(0);
+    assertEquals(2, org.apache.sedona.common.geography.Functions.numGeometries(actualWithEmpty));
+  }
+
+  @Test
   public void testGeometryStillWorks() throws Exception {
     // The geometry overload must remain selectable on the same function.
     RowTypeInfo ti =
