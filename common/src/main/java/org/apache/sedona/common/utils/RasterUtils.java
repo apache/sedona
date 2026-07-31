@@ -41,6 +41,7 @@ import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.RasterAccessors;
 import org.apache.sedona.common.raster.RasterEditors;
+import org.apache.sedona.common.raster.RasterPredicates;
 import org.geotools.api.coverage.SampleDimensionType;
 import org.geotools.api.coverage.grid.GridEnvelope;
 import org.geotools.api.metadata.spatial.PixelOrientation;
@@ -59,6 +60,7 @@ import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.Position2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
 import org.geotools.util.NumberRange;
 import org.locationtech.jts.geom.Geometry;
@@ -575,8 +577,8 @@ public class RasterUtils {
     // In Sedona vector, we do not perform implicit CRS transform. Everything must be done
     // explicitly via ST_Transform
     // In Sedona raster, we do implicit CRS transform if the raster has a CRS. If the SRID of
-    // the geometry is 0, we assume it is 4326.
-    if (geomSRID == 0) {
+    // the geometry is not positive, we assume it is 4326.
+    if (geomSRID <= 0) {
       geomSRID = 4326;
     }
     if (targetCRS != null && !(targetCRS instanceof DefaultEngineeringCRS)) {
@@ -588,6 +590,30 @@ public class RasterUtils {
       }
     }
     return geometry;
+  }
+
+  /**
+   * Transforms a geometry into a raster's coordinate space. Missing raster CRS metadata is
+   * interpreted as WGS84, matching the existing raster predicate policy.
+   *
+   * @param raster raster whose coordinate space is the target
+   * @param geometry geometry to transform
+   * @return geometry expressed in the raster's coordinate space
+   */
+  public static Geometry transformToRasterCRS(GridCoverage2D raster, Geometry geometry) {
+    CoordinateReferenceSystem targetCRS = raster.getCoordinateReferenceSystem();
+    if (targetCRS == null || targetCRS instanceof DefaultEngineeringCRS) {
+      targetCRS = DefaultGeographicCRS.WGS84;
+    }
+    int geometrySRID = geometry.getSRID();
+    if (geometrySRID <= 0) {
+      geometrySRID = 4326;
+    }
+    if (RasterPredicates.isCRSMatchesSRID(targetCRS, geometrySRID)) {
+      // Preserve the identifier-only fast path for the common matched-CRS case.
+      return geometry;
+    }
+    return convertCRSIfNeeded(geometry, targetCRS);
   }
 
   /**

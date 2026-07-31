@@ -44,6 +44,31 @@ import org.locationtech.jts.geom.Geometry;
 
 public class RasterUtilsTest {
   @Test
+  public void testTransformToRasterCRSUsesMatchingIdentifierFastPath() throws FactoryException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 5, 1, -1, 0, 0, 4326);
+    for (int srid : new int[] {0, -1}) {
+      Geometry geometry = setSRID(geomFromWKT("POINT (1 1)"), srid);
+
+      Geometry transformed = RasterUtils.transformToRasterCRS(raster, geometry);
+
+      Assert.assertSame(geometry, transformed);
+      Assert.assertEquals(srid, transformed.getSRID());
+    }
+  }
+
+  @Test
+  public void testTransformToRasterCRSTreatsNegativeSRIDAsWGS84() throws FactoryException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 5, 1, -1, 0, 0, 3857);
+    Geometry geometry = setSRID(geomFromWKT("POINT (2 1)"), -1);
+
+    Geometry transformed = RasterUtils.transformToRasterCRS(raster, geometry);
+
+    Assert.assertEquals(3857, transformed.getSRID());
+    Assert.assertEquals(222638.9816, transformed.getCoordinate().x, 0.0001);
+    Assert.assertEquals(111325.1429, transformed.getCoordinate().y, 0.0001);
+  }
+
+  @Test
   public void testNoDataValue() {
     GridSampleDimension band = new GridSampleDimension("test");
     Assert.assertTrue(Double.isNaN(RasterUtils.getNoDataValue(band)));
