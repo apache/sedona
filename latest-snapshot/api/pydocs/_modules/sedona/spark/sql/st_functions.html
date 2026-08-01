@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_functions &mdash; Apache Sedona Python Documentation</title>
@@ -1327,13 +1326,16 @@
 
 <div class="viewcode-block" id="ST_Intersection"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_Intersection">[docs]</a><span class="nd">@validate_argument_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_Intersection</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the intersection of two geometry columns.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the intersection of two Geometry columns or two Geography columns.</span>
 
-<span class="sd">    :param a: One geometry column to use in the calculation.</span>
+<span class="sd">    Inputs must have the same spatial type. Geography intersections use geodesic edges and</span>
+<span class="sd">    return a Geography.</span>
+
+<span class="sd">    :param a: One Geometry or Geography column to use in the calculation.</span>
 <span class="sd">    :type a: ColumnOrName</span>
-<span class="sd">    :param b: Other geometry column to use in the calculation.</span>
+<span class="sd">    :param b: Other Geometry or Geography column to use in the calculation.</span>
 <span class="sd">    :type b: ColumnOrName</span>
-<span class="sd">    :return: Intersection of a and b as a geometry column.</span>
+<span class="sd">    :return: Intersection of a and b with the same spatial type as the inputs.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_Intersection&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span></div>

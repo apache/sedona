@@ -6147,6 +6147,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/geography/Geography-Functions/ST_GeometryType/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Functions/ST_Intersection/</loc>
+        <lastmod>2026-08-01</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/geography/Geography-Functions/ST_Intersection/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/geography/Geography-Functions/ST_Intersection/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/api/sql/geography/Geography-Functions/ST_Intersects/</loc>
         <lastmod>2026-08-01</lastmod>
         <changefreq>daily</changefreq>
@@ -12956,6 +12963,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/geography/Geography-Functions/ST_GeometryType/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/geography/Geography-Functions/ST_GeometryType/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/geography/Geography-Functions/ST_Intersection/</loc>
+        <lastmod>2026-08-01</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/geography/Geography-Functions/ST_Intersection/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/geography/Geography-Functions/ST_Intersection/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/api/sql/geography/Geography-Functions/ST_Intersects/</loc>
