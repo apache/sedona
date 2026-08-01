@@ -17,6 +17,153 @@
  under the License.
  -->
 
+## Sedona 1.9.1
+
+Sedona 1.9.1 is compiled against:
+
+- **Spark**: 3.4, 3.5, 4.0, 4.1
+- **Flink**: 1.19
+- **Snowflake**: 7+
+
+**Java Requirements:**
+
+- Spark 3.4 & 3.5: Java 11
+- Spark 4.0 & 4.1: Java 17
+
+This is a minor release that includes bug fixes, new features, and improvements.
+
+### New Contributors
+
+* @ThomasDekeyser made their first contribution in https://github.com/apache/sedona/pull/2902
+* @omribz156 made their first contribution in https://github.com/apache/sedona/pull/2962
+* @thuantip made their first contribution in https://github.com/apache/sedona/pull/2995
+* @Herrtian made their first contribution in https://github.com/apache/sedona/pull/2994
+* @oglego made their first contribution in https://github.com/apache/sedona/pull/3018
+* @ShiroKSH made their first contribution in https://github.com/apache/sedona/pull/3107
+* @JakobMiksch made their first contribution in https://github.com/apache/sedona/pull/3117
+* @lntutor made their first contribution in https://github.com/apache/sedona/pull/3221
+
+### Highlights
+
+* [X] [<a href='https://github.com/apache/sedona/issues/2830'>GH-2830</a>] - Geography type support across core SQL functions (ST_Intersects, ST_Within, ST_DWithin, ST_Contains, ST_Equals, ST_Area, ST_Length, ST_Centroid, ST_Buffer, ST_Intersection, ST_MakeLine, and more) with broadcast spatial join support
+* [X] [<a href='https://github.com/apache/sedona/issues/2877'>GH-2877</a>], [<a href='https://github.com/apache/sedona/issues/2973'>GH-2973</a>] - New Box2D and Box3D types with constructors, accessors, predicates, aggregates, spatial join support, and Parquet row-group filter pushdown
+* [X] [<a href='https://github.com/apache/sedona/issues/2824'>GH-2824</a>] - Add geotiff.metadata data source for reading GeoTIFF file metadata without loading raster bands
+* [X] [<a href='https://github.com/apache/sedona/issues/3115'>GH-3115</a>] - Add netcdf.metadata data source for NetCDF file metadata, including CF grid mapping to CRS translation
+* [X] [<a href='https://github.com/apache/sedona/issues/2809'>GH-2809</a>] - Support distance joins for raster predicates
+* [X] [<a href='https://issues.apache.org/jira/browse/SEDONA-756'>SEDONA-756</a>] - Raster Python UDFs: build and return rasters directly from Python UDFs with full metadata preservation via raster serde and with_bands(), replacing the now-deprecated RS_MapAlgebra
+* [X] [<a href='https://github.com/apache/sedona/issues/3058'>GH-3058</a>] - Geography and Box3D support in SedonaFlink
+* [X] Distributed GeoPandas API expansion: dissolve, clip, cx, affine transformations, concave_hull, and many more GeoSeries methods
+* [X] [<a href='https://github.com/apache/sedona/issues/2867'>GH-2867</a>] - Chinese (中文) translation of the documentation website
+
+### New Features
+
+#### Geography Type
+
+* [<a href='https://github.com/apache/sedona/issues/2830'>GH-2830</a>] - Improve Geography query support in the SQL engine (core dual-dispatch infrastructure)
+* [<a href='https://github.com/apache/sedona/issues/2830'>GH-2830</a>] - Add Geography support for ST_Intersects, ST_Within, ST_DWithin, ST_Equals, ST_Area, ST_Length, ST_Centroid, ST_Buffer, ST_NumGeometries, ST_GeometryType, and ST_AsText
+* [<a href='https://github.com/apache/sedona/issues/2830'>GH-2830</a>] - Add broadcast spatial-join support for the Geography type
+* [<a href='https://github.com/apache/sedona/issues/3175'>GH-3175</a>] - Add Geography support for ST_Intersection
+* [<a href='https://github.com/apache/sedona/issues/3176'>GH-3176</a>] - Add Geography support for convex hull and collection functions
+* [<a href='https://github.com/apache/sedona/issues/3177'>GH-3177</a>] - Add Geography support for ST_MakeLine
+* [<a href='https://github.com/apache/sedona/issues/3179'>GH-3179</a>] - Add Geography support for ST_X and ST_Y
+
+#### Box2D and Box3D Types
+
+* [<a href='https://github.com/apache/sedona/issues/2877'>GH-2877</a>] - Add Box2D type and Box2DUDT
+* [<a href='https://github.com/apache/sedona/issues/2881'>GH-2881</a>], [<a href='https://github.com/apache/sedona/issues/2883'>GH-2883</a>], [<a href='https://github.com/apache/sedona/issues/2885'>GH-2885</a>] - Add ST_Box2D, ST_MakeBox2D, ST_GeomFromBox2D, and ST_AsText(box2d)
+* [<a href='https://github.com/apache/sedona/issues/2884'>GH-2884</a>] - Add ST_Extent aggregate (returns Box2D)
+* [<a href='https://github.com/apache/sedona/issues/2882'>GH-2882</a>] - Overload ST_XMin/XMax/YMin/YMax for Box2D
+* [<a href='https://github.com/apache/sedona/issues/2925'>GH-2925</a>] - Add ST_Expand(box2d, ...) overloads
+* [<a href='https://github.com/apache/sedona/issues/2926'>GH-2926</a>], [<a href='https://github.com/apache/sedona/issues/2939'>GH-2939</a>] - Add ST_BoxIntersects and ST_BoxContains with spatial join support
+* [<a href='https://github.com/apache/sedona/issues/2938'>GH-2938</a>] - Push down ST_BoxIntersects / ST_BoxContains via Parquet row-group statistics
+* [<a href='https://github.com/apache/sedona/issues/2886'>GH-2886</a>] - Recognize Box2D columns as GeoParquet bbox covering columns
+* [<a href='https://github.com/apache/sedona/issues/2927'>GH-2927</a>] - Add geometry ↔ Box2D Catalyst cast
+* [<a href='https://github.com/apache/sedona/issues/2971'>GH-2971</a>] - Add ST_DWithin(Box2D, Box2D, distance) overload
+* [<a href='https://github.com/apache/sedona/issues/2887'>GH-2887</a>] - Box2D DataFrame API and Python bindings
+* [<a href='https://github.com/apache/sedona/issues/2973'>GH-2973</a>] - Box3D foundation: value class, UDT, Catalyst plumbing, constructors (ST_Box3D, ST_3DMakeBox), and accessors
+* [<a href='https://github.com/apache/sedona/issues/2983'>GH-2983</a>] - Box3D SQL parser keyword and Geometry → Box3D cast resolution
+* [<a href='https://github.com/apache/sedona/issues/3012'>GH-3012</a>], [<a href='https://github.com/apache/sedona/issues/3027'>GH-3027</a>] - Box3D predicates consolidated into ST_Intersects / ST_Contains
+* [<a href='https://github.com/apache/sedona/issues/3024'>GH-3024</a>] - Add ST_3DDWithin 3D distance-within predicate
+* [<a href='https://github.com/apache/sedona/issues/3013'>GH-3013</a>] - Add ST_3DExtent aggregate
+* [<a href='https://github.com/apache/sedona/issues/3031'>GH-3031</a>], [<a href='https://github.com/apache/sedona/issues/3034'>GH-3034</a>] - Spatial join planner: index Box3D predicates and ST_3DDWithin distance joins
+* [<a href='https://github.com/apache/sedona/issues/3021'>GH-3021</a>] - Python Box3DType UDT bindings
+
+#### SedonaFlink
+
+* [<a href='https://github.com/apache/sedona/issues/3058'>GH-3058</a>] - Add GeographyTypeSerializer to SedonaFlink
+* [<a href='https://github.com/apache/sedona/issues/3061'>GH-3061</a>] - Add geography constructors to SedonaFlink
+* [<a href='https://github.com/apache/sedona/issues/3073'>GH-3073</a>] - Add geography support to SedonaFlink measurement and output functions
+* [<a href='https://github.com/apache/sedona/issues/3075'>GH-3075</a>] - Add geography support to SedonaFlink spatial predicates
+* [<a href='https://github.com/apache/sedona/issues/3179'>GH-3179</a>] - Add Flink Geography support for ST_X and ST_Y
+* [<a href='https://github.com/apache/sedona/issues/2888'>GH-2888</a>] - Flink bindings for Box2D
+* [<a href='https://github.com/apache/sedona/issues/3036'>GH-3036</a>], [<a href='https://github.com/apache/sedona/issues/3039'>GH-3039</a>], [<a href='https://github.com/apache/sedona/issues/3042'>GH-3042</a>] - Flink Box3D support: serializer, constructors, accessors, ST_AsText, ST_3DExtent, and predicates including ST_3DDWithin
+
+#### Data Sources
+
+* [<a href='https://github.com/apache/sedona/issues/2824'>GH-2824</a>] - Add geotiff.metadata data source for GeoTIFF file metadata
+* [<a href='https://github.com/apache/sedona/issues/3115'>GH-3115</a>] - Add netcdf.metadata data source for NetCDF file metadata
+* [<a href='https://github.com/apache/sedona/issues/3121'>GH-3121</a>] - Translate CF grid mapping parameters to CRS in netcdf.metadata
+* [<a href='https://issues.apache.org/jira/browse/SEDONA-753'>SEDONA-753</a>] - Add eo:cloud_cover and eo:snow_cover STAC extensions to the STAC reader
+
+#### Spark SQL
+
+* [<a href='https://github.com/apache/sedona/issues/2809'>GH-2809</a>] - Support distance joins for raster predicates
+* [<a href='https://issues.apache.org/jira/browse/SEDONA-756'>SEDONA-756</a>] - Raster Python serde and with_bands() support for building rasters in Python UDFs
+* [<a href='https://github.com/apache/sedona/issues/2979'>GH-2979</a>] - ST_Split: support puntal input (Point, MultiPoint)
+* [<a href='https://github.com/apache/sedona/issues/3218'>GH-3218</a>] - Support integer values in Moran's I
+
+#### GeoPandas API
+
+* [<a href='https://github.com/apache/sedona/issues/2527'>GH-2527</a>] - Implement GeoSeries.concave_hull
+* [<a href='https://github.com/apache/sedona/issues/3017'>GH-3017</a>], [<a href='https://github.com/apache/sedona/issues/3051'>GH-3051</a>], [<a href='https://github.com/apache/sedona/issues/3134'>GH-3134</a>], [<a href='https://github.com/apache/sedona/issues/3143'>GH-3143</a>], [<a href='https://github.com/apache/sedona/issues/3147'>GH-3147</a>] - Implement distributed affine transformations: rotate, translate, affine_transform, scale, and skew
+* [<a href='https://github.com/apache/sedona/issues/3180'>GH-3180</a>] - Implement distributed cx and clip APIs
+* [<a href='https://github.com/apache/sedona/issues/3181'>GH-3181</a>] - Implement distributed dissolve and tools.collect
+* [<a href='https://github.com/apache/sedona/issues/2385'>GH-2385</a>], [<a href='https://github.com/apache/sedona/issues/3168'>GH-3168</a>], [<a href='https://github.com/apache/sedona/issues/3169'>GH-3169</a>] - Implement GeoSeries is_ccw, interiors, and orient_polygons
+* [<a href='https://github.com/apache/sedona/issues/3156'>GH-3156</a>], [<a href='https://github.com/apache/sedona/issues/3157'>GH-3157</a>], [<a href='https://github.com/apache/sedona/issues/3158'>GH-3158</a>], [<a href='https://github.com/apache/sedona/issues/3162'>GH-3162</a>], [<a href='https://github.com/apache/sedona/issues/3163'>GH-3163</a>], [<a href='https://github.com/apache/sedona/issues/3164'>GH-3164</a>] - Implement additional distributed GeoSeries geometry methods
+* [<a href='https://github.com/apache/sedona/issues/3196'>GH-3196</a>] - Add distributed sampling, point construction, and serialization
+* [<a href='https://github.com/apache/sedona/issues/3204'>GH-3204</a>] - Complete maximum-circle, dwithin-distance, and Voronoi-extent parity
+* [<a href='https://github.com/apache/sedona/issues/3189'>GH-3189</a>] - Preserve CRS metadata without geometry SRIDs
+
+### Bug Fixes
+
+* [<a href='https://github.com/apache/sedona/issues/2830'>GH-2830</a>] - Fix S2 Geography WKB writer to emit OGC-conformant polygon closure
+* [<a href='https://github.com/apache/sedona/issues/3203'>GH-3203</a>] - Preserve Geography coordinates and polygon ring semantics
+* [<a href='https://github.com/apache/sedona/issues/3201'>GH-3201</a>] - Preserve empty Geography envelopes
+* [<a href='https://github.com/apache/sedona/issues/3202'>GH-3202</a>] - Handle empty Geography inputs in ST_MakeLine
+* [<a href='https://github.com/apache/sedona/issues/2901'>GH-2901</a>] - Fix ST_BestSRID logic for geometries near the poles
+* [<a href='https://github.com/apache/sedona/issues/2857'>GH-2857</a>] - Fix ST_S2CellIDs under-covering planar polygons along non-meridional edges
+* [<a href='https://github.com/apache/sedona/issues/3044'>GH-3044</a>] - Fix aggregate function registration in sessions cloned from FunctionRegistry.builtin
+* [<a href='https://github.com/apache/sedona/issues/2880'>GH-2880</a>] - Omit bbox in GeoParquet metadata for empty files
+* [<a href='https://github.com/apache/sedona/issues/3150'>GH-3150</a>] - Preserve GeoParquet CRS metadata
+* [<a href='https://github.com/apache/sedona/issues/3126'>GH-3126</a>] - Fix STAC temporal pushdown and pagination
+* [<a href='https://github.com/apache/sedona/issues/3110'>GH-3110</a>] - Fix STAC Client.search(datetime="YYYY-mm") raising TypeError
+* [<a href='https://github.com/apache/sedona/issues/3128'>GH-3128</a>] - Fix geotiff.metadata partition values, scan identity, and option handling
+* [<a href='https://github.com/apache/sedona/issues/3131'>GH-3131</a>] - Align glob and directory-glob path handling in the raster metadata data sources
+* [<a href='https://github.com/apache/sedona/issues/3089'>GH-3089</a>] - Fix empty-envelope false candidate and RS_DWithin EXPLAIN label in raster distance join
+* [<a href='https://github.com/apache/sedona/issues/3111'>GH-3111</a>] - Fix scanline x-intercepts on rasters with non-square pixels
+* [<a href='https://github.com/apache/sedona/issues/3112'>GH-3112</a>] - RS_AsRaster fills uncovered pixels with noDataValue
+* [<a href='https://github.com/apache/sedona/issues/3118'>GH-3118</a>] - Rasterize line segments by exact cell traversal instead of fixed-step sampling
+* [<a href='https://github.com/apache/sedona/issues/3216'>GH-3216</a>] - Transform geometry before rasterization
+* [<a href='https://issues.apache.org/jira/browse/SEDONA-754'>SEDONA-754</a>] - Make rasterization orientation-agnostic by supporting positive scaleY
+* [<a href='https://issues.apache.org/jira/browse/SEDONA-751'>SEDONA-751</a>] - Fix RS_Interpolate band index and noDataValue handling
+* [<a href='https://issues.apache.org/jira/browse/SEDONA-752'>SEDONA-752</a>] - Fix NullPointerException from deep traversal beyond GeoJSON geometry level
+* [<a href='https://github.com/apache/sedona/issues/3166'>GH-3166</a>] - Resolve raster sample positions the way Java AWT does in the Python raster reader
+* [<a href='https://github.com/apache/sedona/issues/3171'>GH-3171</a>], [<a href='https://github.com/apache/sedona/issues/3172'>GH-3172</a>] - Fix empty polygon orientation and GeoSeries skew flags in GeoPandas
+* [<a href='https://github.com/apache/sedona/issues/3046'>GH-3046</a>] - Flink ST_DWithin: propagate NULL arguments instead of NullPointerException
+
+### Improvements
+
+* [<a href='https://github.com/apache/sedona/issues/3214'>GH-3214</a>] - Deprecate RS_MapAlgebra in favour of Python UDFs
+* [<a href='https://github.com/apache/sedona/issues/2617'>GH-2617</a>] - Reorder raster function signatures
+* [<a href='https://github.com/apache/sedona/issues/3095'>GH-3095</a>] - Exclude the entire Scala toolchain from shaded jars
+* [<a href='https://github.com/apache/sedona/issues/3161'>GH-3161</a>] - Upgrade proj4sedona to 0.1.6
+* [<a href='https://github.com/apache/sedona/issues/3137'>GH-3137</a>] - Bump jt-jiffle from 1.1.24 to 1.1.31
+* [<a href='https://github.com/apache/sedona/issues/2867'>GH-2867</a>] - Chinese (中文) translation of the documentation website
+* [<a href='https://github.com/apache/sedona/issues/2700'>GH-2700</a>] - Refresh docker example notebooks with five end-to-end use cases
+* [<a href='https://github.com/apache/sedona/issues/2804'>GH-2804</a>] - Raster tutorial: end-to-end running example with visuals
+* [<a href='https://github.com/apache/sedona/issues/3048'>GH-3048</a>] - Box3D SQL reference pages with isometric diagrams
+* [<a href='https://github.com/apache/sedona/issues/2869'>GH-2869</a>] - Update Glue docs for Sedona 1.8+ (Glue 5.0, Spark 3.5)
+
 ## Sedona 1.9.0
 
 Sedona 1.9.0 is compiled against:
