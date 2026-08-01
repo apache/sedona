@@ -24,15 +24,18 @@ import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2LatLngRect;
 import com.google.common.geometry.S2Loop;
 import com.google.common.geometry.S2Point;
+import com.google.common.geometry.S2Polyline;
 import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.S2Geography.GeographyWKBSerializer;
 import org.apache.sedona.common.S2Geography.PolygonGeography;
+import org.apache.sedona.common.S2Geography.SinglePolylineGeography;
 import org.apache.sedona.common.S2Geography.WKBGeography;
 import org.apache.sedona.common.geography.Constructors;
 import org.apache.sedona.common.geography.Functions;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.Point;
@@ -64,6 +67,31 @@ public class FunctionTest {
     Geometry geometry = new WKTReader().read(wkt);
     geometry.setSRID(srid);
     return WKBGeography.fromJTS(geometry);
+  }
+
+  private static Geography geographyFromIsoPointWKB(
+      int type, double longitude, double latitude, double thirdOrdinate, int srid) {
+    java.nio.ByteBuffer buffer =
+        java.nio.ByteBuffer.allocate(1 + Integer.BYTES + 3 * Double.BYTES)
+            .order(java.nio.ByteOrder.LITTLE_ENDIAN);
+    buffer.put((byte) 1);
+    buffer.putInt(type);
+    buffer.putDouble(longitude);
+    buffer.putDouble(latitude);
+    buffer.putDouble(thirdOrdinate);
+    return WKBGeography.fromWKB(buffer.array(), srid);
+  }
+
+  private static Geography geographyFromIsoLineStringZWKB(double[] longitudeLatitudeZ, int srid) {
+    int numPoints = longitudeLatitudeZ.length / 3;
+    java.nio.ByteBuffer buffer =
+        java.nio.ByteBuffer.allocate(1 + 2 * Integer.BYTES + numPoints * 3 * Double.BYTES)
+            .order(java.nio.ByteOrder.LITTLE_ENDIAN);
+    buffer.put((byte) 1);
+    buffer.putInt(1002);
+    buffer.putInt(numPoints);
+    for (double ordinate : longitudeLatitudeZ) buffer.putDouble(ordinate);
+    return WKBGeography.fromWKB(buffer.array(), srid);
   }
 
   private static void assertRectLoopVertices(
@@ -966,6 +994,286 @@ public class FunctionTest {
     assertFalse(Functions.intersects(g, null));
     assertFalse(Functions.intersects(null, g));
     assertFalse(Functions.intersects(null, null));
+  }
+
+  @Test
+  public void intersection_nullAndExplicitlyEmptyInputs() throws ParseException {
+    Geography point = Constructors.geogFromWKT("POINT (0 0)", 4326);
+    assertNull(Functions.intersection(null, point));
+    assertNull(Functions.intersection(point, null));
+
+    for (String emptyWkt :
+        new String[] {
+          "POINT EMPTY",
+          "LINESTRING EMPTY",
+          "POLYGON EMPTY",
+          "MULTIPOINT EMPTY",
+          "MULTILINESTRING EMPTY",
+          "MULTIPOLYGON EMPTY",
+          "GEOMETRYCOLLECTION EMPTY",
+          "MULTIPOINT (EMPTY)",
+          "MULTILINESTRING (EMPTY)",
+          "MULTIPOLYGON (EMPTY)",
+          "GEOMETRYCOLLECTION (POINT EMPTY, LINESTRING EMPTY, POLYGON EMPTY)"
+        }) {
+      Geography empty = Constructors.geogFromWKT(emptyWkt, 3857);
+      Geography result = Functions.intersection(empty, point);
+      assertEquals("GEOMETRYCOLLECTION EMPTY", Functions.asText(result));
+      assertEquals(3857, result.getSRID());
+
+      Geography reverseResult = Functions.intersection(point, empty);
+      assertEquals("GEOMETRYCOLLECTION EMPTY", Functions.asText(reverseResult));
+      assertEquals(4326, reverseResult.getSRID());
+    }
+  }
+
+  @Test
+  public void intersection_nonEmptyDisjointInputsRetainMinimumDimension() throws ParseException {
+    String[][] cases = {
+      {"POINT (0 0)", "POINT (0 1)", "POINT EMPTY"},
+      {"POINT (20 20)", "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))", "POINT EMPTY"},
+      {"LINESTRING (0 0, 10 0)", "LINESTRING (0 10, 10 10)", "LINESTRING EMPTY"},
+      {
+        "POLYGON ((0 0, 5 0, 5 5, 0 5, 0 0))",
+        "POLYGON ((10 10, 15 10, 15 15, 10 15, 10 10))",
+        "POLYGON EMPTY"
+      }
+    };
+
+    for (String[] testCase : cases) {
+      Geography left = Constructors.geogFromWKT(testCase[0], 4326);
+      Geography right = Constructors.geogFromWKT(testCase[1], 4326);
+      assertEquals(testCase[2], Functions.asText(Functions.intersection(left, right)));
+    }
+  }
+
+  @Test
+  public void intersection_preservesVerticesInheritedFromEitherInput() throws ParseException {
+    Geography point = Constructors.geogFromWKT("POINT (1 2)", 4326);
+    assertEquals("POINT (1 2)", Functions.asText(Functions.intersection(point, point)));
+
+    Geography polygon = Constructors.geogFromWKT("POLYGON ((0 0, 0 10, 10 10, 10 0, 0 0))", 4326);
+    Geometry polygonIdentity =
+        Constructors.geogToGeometry(Functions.intersection(polygon, polygon));
+    assertTrue(polygonIdentity.toText(), polygonIdentity instanceof Polygon);
+    for (Coordinate coordinate : polygonIdentity.getCoordinates()) {
+      assertEquals(Math.rint(coordinate.x), coordinate.x, 0.0);
+      assertEquals(Math.rint(coordinate.y), coordinate.y, 0.0);
+    }
+
+    Geometry containedPoint = Constructors.geogToGeometry(Functions.intersection(polygon, point));
+    assertTrue(containedPoint.toText(), containedPoint instanceof Point);
+    assertEquals(1.0, containedPoint.getCoordinate().x, 0.0);
+    assertEquals(2.0, containedPoint.getCoordinate().y, 0.0);
+
+    Geography vertical = Constructors.geogFromWKT("LINESTRING (0 0, 0 10)", 4326);
+    Geography touching = Constructors.geogFromWKT("LINESTRING (0 5, 5 5)", 4326);
+    assertEquals("POINT (0 5)", Functions.asText(Functions.intersection(vertical, touching)));
+  }
+
+  @Test
+  public void intersection_acceptsNativeSingleVertexPolyline() {
+    S2Point vertex = S2LatLng.fromDegrees(2, 1).toPoint();
+    Geography polyline =
+        new SinglePolylineGeography(new S2Polyline(java.util.Collections.singletonList(vertex)));
+
+    Geometry result = Constructors.geogToGeometry(Functions.intersection(polyline, polyline));
+    assertTrue(result.toText(), result instanceof Point);
+    assertEquals(1.0, result.getCoordinate().x, EPS);
+    assertEquals(2.0, result.getCoordinate().y, EPS);
+  }
+
+  @Test
+  public void intersection_closedSetDemotesBoundaryResults() throws ParseException {
+    Geography vertical = Constructors.geogFromWKT("LINESTRING (0 -5, 0 5)", 4326);
+    Geography horizontal = Constructors.geogFromWKT("LINESTRING (-5 0, 5 0)", 4326);
+    assertEquals("POINT (0 0)", Functions.asText(Functions.intersection(vertical, horizontal)));
+
+    Geography interiorPoint = Constructors.geogFromWKT("POINT (0 2.5)", 4326);
+    Geometry pointOnLine =
+        Constructors.geogToGeometry(Functions.intersection(interiorPoint, vertical));
+    assertTrue(pointOnLine.toText(), pointOnLine instanceof Point);
+    assertEquals(2.5, ((Point) pointOnLine).getY(), EPS);
+
+    Geography overlapping1 = Constructors.geogFromWKT("LINESTRING (20 0, 30 0)", 4326);
+    Geography overlapping2 = Constructors.geogFromWKT("LINESTRING (20 0, 30 0)", 4326);
+    Geometry overlapping =
+        Constructors.geogToGeometry(Functions.intersection(overlapping1, overlapping2));
+    assertTrue(overlapping.toText(), overlapping instanceof LineString);
+    assertEquals(2, overlapping.getNumPoints());
+    LineString overlappingLine = (LineString) overlapping;
+    assertEquals(
+        20.0,
+        Math.min(overlappingLine.getCoordinateN(0).x, overlappingLine.getCoordinateN(1).x),
+        EPS);
+    assertEquals(
+        30.0,
+        Math.max(overlappingLine.getCoordinateN(0).x, overlappingLine.getCoordinateN(1).x),
+        EPS);
+
+    Geography partiallyOverlapping1 = Constructors.geogFromWKT("LINESTRING (0 0, 0 10)", 4326);
+    Geography partiallyOverlapping2 = Constructors.geogFromWKT("LINESTRING (0 5, 0 15)", 4326);
+    Geometry partiallyOverlapping =
+        Constructors.geogToGeometry(
+            Functions.intersection(partiallyOverlapping1, partiallyOverlapping2));
+    assertTrue(partiallyOverlapping.toText(), partiallyOverlapping instanceof LineString);
+    assertEquals(2, partiallyOverlapping.getNumPoints());
+    Coordinate[] overlapCoordinates = partiallyOverlapping.getCoordinates();
+    assertEquals(5.0, Math.min(overlapCoordinates[0].y, overlapCoordinates[1].y), EPS);
+    assertEquals(10.0, Math.max(overlapCoordinates[0].y, overlapCoordinates[1].y), EPS);
+
+    Geography containingLine = Constructors.geogFromWKT("LINESTRING (0 0, 0 20)", 4326);
+    Geography containedLine = Constructors.geogFromWKT("LINESTRING (0 5, 0 15)", 4326);
+    Geometry containedOverlap =
+        Constructors.geogToGeometry(Functions.intersection(containingLine, containedLine));
+    assertTrue(containedOverlap.toText(), containedOverlap instanceof LineString);
+    assertEquals(2, containedOverlap.getNumPoints());
+    Coordinate[] containedCoordinates = containedOverlap.getCoordinates();
+    assertEquals(5.0, Math.min(containedCoordinates[0].y, containedCoordinates[1].y), EPS);
+    assertEquals(15.0, Math.max(containedCoordinates[0].y, containedCoordinates[1].y), EPS);
+
+    Geography polygon = Constructors.geogFromWKT("POLYGON ((0 0, 5 0, 5 5, 0 5, 0 0))", 4326);
+    Geography edgePoint = Constructors.geogFromWKT("POINT (2.5 0)", 4326);
+    Geometry pointOnPolygonEdge =
+        Constructors.geogToGeometry(Functions.intersection(polygon, edgePoint));
+    assertTrue(pointOnPolygonEdge.toText(), pointOnPolygonEdge instanceof Point);
+    assertEquals(2.5, ((Point) pointOnPolygonEdge).getX(), EPS);
+
+    Geography touchingLine = Constructors.geogFromWKT("LINESTRING (0 0, -10 0)", 4326);
+    assertEquals("POINT (0 0)", Functions.asText(Functions.intersection(polygon, touchingLine)));
+
+    Geography adjacentPolygon =
+        Constructors.geogFromWKT("POLYGON ((5 0, 10 0, 10 5, 5 5, 5 0))", 4326);
+    Geometry sharedEdge =
+        Constructors.geogToGeometry(Functions.intersection(polygon, adjacentPolygon));
+    assertTrue(sharedEdge.toText(), sharedEdge instanceof LineString);
+    assertEquals(2, sharedEdge.getNumPoints());
+
+    Geography partiallySharedEdge = Constructors.geogFromWKT("LINESTRING (2.5 0, -10 0)", 4326);
+    Geometry partialEdge =
+        Constructors.geogToGeometry(Functions.intersection(polygon, partiallySharedEdge));
+    assertTrue(partialEdge.toText(), partialEdge instanceof LineString);
+    assertEquals(2, partialEdge.getNumPoints());
+
+    Geography containedEdge = Constructors.geogFromWKT("LINESTRING (1 0, 4 0)", 4326);
+    Geometry containedPolygonEdge =
+        Constructors.geogToGeometry(Functions.intersection(polygon, containedEdge));
+    assertTrue(containedPolygonEdge.toText(), containedPolygonEdge instanceof LineString);
+    assertEquals(2, containedPolygonEdge.getNumPoints());
+
+    Geography partiallyAdjacentPolygon =
+        Constructors.geogFromWKT("POLYGON ((1 0, 4 0, 4 -5, 1 -5, 1 0))", 4326);
+    Geometry partialPolygonEdge =
+        Constructors.geogToGeometry(Functions.intersection(polygon, partiallyAdjacentPolygon));
+    assertTrue(partialPolygonEdge.toText(), partialPolygonEdge instanceof LineString);
+    Coordinate[] partialPolygonCoordinates = partialPolygonEdge.getCoordinates();
+    assertEquals(
+        1.0, Math.min(partialPolygonCoordinates[0].x, partialPolygonCoordinates[1].x), EPS);
+    assertEquals(
+        4.0, Math.max(partialPolygonCoordinates[0].x, partialPolygonCoordinates[1].x), EPS);
+
+    Geography vertexTouchingPolygon =
+        Constructors.geogFromWKT("POLYGON ((5 5, 10 5, 10 10, 5 10, 5 5))", 4326);
+    Geometry sharedVertex =
+        Constructors.geogToGeometry(Functions.intersection(polygon, vertexTouchingPolygon));
+    assertTrue(sharedVertex.toText(), sharedVertex instanceof Point);
+    assertEquals(5.0, ((Point) sharedVertex).getX(), EPS);
+    assertEquals(5.0, ((Point) sharedVertex).getY(), EPS);
+
+    Geography degeneratePolygon = Constructors.geogFromWKT("POLYGON ((3 3, 3 3, 3 3, 3 3))", 4326);
+    Geography degeneratePoint = Constructors.geogFromWKT("POINT (3 3)", 4326);
+    Geometry degenerateIntersection =
+        Constructors.geogToGeometry(Functions.intersection(degeneratePolygon, degeneratePoint));
+    assertTrue(degenerateIntersection.toText(), degenerateIntersection instanceof Point);
+  }
+
+  @Test
+  public void intersection_polygonOverlapHasPositiveArea() throws ParseException {
+    Geography left = Constructors.geogFromWKT("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))", 4326);
+    Geography right = Constructors.geogFromWKT("POLYGON ((5 5, 15 5, 15 15, 5 15, 5 5))", 4326);
+
+    Geography intersection = Functions.intersection(left, right);
+    assertTrue(Constructors.geogToGeometry(intersection) instanceof Polygon);
+    assertEquals(3.071055126726233e11, Functions.area(intersection), 1e5);
+    assertEquals(intersection.toEWKT(), roundTripWKB(intersection).toEWKT());
+  }
+
+  @Test
+  public void intersection_suppressesComponentsCoveredByHigherDimension() throws ParseException {
+    Geography left =
+        Constructors.geogFromWKT(
+            "GEOMETRYCOLLECTION (POINT (0 0), LINESTRING (0 0, 4 0), "
+                + "POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0)))",
+            4326);
+    Geography right = Constructors.geogFromWKT("POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0))", 4326);
+
+    Geometry result = Constructors.geogToGeometry(Functions.intersection(left, right));
+    assertTrue(result.toText(), result instanceof Polygon);
+  }
+
+  @Test
+  public void intersection_acceptsRawZAndMWkbAndReturnsXY() throws ParseException {
+    Geography point = Constructors.geogFromWKT("POINT (1 2)", 4326);
+
+    for (int type : new int[] {1001, 2001}) {
+      Geography higherDimensional = geographyFromIsoPointWKB(type, 1, 2, 9, 4326);
+      Geography intersection = Functions.intersection(higherDimensional, point);
+      Geometry result = Constructors.geogToGeometry(intersection);
+      assertTrue(result.toText(), result instanceof Point);
+      Point resultPoint = (Point) result;
+      assertEquals(1.0, resultPoint.getX(), EPS);
+      assertEquals(2.0, resultPoint.getY(), EPS);
+      assertTrue(Double.isNaN(resultPoint.getCoordinate().getZ()));
+      assertEquals(21, ((WKBGeography) intersection).getWKBBytes().length);
+    }
+
+    Geography higherDimensionalLine =
+        geographyFromIsoLineStringZWKB(new double[] {0, 0, 9, 0, 10, 10}, 4326);
+    Geography overlappingLine = Constructors.geogFromWKT("LINESTRING (0 5, 0 15)", 4326);
+    Geography lineIntersection = Functions.intersection(higherDimensionalLine, overlappingLine);
+    Geometry lineResult = Constructors.geogToGeometry(lineIntersection);
+    assertTrue(lineResult.toText(), lineResult instanceof LineString);
+    assertEquals(2, lineResult.getNumPoints());
+    assertTrue(Double.isNaN(lineResult.getCoordinate().getZ()));
+    assertEquals(41, ((WKBGeography) lineIntersection).getWKBBytes().length);
+  }
+
+  @Test
+  public void intersection_usesGeodesicEdges() throws ParseException {
+    Geography line = Constructors.geogFromWKT("LINESTRING (-5 5, 5 5)", 4326);
+    Geography polygon = Constructors.geogFromWKT("POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))", 4326);
+    Geometry result = Constructors.geogToGeometry(Functions.intersection(line, polygon));
+
+    assertTrue(result instanceof LineString);
+    Coordinate[] coordinates = result.getCoordinates();
+    assertEquals(2, coordinates.length);
+    Coordinate boundary = Math.abs(coordinates[0].x) < EPS ? coordinates[0] : coordinates[1];
+    assertEquals(0.0, boundary.x, EPS);
+    assertEquals(5.019002, boundary.y, 1e-6);
+  }
+
+  @Test
+  public void intersection_supportsMixedDimensionsAndPreservesFirstSrid() throws ParseException {
+    Geography left =
+        Constructors.geogFromWKT(
+            "GEOMETRYCOLLECTION (POINT (20 20), LINESTRING (20 0, 30 0), "
+                + "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0)))",
+            3857);
+    Geography right =
+        Constructors.geogFromWKT(
+            "GEOMETRYCOLLECTION (POINT (20 20), LINESTRING (20 0, 30 0), "
+                + "POLYGON ((5 5, 15 5, 15 15, 5 15, 5 5)))",
+            4326);
+
+    Geography intersection = Functions.intersection(left, right);
+    Geometry result = Constructors.geogToGeometry(intersection);
+    assertTrue(result instanceof GeometryCollection);
+    assertEquals(result.toText(), 3, result.getNumGeometries());
+    assertTrue(result.getGeometryN(0) instanceof Point);
+    assertTrue(result.getGeometryN(1) instanceof LineString);
+    assertTrue(result.getGeometryN(2) instanceof Polygon);
+    assertEquals(3857, intersection.getSRID());
+    assertEquals(intersection.toEWKT(), roundTripWKB(intersection).toEWKT());
   }
 
   @Test

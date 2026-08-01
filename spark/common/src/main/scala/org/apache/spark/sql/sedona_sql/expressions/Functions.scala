@@ -458,12 +458,15 @@ object ST_Transform {
 }
 
 /**
- * Return the intersection shape of two geometries. The return type is a geometry
+ * Return the intersection of two geometries or two geographies. The return type matches the
+ * inputs.
  *
  * @param inputExpressions
  */
 private[apache] case class ST_Intersection(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.intersection _) {
+    extends InferredExpression(
+      inferrableFunction2(Functions.intersection),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.intersection)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

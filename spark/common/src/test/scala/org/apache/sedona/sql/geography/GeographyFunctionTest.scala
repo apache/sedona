@@ -480,6 +480,62 @@ class GeographyFunctionTest extends TestBaseScala {
       assertEquals("LINESTRING (12 34, 12 34)", row.getString(1))
       assertEquals("SRID=3857; LINESTRING EMPTY", row.getString(2))
     }
+
+    it("ST_Intersection returns Geography and feeds spherical ST_Area") {
+      val result = sparkSession.sql("""
+        SELECT
+          overlap,
+          ST_GeometryType(overlap) AS overlap_type,
+          ST_Area(overlap) AS overlap_area
+        FROM (
+          SELECT ST_Intersection(
+            ST_GeogFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))', 3857),
+            ST_GeogFromWKT('POLYGON ((5 5, 15 5, 15 15, 5 15, 5 5))', 4326)
+          ) AS overlap
+        )
+      """)
+
+      assertTrue(result.schema("overlap").dataType.isInstanceOf[GeographyUDT])
+      val row = result.first()
+      val overlap = row.getAs[Geography](0)
+      assertEquals(3857, overlap.getSRID)
+      assertEquals("ST_Polygon", row.getString(1))
+      assertEquals(3.071055126726233e11, row.getDouble(2), 1e5)
+    }
+
+    it("ST_Intersection uses closed-set boundary semantics") {
+      val row = sparkSession
+        .sql("""
+          SELECT
+            ST_AsText(ST_Intersection(
+              ST_GeogFromWKT('LINESTRING (0 -5, 0 5)', 4326),
+              ST_GeogFromWKT('LINESTRING (-5 0, 5 0)', 4326)
+            )) AS crossing,
+            ST_AsText(ST_Intersection(
+              ST_GeogFromWKT('LINESTRING (0 0, 1 0)', 4326),
+              ST_GeogFromWKT('LINESTRING (0 1, 1 1)', 4326)
+            )) AS disjoint,
+            ST_GeometryType(ST_Intersection(
+              ST_GeogFromWKT('LINESTRING (0 0, 0 20)', 4326),
+              ST_GeogFromWKT('LINESTRING (0 5, 0 15)', 4326)
+            )) AS partial_overlap_type,
+            ST_Length(ST_Intersection(
+              ST_GeogFromWKT('LINESTRING (0 0, 0 20)', 4326),
+              ST_GeogFromWKT('LINESTRING (0 5, 0 15)', 4326)
+            )) AS partial_overlap_length,
+            ST_Intersection(
+              ST_GeogFromWKT(NULL, 4326),
+              ST_GeogFromWKT('POINT (0 0)', 4326)
+            ) AS null_result
+        """)
+        .first()
+
+      assertEquals("POINT (0 0)", row.getString(0))
+      assertEquals("LINESTRING EMPTY", row.getString(1))
+      assertEquals("ST_LineString", row.getString(2))
+      assertTrue(row.getDouble(3) > 1000000.0)
+      assertTrue(row.isNullAt(4))
+    }
   }
 
   // ─── Level 2: ST_Length, ST_Area, ST_Distance ──────────────────────────
@@ -920,6 +976,18 @@ class GeographyFunctionTest extends TestBaseScala {
       val line = df.first().get(0).asInstanceOf[Geography]
       assertTrue(line.isInstanceOf[WKBGeography])
       assertEquals("LINESTRING (0 0, 1 0)", line.toString)
+    }
+
+    it("ST_Intersection via DataFrame API") {
+      val df = sparkSession
+        .sql("SELECT 'LINESTRING (0 -5, 0 5)' AS wkt_a, 'LINESTRING (-5 0, 5 0)' AS wkt_b")
+        .select(
+          st_constructors.ST_GeogFromWKT(col("wkt_a"), lit(4326)).as("a"),
+          st_constructors.ST_GeogFromWKT(col("wkt_b"), lit(4326)).as("b"))
+        .select(st_functions.ST_Intersection(col("a"), col("b")).as("intersection"))
+
+      assertTrue(df.schema("intersection").dataType.isInstanceOf[GeographyUDT])
+      assertEquals("POINT (0 0)", df.first().getAs[Geography](0).toString)
     }
 
     it("ST_Contains via DataFrame API") {

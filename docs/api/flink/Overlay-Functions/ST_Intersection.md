@@ -19,18 +19,22 @@
 
 # ST_Intersection
 
-Introduction: Return the intersection geometry of A and B
+Introduction: Return the intersection of A and B. Geometry inputs use planar overlay; Geography inputs use closed-set spherical overlay with geodesic edges.
 
 ![ST_Intersection](../../../image/ST_Intersection/ST_Intersection.svg "ST_Intersection")
 
-Format: `ST_Intersection (A: Geometry, B: Geometry)`
+Format:
 
-Return type: `Geometry`
+`ST_Intersection(A: Geometry, B: Geometry)`
 
-Since: `v1.5.0`
+`ST_Intersection(A: Geography, B: Geography)`
+
+Return type: `Geometry` or `Geography`, matching the input type
+
+Since: `v1.5.0` (Geometry), `v1.9.1` (Geography)
 
 !!!note
-    If you encounter a `TopologyException` with the message "found non-noded intersection", try enabling the OverlayNG algorithm by adding the following JVM flag:
+    This note applies only to Geometry inputs. If you encounter a `TopologyException` with the message "found non-noded intersection", try enabling the OverlayNG algorithm by adding the following JVM flag:
 
     ```
     -Djts.overlay=ng
@@ -38,7 +42,7 @@ Since: `v1.5.0`
 
     The OverlayNG algorithm is more robust than the legacy overlay implementation in JTS and handles many edge cases that would otherwise cause errors.
 
-Example:
+Geometry example:
 
 ```sql
 SELECT ST_Intersection(
@@ -51,4 +55,23 @@ Output:
 
 ```
 POLYGON ((2 8, 8 8, 8 2, 2 2, 2 8))
+```
+
+For Geography inputs, boundary-only intersections are retained: crossing lines or touching polygon vertices can produce a Point, while shared polygon edges can produce a LineString. Polygon shells are normalized to an area of at most one hemisphere; a shell intended to represent more than half the sphere is interpreted as its complement. Results containing several dimensions are returned as a GeometryCollection.
+
+The Geography result is two-dimensional and copies the first input's SRID without transforming either input or validating that their SRIDs match. An explicitly empty operand produces `GEOMETRYCOLLECTION EMPTY`. A disjoint result from two non-empty inputs preserves the lower input dimension.
+
+Geography example:
+
+```sql
+SELECT ST_AsText(ST_Intersection(
+    ST_GeogFromWKT('LINESTRING (0 -5, 0 5)', 4326),
+    ST_GeogFromWKT('LINESTRING (-5 0, 5 0)', 4326)
+));
+```
+
+Output:
+
+```
+POINT (0 0)
 ```

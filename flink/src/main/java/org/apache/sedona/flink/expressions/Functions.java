@@ -989,6 +989,29 @@ public class Functions {
   }
 
   public static class ST_Intersection extends ScalarFunction {
+    // Reflection cannot distinguish the Geometry and Geography RAW pair overloads, so define the
+    // accepted same-type pairs and their return types explicitly.
+    @Override
+    public TypeInference getTypeInference(DataTypeFactory typeFactory) {
+      DataType geometryType =
+          DataTypes.RAW(Geometry.class, GeometryTypeSerializer.INSTANCE).nullable();
+      DataType geographyType =
+          DataTypes.RAW(Geography.class, GeographyTypeSerializer.INSTANCE).nullable();
+
+      InputTypeStrategy geometryPair =
+          InputTypeStrategies.explicitSequence(geometryType, geometryType);
+      InputTypeStrategy geographyPair =
+          InputTypeStrategies.explicitSequence(geographyType, geographyType);
+      Map<InputTypeStrategy, TypeStrategy> outputs = new LinkedHashMap<>();
+      outputs.put(geometryPair, TypeStrategies.explicit(geometryType));
+      outputs.put(geographyPair, TypeStrategies.explicit(geographyType));
+
+      return TypeInference.newBuilder()
+          .inputTypeStrategy(InputTypeStrategies.or(geometryPair, geographyPair))
+          .outputTypeStrategy(TypeStrategies.mapping(outputs))
+          .build();
+    }
+
     @DataTypeHint(
         value = "RAW",
         rawSerializer = GeometryTypeSerializer.class,
@@ -1007,6 +1030,24 @@ public class Functions {
       Geometry geom1 = (Geometry) g1;
       Geometry geom2 = (Geometry) g2;
       return org.apache.sedona.common.Functions.intersection(geom1, geom2);
+    }
+
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeographyTypeSerializer.class,
+        bridgedTo = Geography.class)
+    public Geography eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = Geography.class)
+            Geography geog1,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeographyTypeSerializer.class,
+                bridgedTo = Geography.class)
+            Geography geog2) {
+      return org.apache.sedona.common.geography.Functions.intersection(geog1, geog2);
     }
   }
 
