@@ -21,7 +21,7 @@ package org.apache.sedona.stats.autocorrelation
 import org.apache.sedona.sql.TestBaseScala
 import org.apache.sedona.stats.Weighting
 import org.apache.sedona.stats.autocorrelation.Moran
-import org.apache.spark.sql.functions.expr
+import org.apache.spark.sql.functions.{col, expr, lit, size, struct, transform}
 
 class MoranTest extends TestBaseScala with AutoCorrelationFixtures {
   describe("Moran's I") {
@@ -61,6 +61,81 @@ class MoranTest extends TestBaseScala with AutoCorrelationFixtures {
 
       assert(moranResult.getPNorm < 0.0001)
       assert(moranResult.getI > 0.99)
+    }
+
+    it("supports integer value columns") {
+      val weights = Weighting
+        .addDistanceBandColumn(
+          positiveCorrelationFrame
+            .selectExpr("id", "geometry", "CAST(value * 10 AS BIGINT) AS value"),
+          1.0,
+          savedAttributes = Seq("id", "value"))
+        .withColumn(
+          "weights",
+          expr("transform(weights, w -> struct(w.neighbor, w.value/size(weights) AS value))"))
+
+      val moranResult = Moran.getGlobal(weights, idColumn = "id")
+
+      assert(moranResult.getPNorm < 0.0001)
+      assert(moranResult.getI > 0.99)
+    }
+
+    it("supports dots in id and value column names") {
+      val weights = Weighting
+        .addDistanceBandColumn(
+          positiveCorrelationFrame,
+          1.0,
+          savedAttributes = Seq("id", "value"))
+        .select(
+          col("id").alias("feature.id"),
+          col("geometry"),
+          col("value").alias("feature.value"),
+          transform(
+            col("weights"),
+            weight =>
+              struct(
+                struct(
+                  weight.getField("neighbor").getField("id").alias("feature.id"),
+                  weight.getField("neighbor").getField("value").alias("feature.value"))
+                  .alias("neighbor"),
+                (weight.getField("value") / size(col("weights"))).alias("value")))
+            .alias("weights"))
+
+      val moranResult =
+        Moran.getGlobal(weights, idColumn = "feature.id", valueColumnName = "feature.value")
+
+      assert(moranResult.getPNorm < 0.0001)
+      assert(moranResult.getI > 0.99)
+    }
+
+    it("rejects all-null value columns") {
+      val weights = Weighting
+        .addDistanceBandColumn(
+          positiveCorrelationFrame,
+          1.0,
+          savedAttributes = Seq("id", "value"))
+        .withColumn("value", lit(null).cast("double"))
+
+      val exception = intercept[IllegalArgumentException] {
+        Moran.getGlobal(weights)
+      }
+
+      assert(exception.getMessage.contains("must contain at least one non-null value"))
+    }
+
+    it("rejects value columns with non-finite means") {
+      val weights = Weighting
+        .addDistanceBandColumn(
+          positiveCorrelationFrame,
+          1.0,
+          savedAttributes = Seq("id", "value"))
+        .withColumn("value", lit(Double.NaN))
+
+      val exception = intercept[IllegalArgumentException] {
+        Moran.getGlobal(weights)
+      }
+
+      assert(exception.getMessage.contains("must have a finite mean"))
     }
 
     it("correlation is negative") {
