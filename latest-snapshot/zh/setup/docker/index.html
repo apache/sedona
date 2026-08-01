@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5966,7 +5965,7 @@
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>apache/sedona:latest
 </code></pre></div>
 <p>示例 2：拉取某个特定 Sedona 发布版本的镜像</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>apache/sedona:1.9.0
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>pull<span class="w"> </span>apache/sedona:1.9.1
 </code></pre></div>
 <h3 id="_2">启动容器<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
 <p>格式：</p>
@@ -5979,9 +5978,9 @@
 <p>该命令会启动一个使用 6GB driver 内存与 8GB executor 内存的容器，并使用最新的 Sedona 镜像；容器以分离模式运行。</p>
 <p>该命令会将容器的 8888、8080、8081、4040、8085 端口分别映射到宿主机的同名端口。</p>
 <p>示例 2：</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-e<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>-p<span class="w"> </span><span class="m">8085</span>:8085<span class="w"> </span>apache/sedona:1.9.0
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-e<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span>-p<span class="w"> </span><span class="m">8081</span>:8081<span class="w"> </span>-p<span class="w"> </span><span class="m">4040</span>:4040<span class="w"> </span>-p<span class="w"> </span><span class="m">8085</span>:8085<span class="w"> </span>apache/sedona:1.9.1
 </code></pre></div>
-<p>该命令会启动一个 driver 与 executor 各使用 4GB 内存的容器，并使用 Sedona 1.9.0 镜像。</p>
+<p>该命令会启动一个 driver 与 executor 各使用 4GB 内存的容器，并使用 Sedona 1.9.1 镜像。</p>
 <p>容器的端口映射与示例 1 相同。</p>
 <p>示例 3：使用 Docker volume 持久化 <code>/opt</code>（Jupyter &amp; Zeppelin 数据）</p>
 <p>为确保 <strong>Jupyter 工作区、Zeppelin notebook 与配置不会丢失</strong>，可以将 <code>/opt</code> 挂载为 <strong>Docker volume</strong>：</p>
@@ -6009,7 +6008,7 @@
 <div class="highlight"><pre><span></span><code>./docker/build.sh<span class="w"> </span>&lt;spark_version&gt;<span class="w"> </span>&lt;sedona_version&gt;<span class="w"> </span>&lt;build_mode&gt;
 </code></pre></div>
 <p>示例：</p>
-<div class="highlight"><pre><span></span><code>./docker/build.sh<span class="w"> </span><span class="m">3</span>.4.1<span class="w"> </span><span class="m">1</span>.9.0
+<div class="highlight"><pre><span></span><code>./docker/build.sh<span class="w"> </span><span class="m">3</span>.4.1<span class="w"> </span><span class="m">1</span>.9.1
 </code></pre></div>
 <p><code>build_mode</code> 为可选项。如果未提供或值为 <code>local</code>，脚本会在本地构建镜像；否则会启动跨平台编译并直接将镜像推送到 DockerHub。</p>
 <h3 id="sedona-master">针对最新的 Sedona master 构建镜像<a class="headerlink" href="#sedona-master" title="Permanent link">&para;</a></h3>
@@ -6048,7 +6047,7 @@
 </code></pre></div>
 <p>示例：</p>
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>login
-./docker/build.sh<span class="w"> </span><span class="m">3</span>.4.1<span class="w"> </span><span class="m">1</span>.9.0<span class="w"> </span>release
+./docker/build.sh<span class="w"> </span><span class="m">3</span>.4.1<span class="w"> </span><span class="m">1</span>.9.1<span class="w"> </span>release
 </code></pre></div>
 
 

@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5731,15 +5730,15 @@
  -->
 
 <p>本教程介绍如何配置 Glue notebook 与 Glue ETL 作业。本文假设您已具备 AWS Glue 作业的基础使用经验。</p>
-<p>教程中使用 Sedona 1.9.0 与 <a href="https://docs.aws.amazon.com/glue/latest/dg/release-notes.html">Glue 5.0</a>，运行环境为 Spark 3.5.4、Java 17、Scala 2.12 和 Python 3.11。Glue 5.0 推荐使用 Sedona 1.8.0 及以上版本。</p>
+<p>教程中使用 Sedona 1.9.1 与 <a href="https://docs.aws.amazon.com/glue/latest/dg/release-notes.html">Glue 5.0</a>，运行环境为 Spark 3.5.4、Java 17、Scala 2.12 和 Python 3.11。Glue 5.0 推荐使用 Sedona 1.8.0 及以上版本。</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p><strong>重要：</strong> 自 Sedona 1.8.0 起不再支持 Java 8 与 Spark 3.3。Sedona 1.8.0+ 需要 Glue 5.0+（支持 Java 17 与 Spark 3.5+）。如果您必须停留在 Glue 4.0（Spark 3.3、Java 8），请使用 Sedona 1.7.1 或更低版本，并将下方的 <code>sedona-spark-shaded-3.5_2.12</code> artifact 替换为 <code>sedona-spark-shaded-3.3_2.12</code>。</p>
 </div>
 <h2 id="maven">收集 Maven 链接<a class="headerlink" href="#maven" title="Permanent link">&para;</a></h2>
 <p>您需要让 Glue 作业指向 Sedona 与 Geotools 的 jar。推荐直接使用 Maven 上发布的 jar。下面给出的链接是为 Glue 5.0 准备的。</p>
-<p>Sedona Jar：<a href="https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.9.0/sedona-spark-shaded-3.5_2.12-1.9.0.jar">Maven Central</a></p>
-<p>Geotools Jar：<a href="https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.9.0-33.5/geotools-wrapper-1.9.0-33.5.jar">Maven Central</a></p>
+<p>Sedona Jar：<a href="https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.9.1/sedona-spark-shaded-3.5_2.12-1.9.1.jar">Maven Central</a></p>
+<p>Geotools Jar：<a href="https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.9.1-33.5/geotools-wrapper-1.9.1-33.5.jar">Maven Central</a></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>请务必选择 Scala 2.12 与 Spark 3.5 的版本。Scala 2.13 的 jar 与 Glue 5.0 不兼容。</p>
@@ -5753,8 +5752,8 @@
 <h3 id="notebook">Notebook 作业<a class="headerlink" href="#notebook" title="Permanent link">&para;</a></h3>
 <p>在创建 sparkContext 或 glueContext 之前，添加以下 cell magic。第一行指向 jar，第二行直接通过 pip 安装 Sedona Python 包。</p>
 <div class="highlight"><pre><span></span><code># Sedona Config
-%extra_jars https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.9.0/sedona-spark-shaded-3.5_2.12-1.9.0.jar, https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.9.0-33.5/geotools-wrapper-1.9.0-33.5.jar
-%additional_python_modules apache-sedona==1.9.0
+%extra_jars https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.9.1/sedona-spark-shaded-3.5_2.12-1.9.1.jar, https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.9.1-33.5/geotools-wrapper-1.9.1-33.5.jar
+%additional_python_modules apache-sedona==1.9.1
 </code></pre></div>
 <p>如果您使用 Glue 提供的示例 notebook，则第一个 cell 现在大致应是：</p>
 <div class="highlight"><pre><span></span><code>%idle_timeout 2880
@@ -5763,8 +5762,8 @@
 %number_of_workers 5
 
 # Sedona Config
-%extra_jars https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.9.0/sedona-spark-shaded-3.5_2.12-1.9.0.jar, https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.9.0-33.5/geotools-wrapper-1.9.0-33.5.jar
-%additional_python_modules apache-sedona==1.9.0
+%extra_jars https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.9.1/sedona-spark-shaded-3.5_2.12-1.9.1.jar, https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.9.1-33.5/geotools-wrapper-1.9.1-33.5.jar
+%additional_python_modules apache-sedona==1.9.1
 
 
 import sys
@@ -5787,7 +5786,7 @@ job = Job(glueContext)
 </code></pre></div>
 <h3 id="etl">ETL 作业<a class="headerlink" href="#etl" title="Permanent link">&para;</a></h3>
 <p>Glue 也将这种作业称为 Script 作业。在作业页面上切换到 “Job details” 选项卡，展开页面底部的 “Advanced properties” 部分。在 “Dependent JARs path” 字段中填入两个 jar 的链接，并以英文逗号分隔。</p>
-<p>要添加 Sedona Python 包，进入 “Job Parameters” 部分新增一个参数，键为 <code>--additional-python-modules</code>，值为 <code>apache-sedona==1.9.0</code>。</p>
+<p>要添加 Sedona Python 包，进入 “Job Parameters” 部分新增一个参数，键为 <code>--additional-python-modules</code>，值为 <code>apache-sedona==1.9.1</code>。</p>
 <p>为验证安装，可在脚本中加入以下代码：</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 

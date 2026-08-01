@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5802,8 +5801,8 @@
 <h2 id="2-sedona-jar-stage">步骤 2：将 Sedona 的 JAR 文件上传到 stage<a class="headerlink" href="#2-sedona-jar-stage" title="Permanent link">&para;</a></h2>
 <p>需要下载以下 2 个 JAR 文件：</p>
 <ul>
-<li>sedona-snowflake-1.9.0.jar：<a href="https://central.sonatype.com/artifact/org.apache.sedona/sedona-snowflake/versions">Sedona 在 Maven Central 的仓库</a></li>
-<li>geotools-wrapper-1.9.0-33.5.jar：<a href="https://central.sonatype.com/artifact/org.datasyslab/geotools-wrapper/versions">GeoTools-wrapper 在 Maven Central 的仓库</a></li>
+<li>sedona-snowflake-1.9.1.jar：<a href="https://central.sonatype.com/artifact/org.apache.sedona/sedona-snowflake/versions">Sedona 在 Maven Central 的仓库</a></li>
+<li>geotools-wrapper-1.9.1-33.5.jar：<a href="https://central.sonatype.com/artifact/org.datasyslab/geotools-wrapper/versions">GeoTools-wrapper 在 Maven Central 的仓库</a></li>
 </ul>
 <p>然后将这 2 个 JAR 文件上传到上一步创建的 stage 中。</p>
 <p>上传完成后，您应能在 stage 中看到这 2 个文件：</p>
@@ -5818,9 +5817,9 @@
 <p>如何创建 schema 可参阅 <a href="https://docs.snowflake.com/en/sql-reference/sql/create-schema.html">Snowflake 官方文档</a>。</p>
 <h2 id="4-sedona-sql">步骤 4：获取创建 Sedona 函数的 SQL 脚本<a class="headerlink" href="#4-sedona-sql" title="Permanent link">&para;</a></h2>
 <p>通过运行以下命令获取该 SQL 脚本：</p>
-<div class="highlight"><pre><span></span><code>java<span class="w"> </span>-jar<span class="w"> </span>sedona-snowflake-1.9.0.jar<span class="w"> </span>--geotools-version<span class="w"> </span><span class="m">1</span>.9.0-33.5<span class="w"> </span>&gt;<span class="w"> </span>sedona-snowflake.sql
+<div class="highlight"><pre><span></span><code>java<span class="w"> </span>-jar<span class="w"> </span>sedona-snowflake-1.9.1.jar<span class="w"> </span>--geotools-version<span class="w"> </span><span class="m">1</span>.9.1-33.5<span class="w"> </span>&gt;<span class="w"> </span>sedona-snowflake.sql
 </code></pre></div>
-<p>其中 sedona-snowflake-1.9.0.jar 即步骤 2 中下载的 JAR 文件。</p>
+<p>其中 sedona-snowflake-1.9.1.jar 即步骤 2 中下载的 JAR 文件。</p>
 <h2 id="5-sql-sedona">步骤 5：运行 SQL 脚本以创建 Sedona 的函数<a class="headerlink" href="#5-sql-sedona" title="Permanent link">&para;</a></h2>
 <p>我们在上一步的数据库下创建一个 worksheet，并运行该 SQL 脚本以创建 Sedona 的函数。</p>
 <p>这里我们选择 <code>Create Worksheet from SQL File</code> 选项。</p>
