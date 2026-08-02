@@ -41,6 +41,8 @@ import org.apache.sedona.common.Functions;
 import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.raster.RasterAccessors;
 import org.apache.sedona.common.raster.RasterEditors;
+import org.apache.sedona.common.raster.RasterPredicates;
+import org.geotools.api.coverage.SampleDimensionType;
 import org.geotools.api.coverage.grid.GridEnvelope;
 import org.geotools.api.metadata.spatial.PixelOrientation;
 import org.geotools.api.referencing.FactoryException;
@@ -58,8 +60,8 @@ import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.Position2D;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
-import org.geotools.util.ClassChanger;
 import org.geotools.util.NumberRange;
 import org.locationtech.jts.geom.Geometry;
 
@@ -294,14 +296,48 @@ public class RasterUtils {
    * @param noDataValue The no data value.
    * @return A new sample dimension with the given no data value.
    */
-  @SuppressWarnings({"unchecked", "rawtypes"})
   public static GridSampleDimension createSampleDimensionWithNoDataValue(
       GridSampleDimension sampleDimension, double noDataValue) {
-    // if noDataValues contain noDataValue, then return the original sample dimension
-    double existingNoDataValue = getNoDataValue(sampleDimension);
-    if (Double.compare(existingNoDataValue, noDataValue) == 0) {
+    return createSampleDimensionWithNoDataValue(
+        sampleDimension, noDataValue, sampleDimension.getSampleDimensionType());
+  }
+
+  /**
+   * Create a sample dimension using a given sampleDimension as template, with the given no data
+   * value encoded for an explicit sample dimension type.
+   *
+   * <p>The type matters because the no data value is wrapped into a {@link Number} of that type. It
+   * is only worth passing explicitly when the template's own type does not describe the pixels the
+   * sample dimension will end up attached to — deserializing a raster whose band data was replaced
+   * by a Python UDF, for instance, where the template comes from the source raster but the pixels
+   * may have a wider type.
+   *
+   * @param sampleDimension The sample dimension to be used as template.
+   * @param noDataValue The no data value.
+   * @param sampleDimensionType The type to encode the no data value for.
+   * @return A new sample dimension with the given no data value.
+   */
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public static GridSampleDimension createSampleDimensionWithNoDataValue(
+      GridSampleDimension sampleDimension,
+      double noDataValue,
+      SampleDimensionType sampleDimensionType) {
+    // Encode the value for the sample dimension type first: a float band stores 99.2 as
+    // 99.19999694824219, and the split ranges and new category must agree on the encoded value,
+    // not the requested one.
+    Number wrappedNoData = TypeMap.wrapSample(noDataValue, sampleDimensionType, false);
+    double effectiveNoDataValue = wrappedNoData.doubleValue();
+
+    // Preserve the existing categories when their declared scalar already agrees. In particular,
+    // callers that copy an existing range-valued NODATA category pass its minimum here and expect
+    // the range to remain intact. Wire-level authoritative overrides remove that category before
+    // calling this shared helper.
+    if (Double.compare(getNoDataValue(sampleDimension), effectiveNoDataValue) == 0) {
       return sampleDimension;
     }
+
+    NumberRange noDataRange =
+        new NumberRange(wrappedNoData.getClass(), wrappedNoData, wrappedNoData);
 
     String description = sampleDimension.getDescription().toString();
     List<Category> categories = sampleDimension.getCategories();
@@ -311,49 +347,41 @@ public class RasterUtils {
     // Copy existing categories. If the category contains noDataValue, split it into two categories.
     List<Category> newCategories = new ArrayList<>(categories.size());
     for (Category category : categories) {
+      if (category.getName().equals(Category.NODATA.getName())) {
+        // The existing no data category is being replaced wholesale, so drop it. This has to
+        // happen before the split below: a range-valued no data category that contains the new
+        // value would otherwise be split into no data-named fragments, and getNoDataValue() reads
+        // the first such category, reporting the fragment's minimum instead of the value asked for.
+        continue;
+      }
       NumberRange<? extends Number> range = category.getRange();
-      if (range.contains((Number) noDataValue)) {
-        // Split this range to two ranges, one is [min, noDataValue), the other is (noDataValue,
-        // max]
-        Number min = range.getMinValue();
-        Number max = range.getMaxValue();
-        final Class<? extends Number> clazz = ClassChanger.getWidestClass(min, max);
-        min = ClassChanger.cast(min, clazz);
-        max = ClassChanger.cast(max, clazz);
-        Number nodata = ClassChanger.cast(noDataValue, clazz);
-        if (min.doubleValue() < noDataValue) {
-          Category leftCategory =
-              new Category(
-                  category.getName(),
-                  category.getColors(),
-                  new NumberRange(clazz, min, range.isMinIncluded(), nodata, false));
-          newCategories.add(leftCategory);
+      if (range.contains(wrappedNoData)) {
+        // NumberRange performs the split in the widest operand type, so a float output retains
+        // Float fragments while a byte category widened to double can represent a fractional
+        // NODATA value. It can return representationally empty fragments at exclusive boundaries;
+        // compare their effective included endpoints before constructing a Category.
+        for (NumberRange<?> fragment : range.subtract(noDataRange)) {
+          if (fragment.getMinimum(true) <= fragment.getMaximum(true)) {
+            newCategories.add(
+                new Category(
+                    category.getName(), category.getColors(), fragment, category.isQuantitative()));
+          }
         }
-        if (max.doubleValue() > noDataValue) {
-          Category rightCategory =
-              new Category(
-                  category.getName(),
-                  category.getColors(),
-                  new NumberRange(clazz, nodata, false, max, range.isMaxIncluded()));
-          newCategories.add(rightCategory);
-        }
-      } else if (!category.getName().equals(Category.NODATA.getName())) {
+      } else {
         // This category does not contain no data value, just keep it as is.
         newCategories.add(category);
       }
     }
 
     // Add the no data value as a new category
-    Number nodata =
-        TypeMap.wrapSample(noDataValue, sampleDimension.getSampleDimensionType(), false);
     newCategories.add(
         new Category(
             Category.NODATA.getName(),
             new Color(0, 0, 0, 0),
-            new NumberRange(nodata.getClass(), nodata, nodata)));
+            new NumberRange(wrappedNoData.getClass(), wrappedNoData, wrappedNoData)));
 
     return new GridSampleDimension(
-        description, newCategories.toArray(new Category[0]), offset, scale);
+        description, newCategories.toArray(new Category[0]), scale, offset);
   }
 
   public static GridSampleDimension createSampleDimensionWithNoDataValue(
@@ -393,7 +421,7 @@ public class RasterUtils {
     double offset = sampleDimension.getOffset();
     double scale = sampleDimension.getScale();
     return new GridSampleDimension(
-        description, newCategories.toArray(new Category[0]), offset, scale);
+        description, newCategories.toArray(new Category[0]), scale, offset);
   }
 
   /**
@@ -549,8 +577,8 @@ public class RasterUtils {
     // In Sedona vector, we do not perform implicit CRS transform. Everything must be done
     // explicitly via ST_Transform
     // In Sedona raster, we do implicit CRS transform if the raster has a CRS. If the SRID of
-    // the geometry is 0, we assume it is 4326.
-    if (geomSRID == 0) {
+    // the geometry is not positive, we assume it is 4326.
+    if (geomSRID <= 0) {
       geomSRID = 4326;
     }
     if (targetCRS != null && !(targetCRS instanceof DefaultEngineeringCRS)) {
@@ -562,6 +590,30 @@ public class RasterUtils {
       }
     }
     return geometry;
+  }
+
+  /**
+   * Transforms a geometry into a raster's coordinate space. Missing raster CRS metadata is
+   * interpreted as WGS84, matching the existing raster predicate policy.
+   *
+   * @param raster raster whose coordinate space is the target
+   * @param geometry geometry to transform
+   * @return geometry expressed in the raster's coordinate space
+   */
+  public static Geometry transformToRasterCRS(GridCoverage2D raster, Geometry geometry) {
+    CoordinateReferenceSystem targetCRS = raster.getCoordinateReferenceSystem();
+    if (targetCRS == null || targetCRS instanceof DefaultEngineeringCRS) {
+      targetCRS = DefaultGeographicCRS.WGS84;
+    }
+    int geometrySRID = geometry.getSRID();
+    if (geometrySRID <= 0) {
+      geometrySRID = 4326;
+    }
+    if (RasterPredicates.isCRSMatchesSRID(targetCRS, geometrySRID)) {
+      // Preserve the identifier-only fast path for the common matched-CRS case.
+      return geometry;
+    }
+    return convertCRSIfNeeded(geometry, targetCRS);
   }
 
   /**
@@ -645,6 +697,158 @@ public class RasterUtils {
       default:
         return false;
     }
+  }
+
+  /**
+   * Verifies that {@code noDataValue} can be stored in the pixel type named by {@code pixelType}
+   * without silent coercion, returning it unchanged when it can. Delegates to {@link
+   * #assertRepresentable(double, String, String)} with the argument name {@code "noDataValue"} so
+   * the nodata path keeps its existing error messages.
+   *
+   * @param noDataValue the candidate nodata / background value
+   * @param pixelType a Sedona pixel type string accepted by {@link #getDataTypeCode(String)} (for
+   *     example {@code "B"}, {@code "I"}, {@code "D"})
+   * @return {@code noDataValue}, unchanged, when it is representable in the pixel type
+   * @throws IllegalArgumentException when {@code noDataValue} cannot be represented in the pixel
+   *     type
+   */
+  public static double assertNoDataValueRepresentable(double noDataValue, String pixelType) {
+    // A nodata value is a sentinel: it must be stored without any coercion (an exact 32-bit float
+    // round-trip, and no negative-zero collapse on integer bands) so the stored background always
+    // matches the recorded nodata metadata.
+    return assertRepresentable(noDataValue, pixelType, "noDataValue", true);
+  }
+
+  /**
+   * Verifies that a burn value can be stored in {@code pixelType}. Unlike a nodata sentinel, a burn
+   * value is ordinary pixel data and does not have to round-trip exactly: a fractional value on a
+   * float / double band (for example {@code 0.1} on {@code "F"}, stored as {@code 0.10000000149…})
+   * is accepted and rounded to the pixel type, matching PostGIS {@code ST_AsRaster} and {@code
+   * gdal_rasterize}. An out-of-range or fractional value on an integer band is still rejected,
+   * since that would burn a different whole number than the caller asked for.
+   *
+   * @param value the candidate burn value
+   * @param pixelType a Sedona pixel type string accepted by {@link #getDataTypeCode(String)}
+   * @return {@code value}, unchanged, when it is storable in the pixel type
+   * @throws IllegalArgumentException when {@code value} cannot be stored in the pixel type
+   */
+  public static double assertBurnValueRepresentable(double value, String pixelType) {
+    return assertRepresentable(value, pixelType, "value", false);
+  }
+
+  /**
+   * Verifies that {@code value} (a nodata / background value, or a burn value) can be stored in the
+   * pixel type named by {@code pixelType} without silent coercion, returning it unchanged when it
+   * can. Writing a value that is out of the pixel type's range, or fractional for an integer pixel
+   * type, coerces the stored sample to a different number than the value the caller asked for (for
+   * example -1.0 or 300.0 wraps to 255 or 44 in an unsigned 8-bit band), so the sample would read
+   * back as a different number than requested. Any non-finite value (NaN or +/-Infinity) is always
+   * rejected. When {@code requireExactStorage} is true the value is treated as a sentinel that must
+   * round-trip byte-for-byte, so a float / double value that does not survive 32-bit float storage,
+   * and negative zero on an integer band (whose sign an integer sample cannot preserve), are also
+   * rejected; burn values pass false, since rounding to the pixel type is expected of ordinary
+   * pixel data. Such a violation is a correctness error, not a per-row data condition, so this
+   * rejects it with an {@link IllegalArgumentException} instead of coercing.
+   *
+   * @param value the candidate value
+   * @param pixelType a Sedona pixel type string accepted by {@link #getDataTypeCode(String)} (for
+   *     example {@code "B"}, {@code "I"}, {@code "D"})
+   * @param argName the name of the argument being validated (for example {@code "noDataValue"} or
+   *     {@code "value"}), used in the exception message
+   * @param requireExactStorage true to require the value be stored without any coercion (a nodata
+   *     sentinel); false to allow rounding to the pixel type (a burn value)
+   * @return {@code value}, unchanged, when it is representable in the pixel type
+   * @throws IllegalArgumentException when {@code value} cannot be represented in the pixel type
+   */
+  public static double assertRepresentable(
+      double value, String pixelType, String argName, boolean requireExactStorage) {
+    int dataTypeCode = getDataTypeCode(pixelType);
+    long min;
+    long max;
+    String description;
+    switch (dataTypeCode) {
+      case DataBuffer.TYPE_BYTE:
+        min = 0;
+        max = 255;
+        description = "unsigned 8-bit";
+        break;
+      case DataBuffer.TYPE_USHORT:
+        min = 0;
+        max = 65535;
+        description = "unsigned 16-bit";
+        break;
+      case DataBuffer.TYPE_SHORT:
+        min = Short.MIN_VALUE;
+        max = Short.MAX_VALUE;
+        description = "signed 16-bit";
+        break;
+      case DataBuffer.TYPE_INT:
+        min = Integer.MIN_VALUE;
+        max = Integer.MAX_VALUE;
+        description = "signed 32-bit";
+        break;
+      case DataBuffer.TYPE_FLOAT:
+        // NaN and infinite values cannot be used on a float/double band: NaN is the codebase's
+        // internal "no nodata" sentinel, so it cannot be stored as a distinct nodata value and
+        // would be silently dropped; an infinite value is not a valid GeoTools category bound and
+        // crashes deep in GeoTools with "Range [Infinity .. Infinity] is not valid". Reject both
+        // up front with a clear error (fail loud) rather than dropping them or crashing later.
+        if (!Double.isFinite(value)) {
+          throw new IllegalArgumentException(
+              String.format(
+                  "%s %s is not supported for pixel type '%s' (NaN and infinite values are not supported); use a finite value",
+                  argName, value, pixelType));
+        }
+        // A nodata sentinel must round-trip exactly through the band's 32-bit float storage —
+        // otherwise the stored sentinel differs from the value the caller set (e.g. 0.1 would be
+        // stored as 0.10000000149...), and comparisons against the caller's value would miss it. A
+        // burn value is ordinary data, so it is allowed to round to the pixel type (as PostGIS and
+        // gdal_rasterize do) and skips this check.
+        if (requireExactStorage && (double) (float) value != value) {
+          throw new IllegalArgumentException(
+              String.format(
+                  "%s %s is not exactly representable in pixel type '%s' (32-bit float)",
+                  argName, value, pixelType));
+        }
+        return value;
+      case DataBuffer.TYPE_DOUBLE:
+      default:
+        // 64-bit float represents every finite double value; only NaN and infinities are rejected
+        // (see the float arm for why).
+        if (!Double.isFinite(value)) {
+          throw new IllegalArgumentException(
+              String.format(
+                  "%s %s is not supported for pixel type '%s' (NaN and infinite values are not supported); use a finite value",
+                  argName, value, pixelType));
+        }
+        return value;
+    }
+
+    // A nodata sentinel of negative zero cannot be stored in an integer sample: the sign is lost,
+    // so the background reads back as +0 while the recorded nodata metadata is -0.0, leaving the
+    // background counted as data (and B/US fail later constructing the category as "Ranges
+    // overlap").
+    // Ordinary comparisons treat -0.0 as +0.0, so it slips through the range/fractional check
+    // below;
+    // reject it explicitly for integer pixel types. +0.0 and float/double -0.0 are unaffected, and
+    // burn values (requireExactStorage == false) are ordinary data, so -0.0 simply stores as 0.
+    if (requireExactStorage
+        && Double.doubleToRawLongBits(value) == Double.doubleToRawLongBits(-0.0d)) {
+      throw new IllegalArgumentException(
+          String.format(
+              "%s %s is not representable in pixel type '%s' (%s integer): negative zero cannot be "
+                  + "stored in an integer sample; use 0",
+              argName, value, pixelType, description));
+    }
+
+    // Integer pixel types: reject out-of-range and fractional values (Math.rint also rejects NaN).
+    if (value < min || value > max || value != Math.rint(value)) {
+      throw new IllegalArgumentException(
+          String.format(
+              "%s %s is not representable in pixel type '%s' (%s integer, valid range %d..%d)",
+              argName, value, pixelType, description, min, max));
+    }
+    return value;
   }
 
   /**

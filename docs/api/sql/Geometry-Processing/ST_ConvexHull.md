@@ -19,15 +19,26 @@
 
 # ST_ConvexHull
 
-Introduction: Return the Convex Hull of polygon A
+Introduction: Returns the smallest convex region containing A. For `Geometry` inputs, the hull is
+computed in the coordinate plane. For `Geography` inputs, it is computed on the sphere and its
+edges follow geodesics.
 
 ![ST_ConvexHull](../../../image/ST_ConvexHull/ST_ConvexHull.svg "ST_ConvexHull")
 
-Format: `ST_ConvexHull (A: Geometry)`
+Format:
 
-Return type: `Geometry`
+`ST_ConvexHull (A: Geometry)`
 
-Since: `v1.0.0`
+`ST_ConvexHull (A: Geography)`
+
+Return type: `Geometry` or `Geography`, matching the input type
+
+Since: `v1.0.0` (`Geometry`), `v1.9.1` (`Geography`)
+
+For a `Geography` input, a single unique point produces a `Point`, while collinear points produce
+a `LineString`. Empty inputs preserve their input type. Polygon holes do not change the hull.
+If the spherical convex hull is the full sphere, the function throws an
+`UnsupportedOperationException` because the full sphere cannot be represented by OGC WKB.
 
 SQL Example
 
@@ -39,4 +50,23 @@ Output:
 
 ```
 POLYGON ((20 40, 175 150, 125 100, 20 40))
+```
+
+Geography SQL Example
+
+```sql
+SELECT ST_GeometryType(
+    ST_ConvexHull(
+        ST_GeogFromWKT(
+            'MULTIPOINT ((170 -10), (170 10), (-170 10), (-170 -10))',
+            4326
+        )
+    )
+)
+```
+
+Output:
+
+```
+ST_Polygon
 ```

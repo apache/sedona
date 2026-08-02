@@ -290,7 +290,8 @@ public class RasterBandAccessorsTest extends RasterTestBase {
     assertEquals(1738.0, actual, 0d);
 
     actual = RasterBandAccessors.getZonalStats(raster, geom, 1, "count", true);
-    assertEquals(1832.0, actual, 0d);
+    // Matches GDAL/rasterio all_touched=True on this raster and geometry.
+    assertEquals(1842.0, actual, 0d);
   }
 
   @Test

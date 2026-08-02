@@ -81,8 +81,9 @@ These functions extract information and properties from geometry objects.
 | [ST_IsClosed](Geometry-Accessors/ST_IsClosed.md) | Boolean | RETURNS true if the LINESTRING start and end point are the same. | v1.3.0 |
 | [ST_IsCollection](Geometry-Accessors/ST_IsCollection.md) | Boolean | Returns `TRUE` if the geometry type of the input is a geometry collection type. Collection types are the following: | v1.5.0 |
 | [ST_IsEmpty](Geometry-Accessors/ST_IsEmpty.md) | Boolean | Test if a geometry is empty geometry | v1.2.1 |
+| [ST_IsLineStringCCW](Geometry-Accessors/ST_IsLineStringCCW.md) | Boolean | Returns true if the input LineString's coordinate sequence has counter-clockwise ring orientation. | v1.9.1 |
 | [ST_IsPolygonCCW](Geometry-Accessors/ST_IsPolygonCCW.md) | Boolean | Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise. | v1.6.0 |
-| [ST_IsPolygonCW](Geometry-Accessors/ST_IsPolygonCW.md) | Boolean | Returns true if all polygonal components in the input geometry have their exterior rings oriented counter-clockwise and interior rings oriented clockwise. | v1.6.0 |
+| [ST_IsPolygonCW](Geometry-Accessors/ST_IsPolygonCW.md) | Boolean | Returns true if all polygonal components in the input geometry have their exterior rings oriented clockwise and interior rings oriented counter-clockwise. | v1.6.0 |
 | [ST_IsRing](Geometry-Accessors/ST_IsRing.md) | Boolean | RETURN true if LINESTRING is ST_IsClosed and ST_IsSimple. | v1.3.0 |
 | [ST_IsSimple](Geometry-Accessors/ST_IsSimple.md) | Boolean | Test if geometry's only self-intersections are at boundary points. | v1.3.0 |
 | [ST_M](Geometry-Accessors/ST_M.md) | Double | Returns M Coordinate of given Point, null otherwise. | v1.6.1 |
@@ -108,7 +109,7 @@ These functions create modified geometries by changing type, structure, or verti
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
 | [ST_AddPoint](Geometry-Editors/ST_AddPoint.md) | Geometry | Return Linestring with additional point at the given index, if position is not available the point will be added at the end of line. | v1.3.0 |
-| [ST_Collect](Geometry-Editors/ST_Collect.md) | Geometry | Returns MultiGeometry object based on geometry column/s or array with geometries | v1.5.0 |
+| [ST_Collect](Geometry-Editors/ST_Collect.md) | Geometry or Geography | Collects two spatial values or an array of spatial values into a multi-object or collection without dissolving boundaries. | v1.5.0 |
 | [ST_CollectionExtract](Geometry-Editors/ST_CollectionExtract.md) | Geometry | Returns a homogeneous multi-geometry from a given geometry collection. | v1.5.0 |
 | [ST_FlipCoordinates](Geometry-Editors/ST_FlipCoordinates.md) | Geometry | Returns a version of the given geometry with X and Y axis flipped. | v1.2.0 |
 | [ST_Force2D](Geometry-Editors/ST_Force2D.md) | Geometry | Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force_2D](Geometry-Editors/ST_Force_2D.md). | v1.8.0 |
@@ -118,9 +119,9 @@ These functions create modified geometries by changing type, structure, or verti
 | [ST_Force4D](Geometry-Editors/ST_Force4D.md) | Geometry | Converts the input geometry to 4D XYZM representation. Retains original Z and M values if present. Assigning 0.0 defaults if `mValue` and `zValue` aren't specified. The output contains X, Y, Z, and... | v1.6.1 |
 | [ST_Force_2D](Geometry-Editors/ST_Force_2D.md) | Geometry | Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force2D](Geometry-Editors/ST_Force2D.md). | v1.2.1 |
 | [ST_ForceCollection](Geometry-Editors/ST_ForceCollection.md) | Geometry | This function converts the input geometry into a GeometryCollection, regardless of the original geometry type. If the input is a multipart geometry, such as a MultiPolygon or MultiLineString, it wi... | v1.6.1 |
-| [ST_ForcePolygonCCW](Geometry-Editors/ST_ForcePolygonCCW.md) | Geometry | For (Multi)Polygon geometries, this function sets the exterior ring orientation to counter-clockwise and interior rings to clockwise orientation. Non-polygonal geometries are returned unchanged. | v1.6.0 |
-| [ST_ForcePolygonCW](Geometry-Editors/ST_ForcePolygonCW.md) | Geometry | For (Multi)Polygon geometries, this function sets the exterior ring orientation to clockwise and interior rings to counter-clockwise orientation. Non-polygonal geometries are returned unchanged. | v1.6.0 |
-| [ST_ForceRHR](Geometry-Editors/ST_ForceRHR.md) | Geometry | Sets the orientation of polygon vertex orderings to follow the Right-Hand-Rule convention. The exterior ring will have a clockwise winding order, while any interior rings are oriented counter-clock... | v1.6.1 |
+| [ST_ForcePolygonCCW](Geometry-Editors/ST_ForcePolygonCCW.md) | Geometry | Sets polygon exterior rings counter-clockwise and interior rings clockwise, including polygonal members nested in GeometryCollections. Non-polygonal members are preserved unchanged. | v1.6.0 |
+| [ST_ForcePolygonCW](Geometry-Editors/ST_ForcePolygonCW.md) | Geometry | Sets polygon exterior rings clockwise and interior rings counter-clockwise, including polygonal members nested in GeometryCollections. Non-polygonal members are preserved unchanged. | v1.6.0 |
+| [ST_ForceRHR](Geometry-Editors/ST_ForceRHR.md) | Geometry | Applies right-hand-rule ring orientation recursively to polygonal members, including those nested in GeometryCollections. Non-polygonal members are preserved unchanged. | v1.6.1 |
 | [ST_LineFromMultiPoint](Geometry-Editors/ST_LineFromMultiPoint.md) | Geometry | Creates a LineString from a MultiPoint geometry. | v1.3.0 |
 | [ST_LineMerge](Geometry-Editors/ST_LineMerge.md) | Geometry | Returns a LineString or MultiLineString formed by sewing together the constituent line work of a MULTILINESTRING. | v1.5.0 |
 | [ST_LineSegments](Geometry-Editors/ST_LineSegments.md) | `Array<Geometry>` | This function transforms a LineString containing multiple coordinates into an array of LineStrings, each with precisely two coordinates. The `lenient` argument, true by default, prevents an excepti... | v1.7.1 |
@@ -166,6 +167,7 @@ These functions test spatial relationships between geometries, returning boolean
 | [ST_Disjoint](Predicates/ST_Disjoint.md) | Boolean | Return true if A and B are disjoint | v1.2.1 |
 | [ST_DWithin](Predicates/ST_DWithin.md) | Boolean | Returns true if 'leftGeometry' and 'rightGeometry' are within a specified 'distance'. | v1.5.1 |
 | [ST_Equals](Predicates/ST_Equals.md) | Boolean | Return true if A equals to B | v1.5.0 |
+| [ST_EqualsExact](Predicates/ST_EqualsExact.md) | Boolean | Return true if A and B have matching structures and corresponding coordinates within a tolerance | v1.9.1 |
 | [ST_Intersects](Predicates/ST_Intersects.md) | Boolean | Return true if A intersects B | v1.2.0 |
 | [ST_OrderingEquals](Predicates/ST_OrderingEquals.md) | Boolean | Returns true if the geometries are equal and the coordinates are in the same order | v1.2.1 |
 | [ST_Overlaps](Predicates/ST_Overlaps.md) | Boolean | Return true if A overlaps B | v1.5.0 |
@@ -214,7 +216,7 @@ These functions compute geometric constructions, or alter geometry size or shape
 | [ST_BuildArea](Geometry-Processing/ST_BuildArea.md) | Geometry | Returns the areal geometry formed by the constituent linework of the input geometry. | v1.2.1 |
 | [ST_Centroid](Geometry-Processing/ST_Centroid.md) | Geometry | Return the centroid point of A | v1.5.0 |
 | [ST_ConcaveHull](Geometry-Processing/ST_ConcaveHull.md) | Geometry | Return the Concave Hull of polygon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true | v1.4.0 |
-| [ST_ConvexHull](Geometry-Processing/ST_ConvexHull.md) | Geometry | Return the Convex Hull of polygon A | v1.5.0 |
+| [ST_ConvexHull](Geometry-Processing/ST_ConvexHull.md) | Geometry or Geography | Returns the planar convex hull of a Geometry or spherical convex hull of a Geography. | v1.5.0 |
 | [ST_DelaunayTriangles](Geometry-Processing/ST_DelaunayTriangles.md) | Geometry | This function computes the [Delaunay triangulation](https://en.wikipedia.org/wiki/Delaunay_triangulation) for the set of vertices in the input geometry. An optional `tolerance` parameter allows sna... | v1.6.1 |
 | [ST_GeneratePoints](Geometry-Processing/ST_GeneratePoints.md) | Geometry | Generates a specified quantity of pseudo-random points within the boundaries of the provided polygonal geometry. When `seed` is either zero or not defined then output will be random. | v1.6.1 |
 | [ST_GeometricMedian](Geometry-Processing/ST_GeometricMedian.md) | Geometry | Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm. The geometric median provides a centrality measure that is less sensitive to outlier points than th... | v1.4.1 |
@@ -264,10 +266,11 @@ These functions change the position and shape of geometries using affine transfo
 
 ## Aggregate Functions
 
-These functions perform aggregate operations on groups of geometries.
+These functions perform aggregate operations on groups of spatial values.
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
+| [ST_Collect_Agg](Aggregate-Functions/ST_Collect_Agg.md) | Geometry or Geography | Collects all non-null spatial values in a group without dissolving boundaries. Geography inputs must share an SRID. | v1.9.1 |
 | [ST_Envelope_Agg](Aggregate-Functions/ST_Envelope_Agg.md) | Geometry | Return the entire envelope boundary of all geometries in A. Empty geometries and null values are skipped. If all inputs are empty or null, the result is null. This behavior is consistent with PostG... | v1.3.0 |
 | [ST_Intersection_Agg](Aggregate-Functions/ST_Intersection_Agg.md) | Geometry | Return the polygon intersection of all polygons in A | v1.5.0 |
 | [ST_Union_Agg](Aggregate-Functions/ST_Union_Agg.md) | Geometry | Return the polygon union of all polygons in A. All inputs must be polygons. | v1.3.0 |

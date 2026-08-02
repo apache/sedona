@@ -19,7 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.spark.sql.catalyst.expressions.{EmptyRow, Literal}
-import org.apache.spark.sql.sedona_sql.expressions.{ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Disjoint, ST_Equals, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Point, ST_Touches, ST_Within}
+import org.apache.spark.sql.sedona_sql.expressions.{ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Disjoint, ST_Equals, ST_EqualsExact, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Point, ST_Touches, ST_Within}
 
 class predicateTestScala extends TestBaseScala {
 
@@ -355,6 +355,25 @@ class predicateTestScala extends TestBaseScala {
       assert(!notOrderEqualsDiffOrder.take(1)(0).get(0).asInstanceOf[Boolean])
     }
 
+    it("Passed ST_EqualsExact") {
+      val result = sparkSession
+        .sql("""
+          SELECT
+            ST_EqualsExact(ST_Point(0.0, 0.0), ST_Point(0.03, 0.04), 0.051),
+            ST_EqualsExact(ST_Point(0.0, 0.0), ST_Point(0.03, 0.04), 0.049),
+            ST_EqualsExact(
+              ST_GeomFromWKT('LINESTRING(0 0, 1 1)'),
+              ST_GeomFromWKT('LINESTRING(1 1, 0 0)'),
+              0.0),
+            ST_EqualsExact(NULL, ST_Point(0.0, 0.0), 0.0)
+        """)
+        .first()
+      assert(result.getBoolean(0))
+      assert(!result.getBoolean(1))
+      assert(!result.getBoolean(2))
+      assert(result.isNullAt(3))
+    }
+
     it("Passed edge cases of ST_Contains and ST_Covers") {
       val testtable = sparkSession.sql(
         "select ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') AS a, ST_GeomFromWKT('POINT(2 0)') AS b")
@@ -419,6 +438,18 @@ class predicateTestScala extends TestBaseScala {
         assert(predicate(missing :: point :: Nil).eval(EmptyRow) == null)
         assert(predicate(missing :: missing :: Nil).eval(EmptyRow) == null)
       }
+    }
+
+    it("Passed null handling in ST_EqualsExact") {
+      val point =
+        ST_Point(Literal.create(0.0) :: Literal.create(0.0) :: Literal.create(0.0) :: Nil)
+      val missing = Literal.create(null)
+      val tolerance = Literal.create(0.0)
+
+      assert(ST_EqualsExact(point :: point :: tolerance :: Nil).eval(EmptyRow) != null)
+      assert(ST_EqualsExact(point :: missing :: tolerance :: Nil).eval(EmptyRow) == null)
+      assert(ST_EqualsExact(missing :: point :: tolerance :: Nil).eval(EmptyRow) == null)
+      assert(ST_EqualsExact(point :: point :: missing :: Nil).eval(EmptyRow) == null)
     }
   }
 }

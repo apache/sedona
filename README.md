@@ -17,7 +17,12 @@
  under the License.
  -->
 
-[![Apache Sedona](docs/image/sedona_logo.png)](https://sedona.apache.org/)
+<a href="https://sedona.apache.org/">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/image/sedona_logo_dark.png">
+    <img alt="Apache Sedona" src="docs/image/sedona_logo.png">
+  </picture>
+</a>
 
 [![CodeQL Workflow Status](https://github.com/apache/sedona/actions/workflows/codeql.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/codeql.yml)
 [![Docker image build](https://github.com/apache/sedona/actions/workflows/docker-build.yml/badge.svg)](https://github.com/apache/sedona/actions/workflows/docker-build.yml)
@@ -67,7 +72,6 @@
 - [Docker image](#docker-image)
 - [Building Sedona](#building-sedona)
 - [Documentation](#documentation)
-- [Star History](#star-history)
 - [Powered by](#powered-by)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -226,10 +230,6 @@ We provide a Docker image for Apache Sedona with Python JupyterLab and a single-
 * [Sedona Python API Documentation](https://sedona.apache.org/latest/api/pydocs/)
 
 Please visit [Apache Sedona website](https://sedona.apache.org/) for detailed information
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=apache/sedona&type=Date)](https://www.star-history.com/#apache/sedona&Date)
 
 ## Powered by
 

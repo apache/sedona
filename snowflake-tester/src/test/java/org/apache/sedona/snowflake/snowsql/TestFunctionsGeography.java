@@ -28,4 +28,26 @@ public class TestFunctionsGeography extends TestBase {
     registerUDFGeography("GeometryType", String.class);
     verifySqlSingleRes("select sedona.GeometryType(ST_GeographyFromWKT('POINT(1 2)'))", "POINT");
   }
+
+  @Test
+  public void test_ST_EqualsExact() {
+    registerUDFGeography("ST_EqualsExact", String.class, String.class, double.class);
+    verifySqlSingleRes(
+        "SELECT SEDONA.ST_EqualsExact(ST_GeographyFromWKT('POINT (0 0)'), ST_GeographyFromWKT('POINT (0.03 0.04)'), 0.051)",
+        true);
+    verifySqlSingleRes(
+        "SELECT SEDONA.ST_EqualsExact(ST_GeographyFromWKT('POINT (0 0)'), ST_GeographyFromWKT('POINT (0.03 0.04)'), 0.049)",
+        false);
+  }
+
+  @Test
+  public void test_ST_IsLineStringCCW() {
+    registerUDFGeography("ST_IsLineStringCCW", String.class);
+    verifySqlSingleRes(
+        "SELECT SEDONA.ST_IsLineStringCCW(ST_GeographyFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 1, 0 0)'))",
+        true);
+    verifySqlSingleRes(
+        "SELECT SEDONA.ST_IsLineStringCCW(ST_GeographyFromWKT('LINESTRING (0 0, 0 1, 1 1, 1 0, 0 0)'))",
+        false);
+  }
 }

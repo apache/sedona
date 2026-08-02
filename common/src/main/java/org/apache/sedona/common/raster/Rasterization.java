@@ -34,6 +34,7 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.algorithm.CGAlgorithmsDD;
 import org.locationtech.jts.geom.*;
 
 public class Rasterization {
@@ -45,11 +46,24 @@ public class Rasterization {
       boolean useGeometryExtent,
       boolean allTouched)
       throws FactoryException {
+    return rasterize(geom, raster, pixelType, value, useGeometryExtent, allTouched, null);
+  }
+
+  protected static List<Object> rasterize(
+      Geometry geom,
+      GridCoverage2D raster,
+      String pixelType,
+      double value,
+      boolean useGeometryExtent,
+      boolean allTouched,
+      Double backgroundValue)
+      throws FactoryException {
 
     // Validate the input geometry and raster metadata
     double[] metadata = RasterAccessors.metadata(raster);
     validateRasterMetadata(metadata);
-    if (!RasterPredicates.rsIntersects(raster, geom)) {
+    geom = RasterUtils.transformToRasterCRS(raster, geom);
+    if (!RasterPredicates.intersectsInRasterCoordinateSpace(raster, geom)) {
       throw new IllegalArgumentException("Geometry does not intersect Raster.");
     }
 
@@ -59,6 +73,8 @@ public class Rasterization {
 
     RasterizationParams params =
         calculateRasterizationParams(raster, useGeometryExtent, metadata, geomExtent, pixelType);
+
+    fillBackground(params.writableRaster, backgroundValue);
 
     rasterizeGeometry(raster, metadata, geom, params, geomExtent, value, allTouched);
 
@@ -83,6 +99,31 @@ public class Rasterization {
     objects.add(rasterized);
 
     return objects;
+  }
+
+  /**
+   * Fills every pixel of the freshly-allocated raster with the background value, so pixels never
+   * covered by the geometry read back as that value instead of the allocation default of 0.
+   *
+   * <p>A null background, or a background of positive zero, keeps the zero-initialized allocation
+   * as-is. Negative zero, however, must still be filled: it is a legitimate noDataValue that is
+   * distinct from the allocation's {@code +0.0}. RS_Count (and other nodata-aware readers) compare
+   * pixels against the band's nodata metadata with {@link Double#compare}, which orders {@code
+   * -0.0} before {@code +0.0}, so a {@code -0.0} nodata left unfilled would leave the untouched
+   * pixels as {@code +0.0} and be miscounted as data. Filling makes the pixel value and the nodata
+   * metadata agree on the sign of zero.
+   */
+  private static void fillBackground(WritableRaster writableRaster, Double backgroundValue) {
+    // Double.compare(x, 0.0) == 0 is true only for +0.0; -0.0 compares as -1 and is filled.
+    if (backgroundValue == null || Double.compare(backgroundValue, 0.0) == 0) {
+      return;
+    }
+    int width = writableRaster.getWidth();
+    double[] row = new double[width];
+    Arrays.fill(row, backgroundValue);
+    for (int y = 0; y < writableRaster.getHeight(); y++) {
+      writableRaster.setSamples(0, y, width, 1, 0, row);
+    }
   }
 
   private static void rasterizeGeometry(
@@ -200,58 +241,80 @@ public class Rasterization {
         double x1 = (end.x - params.upperLeftX) / params.scaleX;
         double y1 = (end.y - params.upperLeftY) / params.scaleY;
 
-        // Apply Bresenham for this segment
-        drawLineBresenham(params, x0, y0, x1, y1, value, 0.2);
+        traverseSegment(params, x0, y0, x1, y1, value);
       }
     }
   }
 
-  // Modified Bresenham with Fractional Steps
-  private static void drawLineBresenham(
-      RasterizationParams params,
-      double x0,
-      double y0,
-      double x1,
-      double y1,
-      double value,
-      double stepSize) {
+  /**
+   * Burns every grid cell the segment passes through, in pixel space where cell (i, j) covers [i, i
+   * + 1) x [j, j + 1). Uses exact cell traversal (Amanatides-Woo): it steps from one cell-boundary
+   * crossing to the next, so a cell is burned whenever the segment enters it, however briefly. A
+   * fixed-step sampling walk instead misses cells crossed over a distance shorter than the step.
+   */
+  private static void traverseSegment(
+      RasterizationParams params, double x0, double y0, double x1, double y1, double value) {
+
+    int width = params.writableRaster.getWidth();
+    int height = params.writableRaster.getHeight();
 
     double dx = x1 - x0;
     double dy = y1 - y0;
 
-    // Compute the number of steps based on the larger of dx or dy
-    double distance = Math.sqrt(dx * dx + dy * dy);
-    int steps = (int) Math.ceil(distance / stepSize);
+    int stepX = (int) Math.signum(dx);
+    int stepY = (int) Math.signum(dy);
 
-    // Calculate the step increment for each axis
-    double stepX = dx / steps;
-    double stepY = dy / steps;
+    int x = (int) Math.floor(x0);
+    int y = (int) Math.floor(y0);
+    int endX = (int) Math.floor(x1);
+    int endY = (int) Math.floor(y1);
 
-    // Start stepping through the line
-    double x = x0;
-    double y = y0;
-
-    for (int i = 0; i <= steps; i++) {
-      int rasterX = (int) (Math.floor(x));
-      int rasterY = (int) (Math.floor(y));
-
-      // Adjust for bottom-up rasters
-      // Reverse the y index
-      if (params.bottomUp) {
-        rasterY = params.writableRaster.getHeight() - 1 - rasterY;
+    // The endpoints are clipped to the geometry extent, so the walk covers at most the grid's
+    // width + height cells; the bound also guards against a floating-point overshoot never reaching
+    // the end cell.
+    int maxSteps = width + height + 2;
+    for (int i = 0; i <= maxSteps; i++) {
+      burnCell(params, x, y, value, width, height);
+      if (x == endX && y == endY) {
+        break;
       }
-
-      // Only write if within raster bounds
-      if (rasterX >= 0
-          && rasterX < params.writableRaster.getWidth()
-          && rasterY >= 0
-          && rasterY < params.writableRaster.getHeight()) {
-        params.writableRaster.setSample(rasterX, rasterY, 0, value);
+      // Decide which axis to advance from the side of the segment on which the next cell corner in
+      // the direction of travel lies. The robust double-double orientation predicate resolves that
+      // side exactly, so the crossing order is computed identically regardless of endpoint order. A
+      // corner off the segment steps the single axis that keeps the walk on the segment's side; a
+      // corner the segment passes exactly through steps both axes at once, burning only the two
+      // cells the segment truly crosses rather than the off-diagonal pair. This supersedes the
+      // parametric tMax comparison, whose floating-point tie was fragile: recomputed from opposite
+      // endpoints in the two directions it could round asymmetrically and flip the step near a
+      // corner, burning a direction-dependent off-diagonal cell.
+      int crossingOrder;
+      if (stepX == 0) {
+        crossingOrder = 1;
+      } else if (stepY == 0) {
+        crossingOrder = -1;
+      } else {
+        double gridX = stepX > 0 ? x + 1.0 : x;
+        double gridY = stepY > 0 ? y + 1.0 : y;
+        int orientation = CGAlgorithmsDD.orientationIndex(x0, y0, x1, y1, gridX, gridY);
+        crossingOrder = -orientation * stepX * stepY;
       }
+      if (crossingOrder < 0) {
+        x += stepX;
+      } else if (crossingOrder > 0) {
+        y += stepY;
+      } else {
+        x += stepX;
+        y += stepY;
+      }
+    }
+  }
 
-      // Increment by fractional steps
-      x += stepX;
-      y += stepY;
+  private static void burnCell(
+      RasterizationParams params, int x, int y, double value, int width, int height) {
+    // Reverse the y index for bottom-up rasters
+    int rasterY = params.bottomUp ? height - 1 - y : y;
+    if (x >= 0 && x < width && rasterY >= 0 && rasterY < height) {
+      params.writableRaster.setSample(x, rasterY, 0, value);
     }
   }
 
@@ -669,7 +732,11 @@ public class Rasterization {
           double xMax = (geomExtent.getMaxX() - params.upperLeftX) / params.scaleX;
 
           for (double y = yStart; y >= yEnd; y--) {
-            double xIntercept = p1X + ((p1Y - y) / slope);
+            // p1X, p1Y and y are in pixel units while slope is world-units dy
+            // over dx, so converting the pixel dy to world units (scaleY) and
+            // the resulting world dx back to pixels (scaleX) keeps the
+            // intercept in pixel space for any pixel aspect ratio.
+            double xIntercept = p1X + ((y - p1Y) * params.scaleY / slope / params.scaleX);
             if ((xIntercept < xMin) || (xIntercept >= xMax)) {
               continue; // Skip xIntercepts outside geomExtent
             }

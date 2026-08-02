@@ -471,6 +471,35 @@ class TestPredicateJoin(TestBase):
         )
         assert actual.radius == pytest.approx(45.18896951053177, 1e-6)
 
+        triangle_df = self.spark.sql(
+            "SELECT ST_GeomFromWKT(" "'POLYGON ((0 0, 1 0, 1 1, 0 0))') AS geom"
+        )
+        coarse = triangle_df.selectExpr("ST_MaximumInscribedCircle(geom, 2.0)").first()[
+            0
+        ]
+        self.assert_geometry_almost_equal("POINT (0.75 0.5)", coarse.center)
+        self.assert_geometry_almost_equal("POINT (0.625 0.625)", coarse.nearest)
+        assert coarse.radius == pytest.approx(0.1767766952966369)
+
+        assert (
+            self.spark.sql(
+                "SELECT ST_MaximumInscribedCircle(ST_GeomFromWKT(NULL))"
+            ).first()[0]
+            is None
+        )
+        assert (
+            triangle_df.selectExpr(
+                "ST_MaximumInscribedCircle(geom, CAST(NULL AS DOUBLE))"
+            ).first()[0]
+            is None
+        )
+        assert (
+            triangle_df.selectExpr(
+                "ST_MaximumInscribedCircle(geom, CAST('NaN' AS DOUBLE))"
+            ).first()[0]
+            is None
+        )
+
     def test_st_is_valid_detail(self):
         baseDf = self.spark.sql(
             "SELECT ST_GeomFromText('POLYGON ((0 0, 2 0, 2 2, 0 2, 1 1, 0 0))') AS geom"

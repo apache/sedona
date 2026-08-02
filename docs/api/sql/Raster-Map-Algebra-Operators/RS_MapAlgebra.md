@@ -21,6 +21,13 @@
 
 Introduction: Apply a map algebra script on a raster.
 
+!!!warning
+    `RS_MapAlgebra` is deprecated since `v1.9.1` and **will be removed in a future version**. Use a
+    [Raster UDF](../Raster-UDF.md) instead, which expresses the same per-pixel calculations in Python
+    and additionally reaches NumPy, SciPy, scikit-learn, and rasterio. See the
+    [Raster UDF page](../Raster-UDF.md#ndvi-as-map-algebra-and-as-a-udf) for the same NDVI example
+    written both ways, and migrate existing scripts.
+
 ![RS_MapAlgebra](../../../image/RS_MapAlgebra/RS_MapAlgebra.svg "RS_MapAlgebra")
 
 Format:
@@ -72,3 +79,4 @@ RS_MapAlgebra(rast0, rast1, 'D', 'out = rast0[0] * 0.5 + rast1[0] * 0.5;', null)
 
 For more details and examples about `RS_MapAlgebra`, please refer to the [Map Algebra documentation](../Raster-map-algebra.md).
 To learn how to write map algebra script, please refer to [Jiffle language summary](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary).
+To express the same calculation in Python with NumPy or rasterio instead, see [Raster UDFs](../Raster-UDF.md).

@@ -447,7 +447,7 @@ public class WKTWriter {
     writer.write(WKTConstants.LINESTRING);
     writer.write(" ");
     appendOrdinateText(outputOrdinates, writer);
-    appendSequenceText(
+    appendLineStringSequenceText(
         lineString.getCoordinateSequence(),
         outputOrdinates,
         useFormatting,
@@ -691,6 +691,33 @@ public class WKTWriter {
   }
 
   /**
+   * Writes a LineString coordinate sequence while preserving valid WKT for S2's one-vertex
+   * representation of an all-degenerate line.
+   */
+  private void appendLineStringSequenceText(
+      CoordinateSequence seq,
+      EnumSet<Ordinate> outputOrdinates,
+      boolean useFormatting,
+      int level,
+      boolean indentFirst,
+      Writer writer,
+      OrdinateFormat formatter)
+      throws IOException {
+    if (seq.size() != 1) {
+      appendSequenceText(
+          seq, outputOrdinates, useFormatting, level, indentFirst, writer, formatter);
+      return;
+    }
+
+    if (indentFirst) indent(useFormatting, level, writer);
+    writer.write("(");
+    appendCoordinate(seq, outputOrdinates, 0, writer, formatter);
+    writer.write(", ");
+    appendCoordinate(seq, outputOrdinates, 0, writer, formatter);
+    writer.write(")");
+  }
+
+  /**
    * Converts a <code>Polygon</code> to &lt;Polygon Text&gt; format, then appends it to the writer.
    *
    * @param polygon the <code>Polygon</code> to process
@@ -810,7 +837,7 @@ public class WKTWriter {
           level2 = level + 1;
           doIndent = true;
         }
-        appendSequenceText(
+        appendLineStringSequenceText(
             new SinglePolylineGeography(multiLineString.getPolylines().get(i))
                 .getCoordinateSequence(),
             outputOrdinates,

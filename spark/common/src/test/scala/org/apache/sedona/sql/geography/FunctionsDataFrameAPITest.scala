@@ -23,6 +23,7 @@ import org.apache.sedona.sql.TestBaseScala
 import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.sedona_sql.expressions.{ST_Envelope, st_constructors, st_functions, st_predicates}
 import org.junit.Assert.{assertEquals, assertTrue}
+import org.locationtech.jts.geom.PrecisionModel
 
 class FunctionsDataFrameAPITest extends TestBaseScala {
   import sparkSession.implicits._
@@ -39,7 +40,7 @@ class FunctionsDataFrameAPITest extends TestBaseScala {
     val env = df.first().get(0).asInstanceOf[Geography]
     val expectedWKT =
       "POLYGON ((-180 -63.3, 180 -63.3, 180 -90, -180 -90, -180 -63.3))";
-    assertEquals(expectedWKT, env.toString)
+    assertEquals(expectedWKT, env.toString(new PrecisionModel(PrecisionModel.FIXED)))
   }
 
   it("Passed ST_Envelope Fiji") {
@@ -56,7 +57,23 @@ class FunctionsDataFrameAPITest extends TestBaseScala {
     val env = df.first().get(0).asInstanceOf[Geography]
     val expectedWKT =
       "POLYGON ((177.3 -18.3, -179.8 -18.3, -179.8 -16, 177.3 -16, 177.3 -18.3))";
-    assertEquals(expectedWKT, env.toString)
+    assertEquals(expectedWKT, env.toString(new PrecisionModel(PrecisionModel.FIXED)))
+  }
+
+  it("ST_Envelope preserves empty Geography") {
+    Seq("POINT EMPTY", "LINESTRING EMPTY", "POLYGON EMPTY", "GEOMETRYCOLLECTION EMPTY").foreach {
+      wkt =>
+        Seq(false, true).foreach { split =>
+          val df = sparkSession
+            .sql(s"SELECT '$wkt' AS wkt")
+            .select(st_constructors.ST_GeogFromWKT(col("wkt"), lit(3857)).as("geog"))
+            .select(st_functions.ST_Envelope(col("geog"), split).as("env"))
+
+          val env = df.first().getAs[Geography]("env")
+          assertEquals(wkt, env.toString)
+          assertEquals(3857, env.getSRID)
+        }
+    }
   }
 
   it("Passed ST_AsEWKT") {

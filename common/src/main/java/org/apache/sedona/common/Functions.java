@@ -1136,6 +1136,12 @@ public class Functions {
         && geometry.isSimple();
   }
 
+  public static boolean isLineStringCCW(Geometry geometry) {
+    return geometry instanceof LineString
+        && geometry.getNumPoints() >= 4
+        && Orientation.isCCW(((LineString) geometry).getCoordinateSequence());
+  }
+
   public static boolean isSimple(Geometry geometry) {
     return new IsSimpleOp(geometry).isSimple();
   }
@@ -1445,12 +1451,31 @@ public class Functions {
   }
 
   public static InscribedCircle maximumInscribedCircle(Geometry geometry) {
-    // Calculating the tolerance
-    Envelope envelope = geometry.getEnvelopeInternal();
-    double width = envelope.getWidth(), height = envelope.getHeight(), size, tolerance;
-    size = Math.max(width, height);
-    tolerance = size / 1000.0;
+    return maximumInscribedCircle(geometry, defaultMaximumInscribedCircleTolerance(geometry));
+  }
 
+  private static double defaultMaximumInscribedCircleTolerance(Geometry geometry) {
+    Envelope envelope = geometry.getEnvelopeInternal();
+    double size = Math.max(envelope.getWidth(), envelope.getHeight());
+    return size / 1000.0;
+  }
+
+  public static InscribedCircle maximumInscribedCircle(Geometry geometry, double tolerance) {
+    if (Double.isNaN(tolerance)) {
+      return null;
+    }
+    // JTS requires a positive tolerance. A zero value requests the same
+    // geometry-dependent default used by GEOS and the one-argument overload.
+    if (tolerance == 0.0) {
+      tolerance = defaultMaximumInscribedCircleTolerance(geometry);
+    }
+    // A non-empty zero-extent geometry has no positive automatic tolerance.
+    // GEOS returns the coincident center and boundary point for this case,
+    // while JTS rejects a zero tolerance before evaluating the geometry.
+    if (tolerance == 0.0 && !geometry.isEmpty()) {
+      Point point = geometry.getFactory().createPoint(geometry.getCoordinate());
+      return new InscribedCircle(point, point.copy(), 0.0);
+    }
     Geometry center, nearest;
     double radius;
 
@@ -1544,12 +1569,21 @@ public class Functions {
 
   /**
    * Forces a Polygon/MultiPolygon to use clockwise orientation for the exterior ring and a
-   * counter-clockwise for the interior ring(s).
+   * counter-clockwise for the interior ring(s). Polygonal members inside GeometryCollections are
+   * transformed recursively.
    *
    * @param geom
-   * @return a clockwise orientated (Multi)Polygon
+   * @return the geometry with polygonal components oriented clockwise
    */
   public static Geometry forcePolygonCW(Geometry geom) {
+    if (geom == null || geom.isEmpty()) {
+      return geom;
+    }
+
+    if (isPlainGeometryCollection(geom)) {
+      return forcePolygonOrientationInCollection((GeometryCollection) geom, true);
+    }
+
     if (isPolygonCW(geom)) {
       return geom;
     }
@@ -1599,7 +1633,8 @@ public class Functions {
   /**
    * This function accepts Polygon and MultiPolygon, if any other type is provided then it will
    * return false. If the exterior ring is clockwise and the interior ring(s) are counter-clockwise
-   * then returns true, otherwise false.
+   * then returns true, otherwise false. Empty Polygon and MultiPolygon inputs return true because
+   * they contain no rings with the opposite orientation.
    *
    * @param geom Polygon or MultiPolygon
    * @return
@@ -1608,11 +1643,12 @@ public class Functions {
     if (geom instanceof MultiPolygon) {
       MultiPolygon multiPolygon = (MultiPolygon) geom;
 
-      boolean arePolygonsCW = checkIfPolygonCW((Polygon) multiPolygon.getGeometryN(0));
-      for (int i = 1; i < multiPolygon.getNumGeometries(); i++) {
-        arePolygonsCW = arePolygonsCW && checkIfPolygonCW((Polygon) multiPolygon.getGeometryN(i));
+      for (int i = 0; i < multiPolygon.getNumGeometries(); i++) {
+        if (!checkIfPolygonCW((Polygon) multiPolygon.getGeometryN(i))) {
+          return false;
+        }
       }
-      return arePolygonsCW;
+      return true;
     } else if (geom instanceof Polygon) {
       return checkIfPolygonCW((Polygon) geom);
     }
@@ -1621,6 +1657,10 @@ public class Functions {
   }
 
   private static boolean checkIfPolygonCW(Polygon geom) {
+    if (geom.isEmpty()) {
+      return true;
+    }
+
     LinearRing exteriorRing = geom.getExteriorRing();
     boolean isExteriorRingCW = !Orientation.isCCW(exteriorRing.getCoordinateSequence());
 
@@ -1658,12 +1698,21 @@ public class Functions {
 
   /**
    * Forces a Polygon/MultiPolygon to use counter-clockwise orientation for the exterior ring and a
-   * clockwise for the interior ring(s).
+   * clockwise for the interior ring(s). Polygonal members inside GeometryCollections are
+   * transformed recursively.
    *
    * @param geom
-   * @return a counter-clockwise orientated (Multi)Polygon
+   * @return the geometry with polygonal components oriented counter-clockwise
    */
   public static Geometry forcePolygonCCW(Geometry geom) {
+    if (geom == null || geom.isEmpty()) {
+      return geom;
+    }
+
+    if (isPlainGeometryCollection(geom)) {
+      return forcePolygonOrientationInCollection((GeometryCollection) geom, false);
+    }
+
     if (isPolygonCCW(geom)) {
       return geom;
     }
@@ -1682,6 +1731,34 @@ public class Functions {
     }
     // Non-polygonal geometries are returned unchanged
     return geom;
+  }
+
+  private static boolean isPlainGeometryCollection(Geometry geometry) {
+    return geometry instanceof GeometryCollection
+        && !(geometry instanceof MultiPoint)
+        && !(geometry instanceof MultiLineString)
+        && !(geometry instanceof MultiPolygon);
+  }
+
+  private static Geometry forcePolygonOrientationInCollection(
+      GeometryCollection collection, boolean clockwise) {
+    Geometry[] orientedGeometries = new Geometry[collection.getNumGeometries()];
+    boolean changed = false;
+    for (int i = 0; i < collection.getNumGeometries(); i++) {
+      Geometry geometry = collection.getGeometryN(i);
+      Geometry orientedGeometry = clockwise ? forcePolygonCW(geometry) : forcePolygonCCW(geometry);
+      orientedGeometries[i] = orientedGeometry;
+      changed |= orientedGeometry != geometry;
+    }
+
+    if (!changed) {
+      return collection;
+    }
+    GeometryCollection orientedCollection =
+        collection.getFactory().createGeometryCollection(orientedGeometries);
+    orientedCollection.setSRID(collection.getSRID());
+    orientedCollection.setUserData(collection.getUserData());
+    return orientedCollection;
   }
 
   private static Geometry transformCCW(Polygon polygon) {
@@ -1713,7 +1790,8 @@ public class Functions {
   /**
    * This function accepts Polygon and MultiPolygon, if any other type is provided then it will
    * return false. If the exterior ring is counter-clockwise and the interior ring(s) are clockwise
-   * then returns true, otherwise false.
+   * then returns true, otherwise false. Empty Polygon and MultiPolygon inputs return true because
+   * they contain no rings with the opposite orientation.
    *
    * @param geom Polygon or MultiPolygon
    * @return
@@ -1722,12 +1800,12 @@ public class Functions {
     if (geom instanceof MultiPolygon) {
       MultiPolygon multiPolygon = (MultiPolygon) geom;
 
-      boolean arePolygonsCCW = checkIfPolygonCCW(((Polygon) multiPolygon.getGeometryN(0)));
-      for (int i = 1; i < multiPolygon.getNumGeometries(); i++) {
-        arePolygonsCCW =
-            arePolygonsCCW && checkIfPolygonCCW((Polygon) multiPolygon.getGeometryN(i));
+      for (int i = 0; i < multiPolygon.getNumGeometries(); i++) {
+        if (!checkIfPolygonCCW((Polygon) multiPolygon.getGeometryN(i))) {
+          return false;
+        }
       }
-      return arePolygonsCCW;
+      return true;
     } else if (geom instanceof Polygon) {
       return checkIfPolygonCCW((Polygon) geom);
     }
@@ -1736,6 +1814,10 @@ public class Functions {
   }
 
   private static boolean checkIfPolygonCCW(Polygon geom) {
+    if (geom.isEmpty()) {
+      return true;
+    }
+
     LinearRing exteriorRing = geom.getExteriorRing();
     boolean isExteriorRingCCW = Orientation.isCCW(exteriorRing.getCoordinateSequence());
 

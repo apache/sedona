@@ -152,7 +152,9 @@ private[apache] case class ST_ConcaveHull(inputExpressions: Seq[Expression])
  * @param inputExpressions
  */
 private[apache] case class ST_ConvexHull(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.convexHull _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.convexHull),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.convexHull)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -456,12 +458,15 @@ object ST_Transform {
 }
 
 /**
- * Return the intersection shape of two geometries. The return type is a geometry
+ * Return the intersection of two geometries or two geographies. The return type matches the
+ * inputs.
  *
  * @param inputExpressions
  */
 private[apache] case class ST_Intersection(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.intersection _) {
+    extends InferredExpression(
+      inferrableFunction2(Functions.intersection),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.intersection)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -736,7 +741,9 @@ private[apache] case class ST_Azimuth(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_X(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.x _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.x),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.x)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -744,7 +751,9 @@ private[apache] case class ST_X(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_Y(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.y _) {
+    extends InferredExpression(
+      inferrableFunction1(Functions.y),
+      inferrableFunction1(org.apache.sedona.common.geography.Functions.y)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1213,7 +1222,8 @@ private[apache] case class ST_Segmentize(inputExpressions: Seq[Expression])
 private[apache] case class ST_MakeLine(inputExpressions: Seq[Expression])
     extends InferredExpression(
       inferrableFunction2(Functions.makeLine),
-      inferrableFunction1(Functions.makeLine)) {
+      inferrableFunction1(Functions.makeLine),
+      inferrableFunction2(org.apache.sedona.common.geography.Functions.makeLine)) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
@@ -1286,13 +1296,45 @@ private[apache] case class ST_MakePolygon(inputExpressions: Seq[Expression])
 
 private[apache] case class ST_MaximumInscribedCircle(children: Seq[Expression])
     extends Expression
+    with ImplicitCastInputTypes
     with CodegenFallback {
+
+  private val nArgs = children.length
+
+  override def inputTypes: Seq[AbstractDataType] = nArgs match {
+    case 1 => Seq(GeometryUDT())
+    case 2 => Seq(GeometryUDT(), DoubleType)
+    case _ =>
+      throw new IllegalArgumentException("ST_MaximumInscribedCircle expects one or two arguments")
+  }
 
   override def eval(input: InternalRow): Any = {
     val geometry = children.head.toGeometry(input)
+    var tolerance: java.lang.Double = null
     try {
-      var inscribedCircle: InscribedCircle = null
-      inscribedCircle = Functions.maximumInscribedCircle(geometry)
+      if (geometry == null) {
+        return null
+      }
+
+      if (nArgs == 2) {
+        tolerance = children(1).eval(input) match {
+          case null => return null
+          case value: Number => value.doubleValue()
+          case value =>
+            throw new IllegalArgumentException(
+              s"Tolerance must be numeric, but received ${value.getClass.getSimpleName}")
+        }
+      }
+
+      val inscribedCircle: InscribedCircle =
+        if (tolerance == null) {
+          Functions.maximumInscribedCircle(geometry)
+        } else {
+          Functions.maximumInscribedCircle(geometry, tolerance)
+        }
+      if (inscribedCircle == null) {
+        return null
+      }
 
       val serCenter = GeometrySerializer.serialize(inscribedCircle.center)
       val serNearest = GeometrySerializer.serialize(inscribedCircle.nearest)
@@ -1301,7 +1343,7 @@ private[apache] case class ST_MaximumInscribedCircle(children: Seq[Expression])
       case e: Exception =>
         InferredExpression.throwExpressionInferenceException(
           getClass.getSimpleName,
-          Seq(geometry),
+          if (nArgs == 1) Seq(geometry) else Seq(geometry, tolerance),
           e)
     }
   }
@@ -1929,6 +1971,13 @@ private[apache] case class ST_NRings(inputExpressions: Seq[Expression])
 
 private[apache] case class ST_IsPolygonCCW(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.isPolygonCCW _) {
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class ST_IsLineStringCCW(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.isLineStringCCW _) {
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
   }

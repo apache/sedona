@@ -26,10 +26,12 @@ import com.google.common.geometry.S2Region;
 import com.google.common.geometry.S2Shape;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.List;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBConstants;
 
 /**
  * A Geography implementation that stores WKB bytes as the primary representation, with lazy-parsed
@@ -38,8 +40,8 @@ import org.locationtech.jts.io.ParseException;
  *
  * <p>Key optimizations (per paleolimbot's review): - dimension() reads WKB type byte directly (no
  * S2 parse) - region()/getCellUnionBound() for points read coordinates from WKB (no S2 parse) -
- * shape()/numShapes() use WkbS2Shape for simple types (no S2Polygon construction) - ShapeIndex is
- * built from WkbS2Shape directly (skips Geography layer)
+ * shape()/numShapes() use WkbS2Shape for simple XY types (no S2Polygon construction) - ShapeIndex
+ * is built from WkbS2Shape directly when the stored WKB is XY (skips Geography layer)
  */
 public class WKBGeography extends Geography {
 
@@ -80,6 +82,14 @@ public class WKBGeography extends Geography {
    */
   public static WKBGeography fromWKB(byte[] wkb, int srid) {
     WKBGeography geog = new WKBGeography(wkb, srid);
+    // Sedona versions before 1.9.1 could emit an empty LineString as only its 5-byte WKB header
+    // (or 9 bytes when an EWKB SRID was present), without the required zero coordinate count.
+    // Normalize that legacy representation at the boundary so it never escapes as malformed WKB.
+    if (wkb.length >= 5
+        && geog.wkbBaseType() == WKBConstants.wkbLineString
+        && wkb.length == geog.wkbPayloadOffset()) {
+      geog = new WKBGeography(Arrays.copyOf(wkb, wkb.length + Integer.BYTES), srid);
+    }
     if (eagerShapeIndex) {
       geog.getShapeIndexGeography();
     }
@@ -134,9 +144,10 @@ public class WKBGeography extends Geography {
   }
 
   /**
-   * Returns a ShapeIndexGeography, lazily built on first access. For simple types (Point,
+   * Returns a ShapeIndexGeography, lazily built on first access. For simple XY types (Point,
    * LineString, Polygon), builds the index directly from WkbS2Shape — no S2 Geography construction
-   * needed.
+   * needed. Higher-dimensional WKB is read through the full reader, which consumes and ignores Z/M
+   * ordinates for spherical operations.
    */
   public ShapeIndexGeography getShapeIndexGeography() {
     ShapeIndexGeography result = shapeIndexGeography;
@@ -145,13 +156,14 @@ public class WKBGeography extends Geography {
         result = shapeIndexGeography;
         if (result == null) {
           int type = wkbBaseType();
-          if (type >= 1 && type <= 3) {
+          if (type >= 1 && type <= 3 && !wkbHasZOrM()) {
             // Point/LineString/Polygon: build ShapeIndex from WkbS2Shape
             // Avoids S2Loop/S2Polygon internal index builds
             result = new ShapeIndexGeography();
             result.shapeIndex.add(new WkbS2Shape(wkbBytes));
           } else {
-            // Multi-types and collections fall back to full S2 parse
+            // Multi-types, collections, and higher-dimensional WKB fall back to the full reader.
+            // WkbS2Shape is deliberately XY-only, while WKBReader consumes and ignores Z/M.
             result = new ShapeIndexGeography(getS2Geography());
           }
           shapeIndexGeography = result;
@@ -228,21 +240,76 @@ public class WKBGeography extends Geography {
     return wkbHasSRID() ? 9 : 5;
   }
 
-  /** Throws if the stored WKB uses Z or M dimensions (EWKB flag or ISO type {@code >= 1000}). */
-  private void requireXYOnly() {
+  /** Returns whether the stored WKB uses Z or M dimensions (EWKB flags or ISO type offsets). */
+  private boolean wkbHasZOrM() {
     int raw = wkbRawType();
     boolean ewkbZ = (raw & EWKB_Z_FLAG) != 0;
     boolean ewkbM = (raw & EWKB_M_FLAG) != 0;
     boolean isoZM = (raw & 0xffff) >= 1000;
-    if (ewkbZ || ewkbM || isoZM) {
+    return ewkbZ || ewkbM || isoZM;
+  }
+
+  /** Throws if the stored WKB uses Z or M dimensions (EWKB flag or ISO type {@code >= 1000}). */
+  private void requireXYOnly() {
+    if (wkbHasZOrM()) {
       throw new UnsupportedOperationException(
-          "WKBGeography only supports 2D WKB; got Z/M type: 0x" + Integer.toHexString(raw));
+          "Direct S2Point extraction only supports 2D WKB; got Z/M type: 0x"
+              + Integer.toHexString(wkbRawType()));
     }
   }
 
   /** Returns true if this WKB represents a single Point (type 1). */
   public boolean isPoint() {
     return wkbBaseType() == 1;
+  }
+
+  /**
+   * Returns true if the top-level WKB is empty without constructing JTS or S2 objects. For
+   * non-point WKB, the first payload integer is the element/ring/vertex count.
+   */
+  public boolean isEmpty() {
+    int type = wkbBaseType();
+    int payloadOffset = wkbPayloadOffset();
+    if (type == 1) {
+      if (wkbBytes.length < payloadOffset + 2 * Double.BYTES) return false;
+      return getPointX() == null;
+    }
+    if (type >= 2 && type <= 7) {
+      if (wkbBytes.length < payloadOffset + Integer.BYTES) return false;
+      boolean le = (wkbBytes[0] == 0x01);
+      ByteBuffer bb =
+          ByteBuffer.wrap(wkbBytes).order(le ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+      return bb.getInt(payloadOffset) == 0;
+    }
+    return false;
+  }
+
+  /** Returns the X coordinate directly from Point WKB, or null for non-points and empty points. */
+  public Double getPointX() {
+    return getPointOrdinate(0);
+  }
+
+  /** Returns the Y coordinate directly from Point WKB, or null for non-points and empty points. */
+  public Double getPointY() {
+    return getPointOrdinate(1);
+  }
+
+  /**
+   * Reads X or Y directly from the WKB payload. Z/M ordinates are intentionally tolerated and
+   * ignored so these accessors match Geometry ST_X/ST_Y behavior for higher-dimensional points.
+   */
+  private Double getPointOrdinate(int ordinate) {
+    if (!isPoint()) return null;
+
+    boolean le = (wkbBytes[0] == 0x01);
+    int coordOffset = wkbPayloadOffset();
+    ByteBuffer bb =
+        ByteBuffer.wrap(wkbBytes).order(le ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
+    double x = bb.getDouble(coordOffset);
+    double y = bb.getDouble(coordOffset + Double.BYTES);
+    // JTS treats a point as empty when either X or Y is NaN.
+    if (Double.isNaN(x) || Double.isNaN(y)) return null;
+    return ordinate == 0 ? x : y;
   }
 
   /** Extract the S2Point from a Point WKB without full S2 parse. */
@@ -288,7 +355,7 @@ public class WKBGeography extends Geography {
   @Override
   public S2Shape shape(int id) {
     int type = wkbBaseType();
-    if (type >= 1 && type <= 3) {
+    if (type >= 1 && type <= 3 && !wkbHasZOrM()) {
       return new WkbS2Shape(wkbBytes);
     }
     return getS2Geography().shape(id);
@@ -296,7 +363,7 @@ public class WKBGeography extends Geography {
 
   @Override
   public S2Region region() {
-    if (isPoint()) {
+    if (isPoint() && !wkbHasZOrM()) {
       return new S2PointRegion(extractPoint());
     }
     return getS2Geography().region();
@@ -304,7 +371,7 @@ public class WKBGeography extends Geography {
 
   @Override
   public void getCellUnionBound(List<S2CellId> cellIds) {
-    if (isPoint()) {
+    if (isPoint() && !wkbHasZOrM()) {
       cellIds.add(S2CellId.fromPoint(extractPoint()));
       return;
     }
@@ -313,11 +380,14 @@ public class WKBGeography extends Geography {
 
   @Override
   public String toString() {
-    return getS2Geography().toString();
+    // WKB is the structural source of truth. Rendering the derived S2 view here would both
+    // canonicalize repeated vertices and apply Geography's default fixed-precision formatting.
+    return getJTSGeometry().toText();
   }
 
   @Override
   public String toString(PrecisionModel precisionModel) {
+    // Keep the S2 writer available to callers that explicitly request precision-controlled text.
     return getS2Geography().toString(precisionModel);
   }
 
@@ -328,9 +398,8 @@ public class WKBGeography extends Geography {
 
   @Override
   public String toEWKT() {
-    Geography s2 = getS2Geography();
-    s2.setSRID(getSRID());
-    return s2.toEWKT();
+    String wkt = toString();
+    return getSRID() > 0 ? "SRID=" + getSRID() + "; " + wkt : wkt;
   }
 
   @Override

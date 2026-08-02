@@ -2596,6 +2596,21 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testIsLineStringCCW() {
+    Table result =
+        tableEnv.sqlQuery(
+            "SELECT "
+                + "ST_IsLineStringCCW(ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 1, 0 0)')), "
+                + "ST_IsLineStringCCW(ST_GeomFromWKT('LINESTRING (0 1, 0 -1, -1 -2, 3 -2)')), "
+                + "ST_IsLineStringCCW(ST_GeomFromWKT('POINT (0 0)'))");
+    Row row = first(result);
+
+    assertTrue((boolean) row.getField(0));
+    assertFalse((boolean) row.getField(1));
+    assertFalse((boolean) row.getField(2));
+  }
+
+  @Test
   public void testGeneratePoints() {
     Table polyTable =
         tableEnv.sqlQuery(
@@ -2685,6 +2700,22 @@ public class FunctionTest extends TestBase {
                         call(Functions.ST_IsPolygonCCW.class.getSimpleName(), $("polyCW"))))
                 .getField(0);
     assertFalse(actual);
+  }
+
+  @Test
+  public void testIsPolygonOrientationForEmptyGeometries() {
+    Table result =
+        tableEnv.sqlQuery(
+            "SELECT "
+                + "ST_IsPolygonCW(ST_GeomFromWKT('POLYGON EMPTY')), "
+                + "ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON EMPTY')), "
+                + "ST_IsPolygonCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY')), "
+                + "ST_IsPolygonCCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY'))");
+
+    Row row = first(result);
+    for (int i = 0; i < row.getArity(); i++) {
+      assertTrue((boolean) row.getField(i));
+    }
   }
 
   @Test

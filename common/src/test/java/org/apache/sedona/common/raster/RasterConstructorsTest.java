@@ -25,13 +25,16 @@ import static org.junit.Assert.assertEquals;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.Constructors;
+import org.apache.sedona.common.FunctionsGeoTools;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.coverage.SampleDimensionType;
 import org.geotools.api.geometry.Position;
@@ -79,6 +82,10 @@ public class RasterConstructorsTest extends RasterTestBase {
 
   @Test
   public void testAsRasterWithEmptyRaster() throws FactoryException, ParseException {
+    // The empty reference rasters below carry no nodata value. Omitting the noDataValue argument
+    // would now inherit the reference band's nodata value and error when there is none, so the
+    // calls that exercise the default burn value of 1 with a zero background pass an explicit null
+    // noDataValue (the escape hatch for "no nodata value, zero background").
     // Polygon
     GridCoverage2D raster =
         RasterConstructors.makeEmptyRaster(2, 255, 255, 1, -1, 2, -2, 0, 0, 4326);
@@ -92,15 +99,15 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     double[] expected =
         new double[] {
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0,
-          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 3093151.0,
-          3093151.0, 3093151.0, 3093151.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
-          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0
+          3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0,
+          3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3093151.0,
+          3093151.0, 3093151.0, 3093151.0, 3.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
+          3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0
         };
 
     assertArrayEquals(expected, actual, 0.1d);
 
-    rasterized = RasterConstructors.asRaster(geom, raster, "d");
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 1d, null);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected =
         new double[] {
@@ -111,7 +118,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     assertArrayEquals(expected, actual, 0.1d);
 
     // Test bottom-up raster case
-    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d");
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 1d, null);
     expected =
         new double[] {
           1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -136,13 +143,13 @@ public class RasterConstructorsTest extends RasterTestBase {
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected =
         new double[] {
-          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
-          3093151.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 0.0, 0.0, 3093151.0,
-          3093151.0, 0.0
+          3093151.0, 3093151.0, 3.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
+          3093151.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3.0, 3093151.0, 3093151.0,
+          3093151.0, 3.0
         };
     assertArrayEquals(expected, actual, 0.1d);
 
-    rasterized = RasterConstructors.asRaster(geom, raster, "d");
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 1d, null);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
 
     expected =
@@ -153,7 +160,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     assertArrayEquals(expected, actual, 0.1d);
 
     // Test bottom-up raster case
-    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d");
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 1d, null);
 
     // Making sure orientation is preserved
     assertEquals(
@@ -177,11 +184,11 @@ public class RasterConstructorsTest extends RasterTestBase {
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected =
         new double[] {
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+          3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+          3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0,
+          3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+          3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0,
+          3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0,
           3093151.0
         };
     assertArrayEquals(expected, actual, 0.1d);
@@ -198,17 +205,17 @@ public class RasterConstructorsTest extends RasterTestBase {
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected =
         new double[] {
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0
+          3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+          3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+          3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+          3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0,
+          3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+          3.0, 3.0, 3.0
         };
 
     assertArrayEquals(expected, actual, 0.1d);
 
-    rasterized = RasterConstructors.asRaster(geom, raster, "d");
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 1d, null);
 
     actual = MapAlgebra.bandAsArray(rasterized, 1);
 
@@ -223,7 +230,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     assertArrayEquals(expected, actual, 0.1d);
 
     // Test bottom-up raster case
-    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d");
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 1d, null);
 
     // Making sure orientation is preserved
     assertEquals(
@@ -250,11 +257,11 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     expected =
         new double[] {
-          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0,
-          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0,
-          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
+          3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0,
+          3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0,
+          3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0,
+          3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0,
+          3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
           3093151.0
         };
     assertArrayEquals(expected, actual, 0.1d);
@@ -271,17 +278,17 @@ public class RasterConstructorsTest extends RasterTestBase {
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected =
         new double[] {
-          0.0, 0.0, 0.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0,
-          3093151.0, 3093151.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0,
-          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0
+          3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0,
+          3093151.0, 3093151.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0,
+          3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0,
+          3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+          3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+          3.0, 3.0
         };
 
     assertArrayEquals(expected, actual, 0.1d);
 
-    rasterized = RasterConstructors.asRaster(geom, raster, "d");
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 1d, null);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
 
     expected =
@@ -295,7 +302,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     assertArrayEquals(expected, actual, 0.1d);
 
     // Test bottom-up raster case
-    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d");
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 1d, null);
 
     // Making sure orientation is preserved
     assertEquals(
@@ -320,10 +327,10 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     expected =
         new double[] {
-          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 3093151.0, 3093151.0
+          3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0,
+          3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+          3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0,
+          3.0, 3.0, 3093151.0, 3093151.0
         };
     assertArrayEquals(expected, actual, 0.1d);
 
@@ -332,15 +339,15 @@ public class RasterConstructorsTest extends RasterTestBase {
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected =
         new double[] {
-          0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0,
-          3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          3093151.0, 3093151.0, 0.0, 0.0, 0.0, 0.0, 0.0
+          3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0,
+          3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0,
+          3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0,
+          3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0
         };
 
     assertArrayEquals(expected, actual, 0.1d);
 
-    rasterized = RasterConstructors.asRaster(geom, raster, "d");
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 1d, null);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
 
     expected =
@@ -353,7 +360,7 @@ public class RasterConstructorsTest extends RasterTestBase {
     assertArrayEquals(expected, actual, 0.1d);
 
     // Test bottom-up raster case
-    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d");
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 1d, null);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected =
         new double[] {
@@ -377,14 +384,605 @@ public class RasterConstructorsTest extends RasterTestBase {
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     assertArrayEquals(expected, actual, 0.1d);
 
-    rasterized = RasterConstructors.asRaster(geom, raster, "d");
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 1d, null);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
     expected = new double[] {1.0, 1.0, 1.0, 1.0};
     assertArrayEquals(expected, actual, 0.1d);
 
     // Test bottom-up raster case
-    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d");
+    rasterized = RasterConstructors.asRaster(geom, raster_bottom_up, "d", false, 1d, null);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
+    assertArrayEquals(expected, actual, 0.1d);
+  }
+
+  @Test
+  public void testAsRasterTransformsGeometryToRasterCRS()
+      throws FactoryException, ParseException, TransformException {
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 5, 1, -1, 0, 0, 4326);
+    Geometry geometry4326 =
+        Constructors.geomFromWKT("POLYGON ((1.2 1.2, 1.2 2.8, 3.6 2.8, 3.6 1.2, 1.2 1.2))", 4326);
+    Geometry geometry3857 = FunctionsGeoTools.transform(geometry4326, "EPSG:4326", "EPSG:3857");
+    geometry3857.setSRID(3857);
+
+    for (boolean useGeometryExtent : new boolean[] {false, true}) {
+      GridCoverage2D expected =
+          RasterConstructors.asRaster(geometry4326, raster, "d", false, 7, 0d, useGeometryExtent);
+      GridCoverage2D actual =
+          RasterConstructors.asRaster(geometry3857, raster, "d", false, 7, 0d, useGeometryExtent);
+
+      double[] expectedPixels = MapAlgebra.bandAsArray(expected, 1);
+      double[] actualPixels = MapAlgebra.bandAsArray(actual, 1);
+      Assert.assertTrue(Arrays.stream(expectedPixels).anyMatch(pixel -> pixel == 7));
+      assertEquals(expected.getEnvelope2D(), actual.getEnvelope2D());
+      assertArrayEquals(expectedPixels, actualPixels, 0d);
+    }
+  }
+
+  @Test
+  public void testAsRasterBackgroundIsNoDataValue() throws FactoryException, ParseException {
+    // Axis-aligned rings on square pixels keep the pixel selection trivial;
+    // the interesting part is that every pixel NOT covered by the geometry
+    // must read back as the noDataValue rather than 0, matching the band's
+    // nodata metadata (PostGIS ST_AsRaster fills untouched cells with
+    // nodataval; gdal_rasterize -init <nodata> -a_nodata <nodata>).
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5), "
+                + "(104.5 497.5, 109.5 497.5, 109.5 491.5, 104.5 491.5, 104.5 497.5))",
+            0);
+
+    GridCoverage2D rasterized =
+        RasterConstructors.asRaster(geom, raster, "d", false, 1d, 9d, false);
+    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+    double[] expected =
+        new double[] {
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1, 1, 1, 1, 1
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+    assertEquals(9d, RasterUtils.getNoDataValue(rasterized.getSampleDimension(0)), 0.1d);
+
+    // Burning value 0 must stay distinguishable from the nodata background
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 0d, 9d, false);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0, 0, 0, 0, 0, 0, 0,
+          0, 0, 9, 9, 9, 0, 0,
+          0, 0, 9, 9, 9, 0, 0,
+          0, 0, 9, 9, 9, 0, 0,
+          0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // Geometry-extent output (the default) fills its background the same way;
+    // this geometry's snapped envelope is the full grid
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 1d, 9d, true);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1, 1, 1, 1, 1
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // Without a noDataValue the background stays 0
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 1d, null, false);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 0, 0, 0, 1, 1,
+          1, 1, 0, 0, 0, 1, 1,
+          1, 1, 0, 0, 0, 1, 1,
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1, 1, 1, 1, 1
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+  }
+
+  @Test
+  public void testAsRasterNegativeZeroNoDataValueIsFilled()
+      throws FactoryException, ParseException {
+    // -0.0 is a legitimate noDataValue distinct from the allocation's +0.0. A 3x3 grid fully
+    // covered except for the centre pixel (a one-pixel hole) must burn 8 pixels and leave the
+    // centre as the -0.0 background. RS_Count(band, excludeNoData=true) compares each pixel to
+    // the nodata metadata with Double.compare, which distinguishes +0.0 from -0.0: if the hole
+    // were left as the zero-initialized +0.0 it would be miscounted as data (9 instead of 8).
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "D", 3, 3, 0, 3, 1, -1, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((0 0, 3 0, 3 3, 0 3, 0 0), (1 1, 2 1, 2 2, 1 2, 1 1))", 0);
+
+    GridCoverage2D rasterized =
+        RasterConstructors.asRaster(geom, raster, "D", false, 1d, -0.0d, false);
+    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+    double[] expected =
+        new double[] {
+          1, 1, 1,
+          1, -0.0, 1,
+          1, 1, 1
+        };
+    assertArrayEquals(expected, actual, 0.0d);
+
+    // The hole pixel must be exactly -0.0 (not +0.0), matching the band's nodata metadata.
+    // Double.compare is sign-of-zero sensitive; assertArrayEquals with a delta is not.
+    assertEquals(0, Double.compare(-0.0d, actual[4]));
+    assertEquals(
+        0, Double.compare(-0.0d, RasterUtils.getNoDataValue(rasterized.getSampleDimension(0))));
+
+    // 8 data pixels, not 9: the -0.0 hole is excluded as nodata.
+    assertEquals(8L, RasterBandAccessors.getCount(rasterized, 1, true));
+  }
+
+  @Test
+  public void testAsRasterRejectsNonRepresentableNoDataValue()
+      throws FactoryException, ParseException {
+    // An unsigned 8-bit band ('B') cannot store a negative or >255 nodata. Silently coercing
+    // -1.0 -> 255 or 300.0 -> 44 would leave the background reading back as data while the
+    // recorded nodata metadata disagreed, so RS_AsRaster rejects such a value up front.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    IllegalArgumentException negative =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, "B", false, 1d, -1d, false));
+    Assert.assertTrue(negative.getMessage(), negative.getMessage().contains("-1.0"));
+    Assert.assertTrue(negative.getMessage(), negative.getMessage().contains("'B'"));
+
+    IllegalArgumentException tooLarge =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, "B", false, 1d, 300d, false));
+    Assert.assertTrue(tooLarge.getMessage(), tooLarge.getMessage().contains("300.0"));
+    Assert.assertTrue(tooLarge.getMessage(), tooLarge.getMessage().contains("'B'"));
+
+    // A fractional nodata cannot be stored in a signed 32-bit integer band either.
+    IllegalArgumentException fractional =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, "I", false, 1d, 1.5d, false));
+    Assert.assertTrue(fractional.getMessage(), fractional.getMessage().contains("1.5"));
+    Assert.assertTrue(fractional.getMessage(), fractional.getMessage().contains("'I'"));
+  }
+
+  @Test
+  public void testAsRasterRejectsFloatNoDataValueNotExactlyRepresentable()
+      throws FactoryException, ParseException {
+    // A nodata sentinel must round-trip exactly through a 32-bit float band. 0.1 has no exact
+    // float32 representation (it would store as 0.10000000149...), so RS_AsRaster on an 'F' band
+    // rejects it up front rather than recording a sentinel no pixel could equal. Previously this
+    // value crashed deep in GeoTools. Values that ARE exactly representable in float32 must still
+    // construct without throwing.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    IllegalArgumentException inexact =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, "F", false, 1d, 0.1d, false));
+    Assert.assertTrue(inexact.getMessage(), inexact.getMessage().contains("0.1"));
+    Assert.assertTrue(inexact.getMessage(), inexact.getMessage().contains("'F'"));
+
+    // Exactly representable in float32 (0.5 = 2^-1, -9999 and 2^24 are integers below 2^24)
+    // construct without throwing.
+    for (double exact : new double[] {0.5d, -9999.0d, 16777216.0d}) {
+      Assert.assertNotNull(RasterConstructors.asRaster(geom, raster, "F", false, 1d, exact, false));
+    }
+  }
+
+  @Test
+  public void testAsRasterRejectsNonFiniteNoDataValue() throws FactoryException, ParseException {
+    // NaN and +/-Infinity are rejected as a nodata value on float ('F') and double ('D') bands.
+    // NaN is the codebase's internal "no nodata" sentinel, so it would be silently dropped rather
+    // than recorded (leaving the NaN-filled background reading back as data); an infinite value is
+    // not a valid GeoTools category bound and previously crashed deep in GeoTools with
+    // "Range [Infinity .. Infinity] is not valid". Both are now rejected up front with a clear
+    // error that names the offending value and pixel type.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    for (String pixelType : new String[] {"F", "D"}) {
+      for (double nonFinite :
+          new double[] {Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY}) {
+        IllegalArgumentException error =
+            Assert.assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                    RasterConstructors.asRaster(
+                        geom, raster, pixelType, false, 1d, nonFinite, false));
+        Assert.assertTrue(
+            error.getMessage(), error.getMessage().contains(String.valueOf(nonFinite)));
+        Assert.assertTrue(error.getMessage(), error.getMessage().contains("'" + pixelType + "'"));
+      }
+    }
+  }
+
+  @Test
+  public void testAsRasterRepresentableNoDataValueOnIntegerBand()
+      throws FactoryException, ParseException {
+    // A representable nodata (9 fits an unsigned 8-bit band) still fills the uncovered pixels and
+    // is recorded as the band's nodata, mirroring testAsRasterBackgroundIsNoDataValue on a double
+    // band. The exact-equality reads confirm no coercion happened on the integer band.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5), "
+                + "(104.5 497.5, 109.5 497.5, 109.5 491.5, 104.5 491.5, 104.5 497.5))",
+            0);
+
+    GridCoverage2D rasterized =
+        RasterConstructors.asRaster(geom, raster, "B", false, 1d, 9d, false);
+    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+    double[] expected =
+        new double[] {
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1, 1, 1, 1, 1
+        };
+    assertArrayEquals(expected, actual, 0.0d);
+    assertEquals(9d, RasterUtils.getNoDataValue(rasterized.getSampleDimension(0)), 0.0d);
+  }
+
+  @Test
+  public void testAsRasterRejectsNonRepresentableBurnValue()
+      throws FactoryException, ParseException {
+    // An out-of-range burn value on an integer band is rejected: 265 cannot be stored in an
+    // unsigned 8-bit ('B') band and would silently coerce to 9, burning a different whole number
+    // than requested, so RS_AsRaster rejects it up front. (Unlike the noDataValue, a fractional
+    // burn value on a float band is allowed to round — see
+    // testAsRasterAcceptsFractionalBurnValueOnFloatBand.) A value that fits ('B' with 200) still
+    // constructs.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    IllegalArgumentException error =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, "B", false, 265d, 0d, false));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("value"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("265"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("'B'"));
+
+    // A representable value/nodata pair still constructs.
+    Assert.assertNotNull(RasterConstructors.asRaster(geom, raster, "B", false, 200d, 0d, false));
+  }
+
+  @Test
+  public void testAsRasterRejectsBurnValueEqualToNoDataValue()
+      throws FactoryException, ParseException {
+    // If the burn value equals the noDataValue every covered pixel reads back as nodata, so the
+    // geometry vanishes. Reject that. This holds both when both are passed explicitly (value 1 ==
+    // nodata 1 on a 'D' band) and when the default value of 1 collides with an inherited nodata of
+    // 1.0.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    IllegalArgumentException explicit =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, "D", false, 1d, 1d, false));
+    Assert.assertTrue(explicit.getMessage(), explicit.getMessage().contains("burn value"));
+    Assert.assertTrue(explicit.getMessage(), explicit.getMessage().contains("noDataValue"));
+
+    // The default-value-1 x inherited-nodata-1.0 footgun: the reference band's nodata is 1.0 and
+    // the noDataValue-less overload burns the default value 1, so they collide and are rejected.
+    GridCoverage2D rasterWithNoData = RasterBandEditors.setBandNoDataValue(raster, 1, 1d);
+    IllegalArgumentException inherited =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, rasterWithNoData, "d"));
+    Assert.assertTrue(inherited.getMessage(), inherited.getMessage().contains("burn value"));
+
+    // A distinct value/nodata pair still constructs.
+    Assert.assertNotNull(RasterConstructors.asRaster(geom, raster, "D", false, 2d, 1d, false));
+  }
+
+  @Test
+  public void testAsRasterAcceptsFractionalBurnValueOnFloatBand()
+      throws FactoryException, ParseException {
+    // A burn value is ordinary pixel data, not a nodata sentinel, so a fractional value that does
+    // not round-trip exactly through a 32-bit float band (0.1 -> 0.10000000149...) is accepted and
+    // rounded to the pixel type, matching PostGIS ST_AsRaster and gdal_rasterize — unlike the
+    // noDataValue, which must be exactly representable. The burned pixels read back as the rounded
+    // value.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    GridCoverage2D rasterized =
+        RasterConstructors.asRaster(geom, raster, "F", false, 0.1d, 0d, false);
+    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+    // Background is the nodata fill (0.0); the covered pixels are the 32-bit-float rounding of 0.1.
+    Assert.assertEquals((double) (float) 0.1d, Arrays.stream(actual).max().getAsDouble(), 0.0d);
+  }
+
+  @Test
+  public void testAsRasterRejectsNegativeZeroNoDataValueOnIntegerBand()
+      throws FactoryException, ParseException {
+    // Negative zero cannot be stored in an integer sample (the sign is lost), so a -0.0 nodata
+    // sentinel would read back as +0 and be counted as data. It slips past the ordinary
+    // range/fractional check (-0.0 compares equal to +0.0), so it is rejected explicitly for
+    // integer pixel types. It remains valid on float / double bands, which preserve the sign.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    IllegalArgumentException error =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, raster, "B", false, 1d, -0.0d, false));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("negative zero"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("'B'"));
+
+    // A double band preserves the sign of zero, so -0.0 is a valid nodata value there.
+    Assert.assertNotNull(RasterConstructors.asRaster(geom, raster, "D", false, 1d, -0.0d, false));
+  }
+
+  @Test
+  public void testAsRasterOmittedNoDataValueInheritsReferenceBandNoData()
+      throws FactoryException, ParseException {
+    // Omitting the noDataValue argument inherits the reference band's nodata value: it fills every
+    // pixel the geometry does not cover (here the polygon's hole) and is recorded as the output
+    // band's nodata metadata. This mirrors testAsRasterBackgroundIsNoDataValue, except the value
+    // is taken from the reference band rather than passed explicitly. The exact-equality reads pin
+    // that the inherited value reaches both the samples and the metadata.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    raster = RasterBandEditors.setBandNoDataValue(raster, 1, 9d);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5), "
+                + "(104.5 497.5, 109.5 497.5, 109.5 491.5, 104.5 491.5, 104.5 497.5))",
+            0);
+
+    GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d");
+    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+    double[] expected =
+        new double[] {
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 9, 9, 9, 1, 1,
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1, 1, 1, 1, 1
+        };
+    assertArrayEquals(expected, actual, 0.0d);
+    assertEquals(9d, RasterUtils.getNoDataValue(rasterized.getSampleDimension(0)), 0.0d);
+    assertEquals(Double.valueOf(9d), RasterBandAccessors.getBandNoDataValue(rasterized, 1));
+  }
+
+  @Test
+  public void testAsRasterOmittedNoDataValueErrorsWithoutReferenceNoData()
+      throws FactoryException, ParseException {
+    // With the noDataValue omitted and the reference band carrying no nodata value there is nothing
+    // to inherit, so RS_AsRaster rejects the call rather than silently producing a raster with no
+    // nodata value and a zero background.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    IllegalArgumentException error =
+        Assert.assertThrows(
+            IllegalArgumentException.class, () -> RasterConstructors.asRaster(geom, raster, "d"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("noDataValue"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("band 1"));
+  }
+
+  @Test
+  public void testAsRasterInheritedNoDataValueNotRepresentableErrors()
+      throws FactoryException, ParseException {
+    // When the noDataValue is omitted, the reference band's nodata is inherited -- but if that
+    // inherited value cannot be stored in the OUTPUT pixel type (here -9999.0 into an unsigned
+    // 8-bit 'B' band) the call is rejected. The error must say the value was inherited from the
+    // reference band and point the user at the explicit-noDataValue override (which works from
+    // SQL), rather than the generic representability message the core check would give.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    raster = RasterBandEditors.setBandNoDataValue(raster, 1, -9999d);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5))", 0);
+
+    GridCoverage2D finalRaster = raster;
+    IllegalArgumentException error =
+        Assert.assertThrows(
+            IllegalArgumentException.class,
+            () -> RasterConstructors.asRaster(geom, finalRaster, "B"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("reference"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("-9999"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("'B'"));
+    Assert.assertTrue(error.getMessage(), error.getMessage().contains("override"));
+  }
+
+  @Test
+  public void testAsRasterExplicitNullNoDataValueLeavesNoNoData()
+      throws FactoryException, ParseException {
+    // Passing an explicit null noDataValue is the escape hatch for "no nodata value": the output
+    // declares no band nodata value and every uncovered pixel stays 0, even when the reference
+    // band has a nodata value that the noDataValue-less overloads would otherwise inherit.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -2, 0, 0, 0);
+    raster = RasterBandEditors.setBandNoDataValue(raster, 1, 9d);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((100.5 499.5, 113.5 499.5, 113.5 488.5, 100.5 488.5, 100.5 499.5), "
+                + "(104.5 497.5, 109.5 497.5, 109.5 491.5, 104.5 491.5, 104.5 497.5))",
+            0);
+
+    GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 1d, null);
+    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+    double[] expected =
+        new double[] {
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 0, 0, 0, 1, 1,
+          1, 1, 0, 0, 0, 1, 1,
+          1, 1, 0, 0, 0, 1, 1,
+          1, 1, 1, 1, 1, 1, 1,
+          1, 1, 1, 1, 1, 1, 1
+        };
+    assertArrayEquals(expected, actual, 0.0d);
+    Assert.assertNull(RasterBandAccessors.getBandNoDataValue(rasterized, 1));
+  }
+
+  @Test
+  public void testAsRasterWithNonSquarePixels() throws FactoryException, ParseException {
+    // Pixels are 2 world units wide and 3 tall, so the x-intercept math cannot
+    // silently conflate pixel-space and world-space slopes the way square
+    // pixels allow. Expected matrices are produced by GDAL
+    // (rasterio.features.rasterize) on the same grid; pixels whose centers are
+    // inside the geometry must be burned.
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 500, 2, -3, 0, 0, 0);
+    Geometry geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((102.7 497.4, 112.4 496.9, 104.2 483.7, 102.7 497.4))", 0);
+
+    GridCoverage2D rasterized =
+        RasterConstructors.asRaster(geom, raster, "d", false, 1d, 0d, false);
+    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+    double[] expected =
+        new double[] {
+          0, 0, 0, 0, 0, 0, 0,
+          0, 1, 1, 1, 1, 1, 0,
+          0, 0, 1, 1, 1, 0, 0,
+          0, 0, 1, 1, 0, 0, 0,
+          0, 0, 1, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // allTouched adds every boundary-touched pixel on the same grid
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", true, 1d, 0d, false);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0, 1, 1, 1, 1, 1, 0,
+          0, 1, 1, 1, 1, 1, 1,
+          0, 1, 1, 1, 1, 1, 0,
+          0, 1, 1, 1, 1, 0, 0,
+          0, 1, 1, 1, 0, 0, 0,
+          0, 0, 1, 0, 0, 0, 0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // An interior ring with diagonal edges exercises hole intercepts too
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((101.1 498.9, 113.5 497.8, 112.9 483.2, 102.3 484.6, 101.1 498.9), "
+                + "(104.1 496.9, 110.2 496.9, 106.3 487.8, 104.1 496.9))",
+            0);
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 1d, 0d, false);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0, 1, 1, 0, 0, 0, 0,
+          0, 1, 0, 0, 0, 1, 1,
+          0, 1, 1, 0, 1, 1, 1,
+          0, 1, 1, 0, 1, 1, 1,
+          0, 1, 1, 1, 1, 1, 1,
+          0, 0, 0, 0, 0, 1, 0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // Bottom-up variant of the same grid: the same triangle, vertically
+    // flipped in pixel space
+    GridCoverage2D rasterBottomUp =
+        RasterConstructors.makeEmptyRaster(1, "d", 7, 6, 100, 482, 2, 3, 0, 0, 0);
+    geom =
+        Constructors.geomFromWKT(
+            "POLYGON ((102.7 497.4, 112.4 496.9, 104.2 483.7, 102.7 497.4))", 0);
+    rasterized = RasterConstructors.asRaster(geom, rasterBottomUp, "d", false, 1d, 0d, false);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0, 0, 0, 0, 0, 0, 0,
+          0, 0, 1, 0, 0, 0, 0,
+          0, 0, 1, 1, 0, 0, 0,
+          0, 0, 1, 1, 1, 0, 0,
+          0, 1, 1, 1, 1, 1, 0,
+          0, 0, 0, 0, 0, 0, 0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+  }
+
+  @Test
+  public void testAsRasterTouchedPixelsExactTraversal() throws FactoryException, ParseException {
+    // A boundary edge that clips a pixel over a chord shorter than one pixel
+    // must still burn that pixel under allTouched, matching GDAL. Fixed-step
+    // sampling of the edge misses such pixels; exact cell traversal does not.
+    // Square unit pixels, so this is independent of the non-square-pixel
+    // selection path. Expected matrices are from GDAL
+    // (rasterio.features.rasterize, all_touched=True).
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, "d", 6, 6, 0, 6, 1, -1, 0, 0, 0);
+
+    Geometry polygon =
+        Constructors.geomFromWKT("POLYGON ((3.7 1.28, 0.92 5.23, 4.26 4.15, 3.7 1.28))", 0);
+    GridCoverage2D rasterized =
+        RasterConstructors.asRaster(polygon, raster, "d", true, 1d, 0d, false);
+    double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
+    double[] expected =
+        new double[] {
+          1, 1, 0, 0, 0, 0,
+          0, 1, 1, 1, 1, 0,
+          0, 1, 1, 1, 1, 0,
+          0, 0, 1, 1, 1, 0,
+          0, 0, 0, 1, 0, 0,
+          0, 0, 0, 0, 0, 0
+        };
+    assertArrayEquals(expected, actual, 0.1d);
+
+    // A LineString goes through the same segment code regardless of allTouched
+    // (a line has no interior); every pixel it crosses must be burned.
+    Geometry line = Constructors.geomFromWKT("LINESTRING (3.97 1.57, 0.31 3.24)", 0);
+    rasterized = RasterConstructors.asRaster(line, raster, "d", false, 1d, 0d, false);
+    actual = MapAlgebra.bandAsArray(rasterized, 1);
+    expected =
+        new double[] {
+          0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0,
+          1, 0, 0, 0, 0, 0,
+          1, 1, 1, 1, 0, 0,
+          0, 0, 0, 1, 0, 0,
+          0, 0, 0, 0, 0, 0
+        };
     assertArrayEquals(expected, actual, 0.1d);
   }
 
@@ -429,24 +1027,29 @@ public class RasterConstructorsTest extends RasterTestBase {
         Constructors.geomFromWKT("POLYGON((1.5 1.5, 3.8 3.0, 4.5 4.4, 3.4 3.5, 1.5 1.5))", 0);
     GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", true, 612028, 5d);
     double[] actual = Arrays.stream(MapAlgebra.bandAsArray(rasterized, 1)).toArray();
+    // Matches GDAL/rasterio all_touched=True except where a vertex lands exactly on a grid line:
+    // there the geometry touches a cell only at a corner or edge and Sedona burns it (a superset
+    // consistent with "all pixels touched"), while GDAL omits it. Tracked separately; see the PR.
     double[] expected = {
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0, 612028.0, 0.0, 0.0, 0.0,
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      0.0, 0.0, 0.0, 612028.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      0.0, 612028.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      612028.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0,
-      612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0, 612028.0, 0.0,
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 612028.0, 612028.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+      5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 612028.0, 5.0, 5.0, 5.0,
+      5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+      5.0, 5.0, 5.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+      5.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+      612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0,
+      612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0,
+      612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 612028.0, 5.0, 5.0,
+      5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0
     };
     assertArrayEquals(expected, actual, 0.1d);
 
-    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 5484);
+    // Omitting the noDataValue would inherit test5.tiff's band nodata value; pass an explicit null
+    // to keep this case's original intent of no nodata value and a zero background.
+    rasterized = RasterConstructors.asRaster(geom, raster, "d", false, 5484, null);
     actual = Arrays.stream(MapAlgebra.bandAsArray(rasterized, 1)).toArray();
     expected =
         new double[] {
@@ -857,6 +1460,55 @@ public class RasterConstructorsTest extends RasterTestBase {
     double actualFirstGridVal = PixelFunctions.value(testRaster, 0, 0, 1);
     double expectedFirstGridVal = 60.95357131958008;
     assertEquals(expectedFirstGridVal, actualFirstGridVal, 1e-6);
+  }
+
+  @Test
+  public void testNetCdfPackedBandMetadata() throws FactoryException, IOException {
+    byte[] bytes =
+        Files.readAllBytes(
+            new File(resourceFolder + "raster/netcdf_variants/test_reader_permuted.nc").toPath());
+    GridCoverage2D raster = RasterConstructors.fromNetCDF(bytes, "temp", "lon", "lat");
+
+    assertEquals(Arrays.asList("time : 100.0"), raster.getProperties().get("BAND_1"));
+    assertEquals(Arrays.asList("time : 160.0"), raster.getProperties().get("BAND_2"));
+  }
+
+  @Test
+  public void testNetCdfPackedMissingValues() throws FactoryException, IOException {
+    byte[] bytes =
+        Files.readAllBytes(
+            new File(resourceFolder + "raster/netcdf_variants/test_packed.nc").toPath());
+    GridCoverage2D raster = RasterConstructors.fromNetCDF(bytes, "temp", "lon", "lat");
+    double[] values = MapAlgebra.bandAsArray(raster, 1);
+
+    Double noDataValue = RasterBandAccessors.getBandNoDataValue(raster, 1);
+    Assert.assertNotNull(noDataValue);
+    Assert.assertTrue(Double.isFinite(noDataValue));
+    assertEquals(noDataValue, values[1], 0.0);
+    assertEquals(noDataValue, values[4], 0.0);
+    assertEquals(-999.0, values[7], 1e-6);
+    assertEquals(7, RasterBandAccessors.getCount(raster, 1, true));
+  }
+
+  @Test
+  public void testNetCdfInt64ValidityIsComparedExactly() throws FactoryException, IOException {
+    byte[] bytes =
+        Files.readAllBytes(
+            new File(resourceFolder + "raster/netcdf_variants/test_int64_validity.nc4").toPath());
+
+    for (String variable : Arrays.asList("signed_temp", "unsigned_temp")) {
+      GridCoverage2D raster = RasterConstructors.fromNetCDF(bytes, variable, "lon", "lat");
+      Double noDataValue = RasterBandAccessors.getBandNoDataValue(raster, 1);
+      Assert.assertNotNull(noDataValue);
+      Assert.assertTrue(Double.isFinite(noDataValue));
+      assertEquals(3, RasterBandAccessors.getCount(raster, 1, true));
+
+      double[] values = MapAlgebra.bandAsArray(raster, 1);
+      assertEquals(noDataValue, values[2], 0.0);
+      Assert.assertNotEquals(noDataValue, values[0]);
+      Assert.assertNotEquals(noDataValue, values[1]);
+      Assert.assertNotEquals(noDataValue, values[3]);
+    }
   }
 
   @Test

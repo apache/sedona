@@ -46,15 +46,15 @@ public class ConstructorsTest {
 
     Geography geog = Constructors.geogFromEWKT("POINT (1 1)");
     assertEquals(0, geog.getSRID());
-    assertEquals("POINT (1 1)", geog.toString());
+    assertEquals("POINT (1 1)", geog.toString(new PrecisionModel(PrecisionModel.FIXED)));
 
     geog = Constructors.geogFromEWKT("SRID=4269; POINT (1 1)");
     assertEquals(4269, geog.getSRID());
-    assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT());
+    assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT(new PrecisionModel(PrecisionModel.FIXED)));
 
     geog = Constructors.geogFromEWKT("SRID=4269;POINT (1 1)");
     assertEquals(4269, geog.getSRID());
-    assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT());
+    assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT(new PrecisionModel(PrecisionModel.FIXED)));
 
     ParseException invalid =
         assertThrows(ParseException.class, () -> Constructors.geogFromEWKT("not valid"));
@@ -219,7 +219,10 @@ public class ConstructorsTest {
     org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
     wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
     String gotGeom = wktWriter.write(got);
-    assertEquals(expected, gotGeom);
+    // S2 loops have no distinguished first vertex, so conversion may cyclically rotate a ring.
+    assertPolygonRingsEqual(
+        new org.locationtech.jts.io.WKTReader().read(expected),
+        new org.locationtech.jts.io.WKTReader().read(gotGeom));
   }
 
   @Test
@@ -244,7 +247,8 @@ public class ConstructorsTest {
     Geometry got =
         Constructors.geogToGeometry(
             g, new GeometryFactory(new PrecisionModel(PrecisionModel.FIXED)));
-    assertEquals(expected, got.toString());
+    // S2 loops have no distinguished first vertex, so conversion may cyclically rotate a ring.
+    assertPolygonRingsEqual(new org.locationtech.jts.io.WKTReader().read(expected), got);
     assertEquals(0, got.getSRID());
   }
 
@@ -266,8 +270,6 @@ public class ConstructorsTest {
     Geography got = Constructors.geomToGeography(g);
     String expected = "SRID=4326; " + wkt;
     assertEquals(4326, got.getSRID());
-    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
-    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
     assertEquals(expected, got.toEWKT());
   }
 
@@ -277,13 +279,29 @@ public class ConstructorsTest {
     Geography got = Constructors.geomToGeography(geom);
     org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
     wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
-    assertEquals(geom.toString(), got.toString());
+    assertEquals(geom.toString(), got.toString(new PrecisionModel(PrecisionModel.FIXED)));
 
     geom =
         org.apache.sedona.common.Constructors.geomFromWKT(
             "MULTIPOINT ((10 10), (20 20), (30 30))", 0);
     got = Constructors.geomToGeography(geom);
-    assertEquals(geom.toString(), got.toString());
+    assertEquals(geom.toString(), got.toString(new PrecisionModel(PrecisionModel.FIXED)));
+  }
+
+  @Test
+  public void geomToGeographyPreservesExactWKBAndEmptyPolygon() throws Exception {
+    Geometry point = org.apache.sedona.common.Constructors.geomFromWKT("POINT (1 2)", 4326);
+    Geography pointGeography = Constructors.geomToGeography(point);
+    assertTrue(pointGeography instanceof WKBGeography);
+    assertEquals("POINT (1 2)", pointGeography.toString());
+    assertEquals("SRID=4326; POINT (1 2)", pointGeography.toEWKT());
+
+    Geometry emptyPolygon =
+        org.apache.sedona.common.Constructors.geomFromWKT("POLYGON EMPTY", 4326);
+    Geography emptyGeography = Constructors.geomToGeography(emptyPolygon);
+    assertTrue(emptyGeography instanceof WKBGeography);
+    assertEquals("POLYGON EMPTY", emptyGeography.toString());
+    assertEquals("SRID=4326; POLYGON EMPTY", emptyGeography.toEWKT());
   }
 
   @Test
@@ -292,15 +310,13 @@ public class ConstructorsTest {
         org.apache.sedona.common.Constructors.geomFromWKT(
             "MULTIPOINT ((10 10), (20 20), (20 20), (30 30))", 0);
     Geography got = Constructors.geomToGeography(geom);
-    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
-    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
-    assertEquals("MULTIPOINT ((10 10), (20 20), (30 30))", got.toString());
+    assertEquals(geom.toText(), got.toString());
 
     geom =
         org.apache.sedona.common.Constructors.geomFromWKT(
             "MULTIPOINT ((10 10), (20 20), (30 30), (20 20), (10 10))", 0);
     got = Constructors.geomToGeography(geom);
-    assertEquals("MULTIPOINT ((10 10), (20 20), (30 30))", got.toString());
+    assertEquals(geom.toText(), got.toString());
   }
 
   @Test
@@ -310,13 +326,13 @@ public class ConstructorsTest {
     Geography got = Constructors.geomToGeography(geom);
     org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
     wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
-    assertEquals(geom.toString(), got.toString());
+    assertEquals(geom.toString(), got.toString(new PrecisionModel(PrecisionModel.FIXED)));
 
     geom =
         org.apache.sedona.common.Constructors.geomFromWKT(
             "MULTILINESTRING((1 2, 3 4), (4 5, 6 7))", 0);
     got = Constructors.geomToGeography(geom);
-    assertEquals(geom.toString(), got.toString());
+    assertEquals(geom.toString(), got.toString(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   @Test
@@ -324,21 +340,19 @@ public class ConstructorsTest {
     Geometry geom =
         org.apache.sedona.common.Constructors.geomFromWKT("LINESTRING (1 2, 3 4, 3 4, 5 6)", 0);
     Geography got = Constructors.geomToGeography(geom);
-    org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
-    wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
-    assertEquals("LINESTRING (1 2, 3 4, 5 6)", got.toString());
+    assertEquals(geom.toText(), got.toString());
 
     geom =
         org.apache.sedona.common.Constructors.geomFromWKT(
             "MULTILINESTRING ((1 2, 3 4), (4 5, 6 7), (1 2, 3 4))", 0);
     got = Constructors.geomToGeography(geom);
-    assertEquals("MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))", got.toString());
+    assertEquals(geom.toText(), got.toString());
 
     geom =
         org.apache.sedona.common.Constructors.geomFromWKT(
             "MULTILINESTRING ((1 2, 3 4), EMPTY, (4 5, 6 7), (1 2, 3 4))", 0);
     got = Constructors.geomToGeography(geom);
-    assertEquals("MULTILINESTRING ((1 2, 3 4), (4 5, 6 7))", got.toString());
+    assertEquals(geom.toText(), got.toString());
   }
 
   @Test
@@ -350,6 +364,53 @@ public class ConstructorsTest {
     Geography got = Constructors.geomToGeography(geom);
     org.locationtech.jts.io.WKTWriter wktWriter = new org.locationtech.jts.io.WKTWriter();
     wktWriter.setPrecisionModel(new PrecisionModel(PrecisionModel.FIXED));
-    assertEquals(geom.toString(), got.toString());
+    assertEquals(geom.toString(), got.toString(new PrecisionModel(PrecisionModel.FIXED)));
+  }
+
+  private static void assertPolygonRingsEqual(Geometry expected, Geometry actual) {
+    assertEquals(expected.getGeometryType(), actual.getGeometryType());
+    assertEquals(expected.getNumGeometries(), actual.getNumGeometries());
+    for (int i = 0; i < expected.getNumGeometries(); i++) {
+      org.locationtech.jts.geom.Polygon expectedPolygon =
+          (org.locationtech.jts.geom.Polygon) expected.getGeometryN(i);
+      org.locationtech.jts.geom.Polygon actualPolygon =
+          (org.locationtech.jts.geom.Polygon) actual.getGeometryN(i);
+      assertRingEqualUpToRotation(
+          expectedPolygon.getExteriorRing().getCoordinates(),
+          actualPolygon.getExteriorRing().getCoordinates());
+      assertEquals(expectedPolygon.getNumInteriorRing(), actualPolygon.getNumInteriorRing());
+      for (int j = 0; j < expectedPolygon.getNumInteriorRing(); j++) {
+        assertRingEqualUpToRotation(
+            expectedPolygon.getInteriorRingN(j).getCoordinates(),
+            actualPolygon.getInteriorRingN(j).getCoordinates());
+      }
+    }
+  }
+
+  private static void assertRingEqualUpToRotation(
+      org.locationtech.jts.geom.Coordinate[] expected,
+      org.locationtech.jts.geom.Coordinate[] actual) {
+    assertEquals(expected.length, actual.length);
+    int numVertices = expected.length - 1;
+    for (int offset = 0; offset < numVertices; offset++) {
+      boolean matches = true;
+      for (int i = 0; i < numVertices; i++) {
+        org.locationtech.jts.geom.Coordinate expectedCoordinate = expected[i];
+        org.locationtech.jts.geom.Coordinate actualCoordinate = actual[(offset + i) % numVertices];
+        if (Math.abs(expectedCoordinate.x - actualCoordinate.x) > 1e-12
+            || Math.abs(expectedCoordinate.y - actualCoordinate.y) > 1e-12) {
+          matches = false;
+          break;
+        }
+      }
+      if (matches) {
+        return;
+      }
+    }
+    fail(
+        "Expected a cyclic rotation of "
+            + java.util.Arrays.toString(expected)
+            + " but got "
+            + java.util.Arrays.toString(actual));
   }
 }

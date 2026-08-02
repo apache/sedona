@@ -27,7 +27,7 @@
     </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
-    <version>1.9.1-SNAPSHOT</version>
+    <version>1.9.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>https://sedona.apache.org/</url>
@@ -76,8 +76,8 @@
         <jts2geojson.version>0.16.1</jts2geojson.version>
         <spatial4j.version>0.8</spatial4j.version>
 
-        <jt-jiffle.version>1.1.24</jt-jiffle.version>
-        <janino-version>3.1.9</janino-version>
+        <jt-jiffle.version>1.1.31</jt-jiffle.version>
+        <janino-version>3.1.12</janino-version>
 
         <!-- Actual scala, spark and log4j version will be set by activated profiles.
              Setting a default value helps IDE:s that can't make sense of profiles. -->
@@ -85,7 +85,7 @@
         <spark.version>3.4.0</spark.version>
         <spark.compat.version>3.4</spark.compat.version>
         <spark.major.version>3</spark.major.version>
-        <log4j.version>2.25.3</log4j.version>
+        <log4j.version>2.25.4</log4j.version>
         <graphframes.version>0.11.0</graphframes.version>
         <flink.version>1.19.0</flink.version>
         <slf4j.version>1.7.36</slf4j.version>
@@ -96,7 +96,7 @@
         <scala-collection-compat.version>2.5.0</scala-collection-compat.version>
         <geoglib.version>1.52</geoglib.version>
         <caffeine.version>2.9.2</caffeine.version>
-        <proj4sedona.version>0.0.8</proj4sedona.version>
+        <proj4sedona.version>0.1.6</proj4sedona.version>
 
         <geotools.scope>provided</geotools.scope>
         <!-- Because it's not in Maven central, make it provided by default -->

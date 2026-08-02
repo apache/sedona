@@ -77,6 +77,27 @@ Or load a single file:
 df = sedona.read.format("geotiff.metadata").load("/path/to/image.tiff")
 ```
 
+Glob paths keep native Spark semantics: a file glob such as `/dir/a*.tif` matches
+direct children of `/dir` only, and a glob that matches nothing is an error, as in
+every other Spark file source.
+
+For directory loads — including globs that expand to directories, such as
+`/data/region*` — `recursiveFileLookup=true` and a GeoTIFF extension
+`pathGlobFilter` are applied as defaults; an explicit option always wins. In
+particular, set `recursiveFileLookup=false` to keep Hive-style partition discovery
+(e.g. `year=2020/` subdirectories become a `year` column):
+
+```python
+df = (
+    sedona.read.format("geotiff.metadata")
+    .option("recursiveFileLookup", "false")
+    .load("/data/rasters/")
+)
+```
+
+The data source is read-only; writing is not supported, and neither are catalog
+table operations (`CREATE TABLE ... USING geotiff.metadata`).
+
 ## Output schema
 
 Each row represents one GeoTIFF file with the following columns:

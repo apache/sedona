@@ -27,12 +27,13 @@ import org.apache.spark.sql.sedona_sql.io.stac.StacUtils.getNumPartitions
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.util.SerializableConfiguration
 
+import java.net.URI
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import scala.jdk.CollectionConverters._
 import scala.util.Random
-import scala.util.control.Breaks.breakable
+import scala.util.Try
 
 /**
  * The `StacBatch` class represents a batch of partitions for reading data in the SpatioTemporal
@@ -53,10 +54,21 @@ case class StacBatch(
     limitFilter: Option[Int])
     extends Batch {
 
+  private val configuredItemsLimitMax = opts.getOrElse("itemsLimitMax", "-1").toInt
+  private val effectiveItemsLimitMax: Option[Int] = {
+    val configuredLimit = Option(configuredItemsLimitMax).filter(_ > 0)
+    val sqlLimit = limitFilter.filter(_ >= 0)
+    (configuredLimit, sqlLimit) match {
+      case (Some(configured), Some(sql)) => Some(math.min(configured, sql))
+      case (configured @ Some(_), None) => configured
+      case (None, sql @ Some(_)) => sql
+      case _ => None
+    }
+  }
+
   private val defaultItemsLimitPerRequest: Int = {
-    val itemsLimitMax = opts.getOrElse("itemsLimitMax", "-1").toInt
     val limitPerRequest = opts.getOrElse("itemsLimitPerRequest", "10").toInt
-    if (itemsLimitMax > 0 && limitPerRequest > itemsLimitMax) itemsLimitMax else limitPerRequest
+    effectiveItemsLimitMax.map(math.min(limitPerRequest, _)).getOrElse(limitPerRequest)
   }
   private val itemsLoadProcessReportThreshold =
     opts.getOrElse("itemsLoadProcessReportThreshold", "1000000").toInt
@@ -85,22 +97,17 @@ case class StacBatch(
    *   An array of input partitions for reading STAC data.
    */
   override def planInputPartitions(): Array[InputPartition] = {
-    val stacCollectionBasePath = StacUtils.getStacCollectionBasePath(stacCollectionUrl)
-
     // Initialize the itemLinks array
     val itemLinks = scala.collection.mutable.ArrayBuffer[String]()
 
     // Get the maximum number of items to process
-    val itemsLimitMax = limitFilter match {
-      case Some(limit) if limit >= 0 => limit
-      case _ => opts.getOrElse("itemsLimitMax", "-1").toInt
-    }
-    val checkItemsLimitMax = itemsLimitMax > 0
+    val itemsLimitMax = effectiveItemsLimitMax.getOrElse(-1)
+    val checkItemsLimitMax = effectiveItemsLimitMax.isDefined
 
     // Start the recursive collection of item links
     setItemMaxLeft(itemsLimitMax)
 
-    collectItemLinks(stacCollectionBasePath, stacCollectionJson, itemLinks, checkItemsLimitMax)
+    collectItemLinks(stacCollectionUrl, stacCollectionJson, itemLinks, checkItemsLimitMax)
 
     // Handle when the number of items is less than 1
     if (itemLinks.isEmpty) {
@@ -138,15 +145,15 @@ case class StacBatch(
   /**
    * Recursively processes collections and collects item links.
    *
-   * @param collectionBasePath
-   *   The base path of the STAC collection.
+   * @param collectionUrl
+   *   The URL of the current STAC collection document.
    * @param collectionJson
    *   The JSON string representation of the STAC collection.
    * @param itemLinks
    *   The list of item links to populate.
    */
   def collectItemLinks(
-      collectionBasePath: String,
+      collectionUrl: String,
       collectionJson: String,
       itemLinks: scala.collection.mutable.ArrayBuffer[String],
       needCountNextItems: Boolean): Unit = {
@@ -166,58 +173,86 @@ case class StacBatch(
     val linksNode = rootNode.get("links")
     val iterator = linksNode.elements()
 
+    def isAbsoluteLink(href: String): Boolean =
+      href.startsWith("http") || href.startsWith("file")
+
+    def normalizeFileUrl(url: String): String = {
+      if (url.startsWith("file:/") && !url.startsWith("file://")) {
+        "file:///" + url.stripPrefix("file:/")
+      } else url
+    }
+
+    def resolveLink(baseUrl: String, href: String): String = {
+      if (href.startsWith("file")) normalizeFileUrl(href)
+      else if (isAbsoluteLink(href)) href
+      else if (baseUrl.startsWith("http")) {
+        Try {
+          if (href.startsWith("?")) {
+            baseUrl.takeWhile(character => character != '?' && character != '#') + href
+          } else if (href.startsWith("#")) {
+            baseUrl.takeWhile(_ != '#') + href
+          } else new URI(baseUrl).resolve(href).toString
+        }.getOrElse(StacUtils.getStacCollectionBasePath(baseUrl) + href)
+      } else if (baseUrl.startsWith("file")) {
+        normalizeFileUrl(new URI(baseUrl).resolve(href).toString)
+      } else StacUtils.getStacCollectionBasePath(baseUrl) + href
+    }
+
+    def getReturnedItemCount(itemRootNode: JsonNode): Int = {
+      val featureCount =
+        Option(itemRootNode.get("features")).filter(_.isArray).map(_.size())
+      val reportedCount = Option(itemRootNode.get("numberReturned"))
+        .filter(_.isIntegralNumber)
+        .map(_.asInt())
+        .filter(_ >= 0)
+      featureCount.orElse(reportedCount).getOrElse(0)
+    }
+
     def iterateItemsWithLimit(itemUrl: String, needCountNextItems: Boolean): Boolean = {
       // Load the item URL and process the response
       var nextUrl: Option[String] = Some(itemUrl)
-      breakable {
-        while (nextUrl.isDefined) {
-          val itemJson = StacUtils.loadStacCollectionToJson(nextUrl.get, headers)
-          val itemRootNode = mapper.readTree(itemJson)
-          // Check if there exists a "next" link
-          val itemLinksNode = itemRootNode.get("links")
-          if (itemLinksNode == null) {
+      while (nextUrl.isDefined) {
+        val currentUrl = nextUrl.get
+        val itemJson = StacUtils.loadStacCollectionToJson(currentUrl, headers)
+        val itemRootNode = mapper.readTree(itemJson)
+
+        if (needCountNextItems) {
+          itemMaxLeft = itemMaxLeft - getReturnedItemCount(itemRootNode)
+          if (itemMaxLeft <= 0) {
             return true
           }
-          val itemIterator = itemLinksNode.elements()
-          nextUrl = None
-          while (itemIterator.hasNext) {
-            val itemLinkNode = itemIterator.next()
-            val itemRel = itemLinkNode.get("rel").asText()
-            val itemHref = itemLinkNode.get("href").asText()
-            if (itemRel == "next") {
-              // Only check the number of items returned if there are more items to process
-              val numberReturnedNode = itemRootNode.get("numberReturned")
-              val numberReturned = if (numberReturnedNode == null) {
-                // From STAC API Spec:
-                // The optional limit parameter limits the number of
-                // items that are presented in the response document.
-                // The default value is 10.
-                defaultItemsLimitPerRequest
-              } else {
-                numberReturnedNode.asInt()
-              }
-              // count the number of items returned and left to be processed
-              itemMaxLeft = itemMaxLeft - numberReturned
-              // early exit if there are no more items to process
-              if (needCountNextItems && itemMaxLeft <= 0) {
-                return true
-              }
-              nextUrl = Some(if (itemHref.startsWith("http") || itemHref.startsWith("file")) {
-                itemHref
-              } else {
-                collectionBasePath + itemHref
-              })
+        }
+
+        val itemLinksNode = itemRootNode.get("links")
+        if (itemLinksNode == null || !itemLinksNode.isArray) {
+          return false
+        }
+
+        val itemIterator = itemLinksNode.elements()
+        var nextHref: Option[String] = None
+        while (itemIterator.hasNext && nextHref.isEmpty) {
+          val itemLinkNode = itemIterator.next()
+          if (itemLinkNode.path("rel").asText() == "next") {
+            val href = itemLinkNode.get("href")
+            if (href != null && href.isTextual) {
+              nextHref = Some(href.asText())
             }
           }
-          if (nextUrl.isDefined) {
-            itemLinks += nextUrl.get
-          }
+        }
+
+        // Pagination links are authoritative and may contain opaque cursor state. Changing their
+        // page size can alter page-number offsets or invalidate a signed URL.
+        nextUrl = nextHref.map(href => resolveLink(currentUrl, href))
+        if (nextUrl.isDefined) {
+          itemLinks += nextUrl.get
         }
       }
       false
     }
 
     while (iterator.hasNext) {
+      if (needCountNextItems && itemMaxLeft <= 0) return
+
       val linkNode = iterator.next()
       val rel = linkNode.get("rel").asText()
       val href = linkNode.get("href").asText()
@@ -225,50 +260,48 @@ case class StacBatch(
       // item links are identified by the "rel" value of "item" or "items"
       if (rel == "item" || rel == "items") {
         // need to handle relative paths and local file paths
-        val itemUrl = if (href.startsWith("http") || href.startsWith("file")) {
-          href
-        } else {
-          collectionBasePath + href
-        }
-        if (rel == "items" && href.startsWith("http")) {
-          itemLinks += (itemUrl + "?limit=" + defaultItemsLimitPerRequest)
-        } else {
-          itemLinks += itemUrl
-        }
-        if (needCountNextItems && itemMaxLeft <= 0) {
-          return
-        } else {
-          if (rel == "item" && needCountNextItems) {
-            // count the number of items returned and left to be processed
-            itemMaxLeft = itemMaxLeft - 1
-          } else if (rel == "items" && href.startsWith("http")) {
-            // iterate through the items and check if the limit is reached (if needed)
-            if (iterateItemsWithLimit(
-                getItemLink(itemUrl, defaultItemsLimitPerRequest, spatialFilter, temporalFilter),
-                needCountNextItems)) return
-          }
+        val itemUrl = resolveLink(collectionUrl, href)
+        val firstPageUrl = if (rel == "items" && itemUrl.startsWith("http")) {
+          getItemLink(itemUrl, defaultItemsLimitPerRequest, spatialFilter, temporalFilter)
+        } else itemUrl
+        itemLinks += firstPageUrl
+
+        if (rel == "item" && needCountNextItems) {
+          // count the number of items returned and left to be processed
+          itemMaxLeft = itemMaxLeft - 1
+        } else if (rel == "items" && itemUrl.startsWith("http")) {
+          // iterate through the items and check if the limit is reached (if needed)
+          if (iterateItemsWithLimit(firstPageUrl, needCountNextItems)) return
         }
       } else if (rel == "child") {
-        val childUrl = if (href.startsWith("http") || href.startsWith("file")) {
-          href
-        } else {
-          collectionBasePath + href
-        }
+        val childUrl = resolveLink(collectionUrl, href)
         // Recursively process the linked collection
         val linkedCollectionJson = StacUtils.loadStacCollectionToJson(childUrl, headers)
-        val nestedCollectionBasePath = StacUtils.getStacCollectionBasePath(childUrl)
         val collectionFiltered =
           filterCollection(linkedCollectionJson, spatialFilter, temporalFilter)
 
         if (!collectionFiltered) {
-          collectItemLinks(
-            nestedCollectionBasePath,
-            linkedCollectionJson,
-            itemLinks,
-            needCountNextItems)
+          collectItemLinks(childUrl, linkedCollectionJson, itemLinks, needCountNextItems)
         }
       }
     }
+  }
+
+  private def setLimitParameter(itemUrl: String, limit: Int): String = {
+    val fragmentIndex = itemUrl.indexOf('#')
+    val (urlWithoutFragment, fragment) = if (fragmentIndex >= 0) {
+      (itemUrl.substring(0, fragmentIndex), itemUrl.substring(fragmentIndex))
+    } else (itemUrl, "")
+    val queryIndex = urlWithoutFragment.indexOf('?')
+    val (path, existingQuery) = if (queryIndex >= 0) {
+      (urlWithoutFragment.substring(0, queryIndex), urlWithoutFragment.substring(queryIndex + 1))
+    } else (urlWithoutFragment, "")
+    val retainedParameters = existingQuery
+      .split("&", -1)
+      .filter(_.nonEmpty)
+      .filterNot(_.takeWhile(_ != '=') == "limit")
+    val query = (retainedParameters :+ s"limit=$limit").mkString("&")
+    s"$path?$query$fragment"
   }
 
   /** Adds an item link to the list of item links. */
@@ -277,9 +310,14 @@ case class StacBatch(
       defaultItemsLimitPerRequest: Int,
       spatialFilter: Option[GeoParquetSpatialFilter],
       temporalFilter: Option[TemporalFilter]): String = {
-    val baseUrl = itemUrl + "?limit=" + defaultItemsLimitPerRequest
-    val urlWithFilters = StacUtils.addFiltersToUrl(baseUrl, spatialFilter, temporalFilter)
-    urlWithFilters
+    val urlWithLimit = setLimitParameter(itemUrl, defaultItemsLimitPerRequest)
+    val fragmentIndex = urlWithLimit.indexOf('#')
+    val (urlWithoutFragment, fragment) = if (fragmentIndex >= 0) {
+      (urlWithLimit.substring(0, fragmentIndex), urlWithLimit.substring(fragmentIndex))
+    } else (urlWithLimit, "")
+    val urlWithFilters =
+      StacUtils.addFiltersToUrl(urlWithoutFragment, spatialFilter, temporalFilter)
+    urlWithFilters + fragment
   }
 
   /**
@@ -341,35 +379,52 @@ case class StacBatch(
     // Filter based on temporal extent
     val temporalFiltered = temporalFilter match {
       case Some(filter) =>
-        val extentNode = rootNode.path("extent").path("temporal").path("interval")
-        if (extentNode.isMissingNode) {
-          // if extent is missing, we assume the collection is not filtered
-          true
-        } else {
-          // parse the temporal intervals
-          val formatter = new DateTimeFormatterBuilder()
-            .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
-            .optionalStart()
-            .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 3, true)
-            .optionalEnd()
-            .appendPattern("'Z'")
-            .toFormatter()
+        StacUtils.calculateTemporalBounds(filter) match {
+          // A proven-empty predicate cannot match any collection.
+          case None => true
+          // An unbounded envelope cannot safely prune a collection.
+          case Some(bounds) if bounds.isUnbounded => false
+          case Some(bounds) =>
+            val extentNode = rootNode.path("extent").path("temporal").path("interval")
+            if (extentNode.isMissingNode || !extentNode.isArray || extentNode.size() == 0) {
+              // Missing or unusable extent metadata cannot prove that a collection is disjoint.
+              false
+            } else {
+              val formatter = new DateTimeFormatterBuilder()
+                .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
+                .optionalStart()
+                .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
+                .optionalEnd()
+                .appendPattern("'Z'")
+                .toFormatter()
 
-          val intervals = extentNode
-            .elements()
-            .asScala
-            .map { intervalNode =>
-              val start = LocalDateTime.parse(intervalNode.get(0).asText(), formatter)
-              val end = LocalDateTime.parse(intervalNode.get(1).asText(), formatter)
-              (start, end)
+              def parseEndpoint(node: JsonNode): Option[Option[LocalDateTime]] = {
+                if (node == null || node.isNull) Some(None)
+                else Try(LocalDateTime.parse(node.asText(), formatter)).toOption.map(Some(_))
+              }
+
+              val intervals = extentNode
+                .elements()
+                .asScala
+                .map { intervalNode =>
+                  for {
+                    start <- parseEndpoint(intervalNode.get(0))
+                    end <- parseEndpoint(intervalNode.get(1))
+                  } yield (start, end)
+                }
+                .toList
+
+              // Malformed metadata is not evidence that the collection is outside the query.
+              if (intervals.exists(_.isEmpty)) false
+              else {
+                !intervals.flatten.exists { case (start, end) =>
+                  val invalidInterval =
+                    start.exists(startValue =>
+                      end.exists(endValue => startValue.isAfter(endValue)))
+                  invalidInterval || bounds.overlaps(start, end)
+                }
+              }
             }
-            .toList
-
-          // check if the filter evaluates to true for any of the interval start or end times
-          !intervals.exists { case (start, end) =>
-            filter.evaluate(Map("datetime" -> start)) ||
-            filter.evaluate(Map("datetime" -> end))
-          }
         }
       // if the collection is not filtered, return false
       case None => false

@@ -159,8 +159,18 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   }
 
   @Test
+  public void testProjJsonRoundTrip_Geographic_NAD27_4267() throws FactoryException {
+    assertProjJsonRoundTrip(4267);
+  }
+
+  @Test
   public void testProjJsonRoundTrip_TransverseMercator_32617() throws FactoryException {
     assertProjJsonRoundTrip(32617);
+  }
+
+  @Test
+  public void testProjJsonRoundTrip_TransverseMercator_NAD27_26711() throws FactoryException {
+    assertProjJsonRoundTrip(26711);
   }
 
   @Test
@@ -362,8 +372,18 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   }
 
   @Test
+  public void testWkt2RoundTrip_Geographic_NAD27_4267() throws FactoryException {
+    assertWkt2RoundTrip(4267);
+  }
+
+  @Test
   public void testWkt2RoundTrip_TransverseMercator_32617() throws FactoryException {
     assertWkt2RoundTrip(32617);
+  }
+
+  @Test
+  public void testWkt2RoundTrip_TransverseMercator_NAD27_26711() throws FactoryException {
+    assertWkt2RoundTrip(26711);
   }
 
   @Test
@@ -447,13 +467,13 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   }
 
   // ---------------------------------------------------------------------------
-  // PROJJSON import failures — spherical datums not parseable after round-trip
+  // Spherical datum coverage
   // ---------------------------------------------------------------------------
 
   @Test
-  public void testProjJsonRoundTrip_LambertAzimuthalEqualArea_Spherical_2163_importFails()
+  public void testProjJsonRoundTrip_LambertAzimuthalEqualArea_Spherical_2163()
       throws FactoryException {
-    assertProjJsonImportFails(2163);
+    assertProjJsonRoundTrip(2163);
   }
 
   @Test
@@ -462,7 +482,7 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
   }
 
   // ---------------------------------------------------------------------------
-  // Export failures — projection types not supported by proj4sedona
+  // Additional projection coverage
   // ---------------------------------------------------------------------------
 
   @Test
@@ -475,14 +495,17 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
     assertTrue("WKT1 should contain PROJCS", wkt1.contains("PROJCS"));
   }
 
+  // proj4sedona 0.1.0 added Krovak variants and Hotine Oblique Mercator PROJ-string
+  // serialization; these CRSs now export and round-trip, so the former
+  // "export must fail" assertions have become positive round-trip checks.
   @Test
-  public void testExportFails_Krovak_2065() throws FactoryException {
-    assertExportFails(2065);
+  public void testProjRoundTrip_Krovak_2065() throws FactoryException {
+    assertProjRoundTrip(2065);
   }
 
   @Test
-  public void testExportFails_HotineObliqueMercator_2056() throws FactoryException {
-    assertExportFails(2056);
+  public void testProjRoundTrip_HotineObliqueMercator_2056() throws FactoryException {
+    assertProjRoundTrip(2056);
   }
 
   // ---------------------------------------------------------------------------
@@ -531,6 +554,10 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
     // First export from EPSG
     String export1 = RasterAccessors.crs(raster1, "projjson");
     assertNotNull("EPSG:" + epsg + " export to PROJJSON should not be null", export1);
+    assertEquals(
+        "EPSG:" + epsg + " default CRS export should equal explicit PROJJSON",
+        export1,
+        RasterAccessors.crs(raster1));
 
     // Re-import from PROJJSON string and re-export
     GridCoverage2D raster2 = RasterEditors.setCrs(baseRaster, export1);
@@ -575,48 +602,6 @@ public class CrsRoundTripComplianceTest extends RasterTestBase {
         "EPSG:" + epsg + " WKT2 string should be stable after round trip (export2 == export3)",
         export2,
         export3);
-  }
-
-  /**
-   * Assert that PROJJSON export succeeds but re-import fails (spherical datum CRS that proj4sedona
-   * can export but GeoTools cannot re-parse).
-   */
-  private void assertProjJsonImportFails(int epsg) throws FactoryException {
-    GridCoverage2D baseRaster = RasterConstructors.makeEmptyRaster(1, 4, 4, 0, 0, 1);
-    GridCoverage2D raster1 = RasterEditors.setCrs(baseRaster, "EPSG:" + epsg);
-
-    // Export should succeed
-    String exported = RasterAccessors.crs(raster1, "projjson");
-    assertNotNull("EPSG:" + epsg + " export to PROJJSON should succeed", exported);
-
-    // Re-import should fail
-    Exception thrown =
-        assertThrows(
-            "EPSG:" + epsg + " PROJJSON re-import should fail for spherical datum",
-            IllegalArgumentException.class,
-            () -> RasterEditors.setCrs(baseRaster, exported));
-    assertTrue(
-        "Error message should mention CRS parsing",
-        thrown.getMessage().contains("Cannot parse CRS string"));
-  }
-
-  /**
-   * Assert that RS_CRS export fails for projection types not supported by proj4sedona. Tests both
-   * "proj" and "projjson" formats.
-   */
-  private void assertExportFails(int epsg) throws FactoryException {
-    GridCoverage2D baseRaster = RasterConstructors.makeEmptyRaster(1, 4, 4, 0, 0, 1);
-    GridCoverage2D raster1 = RasterEditors.setCrs(baseRaster, "EPSG:" + epsg);
-
-    assertThrows(
-        "EPSG:" + epsg + " export to PROJ should fail",
-        Exception.class,
-        () -> RasterAccessors.crs(raster1, "proj"));
-
-    assertThrows(
-        "EPSG:" + epsg + " export to PROJJSON should fail",
-        Exception.class,
-        () -> RasterAccessors.crs(raster1, "projjson"));
   }
 
   /**

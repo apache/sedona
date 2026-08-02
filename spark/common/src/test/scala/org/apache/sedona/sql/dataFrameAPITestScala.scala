@@ -1891,6 +1891,17 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(!actualResult)
     }
 
+    it("Passed ST_EqualsExact") {
+      val baseDf = sparkSession.sql("SELECT ST_Point(0.0, 0.0) AS a, ST_Point(0.03, 0.04) AS b")
+      val result = baseDf
+        .select(
+          ST_EqualsExact("a", "b", 0.051).alias("within"),
+          ST_EqualsExact("a", "b", 0.049).alias("outside"))
+        .first()
+      assert(result.getBoolean(0))
+      assert(!result.getBoolean(1))
+    }
+
     it("Passed ST_Covers") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS a, ST_Point(1.0, 0.0) AS b, ST_Point(0.0, 1.0) AS c")
@@ -2265,6 +2276,14 @@ class dataFrameAPITestScala extends TestBaseScala {
       assertFalse(actual)
     }
 
+    it("Passed ST_IsLineStringCCW") {
+      val baseDf =
+        sparkSession.sql("SELECT ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 1, 0 0)') AS line")
+
+      assertTrue(baseDf.select(ST_IsLineStringCCW("line")).first().getBoolean(0))
+      assertTrue(baseDf.select(ST_IsLineStringCCW(col("line"))).first().getBoolean(0))
+    }
+
     it("Passed ST_Translate") {
       val polyDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON ((1 0 1, 1 1 1, 2 1 1, 2 0 1, 1 0 1))') AS geom")
@@ -2480,6 +2499,20 @@ class dataFrameAPITestScala extends TestBaseScala {
         "POINT (61.64205411585366 104.55256764481707)",
         actual.getAs[Geometry](1))
       assertEquals(45.18896951053177, actual.getDouble(2), 1e-6)
+
+      val triangleDf =
+        sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS geom")
+      val coarse: Row =
+        triangleDf.select(ST_MaximumInscribedCircle("geom", 2.0)).first().getAs[Row](0)
+      assertGeometryEquals("POINT (0.75 0.5)", coarse.getAs[Geometry](0))
+      assertGeometryEquals("POINT (0.625 0.625)", coarse.getAs[Geometry](1))
+      assertEquals(0.1767766952966369, coarse.getDouble(2), 1e-12)
+
+      val explicitDefault: Row =
+        triangleDf.select(ST_MaximumInscribedCircle("geom", 0.0)).first().getAs[Row](0)
+      val implicitDefault: Row =
+        triangleDf.select(ST_MaximumInscribedCircle("geom")).first().getAs[Row](0)
+      assertEquals(implicitDefault, explicitDefault)
     }
 
     it("Should pass ST_IsValidTrajectory") {

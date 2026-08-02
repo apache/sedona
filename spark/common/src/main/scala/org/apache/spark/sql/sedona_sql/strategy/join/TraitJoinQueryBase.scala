@@ -188,6 +188,12 @@ trait TraitJoinQueryBase {
   private[join] def expandRasterFilterEnvelope(
       baseShape: Geometry,
       distance: Double): Geometry = {
+    // An empty shape (e.g. the empty GeometryCollection substituted for a NULL raster/geometry)
+    // must stay empty: expanding its degenerate envelope by `distance` would yield a non-empty
+    // filter geometry that spuriously matches rows the predicate should never join.
+    if (baseShape.isEmpty) {
+      return baseShape
+    }
     val envelope = baseShape.getEnvelopeInternal
     val touchesPole = envelope.getMaxY >= 90.0 || envelope.getMinY <= -90.0
     val tooWide = envelope.getWidth > 180.0

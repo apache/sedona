@@ -309,6 +309,23 @@ class TestPredicate(TestBase):
         assert not not_order_equals_diff_geom.take(1)[0][0]
         assert not not_order_equals_diff_order.take(1)[0][0]
 
+    def test_st_equals_exact(self):
+        result = self.spark.sql("""
+            SELECT
+                ST_EqualsExact(ST_Point(0.0, 0.0), ST_Point(0.03, 0.04), 0.051),
+                ST_EqualsExact(ST_Point(0.0, 0.0), ST_Point(0.03, 0.04), 0.049),
+                ST_EqualsExact(
+                    ST_GeomFromWKT('LINESTRING(0 0, 1 1)'),
+                    ST_GeomFromWKT('LINESTRING(1 1, 0 0)'),
+                    0.0
+                ),
+                ST_EqualsExact(NULL, ST_Point(0.0, 0.0), 0.0)
+            """).first()
+        assert result[0] is True
+        assert result[1] is False
+        assert result[2] is False
+        assert result[3] is None
+
     def test_st_dwithin(self):
         test_table = self.spark.sql(
             "select ST_GeomFromWKT('POINT (0 0)') as origin, ST_GeomFromWKT('POINT (2 0)') as point_1"

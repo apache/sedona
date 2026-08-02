@@ -395,3 +395,85 @@ class TestStacReader(TestBase):
         # Both should return the same count
         assert df_with_tuple is not None
         assert df_with_list is not None
+
+    def test_expand_date(self) -> None:
+        """_expand_date should expand each supported STAC datetime form.
+
+        Whole-period upper bounds end at ``23:59:59.999999Z`` (Spark's
+        microsecond precision) so that the inclusive ``datetime <= end`` filter
+        keeps items in the final fractional second.
+        """
+        # YYYY
+        assert CollectionClient._expand_date("2017") == [
+            "2017-01-01T00:00:00Z",
+            "2017-12-31T23:59:59.999999Z",
+        ]
+        # YYYY-mm expands to the first and last day of the month
+        assert CollectionClient._expand_date("2017-06") == [
+            "2017-06-01T00:00:00Z",
+            "2017-06-30T23:59:59.999999Z",
+        ]
+        # December must not overflow into the next year
+        assert CollectionClient._expand_date("2020-12") == [
+            "2020-12-01T00:00:00Z",
+            "2020-12-31T23:59:59.999999Z",
+        ]
+        # Leap-year February resolves to the 29th
+        assert CollectionClient._expand_date("2020-02") == [
+            "2020-02-01T00:00:00Z",
+            "2020-02-29T23:59:59.999999Z",
+        ]
+        # Non-leap-year February resolves to the 28th
+        assert CollectionClient._expand_date("2021-02") == [
+            "2021-02-01T00:00:00Z",
+            "2021-02-28T23:59:59.999999Z",
+        ]
+        # YYYY-mm-dd
+        assert CollectionClient._expand_date("2017-06-10") == [
+            "2017-06-10T00:00:00Z",
+            "2017-06-10T23:59:59.999999Z",
+        ]
+        # Full timestamps are returned unchanged
+        assert CollectionClient._expand_date("2017-06-01T00:00:00Z") == [
+            "2017-06-01T00:00:00Z",
+            "2017-06-01T00:00:00Z",
+        ]
+
+    def test_expand_date_filter_includes_final_fractional_second(self) -> None:
+        """A whole-period search must keep items in the final fractional second.
+
+        Sedona filters STAC datetimes with an inclusive upper bound, so the
+        expanded end of ``YYYY``/``YYYY-mm``/``YYYY-mm-dd`` periods must cover
+        sub-second timestamps such as ``23:59:59.5Z``. This exercises the real
+        Spark filter, not just the string expansion.
+        """
+        from pyspark.sql import functions as F
+
+        # One row per period type, each sitting in the final fractional second
+        # of that period -- the exact rows that a rounded 23:59:59Z bound drops.
+        df = self.spark.createDataFrame(
+            [
+                ("year-edge", "2020-12-31T23:59:59.5Z"),
+                ("month-edge", "2020-05-31T23:59:59.5Z"),
+                ("day-edge", "2020-05-15T23:59:59.5Z"),
+                ("next-period", "2021-01-01T00:00:00Z"),
+            ],
+            ["id", "datetime_str"],
+        ).withColumn("datetime", F.to_timestamp("datetime_str"))
+
+        def matches(date_str):
+            interval = CollectionClient._expand_date(date_str)
+            filtered = CollectionClient._apply_spatial_temporal_filters(
+                df, datetime=[interval]
+            )
+            return {row["id"] for row in filtered.collect()}
+
+        # YYYY keeps the Dec-31 23:59:59.5 row and excludes the next year.
+        assert matches("2020") == {"year-edge", "month-edge", "day-edge"}
+        # YYYY-mm keeps the last-day fractional-second row.
+        assert "month-edge" in matches("2020-05")
+        assert "day-edge" in matches("2020-05")
+        # YYYY-mm-dd keeps the fractional-second row on that day.
+        assert matches("2020-05-15") == {"day-edge"}
+        # The first instant of the next period is never pulled in.
+        assert "next-period" not in matches("2020")

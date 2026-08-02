@@ -145,13 +145,16 @@ These functions split rasters into tiles.
 
 ## Raster Map Algebra Operators
 
-These functions convert between raster bands and arrays for map algebra operations.
+These functions convert between raster bands and arrays for map algebra operations. Note that
+`RS_MapAlgebra` is deprecated — see [Raster UDFs](Raster-UDF.md) for the recommended way to process
+rasters, and [Map algebra](Raster-map-algebra.md) for the array-based functions, which are not
+deprecated.
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
 | [RS_AddBandFromArray](Raster-Map-Algebra-Operators/RS_AddBandFromArray.md) | Raster | Add a band to a raster from an array of doubles. | v1.5.0 |
 | [RS_BandAsArray](Raster-Map-Algebra-Operators/RS_BandAsArray.md) | `Array<Double>` | Extract a band from a raster as an array of doubles. | v1.4.1 |
-| [RS_MapAlgebra](Raster-Map-Algebra-Operators/RS_MapAlgebra.md) | Raster | Apply a map algebra script on a raster. | v1.5.0 |
+| [RS_MapAlgebra](Raster-Map-Algebra-Operators/RS_MapAlgebra.md) | Raster | Apply a map algebra script on a raster. **Deprecated since v1.9.1, to be removed** — use a [Raster UDF](Raster-UDF.md). | v1.5.0 |
 
 ## Map Algebra Operators
 

@@ -21,12 +21,13 @@ package org.apache.sedona.common.geography;
 import com.google.common.geometry.*;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 import org.apache.sedona.common.S2Geography.*;
 import org.apache.sedona.common.S2Geography.Geography;
-import org.apache.sedona.common.S2Geography.WKTReader;
 import org.apache.sedona.common.utils.GeoHashDecoder;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKTReader;
 
 public class Constructors {
 
@@ -76,11 +77,19 @@ public class Constructors {
   }
 
   public static Geography geogFromWKT(String wkt, int srid) throws ParseException {
-    // Use S2Geography WKTReader for proper spherical normalization and error messages,
-    // then wrap in WKBGeography for WKB-based storage.
-    Geography s2Geog = new WKTReader().read(wkt);
-    s2Geog.setSRID(srid);
-    return WKBGeography.fromS2Geography(s2Geog);
+    try {
+      // Keep WKB as the structural source of truth. The S2 view is built lazily for spherical
+      // operations and may canonicalize degenerate edges without changing stored coordinates.
+      Geometry geometry = new WKTReader().read(wkt);
+      geometry.setSRID(srid);
+      return WKBGeography.fromJTS(geometry);
+    } catch (ParseException e) {
+      String message = e.getMessage();
+      if (message != null) {
+        message = message.replace("Unknown geometry type", "Unknown geography type");
+      }
+      throw new ParseException(message, e);
+    }
   }
 
   public static Geography geogFromEWKT(String ewkt) throws ParseException {
@@ -204,19 +213,24 @@ public class Constructors {
   private static Geometry polygonToGeom(Geography g, GeometryFactory gf) {
     if (g instanceof PolygonGeography) {
       S2Polygon s2p = ((PolygonGeography) g).polygon;
-      return s2LoopsToJts(s2p.getLoops(), gf);
+      return s2PolygonToGeometry(s2p, gf, Constructors::toCoordinate);
     } else if (g instanceof MultiPolygonGeography) {
       List<Geography> parts = ((MultiPolygonGeography) g).getFeatures();
       Polygon[] polys = new Polygon[parts.size()];
       for (int i = 0; i < parts.size(); i++) {
-        polys[i] = (Polygon) s2LoopsToJts(((PolygonGeography) parts.get(i)).polygon.getLoops(), gf);
+        polys[i] =
+            (Polygon)
+                s2PolygonToGeometry(
+                    ((PolygonGeography) parts.get(i)).polygon, gf, Constructors::toCoordinate);
       }
       return gf.createMultiPolygon(polys);
     }
     return null;
   }
 
-  private static Geometry s2LoopsToJts(List<S2Loop> loops, GeometryFactory gf) {
+  static Geometry s2PolygonToGeometry(
+      S2Polygon s2Polygon, GeometryFactory gf, Function<S2Point, Coordinate> coordinateFactory) {
+    List<S2Loop> loops = s2Polygon.getLoops();
     if (loops == null || loops.isEmpty()) return gf.createPolygon();
 
     List<LinearRing> shells = new ArrayList<>();
@@ -238,8 +252,7 @@ public class Constructors {
       // Build & close ring once (x=lng, y=lat)
       Coordinate[] cs = new Coordinate[n + 1];
       for (int i = 0; i < n; i++) {
-        S2LatLng ll = S2LatLng.fromPoint(L.vertex(i)).normalized();
-        cs[i] = new Coordinate(ll.lngDegrees(), ll.latDegrees());
+        cs[i] = coordinateFactory.apply(L.vertex(i));
       }
       cs[n] = cs[0];
 
@@ -285,6 +298,11 @@ public class Constructors {
     return gf.createMultiPolygon(polys);
   }
 
+  private static Coordinate toCoordinate(S2Point point) {
+    S2LatLng latLng = S2LatLng.fromPoint(point).normalized();
+    return new Coordinate(latLng.lngDegrees(), latLng.latDegrees());
+  }
+
   private static LinearRing ensureOrientation(
       LinearRing ring, boolean wantCCW, GeometryFactory gf) {
     boolean isCCW = org.locationtech.jts.algorithm.Orientation.isCCW(ring.getCoordinates());
@@ -312,10 +330,10 @@ public class Constructors {
     if (geom == null) {
       return null;
     }
-    // Build S2 Geography first for proper spherical normalization (e.g., deduplication),
-    // then wrap in WKBGeography for WKB-based storage.
-    Geography s2geog = geomToS2Geography(geom);
-    return WKBGeography.fromS2Geography(s2geog);
+    // Keep the input WKB as the structural source of truth. S2 is derived lazily when a spherical
+    // operation needs it; converting through S2 here would alter coordinates, collapse repeated
+    // vertices, and fail to serialize empty polygons.
+    return WKBGeography.fromJTS(geom);
   }
 
   /**

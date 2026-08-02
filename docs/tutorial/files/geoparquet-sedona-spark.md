@@ -210,7 +210,12 @@ When no `geoparquet.crs` option is explicitly provided, Sedona will automaticall
 * If geometries in a column have mixed SRIDs, the `crs` field defaults to `null`.
 * If an explicit `geoparquet.crs` or `geoparquet.crs.<column_name>` option is provided, it always takes precedence over the SRID-derived CRS.
 
-Sedona geoparquet reader and writer do NOT check the axis order (lon/lat or lat/lon) and assume they are handled by the users themselves when writing / reading the files. You can always use [`ST_FlipCoordinates`](../../api/sql/Geometry-Editors/ST_FlipCoordinates.md) to swap the axis order of your geometries.
+GeoParquet stores WKB coordinates in `(x, y)` order. Per the GeoParquet 1.1
+specification, this ordering overrides any axis order declared by the CRS. Sedona
+therefore preserves the authoritative CRS axis metadata and does not reorder geometry
+coordinates while reading or writing GeoParquet. You can use
+[`ST_FlipCoordinates`](../../api/sql/Geometry-Editors/ST_FlipCoordinates.md) when the
+coordinates themselves need to be swapped.
 
 ## Save GeoParquet with Covering Metadata
 
@@ -268,6 +273,16 @@ ORDER BY geohash
 ```
 
 Let's look closer at how Sedona uses the GeoParquet bbox metadata to optimize queries.
+
+## Compression of GeoParquet file
+
+There are different options to compress Parquet and GeoParquet files. Using `zstd` is a good choice if you want to distribute your GeoParquet file, see [Best Practices for Distributing GeoParquet](https://github.com/opengeospatial/geoparquet/blob/main/format-specs/distributing-geoparquet.md) and [discussion thread](https://github.com/apache/sedona/discussions/3109#discussioncomment-17666620) for details. Example:
+
+```python
+df.write.format("geoparquet").option("compression", "zstd").mode("overwrite").save(
+    "path/to/output"
+)
+```
 
 ## How Sedona uses GeoParquet bounding box (bbox) metadata with Spark
 

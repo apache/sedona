@@ -1563,6 +1563,35 @@ class functionTestScala
       assert(actual == false)
     }
 
+    it("Should pass polygon orientation predicates for empty polygonal geometries") {
+      val actual = sparkSession
+        .sql("""
+            |SELECT
+            |  ST_IsPolygonCW(ST_GeomFromWKT('POLYGON EMPTY')),
+            |  ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON EMPTY')),
+            |  ST_IsPolygonCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY')),
+            |  ST_IsPolygonCCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY'))
+            |""".stripMargin)
+        .first()
+
+      (0 until 4).foreach(index => assertTrue(actual.getBoolean(index)))
+    }
+
+    it("Should pass ST_IsLineStringCCW") {
+      val actual = sparkSession
+        .sql("""
+            |SELECT
+            |  ST_IsLineStringCCW(ST_GeomFromWKT('LINESTRING (0 0, 1 0, 1 1, 0 1, 0 0)')),
+            |  ST_IsLineStringCCW(ST_GeomFromWKT('LINESTRING (0 0, 0 1, 1 1, 1 0, 0 0)')),
+            |  ST_IsLineStringCCW(ST_GeomFromWKT('POINT (0 0)'))
+            |""".stripMargin)
+        .first()
+
+      assertTrue(actual.getBoolean(0))
+      assertFalse(actual.getBoolean(1))
+      assertFalse(actual.getBoolean(2))
+    }
+
     it("Should pass ST_Snap") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON((2.6 12.5, 2.6 20.0, 12.6 20.0, 12.6 12.5, 2.6 12.5 ))') AS poly, ST_GeomFromWKT('LINESTRING (0.5 10.7, 5.4 8.4, 10.1 10.0)') AS line")
@@ -3684,6 +3713,30 @@ class functionTestScala
       "POINT (61.64205411585366 104.55256764481707)",
       actual.getAs[Geometry](1))
     assertEquals(45.18896951053177, actual.getDouble(2), 1e-6)
+
+    val triangleDf =
+      sparkSession.sql("SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS geom")
+    val coarse: Row =
+      triangleDf.selectExpr("ST_MaximumInscribedCircle(geom, 2.0)").first().getAs[Row](0)
+    assertGeometryEquals("POINT (0.75 0.5)", coarse.getAs[Geometry](0))
+    assertGeometryEquals("POINT (0.625 0.625)", coarse.getAs[Geometry](1))
+    assertEquals(0.1767766952966369, coarse.getDouble(2), 1e-12)
+
+    assertTrue(
+      sparkSession
+        .sql("SELECT ST_MaximumInscribedCircle(ST_GeomFromWKT(NULL))")
+        .first()
+        .isNullAt(0))
+    assertTrue(
+      triangleDf
+        .selectExpr("ST_MaximumInscribedCircle(geom, CAST(NULL AS DOUBLE))")
+        .first()
+        .isNullAt(0))
+    assertTrue(
+      triangleDf
+        .selectExpr("ST_MaximumInscribedCircle(geom, CAST('NaN' AS DOUBLE))")
+        .first()
+        .isNullAt(0))
   }
 
   it("Should pass ST_IsValidTrajectory") {

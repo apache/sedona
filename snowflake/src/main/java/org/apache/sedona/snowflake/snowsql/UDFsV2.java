@@ -564,6 +564,17 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"leftGeometry", "rightGeometry", "tolerance"},
+      argTypes = {"Geometry", "Geometry", "double"})
+  public static boolean ST_EqualsExact(
+      String leftGeometry, String rightGeometry, double tolerance) {
+    return Predicates.equalsExact(
+        GeometrySerde.deserGeoJson(leftGeometry),
+        GeometrySerde.deserGeoJson(rightGeometry),
+        tolerance);
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"},
       returnTypes = "Geometry")
@@ -719,6 +730,13 @@ public class UDFsV2 {
       argTypes = {"Geometry"})
   public static boolean ST_IsEmpty(String geometry) {
     return Functions.isEmpty(GeometrySerde.deserGeoJson(geometry));
+  }
+
+  @UDFAnnotations.ParamMeta(
+      argNames = {"geometry"},
+      argTypes = {"Geometry"})
+  public static boolean ST_IsLineStringCCW(String geometry) {
+    return Functions.isLineStringCCW(GeometrySerde.deserGeoJson(geometry));
   }
 
   @UDFAnnotations.ParamMeta(

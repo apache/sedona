@@ -23,6 +23,7 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.connector.read.InputPartition
 import org.apache.spark.sql.connector.read.PartitionReader
 import org.apache.spark.sql.connector.read.PartitionReaderFactory
+import org.apache.spark.sql.execution.datasources.PartitionedFile
 import org.apache.spark.sql.execution.datasources.v2.PartitionReaderWithPartitionValues
 import org.apache.spark.sql.sedona_sql.io.raster.RasterInputPartition
 import org.apache.spark.sql.types.StructType
@@ -36,18 +37,23 @@ case class GeoTiffMetadataPartitionReaderFactory(
     extends PartitionReaderFactory {
 
   private def buildReader(partition: RasterInputPartition): PartitionReader[InternalRow] = {
+    // Each file in a bin-packed partition may belong to a different Hive partition and thus
+    // carry its own partition values, so wrap a per-file reader with that file's values rather
+    // than applying the first file's values to every row.
+    def readerForFile(file: PartitionedFile): PartitionReader[InternalRow] = {
+      val fileReader =
+        new GeoTiffMetadataPartitionReader(
+          broadcastedConf.value.value,
+          Array(file),
+          readDataSchema)
+      new PartitionReaderWithPartitionValues(
+        fileReader,
+        readDataSchema,
+        partitionSchema,
+        file.partitionValues)
+    }
 
-    val fileReader =
-      new GeoTiffMetadataPartitionReader(
-        broadcastedConf.value.value,
-        partition.files,
-        readDataSchema)
-
-    new PartitionReaderWithPartitionValues(
-      fileReader,
-      readDataSchema,
-      partitionSchema,
-      partition.files.head.partitionValues)
+    new GeoTiffMetadataConcatPartitionReader(partition.files, readerForFile)
   }
 
   override def createReader(partition: InputPartition): PartitionReader[InternalRow] = {
@@ -58,4 +64,36 @@ case class GeoTiffMetadataPartitionReaderFactory(
           s"Unexpected partition type: ${partition.getClass.getCanonicalName}")
     }
   }
+}
+
+/**
+ * Reads a bin-packed partition file-by-file, delegating each file to a reader built by
+ * `buildReader` (which attaches that file's partition values). Sub-readers are opened lazily and
+ * closed as the scan advances, so at most one file is open at a time.
+ */
+private class GeoTiffMetadataConcatPartitionReader(
+    files: Array[PartitionedFile],
+    buildReader: PartitionedFile => PartitionReader[InternalRow])
+    extends PartitionReader[InternalRow] {
+
+  private var fileIndex = 0
+  private var current: PartitionReader[InternalRow] = _
+
+  override def next(): Boolean = {
+    while (true) {
+      if (current == null) {
+        if (fileIndex >= files.length) return false
+        current = buildReader(files(fileIndex))
+        fileIndex += 1
+      }
+      if (current.next()) return true
+      current.close()
+      current = null
+    }
+    false // unreachable; satisfies the compiler
+  }
+
+  override def get(): InternalRow = current.get()
+
+  override def close(): Unit = if (current != null) current.close()
 }

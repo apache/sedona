@@ -21,7 +21,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "apache-sedona"
-version = "1.9.0"
+version = "1.9.1"
 description = "Apache Sedona is a cluster computing system for processing large-scale spatial data"
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -71,6 +71,7 @@ dev = [
   "pandas>=2.0.0,<3.0.0",
   "numpy<2",
   "geopandas",
+  "rtree; python_version < '3.9'",
   # https://stackoverflow.com/questions/78949093/how-to-resolve-attributeerror-module-fiona-has-no-attribute-path
   # cannot set geopandas>=0.14.4 since it doesn't support python 3.8, so we pin fiona to <1.10.0
   "fiona<1.10.0",

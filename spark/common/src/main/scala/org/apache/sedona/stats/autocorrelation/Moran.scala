@@ -19,12 +19,15 @@
 package org.apache.sedona.stats.autocorrelation
 
 import org.apache.commons.math3.distribution.NormalDistribution
-import org.apache.spark.sql.{DataFrame, functions}
+import org.apache.spark.sql.{Column, DataFrame, functions}
 import org.apache.spark.sql.functions.{col, explode, pow}
 
 object Moran {
   private val ID_COLUMN = "id"
   private val VALUE_COLUMN = "value"
+
+  private def topLevelColumn(columnName: String): Column =
+    col(s"`${columnName.replace("`", "``")}`")
 
   private def normSf(x: Double, mean: Double = 0.0, stdDev: Double = 1.0): Double = {
     val normalDist = new NormalDistribution(mean, stdDev)
@@ -44,21 +47,35 @@ object Moran {
     val spark = dataframe.sparkSession
     import spark.implicits._
 
-    val data = dataframe
-      .selectExpr(s"avg($valueColumnName)", "count(*)")
-      .as[(Double, Long)]
+    val doubleValueDataframe =
+      dataframe.withColumn(valueColumnName, topLevelColumn(valueColumnName).cast("double"))
+
+    val data = doubleValueDataframe
+      .select(
+        functions.avg(topLevelColumn(valueColumnName)).alias("mean"),
+        functions.count(functions.lit(1)).alias("count"))
       .head()
 
-    val yMean = data._1
+    if (data.isNullAt(0)) {
+      throw new IllegalArgumentException(
+        s"Value column '$valueColumnName' must contain at least one non-null value")
+    }
 
-    val n = data._2
+    val yMean = data.getDouble(0)
+
+    if (!java.lang.Double.isFinite(yMean)) {
+      throw new IllegalArgumentException(
+        s"Value column '$valueColumnName' must have a finite mean")
+    }
+
+    val n = data.getLong(1)
 
     val explodedWeights = dataframe
-      .select(col(idColumn), explode(col("weights")).alias("col"))
+      .select(topLevelColumn(idColumn).alias("id"), explode(col("weights")).alias("weight"))
       .select(
-        $"$idColumn".alias("id"),
-        $"col.neighbor.$idColumn".alias("n_id"),
-        $"col.value".alias("weight_value"))
+        col("id"),
+        col("weight").getField("neighbor").getField(idColumn).alias("n_id"),
+        col("weight").getField("value").alias("weight_value"))
 
     val s1Data = explodedWeights
       .alias("left")
@@ -81,12 +98,26 @@ object Moran {
 
     val s1 = sStats._1
 
-    val inumData = dataframe
-      .selectExpr(
-        s"$idColumn AS id",
-        s"$valueColumnName AS value",
-        f"$valueColumnName - ${yMean} AS z",
-        f"transform(weights, w -> struct(w.neighbor.$idColumn AS id, w.value AS w, w.neighbor.$valueColumnName, w.neighbor.$valueColumnName - ${yMean} AS z)) AS weight")
+    val valueColumn = topLevelColumn(valueColumnName)
+    val yMeanColumn = functions.lit(yMean)
+    val inumData = doubleValueDataframe
+      .select(
+        topLevelColumn(idColumn).alias("id"),
+        valueColumn.alias("value"),
+        (valueColumn - yMeanColumn).alias("z"),
+        functions
+          .transform(
+            col("weights"),
+            weight => {
+              val neighbor = weight.getField("neighbor")
+              val neighborValue = neighbor.getField(valueColumnName).cast("double")
+              functions.struct(
+                neighbor.getField(idColumn).alias("id"),
+                weight.getField("value").alias("w"),
+                neighborValue.alias("value"),
+                (neighborValue - yMeanColumn).alias("z"))
+            })
+          .alias("weight"))
       .selectExpr(
         "z",
         "AGGREGATE(transform(weight, x-> x.z*x.w), CAST(0.0 AS DOUBLE), (acc, x) -> acc + x) AS ZL",

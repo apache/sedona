@@ -207,6 +207,29 @@ public class PredicateTest extends TestBase {
   }
 
   @Test
+  public void testEqualsExact() {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT"
+                + " ST_EqualsExact(ST_Point(0.0, 0.0), ST_Point(0.03, 0.04), 0.05)"
+                + " AS within_tolerance,"
+                + " ST_EqualsExact(ST_Point(0.0, 0.0), ST_Point(0.03, 0.04), 0.049)"
+                + " AS outside_tolerance,"
+                + " ST_EqualsExact(ST_GeomFromWKT(CAST(NULL AS STRING)),"
+                + " ST_Point(0.0, 0.0), 0.0) AS null_left,"
+                + " ST_EqualsExact(ST_Point(0.0, 0.0),"
+                + " ST_GeomFromWKT(CAST(NULL AS STRING)), 0.0) AS null_right,"
+                + " ST_EqualsExact(ST_Point(0.0, 0.0), ST_Point(0.0, 0.0),"
+                + " CAST(NULL AS DOUBLE)) AS null_tolerance");
+    org.apache.flink.types.Row row = first(table);
+    assertEquals(true, row.getField(0));
+    assertEquals(false, row.getField(1));
+    assertNull(row.getField(2));
+    assertNull(row.getField(3));
+    assertNull(row.getField(4));
+  }
+
+  @Test
   public void testOrderingEquals() {
     Table lineStringTable = createLineStringTable(testDataSize);
     String lineString = createLineStringWKT(testDataSize).get(0).getField(0).toString();

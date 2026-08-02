@@ -30,11 +30,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <geotools.scope>compile</geotools.scope>
-        <flink.version>1.19.0</flink.version>
+        <flink.version>1.20.4</flink.version>
         <flink.scope>provided</flink.scope>
         <scala.compat.version>2.12</scala.compat.version>
         <geotools.version>33.1</geotools.version>
-        <log4j.version>2.25.3</log4j.version>
+        <log4j.version>2.25.4</log4j.version>
 
         <!-- For JDK-17 and above -->
         <extraJavaArgs>

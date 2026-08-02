@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="Title band on top — OpenStreetMap, meet Sedona — above a full-width colorful city-map panorama of roads, parks, buildings, water, and points of interest">
+<defs>
+<linearGradient id="space" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="#0b0a26"/><stop offset="0.5" stop-color="#161030"/><stop offset="1" stop-color="#241230"/></linearGradient>
+<linearGradient id="sea" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1c4d74"/><stop offset="1" stop-color="#123a52"/></linearGradient>
+</defs>
+
+<rect width="1280" height="720" fill="url(#space)"/>
+
+<!-- ===== TOP BAND: title, no visuals ===== -->
+<text x="72" y="86" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="19" font-weight="700" letter-spacing="5" fill="#f0a94e">APACHE SEDONA · OSM PBF READER</text>
+<text x="70" y="158" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="58" font-weight="800" fill="#f7efe7">OpenStreetMap, meet <tspan fill="#ff7a45">Sedona</tspan>.</text>
+<text x="72" y="206" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="500" fill="#b6acc9">Read raw <tspan font-family="ui-monospace, Menlo, monospace" font-size="19">.osm.pbf</tspan> into a Sedona DataFrame — distributed across your whole cluster, no conversion step.</text>
+
+<rect x="72" y="238" width="452" height="48" rx="10" fill="#140f28" stroke="#3c3268" stroke-width="1.5"/>
+<text x="94" y="269" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="17" fill="#8fe6d0">sedona.read.<tspan fill="#f7efe7">format</tspan>(<tspan fill="#f5c542">"osmpbf"</tspan>).<tspan fill="#f7efe7">load</tspan>(path)</text>
+
+<g font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="15">
+<rect x="548" y="245" width="132" height="34" rx="17" fill="none" stroke="#f5c542" stroke-opacity="0.6" stroke-width="1.3"/><text x="614" y="267" text-anchor="middle" fill="#f0d08a">nodes &#8594; points</text>
+<rect x="694" y="245" width="126" height="34" rx="17" fill="none" stroke="#35c9d8" stroke-opacity="0.6" stroke-width="1.3"/><text x="757" y="267" text-anchor="middle" fill="#5fd8e0">ways &#8594; lines</text>
+<rect x="834" y="245" width="128" height="34" rx="17" fill="none" stroke="#8a6ff0" stroke-opacity="0.6" stroke-width="1.3"/><text x="898" y="267" text-anchor="middle" fill="#ab97f5">tags &#8594; layers</text>
+<rect x="976" y="245" width="160" height="34" rx="17" fill="none" stroke="#7ed957" stroke-opacity="0.6" stroke-width="1.3"/><text x="1056" y="267" text-anchor="middle" fill="#98e07a">1 file &#8594; N workers</text>
+</g>
+
+<!-- ===== BOTTOM: full-width map panorama (no text overlay) ===== -->
+<!-- faint graticule, map area only -->
+<g stroke="#7d84c8" stroke-opacity="0.08" stroke-width="1">
+<line x1="160" y1="320" x2="160" y2="684"/><line x1="320" y1="320" x2="320" y2="684"/><line x1="480" y1="320" x2="480" y2="684"/><line x1="640" y1="320" x2="640" y2="684"/><line x1="800" y1="320" x2="800" y2="684"/><line x1="960" y1="320" x2="960" y2="684"/><line x1="1120" y1="320" x2="1120" y2="684"/>
+<line x1="0" y1="380" x2="1280" y2="380"/><line x1="0" y1="470" x2="1280" y2="470"/><line x1="0" y1="560" x2="1280" y2="560"/><line x1="0" y1="650" x2="1280" y2="650"/></g>
+
+<!-- water -->
+<path d="M1000,684 C1024,590 1120,548 1280,562 L1280,684 Z" fill="url(#sea)"/>
+<path d="M1064,620 q46,-20 96,-6 M1110,662 q40,-16 86,-4" stroke="#5fd8e0" stroke-opacity="0.35" stroke-width="1.6" fill="none"/>
+<path d="M70,410 q66,-30 126,2 q40,26 8,56 q-48,40 -112,16 q-58,-22 -22,-74 Z" fill="url(#sea)" opacity="0.85"/>
+
+<!-- parks -->
+<path d="M950,380 q64,-28 124,0 q40,22 12,56 q-38,42 -102,26 q-68,-22 -34,-82 Z" fill="#2fd2a8" fill-opacity="0.26" stroke="#2fd2a8" stroke-width="1.5"/>
+<path d="M170,570 q60,-34 126,-8 q44,20 18,60 q-32,48 -102,34 q-80,-20 -42,-86 Z" fill="#7ed957" fill-opacity="0.24" stroke="#7ed957" stroke-width="1.5"/>
+<path d="M580,610 q52,-24 100,0 q28,18 8,44 q-30,32 -82,18 q-54,-14 -26,-62 Z" fill="#2fd2a8" fill-opacity="0.2" stroke="#2fd2a8" stroke-width="1.3"/>
+
+<!-- buildings -->
+<g fill="#8a6ff0" fill-opacity="0.5" stroke="#8a6ff0" stroke-width="1">
+<rect x="330" y="370" width="34" height="26" transform="rotate(8 347 383)"/>
+<rect x="374" y="362" width="26" height="34" transform="rotate(8 387 379)"/>
+<rect x="342" y="416" width="40" height="24" transform="rotate(8 362 428)"/>
+<rect x="1075" y="440" width="30" height="26" transform="rotate(14 1090 453)"/>
+<rect x="1113" y="430" width="24" height="32" transform="rotate(14 1125 446)"/>
+<rect x="430" y="590" width="30" height="24" transform="rotate(-6 445 602)"/>
+<rect x="468" y="618" width="38" height="22" transform="rotate(-6 487 629)"/>
+<rect x="835" y="600" width="30" height="24" transform="rotate(5 850 612)"/>
+</g>
+
+<!-- roads -->
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path d="M-20,600 L240,545 L520,505 L800,465 L1080,415 L1300,385" stroke="#f5c542" stroke-width="5"/>
+<path d="M240,545 L340,430 L500,375 L680,345" stroke="#35c9d8" stroke-width="3.4"/>
+<path d="M800,465 L920,545 L1080,610 L1240,655" stroke="#35c9d8" stroke-width="3.4"/>
+<g stroke="#4d8ff5" stroke-width="2.2">
+<path d="M340,430 L500,455 L520,505"/>
+<path d="M500,375 L640,395 L780,375"/>
+<path d="M520,505 L600,590 L580,612"/>
+<path d="M920,545 L990,480 L1080,415"/>
+</g>
+<g stroke="#ff6a9a" stroke-width="1.8" stroke-dasharray="5 5">
+<path d="M150,470 Q250,450 340,430"/>
+<path d="M1080,415 Q1030,380 980,352"/>
+<path d="M600,590 Q720,600 835,612"/>
+</g>
+</g>
+
+<!-- junction nodes -->
+<g fill="#e9ecff" stroke="#0b0a26" stroke-width="1.4">
+<circle cx="240" cy="545" r="5"/><circle cx="520" cy="505" r="5"/><circle cx="800" cy="465" r="5"/><circle cx="1080" cy="415" r="5"/><circle cx="340" cy="430" r="5"/><circle cx="500" cy="375" r="5"/><circle cx="920" cy="545" r="5"/><circle cx="600" cy="590" r="5"/><circle cx="500" cy="455" r="5"/></g>
+
+<!-- POI pins -->
+<g>
+<g transform="translate(225,505)"><path d="M0,0 C-10,-15 -10,-28 0,-28 C10,-28 10,-15 0,0 Z" fill="#ff7a45"/><circle cx="0" cy="-19" r="3.6" fill="#0b0a26"/></g>
+<g transform="translate(905,400)"><path d="M0,0 C-10,-15 -10,-28 0,-28 C10,-28 10,-15 0,0 Z" fill="#ff7a45"/><circle cx="0" cy="-19" r="3.6" fill="#0b0a26"/></g>
+<g transform="translate(1150,520)"><path d="M0,0 C-10,-15 -10,-28 0,-28 C10,-28 10,-15 0,0 Z" fill="#ff7a45"/><circle cx="0" cy="-19" r="3.6" fill="#0b0a26"/></g>
+<g transform="translate(690,560)"><path d="M0,0 C-10,-15 -10,-28 0,-28 C10,-28 10,-15 0,0 Z" fill="#ff7a45"/><circle cx="0" cy="-19" r="3.6" fill="#0b0a26"/></g>
+</g>
+
+<!-- boundary relation frames the map strip -->
+<polygon points="34,332 1246,326 1252,678 28,674" fill="none" stroke="#f5c542" stroke-opacity="0.4" stroke-width="1.6" stroke-dasharray="8 6"/>
+<text x="50" y="352" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="12.5" fill="#a9b3e0">relation · boundary</text>
+
+<!-- legend below the map -->
+<text x="640" y="708" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="13" fill="#a9b3e0"><tspan fill="#e9ecff">●</tspan> nodes  <tspan fill="#f5c542">—</tspan> ways  <tspan fill="#ff7a45">◍</tspan> amenity  <tspan fill="#8a6ff0">▮</tspan> building  <tspan fill="#7ed957">▲</tspan> park  <tspan fill="#5fd8e0">≈</tspan> water</text>
+</svg>

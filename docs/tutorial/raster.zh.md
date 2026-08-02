@@ -279,6 +279,12 @@ ndviDf.createOrReplaceTempView("ndviDf")
 
 Map algebra 是最通用的处理原语 —— 裁剪、遮罩、阈值过滤、不同波段或不同栅格之间的算术运算，都可以用同样的 `RS_MapAlgebra(rast, pixelType, script)`（或双栅格版本）写出来。脚本语法见 [Map algebra](../api/sql/Raster-map-algebra.md)；其他备选算子（`RS_Clip`、`RS_Resample`、`RS_SetValues`）见下文的 [栅格处理参考](#raster-processing-reference)。
 
+!!!warning
+    `RS_MapAlgebra` 自 `v1.9.1` 起弃用，并将在**未来版本中移除**，请改用
+    [栅格 UDF](../api/sql/Raster-UDF.md)：它用 Python 表达同样的逐像素计算，而且还能直接使用 NumPy、SciPy、
+    scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原样运行没有问题，但新代码应改用 UDF；两种写法的
+    对照见 [NDVI：地图代数写法与 UDF 写法](../api/sql/Raster-UDF.md#ndvi-as-map-algebra-and-as-a-udf)。
+
 ### 6. 可视化处理结果
 
 NDVI 栅格让植被田一目了然：NDVI 高的像素显示为绿色，其余为淡红色。
@@ -519,19 +525,38 @@ FROM rawdf
 
 ![Reproject match](../image/RS_ReprojectMatch/RS_ReprojectMatch.svg)
 
-### Map algebra
+### 逐像素计算
 
-[`RS_MapAlgebra`](../api/sql/Raster-map-algebra.md) 有两种形式：
+请使用[栅格 UDF](../api/sql/Raster-UDF.md)。UDF 可以接收一个或多个栅格列，因此已弃用的 `RS_MapAlgebra` 的两种
+形式都有直接对应的写法 —— 下面是双栅格的变化检测场景：
 
-- **单栅格** —— `RS_MapAlgebra(rast, pixelType, script)`。对单个栅格的多个波段按像素运行脚本。教程主线即使用此形式。
-- **双栅格** —— `RS_MapAlgebra(rast0, rast1, pixelType, script, noDataValue)`。对两个栅格按像素运行脚本，常用于差分栅格与变化检测。
+```python
+import numpy as np
+from pyspark.sql.functions import col, udf
 
-```sql
--- 双栅格：用一个 NDVI 减去另一个
-SELECT RS_MapAlgebra(a.rast, b.rast, 'D',
-                     'out[0] = rast0[0] - rast1[0];', -9999.0) AS delta
-FROM ndvi_after a JOIN ndvi_before b ON a.x = b.x AND a.y = b.y
+from sedona.spark.sql.types import RasterType
+
+NODATA = -9999.0
+
+
+@udf(returnType=RasterType())
+def delta(after, before):
+    # 用 as_numpy_masked() 而非 as_numpy()：NODATA 会变成 NaN，从而保持无效状态，
+    # 不会把哨兵值带进减法结果。
+    diff = after.as_numpy_masked()[0] - before.as_numpy_masked()[0]
+    return after.with_bands(np.where(np.isnan(diff), NODATA, diff), nodata=NODATA)
+
+
+# ndvi_after 与 ndvi_before 是两个日期的 NDVI 栅格，位于同一网格上，
+# 并各自带有 raster 数据源生成的 x、y tile 索引列。
+(
+    ndvi_after.alias("after")
+    .join(ndvi_before.alias("before"), ["x", "y"])
+    .select(delta(col("after.rast"), col("before.rast")).alias("delta"))
+)
 ```
+
+单栅格写法、NDVI 的两种写法对照，以及需要注意的限制，见[栅格 UDF](../api/sql/Raster-UDF.md)。
 
 ## 栅格与矢量互通
 
@@ -543,7 +568,7 @@ FROM ndvi_after a JOIN ndvi_before b ON a.x = b.x AND a.y = b.y
 SELECT RS_AsRaster(
     ST_GeomFromWKT('POLYGON((150 150, 220 260, 190 300, 300 220, 150 150))'),
     RS_MakeEmptyRaster(1, 'b', 4, 6, 1, -1, 1),
-    'b', 230
+    'b', false, 230, 0
 )
 ```
 
@@ -651,7 +676,11 @@ my_raster_file
 rasterDf = sedona.read.format("raster").load("my_raster_file/*/*.tiff")
 ```
 
-## 在 Python 中处理栅格 DataFrame
+{% raw %}
+
+## 在 Python 中处理栅格 DataFrame {#working-with-raster-dataframes-in-python}
+
+{% endraw %}
 
 自 `v1.6.0` 起，可以把含栅格列的 DataFrame 拉到 Python driver 端本地处理。被收集回的栅格元素表现为 `SedonaRaster` 对象。
 
@@ -692,7 +721,7 @@ band1 = ds.read(1)
 
 ## 在栅格上编写 Python UDF
 
-Python UDF 接收栅格数据，使用 NumPy / SciPy / scikit-learn 等处理，并返回标量或新栅格。
+Python UDF 接收栅格数据，使用 NumPy / SciPy / scikit-learn 等处理，并返回标量或新栅格。本节是入门介绍；完整内容见 [栅格 UDF](../api/sql/Raster-UDF.md)，其中包括何时该选 UDF 而不是 `RS_MapAlgebra`、双栅格 UDF，以及需要注意的各项限制。
 
 ### 栅格 → 标量
 
@@ -720,7 +749,7 @@ df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
 
 ### 栅格 → 栅格
 
-UDF 也可以返回栅格对象。使用 `SedonaRaster.with_bands()` 替换像素数据，同时保留所有空间元数据（CRS、仿射变换、NODATA 等）。波段数与 dtype 可自由变化。
+从 `v1.9.1` 起，UDF 也可以返回栅格对象。使用 `SedonaRaster.with_bands()` 替换像素数据，同时沿用源栅格的 CRS 与仿射变换。波段数与 dtype 可自由变化。
 
 ```python
 import numpy as np
@@ -728,9 +757,10 @@ from sedona.spark.sql.types import RasterType
 
 
 def mask_udf(raster):
+    # 假定场景没有空洞；若可能携带 NODATA，请改用 as_numpy_masked() —— 见栅格 UDF 页面
     band1 = raster.as_numpy()[0, :, :]
     mask = (band1 < 1400).astype(np.float32)
-    return raster.with_bands(mask)  # 1 个波段，保留 CRS / 仿射变换 / NODATA
+    return raster.with_bands(mask)  # 1 个波段，位于输入的网格上
 
 
 sedona.udf.register("mask_udf", mask_udf, RasterType())
@@ -745,7 +775,43 @@ df_raster.withColumn("mask_rast", expr("mask_udf(rast)")).show()
 +--------------------+--------------------+
 ```
 
-`with_bands()` 接受 NumPy 数组：CHW 顺序（波段 × 高 × 宽），或单波段输出时的 HW 顺序（高 × 宽）。返回的 `SedonaRaster` 携带全部原始元数据，UDF 返回时会自动序列化回 JVM 端。
+`with_bands()` 接受 NumPy 数组：CHW 顺序（波段 × 高 × 宽），或单波段输出时的 HW 顺序（高 × 宽）。返回的 `SedonaRaster` 在 UDF 返回时会自动序列化回 JVM 端，因此输出就是一个普通栅格列。
+
+除非另行指定，输出的 NODATA 会继承自输入波段，而这通常不是派生栅格想要的 —— 用 `nodata=` 明确设置：
+
+```python
+return raster.with_bands(mask, nodata=-9999.0)
+```
+
+!!!note
+    结果始终位于输入的网格上 —— `with_bands()` 要求高、宽一致，并沿用输入的 CRS 与仿射变换，因此重投影和重采样无法在 Python UDF 内部完成。这一点以及 dtype 相关的注意事项见 [栅格 UDF](../api/sql/Raster-UDF.md#limits)。
+
+### 在 UDF 中使用 rasterio
+
+`as_rasterio()` 在 UDF 内部同样可用，因此 rasterio 与 GDAL 的算法可以直接作用于栅格列。该 dataset 是只读的 —— 若要返回栅格，需要把得到的数组交给 `with_bands()`：
+
+```python
+import rasterio.fill
+
+
+def fill_udf(raster):
+    # GDAL dataset 不携带 Sedona 的 NODATA，因此要从 SedonaRaster 构造掩膜 ——
+    # as_numpy_masked() 会把 NODATA 替换为 NaN。
+    nodata = raster.bands_meta[0].nodata
+    valid = ~np.isnan(raster.as_numpy_masked()[0])
+    with raster.as_rasterio() as src:
+        filled = rasterio.fill.fillnodata(src.read(1), mask=valid.astype(np.uint8))
+    # fillnodata 只在距有效数据 max_search_distance（默认 100 像素）内插值，更深处
+    # 的像素仍保留哨兵值，因此保留 NODATA 声明。只有确定所有空洞都能被完全填充时，
+    # 才改用 nodata=float("nan")。
+    return raster.with_bands(filled, nodata=nodata)
+
+
+sedona.udf.register("fill_udf", fill_udf, RasterType())
+df_raster.withColumn("filled", expr("fill_udf(rast)")).show()
+```
+
+这适用于任何不改变网格的 rasterio 运算。warp 与重投影会改变网格，无法这样返回 —— 请改用 [`RS_Resample`](../api/sql/Raster-Operators/RS_Resample.md) 或 [`RS_ReprojectMatch`](../api/sql/Raster-Operators/RS_ReprojectMatch.md)。
 
 ## 性能优化
 

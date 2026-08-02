@@ -181,7 +181,8 @@ nyc_buildings.head()
 
 ### 空间过滤
 
-使用空间索引与过滤方法。注意：当前版本尚未实现 `cx` 空间索引：
+使用 `cx` 进行分布式坐标范围筛选；如需将相交的几何裁剪到掩膜边界，
+可继续使用 `clip`：
 
 ```python
 from shapely.geometry import box
@@ -194,13 +195,14 @@ central_park_bbox = box(
     40.789,  # 右上角（经度，纬度）
 )
 
-# 使用空间索引筛选边界框内的建筑
-# 注意：该写法需要把数据收集到 driver 才能进行空间过滤
-# 对于大规模数据，建议改用空间连接（spatial join）
-buildings_sample = nyc_buildings.sample(1000)  # 演示用：抽样 1000 行
-central_park_buildings = buildings_sample[
-    buildings_sample.geometry.intersects(central_park_bbox)
+# 筛选与坐标范围相交的要素
+central_park_buildings = nyc_buildings.cx[
+    -73.973:-73.951,
+    40.764:40.789,
 ]
+
+# 将筛选后的几何裁剪到精确的多边形边界
+central_park_buildings = central_park_buildings.clip(central_park_bbox)
 
 # 显示结果
 print(
@@ -296,7 +298,7 @@ buildings_projected["perimeter"] = buildings_projected.geometry.length
 
 ## 已支持的操作
 
-Apache Sedona 的 GeoPandas API 已实现 **39 个 GeoSeries 函数** 与 **10 个 GeoDataFrame 函数**，覆盖了 GeoPandas 中最常用的操作：
+Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame 操作：
 
 ### 数据 I/O
 
@@ -307,6 +309,8 @@ Apache Sedona 的 GeoPandas API 已实现 **39 个 GeoSeries 函数** 与 **10 �
 ### 空间操作
 
 - `sjoin()` —— 多种谓词的空间连接
+- `cx` —— 基于坐标范围的空间筛选
+- `clip()` —— 使用标量、矩形或分布式掩膜裁剪几何
 - `buffer()` —— 几何缓冲
 - `distance()` —— 距离计算
 - `intersects()`、`contains()`、`within()` —— 空间谓词
@@ -333,14 +337,57 @@ Apache Sedona 的 GeoPandas API 已实现 **39 个 GeoSeries 函数** 与 **10 �
 - `intersects()`、`contains()`、`within()` —— 空间谓词
 - `intersection()` —— 几何相交
 - `make_valid()` —— 几何校验与修复
+- `sample_points()` —— 使用原生分布式表达式按面积对多边形采样、按长度对线采样
+- `cx` —— 基于坐标范围的空间筛选
+- `clip()` —— 分布式几何裁剪
 - `sindex` —— 空间索引（功能有限）
+
+### 分布式几何聚合
+
+- `GeoDataFrame.dissolve()` —— 对行进行分组，并使用 Sedona 原生分布式聚合
+  对每组几何执行并集
+- `sedona.spark.geopandas.tools.collect()` —— 将分布式 GeoSeries 聚合为一个
+  几何，并在需要时使用同构多部件几何
+
+```python
+from sedona.spark.geopandas.tools import collect
+
+by_region = buildings.dissolve(
+    by="region",
+    aggfunc={"population": "sum", "name": "first"},
+)
+all_building_parts = collect(buildings.geometry)
+```
+
+`dissolve` 支持 `unary` 并集方法，并会明确拒绝定点精度 `grid_size`、
+`coverage` 与 `disjoint_subset` 并集。多个属性聚合会保留为 pandas-on-Spark
+的两级 `MultiIndex`；GeoPandas 则把对应元组标签放在单级 object 索引中。
+原生 `first`、`last` 与 `count` 聚合支持所有属性类型；`nunique` 支持数值、
+布尔与字符串列；`min`、`max`、`sum`、`mean`、`median`、`std` 与 `var`
+支持数值和布尔列。字符串 `sum` 与所有 `prod` 聚合都会被明确拒绝。可调用
+聚合仅限 Python 内置的 `min`、`max`、`sum`，以及 NumPy 的 `amin`、
+`amax`、`min`、`max`、`sum`、`mean`、`median`、`std` 与 `var`。
+两个操作都在 Spark executor 上聚合输入行。`collect` 只会把聚合元数据和
+该 API 所需的单个几何结果传输到 driver。
 
 ### 数据转换
 
 - `to_geopandas()` —— 转换为传统 GeoPandas
-- `to_wkb()`、`to_wkt()` —— 转换为 WKB/WKT
-- `from_xy()` —— 通过坐标创建几何
+- `GeoDataFrame.to_wkb()`、`GeoDataFrame.to_wkt()` —— 在分布式
+  pandas-on-Spark DataFrame 中把所有几何列序列化为 WKB/WKT
+- `points_from_xy()`、`GeoSeries.from_xy()` —— 通过坐标列创建分布式
+  GeoSeries，且不收集分布式输入
 - `geom_type` —— 获取几何类型
+
+与 GeoPandas 不同，`GeoDataFrame.to_wkb()` 和 `GeoDataFrame.to_wkt()` 返回
+惰性的 pandas-on-Spark DataFrame。仅在需要本地 pandas DataFrame 时，才对结果
+调用 `.to_pandas()`。
+
+`points_from_xy()` 会让 pandas-on-Spark 坐标 Series 保持分布式执行。本地
+列表、NumPy 数组和 pandas 对象会先在 driver 上物化，因此大型坐标列应使用
+分布式 Series。类似地，大型逐行 `sample_points()` 数量向量也应使用分布式
+`size` Series。采样输出与逐行中间计算量会随请求的数量增长；当前线采样器会先
+物化该行的采样点，再把它们收集为 MultiPoint。
 
 ## 完整工作流示例
 

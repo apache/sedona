@@ -22,7 +22,7 @@
     <parent>
         <artifactId>sedona-parent</artifactId>
         <groupId>org.apache.sedona</groupId>
-        <version>1.9.1-SNAPSHOT</version>
+        <version>1.9.2-SNAPSHOT</version>
     </parent>
     <artifactId>sedona-flink-shaded_${scala.compat.version}</artifactId>
 
@@ -85,7 +85,12 @@
                             </transformers>
                             <artifactSet>
                                 <excludes>
-                                    <exclude>org.scala-lang:scala-library</exclude>
+                                    <!-- Never bundle the Scala toolchain (scala-library, scala-reflect,
+                                         scala-compiler): the runtime provides its own, and an unrelocated
+                                         copy shadows it, breaking Scala-compiler users such as
+                                         almond/Ammonite kernels. The groupId match is exact, so
+                                         org.scala-lang.modules artifacts are still bundled. -->
+                                    <exclude>org.scala-lang:*</exclude>
                                 </excludes>
                             </artifactSet>
                             <relocations>

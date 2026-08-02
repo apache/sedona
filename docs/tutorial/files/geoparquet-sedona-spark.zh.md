@@ -207,7 +207,10 @@ df.write.format("geoparquet")
 * 若同一列中的几何对象 SRID 不一致，`crs` 字段默认置为 `null`。
 * 若显式提供了 `geoparquet.crs` 或 `geoparquet.crs.<column_name>` 选项，则始终优先于 SRID 推导出的 CRS。
 
-Sedona 的 GeoParquet 读写器**不会**校验坐标轴顺序（lon/lat 还是 lat/lon），假定使用者在读写时自行处理。可以使用 [`ST_FlipCoordinates`](../../api/sql/Geometry-Editors/ST_FlipCoordinates.md) 来交换几何对象的坐标轴顺序。
+GeoParquet 以 `(x, y)` 顺序存储 WKB 坐标。根据 GeoParquet 1.1 规范，此顺序会覆盖 CRS
+中声明的坐标轴顺序。因此，Sedona 会保留权威的 CRS 坐标轴元数据，并且在读写 GeoParquet
+时不会重新排列几何坐标。如果坐标本身需要交换，可以使用
+[`ST_FlipCoordinates`](../../api/sql/Geometry-Editors/ST_FlipCoordinates.md)。
 
 ## 写出带 covering 元数据的 GeoParquet
 

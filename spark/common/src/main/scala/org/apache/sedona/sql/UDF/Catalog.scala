@@ -98,6 +98,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[ST_IsClosed](),
     function[ST_IsCollection](),
     function[ST_IsEmpty](),
+    function[ST_IsLineStringCCW](),
     function[ST_IsPolygonCCW](),
     function[ST_IsPolygonCW](),
     function[ST_IsRing](),
@@ -172,6 +173,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[ST_DWithin](),
     function[ST_3DDWithin](),
     function[ST_Equals](),
+    function[ST_EqualsExact](),
     function[ST_Intersects](),
     function[ST_OrderingEquals](),
     function[ST_Overlaps](),
@@ -323,6 +325,9 @@ object Catalog extends AbstractCatalog with Logging {
 
   // Other / utility expressions not in any docs category
   val otherExprs: Seq[FunctionDescription] = Seq(function[Barrier]())
+
+  // Aggregate functions implemented as native Catalyst expressions
+  val catalystAggregateExprs: Seq[FunctionDescription] = Seq(function[ST_Collect_Agg]())
 
   // Geography (ST_Geog*) — see docs/api/sql/geography/Geography-Functions
   val geographyExprs: Seq[FunctionDescription] = Seq(
@@ -525,6 +530,7 @@ object Catalog extends AbstractCatalog with Logging {
     spatialIndexingExprs,
     addressExprs,
     otherExprs,
+    catalystAggregateExprs,
     geographyExprs,
     rasterConstructorExprs,
     rasterAccessorExprs,
@@ -551,6 +557,5 @@ object Catalog extends AbstractCatalog with Logging {
       new ST_Extent,
       new ST_3DExtent,
       new ST_Intersection_Aggr,
-      new ST_Union_Aggr(),
-      new ST_Collect_Agg())
+      new ST_Union_Aggr())
 }

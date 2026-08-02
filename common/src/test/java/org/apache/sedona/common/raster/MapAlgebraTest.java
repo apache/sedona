@@ -600,6 +600,29 @@ public class MapAlgebraTest extends RasterTestBase {
     }
   }
 
+  @Test
+  public void testMapAlgebraAtan2() throws FactoryException {
+    // atan2 was added to Jiffle in jt-jiffle 1.1.28; this guards the
+    // dependency from regressing below that version.
+    int width = 10;
+    int height = 10;
+    GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, "d", width, height, 10, 20, 1);
+    double[] band1 = new double[width * height];
+    double[] band2 = new double[width * height];
+    for (int i = 0; i < band1.length; i++) {
+      band1[i] = i + 1;
+      band2[i] = 2 * (i + 1);
+    }
+    raster = MapAlgebra.addBandFromArray(raster, band1, 1);
+    raster = MapAlgebra.addBandFromArray(raster, band2, 2);
+    GridCoverage2D result =
+        MapAlgebra.mapAlgebra(raster, "d", "out = atan2(rast[0], rast[1]);", null);
+    double[] bandResult = MapAlgebra.bandAsArray(result, 1);
+    for (int i = 0; i < band1.length; i++) {
+      Assert.assertEquals(Math.atan2(band1[i], band2[i]), bandResult[i], 1e-9);
+    }
+  }
+
   private void testMapAlgebra(int width, int height, String pixelType, Double noDataValue)
       throws FactoryException {
     GridCoverage2D raster = RasterConstructors.makeEmptyRaster(2, "b", width, height, 10, 20, 1);

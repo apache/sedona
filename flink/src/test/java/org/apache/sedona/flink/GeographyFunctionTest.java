@@ -22,6 +22,7 @@ import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
 import static org.apache.flink.table.api.Expressions.lit;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -51,6 +52,10 @@ public class GeographyFunctionTest extends TestBase {
    * A single-row table whose column "geog" is the geography parsed from {@code wkt} (SRID 4326).
    */
   private Table geogTable(String wkt) {
+    return geogTable(wkt, 4326);
+  }
+
+  private Table geogTable(String wkt, int srid) {
     RowTypeInfo ti =
         new RowTypeInfo(
             new TypeInformation<?>[] {BasicTypeInfo.STRING_TYPE_INFO}, new String[] {"v"});
@@ -58,12 +63,16 @@ public class GeographyFunctionTest extends TestBase {
     return tableEnv
         .fromDataStream(ds)
         .select(
-            call(GeographyConstructors.ST_GeogFromWKT.class.getSimpleName(), $("v"), lit(4326))
+            call(GeographyConstructors.ST_GeogFromWKT.class.getSimpleName(), $("v"), lit(srid))
                 .as("geog"));
   }
 
   private Object eval(String wkt, ApiExpression call) {
     return first(geogTable(wkt).select(call.as("o"))).getFieldAs("o");
+  }
+
+  private Object eval(String wkt, int srid, ApiExpression call) {
+    return first(geogTable(wkt, srid).select(call.as("o"))).getFieldAs("o");
   }
 
   @Test
@@ -84,6 +93,120 @@ public class GeographyFunctionTest extends TestBase {
     double expected =
         org.apache.sedona.common.geography.Functions.length(Constructors.geogFromWKT(wkt, 4326));
     assertEquals(expected, (Double) out, 1e-6);
+  }
+
+  @Test
+  public void testMakeLineDeduplicatesLineStringSeam() throws Exception {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT line, ST_AsEWKT(line) AS ewkt FROM ("
+                + "SELECT ST_MakeLine("
+                + "ST_GeogFromWKT('LINESTRING (0 0, 1 0)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (1 0, 2 0)', 4326)) AS line)");
+
+    Row row = first(table);
+    Geography line = row.getFieldAs("line");
+    assertEquals(
+        "LINESTRING (0 0, 1 0, 2 0)", org.apache.sedona.common.geography.Functions.asText(line));
+    assertEquals("SRID=4326; LINESTRING (0 0, 1 0, 2 0)", row.getFieldAs("ewkt"));
+    assertEquals(3, org.apache.sedona.common.geography.Functions.nPoints(line));
+    assertEquals(4326, line.getSRID());
+  }
+
+  @Test
+  public void testMakeLinePreservesCoincidentPointsAndFirstSRID() throws Exception {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT line, ST_AsText(line) AS wkt, ST_AsEWKT(line) AS ewkt, "
+                + "ST_Centroid(line) AS centroid, ST_Envelope(line, FALSE) AS envelope, "
+                + "ST_Envelope(line, TRUE) AS split_envelope FROM ("
+                + "SELECT ST_MakeLine("
+                + "ST_GeogFromWKT('POINT (12 34)', 4326), "
+                + "ST_GeogFromWKT('POINT (12 34)', 3857)) AS line)");
+
+    Row row = first(table);
+    Geography line = row.getFieldAs("line");
+    assertEquals("LINESTRING (12 34, 12 34)", row.getFieldAs("wkt"));
+    assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", row.getFieldAs("ewkt"));
+    Geography centroid = row.getFieldAs("centroid");
+    assertEquals(4326, centroid.getSRID());
+    assertEquals("POINT (12 34)", centroid.toString());
+    assertEquals(2, org.apache.sedona.common.geography.Functions.nPoints(line));
+    assertEquals(0.0, org.apache.sedona.common.geography.Functions.length(line), 0.0);
+    assertEquals(4326, line.getSRID());
+    assertEquals("LINESTRING (12 34, 12 34)", line.toString());
+    assertEquals("SRID=4326; LINESTRING (12 34, 12 34)", line.toEWKT());
+    for (String field : new String[] {"envelope", "split_envelope"}) {
+      Geography envelope = row.getFieldAs(field);
+      assertEquals(4326, envelope.getSRID());
+      assertEquals("ST_Point", org.apache.sedona.common.geography.Functions.geometryType(envelope));
+      assertEquals(12.0, org.apache.sedona.common.geography.Functions.x(envelope), 1e-12);
+      assertEquals(34.0, org.apache.sedona.common.geography.Functions.y(envelope), 1e-12);
+    }
+  }
+
+  @Test
+  public void testMakeLineSkipsEmptyGeographyInputs() throws Exception {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT "
+                + "ST_AsText(ST_MakeLine("
+                + "ST_GeogFromWKT('POINT EMPTY', 3857), "
+                + "ST_GeogFromWKT('POINT (12 34)', 4326))) AS empty_first, "
+                + "ST_AsText(ST_MakeLine("
+                + "ST_GeogFromWKT('POINT (12 34)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING EMPTY', 3857))) AS empty_second, "
+                + "ST_AsEWKT(ST_MakeLine("
+                + "ST_GeogFromWKT('POINT EMPTY', 3857), "
+                + "ST_GeogFromWKT('LINESTRING EMPTY', 4326))) AS both_empty");
+
+    Row row = first(table);
+    assertEquals("LINESTRING (12 34, 12 34)", row.getFieldAs("empty_first"));
+    assertEquals("LINESTRING (12 34, 12 34)", row.getFieldAs("empty_second"));
+    assertEquals("SRID=3857; LINESTRING EMPTY", row.getFieldAs("both_empty"));
+  }
+
+  @Test
+  public void testIntersectionReturnsGeographyAndPreservesFirstSRID() throws Exception {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT overlap, ST_GeometryType(overlap) AS overlap_type, "
+                + "ST_Area(overlap) AS overlap_area FROM ("
+                + "SELECT ST_Intersection("
+                + "ST_GeogFromWKT('POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))', 3857), "
+                + "ST_GeogFromWKT('POLYGON ((5 5, 15 5, 15 15, 5 15, 5 5))', 4326)) "
+                + "AS overlap)");
+
+    Row row = first(table);
+    Geography overlap = row.getFieldAs("overlap");
+    assertEquals(3857, overlap.getSRID());
+    assertEquals("ST_Polygon", row.getFieldAs("overlap_type"));
+    assertEquals(3.071055126726233e11, (Double) row.getFieldAs("overlap_area"), 1e5);
+  }
+
+  @Test
+  public void testIntersectionUsesClosedSetBoundarySemantics() throws Exception {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT "
+                + "ST_AsText(ST_Intersection("
+                + "ST_GeogFromWKT('LINESTRING (0 -5, 0 5)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (-5 0, 5 0)', 4326))) AS crossing, "
+                + "ST_AsText(ST_Intersection("
+                + "ST_GeogFromWKT('LINESTRING (0 0, 1 0)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (0 1, 1 1)', 4326))) AS disjoint, "
+                + "ST_GeometryType(ST_Intersection("
+                + "ST_GeogFromWKT('LINESTRING (0 0, 0 20)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (0 5, 0 15)', 4326))) AS partial_overlap_type, "
+                + "ST_Length(ST_Intersection("
+                + "ST_GeogFromWKT('LINESTRING (0 0, 0 20)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (0 5, 0 15)', 4326))) AS partial_overlap_length");
+
+    Row row = first(table);
+    assertEquals("POINT (0 0)", row.getFieldAs("crossing"));
+    assertEquals("LINESTRING EMPTY", row.getFieldAs("disjoint"));
+    assertEquals("ST_LineString", row.getFieldAs("partial_overlap_type"));
+    assertTrue((Double) row.getFieldAs("partial_overlap_length") > 1000000.0);
   }
 
   @Test
@@ -141,6 +264,23 @@ public class GeographyFunctionTest extends TestBase {
   }
 
   @Test
+  public void testXY() {
+    String wkt = "POINT (-73.9857 40.7484)";
+    Object x = eval(wkt, call(Functions.ST_X.class.getSimpleName(), $("geog")));
+    Object y = eval(wkt, call(Functions.ST_Y.class.getSimpleName(), $("geog")));
+    assertEquals(-73.9857, (Double) x, 1e-12);
+    assertEquals(40.7484, (Double) y, 1e-12);
+  }
+
+  @Test
+  public void testXYReturnNullForNonPointAndEmpty() {
+    for (String wkt : new String[] {"LINESTRING (0 0, 1 1)", "POINT EMPTY"}) {
+      assertNull(eval(wkt, call(Functions.ST_X.class.getSimpleName(), $("geog"))));
+      assertNull(eval(wkt, call(Functions.ST_Y.class.getSimpleName(), $("geog"))));
+    }
+  }
+
+  @Test
   public void testAsText() throws Exception {
     String wkt = "POINT (1 2)";
     Object out = eval(wkt, call(Functions.ST_AsText.class.getSimpleName(), $("geog")));
@@ -151,11 +291,9 @@ public class GeographyFunctionTest extends TestBase {
 
   @Test
   public void testAsEWKT() throws Exception {
-    String wkt = "POINT (1 2)";
+    String wkt = "POINT (-122.4194 37.7749)";
     Object out = eval(wkt, call(Functions.ST_AsEWKT.class.getSimpleName(), $("geog")));
-    assertEquals(
-        org.apache.sedona.common.geography.Functions.asEWKT(Constructors.geogFromWKT(wkt, 4326)),
-        out.toString());
+    assertEquals("SRID=4326; POINT (-122.4194 37.7749)", out.toString());
   }
 
   @Test
@@ -189,6 +327,28 @@ public class GeographyFunctionTest extends TestBase {
             Constructors.geogFromWKT(wkt, 4326), true);
     assertEquals(expected.toEWKT(), ((Geography) out).toEWKT());
     assertTrue(expected.toEWKT().contains("MULTIPOLYGON"));
+  }
+
+  @Test
+  public void testEnvelopePreservesEmptyGeography() {
+    for (String wkt :
+        new String[] {
+          "POINT EMPTY", "LINESTRING EMPTY", "POLYGON EMPTY", "GEOMETRYCOLLECTION EMPTY"
+        }) {
+      for (boolean splitAtAntiMeridian : new boolean[] {false, true}) {
+        Geography out =
+            (Geography)
+                eval(
+                    wkt,
+                    3857,
+                    call(
+                        Functions.ST_Envelope.class.getSimpleName(),
+                        $("geog"),
+                        lit(splitAtAntiMeridian)));
+        assertEquals(wkt, out.toString());
+        assertEquals(3857, out.getSRID());
+      }
+    }
   }
 
   @Test
@@ -240,6 +400,74 @@ public class GeographyFunctionTest extends TestBase {
       sb.append(c.getMessage()).append(" | ");
     }
     return sb.toString();
+  }
+
+  @Test
+  public void testConvexHull() throws Exception {
+    String wkt = "MULTIPOINT ((170 10), (-170 10), (180 30), (175 15))";
+    Object out = eval(wkt, call(Functions.ST_ConvexHull.class.getSimpleName(), $("geog")));
+    Geography expected =
+        org.apache.sedona.common.geography.Functions.convexHull(
+            Constructors.geogFromWKT(wkt, 4326));
+    assertEquals(expected.toEWKT(), ((Geography) out).toEWKT());
+    assertEquals(4326, ((Geography) out).getSRID());
+
+    Object empty =
+        eval("LINESTRING EMPTY", call(Functions.ST_ConvexHull.class.getSimpleName(), $("geog")));
+    assertEquals("LINESTRING EMPTY", ((Geography) empty).toString());
+    assertEquals(4326, ((Geography) empty).getSRID());
+  }
+
+  @Test
+  public void testCollectWithTwoInputs() throws Exception {
+    Table geographies =
+        tableEnv.sqlQuery(
+            "SELECT ST_GeogFromWKT('POINT (1 2)', 4326) AS g1, "
+                + "ST_GeogFromWKT('POINT (-2 3)', 4326) AS g2");
+    Geography actual =
+        (Geography)
+            first(
+                    geographies.select(
+                        call(Functions.ST_Collect.class.getSimpleName(), $("g1"), $("g2"))))
+                .getField(0);
+    Geography expected =
+        org.apache.sedona.common.geography.Functions.createMultiGeography(
+            new Geography[] {
+              Constructors.geogFromWKT("POINT (1 2)", 4326),
+              Constructors.geogFromWKT("POINT (-2 3)", 4326)
+            });
+    assertEquals(expected.toEWKT(), actual.toEWKT());
+  }
+
+  @Test
+  public void testCollectWithArray() throws Exception {
+    Table geographies =
+        tableEnv.sqlQuery(
+            "SELECT ARRAY["
+                + "ST_GeogFromWKT('LINESTRING (1 2, 3 4)', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (3 4, 4 5)', 4326)] AS geogs");
+    Geography actual =
+        (Geography)
+            first(geographies.select(call(Functions.ST_Collect.class.getSimpleName(), $("geogs"))))
+                .getField(0);
+    Geography expected =
+        org.apache.sedona.common.geography.Functions.createMultiGeography(
+            new Geography[] {
+              Constructors.geogFromWKT("LINESTRING (1 2, 3 4)", 4326),
+              Constructors.geogFromWKT("LINESTRING (3 4, 4 5)", 4326)
+            });
+    assertEquals(expected.toEWKT(), actual.toEWKT());
+
+    Table withEmpty =
+        tableEnv.sqlQuery(
+            "SELECT ARRAY["
+                + "ST_GeogFromWKT('LINESTRING EMPTY', 4326), "
+                + "ST_GeogFromWKT('LINESTRING (3 4, 4 5)', 4326)] AS geogs");
+    Geography actualWithEmpty =
+        (Geography)
+            first(withEmpty.select(call(Functions.ST_Collect.class.getSimpleName(), $("geogs"))))
+                .getField(0);
+    assertEquals(2, org.apache.sedona.common.geography.Functions.numGeometries(actualWithEmpty));
   }
 
   @Test

@@ -19,7 +19,7 @@ import numpy as np
 import pyspark
 import pytest
 import rasterio
-from pyspark.sql.functions import expr
+from pyspark.sql.functions import col, expr, udf
 from tests import world_map_raster_input_location
 from tests.test_base import TestBase
 
@@ -156,6 +156,79 @@ class TestRasterSerde(TestBase):
                         expected = expected % 16
                     assert arr[b, y, x] == expected
                     assert band[y, x] == expected
+
+    def test_nodata_override_trailer_survives_python_round_trip(self):
+        from sedona.spark.raster import raster_serde
+
+        original = self.spark.sql(
+            "SELECT RS_MakeRasterForTesting(1, 'D', 'BandedSampleModel', "
+            "4, 3, 100, 100, 10, -10, 0, 0, 3857) AS raster"
+        ).first()["raster"]
+        output = original.with_bands(original.as_numpy()[0].copy(), nodata=-9999.0)
+
+        serialized = raster_serde.serialize(output)
+        assert serialized.endswith(b"NDO1\x01")
+
+        round_tripped = raster_serde.deserialize(serialized)
+        assert round_tripped._sample_dimension_override_flags == [1]
+        assert round_tripped.bands_meta[0].nodata == -9999.0
+        np.testing.assert_array_equal(round_tripped.as_numpy(), output.as_numpy())
+
+        round_tripped.close()
+        output.close()
+        original.close()
+
+    @pytest.mark.parametrize(
+        ("num_bands", "data_type", "sample_model", "expected_pixel_type"),
+        [
+            pytest.param(
+                1,
+                "B",
+                "MultiPixelPackedSampleModel",
+                "UNSIGNED_8BITS",
+                id="multi-pixel-packed",
+            ),
+            pytest.param(
+                4,
+                "I",
+                "SinglePixelPackedSampleModel",
+                "SIGNED_32BITS",
+                id="single-pixel-packed",
+            ),
+        ],
+    )
+    @pytest.mark.skipif(
+        pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"
+    )
+    def test_with_bands_retypes_packed_sample_models(
+        self, num_bands, data_type, sample_model, expected_pixel_type
+    ):
+        from sedona.spark.raster import raster_serde
+
+        df = self.spark.sql(
+            "SELECT RS_MakeRasterForTesting("
+            f"{num_bands}, '{data_type}', '{sample_model}', "
+            "10, 10, 100, 100, 10, -10, 0, 0, 3857) AS raster"
+        )
+        original = df.first()["raster"]
+        rebuilt = original.with_bands(original.as_numpy().copy())
+        expected_flags = [2] * num_bands
+        assert rebuilt._sample_dimension_override_flags == expected_flags
+        assert raster_serde.serialize(rebuilt).endswith(b"NDO1" + bytes(expected_flags))
+        rebuilt.close()
+        original.close()
+
+        @udf(returnType=RasterType())
+        def rebuild(raster):
+            return raster.with_bands(raster.as_numpy().copy())
+
+        result = (
+            df.select(rebuild(col("raster")).alias("out"))
+            .selectExpr("RS_BandPixelType(out, 1) AS pixel_type")
+            .first()
+        )
+
+        assert result["pixel_type"] == expected_pixel_type
 
     @pytest.mark.skipif(
         pyspark.__version__ < "3.4", reason="requires Spark 3.4 or higher"

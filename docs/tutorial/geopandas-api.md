@@ -181,7 +181,8 @@ nyc_buildings.head()
 
 ### Spatial Filtering
 
-Use spatial indexing and filtering methods. Note that `cx` spatial indexing is not yet implemented in the current version:
+Use `cx` for distributed coordinate-based filtering and `clip` when the
+matching geometries should also be cut to the mask:
 
 ```python
 from shapely.geometry import box
@@ -194,13 +195,14 @@ central_park_bbox = box(
     40.789,  # top-right (longitude, latitude)
 )
 
-# Filter buildings within the bounding box using spatial index
-# Note: This requires collecting data to driver for spatial filtering
-# For large datasets, consider using spatial joins instead
-buildings_sample = nyc_buildings.sample(1000)  # Sample for demonstration
-central_park_buildings = buildings_sample[
-    buildings_sample.geometry.intersects(central_park_bbox)
+# Select features that intersect the coordinate bounds
+central_park_buildings = nyc_buildings.cx[
+    -73.973:-73.951,
+    40.764:40.789,
 ]
+
+# Cut the selected geometries to the exact polygon boundary
+central_park_buildings = central_park_buildings.clip(central_park_bbox)
 
 # Display results
 print(
@@ -296,7 +298,7 @@ buildings_projected["perimeter"] = buildings_projected.geometry.length
 
 ## Supported Operations
 
-The GeoPandas API for Apache Sedona has implemented **39 GeoSeries functions** and **10 GeoDataFrame functions**, covering the most commonly used GeoPandas operations:
+The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries and GeoDataFrame operations:
 
 ### Data I/O
 
@@ -307,6 +309,8 @@ The GeoPandas API for Apache Sedona has implemented **39 GeoSeries functions** a
 ### Spatial Operations
 
 - `sjoin()` - Spatial joins with various predicates
+- `cx` - Coordinate-based spatial filtering
+- `clip()` - Clip geometries with scalar, rectangular, or distributed masks
 - `buffer()` - Geometric buffering
 - `distance()` - Distance calculations
 - `intersects()`, `contains()`, `within()` - Spatial predicates
@@ -333,14 +337,62 @@ The GeoPandas API for Apache Sedona has implemented **39 GeoSeries functions** a
 - `intersects()`, `contains()`, `within()` - Spatial predicates
 - `intersection()` - Geometric intersection
 - `make_valid()` - Geometry validation and repair
+- `sample_points()` - Sample polygons by area and lines by length with native
+  distributed expressions
+- `cx` - Coordinate-based spatial filtering
+- `clip()` - Distributed geometry clipping
 - `sindex` - Spatial indexing (limited functionality)
+
+### Distributed Geometry Aggregation
+
+- `GeoDataFrame.dissolve()` - Group rows and union each group's geometries
+  with Sedona's native distributed aggregate
+- `sedona.spark.geopandas.tools.collect()` - Collect a distributed GeoSeries
+  into one geometry, using a homogeneous multipart geometry when needed
+
+```python
+from sedona.spark.geopandas.tools import collect
+
+by_region = buildings.dissolve(
+    by="region",
+    aggfunc={"population": "sum", "name": "first"},
+)
+all_building_parts = collect(buildings.geometry)
+```
+
+`dissolve` supports the `unary` union method. Fixed-precision `grid_size`,
+`coverage`, and `disjoint_subset` unions are rejected explicitly. Multiple
+attribute aggregations remain a two-level pandas-on-Spark `MultiIndex`;
+GeoPandas instead represents their tuple labels in a one-level object index.
+Native `first`, `last`, and `count` aggregation supports every attribute type;
+`nunique` supports numeric, boolean, and string columns; and `min`, `max`,
+`sum`, `mean`, `median`, `std`, and `var` support numeric and boolean columns.
+String `sum` and every `prod` aggregation are rejected explicitly. Callable
+aliases are limited to built-in `min`, `max`, and `sum`, plus NumPy `amin`,
+`amax`, `min`, `max`, `sum`, `mean`, `median`, `std`, and `var`.
+Both operations aggregate input rows on Spark executors. `collect` transfers
+only aggregate metadata and the API's single geometry result to the driver.
 
 ### Data Conversion
 
 - `to_geopandas()` - Convert to traditional GeoPandas
-- `to_wkb()`, `to_wkt()` - Convert to WKB/WKT formats
-- `from_xy()` - Create geometries from coordinates
+- `GeoDataFrame.to_wkb()`, `GeoDataFrame.to_wkt()` - Serialize every geometry
+  column to WKB/WKT in a distributed pandas-on-Spark DataFrame
+- `points_from_xy()`, `GeoSeries.from_xy()` - Create a distributed GeoSeries
+  from coordinate columns without collecting distributed inputs
 - `geom_type` - Get geometry types
+
+Unlike GeoPandas, `GeoDataFrame.to_wkb()` and `GeoDataFrame.to_wkt()` return a
+lazy pandas-on-Spark DataFrame. Call `.to_pandas()` on the result only when a
+local pandas DataFrame is required.
+
+`points_from_xy()` keeps pandas-on-Spark coordinate Series distributed.
+Local lists, NumPy arrays, and pandas objects are first materialized on the
+driver, so use distributed Series for large coordinate columns. Likewise, use
+a distributed `size` Series for large per-row `sample_points()` sizes.
+Sampling output and per-row intermediate work grow with the requested size;
+the current line sampler materializes the row's sampled points before
+collecting them into a MultiPoint.
 
 ## Complete Workflow Example
 
