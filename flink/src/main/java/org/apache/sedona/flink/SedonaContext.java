@@ -63,10 +63,12 @@ public class SedonaContext {
 
   /**
    * ExecutionConfig.registerTypeWithKryoSerializer was removed; Flink 1.19+'s public replacement is
-   * the declarative pipeline.serialization-config option (FLIP-398), applied here via the
-   * SerializerConfig interface's own configure(ReadableConfig, ClassLoader) — no cast to the
-   * internal SerializerConfigImpl needed. Flink instantiates GeometrySerde/SpatialIndexSerde itself
-   * via their no-arg constructors, so only the class names are registered here.
+   * the declarative pipeline.serialization-config option (FLIP-398). Applied via
+   * StreamExecutionEnvironment.configure(ReadableConfig) — env.getConfig().getSerializerConfig() is
+   * itself @Internal in both Flink 1.19 and 2.2, so this goes through the environment's public API
+   * instead, which also uses the environment's own user classloader rather than the calling
+   * thread's context classloader. Flink instantiates GeometrySerde/SpatialIndexSerde itself via
+   * their no-arg constructors, so only the class names are registered here.
    */
   static void registerGeometryKryoSerializers(StreamExecutionEnvironment env) {
     List<String> kryoRegistrations =
@@ -85,9 +87,7 @@ public class SedonaContext {
 
     Configuration configuration = new Configuration();
     configuration.set(PipelineOptions.SERIALIZATION_CONFIG, kryoRegistrations);
-    env.getConfig()
-        .getSerializerConfig()
-        .configure(configuration, Thread.currentThread().getContextClassLoader());
+    env.configure(configuration);
   }
 
   private static String kryoRegistration(Class<?> type, Class<?> serializer) {
