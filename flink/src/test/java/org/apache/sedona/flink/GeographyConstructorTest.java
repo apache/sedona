@@ -21,6 +21,8 @@ package org.apache.sedona.flink;
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.Expressions.call;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +35,7 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.types.Row;
 import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.geography.Constructors;
+import org.apache.sedona.common.geography.Functions;
 import org.apache.sedona.flink.expressions.geography.GeographyConstructors;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -160,8 +163,47 @@ public class GeographyConstructorTest extends TestBase {
             call(GeographyConstructors.ST_GeomToGeography.class.getSimpleName(), $("geom"))
                 .as("geog"));
     Geography result = first(out).getFieldAs("geog");
-    Geometry point = new WKTReader().read("POINT (1 2)");
-    assertEquals(Constructors.geomToGeography(point).toEWKT(), result.toEWKT());
+    assertEquals("POINT (1 2)", result.toString());
+  }
+
+  @Test
+  public void testGeomToGeographyEmptyPolygon() {
+    Table src = sourceTable("wkt", "POLYGON EMPTY", BasicTypeInfo.STRING_TYPE_INFO);
+    Table geomTable =
+        src.select(
+            call(
+                    org.apache.sedona.flink.expressions.Constructors.ST_GeomFromWKT.class
+                        .getSimpleName(),
+                    $("wkt"))
+                .as("geom"));
+    Table out =
+        geomTable.select(
+            call(GeographyConstructors.ST_GeomToGeography.class.getSimpleName(), $("geom"))
+                .as("geog"));
+    Geography result = first(out).getFieldAs("geog");
+    assertEquals("POLYGON EMPTY", result.toString());
+  }
+
+  @Test
+  public void testGeomToGeographyPolygonUsesRingRoles() throws Exception {
+    String wkt = "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))";
+    Table src = sourceTable("wkt", wkt, BasicTypeInfo.STRING_TYPE_INFO);
+    Table geomTable =
+        src.select(
+            call(
+                    org.apache.sedona.flink.expressions.Constructors.ST_GeomFromWKT.class
+                        .getSimpleName(),
+                    $("wkt"))
+                .as("geom"));
+    Table out =
+        geomTable.select(
+            call(GeographyConstructors.ST_GeomToGeography.class.getSimpleName(), $("geom"))
+                .as("geog"));
+    Geography result = first(out).getFieldAs("geog");
+
+    assertEquals(wkt, result.toString());
+    assertTrue(Functions.contains(result, Constructors.geogFromWKT("POINT (0.5 0.5)", 0)));
+    assertFalse(Functions.contains(result, Constructors.geogFromWKT("POINT (5 5)", 0)));
   }
 
   @Test

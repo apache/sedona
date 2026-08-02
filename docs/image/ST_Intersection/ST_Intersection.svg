@@ -12,9 +12,9 @@
   <path d="M 207.14 192.86 L 292.86 192.86 L 292.86 107.14 L 207.14 107.14 L 207.14 192.86 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="3" fill-rule="evenodd" />
   <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns the shared portion of A and B</text>
   <rect x="101" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
-  <text x="117" y="266" font-size="13" fill="#333333">Geometry A</text>
+  <text x="117" y="266" font-size="13" fill="#333333">Input A</text>
   <rect x="211" y="255" width="12" height="12" rx="2" fill="#d94a4a" stroke="#d94a4a" stroke-width="1" />
-  <text x="227" y="266" font-size="13" fill="#333333">Geometry B</text>
+  <text x="227" y="266" font-size="13" fill="#333333">Input B</text>
   <rect x="321" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
   <text x="337" y="266" font-size="13" fill="#333333">Result</text>
 </svg>

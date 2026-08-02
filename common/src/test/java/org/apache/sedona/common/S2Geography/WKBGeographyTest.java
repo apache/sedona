@@ -20,9 +20,12 @@ package org.apache.sedona.common.S2Geography;
 
 import static org.junit.Assert.*;
 
+import com.google.common.geometry.S2CellId;
 import com.google.common.geometry.S2LatLng;
 import com.google.common.geometry.S2Point;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.sedona.common.geography.Constructors;
 import org.apache.sedona.common.geography.Functions;
 import org.junit.Test;
@@ -197,6 +200,40 @@ public class WKBGeographyTest {
     assertEquals("SRID=4326; POINT (1 1)", geog.toEWKT());
   }
 
+  @Test
+  public void defaultTextRendering_preservesStoredCoordinatesAndSRID() throws ParseException {
+    org.locationtech.jts.io.WKTReader jtsReader = new org.locationtech.jts.io.WKTReader();
+    Geometry jts = jtsReader.read("POINT (-122.4194 37.7749)");
+    byte[] wkb = new org.locationtech.jts.io.WKBWriter().write(jts);
+    WKBGeography geog = WKBGeography.fromWKB(wkb, 4326);
+
+    assertEquals("POINT (-122.4194 37.7749)", geog.toString());
+    assertEquals("SRID=4326; POINT (-122.4194 37.7749)", geog.toEWKT());
+  }
+
+  @Test
+  public void defaultTextRendering_preservesRepeatedCoordinates() throws ParseException {
+    org.locationtech.jts.io.WKTReader jtsReader = new org.locationtech.jts.io.WKTReader();
+    Geometry jts = jtsReader.read("LINESTRING (0 0, 1.25 2.5, 1.25 2.5, 3 4)");
+    byte[] wkb = new org.locationtech.jts.io.WKBWriter().write(jts);
+    WKBGeography geog = WKBGeography.fromWKB(wkb, 4326);
+
+    assertEquals("LINESTRING (0 0, 1.25 2.5, 1.25 2.5, 3 4)", geog.toString());
+    assertEquals("SRID=4326; LINESTRING (0 0, 1.25 2.5, 1.25 2.5, 3 4)", geog.toEWKT());
+  }
+
+  @Test
+  public void explicitPrecisionRendering_usesRequestedS2Formatting() throws ParseException {
+    org.locationtech.jts.io.WKTReader jtsReader = new org.locationtech.jts.io.WKTReader();
+    Geometry jts = jtsReader.read("POINT (-122.4194 37.7749)");
+    byte[] wkb = new org.locationtech.jts.io.WKBWriter().write(jts);
+    WKBGeography geog = WKBGeography.fromWKB(wkb, 4326);
+    PrecisionModel fixed = new PrecisionModel(PrecisionModel.FIXED);
+
+    assertEquals("POINT (-122.4 37.8)", geog.toString(fixed));
+    assertEquals("SRID=4326; POINT (-122.4 37.8)", geog.toEWKT(fixed));
+  }
+
   // ─── Serializer round-trip ───────────────────────────────────────────────
 
   @Test
@@ -313,7 +350,7 @@ public class WKBGeographyTest {
     Geography deserialized = GeographyWKBSerializer.deserialize(bytes);
     assertTrue(deserialized instanceof WKBGeography);
     assertEquals(4326, deserialized.getSRID());
-    assertEquals("POINT (30 10)", deserialized.toString());
+    assertEquals("POINT (30 10)", deserialized.toString(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   // ─── SRID preservation ───────────────────────────────────────────────────
@@ -363,7 +400,7 @@ public class WKBGeographyTest {
     Geography geog = Constructors.geogFromWKT("POINT (1 1)", 4326);
     assertTrue(geog instanceof WKBGeography);
     assertEquals(4326, geog.getSRID());
-    assertEquals("POINT (1 1)", geog.toString());
+    assertEquals("POINT (1 1)", geog.toString(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   @Test
@@ -396,7 +433,7 @@ public class WKBGeographyTest {
     Geography geog = Constructors.geogFromEWKT("SRID=4269; POINT (1 1)");
     assertTrue(geog instanceof WKBGeography);
     assertEquals(4269, geog.getSRID());
-    assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT());
+    assertEquals("SRID=4269; POINT (1 1)", geog.toEWKT(new PrecisionModel(PrecisionModel.FIXED)));
   }
 
   // ─── Eager ShapeIndex mode ───────────────────────────────────────────────
@@ -461,6 +498,34 @@ public class WKBGeographyTest {
     return buf.array();
   }
 
+  /** Builds a PostGIS-style EWKB PointZ (little-endian) using the Z flag. */
+  private static byte[] buildEwkbPointZ(double lon, double lat, double z) {
+    java.nio.ByteBuffer buf = java.nio.ByteBuffer.allocate(29);
+    buf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+    buf.put((byte) 0x01);
+    buf.putInt(1 | 0x80000000); // POINT with EWKB Z flag
+    buf.putDouble(lon);
+    buf.putDouble(lat);
+    buf.putDouble(z);
+    return buf.array();
+  }
+
+  /** Builds an ISO WKB LineStringZ (little-endian) with type 1002. */
+  private static byte[] buildIsoLineStringZ() {
+    java.nio.ByteBuffer buf = java.nio.ByteBuffer.allocate(57);
+    buf.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+    buf.put((byte) 0x01);
+    buf.putInt(1002); // ISO LineStringZ
+    buf.putInt(2);
+    buf.putDouble(30.0);
+    buf.putDouble(10.0);
+    buf.putDouble(5.0);
+    buf.putDouble(31.0);
+    buf.putDouble(11.0);
+    buf.putDouble(6.0);
+    return buf.array();
+  }
+
   @Test
   public void ewkbPoint_withSRIDFlag_decodesCorrectly() throws ParseException {
     byte[] ewkb = buildEwkbPointWithSRID(30.0, 10.0, 4326);
@@ -483,11 +548,27 @@ public class WKBGeographyTest {
   public void isoPointZ_throwsUnsupported() {
     byte[] wkbZ = buildIsoPointZ(30.0, 10.0, 5.0);
     WKBGeography geog = WKBGeography.fromWKB(wkbZ, 0);
-    // isPoint() is safe — just tests base type — but extractPoint/shape must refuse Z/M.
+    // isPoint() is safe — just tests base type — but the explicitly XY-only accessors refuse Z/M.
     assertTrue(geog.isPoint());
     assertEquals(30.0, geog.getPointX(), EPS);
     assertEquals(10.0, geog.getPointY(), EPS);
     assertThrows(UnsupportedOperationException.class, geog::extractPoint);
     assertThrows(UnsupportedOperationException.class, () -> new WkbS2Shape(wkbZ));
+  }
+
+  @Test
+  public void higherDimensionalSimpleWkb_sphericalAccessFallsBackToFullReader() {
+    for (byte[] wkb :
+        new byte[][] {
+          buildIsoPointZ(30.0, 10.0, 5.0), buildEwkbPointZ(30.0, 10.0, 5.0), buildIsoLineStringZ()
+        }) {
+      WKBGeography geog = WKBGeography.fromWKB(wkb, 0);
+      assertNotNull(geog.getShapeIndexGeography().shape(0));
+      assertNotNull(geog.shape(0));
+      assertNotNull(geog.region());
+      List<S2CellId> cellIds = new ArrayList<>();
+      geog.getCellUnionBound(cellIds);
+      assertFalse(cellIds.isEmpty());
+    }
   }
 }

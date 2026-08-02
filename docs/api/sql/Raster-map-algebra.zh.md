@@ -19,6 +19,13 @@
 
 ## 地图代数（Map Algebra）
 
+!!!warning
+    `RS_MapAlgebra` 自 `v1.9.1` 起弃用，并将在**未来版本中移除**，请改用[栅格 UDF](Raster-UDF.md)：它同样能
+    完成这些逐像素计算，而且还能直接使用 NumPy、SciPy、scikit-learn 与 rasterio。该函数目前仍然可用，但已有
+    脚本应尽早迁移。下面的 [NDVI 示例](#ndvi)在栅格 UDF 页面上给出了两种写法的对照。
+
+    本页介绍的基于数组的函数 —— `RS_BandAsArray`、`RS_Add`、`RS_NormalizedDifference` 等 —— 未被弃用。
+
 地图代数是一种使用数学表达式来执行栅格计算的方法。表达式可以是简单的算术运算，也可以是多种运算的复杂组合。该表达式可以作用在单个栅格波段，也可以作用在多个栅格波段上。表达式的结果是一个新的栅格。
 
 !!!tip
@@ -142,4 +149,5 @@ FROM raster_table) t
 ### 延伸阅读
 
 * [Jiffle language summary](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary)
+* [栅格 UDF](Raster-UDF.md) —— 用 Python、NumPy 与 rasterio 实现同样的运算
 * [Raster operators](Raster-Functions.md#raster-operators)

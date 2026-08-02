@@ -39,6 +39,9 @@ class RasterTypes:
     IN_DB = 0
 
 
+_SAMPLE_DIMENSION_OVERRIDE_TRAILER_MAGIC = b"NDO1"
+
+
 def deserialize(buf: Union[bytearray, bytes]) -> Optional[SedonaRaster]:
     if buf is None:
         return None
@@ -58,11 +61,15 @@ def _deserialize(bio: BytesIO, raster_type: int) -> SedonaRaster:
     bands_meta, category_blobs = _read_sample_dimensions(bio)
     if raster_type == RasterTypes.IN_DB:
         awt_raster, properties_blob, color_model_blob = _read_awt_raster(bio)
+        metadata_override_flags = _read_sample_dimension_override_trailer(
+            bio, len(bands_meta)
+        )
         raster = InDbSedonaRaster(
             width, height, bands_meta, affine_trans, crs_wkt, awt_raster
         )
         raster._name = name
         raster._category_blobs = category_blobs
+        raster._sample_dimension_override_flags = metadata_override_flags
         raster._properties_blob = properties_blob
         raster._color_model_blob = color_model_blob
         return raster
@@ -112,6 +119,20 @@ def _read_sample_dimensions(
         category_blobs.append(blob)
         bands_meta.append(SampleDimension(description, offset, scale, nodata))
     return bands_meta, category_blobs
+
+
+def _read_sample_dimension_override_trailer(bio: BytesIO, num_bands: int) -> List[int]:
+    """Read the optional Python sample-dimension provenance trailer."""
+    trailer_start = bio.tell()
+    magic = bio.read(len(_SAMPLE_DIMENSION_OVERRIDE_TRAILER_MAGIC))
+    if magic != _SAMPLE_DIMENSION_OVERRIDE_TRAILER_MAGIC:
+        bio.seek(trailer_start)
+        return [0] * num_bands
+    flags = bio.read(num_bands)
+    if len(flags) != num_bands:
+        bio.seek(trailer_start)
+        return [0] * num_bands
+    return list(flags)
 
 
 def _read_awt_raster(bio: BytesIO) -> Tuple[AWTRaster, bytes, bytes]:
@@ -362,6 +383,23 @@ def serialize(raster: "InDbSedonaRaster") -> Optional[bytes]:
 
     # 12. DataBuffer (the actual pixel data)
     _write_data_buffer(bio, awt.data_buffer)
+
+    # 13. Optional sample-dimension provenance trailer. Older JVM and Python readers stop
+    # after the DataBuffer and safely ignore these bytes.
+    if len(raster._sample_dimension_override_flags) != len(raster.bands_meta):
+        raise ValueError(
+            f"Expected {len(raster.bands_meta)} sample-dimension provenance flags but found "
+            f"{len(raster._sample_dimension_override_flags)}. This indicates a bug in with_bands() "
+            f"or deserialization."
+        )
+    if any(
+        not isinstance(flag, int) or isinstance(flag, bool) or not 0 <= flag <= 255
+        for flag in raster._sample_dimension_override_flags
+    ):
+        raise ValueError("Sample-dimension provenance flags must be bytes")
+    if any(raster._sample_dimension_override_flags):
+        bio.write(_SAMPLE_DIMENSION_OVERRIDE_TRAILER_MAGIC)
+        bio.write(bytes(raster._sample_dimension_override_flags))
 
     return bio.getvalue()
 

@@ -18,10 +18,16 @@
  */
 package org.apache.sedona.common.raster;
 
+import com.google.common.geometry.S1Angle;
+import com.google.common.geometry.S2LatLng;
+import com.google.common.geometry.S2Point;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.sedona.common.FunctionsGeoTools;
-import org.apache.sedona.common.S2Geography.WKBGeography;
+import org.apache.sedona.common.S2Geography.Distance;
+import org.apache.sedona.common.S2Geography.ShapeIndexGeography;
+import org.apache.sedona.common.S2Geography.WkbS2Shape;
+import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.utils.CachedCRSTransformFinder;
 import org.apache.sedona.common.utils.GeomUtils;
 import org.geotools.api.referencing.FactoryException;
@@ -37,9 +43,13 @@ import org.geotools.referencing.crs.DefaultEngineeringCRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.ByteOrderValues;
+import org.locationtech.jts.io.WKBWriter;
 
 public class RasterPredicates {
   /**
@@ -110,85 +120,118 @@ public class RasterPredicates {
   }
 
   /**
-   * Run {@link org.apache.sedona.common.geography.Functions#dWithin} on two WGS84 JTS geometries by
-   * wrapping them as {@link WKBGeography}. The Geography path uses S2's {@code ClosestEdgeQuery}
-   * for the minimum geodesic distance — overlap/touch returns 0 — so the threshold is interpreted
-   * strictly as "meters between any two points on the shapes."
+   * Run S2's {@code ClosestEdgeQuery} on two WGS84 JTS geometries, interpreting ring direction as
+   * the spherical interior. The result is the minimum geodesic distance — overlap/touch returns 0 —
+   * so the threshold is interpreted strictly as "meters between any two points on the shapes."
    *
-   * <p>This intentionally does not go through {@code Constructors.geomToGeography}: that helper
-   * builds S2 loops via {@code S2Loop.normalize()}, which always picks the smaller hemisphere as
-   * the polygon interior. Raster convex hulls (especially global mosaics, polar projections, and
-   * antimeridian-crossing UTM zones) can be larger than a hemisphere after WGS84 reprojection, so
-   * normalisation would collapse the intended footprint to a tiny region between the projected
-   * corners. The WKB path preserves the orientation we set in {@link #ensureCcwForS2}.
+   * <p>This intentionally uses a private directed-ring conversion rather than public Geography
+   * construction, where polygon ring positions have simple-features semantics independent of
+   * winding. Raster convex hulls (especially global mosaics, polar projections, and
+   * antimeridian-crossing UTM zones) can cover more than a hemisphere after WGS84 reprojection, so
+   * choosing the smaller spherical side would invert the intended footprint. The directed path
+   * preserves the orientation set by {@link #orientPolygonForS2} without changing Geography
+   * behavior elsewhere.
    */
   private static boolean geographyDWithin(Geometry left, Geometry right, double distance) {
-    WKBGeography leftGeog = WKBGeography.fromJTS(toS2Ready(left));
-    WKBGeography rightGeog = WKBGeography.fromJTS(toS2Ready(right));
-    return org.apache.sedona.common.geography.Functions.dWithin(leftGeog, rightGeog, distance);
+    boolean leftIsPoint = left instanceof Point && !left.isEmpty();
+    boolean rightIsPoint = right instanceof Point && !right.isEmpty();
+
+    double radians;
+    if (leftIsPoint && rightIsPoint) {
+      radians = new S1Angle(toS2Point((Point) left), toS2Point((Point) right)).radians();
+    } else {
+      WKBWriter writer = new WKBWriter(2, ByteOrderValues.LITTLE_ENDIAN);
+      if (leftIsPoint) {
+        radians =
+            Distance.S2_distancePointToIndex(
+                toS2Point((Point) left), toDirectedShapeIndex(right, writer));
+      } else if (rightIsPoint) {
+        radians =
+            Distance.S2_distancePointToIndex(
+                toS2Point((Point) right), toDirectedShapeIndex(left, writer));
+      } else {
+        radians =
+            new Distance()
+                .S2_distance(
+                    toDirectedShapeIndex(left, writer), toDirectedShapeIndex(right, writer));
+      }
+    }
+    return radians * Haversine.AVG_EARTH_RADIUS <= distance;
+  }
+
+  private static S2Point toS2Point(Point point) {
+    return S2LatLng.fromDegrees(point.getY(), point.getX()).toPoint();
   }
 
   /**
-   * Produce a fresh JTS geometry ready for the S2-backed distance query: shell orientation forced
-   * to CCW (S2's expected interior side) and SRID stamped to 4326 (the caller has already
-   * reprojected to WGS84 via {@link #toWGS84Pair}). Returns a copy whenever the caller-owned
-   * geometry would otherwise be mutated, so this helper is side-effect-free with respect to its
-   * input — important because {@link #rsDWithin} is a public predicate that should not modify
-   * geometries handed to it.
+   * Builds a temporary ShapeIndex whose polygon chains retain the direction supplied by the JTS
+   * geometry. Multi-geometries are decomposed into their simple components so the directed behavior
+   * never leaks into the general Geography WKB reader.
    */
-  private static Geometry toS2Ready(Geometry geom) {
-    Geometry oriented = ensureCcwForS2(geom);
-    if (oriented == geom) {
-      // ensureCcwForS2 returned the input unchanged (already CCW or non-polygon); clone before
-      // touching SRID so we don't write back into the caller's object.
-      oriented = geom.copy();
+  private static ShapeIndexGeography toDirectedShapeIndex(Geometry geometry, WKBWriter writer) {
+    ShapeIndexGeography result = new ShapeIndexGeography();
+    addDirectedShapes(geometry, writer, result);
+    return result;
+  }
+
+  private static void addDirectedShapes(
+      Geometry geometry, WKBWriter writer, ShapeIndexGeography result) {
+    if (geometry.isEmpty()) {
+      return;
     }
-    // S2 treats coordinates as lat/lng regardless of SRID metadata, but we tag the geography as
-    // EPSG:4326 since both inputs are guaranteed to be in WGS84 here. JTS.transform does not
-    // propagate SRID, so we set it explicitly on the (now-owned) copy.
-    oriented.setSRID(4326);
+    if (geometry instanceof Polygon) {
+      Polygon oriented = orientPolygonForS2((Polygon) geometry);
+      result.shapeIndex.add(WkbS2Shape.withPreservedLoopOrientation(writer.write(oriented)));
+      return;
+    }
+    if (geometry instanceof Point || geometry instanceof LineString) {
+      result.shapeIndex.add(WkbS2Shape.withPreservedLoopOrientation(writer.write(geometry)));
+      return;
+    }
+    if (geometry instanceof GeometryCollection) {
+      for (int i = 0; i < geometry.getNumGeometries(); i++) {
+        addDirectedShapes(geometry.getGeometryN(i), writer, result);
+      }
+      return;
+    }
+    throw new IllegalArgumentException(
+        "Unsupported JTS geometry for raster distance: " + geometry.getGeometryType());
+  }
+
+  /**
+   * Returns a polygon whose shell traverses CCW and whose holes traverse CW, as required by the
+   * directed S2 shape. Ring position remains authoritative even when the JTS input uses arbitrary
+   * winding. The input polygon is returned unchanged when every ring is already oriented correctly.
+   */
+  private static Polygon orientPolygonForS2(Polygon polygon) {
+    if (polygon.isEmpty()) {
+      return polygon;
+    }
+
+    LinearRing shell = (LinearRing) polygon.getExteriorRing();
+    boolean changed = false;
+    if (!Orientation.isCCW(shell.getCoordinates())) {
+      shell = (LinearRing) shell.reverse();
+      changed = true;
+    }
+
+    int numHoles = polygon.getNumInteriorRing();
+    LinearRing[] holes = new LinearRing[numHoles];
+    for (int i = 0; i < numHoles; i++) {
+      LinearRing hole = (LinearRing) polygon.getInteriorRingN(i);
+      if (Orientation.isCCW(hole.getCoordinates())) {
+        hole = (LinearRing) hole.reverse();
+        changed = true;
+      }
+      holes[i] = hole;
+    }
+    if (!changed) {
+      return polygon;
+    }
+
+    Polygon oriented = polygon.getFactory().createPolygon(shell, holes);
+    oriented.setSRID(polygon.getSRID());
     return oriented;
-  }
-
-  /**
-   * Return {@code geom} with every polygon shell oriented CCW (S2's expected orientation).
-   * Non-polygon geometries are returned unchanged. For MultiPolygons each component polygon is
-   * checked and reversed independently — JTS/OGC does not require consistent ring orientation
-   * across the components of a user-supplied MultiPolygon, so flipping the whole geometry based on
-   * the first shell would mis-orient any later polygon with the opposite winding. Empty polygons
-   * and {@code MULTIPOLYGON EMPTY} pass through untouched.
-   */
-  private static Geometry ensureCcwForS2(Geometry geom) {
-    if (geom instanceof Polygon) {
-      Polygon p = (Polygon) geom;
-      if (p.isEmpty() || Orientation.isCCW(p.getExteriorRing().getCoordinates())) {
-        return geom;
-      }
-      return geom.reverse();
-    }
-    if (geom instanceof MultiPolygon) {
-      int n = geom.getNumGeometries();
-      if (n == 0) {
-        return geom;
-      }
-      Polygon[] reoriented = new Polygon[n];
-      boolean anyReversal = false;
-      for (int i = 0; i < n; i++) {
-        Polygon p = (Polygon) geom.getGeometryN(i);
-        if (p.isEmpty() || Orientation.isCCW(p.getExteriorRing().getCoordinates())) {
-          reoriented[i] = p;
-        } else {
-          reoriented[i] = (Polygon) p.reverse();
-          anyReversal = true;
-        }
-      }
-      if (!anyReversal) {
-        return geom;
-      }
-      GeometryFactory factory = geom.getFactory();
-      return factory.createMultiPolygon(reoriented);
-    }
-    return geom;
   }
 
   private static Pair<Geometry, Geometry> toWGS84Pair(GridCoverage2D raster, Geometry queryWindow) {
@@ -307,6 +350,20 @@ public class RasterPredicates {
     Geometry transformedLeftGeometry = transformGeometryToWGS84(leftGeometry, leftCRS);
     Geometry transformedRightGeometry = transformGeometryToWGS84(rightGeometry, rightCRS);
     return Pair.of(transformedLeftGeometry, transformedRightGeometry);
+  }
+
+  /**
+   * Tests intersection without CRS conversion.
+   *
+   * @param raster raster defining the coordinate space
+   * @param queryWindow geometry already transformed into the raster's coordinate space
+   */
+  static boolean intersectsInRasterCoordinateSpace(GridCoverage2D raster, Geometry queryWindow) {
+    try {
+      return GeometryFunctions.convexHull(raster).intersects(queryWindow);
+    } catch (FactoryException | TransformException e) {
+      throw new RuntimeException("Failed to calculate the convex hull of the raster", e);
+    }
   }
 
   /**

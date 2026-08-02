@@ -515,6 +515,21 @@ public class RasterPredicatesTest extends RasterTestBase {
   }
 
   @Test
+  public void testDWithinGlobalRasterPreservesDirectedInterior()
+      throws FactoryException, IOException {
+    GridCoverage2D raster =
+        rasterFromGeoTiff(resourceFolder + "raster/raster_with_no_data/test5.tiff");
+    Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(-73.9857, 40.7484));
+    point.setSRID(4326);
+
+    // The WGS84 footprint covers more than half the sphere. Public Geography construction
+    // deliberately applies simple-features ring roles, but the raster distance path must retain
+    // this directed footprint so a point inside it has zero distance.
+    Assert.assertTrue(RasterPredicates.rsDWithin(raster, point, 0.0));
+    Assert.assertTrue(RasterPredicates.rsDWithin(raster, point, 1.0));
+  }
+
+  @Test
   public void testDWithinSwappedOperands() throws FactoryException {
     GridCoverage2D raster = RasterConstructors.makeEmptyRaster(1, 5, 5, 0, 0, 1, -1, 0, 0, 4326);
     Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(12.5, -2.5));
@@ -610,6 +625,42 @@ public class RasterPredicatesTest extends RasterTestBase {
     Assert.assertEquals(
         RasterPredicates.rsDWithin(raster, allCcw, 1_000_000.0),
         RasterPredicates.rsDWithin(raster, mixed, 1_000_000.0));
+  }
+
+  @Test
+  public void testDWithinPolygonHoleUsesRingRole() throws FactoryException, ParseException {
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, 1, 1, 1.9, 2.1, 0.2, -0.2, 0, 0, 4326);
+    WKTReader reader = new WKTReader();
+    Geometry clockwiseHole =
+        reader.read("POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0), " + "(1 1, 1 3, 3 3, 3 1, 1 1))");
+    clockwiseHole.setSRID(4326);
+    Geometry counterClockwiseHole =
+        reader.read("POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0), " + "(1 1, 3 1, 3 3, 1 3, 1 1))");
+    counterClockwiseHole.setSRID(4326);
+
+    // The raster lies strictly inside the hole, so it does not overlap the polygon. Ring position,
+    // not caller-provided winding, determines that result.
+    Assert.assertFalse(RasterPredicates.rsDWithin(raster, clockwiseHole, 0.0));
+    Assert.assertFalse(RasterPredicates.rsDWithin(raster, counterClockwiseHole, 0.0));
+    Assert.assertTrue(RasterPredicates.rsDWithin(raster, clockwiseHole, 200_000.0));
+    Assert.assertTrue(RasterPredicates.rsDWithin(raster, counterClockwiseHole, 200_000.0));
+  }
+
+  @Test
+  public void testDWithinNormalizesPolygonInsideGeometryCollection()
+      throws FactoryException, ParseException {
+    GridCoverage2D raster =
+        RasterConstructors.makeEmptyRaster(1, 1, 1, 1.9, 2.1, 0.2, -0.2, 0, 0, 4326);
+    WKTReader reader = new WKTReader();
+    Geometry counterClockwise =
+        reader.read("GEOMETRYCOLLECTION (POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0)))");
+    counterClockwise.setSRID(4326);
+    Geometry clockwise = reader.read("GEOMETRYCOLLECTION (POLYGON ((0 0, 0 4, 4 4, 4 0, 0 0)))");
+    clockwise.setSRID(4326);
+
+    Assert.assertTrue(RasterPredicates.rsDWithin(raster, counterClockwise, 0.0));
+    Assert.assertTrue(RasterPredicates.rsDWithin(raster, clockwise, 0.0));
   }
 
   @Test

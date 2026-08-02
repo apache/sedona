@@ -23,7 +23,7 @@ Introduction: Return the spherical area of a geography in square meters, calcula
 
 ![ST_Area on a Geography (sphere-native)](../../../image/ST_Area_geography/ST_Area_geography.svg "ST_Area on a Geography (sphere-native)")
 
-If the input ring is wound in the orientation that would describe the rest of the planet, Sedona returns the smaller of the two regions, so the answer is always bounded by half the surface of the Earth. If you specifically want the WGS84 ellipsoidal value, convert via `ST_GeogToGeometry` first and use the geometry overload.
+Each Geography polygon shell is normalized to an area of at most one hemisphere. A shell intended to represent more than half the sphere is therefore interpreted as its complement; reversing the ring's coordinate sequence does not select the larger region. The returned area is bounded by half the surface of the Earth. If you specifically want the WGS84 ellipsoidal value, convert via `ST_GeogToGeometry` first and use the geometry overload.
 
 Format:
 

@@ -1,0 +1,106 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+name: Bug report
+description: Report unexpected behavior in Apache Sedona
+title: ''
+labels:
+  - bug
+assignees: []
+body:
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: Describe what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual behavior
+      description: Describe what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide a minimal example or the exact steps that reproduce the problem.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: sedona-version
+    attributes:
+      label: Sedona version
+      placeholder: e.g. 1.8.0
+    validations:
+      required: true
+  - type: input
+    id: spark-version
+    attributes:
+      label: Apache Spark version
+      placeholder: e.g. 3.5.5
+  - type: input
+    id: flink-version
+    attributes:
+      label: Apache Flink version
+      placeholder: e.g. 1.20.1
+  - type: dropdown
+    id: api-type
+    attributes:
+      label: API type
+      options:
+        - Scala
+        - Java
+        - Python
+        - SQL
+        - R
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: scala-version
+    attributes:
+      label: Scala version
+      placeholder: e.g. 2.12
+  - type: input
+    id: jre-version
+    attributes:
+      label: JRE version
+      placeholder: e.g. 11
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      placeholder: e.g. 3.12
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Describe where Sedona is running.
+      placeholder: e.g. Standalone, AWS EC2, EMR, Azure, or Databricks
+    validations:
+      required: true
+  - type: checkboxes
+    id: existing-issues
+    attributes:
+      label: Existing issues
+      options:
+        - label: I searched the existing issues and did not find a duplicate.
+          required: true
