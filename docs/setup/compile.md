@@ -236,7 +236,7 @@ uv run prek run <hook_id> --all-files
 To keep linter definitions synchronized with upstream styling configurations without a `Makefile` shortcut, trigger an explicit update through the core engine:
 
 ```bash
-uv run prek autoupdate
+uv run prek auto-update --freeze
 ```
 
 ---
