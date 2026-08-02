@@ -19,21 +19,30 @@
 
 # ST_Collect
 
-Introduction: Returns MultiGeometry object based on geometry column/s or array with geometries
+Introduction: Collects spatial values without dissolving their boundaries. Homogeneous
+`Point`, `LineString`, or `Polygon` values produce the corresponding multi-object; mixed types
+produce a `GeometryCollection`.
 
 ![ST_Collect](../../../image/ST_Collect/ST_Collect.svg "ST_Collect")
 
 Format:
 
-`ST_Collect(*geom: Geometry)`
+`ST_Collect(geom1: Geometry, geom2: Geometry)`
 
 `ST_Collect(geom: ARRAY[Geometry])`
 
-Return type: `Geometry`
+`ST_Collect(geog1: Geography, geog2: Geography)`
 
-Since: `v1.5.0`
+`ST_Collect(geog: ARRAY[Geography])`
 
-Example:
+Return type: `Geometry` or `Geography`, matching the input type
+
+Since: `v1.5.0` (`Geometry`), `v1.9.1` (`Geography`)
+
+Member order and duplicates are retained. The `Geography` overloads ignore null elements and use
+the first non-null input's SRID for the result.
+
+Geometry example:
 
 ```sql
 SELECT ST_Collect(
@@ -52,23 +61,21 @@ Result:
 +---------------------------------------------------------------+
 ```
 
-Example:
+Geography array example:
 
 ```sql
-SELECT ST_Collect(
-    Array(
-        ST_GeomFromText('POINT(21.427834 52.042576573)'),
-        ST_GeomFromText('POINT(45.342524 56.342354355)')
+SELECT ST_AsEWKT(
+    ST_Collect(
+        ARRAY[
+            ST_GeogFromWKT('POINT(-122.4 37.8)', 4326),
+            ST_GeogFromWKT('POINT(-122.5 37.7)', 4326)
+        ]
     )
-) AS geom
+) AS geog
 ```
 
 Result:
 
 ```
-+---------------------------------------------------------------+
-|geom                                                           |
-+---------------------------------------------------------------+
-|MULTIPOINT ((21.427834 52.042576573), (45.342524 56.342354355))|
-+---------------------------------------------------------------+
+SRID=4326;MULTIPOINT ((-122.4 37.8), (-122.5 37.7))
 ```

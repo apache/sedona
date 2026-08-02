@@ -16,7 +16,7 @@
 # under the License.
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Sequence, Union
 import json
 from xml.etree.ElementTree import Element, SubElement, tostring  # nosec B405
 
@@ -37,9 +37,17 @@ except:
 from .awt_raster import AWTRaster
 from .data_buffer import DataBuffer
 from .meta import AffineTransform, SampleDimension
-from .sample_model import ComponentSampleModel, SampleModel
+from .sample_model import (
+    ComponentSampleModel,
+    MultiPixelPackedSampleModel,
+    SampleModel,
+    SinglePixelPackedSampleModel,
+)
 
 GDAL_VERSION = rasterio.env.GDALVersion.runtime()
+
+_SAMPLE_DIMENSION_NO_DATA_VALUE_OVERRIDE = 0x01
+_SAMPLE_DIMENSION_SAMPLE_TYPE_OVERRIDE = 0x02
 
 
 def _has_env_with_gdal_mem_enabled():
@@ -116,6 +124,26 @@ def _numpy_dtype_to_data_buffer_type(dtype: np.dtype) -> int:
             f"negative values will be reinterpreted."
         )
     return mapping[dtype]
+
+
+def _sample_model_band_size(sample_model: SampleModel, band: int) -> int:
+    """Return the number of bits Java exposes for one band of a SampleModel."""
+    storage_sizes = {
+        DataBuffer.TYPE_BYTE: 8,
+        DataBuffer.TYPE_USHORT: 16,
+        DataBuffer.TYPE_SHORT: 16,
+        DataBuffer.TYPE_INT: 32,
+        DataBuffer.TYPE_FLOAT: 32,
+        DataBuffer.TYPE_DOUBLE: 64,
+    }
+    storage_size = storage_sizes[sample_model.data_type]
+    if isinstance(sample_model, SinglePixelPackedSampleModel):
+        source_band = min(band, len(sample_model.bit_masks) - 1)
+        mask = sample_model.bit_masks[source_band] & ((1 << storage_size) - 1)
+        return bin(mask).count("1")
+    if isinstance(sample_model, MultiPixelPackedSampleModel):
+        return sample_model.num_bits
+    return storage_size
 
 
 def _generate_vrt_xml(
@@ -234,9 +262,18 @@ class SedonaRaster(ABC):
 
         """
         arr = self.as_numpy()
+        # Java stores int8 pixels in an unsigned byte buffer and uint32 pixels in a signed
+        # int buffer. with_bands() keeps the caller's NumPy dtype until serialization while
+        # bands_meta carries the Java-facing NODATA value, so compare through a storage view.
+        # Keep arr for the result so valid samples retain their original signedness.
+        storage_arr = arr
+        if arr.dtype == np.dtype(np.int8):
+            storage_arr = arr.view(np.uint8)
+        elif arr.dtype == np.dtype(np.uint32):
+            storage_arr = arr.view(np.int32)
         nodata_values = np.array([bm.nodata for bm in self._bands_meta])
         nodata_values_reshaped = nodata_values[:, None, None]
-        mask = arr == nodata_values_reshaped
+        mask = storage_arr == nodata_values_reshaped
         masked_arr = np.where(mask, np.nan, arr)
         return masked_arr
 
@@ -253,7 +290,11 @@ class SedonaRaster(ABC):
         """
         raise NotImplementedError()
 
-    def with_bands(self, new_data: np.ndarray) -> "SedonaRaster":
+    def with_bands(
+        self,
+        new_data: np.ndarray,
+        nodata: Optional[Union[float, Sequence[float]]] = None,
+    ) -> "SedonaRaster":
         """Replace pixel data, preserving spatial metadata.
 
         Only supported on InDbSedonaRaster.
@@ -294,6 +335,9 @@ class InDbSedonaRaster(SedonaRaster):
         # If None, the raster cannot be serialized.
         self._name: str = ""
         self._category_blobs: Optional[List[bytes]] = None
+        # An optional wire trailer marks why a band's Python output metadata must override
+        # replayed source categories: bit 0 for NODATA and bit 1 for sample type.
+        self._sample_dimension_override_flags: List[int] = [0] * len(bands_meta)
         self._properties_blob: Optional[bytes] = None
         self._color_model_blob: Optional[bytes] = None
 
@@ -382,7 +426,11 @@ class InDbSedonaRaster(SedonaRaster):
         dataset.mem_data_array = data_array
         return dataset
 
-    def with_bands(self, new_data: np.ndarray) -> "InDbSedonaRaster":
+    def with_bands(
+        self,
+        new_data: np.ndarray,
+        nodata: Optional[Union[float, Sequence[float]]] = None,
+    ) -> "InDbSedonaRaster":
         """Create a new InDbSedonaRaster with replaced pixel data but same spatial metadata.
 
         The spatial metadata (CRS, affine transform, name) and cached opaque blobs
@@ -406,6 +454,17 @@ class InDbSedonaRaster(SedonaRaster):
               - (bands, height, width) — CHW layout
             Height and width must match the source raster.
             Band count and dtype may differ from source.
+        nodata : float or sequence of float, optional
+            NODATA value for the output bands. A scalar applies to every band; a
+            sequence must have one entry per output band. Use ``float('nan')`` for
+            a band that should have no NODATA.
+
+            When omitted, each output band inherits NODATA from the source band in
+            the same position, and bands beyond the source's band count inherit it
+            from the source's last band. Pass this whenever the output means
+            something different from the input — a 0/1 mask derived from a scene
+            whose band has NODATA ``0`` would otherwise treat every unset pixel as
+            NODATA.
 
         Returns
         -------
@@ -415,7 +474,8 @@ class InDbSedonaRaster(SedonaRaster):
         Raises
         ------
         ValueError
-            If spatial dimensions don't match.
+            If spatial dimensions don't match, or if ``nodata`` is a sequence whose
+            length differs from the output band count.
         RuntimeError
             If the source raster has no cached blobs (cannot be serialized).
         """
@@ -450,29 +510,83 @@ class InDbSedonaRaster(SedonaRaster):
 
         # Adjust category blobs for new band count
         source_n_bands = len(self._bands_meta)
+        output_sample_size = np.dtype(new_data.dtype).itemsize * 8
+        source_sample_model = self.awt_raster.sample_model
+        sample_type_changed = [
+            data_type != source_sample_model.data_type
+            or output_sample_size
+            != _sample_model_band_size(
+                source_sample_model, min(band, source_n_bands - 1)
+            )
+            for band in range(n_bands)
+        ]
         if n_bands <= source_n_bands:
             category_blobs = list(self._category_blobs[:n_bands])
+            metadata_override_flags = list(
+                self._sample_dimension_override_flags[:n_bands]
+            )
         else:
             category_blobs = list(self._category_blobs)
+            metadata_override_flags = list(self._sample_dimension_override_flags)
             # Replicate last source category blob for new bands
             last_blob = self._category_blobs[-1]
+            last_metadata_override_flags = self._sample_dimension_override_flags[-1]
             for _ in range(n_bands - source_n_bands):
                 category_blobs.append(last_blob)
+                metadata_override_flags.append(last_metadata_override_flags)
 
-        # Adjust band metadata for new band count
+        # Adjust band metadata for new band count. Bands beyond the source's band count
+        # replay the source's last category blob (above), so they inherit its nodata on
+        # the JVM side — record that here rather than NaN, otherwise bands_meta and
+        # RS_BandNoDataValue disagree about the same band.
         if n_bands <= source_n_bands:
             bands_meta = list(self._bands_meta[:n_bands])
         else:
             bands_meta = list(self._bands_meta)
+            last_meta = self._bands_meta[-1]
             for _ in range(n_bands - source_n_bands):
                 bands_meta.append(
                     SampleDimension(
                         description="",
                         offset=0.0,
                         scale=1.0,
-                        nodata=float("nan"),
+                        nodata=last_meta.nodata,
                     )
                 )
+
+        if nodata is not None:
+            bands_meta = self._override_nodata(bands_meta, nodata, new_data.dtype)
+            metadata_override_flags = [
+                flags
+                | _SAMPLE_DIMENSION_NO_DATA_VALUE_OVERRIDE
+                | (_SAMPLE_DIMENSION_SAMPLE_TYPE_OVERRIDE if type_changed else 0)
+                for flags, type_changed in zip(
+                    metadata_override_flags, sample_type_changed
+                )
+            ]
+        else:
+            inherited_meta = bands_meta
+            bands_meta = self._normalize_inherited_nodata(
+                inherited_meta, new_data.dtype
+            )
+            metadata_override_flags = [
+                flags
+                | (_SAMPLE_DIMENSION_SAMPLE_TYPE_OVERRIDE if type_changed else 0)
+                | (
+                    _SAMPLE_DIMENSION_NO_DATA_VALUE_OVERRIDE
+                    if (
+                        not (np.isnan(before.nodata) and np.isnan(after.nodata))
+                        and before.nodata != after.nodata
+                    )
+                    else 0
+                )
+                for before, after, flags, type_changed in zip(
+                    inherited_meta,
+                    bands_meta,
+                    metadata_override_flags,
+                    sample_type_changed,
+                )
+            ]
 
         # Build BandedSampleModel (TYPE_BANDED = 1)
         # ComponentSampleModel.__init__() sets TYPE_COMPONENT, so we must
@@ -504,9 +618,181 @@ class InDbSedonaRaster(SedonaRaster):
         )
         result._name = self._name
         result._category_blobs = category_blobs
+        result._sample_dimension_override_flags = metadata_override_flags
         result._properties_blob = self._properties_blob
         result._color_model_blob = self._color_model_blob  # replay unchanged
         return result
+
+    @staticmethod
+    def _as_nodata_scalar(value) -> Optional[float]:
+        """Return value as a float if it is a real scalar, else None.
+
+        np.float32(-9999) and friends are not Python floats but are scalars, so they
+        have to be recognised here rather than falling through to the sequence branch.
+        Complex numbers are rejected rather than silently losing their imaginary part,
+        and bool is rejected because True as a NODATA value is almost certainly a
+        mistake. 0-d arrays are unwrapped, since they are scalars that happen not to be
+        instances of np.number.
+        """
+        if isinstance(value, bool) or isinstance(value, np.bool_):
+            return None
+        if isinstance(value, (int, float, np.floating, np.integer)):
+            return float(value)
+        if isinstance(value, np.ndarray) and value.ndim == 0:
+            if np.issubdtype(value.dtype, np.floating) or np.issubdtype(
+                value.dtype, np.integer
+            ):
+                return float(value)
+        return None
+
+    @staticmethod
+    def _override_nodata(
+        bands_meta: List[SampleDimension],
+        nodata: Union[float, Sequence[float]],
+        dtype: np.dtype,
+    ) -> List[SampleDimension]:
+        """Return bands_meta with NODATA replaced by the requested value(s)."""
+        scalar = InDbSedonaRaster._as_nodata_scalar(nodata)
+        if scalar is not None:
+            values = [scalar] * len(bands_meta)
+        else:
+            try:
+                entries = list(nodata)
+            except TypeError:
+                raise ValueError(
+                    f"nodata must be a real number or a sequence of real numbers, "
+                    f"got {type(nodata).__name__}"
+                ) from None
+            values = []
+            for entry in entries:
+                value = InDbSedonaRaster._as_nodata_scalar(entry)
+                if value is None:
+                    raise ValueError(
+                        f"nodata entries must be real numbers, got "
+                        f"{type(entry).__name__}"
+                    )
+                values.append(value)
+            if len(values) != len(bands_meta):
+                raise ValueError(
+                    f"nodata has {len(values)} entries but the output has "
+                    f"{len(bands_meta)} band(s)"
+                )
+
+        values = [
+            InDbSedonaRaster._normalize_nodata_for_dtype(value, dtype, inherited=False)
+            for value in values
+        ]
+
+        return [
+            SampleDimension(
+                description=bm.description,
+                offset=bm.offset,
+                scale=bm.scale,
+                nodata=value,
+            )
+            for bm, value in zip(bands_meta, values)
+        ]
+
+    @staticmethod
+    def _normalize_inherited_nodata(
+        bands_meta: List[SampleDimension], dtype: np.dtype
+    ) -> List[SampleDimension]:
+        """Validate inherited NODATA against the output dtype.
+
+        Without this, narrowing the dtype silently invalidates the metadata: a float64
+        source whose NODATA is -9999 narrowed to uint8 output would keep declaring
+        -9999, a value no uint8 pixel can hold, so every hole would read as valid data.
+        """
+        normalized_meta = []
+        for bm in bands_meta:
+            value = bm.nodata
+            if np.isnan(value):
+                normalized_meta.append(bm)
+                continue
+            normalized = InDbSedonaRaster._normalize_nodata_for_dtype(
+                value, dtype, inherited=True
+            )
+            if normalized == value:
+                normalized_meta.append(bm)
+            else:
+                normalized_meta.append(
+                    SampleDimension(
+                        description=bm.description,
+                        offset=bm.offset,
+                        scale=bm.scale,
+                        nodata=normalized,
+                    )
+                )
+        return normalized_meta
+
+    # NODATA is stored using the JVM data buffer type, which does not always match the
+    # NumPy dtype: int8 is stored as an unsigned byte and uint32 as a signed int (see
+    # _numpy_dtype_to_data_buffer_type). Ranges are the JVM storage ranges.
+    _NODATA_STORAGE_RANGES = {
+        np.dtype(np.uint8): (0, 255),
+        np.dtype(np.int8): (0, 255),
+        np.dtype(np.int16): (-(2**15), 2**15 - 1),
+        np.dtype(np.uint16): (0, 2**16 - 1),
+        np.dtype(np.int32): (-(2**31), 2**31 - 1),
+        np.dtype(np.uint32): (-(2**31), 2**31 - 1),
+    }
+
+    @staticmethod
+    def _normalize_nodata_for_dtype(
+        value: float, dtype: np.dtype, inherited: bool
+    ) -> float:
+        """Map a NODATA value onto what the JVM will actually store for this dtype.
+
+        Integral bands reject fractional and out-of-range values, and reinterpret the
+        two documented storage mismatches the same way the pixel data is reinterpreted:
+        int8 negatives as unsigned bytes (-2 -> 254) and uint32 values above 2**31 - 1
+        as their signed equivalent. float32 values are rounded to the nearest float32,
+        since that is what the pixels themselves hold. Non-finite values other than NaN
+        are rejected for every dtype.
+        """
+        if np.isnan(value):
+            return value
+        dtype = np.dtype(dtype)
+        hint = (
+            " (inherited from the source raster; pass nodata= explicitly, or clean the"
+            " pixel data before changing its dtype)"
+            if inherited
+            else ""
+        )
+        if np.issubdtype(dtype, np.integer):
+            if not np.isfinite(value) or value != int(value):
+                raise ValueError(
+                    f"nodata={value} is not representable in an integral output of "
+                    f"dtype {dtype}{hint}; use a whole number, or cast the band data "
+                    f"to a floating dtype first"
+                )
+            if dtype == np.dtype(np.int8) and -128 <= value < 0:
+                # int8 pixels are stored as unsigned bytes, so -2 reads back as 254.
+                # Reinterpret the nodata value the same way so it still marks the holes.
+                value = value + 256
+            elif dtype == np.dtype(np.uint32) and 2**31 <= value <= 2**32 - 1:
+                # uint32 pixels are stored as signed ints, so 4294967295 reads back
+                # as -1. Same reinterpretation.
+                value = value - 2**32
+            lo, hi = InDbSedonaRaster._NODATA_STORAGE_RANGES[dtype]
+            if not (lo <= value <= hi):
+                raise ValueError(
+                    f"nodata={value} is outside the storage range of dtype {dtype} "
+                    f"[{lo}, {hi}]{hint}"
+                )
+            return float(value)
+        if dtype == np.dtype(np.float32):
+            # Pixels hold float32 values, so the declared nodata has to be one too —
+            # 0.1 would otherwise never equal the float32 0.1 the pixels carry.
+            coerced = float(np.float32(value))
+            if not np.isfinite(coerced):
+                raise ValueError(
+                    f"nodata={value} is not representable as float32{hint}"
+                )
+            return coerced
+        if not np.isfinite(value):
+            raise ValueError(f"nodata={value} must be finite or NaN{hint}")
+        return float(value)
 
     def close(self):
         if self.rasterio_dataset_reader is not None:

@@ -128,7 +128,12 @@ public class MapAlgebra {
    * @param script The script to apply
    * @param noDataValue The no data value of the output raster.
    * @return The result of the map algebra script
+   * @deprecated since 1.9.1, in favour of Python UDFs over rasters, which express the same
+   *     per-pixel calculations and additionally reach NumPy, SciPy, scikit-learn and rasterio. This
+   *     method will be removed in a future version. See
+   *     https://sedona.apache.org/latest/api/sql/Raster-UDF/
    */
+  @Deprecated
   public static GridCoverage2D mapAlgebra(
       GridCoverage2D gridCoverage2D, String pixelType, String script, Double noDataValue) {
     if (gridCoverage2D == null || script == null) {
@@ -192,6 +197,13 @@ public class MapAlgebra {
     }
   }
 
+  /**
+   * @deprecated since 1.9.1, in favour of Python UDFs over rasters, which express the same
+   *     per-pixel calculations and additionally reach NumPy, SciPy, scikit-learn and rasterio. This
+   *     method will be removed in a future version. See
+   *     https://sedona.apache.org/latest/api/sql/Raster-UDF/
+   */
+  @Deprecated
   public static GridCoverage2D mapAlgebra(
       GridCoverage2D gridCoverage2D, String pixelType, String script) {
     return mapAlgebra(gridCoverage2D, pixelType, script, null);
@@ -206,6 +218,13 @@ public class MapAlgebra {
     }
   }
 
+  /**
+   * @deprecated since 1.9.1, in favour of Python UDFs over rasters, which express the same
+   *     per-pixel calculations and additionally reach NumPy, SciPy, scikit-learn and rasterio. This
+   *     method will be removed in a future version. See
+   *     https://sedona.apache.org/latest/api/sql/Raster-UDF/
+   */
+  @Deprecated
   public static GridCoverage2D mapAlgebra(
       GridCoverage2D rast0,
       GridCoverage2D rast1,

@@ -109,7 +109,7 @@ These functions create modified geometries by changing type, structure, or verti
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
 | [ST_AddPoint](Geometry-Editors/ST_AddPoint.md) | Geometry | Return Linestring with additional point at the given index, if position is not available the point will be added at the end of line. | v1.3.0 |
-| [ST_Collect](Geometry-Editors/ST_Collect.md) | Geometry | Returns MultiGeometry object based on geometry column/s or array with geometries | v1.5.0 |
+| [ST_Collect](Geometry-Editors/ST_Collect.md) | Geometry or Geography | Collects two spatial values or an array of spatial values into a multi-object or collection without dissolving boundaries. | v1.5.0 |
 | [ST_CollectionExtract](Geometry-Editors/ST_CollectionExtract.md) | Geometry | Returns a homogeneous multi-geometry from a given geometry collection. | v1.5.0 |
 | [ST_FlipCoordinates](Geometry-Editors/ST_FlipCoordinates.md) | Geometry | Returns a version of the given geometry with X and Y axis flipped. | v1.2.0 |
 | [ST_Force2D](Geometry-Editors/ST_Force2D.md) | Geometry | Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force_2D](Geometry-Editors/ST_Force_2D.md). | v1.8.0 |
@@ -216,7 +216,7 @@ These functions compute geometric constructions, or alter geometry size or shape
 | [ST_BuildArea](Geometry-Processing/ST_BuildArea.md) | Geometry | Returns the areal geometry formed by the constituent linework of the input geometry. | v1.2.1 |
 | [ST_Centroid](Geometry-Processing/ST_Centroid.md) | Geometry | Return the centroid point of A | v1.5.0 |
 | [ST_ConcaveHull](Geometry-Processing/ST_ConcaveHull.md) | Geometry | Return the Concave Hull of polygon A, with alpha set to pctConvex[0, 1] in the Delaunay Triangulation method, the concave hull will not contain a hole unless allowHoles is set to true | v1.4.0 |
-| [ST_ConvexHull](Geometry-Processing/ST_ConvexHull.md) | Geometry | Return the Convex Hull of polygon A | v1.5.0 |
+| [ST_ConvexHull](Geometry-Processing/ST_ConvexHull.md) | Geometry or Geography | Returns the planar convex hull of a Geometry or spherical convex hull of a Geography. | v1.5.0 |
 | [ST_DelaunayTriangles](Geometry-Processing/ST_DelaunayTriangles.md) | Geometry | This function computes the [Delaunay triangulation](https://en.wikipedia.org/wiki/Delaunay_triangulation) for the set of vertices in the input geometry. An optional `tolerance` parameter allows sna... | v1.6.1 |
 | [ST_GeneratePoints](Geometry-Processing/ST_GeneratePoints.md) | Geometry | Generates a specified quantity of pseudo-random points within the boundaries of the provided polygonal geometry. When `seed` is either zero or not defined then output will be random. | v1.6.1 |
 | [ST_GeometricMedian](Geometry-Processing/ST_GeometricMedian.md) | Geometry | Computes the approximate geometric median of a MultiPoint geometry using the Weiszfeld algorithm. The geometric median provides a centrality measure that is less sensitive to outlier points than th... | v1.4.1 |
@@ -266,10 +266,11 @@ These functions change the position and shape of geometries using affine transfo
 
 ## Aggregate Functions
 
-These functions perform aggregate operations on groups of geometries.
+These functions perform aggregate operations on groups of spatial values.
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
+| [ST_Collect_Agg](Aggregate-Functions/ST_Collect_Agg.md) | Geometry or Geography | Collects all non-null spatial values in a group without dissolving boundaries. Geography inputs must share an SRID. | v1.9.1 |
 | [ST_Envelope_Agg](Aggregate-Functions/ST_Envelope_Agg.md) | Geometry | Return the entire envelope boundary of all geometries in A. Empty geometries and null values are skipped. If all inputs are empty or null, the result is null. This behavior is consistent with PostG... | v1.3.0 |
 | [ST_Intersection_Agg](Aggregate-Functions/ST_Intersection_Agg.md) | Geometry | Return the polygon intersection of all polygons in A | v1.5.0 |
 | [ST_Union_Agg](Aggregate-Functions/ST_Union_Agg.md) | Geometry | Return the polygon union of all polygons in A. All inputs must be polygons. | v1.3.0 |

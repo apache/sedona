@@ -21,11 +21,16 @@ package org.apache.sedona.common.S2Geography;
 import com.google.common.geometry.S2;
 import com.google.common.geometry.S2EdgeUtil;
 import com.google.common.geometry.S2LatLng;
+import com.google.common.geometry.S2Loop;
 import com.google.common.geometry.S2Point;
 import com.google.common.geometry.S2Predicates;
 import com.google.common.geometry.S2Shape;
+import com.google.common.geometry.S2ShapeMeasures;
+import com.google.common.geometry.S2ShapeUtil;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An S2Shape implementation that reads WKB bytes once, converts all coordinates to S2Points in the
@@ -48,11 +53,29 @@ public class WkbS2Shape implements S2Shape {
   private final int[] chainStarts; // edge offset for each chain
   private final int[] chainLengths; // edge count for each chain
   private final int[] vertexOffsets; // index into vertices[] for first vertex of each chain
+  // Polygon rings are normalized virtually: source WKB and vertices[] remain unchanged.
+  private final boolean[] chainReversed;
 
   // For polygon containsOrigin — computed eagerly at construction for polygons
   private final boolean containsOriginValue;
 
   public WkbS2Shape(byte[] wkb) {
+    this(wkb, true);
+  }
+
+  /**
+   * Builds a shape whose polygon rings retain their WKB traversal direction.
+   *
+   * <p>This is an internal escape hatch for callers that intentionally encode the spherical
+   * interior through ring direction, such as raster footprints that cover more than a hemisphere.
+   * General Geography construction must use {@link #WkbS2Shape(byte[])}, which applies
+   * simple-features shell/hole semantics independent of input winding.
+   */
+  public static WkbS2Shape withPreservedLoopOrientation(byte[] wkb) {
+    return new WkbS2Shape(wkb, false);
+  }
+
+  private WkbS2Shape(byte[] wkb, boolean normalizePolygonRings) {
     boolean le = (wkb[0] == 0x01);
     ByteBuffer buf =
         ByteBuffer.wrap(wkb).order(le ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN);
@@ -80,6 +103,7 @@ public class WkbS2Shape implements S2Shape {
           this.chainStarts = new int[] {0};
           this.chainLengths = new int[] {1};
           this.vertexOffsets = new int[] {0};
+          this.chainReversed = new boolean[] {false};
           this.containsOriginValue = false;
           break;
         }
@@ -93,6 +117,7 @@ public class WkbS2Shape implements S2Shape {
           this.chainStarts = new int[] {0};
           this.chainLengths = new int[] {totalEdges};
           this.vertexOffsets = new int[] {0};
+          this.chainReversed = new boolean[] {false};
           this.containsOriginValue = false;
           break;
         }
@@ -104,6 +129,7 @@ public class WkbS2Shape implements S2Shape {
           this.chainStarts = new int[numRings];
           this.chainLengths = new int[numRings];
           this.vertexOffsets = new int[numRings];
+          this.chainReversed = new boolean[numRings];
 
           // First pass: count total vertices and compute offsets. Sedona's WKBWriter writes
           // open rings (n unique vertices, no closing duplicate); standard WKB writes closed
@@ -149,7 +175,18 @@ public class WkbS2Shape implements S2Shape {
             }
           }
 
-          // Eagerly compute containsOrigin from first ring
+          if (normalizePolygonRings) {
+            // Match SedonaDB's simple-features interpretation: the first ring is a shell and every
+            // subsequent ring is a hole regardless of input winding. Reverse only the S2-facing
+            // traversal, leaving the stored WKB and vertex order untouched.
+            for (int r = 0; r < numRings; r++) {
+              boolean isHole = r > 0;
+              boolean isClockwise = isClockwise(r);
+              chainReversed[r] = isHole != isClockwise;
+            }
+          }
+
+          // Compute reference containment after any virtual ring reversal has been applied.
           this.containsOriginValue = computeContainsOrigin();
           break;
         }
@@ -176,9 +213,7 @@ public class WkbS2Shape implements S2Shape {
     // Find chain
     int chainId = findChain(edgeId);
     int offset = edgeId - chainStarts[chainId];
-    int vi = vertexOffsets[chainId] + offset;
-    result.a = vertices[vi];
-    result.b = vertices[vi + 1];
+    getChainEdge(chainId, offset, result);
   }
 
   @Override
@@ -213,9 +248,14 @@ public class WkbS2Shape implements S2Shape {
       result.b = vertices[0];
       return;
     }
-    int vi = vertexOffsets[chainId] + offset;
-    result.a = vertices[vi];
-    result.b = vertices[vi + 1];
+    int vi = vertexOffsets[chainId];
+    if (chainReversed[chainId]) {
+      result.a = vertices[vi + chainLengths[chainId] - offset];
+      result.b = vertices[vi + chainLengths[chainId] - offset - 1];
+    } else {
+      result.a = vertices[vi + offset];
+      result.b = vertices[vi + offset + 1];
+    }
   }
 
   @Override
@@ -226,7 +266,11 @@ public class WkbS2Shape implements S2Shape {
 
   @Override
   public S2Point getChainVertex(int chainId, int edgeOffset) {
-    return vertices[vertexOffsets[chainId] + edgeOffset];
+    if (dim == 0) {
+      return vertices[0];
+    }
+    int offset = chainReversed[chainId] ? chainLengths[chainId] - edgeOffset : edgeOffset;
+    return vertices[vertexOffsets[chainId] + offset];
   }
 
   @Override
@@ -268,40 +312,83 @@ public class WkbS2Shape implements S2Shape {
   }
 
   /**
-   * Compute containsOrigin for polygon outer ring using direct edge-crossing test against
-   * S2.origin(). Same algorithm as S2Loop.initOriginAndBound() but without constructing an S2Loop
-   * (which builds its own internal S2ShapeIndex).
+   * Returns whether a polygon chain has negative S2 curvature (clockwise traversal). The fast path
+   * uses S2's robust turning-angle implementation through {@link S2ShapeMeasures}. Only a result
+   * within S2's documented turning-angle error bound of a half-sphere allocates an S2Loop to apply
+   * S2's hemisphere normalization convention.
+   */
+  private boolean isClockwise(int chainId) {
+    if (chainLengths[chainId] < 3) {
+      return false;
+    }
+
+    // approxLoopArea() calls back into getChainVertex(). This method must run before assigning this
+    // chain's chainReversed entry so it measures the original WKB traversal.
+    assert !chainReversed[chainId] : "ring orientation must be measured before virtual reversal";
+
+    double halfSphere = 2.0 * Math.PI;
+    double loopArea = S2ShapeMeasures.approxLoopArea(this, chainId);
+    double maxError = S2.getTurningAngleMaxError(chainLengths[chainId]);
+    if (Math.abs(loopArea - halfSphere) > maxError) {
+      return loopArea > halfSphere;
+    }
+
+    int length = chainLengths[chainId];
+    List<S2Point> ring = new ArrayList<>(length);
+    int start = vertexOffsets[chainId];
+    for (int i = 0; i < length; i++) {
+      ring.add(vertices[start + i]);
+    }
+    return !new S2Loop(ring).isNormalized();
+  }
+
+  /**
+   * Computes S2.origin() containment. A single-ring polygon uses the same one-pass initialization
+   * as S2Loop; polygons with holes use a whole-shape reference point so every ring participates in
+   * the result.
    */
   private boolean computeContainsOrigin() {
-    int start = vertexOffsets[0];
-    int numVerts = chainLengths[0]; // edges = verts - 1 for closed ring, but we use edge count
+    if (numChains() == 1) {
+      return computeSingleLoopContainsOrigin(0);
+    }
 
-    if (numVerts < 3) return false;
+    ReferencePoint reference = S2ShapeUtil.getReferencePoint(this);
+    S2Point origin = S2.origin();
+    if (reference.equalsPoint(origin)) {
+      return reference.contained();
+    }
 
-    // Same logic as S2Loop.initOriginAndBound():
-    // 1. Guess originInside = false
-    // 2. Check if vertex(1) is inside via angle test
-    // 3. Check if contains(vertex(1)) matches — if not, flip originInside
-    S2Point v0 = vertices[start];
-    S2Point v1 = vertices[start + 1];
-    S2Point v2 = vertices[start + 2];
+    S2EdgeUtil.EdgeCrosser crosser = new S2EdgeUtil.EdgeCrosser(reference.point(), origin);
+    boolean inside = reference.contained();
+    MutableEdge edge = new MutableEdge();
+    for (int i = 0; i < numEdges(); i++) {
+      getEdge(i, edge);
+      inside ^= crosser.edgeOrVertexCrossing(edge.a, edge.b);
+    }
+    return inside;
+  }
 
+  /**
+   * Computes origin containment for one polygon chain using the initialization algorithm from
+   * S2Loop, without constructing an S2Loop or first finding another reference point.
+   */
+  private boolean computeSingleLoopContainsOrigin(int chainId) {
+    int numVertices = chainLengths[chainId];
+    if (numVertices < 3) {
+      return false;
+    }
+
+    S2Point v0 = getChainVertex(chainId, 0);
+    S2Point v1 = getChainVertex(chainId, 1);
+    S2Point v2 = getChainVertex(chainId, 2);
     boolean v1Inside =
         !v0.equalsPoint(v1) && !v2.equalsPoint(v1) && S2Predicates.angleContainsVertex(v0, v1, v2);
 
-    // Brute force contains(vertex(1)) with originInside = false
-    boolean originInside = false;
-    S2Point origin = S2.origin();
-    S2EdgeUtil.EdgeCrosser crosser = new S2EdgeUtil.EdgeCrosser(origin, v1, v0);
-    boolean inside = originInside;
-    for (int i = 1; i <= numVerts; i++) {
-      S2Point next = vertices[start + (i % numVerts)];
-      inside ^= crosser.edgeOrVertexCrossing(next);
+    S2EdgeUtil.EdgeCrosser crosser = new S2EdgeUtil.EdgeCrosser(S2.origin(), v1, v0);
+    boolean inside = false;
+    for (int i = 1; i <= numVertices; i++) {
+      inside ^= crosser.edgeOrVertexCrossing(getChainVertex(chainId, i));
     }
-
-    if (v1Inside != inside) {
-      originInside = true;
-    }
-    return originInside;
+    return v1Inside != inside;
   }
 }

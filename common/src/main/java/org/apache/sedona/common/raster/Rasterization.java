@@ -62,7 +62,8 @@ public class Rasterization {
     // Validate the input geometry and raster metadata
     double[] metadata = RasterAccessors.metadata(raster);
     validateRasterMetadata(metadata);
-    if (!RasterPredicates.rsIntersects(raster, geom)) {
+    geom = RasterUtils.transformToRasterCRS(raster, geom);
+    if (!RasterPredicates.intersectsInRasterCoordinateSpace(raster, geom)) {
       throw new IllegalArgumentException("Geometry does not intersect Raster.");
     }
 

@@ -19,6 +19,15 @@
 
 ## Map Algebra
 
+!!!warning
+    `RS_MapAlgebra` is deprecated since `v1.9.1` and **will be removed in a future version**, in favour of
+    [Raster UDFs](Raster-UDF.md), which cover the same per-pixel calculations in Python and additionally
+    reach NumPy, SciPy, scikit-learn, and rasterio. It still works for now, but existing scripts should be
+    migrated. The [NDVI example below](#ndvi) is written both ways on the Raster UDF page.
+
+    The array-based functions described on this page — `RS_BandAsArray`, `RS_Add`, `RS_NormalizedDifference`
+    and friends — are not deprecated.
+
 Map algebra is a way to perform raster calculations using mathematical expressions. The expression can be a simple arithmetic operation or a complex combination of multiple operations. The expression can be applied to a single raster band or multiple raster bands. The result of the expression is a new raster.
 
 !!!tip
@@ -145,4 +154,5 @@ FROM raster_table) t
 ### Further Reading
 
 * [Jiffle language summary](https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary)
+* [Raster UDFs](Raster-UDF.md) — the same operations in Python, with NumPy and rasterio
 * [Raster operators](Raster-Functions.md#raster-operators)

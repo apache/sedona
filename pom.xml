@@ -27,7 +27,7 @@
     </parent>
     <groupId>org.apache.sedona</groupId>
     <artifactId>sedona-parent</artifactId>
-    <version>1.9.1-SNAPSHOT</version>
+    <version>1.9.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>sedona-parent</name>
     <url>https://sedona.apache.org/</url>

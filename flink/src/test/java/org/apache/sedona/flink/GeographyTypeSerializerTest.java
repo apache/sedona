@@ -18,13 +18,18 @@
  */
 package org.apache.sedona.flink;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.flink.core.memory.DataInputDeserializer;
 import org.apache.flink.core.memory.DataOutputSerializer;
 import org.apache.sedona.common.S2Geography.Geography;
+import org.apache.sedona.common.S2Geography.WKBGeography;
 import org.apache.sedona.common.geography.Constructors;
+import org.apache.sedona.common.geography.Functions;
 import org.junit.Test;
 
 public class GeographyTypeSerializerTest {
@@ -48,9 +53,16 @@ public class GeographyTypeSerializerTest {
 
   @Test
   public void testPolygonRoundTrip() throws Exception {
-    Geography polygon = Constructors.geogFromWKT("POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))", 4326);
+    String wkt = "POLYGON ((0 0, 0 4, 4 4, 4 0, 0 0), (1 1, 1 3, 3 3, 3 1, 1 1))";
+    WKBGeography polygon = (WKBGeography) Constructors.geogFromWKT(wkt, 4326);
+    byte[] originalWkb = polygon.getWKBBytes().clone();
     Geography result = roundTrip(polygon);
+
     assertEquals(polygon.toEWKT(), result.toEWKT());
+    assertTrue(result instanceof WKBGeography);
+    assertArrayEquals(originalWkb, ((WKBGeography) result).getWKBBytes());
+    assertTrue(Functions.contains(result, Constructors.geogFromWKT("POINT (0.5 0.5)", 4326)));
+    assertFalse(Functions.contains(result, Constructors.geogFromWKT("POINT (2 2)", 4326)));
   }
 
   @Test

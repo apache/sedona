@@ -23,6 +23,10 @@ Introduction: Tests whether two geography objects intersect on the sphere using 
 
 Edges are interpreted as great-circle arcs, so the test is correct even when geographies cross the antimeridian or wrap around the poles — situations where a planar `ST_Intersects` would be wrong.
 
+Polygon ring roles follow the simple-features structure: the first ring is a shell and subsequent rings are holes, regardless of input winding. Sedona preserves the submitted coordinate order for structural output such as `ST_AsText`, while normalizing only the S2-facing traversal used by spherical operations.
+
+Each Geography polygon shell is normalized to an area of at most one hemisphere. A shell intended to represent more than half the sphere is therefore interpreted as its complement; reversing the ring's coordinate sequence does not select the larger region.
+
 ![ST_Intersects returning true](../../../../image/ST_Intersects_geography/ST_Intersects_geography_true.svg "ST_Intersects returning true")
 ![ST_Intersects returning false](../../../../image/ST_Intersects_geography/ST_Intersects_geography_false.svg "ST_Intersects returning false")
 

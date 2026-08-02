@@ -282,6 +282,14 @@ ndviDf.createOrReplaceTempView("ndviDf")
 
 Map algebra is the most general processing primitive — clipping, masking, thresholding, and arithmetic between bands or between rasters all fit the same `RS_MapAlgebra(rast, pixelType, script)` (or two-raster) shape. See [Map algebra](../api/sql/Raster-map-algebra.md) for the script syntax and [Raster processing](#raster-processing-reference) below for alternatives (`RS_Clip`, `RS_Resample`, `RS_SetValues`).
 
+!!!warning
+    `RS_MapAlgebra` is deprecated since `v1.9.1` and **will be removed in a future version**, in favour of
+    [Raster UDFs](../api/sql/Raster-UDF.md), which express the same per-pixel calculations in Python and
+    additionally reach NumPy, SciPy, scikit-learn, and rasterio. It still works, so this walkthrough runs as
+    written, but new code should use a UDF — see
+    [NDVI as map algebra and as a UDF](../api/sql/Raster-UDF.md#ndvi-as-map-algebra-and-as-a-udf) for the
+    same calculation written both ways.
+
 ### 6. Visualize the processed raster
 
 The NDVI raster makes the vegetated field obvious: green pixels where NDVI is high, washed-out red elsewhere.
@@ -552,19 +560,39 @@ The walkthrough used `RS_MapAlgebra` for NDVI. The full operator surface:
 
 ![Reproject match](../image/RS_ReprojectMatch/RS_ReprojectMatch.svg)
 
-### Map algebra
+### Per-pixel calculations
 
-[`RS_MapAlgebra`](../api/sql/Raster-map-algebra.md) has two shapes:
+Use a [Raster UDF](../api/sql/Raster-UDF.md). A UDF takes one raster column or several, so both shapes of the
+deprecated `RS_MapAlgebra` have a direct equivalent — here is the two-raster change-detection case:
 
-- **Single-raster** — `RS_MapAlgebra(rast, pixelType, script)`. Per-pixel script over bands of one raster. Used in the walkthrough.
-- **Two-raster** — `RS_MapAlgebra(rast0, rast1, pixelType, script, noDataValue)`. Per-pixel script across two rasters. Common for difference rasters and change detection.
+```python
+import numpy as np
+from pyspark.sql.functions import col, udf
 
-```sql
--- Two-raster: subtract one NDVI raster from another
-SELECT RS_MapAlgebra(a.rast, b.rast, 'D',
-                     'out[0] = rast0[0] - rast1[0];', -9999.0) AS delta
-FROM ndvi_after a JOIN ndvi_before b ON a.x = b.x AND a.y = b.y
+from sedona.spark.sql.types import RasterType
+
+NODATA = -9999.0
+
+
+@udf(returnType=RasterType())
+def delta(after, before):
+    # as_numpy_masked(), not as_numpy(): NODATA becomes NaN and stays invalid through
+    # the subtraction instead of contributing its sentinel value.
+    diff = after.as_numpy_masked()[0] - before.as_numpy_masked()[0]
+    return after.with_bands(np.where(np.isnan(diff), NODATA, diff), nodata=NODATA)
+
+
+# ndvi_after and ndvi_before are NDVI rasters for two dates, tiled on the same grid,
+# each with the x and y tile-index columns the raster data source adds.
+(
+    ndvi_after.alias("after")
+    .join(ndvi_before.alias("before"), ["x", "y"])
+    .select(delta(col("after.rast"), col("before.rast")).alias("delta"))
+)
 ```
+
+See [Raster UDFs](../api/sql/Raster-UDF.md) for the single-raster form, NDVI written both ways, and the
+limits to be aware of.
 
 ## Raster–vector interop
 
@@ -721,7 +749,7 @@ band1 = ds.read(1)
 
 ## Python UDFs over rasters
 
-Python UDFs receive raster data, process it with NumPy / SciPy / scikit-learn / etc., and return either a scalar value or a new raster.
+Python UDFs receive raster data, process it with NumPy / SciPy / scikit-learn / etc., and return either a scalar value or a new raster. This section is an introduction; see [Raster UDFs](../api/sql/Raster-UDF.md) for the full treatment, including when to prefer a UDF over `RS_MapAlgebra`, two-raster UDFs, and the limits to be aware of.
 
 ### Raster to scalar
 
@@ -749,7 +777,7 @@ df_raster.withColumn("mean", expr("mean_udf(rast)")).show()
 
 ### Raster to raster
 
-UDFs can also return raster objects. Use `SedonaRaster.with_bands()` to replace pixel data while preserving all spatial metadata (CRS, affine transform, NODATA, etc.). Band count and dtype can change freely.
+Since `v1.9.1`, UDFs can also return raster objects. Use `SedonaRaster.with_bands()` to replace pixel data while carrying over the source raster's CRS and affine transform. Band count and dtype can change freely.
 
 ```python
 import numpy as np
@@ -757,9 +785,11 @@ from sedona.spark.sql.types import RasterType
 
 
 def mask_udf(raster):
+    # assumes a hole-free scene; use as_numpy_masked() if it may carry NODATA —
+    # see the Raster UDF page
     band1 = raster.as_numpy()[0, :, :]
     mask = (band1 < 1400).astype(np.float32)
-    return raster.with_bands(mask)  # 1 band, preserves CRS/affine/nodata
+    return raster.with_bands(mask)  # 1 band, on the input's grid
 
 
 sedona.udf.register("mask_udf", mask_udf, RasterType())
@@ -774,7 +804,43 @@ df_raster.withColumn("mask_rast", expr("mask_udf(rast)")).show()
 +--------------------+--------------------+
 ```
 
-`with_bands()` accepts a NumPy array in CHW order (bands × height × width), or HW order (height × width) for single-band output. The returned `SedonaRaster` carries all the original metadata and is serialized back to the JVM automatically when the UDF returns.
+`with_bands()` accepts a NumPy array in CHW order (bands × height × width), or HW order (height × width) for single-band output. The returned `SedonaRaster` is serialized back to the JVM automatically when the UDF returns, so the output is an ordinary raster column.
+
+Output NODATA is inherited from the input band unless you say otherwise, which is rarely what a derived raster wants — pass `nodata=` to set it:
+
+```python
+return raster.with_bands(mask, nodata=-9999.0)
+```
+
+!!!note
+    The result always sits on the input's grid — `with_bands()` requires the same height and width and reuses the input's CRS and affine transform, so reprojection and resampling can't be done inside a Python UDF. See [Raster UDFs](../api/sql/Raster-UDF.md#limits) for that and the dtype caveats.
+
+### Using rasterio inside a UDF
+
+`as_rasterio()` works inside a UDF too, so rasterio and GDAL algorithms apply to raster columns directly. The dataset is read-only — to return a raster, pass the resulting array through `with_bands()`:
+
+```python
+import rasterio.fill
+
+
+def fill_udf(raster):
+    # The GDAL dataset does not carry Sedona's NODATA, so build the mask from the
+    # SedonaRaster instead — as_numpy_masked() substitutes NaN for NODATA.
+    nodata = raster.bands_meta[0].nodata
+    valid = ~np.isnan(raster.as_numpy_masked()[0])
+    with raster.as_rasterio() as src:
+        filled = rasterio.fill.fillnodata(src.read(1), mask=valid.astype(np.uint8))
+    # fillnodata only reaches max_search_distance (100 px) from valid data; deeper
+    # cells keep the sentinel, so keep the NODATA declared. Use nodata=float("nan")
+    # only when every hole is small enough to be filled completely.
+    return raster.with_bands(filled, nodata=nodata)
+
+
+sedona.udf.register("fill_udf", fill_udf, RasterType())
+df_raster.withColumn("filled", expr("fill_udf(rast)")).show()
+```
+
+This works for any rasterio operation that leaves the grid unchanged. Warping and reprojection change the grid and so can't be returned this way — use [`RS_Resample`](../api/sql/Raster-Operators/RS_Resample.md) or [`RS_ReprojectMatch`](../api/sql/Raster-Operators/RS_ReprojectMatch.md) instead.
 
 ## Performance
 

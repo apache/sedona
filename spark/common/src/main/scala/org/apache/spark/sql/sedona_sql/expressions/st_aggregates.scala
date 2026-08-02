@@ -20,7 +20,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 
 import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.Column
-import org.apache.spark.sql.functions.{col, udaf}
+import org.apache.spark.sql.functions.{call_udf, col, udaf}
 
 object st_aggregates {
   def ST_Envelope_Aggr(geometry: Column): Column = {
@@ -54,13 +54,11 @@ object st_aggregates {
   }
 
   def ST_Collect_Agg(geometry: Column): Column = {
-    val aggrFunc = udaf(new ST_Collect_Agg)
-    aggrFunc(geometry)
+    call_udf("ST_Collect_Agg", geometry)
   }
 
   def ST_Collect_Agg(geometry: String): Column = {
-    val aggrFunc = udaf(new ST_Collect_Agg)
-    aggrFunc(col(geometry))
+    ST_Collect_Agg(col(geometry))
   }
 
   def ST_Extent(geometry: Column): Column = {

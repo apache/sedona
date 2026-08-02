@@ -1117,13 +1117,16 @@ def ST_InteriorRingN(polygon: ColumnOrName, n: Union[ColumnOrName, int]) -> Colu
 
 @validate_argument_types
 def ST_Intersection(a: ColumnOrName, b: ColumnOrName) -> Column:
-    """Calculate the intersection of two geometry columns.
+    """Calculate the intersection of two Geometry columns or two Geography columns.
 
-    :param a: One geometry column to use in the calculation.
+    Inputs must have the same spatial type. Geography intersections use geodesic edges and
+    return a Geography.
+
+    :param a: One Geometry or Geography column to use in the calculation.
     :type a: ColumnOrName
-    :param b: Other geometry column to use in the calculation.
+    :param b: Other Geometry or Geography column to use in the calculation.
     :type b: ColumnOrName
-    :return: Intersection of a and b as a geometry column.
+    :return: Intersection of a and b with the same spatial type as the inputs.
     :rtype: Column
     """
     return _call_st_function("ST_Intersection", (a, b))

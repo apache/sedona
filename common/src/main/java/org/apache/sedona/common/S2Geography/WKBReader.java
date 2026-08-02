@@ -343,7 +343,15 @@ public class WKBReader {
       for (int i = 0; i < seq.size(); i++) {
         pts.add(S2LatLng.fromDegrees(seq.getY(i), seq.getX(i)).toPoint());
       }
-      loops.add(new S2Loop(pts));
+      S2Loop loop = new S2Loop(pts);
+      // Match simple-features/SedonaDB semantics: ring position determines whether it is a shell
+      // or hole. Normalize only the operational S2 loop; WKBGeography retains the source bytes.
+      boolean isHole = r > 0;
+      boolean isClockwise = loop.getTurningAngle() < 0;
+      if (isHole != isClockwise) {
+        loop.invert();
+      }
+      loops.add(loop);
     }
     if (loops.isEmpty()) {
       return new PolygonGeography();
