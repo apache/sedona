@@ -172,7 +172,7 @@ make docsbuild
 **What this command does behind the scenes:**
 
 1. **Environment Verification:** Validates that `uv` is available on your local path.
-2. **Dependency Syncing:** Runs `uv sync --all-groups` to automatically set up or synchronize an isolated virtual environment (`.venv`) containing MkDocs and compilation dependencies.
+2. **Dependency Syncing:** Runs `uv sync --group docs` (via `make docsinstall`) to set up or synchronize the documentation environment containing MkDocs and compilation dependencies.
 3. **Asset Generation:** Navigates into the `docs-overrides` directory to fetch, build, and bundle required JavaScript and CSS assets via Node/NPM and Gulp workflows.
 4. **MkDocs Compilation:** Compiles the Markdown files in the `docs` directory into a fully optimized, static HTML website based on the configuration inside `mkdocs.yml`.
 
