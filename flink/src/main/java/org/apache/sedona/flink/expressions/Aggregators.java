@@ -27,6 +27,7 @@ import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.S2Geography.GeographyWKBSerializer;
 import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
+import org.apache.sedona.flink.AccGeometryCollectionTypeSerializer;
 import org.apache.sedona.flink.Box2DTypeSerializer;
 import org.apache.sedona.flink.Box3DTypeSerializer;
 import org.apache.sedona.flink.GeographyTypeSerializer;
@@ -391,7 +392,10 @@ public class Aggregators {
               rawSerializer = GeometryTypeSerializer.class,
               bridgedTo = Geometry.class),
       accumulator =
-          @DataTypeHint(value = "RAW", bridgedTo = Accumulators.AccGeometryCollection.class),
+          @DataTypeHint(
+              value = "RAW",
+              rawSerializer = AccGeometryCollectionTypeSerializer.class,
+              bridgedTo = Accumulators.AccGeometryCollection.class),
       output =
           @DataTypeHint(
               value = "RAW",
@@ -404,7 +408,10 @@ public class Aggregators {
               rawSerializer = GeographyTypeSerializer.class,
               bridgedTo = Geography.class),
       accumulator =
-          @DataTypeHint(value = "RAW", bridgedTo = Accumulators.AccGeometryCollection.class),
+          @DataTypeHint(
+              value = "RAW",
+              rawSerializer = AccGeometryCollectionTypeSerializer.class,
+              bridgedTo = Accumulators.AccGeometryCollection.class),
       output =
           @DataTypeHint(
               value = "RAW",
@@ -565,7 +572,10 @@ public class Aggregators {
               rawSerializer = GeometryTypeSerializer.class,
               bridgedTo = Geometry.class),
       accumulator =
-          @DataTypeHint(value = "RAW", bridgedTo = Accumulators.AccGeometryCollection.class),
+          @DataTypeHint(
+              value = "RAW",
+              rawSerializer = AccGeometryCollectionTypeSerializer.class,
+              bridgedTo = Accumulators.AccGeometryCollection.class),
       output =
           @DataTypeHint(
               value = "RAW",
@@ -578,7 +588,10 @@ public class Aggregators {
               rawSerializer = GeographyTypeSerializer.class,
               bridgedTo = Geography.class),
       accumulator =
-          @DataTypeHint(value = "RAW", bridgedTo = Accumulators.AccGeometryCollection.class),
+          @DataTypeHint(
+              value = "RAW",
+              rawSerializer = AccGeometryCollectionTypeSerializer.class,
+              bridgedTo = Accumulators.AccGeometryCollection.class),
       output =
           @DataTypeHint(
               value = "RAW",
