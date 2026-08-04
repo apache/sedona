@@ -63,7 +63,6 @@ sync-no-dev: check-install ## Sync non-development dependencies using uv
 update: install
 	prek auto-update --freeze
 
-update-deps: check-install ## Update pre-commit hooks and dependency locks
+update-deps: check-install ## Update pre-commit hooks and local dependencies
 	prek auto-update --freeze || :
-	uv lock --upgrade
-	uv sync --all-groups
+	uv sync --all-groups --upgrade

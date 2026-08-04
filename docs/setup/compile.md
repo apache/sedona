@@ -188,13 +188,13 @@ Make sure your machine has `uv` and Python 3.8+ installed before running checks.
 
 ### Core Workflow via Makefile
 
-The `Makefile` handles environment isolation and dependency resolution automatically using `uv`. For maximum convenience, you should interact with `prek` entirely through the following make shortcuts:
+The `Makefile` handles environment isolation and dependency resolution automatically using `uv`. The generated root `uv.lock` remains local and is not committed, so dependency versions may change when the environment is refreshed. For maximum convenience, you should interact with `prek` entirely through the following make shortcuts:
 
 * **`make check-stage`** *Runs checks on staged changes only (Recommended before committing).* Evaluates `prek` only against the files you have explicitly staged using `git add`. It is incredibly fast.
 * **`make check`** *Runs checks on the full codebase.* Forces `prek` to evaluate every single file in the repository, regardless of git status. **Use this before opening a Pull Request.**
 * **`make check-from-ref`** *Runs checks on your entire branch history.* Automatically identifies all files changed since you branched off of the `master` branch and runs linting rules against them.
 * **`make check-last`** *Runs checks on your last commit.* If you just committed code and want to double-check that everything passes post-commit.
-* **`make update-deps`** *Keeps linter hooks up to date.* Upgrades `prek` hooks to their latest respective upstream versions and updates your local locked dependencies.
+* **`make update-deps`** *Keeps linter hooks up to date.* Upgrades `prek` hooks to their latest respective upstream versions and refreshes local development dependencies to their latest compatible versions.
 
 ### Running prek Standalone (Without Makefile)
 
