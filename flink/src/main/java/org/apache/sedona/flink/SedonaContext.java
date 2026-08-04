@@ -64,11 +64,13 @@ public class SedonaContext {
   /**
    * ExecutionConfig.registerTypeWithKryoSerializer was removed; Flink 1.19+'s public replacement is
    * the declarative pipeline.serialization-config option (FLIP-398). Applied via
-   * StreamExecutionEnvironment.configure(ReadableConfig) — env.getConfig().getSerializerConfig() is
-   * itself @Internal in both Flink 1.19 and 2.2, so this goes through the environment's public API
-   * instead, which also uses the environment's own user classloader rather than the calling
-   * thread's context classloader. Flink instantiates GeometrySerde/SpatialIndexSerde itself via
-   * their no-arg constructors, so only the class names are registered here.
+   * StreamExecutionEnvironment.configure(ReadableConfig, ClassLoader) — env.getConfig().getSerializerConfig()
+   * is itself @Internal in both Flink 1.19 and 2.2, so this goes through the environment's public API
+   * instead. The two-argument overload is used to pass the calling thread's context classloader
+   * explicitly: the one-argument overload resolves classes with the environment's own user
+   * classloader, which does not see PyFlink's job classloader and fails PyFlink jobs with
+   * ClassNotFoundException. Flink instantiates GeometrySerde/SpatialIndexSerde itself via their
+   * no-arg constructors, so only the class names are registered here.
    */
   static void registerGeometryKryoSerializers(StreamExecutionEnvironment env) {
     List<String> kryoRegistrations =
@@ -87,7 +89,7 @@ public class SedonaContext {
 
     Configuration configuration = new Configuration();
     configuration.set(PipelineOptions.SERIALIZATION_CONFIG, kryoRegistrations);
-    env.configure(configuration);
+    env.configure(configuration, Thread.currentThread().getContextClassLoader());
   }
 
   private static String kryoRegistration(Class<?> type, Class<?> serializer) {
