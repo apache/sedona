@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -4930,6 +4929,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#compiling-via-makefile-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compiling via Makefile (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -4959,10 +4969,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#the-core-workflow-uv-prek" class="md-nav__link">
+  <a href="#core-workflow-via-makefile" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Core Workflow: uv + prek
+        Core Workflow via Makefile
       
     </span>
   </a>
@@ -4970,10 +4980,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#available-make-commands" class="md-nav__link">
+  <a href="#running-prek-standalone-without-makefile" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Available Make Commands
+        Running prek Standalone (Without Makefile)
       
     </span>
   </a>
@@ -5817,6 +5827,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#compiling-via-makefile-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compiling via Makefile (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -5846,10 +5867,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#the-core-workflow-uv-prek" class="md-nav__link">
+  <a href="#core-workflow-via-makefile" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Core Workflow: uv + prek
+        Core Workflow via Makefile
       
     </span>
   </a>
@@ -5857,10 +5878,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#available-make-commands" class="md-nav__link">
+  <a href="#running-prek-standalone-without-makefile" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Available Make Commands
+        Running prek Standalone (Without Makefile)
       
     </span>
   </a>
@@ -6062,30 +6083,60 @@ cd ..
 uv run mike deploy --update-aliases latest-snapshot -b website -p
 uv run mike serve -b website
 </code></pre></div>
-<h2 id="code-quality-checks-with-prek-uv-and-make">Code Quality Checks with <code>prek</code>, <code>uv</code>, and <code>make</code><a class="headerlink" href="#code-quality-checks-with-prek-uv-and-make" title="Permanent link">&para;</a></h2>
-<p>This guide explains how Apache Sedona manages local code quality checks, formatting, and linting. To ensure a fast and consistent developer experience, we combine <strong><code>uv</code></strong> (a lightning-fast Python package and environment manager) with <strong><code>prek</code></strong> (our internal pre-commit wrapper framework) and expose everything via a simple, unified <code>Makefile</code>.</p>
-<hr />
-<h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
-<p>Before running any checks, ensure you have <code>uv</code> installed on your machine. If you don't have it yet, you can install it via the official installer:</p>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-LsSf<span class="w"> </span>https://astral.sh/uv/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+<h3 id="compiling-via-makefile-recommended">Compiling via Makefile (Recommended)<a class="headerlink" href="#compiling-via-makefile-recommended" title="Permanent link">&para;</a></h3>
+<p>For a streamlined developer experience, a unified <code>Makefile</code> is provided to handle local documentation builds automatically.</p>
+<p>To build and serve the documentation locally using the automated environment pipeline, run:</p>
+<div class="highlight"><pre><span></span><code>make<span class="w"> </span>docsbuild
 </code></pre></div>
-<blockquote>
-<p>💡 <strong>Note:</strong> You do not need to manually install Python virtual environments, <code>pre-commit</code>, or <code>prek</code>. The <code>Makefile</code> handles environment isolation and dependency resolution automatically using <code>uv</code>.</p>
-</blockquote>
+<p><strong>What this command does behind the scenes:</strong></p>
+<ol>
+<li><strong>Environment Verification:</strong> Validates that <code>uv</code> is available on your local path.</li>
+<li><strong>Dependency Syncing:</strong> Runs <code>uv sync --group docs</code> (via <code>make docsinstall</code>) to set up or synchronize the documentation environment containing MkDocs and compilation dependencies.</li>
+<li><strong>Asset Generation:</strong> Navigates into the <code>docs-overrides</code> directory to fetch, build, and bundle required JavaScript and CSS assets via Node/NPM and Gulp workflows.</li>
+<li><strong>MkDocs Compilation:</strong> Compiles the Markdown files in the <code>docs</code> directory into a fully optimized, static HTML website based on the configuration inside <code>mkdocs.yml</code>.</li>
+</ol>
 <hr />
-<h3 id="the-core-workflow-uv-prek">The Core Workflow: <code>uv</code> + <code>prek</code><a class="headerlink" href="#the-core-workflow-uv-prek" title="Permanent link">&para;</a></h3>
-<p>Our codebase uses <code>prek</code> to orchestrate linting and formatting workflows (such as <em>Black</em>, <em>markdownlint</em>, or <em>oxipng</em>).</p>
-<p>Instead of forcing you to activate a virtual environment manually, the <code>Makefile</code> uses <code>uv sync</code> to build a perfectly isolated environment behind the scenes. When you run any <code>make check-*</code> command, it guarantees that <code>prek</code> is executed using the exact dependency versions locked in the project.</p>
-<hr />
-<h3 id="available-make-commands">Available Make Commands<a class="headerlink" href="#available-make-commands" title="Permanent link">&para;</a></h3>
-<p>For maximum convenience, you should interact with <code>prek</code> entirely through the following <code>make</code> shortcuts:</p>
+<h2 id="code-quality-checks-with-prek-uv-and-make">Code Quality Checks with <code>prek</code>, <code>uv</code>, and <code>make</code><a class="headerlink" href="#code-quality-checks-with-prek-uv-and-make" title="Permanent link">&para;</a></h2>
+<p>This guide explains how Apache Sedona manages local code quality checks, formatting, and linting. To ensure a fast and consistent developer experience, we combine <code>uv</code> (a lightning-fast Python package and environment manager) with <code>prek</code> (our internal pre-commit wrapper framework) and expose everything via a simple, unified <code>Makefile</code>.</p>
+<h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
+<p>Make sure your machine has <code>uv</code> and Python 3.8+ installed before running checks.</p>
+<h3 id="core-workflow-via-makefile">Core Workflow via Makefile<a class="headerlink" href="#core-workflow-via-makefile" title="Permanent link">&para;</a></h3>
+<p>The <code>Makefile</code> handles environment isolation and dependency resolution automatically using <code>uv</code>. For maximum convenience, you should interact with <code>prek</code> entirely through the following make shortcuts:</p>
 <ul>
 <li><strong><code>make check-stage</code></strong> <em>Runs checks on staged changes only (Recommended before committing).</em> Evaluates <code>prek</code> only against the files you have explicitly staged using <code>git add</code>. It is incredibly fast.</li>
 <li><strong><code>make check</code></strong> <em>Runs checks on the full codebase.</em> Forces <code>prek</code> to evaluate every single file in the repository, regardless of git status. <strong>Use this before opening a Pull Request.</strong></li>
-<li><strong><code>make check-from-ref</code></strong> <em>Runs checks on your entire branch history.</em> Automatically identifies all files changed since you branched off of the <code>main</code> branch and runs linting rules against them.</li>
+<li><strong><code>make check-from-ref</code></strong> <em>Runs checks on your entire branch history.</em> Automatically identifies all files changed since you branched off of the <code>master</code> branch and runs linting rules against them.</li>
 <li><strong><code>make check-last</code></strong> <em>Runs checks on your last commit.</em> If you just committed code and want to double-check that everything passes post-commit.</li>
 <li><strong><code>make update-deps</code></strong> <em>Keeps linter hooks up to date.</em> Upgrades <code>prek</code> hooks to their latest respective upstream versions and updates your local locked dependencies.</li>
 </ul>
+<h3 id="running-prek-standalone-without-makefile">Running prek Standalone (Without Makefile)<a class="headerlink" href="#running-prek-standalone-without-makefile" title="Permanent link">&para;</a></h3>
+<p>For developers on execution environments where running a <code>Makefile</code> is unavailable, restrictive, or unoptimized (such as native Windows environments without an active bash/make emulation layer), you can execute code quality workflows by interacting with <code>prek</code> directly using <code>uv</code>.</p>
+<h4 id="1-bootstrap-the-environment">1. Bootstrap the Environment<a class="headerlink" href="#1-bootstrap-the-environment" title="Permanent link">&para;</a></h4>
+<p>Before invoking <code>prek</code> manually, force <code>uv</code> to resolve and install the mandatory development groups and local hook ecosystems:</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>sync<span class="w"> </span>--all-groups
+</code></pre></div>
+<h4 id="2-executing-standalone-hooks">2. Executing Standalone Hooks<a class="headerlink" href="#2-executing-standalone-hooks" title="Permanent link">&para;</a></h4>
+<p>Once dependencies are synced inside your virtual environment, execute <code>prek</code> tasks via <code>uv run</code>:</p>
+<ul>
+<li><strong>Check Staged Files Only:</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>prek<span class="w"> </span>run
+</code></pre></div>
+<ul>
+<li><strong>Check the Entire Codebase:</strong></li>
+</ul>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>prek<span class="w"> </span>run<span class="w"> </span>--all-files
+</code></pre></div>
+<ul>
+<li><strong>Run Specific Linters Standalone:</strong>
+  If you only wish to validate explicit targets (such as Python formatting, markdown linter rules, or security auditing profiles), pass the specific hook ID directly:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>prek<span class="w"> </span>run<span class="w"> </span>&lt;hook_id&gt;<span class="w"> </span>--all-files
+</code></pre></div>
+<h4 id="3-updating-hooks-manually">3. Updating Hooks Manually<a class="headerlink" href="#3-updating-hooks-manually" title="Permanent link">&para;</a></h4>
+<p>To keep linter definitions synchronized with upstream styling configurations without a <code>Makefile</code> shortcut, trigger an explicit update through the core engine:</p>
+<div class="highlight"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>prek<span class="w"> </span>auto-update<span class="w"> </span>--freeze
+</code></pre></div>
 <hr />
 <h3 id="advanced-usage-examples">Advanced Usage &amp; Examples<a class="headerlink" href="#advanced-usage-examples" title="Permanent link">&para;</a></h3>
 <h4 id="skipping-specific-hooks-locally">Skipping Specific Hooks Locally<a class="headerlink" href="#skipping-specific-hooks-locally" title="Permanent link">&para;</a></h4>
@@ -6152,7 +6203,7 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="May 28, 2026 05:27:59 UTC">May 28, 2026 05:27:59</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 4, 2026 18:21:57 UTC">August 4, 2026 18:21:57</span>
   </span>
 
     
