@@ -29,11 +29,11 @@
 
 {% block header %}
   {%- set announcement = {
-            'en': '🎉 SedonaDB 0.4.0 is out now! 🗺️ Python DataFrame API, R dplyr, Geography support & GPU-accelerated spatial joins. Read the release blog →',
-            'zh': '🎉 SedonaDB 0.4.0 已正式发布！🗺️ 新增 Python DataFrame API、R dplyr 接口、Geography 支持及 GPU 加速空间连接。阅读发布博客 →'
+            'en': '🎉 Apache Sedona 1.9.1 is out now! 🗺️ Geography SQL functions, Box2D & Box3D types, raster Python UDFs & more. Read the release notes →',
+            'zh': '🎉 Apache Sedona 1.9.1 已正式发布！🗺️ 新增 Geography SQL 函数、Box2D 与 Box3D 类型、栅格 Python UDF 等。查看发布说明 →'
   } -%}
   <div style="background: #CA463A; color: white; text-align: center; padding: 0.5rem;">
-        <a href="{{ 'blog/2026/06/19/sedonadb-040-release/' | url }}" title="Announcement">{{ announcement[cur_lang] }}</a>
+        <a href="{{ 'setup/release-notes/' | url }}" title="Announcement">{{ announcement[cur_lang] }}</a>
   </div>
   {{ super() }} {# This renders the original header below your test bar #}
 {% endblock %}

@@ -73,14 +73,14 @@ For faster iteration during notebook authoring, you can replicate the harness wi
 
 - Python 3.10+ (image uses 3.12)
 - `pyspark==4.0.1`
-- `apache-sedona==1.9.0`
+- `apache-sedona==1.9.1`
 - `keplergl==0.3.7`, `geopandas`, `pyarrow`, `pandas`, `matplotlib`, `fiona==1.10.1`
 - `JAVA_HOME` pointing at a JDK 17 install
 
 Then export the Sedona Maven coordinates (the docker image bakes the JAR in directly; locally you let Maven pull it):
 
 ```bash
-export PYSPARK_SUBMIT_ARGS="--packages org.apache.sedona:sedona-spark-shaded-4.0_2.13:1.9.0,org.datasyslab:geotools-wrapper:1.9.0-33.5 --driver-memory 4g pyspark-shell"
+export PYSPARK_SUBMIT_ARGS="--packages org.apache.sedona:sedona-spark-shaded-4.0_2.13:1.9.1,org.datasyslab:geotools-wrapper:1.9.1-33.5 --driver-memory 4g pyspark-shell"
 ```
 
 Convert and run:
