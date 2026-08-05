@@ -15,6 +15,13 @@
 # limitations under the License.
 #
 
+ARG spark_version=4.0.1
+
+# Official ASF Spark image, used only as the source of ${SPARK_HOME}.
+# Docker Hub keeps every historical version, unlike the ASF dist mirrors
+# which only carry current releases.
+FROM apache/spark:${spark_version} AS spark
+
 FROM ubuntu:24.04
 
 ARG shared_workspace=/opt/workspace
@@ -44,9 +51,10 @@ ENV PYTHONPATH=${SPARK_HOME}/python
 RUN apt-get update
 RUN apt-get install -y openjdk-17-jdk-headless curl python3-pip maven
 RUN pip3 install --no-cache-dir pipenv --break-system-packages
+COPY --from=spark --chown=root:root /opt/spark ${SPARK_HOME}
 COPY ./docker/install-spark.sh ${SEDONA_HOME}/docker/
 RUN chmod +x ${SEDONA_HOME}/docker/install-spark.sh
-RUN ${SEDONA_HOME}/docker/install-spark.sh ${spark_version} ${hadoop_s3_version} ${aws_sdk_version}
+RUN ${SEDONA_HOME}/docker/install-spark.sh ${hadoop_s3_version} ${aws_sdk_version}
 
 # Install Python dependencies
 # --ignore-installed is required because install-spark.sh installs GDAL
