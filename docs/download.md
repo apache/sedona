@@ -40,13 +40,6 @@ Automatically generated binary JARs (per each Master branch commit): [GitHub Act
 |    Source code    | [src](https://www.apache.org/dyn/closer.lua/sedona/1.9.1/apache-sedona-1.9.1-src.tar.gz) | [sha512](https://downloads.apache.org/sedona/1.9.1/apache-sedona-1.9.1-src.tar.gz.sha512) | [asc](https://downloads.apache.org/sedona/1.9.1/apache-sedona-1.9.1-src.tar.gz.asc) |
 |       Binary      | [bin](https://www.apache.org/dyn/closer.lua/sedona/1.9.1/apache-sedona-1.9.1-bin.tar.gz) | [sha512](https://downloads.apache.org/sedona/1.9.1/apache-sedona-1.9.1-bin.tar.gz.sha512) | [asc](https://downloads.apache.org/sedona/1.9.1/apache-sedona-1.9.1-bin.tar.gz.asc) |
 
-### 1.9.0
-
-| |                                    Download from ASF                                     |                                         Checksum                                          |                                      Signature                                      |
-|:-----------------:|:----------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|
-|    Source code    | [src](https://www.apache.org/dyn/closer.lua/sedona/1.9.0/apache-sedona-1.9.0-src.tar.gz) | [sha512](https://downloads.apache.org/sedona/1.9.0/apache-sedona-1.9.0-src.tar.gz.sha512) | [asc](https://downloads.apache.org/sedona/1.9.0/apache-sedona-1.9.0-src.tar.gz.asc) |
-|       Binary      | [bin](https://www.apache.org/dyn/closer.lua/sedona/1.9.0/apache-sedona-1.9.0-bin.tar.gz) | [sha512](https://downloads.apache.org/sedona/1.9.0/apache-sedona-1.9.0-bin.tar.gz.sha512) | [asc](https://downloads.apache.org/sedona/1.9.0/apache-sedona-1.9.0-bin.tar.gz.asc) |
-
 ### 1.8.1
 
 | |                                    Download from ASF                                     |                                         Checksum                                          |                                      Signature                                      |
