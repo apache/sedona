@@ -163,8 +163,8 @@ public class GeometryArrayTypeSerializer extends TypeSerializer<Geometry[]> {
 
     @Override
     public TypeSerializerSchemaCompatibility<Geometry[]> resolveSchemaCompatibility(
-        TypeSerializer<Geometry[]> newSerializer) {
-      if (newSerializer instanceof GeometryArrayTypeSerializer) {
+        TypeSerializerSnapshot<Geometry[]> oldSerializerSnapshot) {
+      if (oldSerializerSnapshot instanceof GeometryArraySerializerSnapshot) {
         return TypeSerializerSchemaCompatibility.compatibleAsIs();
       } else {
         return TypeSerializerSchemaCompatibility.incompatible();

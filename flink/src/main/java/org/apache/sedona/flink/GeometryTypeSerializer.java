@@ -148,8 +148,8 @@ public class GeometryTypeSerializer extends TypeSerializer<org.locationtech.jts.
 
     @Override
     public TypeSerializerSchemaCompatibility<Geometry> resolveSchemaCompatibility(
-        TypeSerializer<Geometry> newSerializer) {
-      if (newSerializer instanceof GeometryTypeSerializer) {
+        TypeSerializerSnapshot<Geometry> oldSerializerSnapshot) {
+      if (oldSerializerSnapshot instanceof GeometrySerializerSnapshot) {
         return TypeSerializerSchemaCompatibility.compatibleAsIs();
       } else {
         return TypeSerializerSchemaCompatibility.incompatible();

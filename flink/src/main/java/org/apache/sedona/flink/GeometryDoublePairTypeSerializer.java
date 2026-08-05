@@ -19,22 +19,22 @@
 package org.apache.sedona.flink;
 
 import java.io.IOException;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
 import org.apache.flink.api.common.typeutils.TypeSerializerSchemaCompatibility;
 import org.apache.flink.api.common.typeutils.TypeSerializerSnapshot;
 import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
-import org.apache.sedona.common.S2Geography.Geography;
-import org.apache.sedona.common.S2Geography.GeographyWKBSerializer;
-import org.apache.sedona.common.S2Geography.SinglePointGeography;
+import org.locationtech.jts.geom.Geometry;
 
-public class GeographyTypeSerializer extends TypeSerializer<Geography> {
+public class GeometryDoublePairTypeSerializer extends TypeSerializer<Pair<Geometry, Double>> {
 
   private static final long serialVersionUID = 1L;
 
-  public static final GeographyTypeSerializer INSTANCE = new GeographyTypeSerializer();
+  public static final GeometryDoublePairTypeSerializer INSTANCE =
+      new GeometryDoublePairTypeSerializer();
 
-  public GeographyTypeSerializer() {}
+  public GeometryDoublePairTypeSerializer() {}
 
   @Override
   public boolean isImmutableType() {
@@ -42,30 +42,26 @@ public class GeographyTypeSerializer extends TypeSerializer<Geography> {
   }
 
   @Override
-  public TypeSerializer<Geography> duplicate() {
+  public TypeSerializer<Pair<Geometry, Double>> duplicate() {
     return this;
   }
 
   @Override
-  public Geography createInstance() {
-    return new SinglePointGeography();
+  public Pair<Geometry, Double> createInstance() {
+    return Pair.of(null, 0.0);
   }
 
   @Override
-  public Geography copy(Geography from) {
+  public Pair<Geometry, Double> copy(Pair<Geometry, Double> from) {
     if (from == null) {
       return null;
     }
-    // Geography has no copy()/clone(); a serialize/deserialize round-trip is a safe deep copy.
-    try {
-      return GeographyWKBSerializer.deserialize(GeographyWKBSerializer.serialize(from));
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to copy Geography", e);
-    }
+    Geometry geom = from.getLeft() == null ? null : (Geometry) from.getLeft().copy();
+    return Pair.of(geom, from.getRight());
   }
 
   @Override
-  public Geography copy(Geography from, Geography reuse) {
+  public Pair<Geometry, Double> copy(Pair<Geometry, Double> from, Pair<Geometry, Double> reuse) {
     return copy(from);
   }
 
@@ -75,44 +71,45 @@ public class GeographyTypeSerializer extends TypeSerializer<Geography> {
   }
 
   @Override
-  public void serialize(Geography record, DataOutputView target) throws IOException {
+  public void serialize(Pair<Geometry, Double> record, DataOutputView target) throws IOException {
     if (record == null) {
-      target.writeInt(-1);
+      target.writeBoolean(false);
     } else {
-      byte[] data = GeographyWKBSerializer.serialize(record);
-      target.writeInt(data.length);
-      target.write(data);
+      target.writeBoolean(true);
+      GeometryTypeSerializer.INSTANCE.serialize(record.getLeft(), target);
+      target.writeDouble(record.getRight());
     }
   }
 
   @Override
-  public Geography deserialize(DataInputView source) throws IOException {
-    int length = source.readInt();
-    if (length == -1) {
+  public Pair<Geometry, Double> deserialize(DataInputView source) throws IOException {
+    if (!source.readBoolean()) {
       return null;
     }
-    byte[] data = new byte[length];
-    source.readFully(data);
-    return GeographyWKBSerializer.deserialize(data);
+    Geometry geom = GeometryTypeSerializer.INSTANCE.deserialize(source);
+    double value = source.readDouble();
+    return Pair.of(geom, value);
   }
 
   @Override
-  public Geography deserialize(Geography reuse, DataInputView source) throws IOException {
+  public Pair<Geometry, Double> deserialize(Pair<Geometry, Double> reuse, DataInputView source)
+      throws IOException {
     return deserialize(source);
   }
 
   @Override
   public void copy(DataInputView source, DataOutputView target) throws IOException {
-    int length = source.readInt();
-    target.writeInt(length);
-    if (length > 0) {
-      target.write(source, length);
+    boolean present = source.readBoolean();
+    target.writeBoolean(present);
+    if (present) {
+      GeometryTypeSerializer.INSTANCE.copy(source, target);
+      target.writeDouble(source.readDouble());
     }
   }
 
   @Override
   public boolean equals(Object obj) {
-    return obj instanceof GeographyTypeSerializer;
+    return obj instanceof GeometryDoublePairTypeSerializer;
   }
 
   @Override
@@ -121,12 +118,12 @@ public class GeographyTypeSerializer extends TypeSerializer<Geography> {
   }
 
   @Override
-  public TypeSerializerSnapshot<Geography> snapshotConfiguration() {
-    return new GeographySerializerSnapshot();
+  public TypeSerializerSnapshot<Pair<Geometry, Double>> snapshotConfiguration() {
+    return new GeometryDoublePairSerializerSnapshot();
   }
 
-  public static final class GeographySerializerSnapshot
-      implements TypeSerializerSnapshot<Geography> {
+  public static final class GeometryDoublePairSerializerSnapshot
+      implements TypeSerializerSnapshot<Pair<Geometry, Double>> {
     private static final int CURRENT_VERSION = 1;
 
     @Override
@@ -150,14 +147,14 @@ public class GeographyTypeSerializer extends TypeSerializer<Geography> {
     }
 
     @Override
-    public TypeSerializer<Geography> restoreSerializer() {
-      return GeographyTypeSerializer.INSTANCE;
+    public TypeSerializer<Pair<Geometry, Double>> restoreSerializer() {
+      return GeometryDoublePairTypeSerializer.INSTANCE;
     }
 
     @Override
-    public TypeSerializerSchemaCompatibility<Geography> resolveSchemaCompatibility(
-        TypeSerializerSnapshot<Geography> oldSerializerSnapshot) {
-      if (oldSerializerSnapshot instanceof GeographySerializerSnapshot) {
+    public TypeSerializerSchemaCompatibility<Pair<Geometry, Double>> resolveSchemaCompatibility(
+        TypeSerializerSnapshot<Pair<Geometry, Double>> oldSerializerSnapshot) {
+      if (oldSerializerSnapshot instanceof GeometryDoublePairSerializerSnapshot) {
         return TypeSerializerSchemaCompatibility.compatibleAsIs();
       } else {
         return TypeSerializerSchemaCompatibility.incompatible();

@@ -40,6 +40,7 @@ import org.apache.sedona.flink.Box2DTypeSerializer;
 import org.apache.sedona.flink.Box3DTypeSerializer;
 import org.apache.sedona.flink.GeographyTypeSerializer;
 import org.apache.sedona.flink.GeometryArrayTypeSerializer;
+import org.apache.sedona.flink.GeometryDoublePairTypeSerializer;
 import org.apache.sedona.flink.GeometryTypeSerializer;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.operation.TransformException;
@@ -2723,7 +2724,17 @@ public class Functions {
   }
 
   public static class ST_MinimumBoundingRadius extends ScalarFunction {
-    @DataTypeHint(value = "RAW")
+    // A bare @DataTypeHint(value = "RAW") return type relies on Flink to build a Kryo serializer
+    // automatically; under Flink 2.2.1 that path throws a ValidationException during type
+    // inference. Every other RAW hint in this file avoids that by providing an explicit
+    // serializer, so this does the same instead of depending on Flink's auto-derivation.
+    // NOTE: this changed the wire format from the old auto-derived Kryo serializer (Sedona 2.0.0)
+    // — stateful Table/SQL jobs with this result in their state cannot restore from a checkpoint
+    // or savepoint taken before this change. See release notes for Sedona 2.0.0.
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryDoublePairTypeSerializer.class,
+        bridgedTo = Pair.class)
     public Pair<Geometry, Double> eval(
         @DataTypeHint(
                 value = "RAW",

@@ -91,6 +91,11 @@ jobs:
             jdk: '11'
             skipTests: ''
             skipLibPostalTests: 'true'
+          - spark: 3.5.8
+            scala: 2.12.15
+            jdk: '17'
+            flinkVersion: 2.2.1
+            skipLibPostalTests: 'true'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -147,6 +152,7 @@ jobs:
           SCALA_VERSION: ${{ matrix.scala }}
           SKIP_TESTS: ${{ matrix.skipTests }}
           SEDONA_SKIP_LIBPOSTAL_TESTS: ${{ matrix.skipLibPostalTests }}
+          FLINK_VERSION: ${{ matrix.flinkVersion }}
         run: |
           SPARK_COMPAT_VERSION=${SPARK_VERSION:0:3}
 
@@ -155,7 +161,12 @@ jobs:
               export SPARK_HOME=$(python -c "import pyspark; print(pyspark.__path__[0])")
           fi
 
-          mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${SKIP_TESTS}
+          FLINK_ARGS=""
+          if [[ -n "${FLINK_VERSION}" ]]; then
+              FLINK_ARGS="-Dflink.version=${FLINK_VERSION}"
+          fi
+
+          mvn -q clean install -Dspark=${SPARK_COMPAT_VERSION} -Dscala=${SCALA_VERSION:0:4} -Dspark.version=${SPARK_VERSION} ${FLINK_ARGS} ${SKIP_TESTS}
       - run: mkdir staging
       - run: cp spark-shaded/target/sedona-*.jar staging
       - run: |

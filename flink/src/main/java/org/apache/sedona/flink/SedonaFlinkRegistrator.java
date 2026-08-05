@@ -21,12 +21,6 @@ package org.apache.sedona.flink;
 import java.util.Arrays;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.sedona.common.geometryObjects.Circle;
-import org.apache.sedona.common.geometrySerde.GeometrySerde;
-import org.apache.sedona.common.geometrySerde.SpatialIndexSerde;
-import org.locationtech.jts.geom.*;
-import org.locationtech.jts.index.quadtree.Quadtree;
-import org.locationtech.jts.index.strtree.STRtree;
 
 public class SedonaFlinkRegistrator {
 
@@ -49,18 +43,6 @@ public class SedonaFlinkRegistrator {
    */
   @Deprecated
   public static void registerType(StreamExecutionEnvironment env) {
-    GeometrySerde serializer = new GeometrySerde();
-    SpatialIndexSerde indexSerializer = new SpatialIndexSerde(serializer);
-    env.getConfig().registerTypeWithKryoSerializer(Point.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(LineString.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(Polygon.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(MultiPoint.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(MultiLineString.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(MultiPolygon.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(GeometryCollection.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(Circle.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(Envelope.class, serializer);
-    env.getConfig().registerTypeWithKryoSerializer(Quadtree.class, indexSerializer);
-    env.getConfig().registerTypeWithKryoSerializer(STRtree.class, indexSerializer);
+    SedonaContext.registerGeometryKryoSerializers(env);
   }
 }

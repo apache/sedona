@@ -17,6 +17,20 @@
  under the License.
  -->
 
+## Sedona 2.0.0
+
+### Breaking Changes
+
+* **Flink**: The minimum supported Flink version is now 1.19 (previously 1.12). Flink 1.12 - 1.18
+  are no longer supported, as the Apache Flink community itself no longer supports those
+  versions. Flink 2.2 is now supported alongside 1.19+.
+* **Flink `ST_MinimumBoundingRadius`**: this function's result type changed from a Kryo-derived
+  `RAW` type to an explicit `GeometryDoublePairTypeSerializer`, as part of the Flink 1.19+/2.x
+  compatibility work. Fresh, stateless queries are unaffected, but **stateful Table/SQL jobs
+  whose state contains a serialized `ST_MinimumBoundingRadius` result cannot restore from a
+  checkpoint or savepoint taken with the previous serializer** — such jobs need to be restarted
+  without state, or migrated before upgrading.
+
 ## Sedona 1.9.1
 
 Sedona 1.9.1 is compiled against:
