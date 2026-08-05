@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_Simplify</text>
+  <polyline points="127.78,174.44 152.22,125.56 176.67,198.89 201.11,101.11 225.56,223.33 250.0,76.67 274.44,198.89 298.89,125.56 323.33,223.33 347.78,101.11 372.22,174.44" fill="none" stroke="#4a90d9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,3" />
+  <circle cx="127.78" cy="174.44" r="3" fill="#4a90d9" />
+  <circle cx="152.22" cy="125.56" r="3" fill="#4a90d9" />
+  <circle cx="176.67" cy="198.89" r="3" fill="#4a90d9" />
+  <circle cx="201.11" cy="101.11" r="3" fill="#4a90d9" />
+  <circle cx="225.56" cy="223.33" r="3" fill="#4a90d9" />
+  <circle cx="250.0" cy="76.67" r="3" fill="#4a90d9" />
+  <circle cx="274.44" cy="198.89" r="3" fill="#4a90d9" />
+  <circle cx="298.89" cy="125.56" r="3" fill="#4a90d9" />
+  <circle cx="323.33" cy="223.33" r="3" fill="#4a90d9" />
+  <circle cx="347.78" cy="101.11" r="3" fill="#4a90d9" />
+  <circle cx="372.22" cy="174.44" r="3" fill="#4a90d9" />
+  <polyline points="127.78,174.44 250.0,76.67 372.22,174.44" fill="none" stroke="#2ecc71" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="127.78" cy="174.44" r="3" fill="#2ecc71" />
+  <circle cx="250.0" cy="76.67" r="3" fill="#2ecc71" />
+  <circle cx="372.22" cy="174.44" r="3" fill="#2ecc71" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Simplifies geometry using the Douglas-Peucker algorithm</text>
+  <rect x="176" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="192" y="266" font-size="13" fill="#333333">Input</text>
+  <rect x="246" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="262" y="266" font-size="13" fill="#333333">Result</text>
+</svg>

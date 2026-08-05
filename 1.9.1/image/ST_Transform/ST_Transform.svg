@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250">
+  <rect width="400" height="250" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_Transform</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Re-project geometry between CRS</text>
+  <circle cx="95" cy="120" r="65" fill="#e3f2fd" stroke="#1565C0" stroke-width="1.5"/>
+  <ellipse cx="95" cy="169.8" rx="41.8" ry="5.0" fill="none" stroke="#BBDEFB" stroke-width="0.5"/>
+  <ellipse cx="95" cy="142.2" rx="61.1" ry="7.3" fill="none" stroke="#BBDEFB" stroke-width="0.5"/>
+  <ellipse cx="95" cy="120.0" rx="65.0" ry="7.8" fill="none" stroke="#BBDEFB" stroke-width="0.5"/>
+  <ellipse cx="95" cy="97.8" rx="61.1" ry="7.3" fill="none" stroke="#BBDEFB" stroke-width="0.5"/>
+  <ellipse cx="95" cy="70.2" rx="41.8" ry="5.0" fill="none" stroke="#BBDEFB" stroke-width="0.5"/>
+  <ellipse cx="72" cy="120" rx="7" ry="65" fill="none" stroke="#BBDEFB" stroke-width="0.5"/>
+  <ellipse cx="95" cy="120" rx="8" ry="65" fill="none" stroke="#BBDEFB" stroke-width="0.5"/>
+  <ellipse cx="118" cy="120" rx="7" ry="65" fill="none" stroke="#BBDEFB" stroke-width="0.5"/>
+  <rect x="87" y="107.33487672140222" width="14" height="14" fill="rgba(233,30,99,0.4)" stroke="#C2185B" stroke-width="1.5" rx="1"/>
+  <text x="105" y="117.33487672140222" font-family="monospace" font-size="7" fill="#C2185B">5°N</text>
+  <rect x="90" y="59.755117121215534" width="14" height="14" fill="rgba(46,204,113,0.4)" stroke="#1B5E20" stroke-width="1.5" rx="1"/>
+  <text x="108" y="69.75511712121553" font-family="monospace" font-size="7" fill="#1B5E20">55°N</text>
+  <text x="95" y="201" font-family="monospace" font-size="9" fill="#1565C0" text-anchor="middle" font-weight="bold">WGS 84 (EPSG:4326)</text>
+  <text x="95" y="213" font-family="monospace" font-size="8" fill="#999" text-anchor="middle">Same-size regions</text>
+  <defs><marker id="arrt" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#666"/></marker></defs>
+  <line x1="172" y1="120" x2="210" y2="120" stroke="#666" stroke-width="1.5" marker-end="url(#arrt)"/>
+  <text x="191" y="113" font-family="monospace" font-size="7" fill="#666" text-anchor="middle">ST_Transform</text>
+  <rect x="222" y="45" width="155" height="150" fill="#fff" stroke="#2ecc71" stroke-width="1.5"/>
+  <line x1="253" y1="45" x2="253" y2="195" stroke="#e8f5e9" stroke-width="0.6"/>
+  <line x1="284" y1="45" x2="284" y2="195" stroke="#e8f5e9" stroke-width="0.6"/>
+  <line x1="315" y1="45" x2="315" y2="195" stroke="#e8f5e9" stroke-width="0.6"/>
+  <line x1="346" y1="45" x2="346" y2="195" stroke="#e8f5e9" stroke-width="0.6"/>
+  <line x1="222" y1="163.7" x2="377" y2="163.7" stroke="#e8f5e9" stroke-width="0.6"/>
+  <text x="380" y="166.7" font-family="monospace" font-size="6" fill="#aaa">-50°</text>
+  <line x1="222" y1="135.4" x2="377" y2="135.4" stroke="#e8f5e9" stroke-width="0.6"/>
+  <text x="380" y="138.4" font-family="monospace" font-size="6" fill="#aaa">-20°</text>
+  <line x1="222" y1="120.0" x2="377" y2="120.0" stroke="#e8f5e9" stroke-width="0.6"/>
+  <text x="380" y="123.0" font-family="monospace" font-size="6" fill="#aaa">0°</text>
+  <line x1="222" y1="104.6" x2="377" y2="104.6" stroke="#e8f5e9" stroke-width="0.6"/>
+  <text x="380" y="107.6" font-family="monospace" font-size="6" fill="#aaa">20°</text>
+  <line x1="222" y1="76.3" x2="377" y2="76.3" stroke="#e8f5e9" stroke-width="0.6"/>
+  <text x="380" y="79.3" font-family="monospace" font-size="6" fill="#aaa">50°</text>
+  <text x="219" y="123.0" font-family="monospace" font-size="6" fill="#aaa" text-anchor="end">eq</text>
+  <rect x="276.2" y="110.9" width="16.8" height="10.6" fill="rgba(233,30,99,0.4)" stroke="#C2185B" stroke-width="1.5" rx="1"/>
+  <rect x="284.0" y="60.8" width="16.8" height="18.6" fill="rgba(46,204,113,0.4)" stroke="#1B5E20" stroke-width="1.5" rx="1"/>
+  <line x1="305.8" y1="60.8" x2="305.8" y2="79.4" stroke="#1B5E20" stroke-width="1" stroke-dasharray="2,1"/>
+  <text x="308.8" y="73.1" font-family="monospace" font-size="6" fill="#1B5E20">stretched</text>
+  <text x="299" y="211" font-family="monospace" font-size="9" fill="#2ecc71" text-anchor="middle" font-weight="bold">Web Mercator (EPSG:3857)</text>
+  <text x="299" y="223" font-family="monospace" font-size="8" fill="#999" text-anchor="middle">High latitudes appear larger</text>
+  <text x="200" y="238" font-family="monospace" font-size="9" fill="#333" text-anchor="middle">ST_Transform re-projects coordinates, changing shape and scale</text>
+</svg>

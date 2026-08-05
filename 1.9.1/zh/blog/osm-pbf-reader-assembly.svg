@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="440" viewBox="0 0 1180 440" role="img" aria-label="A way stores an ordered list of node references; joining them to node coordinates and connecting them in order reconstructs a LineString">
+<defs>
+<linearGradient id="abg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1c1022"/><stop offset="0.55" stop-color="#2a1420"/><stop offset="1" stop-color="#3a1e1b"/></linearGradient>
+</defs>
+<rect width="1180" height="440" rx="18" fill="url(#abg)"/>
+
+<text x="590" y="42" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="17" fill="#f0d3b8">a <tspan fill="#f2913a">way</tspan> is only node IDs  &#8594;  join <tspan fill="#f5c542">node coordinates</tspan>  &#8594;  connect in order = <tspan fill="#ff7a45">LineString</tspan></text>
+
+<!-- ===== CARD A: WAY ===== -->
+<g font-family="Inter, 'Helvetica Neue', Arial, sans-serif">
+<rect x="30" y="74" width="330" height="300" rx="14" fill="#2a181c" stroke="#6e3a24" stroke-width="1.5"/>
+<rect x="30" y="74" width="330" height="40" rx="14" fill="#3a2119"/><rect x="30" y="94" width="330" height="20" fill="#3a2119"/>
+<text x="50" y="100" font-family="ui-monospace, Menlo, monospace" font-size="13" font-weight="600" fill="#f2913a">WAY · id 239592573</text>
+<text x="52" y="150" font-family="ui-monospace, Menlo, monospace" font-size="13" fill="#c6ab9c">tags: {highway: <tspan fill="#f7efe7">primary</tspan>}</text>
+<text x="52" y="182" font-family="ui-monospace, Menlo, monospace" font-size="13" fill="#c6ab9c">refs:  <tspan fill="#a8897a">(ordered)</tspan></text>
+<!-- ordered ref chips -->
+<g font-family="ui-monospace, Menlo, monospace" font-size="13">
+<rect x="60" y="200" width="240" height="30" rx="8" fill="none" stroke="#f5c542" stroke-opacity="0.5" stroke-width="1.2"/>
+<text x="180" y="220" text-anchor="middle" fill="#f0d08a">101 · 102 · 103 · 104 · 105</text>
+</g>
+<text x="52" y="272" font-family="Inter, Arial, sans-serif" font-size="12.5" fill="#a8897a">posexplode(refs) keeps each</text>
+<text x="52" y="292" font-family="Inter, Arial, sans-serif" font-size="12.5" fill="#a8897a">ref with its position (0,1,2,…)</text>
+</g>
+<text x="378" y="230" text-anchor="middle" font-size="26" fill="#c6ab9c" font-family="Inter, Arial, sans-serif">&#8594;</text>
+
+<!-- ===== CARD B: NODES lookup ===== -->
+<g font-family="ui-monospace, Menlo, monospace">
+<rect x="400" y="74" width="300" height="300" rx="14" fill="#2a181c" stroke="#6e3a24" stroke-width="1.5"/>
+<rect x="400" y="74" width="300" height="40" rx="14" fill="#3a2119"/><rect x="400" y="94" width="300" height="20" fill="#3a2119"/>
+<text x="420" y="100" font-size="13" font-weight="600" fill="#f5c542">NODES · id &#8594; lon lat</text>
+<g font-size="13" fill="#e7d9cf">
+<text x="424" y="150"><tspan fill="#f5c542">101</tspan>   7.4206  43.7386</text>
+<text x="424" y="184"><tspan fill="#f5c542">102</tspan>   7.4219  43.7392</text>
+<text x="424" y="218"><tspan fill="#f5c542">103</tspan>   7.4231  43.7395</text>
+<text x="424" y="252"><tspan fill="#f5c542">104</tspan>   7.4244  43.7401</text>
+<text x="424" y="286"><tspan fill="#f5c542">105</tspan>   7.4258  43.7404</text>
+</g>
+<line x1="416" y1="162" x2="676" y2="162" stroke="#5a3226" stroke-width="1"/>
+<text x="424" y="322" font-family="Inter, Arial, sans-serif" font-size="12.5" fill="#a8897a">JOIN osm nodes ON n.id = ref</text>
+</g>
+<text x="735" y="226" text-anchor="middle" font-size="26" fill="#c6ab9c" font-family="Inter, Arial, sans-serif">&#8594;</text>
+
+<!-- ===== CARD C: LINESTRING ===== -->
+<g font-family="Inter, 'Helvetica Neue', Arial, sans-serif">
+<rect x="770" y="74" width="380" height="300" rx="14" fill="#2a181c" stroke="#ff5a2e" stroke-width="1.8"/>
+<rect x="770" y="74" width="380" height="40" rx="14" fill="#4a1e15"/><rect x="770" y="94" width="380" height="20" fill="#4a1e15"/>
+<text x="790" y="100" font-family="ui-monospace, Menlo, monospace" font-size="13" font-weight="600" fill="#ff8f5c">LINESTRING · ordered vertices</text>
+<g stroke="#8a5a3a" stroke-opacity="0.3" stroke-width="1"><line x1="770" y1="200" x2="1150" y2="200"/><line x1="770" y1="280" x2="1150" y2="280"/><line x1="880" y1="130" x2="880" y2="360"/><line x1="1000" y1="130" x2="1000" y2="360"/></g>
+<!-- the assembled line -->
+<polyline points="835,320 900,250 965,270 1035,205 1095,232" fill="none" stroke="#f2913a" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+<!-- vertices, numbered in order -->
+<g fill="#f5c542" stroke="#2a181c" stroke-width="1.5" font-family="ui-monospace, Menlo, monospace">
+<circle cx="835" cy="320" r="8"/><circle cx="900" cy="250" r="8"/><circle cx="965" cy="270" r="8"/><circle cx="1035" cy="205" r="8"/><circle cx="1095" cy="232" r="8"/>
+</g>
+<g font-family="Inter, Arial, sans-serif" font-size="11" font-weight="700" fill="#2a181c" text-anchor="middle">
+<text x="835" y="324">1</text><text x="900" y="254">2</text><text x="965" y="274">3</text><text x="1035" y="209">4</text><text x="1095" y="236">5</text>
+</g>
+<text x="960" y="352" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="12" fill="#ff9a6e">array_sort by position &#8594; connect</text>
+</g>
+</svg>

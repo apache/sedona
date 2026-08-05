@@ -1,0 +1,25 @@
+[data-demo-state-disable] {
+    display: none;
+}
+
+.demo-head {
+    height: 200px;
+}
+
+.demo-head__item {
+    position: absolute;
+    left: 0;
+    height: 100px;
+    width: 100%;
+    border: 1px solid #999;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    z-index: 10;
+    box-sizing: border-box;
+    font-size: 1.2em;
+}
+
+.demo-head__item:nth-child(2) {
+    transform: translateY(99px);
+}

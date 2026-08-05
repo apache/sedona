@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 320" width="540" height="320" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <radialGradient id="globeArea" cx="42%" cy="38%" r="65%">
+      <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="60%" stop-color="#e7e7f7" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#c5c5eb" stop-opacity="0.95"/>
+    </radialGradient>
+    <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(35)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#1565C0" stroke-width="1.0" stroke-opacity="0.55"/>
+    </pattern>
+  </defs>
+
+  <!-- Title -->
+  <text x="270" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">ST_Area on a Geography</text>
+  <text x="270" y="40" text-anchor="middle" font-size="11" fill="#666666">spherical area in m², measured on the sphere of Earth radius R</text>
+
+  <!-- Globe -->
+  <circle cx="200" cy="170" r="100" fill="url(#globeArea)" stroke="#8e8ed0" stroke-width="1.6"/>
+  <!-- Equator (great circle ellipse hint) -->
+  <ellipse cx="200" cy="170" rx="100" ry="22" fill="none" stroke="#8e8ed0" stroke-width="0.6" stroke-opacity="0.7"/>
+  <!-- Prime meridian -->
+  <ellipse cx="200" cy="170" rx="22" ry="100" fill="none" stroke="#8e8ed0" stroke-width="0.6" stroke-opacity="0.7"/>
+
+  <!-- Polygon on the globe (curved edges to suggest geodesic sides) -->
+  <path d="M 215 154
+           Q 250 152, 270 168
+           Q 274 188, 256 200
+           Q 226 206, 210 196
+           Q 200 178, 215 154 Z"
+        fill="url(#hatch)" stroke="#1565C0" stroke-width="1.8"/>
+
+  <!-- Sigma label -->
+  <text x="240" y="178" font-size="14" font-weight="bold" fill="#1565C0" font-style="italic">Σ</text>
+
+  <!-- Right-hand panel: explanation -->
+  <rect x="320" y="86" width="200" height="170" rx="6" fill="#fafafa" stroke="#dddddd" stroke-width="1"/>
+  <text x="420" y="108" text-anchor="middle" font-size="12" font-weight="bold" fill="#333333">how it's measured</text>
+
+  <text x="334" y="132" font-size="11" fill="#1565C0" font-weight="bold">1.</text>
+  <text x="350" y="132" font-size="11" fill="#333333">edges are great-circle</text>
+  <text x="350" y="146" font-size="11" fill="#333333">arcs on the sphere</text>
+
+  <text x="334" y="170" font-size="11" fill="#1565C0" font-weight="bold">2.</text>
+  <text x="350" y="170" font-size="11" fill="#333333">the polygon's spherical</text>
+  <text x="350" y="184" font-size="11" fill="#333333">interior is integrated</text>
+
+  <text x="334" y="208" font-size="11" fill="#1565C0" font-weight="bold">3.</text>
+  <text x="350" y="208" font-size="11" fill="#333333">scaled by R² where</text>
+  <text x="350" y="222" font-size="11" fill="#333333">R = 6 371 008 m</text>
+  <text x="350" y="236" font-size="11" fill="#666666">(authalic Earth radius)</text>
+
+  <!-- Footer note -->
+  <text x="270" y="295" text-anchor="middle" font-size="11" fill="#666666">Result is in m² and is always bounded by half the Earth's surface</text>
+  <text x="270" y="312" text-anchor="middle" font-size="11" fill="#666666">(~2.55 × 10¹⁴ m²); use ST_GeogToGeometry for the WGS84 ellipsoid value</text>
+</svg>

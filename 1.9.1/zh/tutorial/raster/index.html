@@ -1,0 +1,7370 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Apache Sedona 是一个用于处理大规模空间数据的集群计算系统。Sedona 在 Apache Spark、Apache Flink 和 Snowflake 等现有集群计算系统的基础上，提供了一套开箱即用的分布式空间数据集和空间 SQL，可以高效地跨机器加载、处理和分析大规模空间数据。">
+      
+      
+      
+        <link rel="canonical" href="https://sedona.apache.org/latest/zh/tutorial/raster/">
+      
+      
+        <link rel="prev" href="../sql/">
+      
+      
+        <link rel="next" href="../sql-pure-sql/">
+      
+      
+        
+          <link rel="alternate" href="../../../tutorial/raster/" hreflang="en">
+        
+          <link rel="alternate" href="./" hreflang="zh">
+        
+      
+      
+      <link rel="icon" href="../../../favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>栅格 DataFrame / SQL 应用 - Apache Sedona</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/extra.min.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+
+<meta name="google-site-verification" content="o2riomKLozYKc2IQivWGsrI2unuyQs7hXiAD4kGMCTQ" />
+<link rel="apple-touch-icon" sizes="180x180" href="../../../favicons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../../favicons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../../favicons/favicon-16x16.png">
+<link rel="manifest" href="../../../favicons/site.webmanifest">
+<meta name="msapplication-config" content="../../../favicons/browserconfig.xml">
+<meta name="msapplication-TileColor" content="#ca463a">
+<meta name="theme-color" content="#ca463a">
+
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              您当前查看的不是最新稳定版本。
+<a href="../../../..">
+  <strong>点击此处跳转到最新稳定版本。</strong>
+</a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    <div style="background: #CA463A; color: white; text-align: center; padding: 0.5rem;">
+        <a href="../../../setup/release-notes/" title="Announcement">🎉 Apache Sedona 1.9.1 已正式发布！🗺️ 新增 Geography SQL 函数、Box2D 与 Box3D 类型、栅格 Python UDF 等。查看发布说明 →</a>
+  </div>
+  
+      <!--
+  Copyright (c) 2016-2025 Martin Donath <martin.donath@squidfunk.com>
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to
+  deal in the Software without restriction, including without limitation the
+  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+  sell copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  IN THE SOFTWARE.
+-->
+
+<!-- Determine classes -->
+
+
+
+
+
+<!-- Header -->
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+    <nav
+      class="md-header__inner md-grid container"
+      aria-label="页眉"
+    >
+      <div class="left-part">
+
+        <!-- Button to open drawer -->
+        <label class="md-header__button md-icon" for="__drawer">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+        </label>
+
+        <!-- Link to home -->
+        <a
+          href="../../"
+          title="Apache Sedona"
+          class="header-logo"
+          aria-label="Apache Sedona"
+          data-md-component="logo"
+        >
+          
+  <img src="../../../image/logo.svg" alt="logo">
+
+        </a>
+
+        <!-- Header title -->
+        <div class="md-header__title" data-md-component="header-title">
+          <div class="md-header__ellipsis">
+            <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Apache Sedona
+          </span>
+            </div>
+            <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              栅格 DataFrame / SQL 应用
+            
+          </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Color palette toggle -->
+        
+        
+        
+
+        <!-- User preference: color palette -->
+        
+      </div>
+      <div class="right-part">
+
+        <!-- Site language selector -->
+        
+        
+<details class="sd-lang-switch">
+  <summary class="sd-lang-switch__trigger" aria-label="选择当前语言" title="选择当前语言">
+    <span class="sd-lang-switch__glyph" aria-hidden="true"><span class="sd-lang-switch__glyph-cn">文</span><span class="sd-lang-switch__glyph-en">A</span></span>
+  </summary>
+  <ul class="sd-lang-switch__menu"><li>
+        <a
+          href="../../../tutorial/raster/"
+          hreflang="en"
+          lang="en"
+          target="_self"
+          class="sd-lang-switch__link"
+          
+        >English</a>
+      </li>
+    <li>
+        <a
+          href="./"
+          hreflang="zh"
+          lang="zh"
+          target="_self"
+          class="sd-lang-switch__link sd-lang-switch__link--active"
+          aria-current="true"
+        >中文</a>
+      </li>
+    
+  </ul>
+</details>
+
+        
+
+        <!-- Button to open search modal -->
+        
+        
+
+        <!-- Check if search is actually enabled - see https://t.ly/DT_0V -->
+        
+        <label class="md-header__button md-icon btn-search" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+
+        <!-- Search interface -->
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        
+        
+
+        <!-- Repository information -->
+        
+        <div class="md-header__source">
+          
+<a href="https://github.com/apache/sedona" title="apache/sedona" class="md-source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">apache/sedona</div>
+  </a>
+  
+        </div>
+        
+      </div>
+    </nav>
+
+    <!-- Navigation tabs (sticky) -->
+    
+    
+    
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../" class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="https://sedona.apache.org/sedonadb/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  SedonaDB
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../sedonaspark/" class="md-tabs__link">
+          
+  
+  
+  SedonaSpark
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../sedonaflink/" class="md-tabs__link">
+          
+  
+  
+  SedonaFlink
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../sedonasnow/" class="md-tabs__link">
+          
+  
+  
+  SedonaSnow
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="https://sedona.apache.org/spatialbench/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  SpatialBench
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../blog/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Blog
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../download/" class="md-tabs__link">
+          
+  
+  
+  社区
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../asf/asf/" class="md-tabs__link">
+          
+  
+  
+  Apache 软件基金会
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+    
+</header>
+     
+
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+
+
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../" title="Apache Sedona" class="logo-link" aria-label="Apache Sedona" data-md-component="logo">
+      <img src="../../../image/header/logo-mobile.svg" alt="" class="logo">
+    </a>
+  </label>
+
+  
+  <div class="md-nav__source">
+    
+<a href="https://github.com/apache/sedona" title="apache/sedona" class="md-source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">apache/sedona</div>
+  </a>
+  
+  </div>
+  
+
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+    
+    
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+    
+    
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://sedona.apache.org/sedonadb/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SedonaDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+    
+    
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SedonaSpark
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SedonaSpark
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sedonaspark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安装
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    安装
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概述
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/modules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    模块
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/platform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    语言封装
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/maven-coordinates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maven Central 坐标
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/docker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    在 Docker 中使用 Sedona
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2_6" id="__nav_3_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    在本地 Spark 集群中安装 Sedona
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    在本地 Spark 集群中安装 Sedona
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/install-scala/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安装 Sedona Scala/Java
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/install-python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安装 Sedona Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/rdocs" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安装 Sedona R
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/zeppelin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安装 Sedona-Zeppelin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/cluster/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    手动搭建 Spark 集群
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2_7" id="__nav_3_2_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    云平台
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    云平台
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/wherobots/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    在 Wherobots 上安装
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/databricks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    在 Databricks 上安装
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/emr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    在 AWS EMR 上安装
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/glue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    在 AWS Glue 上安装
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/fabric/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    在 Microsoft Fabric 上安装
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/azure-synapse-analytics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    在 Azure Synapse Analytics 上安装
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    编程指南
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    编程指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    空间 DataFrame / SQL 应用
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    栅格 DataFrame / SQL 应用
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    栅格 DataFrame / SQL 应用
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置依赖
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sedonacontext" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        创建 SedonaContext
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        端到端教程
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="端到端教程">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 准备输入场景
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-raster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 使用 raster 数据源加载
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 检视元数据
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 可视化原始栅格
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-map-algebra-ndvi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 处理 —— 用 map algebra 计算 NDVI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 可视化处理结果
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 使用分区统计聚合到矢量区域
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. 写回磁盘
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        加载选项
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="加载选项">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tile 大小覆盖
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#glob" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        按目录与 glob 加载
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geotiff-netcdfarc-grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        非 GeoTIFF 格式（NetCDF、Arc Grid）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#raster-metadata-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        栅格元数据参考
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#raster-processing-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        栅格处理参考
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="栅格处理参考">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坐标转换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        像素操作
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        波段操作
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        重采样与裁剪
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        逐像素计算
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        栅格与矢量互通
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="栅格与矢量互通">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        几何栅格化
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        空间过滤与连接
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        分区统计
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        可视化参考
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#writing-rasters-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        写出栅格参考
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-raster-dataframes-in-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        在 Python 中处理栅格 DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-udf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        在栅格上编写 Python UDF
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="在栅格上编写 Python UDF">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        栅格 → 标量
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        栅格 → 栅格
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#udf-rasterio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        在 UDF 中使用 rasterio
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        性能优化
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sql-pure-sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    纯 SQL 环境
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../geopandas-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sedona 上的 GeoPandas API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rdd/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    空间 RDD 应用
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/rdocs" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sedona R
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../geopandas-shapely/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    与 GeoPandas 和 Shapely 配合使用
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3_8" id="__nav_3_3_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    文件
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    文件
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../files/csv-geometry-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CSV
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../files/geopackage-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GeoPackage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../files/geoparquet-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GeoParquet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../files/geojson-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GeoJSON
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../files/shapefiles-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shapefiles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../files/geotiffmetadata-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GeoTIFF metadata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../files/netcdfmetadata-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NetCDF metadata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../files/stac-sedona-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    STAC catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3_9" id="__nav_3_3_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概念
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    概念
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/spatial-joins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    空间连接
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/clustering-algorithms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    聚类算法
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/distance-spark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    距离
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3_10" id="__nav_3_3_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地图可视化 SQL 应用
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    地图可视化 SQL 应用
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../viz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scala/Java
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../zeppelin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    使用 Apache Zeppelin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../viz-gallery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    案例库
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3_11" id="__nav_3_3_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    性能调优
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_3_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    性能调优
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmark/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    基准测试
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Advanced-Tutorial-Tune-your-Application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    调优 RDD 应用
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../storing-blobs-in-parquet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    在 Parquet 文件中存储大型栅格几何对象
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4_1" id="__nav_3_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SQL
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SQL
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    快速开始
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4_1_2" id="__nav_3_4_1_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    矢量数据
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_3_4_1_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_1_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    矢量数据
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Geometry-Functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    几何函数
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/box2d/Box2D-Functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Box2D 函数
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/box3d/Box3D-Functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Box3D 函数
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/geography/Geography-Functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地理函数
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/DataFrameAPI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataFrame 风格函数
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Optimizer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    查询优化
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/CRS-Transformation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    坐标系转换
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/NearestNeighbourSearching/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    最近邻搜索
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Spider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spider:Spatial Data Generator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Reading-legacy-parquet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    读取旧版 Parquet 文件
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_2_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4_1_2_11" id="__nav_3_4_1_2_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    可视化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_3_4_1_2_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_1_2_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    可视化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Visualization-SedonaPyDeck/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SedonaPyDeck
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Visualization-SedonaKepler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SedonaKepler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_1_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4_1_3" id="__nav_3_4_1_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    栅格数据
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_3_4_1_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_1_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    栅格数据
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Raster-Functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    栅格函数
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Raster-map-algebra/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    栅格地图代数
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Raster-UDF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    栅格 UDF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Raster-affine-transformation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    栅格仿射变换
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/sql/Parameter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    参数
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4_2" id="__nav_3_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RDD（核心）
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    RDD（核心）
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/java-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scala/Java 文档
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4_3" id="__nav_3_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    统计
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    统计
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/stats/sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataFrame
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4_4" id="__nav_3_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    可视化
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    可视化
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/viz/sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DataFrame/SQL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/viz/java-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RDD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/rdocs" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sedona R
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/pydocs" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sedona Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    发布说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+    
+    
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SedonaFlink
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SedonaFlink
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sedonaflink/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安装
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    安装
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/flink/install-scala/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安装 Sedona Scala/Java
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/flink/install-python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安装 Sedona Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/flink/modules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    模块
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/flink/platform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    语言封装
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    编程指南
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    编程指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_1" id="__nav_4_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    在 Apache Flink 上使用 Sedona
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    在 Apache Flink 上使用 Sedona
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flink/sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    空间 SQL 应用（Flink）
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flink/pyflink-sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    空间 SQL 应用（PyFlink）
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3_2" id="__nav_4_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    示例
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    示例
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scala/Java
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../jupyter-notebook/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4_1" id="__nav_4_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SQL
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SQL
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/flink/Overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概述（Flink）
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/flink/Geometry-Functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    几何函数
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/flink/Geography-Functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    地理函数
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    发布说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+    
+    
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SedonaSnow
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SedonaSnow
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sedonasnow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安装
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    安装
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/snowflake/install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安装 Sedona SQL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../snowflake/sql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    空间 SQL 应用（Snowflake）
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/snowflake/modules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    模块
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_3_1" id="__nav_5_3_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SQL
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_5_3_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_3_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SQL
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/snowflake/vector-data/Overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概述（Snowflake）
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/snowflake/vector-data/Geometry-Functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    几何函数
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    发布说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+    
+    
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://sedona.apache.org/spatialbench/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SpatialBench
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+    
+    
+  
+  
+  
+    
+  
+  
+    <li class="md-nav__item">
+      <a href="../../blog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+    
+    
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    社区
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    社区
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../download/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    下载
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    发布说明
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/compile/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    编译源码
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../community/contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    社区
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    贡献者指南
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    贡献者指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../community/rule/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    规则
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../community/develop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    开发
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../community/geopandas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    为 Sedona 的 Geopandas API 贡献代码
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_8_6" id="__nav_8_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    提交者指南
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    提交者指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../community/contributor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    项目管理委员会
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../community/release-manager/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    成为发布经理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../community/snapshot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    发布快照版本
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../community/publish/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    发布版本
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../community/vote/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    投票发布
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../community/publication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    论文
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+    
+    
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Apache 软件基金会
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Apache 软件基金会
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../asf/asf/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    基金会
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/licenses/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    许可证
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/events/current-event" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    活动
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/foundation/sponsorship.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    赞助
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/foundation/thanks.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    致谢
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://www.apache.org/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安全
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://privacy.apache.org/policies/privacy-policy-public.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    隐私
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../asf/telemetry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    遥测
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+
+    <li class="btn-group">
+      <a href="#" class="btn btn-red">
+        Get started
+      </a>
+    </li>
+
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        配置依赖
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sedonacontext" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        创建 SedonaContext
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        端到端教程
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="端到端教程">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 准备输入场景
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-raster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 使用 raster 数据源加载
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 检视元数据
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 可视化原始栅格
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-map-algebra-ndvi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 处理 —— 用 map algebra 计算 NDVI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 可视化处理结果
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 使用分区统计聚合到矢量区域
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. 写回磁盘
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        加载选项
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="加载选项">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tile 大小覆盖
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#glob" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        按目录与 glob 加载
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#geotiff-netcdfarc-grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        非 GeoTIFF 格式（NetCDF、Arc Grid）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#raster-metadata-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        栅格元数据参考
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#raster-processing-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        栅格处理参考
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="栅格处理参考">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        坐标转换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        像素操作
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        波段操作
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        重采样与裁剪
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        逐像素计算
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        栅格与矢量互通
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="栅格与矢量互通">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        几何栅格化
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        空间过滤与连接
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        分区统计
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        可视化参考
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#writing-rasters-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        写出栅格参考
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-raster-dataframes-in-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        在 Python 中处理栅格 DataFrame
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-udf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        在栅格上编写 Python UDF
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="在栅格上编写 Python UDF">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        栅格 → 标量
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        栅格 → 栅格
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#udf-rasterio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        在 UDF 中使用 rasterio
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        性能优化
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+    
+    
+    
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/apache/sedona/edit/master/docs/tutorial/raster.zh.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+  <h1>栅格 DataFrame / SQL 应用</h1>
+
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
+<p>Sedona SQL 在矢量之外也原生支持栅格数据。本教程使用同一份数据集，把它从加载、检视、可视化、处理、再次可视化到落盘走完一遍完整的流水线，让你能直接看到每一步产出的结果。其他格式、所有算子的速查、以及 Python 端的额外用法，放在文末的参考章节。</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Sedona 中所有栅格函数均使用从 1 开始的索引，唯一例外是 <a href="../../api/sql/Raster-map-algebra/">map algebra</a>，它使用从 0 开始的索引。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Sedona 假定地理坐标按经度/纬度顺序排列。若数据是 lat/lon 顺序，请使用 <code>ST_FlipCoordinates</code> 交换 X 与 Y。</p>
+</div>
+<p>Scala、Java、Python、R 等所有 Sedona 语言绑定都已支持栅格能力。本教程以 Python 为主语言进行示例，关键步骤会附上多语言切换标签。</p>
+<h2 id="_1">配置依赖<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Scala/Java</label><label for="__tabbed_1_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>阅读 <a href="../../setup/maven-coordinates/">Sedona Maven Central 坐标</a>，并在 build.sbt 或 pom.xml 中添加 Sedona 依赖。</li>
+<li>添加 <a href="https://mvnrepository.com/artifact/org.apache.spark/spark-core">Apache Spark core</a> 与 <a href="https://mvnrepository.com/artifact/org.apache.spark/spark-sql">Apache SparkSQL</a> 依赖。</li>
+<li>参考 <a href="../demo/">SQL 示例项目</a>。</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<ol>
+<li>阅读 <a href="../../setup/install-python/">快速开始</a> 安装 Sedona Python。</li>
+<li>本教程结构参考 <a href="../jupyter-notebook/">Sedona SQL Jupyter Notebook 示例</a>。</li>
+<li>教程主线使用 NumPy 和 rasterio 合成输入场景：<code>pip install numpy rasterio</code>。如果直接读取已有的 GeoTIFF，则无需安装 rasterio。</li>
+</ol>
+</div>
+</div>
+</div>
+<h2 id="sedonacontext">创建 SedonaContext<a class="headerlink" href="#sedonacontext" title="Permanent link">&para;</a></h2>
+<p>若你已经有 SparkSession（例如来自 Wherobots、AWS EMR 或 Databricks），可直接跳过此步并把它传入 <code>SedonaContext.create</code>。否则：</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Scala</label><label for="__tabbed_2_2">Java</label><label for="__tabbed_2_3">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">sedona</span><span class="p">.</span><span class="nn">spark</span><span class="p">.</span><span class="nc">SedonaContext</span>
+
+<span class="kd">val</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SedonaContext</span><span class="p">.</span><span class="n">builder</span><span class="p">()</span>
+<span class="w">  </span><span class="p">.</span><span class="n">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// 在集群上运行时请删除此行</span>
+<span class="w">  </span><span class="p">.</span><span class="n">appName</span><span class="p">(</span><span class="s">&quot;rasterTutorial&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">sedona</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SedonaContext</span><span class="p">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">org.apache.sedona.spark.SedonaContext</span><span class="p">;</span>
+
+<span class="n">SparkSession</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SedonaContext</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+<span class="w">  </span><span class="p">.</span><span class="na">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// 在集群上运行时请删除此行</span>
+<span class="w">  </span><span class="p">.</span><span class="na">appName</span><span class="p">(</span><span class="s">&quot;rasterTutorial&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="na">getOrCreate</span><span class="p">();</span>
+<span class="n">SparkSession</span><span class="w"> </span><span class="n">sedona</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SedonaContext</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p><div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaContext</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span>
+        <span class="s2">&quot;spark.jars.packages&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;org.apache.sedona:sedona-spark-shaded-3.3_2.12:1.9.1,&quot;</span>
+        <span class="s2">&quot;org.datasyslab:geotools-wrapper:1.9.1-33.5&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</code></pre></div>
+请将 <code>sedona-spark-shaded-3.3</code> 中的 <code>3.3</code> 替换为对应的 Spark 主.次版本号，例如 <code>sedona-spark-shaded-3.4_2.12</code>。</p>
+</div>
+</div>
+</div>
+<p>你也可以通过给 <code>spark-submit</code> 或 <code>spark-shell</code> 传入 <code>--conf spark.sql.extensions=org.apache.sedona.sql.SedonaSqlExtensions</code> 来注册 Sedona。</p>
+<h2 id="_2">端到端教程<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>本教程贯穿一份 2 波段 GeoTIFF —— 一小块 AOI 上的红光与近红外反射率影像 —— 让它走完一条典型的栅格处理流水线。场景影像在 Python 中合成，因此整个示例可重复运行，仓库无需新增任何二进制数据。对真实的 Sentinel-2 切片，下面同样的 SQL 不用改一行就能跑，仅输入路径需要换一下。</p>
+<p><img alt="流水线总览" src="../../../image/raster-tutorial/00-pipeline.png" /></p>
+<details class="example">
+<summary>真实栅格长什么样</summary>
+<p>上面这套代码可处理任何符合 GeoTIFF 规范的数据。下面两个示例来自 Sedona 自带的测试资源：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">3 波段彩色栅格</th>
+<th style="text-align: left;">单波段栅格</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><img alt="多波段" src="../../../image/raster-tutorial/real-rgb.png" /></td>
+<td style="text-align: left;"><img alt="单波段" src="../../../image/raster-tutorial/real-singleband.png" /></td>
+</tr>
+</tbody>
+</table>
+<p>它们的 <code>RS_NumBands(rast)</code> 分别返回 <code>3</code> 和 <code>1</code>。<code>RS_Band(rast, ARRAY(1,2,3))</code>、<code>RS_MapAlgebra</code> 等波段级函数在两类栅格上用法一致。</p>
+</details>
+<h3 id="1">1. 准备输入场景<a class="headerlink" href="#1" title="Permanent link">&para;</a></h3>
+<p>合成一份 256 × 256 的栅格，其中包含一块圆形植被田。真实工作流跳过这一步，直接让 Sedona 读取磁盘或对象存储上已有的 GeoTIFF。</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.transform</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_bounds</span>
+
+<span class="n">WORK</span> <span class="o">=</span> <span class="s2">&quot;/tmp/sedona-raster-tutorial&quot;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">WORK</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">AOI</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">91.10</span><span class="p">,</span> <span class="mf">41.50</span><span class="p">,</span> <span class="o">-</span><span class="mf">91.00</span><span class="p">,</span> <span class="mf">41.60</span><span class="p">)</span>  <span class="c1"># xmin, ymin, xmax, ymax，EPSG:4326</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">H</span> <span class="o">=</span> <span class="mi">256</span>
+<span class="n">transform</span> <span class="o">=</span> <span class="n">from_bounds</span><span class="p">(</span><span class="o">*</span><span class="n">AOI</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">H</span><span class="p">)</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="n">ys</span><span class="p">,</span> <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">H</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="n">W</span><span class="p">]</span>
+<span class="n">field</span> <span class="o">=</span> <span class="p">((</span><span class="n">xs</span> <span class="o">-</span> <span class="mi">96</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">ys</span> <span class="o">-</span> <span class="mi">160</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="o">**</span><span class="mi">2</span>  <span class="c1"># 圆形植被田</span>
+
+<span class="n">red</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1500</span> <span class="o">+</span> <span class="mi">200</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">)))</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;uint16&quot;</span><span class="p">)</span>
+<span class="n">nir</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1800</span> <span class="o">+</span> <span class="mi">200</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">)))</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
+<span class="n">nir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">nir</span> <span class="o">+</span> <span class="mi">4000</span><span class="p">,</span> <span class="n">nir</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;uint16&quot;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">WORK</span><span class="si">}</span><span class="s2">/scene.tif&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;w&quot;</span><span class="p">,</span>
+    <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;GTiff&quot;</span><span class="p">,</span>
+    <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">blockxsize</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+    <span class="n">blockysize</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+    <span class="n">height</span><span class="o">=</span><span class="n">H</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="n">W</span><span class="p">,</span>
+    <span class="n">count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;uint16&quot;</span><span class="p">,</span>
+    <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span>
+    <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
+<span class="p">)</span> <span class="k">as</span> <span class="n">dst</span><span class="p">:</span>
+    <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">red</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">dst</span><span class="o">.</span><span class="n">set_band_description</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">)</span>
+    <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">nir</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">dst</span><span class="o">.</span><span class="n">set_band_description</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;nir&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="2-raster">2. 使用 <code>raster</code> 数据源加载<a class="headerlink" href="#2-raster" title="Permanent link">&para;</a></h3>
+<p><code>raster</code> 数据源可以加载 GeoTIFF 并自动将文件切成多个 tile。每一个 tile 在结果 DataFrame 中对应一行，<code>Raster</code> 类型保存于其中的一列。</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Scala</label><label for="__tabbed_3_2">Java</label><label for="__tabbed_3_3">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1">// 把路径替换为 scene.tif 的实际位置，例如对象存储 URL。</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">rasterDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/tmp/sedona-raster-tutorial/scene.tif&quot;</span><span class="p">)</span>
+<span class="n">rasterDf</span><span class="p">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s">&quot;rasterDf&quot;</span><span class="p">)</span>
+<span class="n">rasterDf</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1">// 把路径替换为 scene.tif 的实际位置，例如对象存储 URL。</span>
+<span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">rasterDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">&quot;/tmp/sedona-raster-tutorial/scene.tif&quot;</span><span class="p">);</span>
+<span class="n">rasterDf</span><span class="p">.</span><span class="na">createOrReplaceTempView</span><span class="p">(</span><span class="s">&quot;rasterDf&quot;</span><span class="p">);</span>
+<span class="n">rasterDf</span><span class="p">.</span><span class="na">show</span><span class="p">();</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">rasterDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">WORK</span><span class="si">}</span><span class="s2">/scene.tif&quot;</span><span class="p">)</span>
+<span class="n">rasterDf</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;rasterDf&quot;</span><span class="p">)</span>
+<span class="n">rasterDf</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="highlight"><pre><span></span><code>+--------------------+---+---+----------+
+|                rast|  x|  y|      name|
++--------------------+---+---+----------+
+|GridCoverage2D[&quot;g...|  0|  0| scene.tif|
++--------------------+---+---+----------+
+</code></pre></div>
+<p>各列含义：</p>
+<ul>
+<li><code>rast</code> —— 栅格数据，Sedona 内置 <code>Raster</code> 类型。</li>
+<li><code>x</code>、<code>y</code> —— 当前 tile 在源文件内的 0 基索引（仅在启用 retile 时出现）。</li>
+<li><code>name</code> —— 源文件名。</li>
+</ul>
+<p>256 × 256 的场景在这里恰好放在一个 tile 中，所以 DataFrame 只有一行。一份几 GB 的 GeoTIFF 则会产生很多行 —— 下游同一份 SQL 在两种情况下都能工作。</p>
+<p><img alt="Tiling 流程示意" src="../../../image/raster-tutorial/tiling-flow.svg" /></p>
+<p>更多内容见下文的 <a href="#loading-options">加载选项</a>：包括 tile 大小覆盖、目录递归读取、以及 NetCDF / Arc Grid 等非 GeoTIFF 格式。</p>
+<h3 id="3">3. 检视元数据<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
+<p>在做任何处理之前，先确认像素维度、地理参考与坐标系：</p>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    SELECT RS_Width(rast)       AS width,</span>
+<span class="s2">           RS_Height(rast)      AS height,</span>
+<span class="s2">           RS_NumBands(rast)    AS bands,</span>
+<span class="s2">           RS_SRID(rast)        AS srid,</span>
+<span class="s2">           RS_GeoReference(rast) AS world_file</span>
+<span class="s2">    FROM rasterDf</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>+-----+------+-----+----+----------------------------------------------------------+
+|width|height|bands|srid|world_file                                                 |
++-----+------+-----+----+----------------------------------------------------------+
+|256  |256   |2    |4326|0.000391\n0.000000\n0.000000\n-0.000391\n-91.099805\n41.599805|
++-----+------+-----+----+----------------------------------------------------------+
+</code></pre></div>
+<p><a href="../../api/sql/Raster-Operators/RS_MetaData/"><code>RS_MetaData</code></a> 把同样的信息以单个数组返回：<code>[upperLeftX, upperLeftY, width, height, scaleX, scaleY, skewX, skewY, srid, numBands]</code>。</p>
+<p>地理参考字段共同定义了从像素空间到世界坐标的仿射变换：</p>
+<p><img alt="仿射变换" src="../../../image/Raster_Affine_Transformation/Raster_Affine_Transformation.svg" /></p>
+<p>每个访问器的详细说明见 <a href="#raster-metadata-reference">栅格元数据参考</a>；运行时的像素—世界坐标互转使用 <a href="../../api/sql/Pixel-Functions/RS_PixelAsPoint/"><code>RS_PixelAsPoint</code></a> 与 <a href="../../api/sql/Raster-Accessors/RS_WorldToRasterCoord/"><code>RS_WorldToRasterCoord</code></a>。</p>
+<h3 id="4">4. 可视化原始栅格<a class="headerlink" href="#4" title="Permanent link">&para;</a></h3>
+<p>先把两个波段渲染出来，看看处理前的输入是什么样子。<code>SedonaUtils.display_image</code> 在 Jupyter notebook 中会自动检测栅格列并就地渲染：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaUtils</span>
+
+<span class="n">SedonaUtils</span><span class="o">.</span><span class="n">display_image</span><span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT RS_Band(rast, ARRAY(1)) AS rast FROM rasterDf&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">SedonaUtils</span><span class="o">.</span><span class="n">display_image</span><span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT RS_Band(rast, ARRAY(2)) AS rast FROM rasterDf&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>波段 1 是红光通道 —— 大体是没什么特征的裸地。波段 2 (NIR) 在植被田上明显变亮：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">波段 1（红光）</th>
+<th style="text-align: left;">波段 2 (NIR)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><img alt="原始红光波段" src="../../../image/raster-tutorial/01-raw-red.png" /></td>
+<td style="text-align: left;"><img alt="原始 NIR 波段" src="../../../image/raster-tutorial/02-raw-nir.png" /></td>
+</tr>
+</tbody>
+</table>
+<p>如果不在 notebook 环境，使用 <a href="../../api/sql/Raster-Output/RS_AsImage/"><code>RS_AsImage(rast, width)</code></a> 得到 HTML <code>&lt;img&gt;</code> 标签，或者用 <a href="../../api/sql/Raster-Output/RS_AsBase64/"><code>RS_AsBase64</code></a> 得到任意图像查看器都能解码的 Base64 字符串。</p>
+<h3 id="5-map-algebra-ndvi">5. 处理 —— 用 map algebra 计算 NDVI<a class="headerlink" href="#5-map-algebra-ndvi" title="Permanent link">&para;</a></h3>
+<p>归一化植被指数（NDVI）可以把活体植被从其他地物中分离出来：</p>
+<div class="highlight"><pre><span></span><code>NDVI = (NIR − Red) / (NIR + Red)
+</code></pre></div>
+<p><a href="../../api/sql/Raster-map-algebra/"><code>RS_MapAlgebra</code></a> 在一个或多个波段上按像素运行一段脚本。输出类型 <code>'D'</code>（double）保留 NDVI 的负值范围：</p>
+<div class="highlight"><pre><span></span><code><span class="n">ndviDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    SELECT RS_MapAlgebra(</span>
+<span class="s2">               rast, &#39;D&#39;,</span>
+<span class="s2">               &#39;out[0] = (rast[1] - rast[0]) / (rast[1] + rast[0] + 1e-6);&#39;</span>
+<span class="s2">           ) AS rast</span>
+<span class="s2">    FROM rasterDf</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">ndviDf</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;ndviDf&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p><img alt="NDVI map algebra 示意" src="../../../image/raster-tutorial/ndvi-math.svg" /></p>
+<p>Map algebra 是最通用的处理原语 —— 裁剪、遮罩、阈值过滤、不同波段或不同栅格之间的算术运算，都可以用同样的 <code>RS_MapAlgebra(rast, pixelType, script)</code>（或双栅格版本）写出来。脚本语法见 <a href="../../api/sql/Raster-map-algebra/">Map algebra</a>；其他备选算子（<code>RS_Clip</code>、<code>RS_Resample</code>、<code>RS_SetValues</code>）见下文的 <a href="#raster-processing-reference">栅格处理参考</a>。</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code>RS_MapAlgebra</code> 自 <code>v1.9.1</code> 起弃用，并将在**未来版本中移除**，请改用
+<a href="../../api/sql/Raster-UDF/">栅格 UDF</a>：它用 Python 表达同样的逐像素计算，而且还能直接使用 NumPy、SciPy、
+scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原样运行没有问题，但新代码应改用 UDF；两种写法的
+对照见 <a href="../../api/sql/Raster-UDF/#ndvi-as-map-algebra-and-as-a-udf">NDVI：地图代数写法与 UDF 写法</a>。</p>
+</div>
+<h3 id="6">6. 可视化处理结果<a class="headerlink" href="#6" title="Permanent link">&para;</a></h3>
+<p>NDVI 栅格让植被田一目了然：NDVI 高的像素显示为绿色，其余为淡红色。</p>
+<div class="highlight"><pre><span></span><code><span class="n">SedonaUtils</span><span class="o">.</span><span class="n">display_image</span><span class="p">(</span><span class="n">ndviDf</span><span class="p">)</span>
+</code></pre></div>
+<p><img alt="NDVI 结果" src="../../../image/raster-tutorial/03-ndvi.png" /></p>
+<h3 id="7">7. 使用分区统计聚合到矢量区域<a class="headerlink" href="#7" title="Permanent link">&para;</a></h3>
+<p>逐像素的 NDVI 很少是最终的可交付成果。真正想回答的问题往往是「哪一块*区域*变绿了？」—— 哪个农业地块、哪个普查区、哪个流域。<a href="../../api/sql/Raster-Band-Accessors/RS_ZonalStats/"><code>RS_ZonalStats(raster, zone, statType)</code></a> 就是栅格 → 矢量聚合的规范函数：落在区域多边形内的每个像素都会贡献到该统计值上。</p>
+<p>真实的地块边界往往是不规则的 —— 形状各异的田地、地块之间留出的道路与地役权间隙、不属于任何区域的留白。下面在 AOI 上手绘 5 个地块：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">Row</span>
+
+<span class="n">parcels</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="n">Row</span><span class="p">(</span>
+            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">&quot;Orchard&quot;</span><span class="p">,</span>
+            <span class="n">wkt</span><span class="o">=</span><span class="s2">&quot;POLYGON((-91.085 41.515, -91.045 41.510, -91.030 41.530, &quot;</span>
+            <span class="s2">&quot;-91.040 41.560, -91.075 41.572, -91.085 41.555, -91.085 41.515))&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">Row</span><span class="p">(</span>
+            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">&quot;EastFarm&quot;</span><span class="p">,</span>
+            <span class="n">wkt</span><span class="o">=</span><span class="s2">&quot;POLYGON((-91.025 41.512, -91.005 41.512, -91.005 41.572, &quot;</span>
+            <span class="s2">&quot;-91.035 41.572, -91.025 41.535, -91.025 41.512))&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">Row</span><span class="p">(</span>
+            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">&quot;WestFarm&quot;</span><span class="p">,</span>
+            <span class="n">wkt</span><span class="o">=</span><span class="s2">&quot;POLYGON((-91.095 41.520, -91.087 41.520, -91.080 41.555, &quot;</span>
+            <span class="s2">&quot;-91.080 41.572, -91.095 41.572, -91.095 41.520))&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">Row</span><span class="p">(</span>
+            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">&quot;NorthBlock&quot;</span><span class="p">,</span>
+            <span class="n">wkt</span><span class="o">=</span><span class="s2">&quot;POLYGON((-91.095 41.580, -91.005 41.580, -91.005 41.598, &quot;</span>
+            <span class="s2">&quot;-91.095 41.598, -91.095 41.580))&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">Row</span><span class="p">(</span>
+            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">&quot;SouthStrip&quot;</span><span class="p">,</span>
+            <span class="n">wkt</span><span class="o">=</span><span class="s2">&quot;POLYGON((-91.095 41.502, -91.005 41.502, -91.005 41.508, &quot;</span>
+            <span class="s2">&quot;-91.095 41.508, -91.095 41.502))&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">]</span>
+<span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;parcel_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ST_GeomFromText(wkt) AS geom&quot;</span><span class="p">)</span>
+
+<span class="n">parcels</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;parcels&quot;</span><span class="p">)</span>
+
+<span class="n">ranked</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    SELECT p.parcel_id,</span>
+<span class="s2">           ROUND(RS_ZonalStats(n.rast, p.geom, &#39;mean&#39;), 4) AS mean_ndvi</span>
+<span class="s2">    FROM parcels p, ndviDf n</span>
+<span class="s2">    ORDER BY mean_ndvi DESC</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">ranked</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>+----------+---------+
+| parcel_id|mean_ndvi|
++----------+---------+
+|   Orchard|   0.4213|
+|  WestFarm|   0.1182|
+|NorthBlock|   0.0925|
+|  EastFarm|   0.0907|
+|SouthStrip|   0.0905|
++----------+---------+
+</code></pre></div>
+<p>不规则形状的 <strong>Orchard</strong> 地块明显胜出 —— 它正好覆盖了植被田。落在地块缝隙里的像素（道路、未登记土地）不属于任何区域，对所有统计值都没有影响。</p>
+<p><img alt="分区统计" src="../../../image/raster-tutorial/07-zonalstats.png" /></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>当输入栅格被分成多个 tile 时，<code>parcels × ndviDf</code> 的笛卡尔连接会产生每个 <code>(parcel, tile)</code> 一行的结果。要在 tile 之间正确聚合，应该按 tile 先算 <code>sum</code> 与 <code>count</code>，再 <code>GROUP BY parcel_id</code> 用 <code>SUM(sum) / SUM(count)</code> 汇总。思路相同，只是多加一层聚合。<a href="../../api/sql/Raster-Band-Accessors/RS_ZonalStatsAll/"><code>RS_ZonalStatsAll</code></a> 可以在一次调用里返回所有常用统计量。</p>
+</div>
+<h3 id="8">8. 写回磁盘<a class="headerlink" href="#8" title="Permanent link">&para;</a></h3>
+<p>写出栅格分两步：先用 <code>RS_AsXXX</code> 把 <code>Raster</code> 列转成二进制，再把这个二进制 DataFrame 交给 Sedona 的 <code>raster</code> writer。</p>
+<p><img alt="写出流水线" src="../../../image/raster-tutorial/write-pipeline.svg" /></p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Scala</label><label for="__tabbed_4_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">spark</span><span class="p">.</span><span class="nn">sql</span><span class="p">.</span><span class="nn">functions</span><span class="p">.</span><span class="n">expr</span>
+
+<span class="n">ndviDf</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;raster_binary&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;RS_AsGeoTiff(rast)&quot;</span><span class="p">))</span>
+<span class="w">  </span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">).</span><span class="n">mode</span><span class="p">(</span><span class="s">&quot;overwrite&quot;</span><span class="p">).</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/tmp/sedona-raster-tutorial/ndvi_out&quot;</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">expr</span>
+
+<span class="p">(</span>
+    <span class="n">ndviDf</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;raster_binary&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;RS_AsGeoTiff(rast)&quot;</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">WORK</span><span class="si">}</span><span class="s2">/ndvi_out&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>输出目录中，每一行对应一个 part 子目录中的一个文件，再加上 Spark 的 <code>_SUCCESS</code> 标记。读回方式：</p>
+<div class="highlight"><pre><span></span><code><span class="n">roundtrip</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">WORK</span><span class="si">}</span><span class="s2">/ndvi_out/*/*.tiff&quot;</span><span class="p">)</span>
+<span class="n">roundtrip</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;RS_Width(rast) AS w&quot;</span><span class="p">,</span> <span class="s2">&quot;RS_Height(rast) AS h&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p>完整的 writer 选项（<code>rasterField</code>、<code>pathField</code>、<code>fileExtension</code>、<code>useDirectCommitter</code>）与可选的二进制格式（<code>RS_AsGeoTiff</code>、<code>RS_AsCOG</code>、<code>RS_AsArcGrid</code>、<code>RS_AsPNG</code>）见下文 <a href="#writing-rasters-reference">写出栅格参考</a>。</p>
+<hr />
+<p>下面是参考材料：其他加载方式、按用途分组的所有栅格算子、以及在 Python 端处理已收集 <code>SedonaRaster</code> 对象的用法。</p>
+<h2 id="loading-options">加载选项<a class="headerlink" href="#loading-options" title="Permanent link">&para;</a></h2>
+<h3 id="tile">Tile 大小覆盖<a class="headerlink" href="#tile" title="Permanent link">&para;</a></h3>
+<p><code>raster</code> 数据源默认使用 GeoTIFF 自身的内部 tile 方案。推荐使用 <a href="https://www.cogeo.org/">Cloud Optimized GeoTIFF</a>（COG）作为源格式，因为它本身就把像素按方形 tile 组织。要显式覆盖 tile 设置：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">选项</th>
+<th style="text-align: left;">默认值</th>
+<th style="text-align: left;">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>retile</code></td>
+<td style="text-align: left;"><code>true</code></td>
+<td style="text-align: left;">是否进行 tile 切分。设为 <code>false</code> 时每个文件作为单行加载。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>tileWidth</code></td>
+<td style="text-align: left;">源文件内部的 tile 宽度</td>
+<td style="text-align: left;">覆盖每个 tile 的宽度（像素）。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>tileHeight</code></td>
+<td style="text-align: left;">若已设置 <code>tileWidth</code>，则同其</td>
+<td style="text-align: left;">覆盖每个 tile 的高度（像素）。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>padWithNoData</code></td>
+<td style="text-align: left;"><code>false</code></td>
+<td style="text-align: left;">当右侧/底部边缘的 tile 小于指定尺寸时，是否用 NODATA 值填充。</td>
+</tr>
+</tbody>
+</table>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:1"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">rasterDf</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tileWidth&quot;</span><span class="p">,</span> <span class="s2">&quot;256&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tileHeight&quot;</span><span class="p">,</span> <span class="s2">&quot;256&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/some/path/*.tif&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>若文件内部布局不适合 tile 切分，数据源会报错。可通过 <code>option("retile", "false")</code> 禁用，或显式指定 tile 尺寸；更彻底的做法是用 <code>gdal_translate</code> 把文件重写为 COG。</p>
+</div>
+<h3 id="glob">按目录与 glob 加载<a class="headerlink" href="#glob" title="Permanent link">&para;</a></h3>
+<p><code>raster</code> 数据源支持 Spark 通用的文件源选项：</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:1"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">rasterDf</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;recursiveFileLookup&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;pathGlobFilter&quot;</span><span class="p">,</span> <span class="s2">&quot;*.tif*&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/raster_folder&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>如果加载路径以 <code>/</code> 结尾，会自动开启递归扫描 —— 相当于设置了 <code>recursiveFileLookup=true</code>。</p>
+</div>
+<h3 id="geotiff-netcdfarc-grid">非 GeoTIFF 格式（NetCDF、Arc Grid）<a class="headerlink" href="#geotiff-netcdfarc-grid" title="Permanent link">&para;</a></h3>
+<p>对 GeoTIFF 以外的格式，使用 Spark 的 <code>binaryFile</code> 数据源加上 Sedona 的栅格构造器。</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:1"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="n">rawDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;binaryFile&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/file.asc&quot;</span><span class="p">)</span>
+<span class="n">rawDf</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;rawdf&quot;</span><span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>然后把 <code>content</code> 列提升为 <code>Raster</code>：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">构造器</th>
+<th style="text-align: left;">源格式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../../api/sql/Raster-Constructors/RS_FromGeoTiff/"><code>RS_FromGeoTiff(content)</code></a></td>
+<td style="text-align: left;">GeoTIFF（也可通过上述 <code>raster</code> 数据源直接读）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../../api/sql/Raster-Constructors/RS_FromArcInfoAsciiGrid/"><code>RS_FromArcInfoAsciiGrid(content)</code></a></td>
+<td style="text-align: left;">Arc Info ASCII Grid</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../../api/sql/Raster-Constructors/RS_FromNetCDF/"><code>RS_FromNetCDF(...)</code></a></td>
+<td style="text-align: left;">NetCDF</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_FromArcInfoAsciiGrid</span><span class="p">(</span><span class="n">content</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">rast</span><span class="p">,</span>
+<span class="w">       </span><span class="n">modificationTime</span><span class="p">,</span><span class="w"> </span><span class="k">length</span><span class="p">,</span><span class="w"> </span><span class="n">path</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">rawdf</span>
+</code></pre></div>
+<h2 id="raster-metadata-reference">栅格元数据参考<a class="headerlink" href="#raster-metadata-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">函数</th>
+<th style="text-align: left;">返回内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../../api/sql/Raster-Operators/RS_MetaData/"><code>RS_MetaData(rast)</code></a></td>
+<td style="text-align: left;">上述所有字段，以单个数组返回</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../../api/sql/Raster-Accessors/RS_Width/"><code>RS_Width(rast)</code></a>、<a href="../../api/sql/Raster-Accessors/RS_Height/"><code>RS_Height(rast)</code></a></td>
+<td style="text-align: left;">像素维度</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../../api/sql/Raster-Operators/RS_NumBands/"><code>RS_NumBands(rast)</code></a></td>
+<td style="text-align: left;">波段数</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../../api/sql/Raster-Operators/RS_SRID/"><code>RS_SRID(rast)</code></a></td>
+<td style="text-align: left;">坐标参考系（EPSG 代码）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../../api/sql/Raster-Accessors/RS_GeoReference/"><code>RS_GeoReference(rast, format)</code></a></td>
+<td style="text-align: left;">world file（GDAL 或 ESRI 风格）</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../../api/sql/Raster-Accessors/RS_UpperLeftX/"><code>RS_UpperLeftX(rast)</code></a>、<code>RS_UpperLeftY</code></td>
+<td style="text-align: left;">左上角世界坐标</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../../api/sql/Raster-Accessors/RS_ScaleX/"><code>RS_ScaleX(rast)</code></a>、<code>RS_ScaleY</code></td>
+<td style="text-align: left;">每像素对应的世界坐标尺寸</td>
+</tr>
+</tbody>
+</table>
+<h2 id="raster-processing-reference">栅格处理参考<a class="headerlink" href="#raster-processing-reference" title="Permanent link">&para;</a></h2>
+<p>教程主线使用 <code>RS_MapAlgebra</code> 计算 NDVI。完整的算子集合：</p>
+<h3 id="_3">坐标转换<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="../../api/sql/Pixel-Functions/RS_PixelAsPoint/"><code>RS_PixelAsPoint(rast, col, row)</code></a> —— 像素 → 世界坐标。</li>
+<li><a href="../../api/sql/Raster-Accessors/RS_WorldToRasterCoord/"><code>RS_WorldToRasterCoord(rast, x, y)</code></a> —— 世界坐标 → 像素（只取单轴时用 <code>RS_WorldToRasterCoordX</code> / <code>Y</code>）。</li>
+</ul>
+<p><img alt="世界坐标转栅格坐标" src="../../../image/RS_WorldToRasterCoord/RS_WorldToRasterCoord.svg" /></p>
+<h3 id="_4">像素操作<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="../../api/sql/Raster-Operators/RS_Values/"><code>RS_Values(rast, points)</code></a> —— 在一组点几何处采样像素值。</li>
+<li><a href="../../api/sql/Raster-Operators/RS_SetValues/"><code>RS_SetValues(rast, band, x, y, width, height, values)</code></a> —— 覆写一个矩形像素块。</li>
+</ul>
+<h3 id="_5">波段操作<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="../../api/sql/Raster-Band-Accessors/RS_Band/"><code>RS_Band(rast, bands)</code></a> —— 选取部分波段构造新栅格。</li>
+<li><a href="../../api/sql/Raster-Operators/RS_AddBand/"><code>RS_AddBand(target, source, srcBand, dstBand)</code></a> —— 在两个栅格之间复制波段。</li>
+</ul>
+<h3 id="_6">重采样与裁剪<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="../../api/sql/Raster-Operators/RS_Resample/"><code>RS_Resample(rast, scaleX, scaleY, gridX, gridY, useScale, method)</code></a> —— 改变像元尺寸或将栅格对齐到目标网格，支持最近邻、双线性、双立方插值。</li>
+<li><a href="../../api/sql/Raster-Operators/RS_Clip/"><code>RS_Clip(rast, band, geom)</code></a> —— 按多边形裁剪。</li>
+<li><a href="../../api/sql/Raster-Operators/RS_ReprojectMatch/"><code>RS_ReprojectMatch</code></a> —— 将一个栅格重采样到另一个栅格的网格与坐标系上：</li>
+</ul>
+<p><img alt="Reproject match" src="../../../image/RS_ReprojectMatch/RS_ReprojectMatch.svg" /></p>
+<h3 id="_7">逐像素计算<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<p>请使用<a href="../../api/sql/Raster-UDF/">栅格 UDF</a>。UDF 可以接收一个或多个栅格列，因此已弃用的 <code>RS_MapAlgebra</code> 的两种
+形式都有直接对应的写法 —— 下面是双栅格的变化检测场景：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">udf</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">RasterType</span>
+
+<span class="n">NODATA</span> <span class="o">=</span> <span class="o">-</span><span class="mf">9999.0</span>
+
+
+<span class="nd">@udf</span><span class="p">(</span><span class="n">returnType</span><span class="o">=</span><span class="n">RasterType</span><span class="p">())</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">delta</span><span class="p">(</span><span class="n">after</span><span class="p">,</span> <span class="n">before</span><span class="p">):</span>
+    <span class="c1"># 用 as_numpy_masked() 而非 as_numpy()：NODATA 会变成 NaN，从而保持无效状态，</span>
+    <span class="c1"># 不会把哨兵值带进减法结果。</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">after</span><span class="o">.</span><span class="n">as_numpy_masked</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">before</span><span class="o">.</span><span class="n">as_numpy_masked</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">after</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">diff</span><span class="p">),</span> <span class="n">NODATA</span><span class="p">,</span> <span class="n">diff</span><span class="p">),</span> <span class="n">nodata</span><span class="o">=</span><span class="n">NODATA</span><span class="p">)</span>
+
+
+<span class="c1"># ndvi_after 与 ndvi_before 是两个日期的 NDVI 栅格，位于同一网格上，</span>
+<span class="c1"># 并各自带有 raster 数据源生成的 x、y tile 索引列。</span>
+<span class="p">(</span>
+    <span class="n">ndvi_after</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ndvi_before</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;before&quot;</span><span class="p">),</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">])</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">delta</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;after.rast&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;before.rast&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;delta&quot;</span><span class="p">))</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>单栅格写法、NDVI 的两种写法对照，以及需要注意的限制，见<a href="../../api/sql/Raster-UDF/">栅格 UDF</a>。</p>
+<h2 id="_8">栅格与矢量互通<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h3 id="_9">几何栅格化<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p><a href="../../api/sql/Raster-Operators/RS_AsRaster/"><code>RS_AsRaster</code></a> 将矢量几何渲染到栅格网格上：</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_AsRaster</span><span class="p">(</span>
+<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON((150 150, 220 260, 190 300, 300 220, 150 150))&#39;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;b&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">&#39;b&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">,</span><span class="w"> </span><span class="mi">230</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><img alt="矢量栅格化结果" src="../../../image/rasterized-image.png" /></p>
+<h3 id="_10">空间过滤与连接<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p>栅格谓词既可用于 <code>WHERE</code> 子句，也可作为连接条件：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 范围查询：保留与 AOI 相交的 tile</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">rast</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">rasterDf</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">RS_Intersects</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))&#39;</span><span class="p">))</span>
+
+<span class="c1">-- 空间连接：把每个 tile 与覆盖到它的矢量要素配对</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="k">g</span><span class="p">.</span><span class="n">geom</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">rasterDf</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">geomDf</span><span class="w"> </span><span class="k">g</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">RS_Intersects</span><span class="p">(</span><span class="n">r</span><span class="p">.</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="k">g</span><span class="p">.</span><span class="n">geom</span><span class="p">)</span>
+</code></pre></div>
+<p><a href="../../api/sql/Raster-Predicates/RS_Intersects/"><code>RS_Intersects</code></a> 与其他 <a href="../../api/sql/Raster-Functions/#raster-predicates">栅格谓词</a> 都基于栅格的空间外包做判断。</p>
+<h3 id="_11">分区统计<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>教程主线使用 <a href="../../api/sql/Raster-Band-Accessors/RS_ZonalStats/"><code>RS_ZonalStats(raster, zone, statType)</code></a> 配合 <code>'mean'</code>。同一函数还支持 <code>'sum'</code>、<code>'count'</code>、<code>'min'</code>、<code>'max'</code>、<code>'stddev'</code>。如需一次拿到所有标准统计量，使用 <a href="../../api/sql/Raster-Band-Accessors/RS_ZonalStatsAll/"><code>RS_ZonalStatsAll</code></a>，它对每个区域返回一个 struct，包含全部统计字段。</p>
+<h2 id="_12">可视化参考<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
+<p>除教程主线使用的 <code>SedonaUtils.display_image</code> 与 <code>RS_AsImage</code> 之外：</p>
+<ul>
+<li><a href="../../api/sql/Raster-Output/RS_AsBase64/"><code>RS_AsBase64(rast)</code></a> —— 编码为 Base64 字符串，便于嵌入或使用 <a href="https://base64-viewer.onrender.com/">在线解码器</a> 查看。</li>
+<li><a href="../../api/sql/Raster-Output/RS_AsMatrix/"><code>RS_AsMatrix(rast)</code></a> —— 把底层像素网格渲染成文本矩阵（适合小尺寸栅格或调试场景）。</li>
+</ul>
+<p>完整列表见 <a href="../../api/sql/Raster-Functions/#raster-output">栅格输出函数</a>。</p>
+<h2 id="writing-rasters-reference">写出栅格参考<a class="headerlink" href="#writing-rasters-reference" title="Permanent link">&para;</a></h2>
+<p>教程使用的两步写出流程支持以下四种输出格式：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">函数</th>
+<th style="text-align: left;">格式</th>
+<th style="text-align: left;">适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><a href="../../api/sql/Raster-Output/RS_AsGeoTiff/"><code>RS_AsGeoTiff</code></a></td>
+<td style="text-align: left;">GeoTIFF</td>
+<td style="text-align: left;">通用格式，可选压缩</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../../api/sql/Raster-Output/RS_AsCOG/"><code>RS_AsCOG</code></a></td>
+<td style="text-align: left;">Cloud Optimized GeoTIFF</td>
+<td style="text-align: left;">对象存储 + 高效 range read</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../../api/sql/Raster-Output/RS_AsArcGrid/"><code>RS_AsArcGrid</code></a></td>
+<td style="text-align: left;">Arc Info ASCII Grid</td>
+<td style="text-align: left;">单波段、文本格式</td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="../../api/sql/Raster-Output/RS_AsPNG/"><code>RS_AsPNG</code></a></td>
+<td style="text-align: left;">PNG</td>
+<td style="text-align: left;">仅用于显示，像素类型必须为无符号整数</td>
+</tr>
+</tbody>
+</table>
+<p><code>raster</code> writer 支持以下选项：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">选项</th>
+<th style="text-align: left;">默认值</th>
+<th style="text-align: left;">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>rasterField</code></td>
+<td style="text-align: left;">schema 中最后一个 <code>binary</code> 列</td>
+<td style="text-align: left;">要写出的二进制列名。当 DataFrame 中存在多个二进制列时建议显式设置。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fileExtension</code></td>
+<td style="text-align: left;"><code>.tiff</code></td>
+<td style="text-align: left;">输出文件扩展名（例如 <code>.png</code>、<code>.asc</code>）。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>pathField</code></td>
+<td style="text-align: left;">无</td>
+<td style="text-align: left;">提供输出文件名的列。仅使用文件 basename，已有扩展名会被 <code>fileExtension</code> 替换。未设置时每个文件以随机 UUID 命名。</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>useDirectCommitter</code></td>
+<td style="text-align: left;"><code>true</code></td>
+<td style="text-align: left;">直接写入目标位置。设为 <code>false</code> 时先写到临时位置，速度较慢，尤其在 S3 等对象存储上。</td>
+</tr>
+</tbody>
+</table>
+<p>设置所有选项的完整示例：</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Scala</label><label for="__tabbed_8_2">Python</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">spark</span><span class="p">.</span><span class="nn">sql</span><span class="p">.</span><span class="nn">functions</span><span class="p">.</span><span class="n">expr</span>
+
+<span class="n">rasterDf</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;raster_binary&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;RS_AsGeoTiff(rast)&quot;</span><span class="p">))</span>
+<span class="w">  </span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;rasterField&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;raster_binary&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;pathField&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;name&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;fileExtension&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.tiff&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">mode</span><span class="p">(</span><span class="s">&quot;overwrite&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;my_raster_file&quot;</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">expr</span>
+
+<span class="p">(</span>
+    <span class="n">rasterDf</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;raster_binary&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;RS_AsGeoTiff(rast)&quot;</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;rasterField&quot;</span><span class="p">,</span> <span class="s2">&quot;raster_binary&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;pathField&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;fileExtension&quot;</span><span class="p">,</span> <span class="s2">&quot;.tiff&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;my_raster_file&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>输出目录结构：</p>
+<div class="highlight"><pre><span></span><code>my_raster_file
+├── part-00000-…-c000
+│   ├── test1.tiff
+│   └── .test1.tiff.crc
+├── part-00001-…-c000
+│   ├── test2.tiff
+│   └── .test2.tiff.crc
+└── _SUCCESS
+</code></pre></div>
+<p>使用同一 <code>raster</code> 数据源读回：</p>
+<div class="highlight"><pre><span></span><code><span class="n">rasterDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;my_raster_file/*/*.tiff&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="working-with-raster-dataframes-in-python">在 Python 中处理栅格 DataFrame<a class="headerlink" href="#working-with-raster-dataframes-in-python" title="Permanent link">&para;</a></h2>
+<p>自 <code>v1.6.0</code> 起，可以把含栅格列的 DataFrame 拉到 Python driver 端本地处理。被收集回的栅格元素表现为 <code>SedonaRaster</code> 对象。</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>在 Jupyter 中若只是想快速可视化栅格，优先使用 <code>SedonaUtils.display_image(df)</code>，无需 collect。</p>
+</div>
+<div class="highlight"><pre><span></span><code><span class="n">df_raster</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;retile&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/raster.tif&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">rows</span> <span class="o">=</span> <span class="n">df_raster</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+<span class="n">raster</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rast</span>
+<span class="n">raster</span>  <span class="c1"># &lt;sedona.raster.sedona_raster.InDbSedonaRaster at 0x…&gt;</span>
+</code></pre></div>
+<p><code>SedonaRaster</code> 通过 Python 属性暴露元数据：</p>
+<div class="highlight"><pre><span></span><code><span class="n">raster</span><span class="o">.</span><span class="n">width</span>
+<span class="n">raster</span><span class="o">.</span><span class="n">height</span>
+<span class="n">raster</span><span class="o">.</span><span class="n">affine_trans</span>
+<span class="n">raster</span><span class="o">.</span><span class="n">crs_wkt</span>
+</code></pre></div>
+<p>像素数据以 NumPy 数组形式提供（CHW 排列）：</p>
+<div class="highlight"><pre><span></span><code><span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()</span>  <span class="c1"># ndarray</span>
+<span class="n">raster</span><span class="o">.</span><span class="n">as_numpy_masked</span><span class="p">()</span>  <span class="c1"># ndarray，NODATA 被掩码为 NaN</span>
+</code></pre></div>
+<p>需要与 <code>rasterio</code>（&gt;= 1.2.10）互操作时：</p>
+<div class="highlight"><pre><span></span><code><span class="n">ds</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">as_rasterio</span><span class="p">()</span>  <span class="c1"># rasterio.DatasetReader</span>
+<span class="n">band1</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="python-udf">在栅格上编写 Python UDF<a class="headerlink" href="#python-udf" title="Permanent link">&para;</a></h2>
+<p>Python UDF 接收栅格数据，使用 NumPy / SciPy / scikit-learn 等处理，并返回标量或新栅格。本节是入门介绍；完整内容见 <a href="../../api/sql/Raster-UDF/">栅格 UDF</a>，其中包括何时该选 UDF 而不是 <code>RS_MapAlgebra</code>、双栅格 UDF，以及需要注意的各项限制。</p>
+<h3 id="_13">栅格 → 标量<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<p>UDF 可接收 <code>SedonaRaster</code> 输入并返回任意 Spark 数据类型。下面的 UDF 计算栅格均值：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoubleType</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mean_udf</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+
+
+<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mean_udf&quot;</span><span class="p">,</span> <span class="n">mean_udf</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;mean_udf(rast)&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>+--------------------+------------------+
+|                rast|              mean|
++--------------------+------------------+
+|GridCoverage2D[&quot;g...|1542.8092886117788|
++--------------------+------------------+
+</code></pre></div>
+<h3 id="_14">栅格 → 栅格<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<p>从 <code>v1.9.1</code> 起，UDF 也可以返回栅格对象。使用 <code>SedonaRaster.with_bands()</code> 替换像素数据，同时沿用源栅格的 CRS 与仿射变换。波段数与 dtype 可自由变化。</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">RasterType</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mask_udf</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
+    <span class="c1"># 假定场景没有空洞；若可能携带 NODATA，请改用 as_numpy_masked() —— 见栅格 UDF 页面</span>
+    <span class="n">band1</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">band1</span> <span class="o">&lt;</span> <span class="mi">1400</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>  <span class="c1"># 1 个波段，位于输入的网格上</span>
+
+
+<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mask_udf&quot;</span><span class="p">,</span> <span class="n">mask_udf</span><span class="p">,</span> <span class="n">RasterType</span><span class="p">())</span>
+<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mask_rast&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;mask_udf(rast)&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>+--------------------+--------------------+
+|                rast|           mask_rast|
++--------------------+--------------------+
+|GridCoverage2D[&quot;g...|GridCoverage2D[&quot;g...|
++--------------------+--------------------+
+</code></pre></div>
+<p><code>with_bands()</code> 接受 NumPy 数组：CHW 顺序（波段 × 高 × 宽），或单波段输出时的 HW 顺序（高 × 宽）。返回的 <code>SedonaRaster</code> 在 UDF 返回时会自动序列化回 JVM 端，因此输出就是一个普通栅格列。</p>
+<p>除非另行指定，输出的 NODATA 会继承自输入波段，而这通常不是派生栅格想要的 —— 用 <code>nodata=</code> 明确设置：</p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=-</span><span class="mf">9999.0</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>结果始终位于输入的网格上 —— <code>with_bands()</code> 要求高、宽一致，并沿用输入的 CRS 与仿射变换，因此重投影和重采样无法在 Python UDF 内部完成。这一点以及 dtype 相关的注意事项见 <a href="../../api/sql/Raster-UDF/#limits">栅格 UDF</a>。</p>
+</div>
+<h3 id="udf-rasterio">在 UDF 中使用 rasterio<a class="headerlink" href="#udf-rasterio" title="Permanent link">&para;</a></h3>
+<p><code>as_rasterio()</code> 在 UDF 内部同样可用，因此 rasterio 与 GDAL 的算法可以直接作用于栅格列。该 dataset 是只读的 —— 若要返回栅格，需要把得到的数组交给 <code>with_bands()</code>：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">rasterio.fill</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fill_udf</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
+    <span class="c1"># GDAL dataset 不携带 Sedona 的 NODATA，因此要从 SedonaRaster 构造掩膜 ——</span>
+    <span class="c1"># as_numpy_masked() 会把 NODATA 替换为 NaN。</span>
+    <span class="n">nodata</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">bands_meta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nodata</span>
+    <span class="n">valid</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">raster</span><span class="o">.</span><span class="n">as_numpy_masked</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">with</span> <span class="n">raster</span><span class="o">.</span><span class="n">as_rasterio</span><span class="p">()</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
+        <span class="n">filled</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">fill</span><span class="o">.</span><span class="n">fillnodata</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">))</span>
+    <span class="c1"># fillnodata 只在距有效数据 max_search_distance（默认 100 像素）内插值，更深处</span>
+    <span class="c1"># 的像素仍保留哨兵值，因此保留 NODATA 声明。只有确定所有空洞都能被完全填充时，</span>
+    <span class="c1"># 才改用 nodata=float(&quot;nan&quot;)。</span>
+    <span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">filled</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">)</span>
+
+
+<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;fill_udf&quot;</span><span class="p">,</span> <span class="n">fill_udf</span><span class="p">,</span> <span class="n">RasterType</span><span class="p">())</span>
+<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;filled&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;fill_udf(rast)&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p>这适用于任何不改变网格的 rasterio 运算。warp 与重投影会改变网格，无法这样返回 —— 请改用 <a href="../../api/sql/Raster-Operators/RS_Resample/"><code>RS_Resample</code></a> 或 <a href="../../api/sql/Raster-Operators/RS_ReprojectMatch/"><code>RS_ReprojectMatch</code></a>。</p>
+<h2 id="_15">性能优化<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h2>
+<p>处理大体量栅格时，可参考 <a href="../storing-blobs-in-parquet/">将栅格几何以 Parquet 形式存储</a> 的分区与持久化建议。</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="最后更新">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年7月30日 20:24:40 UTC">2026年7月30日 20:24:40</span>
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+    
+
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="footer md-footer">
+  <div class="container">
+
+    <div class="footer__top">
+
+      <div class="col-left">
+        <img src="../../../image/footer/logo-footer.svg" alt="" class="footer-logo">
+      </div>
+
+      <div class="col-right">
+        
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/apache/sedona" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/ApacheSedona" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M459.4 151.7c.3 4.5.3 9.1.3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53C87.4 130.8 165 172.4 252.1 176.9c-1.6-7.8-2.6-15.9-2.6-24C249.5 95.1 296.3 48 354.4 48c30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://discord.gg/9A3k5dEBsY" target="_blank" rel="noopener" title="discord.gg" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M492.5 69.8c-.2-.3-.4-.6-.8-.7-38.1-17.5-78.4-30-119.7-37.1-.4-.1-.8 0-1.1.1s-.6.4-.8.8c-5.5 9.9-10.5 20.2-14.9 30.6-44.6-6.8-89.9-6.8-134.4 0-4.5-10.5-9.5-20.7-15.1-30.6-.2-.3-.5-.6-.8-.8s-.7-.2-1.1-.2C162.5 39 122.2 51.5 84.1 69c-.3.1-.6.4-.8.7C7.1 183.5-13.8 294.6-3.6 404.2c0 .3.1.5.2.8s.3.4.5.6c44.4 32.9 94 58 146.8 74.2.4.1.8.1 1.1 0s.7-.4.9-.7c11.3-15.4 21.4-31.8 30-48.8.1-.2.2-.5.2-.8s0-.5-.1-.8-.2-.5-.4-.6-.4-.3-.7-.4c-15.8-6.1-31.2-13.4-45.9-21.9-.3-.2-.5-.4-.7-.6s-.3-.6-.3-.9 0-.6.2-.9.3-.5.6-.7c3.1-2.3 6.2-4.7 9.1-7.1.3-.2.6-.4.9-.4s.7 0 1 .1c96.2 43.9 200.4 43.9 295.5 0 .3-.1.7-.2 1-.2s.7.2.9.4c2.9 2.4 6 4.9 9.1 7.2.2.2.4.4.6.7s.2.6.2.9-.1.6-.3.9-.4.5-.6.6c-14.7 8.6-30 15.9-45.9 21.8-.2.1-.5.2-.7.4s-.3.4-.4.7-.1.5-.1.8.1.5.2.8c8.8 17 18.8 33.3 30 48.8.2.3.6.6.9.7s.8.1 1.1 0c52.9-16.2 102.6-41.3 147.1-74.2.2-.2.4-.4.5-.6s.2-.5.2-.8c12.3-126.8-20.5-236.9-86.9-334.5zm-302 267.7c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.4 59.2-52.8 59.2m195.4 0c-29 0-52.8-26.6-52.8-59.2s23.4-59.2 52.8-59.2c29.7 0 53.3 26.8 52.8 59.2 0 32.7-23.2 59.2-52.8 59.2"/></svg>
+    </a>
+  
+</div>
+        
+      </div>
+    </div>
+
+    <hr class="footer-hr"></hr>
+
+    <div class="footer__bot">
+      <div class="md-copyright">
+  
+  <div class="md-copyright__highlight">Copyright © 2026 The Apache Software Foundation. Apache Sedona, Sedona, Apache, the Apache feather logo, and the Apache Sedona project logo are either registered trademarks or trademarks of The Apache Software Foundation in the United States and other countries. All other marks mentioned may be trademarks or registered trademarks of their respective owners. Please visit <a href="https://www.apache.org/">Apache Software Foundation</a> for more details.<img referrerpolicy="no-referrer-when-downgrade" src="https://static.scarf.sh/a.png?x-pxid=f3e121f6-c909-4592-8be6-5bd345768cba" /><img referrerpolicy="no-referrer-when-downgrade" src="https://analytics.apache.org/matomo.php?idsite=74&rec=1" /></div>
+  
+  <div class="md-copyright__asf-links">
+    <a href="https://www.apache.org/licenses/">License</a> |
+    <a href="https://www.apache.org/events/current-event">Events</a> |
+    <a href="https://www.apache.org/foundation/sponsorship.html">Sponsorship</a> |
+    <a href="https://www.apache.org/foundation/thanks.html">Thanks</a> |
+    <a href="https://www.apache.org/security/">Security</a> |
+    <a href="https://privacy.apache.org/policies/privacy-policy-public.html">Privacy</a> |
+    <a href="https://www.apache.org/foundation/marks/">Trademarks</a>
+  </div>
+  
+  <div class="md-copyright__generator">Made with <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">Material for MkDocs</a>
+  </div>
+  
+</div>
+    </div>
+
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["announce.dismiss", "content.code.copy", "content.action.edit", "search.highlight", "search.share", "search.suggest", "navigation.footer", "navigation.instant", "navigation.instant.prefetch", "navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": ["latest"], "provider": "mike"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../assets/javascripts/main.min.js"></script>
+      
+    
+  </body>
+</html>

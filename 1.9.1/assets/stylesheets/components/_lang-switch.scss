@@ -1,0 +1,99 @@
+.sd-lang-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0.2rem;
+
+  // Hide the default disclosure marker on summary
+  &__trigger::-webkit-details-marker { display: none; }
+  &__trigger { list-style: none; }
+
+  &__trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.7rem;
+    height: 1.7rem;
+    padding: 0 0.32rem;
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+    transition: background-color 120ms ease, color 120ms ease;
+
+    &:hover,
+    &:focus-visible {
+      color: #ffffff;
+      background-color: rgba(255, 255, 255, 0.18);
+      outline: none;
+    }
+  }
+
+  &__glyph {
+    display: inline-flex;
+    align-items: baseline;
+    font-family: -apple-system, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  &__glyph-cn {
+    font-size: 0.95rem;
+    margin-right: 0.05rem;
+  }
+
+  &__glyph-en {
+    font-size: 0.7rem;
+    transform: translateY(-0.18rem);
+    font-weight: 700;
+  }
+
+  &[open] &__trigger {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.22);
+  }
+
+  &__menu {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    min-width: 8rem;
+    margin: 0;
+    padding: 0.3rem 0;
+    list-style: none;
+    background: #ffffff;
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+    z-index: 100;
+
+    li { margin: 0; padding: 0; }
+  }
+
+  &__link {
+    display: block;
+    padding: 0.4rem 0.9rem;
+    color: rgba(0, 0, 0, 0.78);
+    text-decoration: none;
+    font-size: 0.72rem;
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+
+    &:hover,
+    &:focus {
+      color: #ca463a;
+      background-color: rgba(202, 70, 58, 0.08);
+      outline: none;
+    }
+
+    &--active {
+      color: #ca463a;
+      font-weight: 700;
+    }
+  }
+}
+
+// The native <details> element stays open until the user clicks the
+// summary again. We accept that behavior here; clicking elsewhere on
+// the page does not auto-close the menu. Keeping it pure HTML/CSS
+// means the dropdown works without any JS dependency.

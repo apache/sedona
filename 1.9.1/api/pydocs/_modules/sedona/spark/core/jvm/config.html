@@ -1,0 +1,467 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sedona.spark.core.jvm.config &mdash; Apache Sedona Python Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/custom.css" />
+
+  
+      <script src="../../../../../_static/jquery.js"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+      <script src="../../../../../_static/doctools.js"></script>
+      <script src="../../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+     
+    <!-- Google Fonts for Apache Sedona styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Additional meta tags for better rendering -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1565c0">
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #ff5722" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            Apache Sedona Python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sedona.flink.html">sedona.flink package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.flink.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.flink.html#module-sedona.flink.context">sedona.flink.context module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.flink.html#sedona.flink.context.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.flink.html#sedona.flink.context.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.flink.html#module-sedona.flink">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../sedona.spark.html">sedona.spark package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.core.html">sedona.spark.core package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.core.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.core.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.core.html#module-sedona.spark.core.utils">sedona.spark.core.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.core.html#module-sedona.spark.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.geoarrow.html">sedona.spark.geoarrow package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geoarrow.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geoarrow.html#module-sedona.spark.geoarrow.geoarrow">sedona.spark.geoarrow.geoarrow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geoarrow.html#module-sedona.spark.geoarrow">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.geopandas.html">sedona.spark.geopandas package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.api.html">sedona.spark.geopandas core</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.io.html">sedona.spark.geopandas.io</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.geopandas.tools.html">sedona.spark.geopandas.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.maps.html">sedona.spark.maps package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaKepler">sedona.spark.maps.SedonaKepler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaMapUtils">sedona.spark.maps.SedonaMapUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaPyDeck">sedona.spark.maps.SedonaPyDeck module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.maps.html#module-sedona.spark.maps">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.raster.html">sedona.spark.raster package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.awt_raster">sedona.spark.raster.awt_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.data_buffer">sedona.spark.raster.data_buffer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.meta">sedona.spark.raster.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.raster_serde">sedona.spark.raster.raster_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.sample_model">sedona.spark.raster.sample_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster.sedona_raster">sedona.spark.raster.sedona_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster.html#module-sedona.spark.raster">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.raster_utils.html">sedona.spark.raster_utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster_utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster_utils.html#module-sedona.spark.raster_utils.SedonaUtils">sedona.spark.raster_utils.SedonaUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.raster_utils.html#module-sedona.spark.raster_utils">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.register.html">sedona.spark.register package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.register.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.register.html#module-sedona.spark.register.geo_registrator">sedona.spark.register.geo_registrator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.register.html#module-sedona.spark.register.java_libs">sedona.spark.register.java_libs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.register.html#module-sedona.spark.register">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.sql.html">sedona.spark.sql package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#sedona-spark-sql-connect-module">sedona.spark.sql.connect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.dataframe_api">sedona.spark.sql.dataframe_api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.exceptions">sedona.spark.sql.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.functions">sedona.spark.sql.functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_aggregates">sedona.spark.sql.st_aggregates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_constructors">sedona.spark.sql.st_constructors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_functions">sedona.spark.sql.st_functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_predicates">sedona.spark.sql.st_predicates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql.types">sedona.spark.sql.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.sql.html#module-sedona.spark.sql">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.stac.html">sedona.spark.stac package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stac.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stac.html#module-sedona.spark.stac.client">sedona.spark.stac.client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stac.html#module-sedona.spark.stac.collection_client">sedona.spark.stac.collection_client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stac.html#module-sedona.spark.stac">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.stats.html">sedona.spark.stats package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stats.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stats.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stats.html#module-sedona.spark.stats.weighting">sedona.spark.stats.weighting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.stats.html#module-sedona.spark.stats">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.utils.html">sedona.spark.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.abstract_parser">sedona.spark.utils.abstract_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.adapter">sedona.spark.utils.adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.binary_parser">sedona.spark.utils.binary_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.decorators">sedona.spark.utils.decorators module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_adapter">sedona.spark.utils.geometry_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_serde">sedona.spark.utils.geometry_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_serde_general">sedona.spark.utils.geometry_serde_general module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.geomserde_speedup">sedona.spark.utils.geomserde_speedup module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.jvm">sedona.spark.utils.jvm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.meta">sedona.spark.utils.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.prep">sedona.spark.utils.prep module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.serde">sedona.spark.utils.serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.spatial_rdd_parser">sedona.spark.utils.spatial_rdd_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.structured_adapter">sedona.spark.utils.structured_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils.types">sedona.spark.utils.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.utils.html#module-sedona.spark.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.html#module-sedona.spark.SedonaContext">sedona.spark.SedonaContext module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.__init__"><code class="docutils literal notranslate"><span class="pre">SedonaContext.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.builder"><code class="docutils literal notranslate"><span class="pre">SedonaContext.builder()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../sedona.spark.html#module-sedona.spark">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #ff5722" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">Apache Sedona Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sedona.spark.core.jvm.config</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    <div class="sedona-content-wrapper">
+        
+           <div itemprop="articleBody">
+             
+  <h1>Source code for sedona.spark.core.jvm.config</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Licensed to the Apache Software Foundation (ASF) under one</span>
+<span class="c1"># or more contributor license agreements.  See the NOTICE file</span>
+<span class="c1"># distributed with this work for additional information</span>
+<span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
+<span class="c1"># to you under the Apache License, Version 2.0 (the</span>
+<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># with the License.  You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing,</span>
+<span class="c1"># software distributed under the License is distributed on an</span>
+<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># KIND, either express or implied.  See the License for the</span>
+<span class="c1"># specific language governing permissions and limitations</span>
+<span class="c1"># under the License.</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">re</span><span class="w"> </span><span class="kn">import</span> <span class="n">findall</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">classproperty</span>
+
+<span class="n">string_types</span> <span class="o">=</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="is_greater_or_equal_version"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.is_greater_or_equal_version">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">is_greater_or_equal_version</span><span class="p">(</span><span class="n">version_a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">version_b</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">version_b</span><span class="p">,</span> <span class="n">version_a</span><span class="p">]):</span>
+        <span class="n">version_numbers</span> <span class="o">=</span> <span class="n">version_a</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">),</span> <span class="n">version_b</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">version</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="k">for</span> <span class="n">version</span> <span class="ow">in</span> <span class="n">version_numbers</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">for</span> <span class="n">ver_a</span><span class="p">,</span> <span class="n">ver_b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">version_numbers</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">ver_a</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">ver_b</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="nb">int</span><span class="p">(</span><span class="n">ver_a</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">ver_b</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="since"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.since">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">since</span><span class="p">(</span><span class="n">version</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">applier</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">sedona_version</span> <span class="o">=</span> <span class="n">SedonaMeta</span><span class="o">.</span><span class="n">version</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="n">sedona_version</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;This function is not available for </span><span class="si">{</span><span class="n">sedona_version</span><span class="si">}</span><span class="s2">, &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;please use version higher than </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not available before </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2"> sedona version&quot;</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">return</span> <span class="n">applier</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span></div>
+
+
+<div class="viewcode-block" id="deprecated"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.deprecated">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deprecated</span><span class="p">(</span><span class="n">reason</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a decorator which can be used to mark functions</span>
+<span class="sd">    as deprecated. It will result in a warning being emitted</span>
+<span class="sd">    when the function is used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reason</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
+
+        <span class="c1"># The @deprecated is used with a &#39;reason&#39;.</span>
+        <span class="c1">#</span>
+        <span class="c1"># .. code-block:: python</span>
+        <span class="c1">#</span>
+        <span class="c1">#    @deprecated(&quot;please, use another function&quot;)</span>
+        <span class="c1">#    def old_function(x, y):</span>
+        <span class="c1">#      pass</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">func1</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">func1</span><span class="p">):</span>
+                <span class="n">fmt1</span> <span class="o">=</span> <span class="s2">&quot;Call to deprecated class </span><span class="si">{name}</span><span class="s2"> (</span><span class="si">{reason}</span><span class="s2">).&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fmt1</span> <span class="o">=</span> <span class="s2">&quot;Call to deprecated function </span><span class="si">{name}</span><span class="s2"> (</span><span class="si">{reason}</span><span class="s2">).&quot;</span>
+
+            <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func1</span><span class="p">)</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">new_func1</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="n">fmt1</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">func1</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="n">reason</span><span class="p">),</span>
+                    <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">,</span>
+                    <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="n">func1</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">new_func1</span>
+
+        <span class="k">return</span> <span class="n">decorator</span>
+
+    <span class="k">elif</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">reason</span><span class="p">)</span> <span class="ow">or</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isfunction</span><span class="p">(</span><span class="n">reason</span><span class="p">):</span>
+
+        <span class="c1"># The @deprecated is used without any &#39;reason&#39;.</span>
+        <span class="c1">#</span>
+        <span class="c1"># .. code-block:: python</span>
+        <span class="c1">#</span>
+        <span class="c1">#    @deprecated</span>
+        <span class="c1">#    def old_function(x, y):</span>
+        <span class="c1">#      pass</span>
+
+        <span class="n">func2</span> <span class="o">=</span> <span class="n">reason</span>
+
+        <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">func2</span><span class="p">):</span>
+            <span class="n">fmt2</span> <span class="o">=</span> <span class="s2">&quot;Call to deprecated class </span><span class="si">{name}</span><span class="s2">.&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fmt2</span> <span class="o">=</span> <span class="s2">&quot;Call to deprecated function </span><span class="si">{name}</span><span class="s2">.&quot;</span>
+
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func2</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">new_func2</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="n">fmt2</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">func2</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span>
+                <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">func2</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_func2</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">reason</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="SparkJars"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SparkJars">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SparkJars</span><span class="p">:</span>
+<div class="viewcode-block" id="SparkJars.get_used_jars"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SparkJars.get_used_jars">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_used_jars</span><span class="p">():</span>
+        <span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">_instantiatedSession</span>
+
+        <span class="c1"># When deployed normally, Sedona appears in `spark.jars``, when it&#39;s submitted</span>
+        <span class="c1"># via YARN it&#39;s in `spark.yarn.dist.jars`</span>
+        <span class="n">used_jar_files_lookup_with_errors</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">SparkJars</span><span class="o">.</span><span class="n">get_spark_java_config</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">config_id</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">config_id</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;spark.jars&quot;</span><span class="p">,</span> <span class="s2">&quot;spark.yarn.dist.jars&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="n">used_jar_files_lookup</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">lookup_result</span> <span class="k">for</span> <span class="n">lookup_result</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">used_jar_files_lookup_with_errors</span>
+        <span class="p">]</span>
+
+        <span class="n">used_jar_files</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">jars</span> <span class="k">for</span> <span class="n">jars</span> <span class="ow">in</span> <span class="n">used_jar_files_lookup</span> <span class="k">if</span> <span class="n">jars</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">used_jar_files_lookup</span><span class="p">)</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">used_jar_files</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">used_jar_files_lookup_with_errors</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Trying to get filenames from the $SPARK_HOME/jars directory&quot;</span><span class="p">)</span>
+            <span class="n">used_jar_files</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;SPARK_HOME&quot;</span><span class="p">],</span> <span class="s2">&quot;jars&quot;</span><span class="p">))</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">used_jar_files</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">jars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;__spark_jars&quot;</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;__spark_jars&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_used_jars</span><span class="p">())</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;__spark_jars&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SparkJars.get_spark_java_config"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SparkJars.get_spark_java_config">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_spark_java_config</span><span class="p">(</span>
+        <span class="n">spark</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+        <span class="k">if</span> <span class="n">spark</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">spark_conf</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">conf</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;SparkSession is not initiated&quot;</span><span class="p">)</span>
+
+        <span class="n">java_spark_conf</span> <span class="o">=</span> <span class="n">spark_conf</span><span class="o">.</span><span class="n">_jconf</span>
+        <span class="n">used_jar_files</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">error_message</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">used_jar_files</span> <span class="o">=</span> <span class="n">java_spark_conf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Didn&#39;t find the value of </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> from SparkConf&quot;</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">used_jar_files</span><span class="p">,</span> <span class="n">error_message</span></div></div>
+
+
+<div class="viewcode-block" id="SedonaMeta"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SedonaMeta">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SedonaMeta</span><span class="p">:</span>
+<div class="viewcode-block" id="SedonaMeta.get_version"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SedonaMeta.get_version">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spark_jars</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="c1"># Find Spark version, Scala version and Sedona version.</span>
+        <span class="n">versions</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s2">&quot;sedona-(?:python-adapter|spark-shaded|spark)-([^,\n]</span><span class="si">{3}</span><span class="s2">)_([^,\n]</span><span class="si">{4}</span><span class="s2">)-([^,\n]</span><span class="si">{5}</span><span class="s2">)&quot;</span><span class="p">,</span>
+            <span class="n">spark_jars</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">versions</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sedona_version</span> <span class="o">=</span> <span class="n">versions</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">sedona_version</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">sedona_version</span></div>
+
+    <span class="nd">@classproperty</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">spark_jars</span> <span class="o">=</span> <span class="n">SparkJars</span><span class="o">.</span><span class="n">get_used_jars</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__version&quot;</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__version&quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_version</span><span class="p">(</span><span class="n">spark_jars</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__version&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">&quot;1.1.5&quot;</span><span class="p">,</span> <span class="s2">&quot;1.2.0&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">&quot;1.2.0&quot;</span><span class="p">,</span> <span class="s2">&quot;1.1.5&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">&quot;1.3.5&quot;</span><span class="p">,</span> <span class="s2">&quot;1.2.0&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;1.2.0&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">&quot;1.3.5&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+    </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Apache Software Foundation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

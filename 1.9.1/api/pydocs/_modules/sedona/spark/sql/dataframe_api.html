@@ -1,0 +1,429 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sedona.spark.sql.dataframe_api &mdash; Apache Sedona Python Documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
+
+  
+      <script src="../../../../_static/jquery.js"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+      <script src="../../../../_static/doctools.js"></script>
+      <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+     
+    <!-- Google Fonts for Apache Sedona styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Additional meta tags for better rendering -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1565c0">
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #ff5722" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Apache Sedona Python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sedona.flink.html">sedona.flink package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../sedona.flink.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../sedona.flink.html#module-sedona.flink.context">sedona.flink.context module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.flink.html#sedona.flink.context.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.flink.html#sedona.flink.context.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../sedona.flink.html#module-sedona.flink">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../sedona.spark.html">sedona.spark package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../sedona.spark.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.core.html">sedona.spark.core package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.core.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.core.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.core.html#module-sedona.spark.core.utils">sedona.spark.core.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.core.html#module-sedona.spark.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.geoarrow.html">sedona.spark.geoarrow package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geoarrow.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geoarrow.html#module-sedona.spark.geoarrow.geoarrow">sedona.spark.geoarrow.geoarrow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geoarrow.html#module-sedona.spark.geoarrow">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.geopandas.html">sedona.spark.geopandas package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.api.html">sedona.spark.geopandas core</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.io.html">sedona.spark.geopandas.io</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.geopandas.tools.html">sedona.spark.geopandas.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.maps.html">sedona.spark.maps package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.maps.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaKepler">sedona.spark.maps.SedonaKepler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaMapUtils">sedona.spark.maps.SedonaMapUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.maps.html#module-sedona.spark.maps.SedonaPyDeck">sedona.spark.maps.SedonaPyDeck module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.maps.html#module-sedona.spark.maps">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.raster.html">sedona.spark.raster package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#module-sedona.spark.raster.awt_raster">sedona.spark.raster.awt_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#module-sedona.spark.raster.data_buffer">sedona.spark.raster.data_buffer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#module-sedona.spark.raster.meta">sedona.spark.raster.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#module-sedona.spark.raster.raster_serde">sedona.spark.raster.raster_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#module-sedona.spark.raster.sample_model">sedona.spark.raster.sample_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#module-sedona.spark.raster.sedona_raster">sedona.spark.raster.sedona_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster.html#module-sedona.spark.raster">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.raster_utils.html">sedona.spark.raster_utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster_utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster_utils.html#module-sedona.spark.raster_utils.SedonaUtils">sedona.spark.raster_utils.SedonaUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.raster_utils.html#module-sedona.spark.raster_utils">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.register.html">sedona.spark.register package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.register.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.register.html#module-sedona.spark.register.geo_registrator">sedona.spark.register.geo_registrator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.register.html#module-sedona.spark.register.java_libs">sedona.spark.register.java_libs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.register.html#module-sedona.spark.register">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.sql.html">sedona.spark.sql package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#sedona-spark-sql-connect-module">sedona.spark.sql.connect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.dataframe_api">sedona.spark.sql.dataframe_api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.exceptions">sedona.spark.sql.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.functions">sedona.spark.sql.functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_aggregates">sedona.spark.sql.st_aggregates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_constructors">sedona.spark.sql.st_constructors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_functions">sedona.spark.sql.st_functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.st_predicates">sedona.spark.sql.st_predicates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql.types">sedona.spark.sql.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.sql.html#module-sedona.spark.sql">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.stac.html">sedona.spark.stac package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stac.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stac.html#module-sedona.spark.stac.client">sedona.spark.stac.client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stac.html#module-sedona.spark.stac.collection_client">sedona.spark.stac.collection_client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stac.html#module-sedona.spark.stac">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.stats.html">sedona.spark.stats package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stats.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stats.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stats.html#module-sedona.spark.stats.weighting">sedona.spark.stats.weighting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.stats.html#module-sedona.spark.stats">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.utils.html">sedona.spark.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.abstract_parser">sedona.spark.utils.abstract_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.adapter">sedona.spark.utils.adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.binary_parser">sedona.spark.utils.binary_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.decorators">sedona.spark.utils.decorators module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_adapter">sedona.spark.utils.geometry_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_serde">sedona.spark.utils.geometry_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.geometry_serde_general">sedona.spark.utils.geometry_serde_general module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.geomserde_speedup">sedona.spark.utils.geomserde_speedup module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.jvm">sedona.spark.utils.jvm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.meta">sedona.spark.utils.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.prep">sedona.spark.utils.prep module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.serde">sedona.spark.utils.serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.spatial_rdd_parser">sedona.spark.utils.spatial_rdd_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.structured_adapter">sedona.spark.utils.structured_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils.types">sedona.spark.utils.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.utils.html#module-sedona.spark.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../sedona.spark.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../sedona.spark.html#module-sedona.spark.SedonaContext">sedona.spark.SedonaContext module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.__init__"><code class="docutils literal notranslate"><span class="pre">SedonaContext.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.builder"><code class="docutils literal notranslate"><span class="pre">SedonaContext.builder()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../sedona.spark.html#module-sedona.spark">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #ff5722" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Apache Sedona Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">sedona.spark.sql.dataframe_api</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    <div class="sedona-content-wrapper">
+        
+           <div itemprop="articleBody">
+             
+  <h1>Source code for sedona.spark.sql.dataframe_api</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Licensed to the Apache Software Foundation (ASF) under one</span>
+<span class="c1"># or more contributor license agreements.  See the NOTICE file</span>
+<span class="c1"># distributed with this work for additional information</span>
+<span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
+<span class="c1"># to you under the Apache License, Version 2.0 (the</span>
+<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># with the License.  You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing,</span>
+<span class="c1"># software distributed under the License is distributed on an</span>
+<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># KIND, either express or implied.  See the License for the</span>
+<span class="c1"># specific language governing permissions and limitations</span>
+<span class="c1"># under the License.</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">SparkSession</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">f</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.connect.column</span><span class="w"> </span><span class="kn">import</span> <span class="n">Column</span> <span class="k">as</span> <span class="n">ConnectColumn</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_remote</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c1"># be backwards compatible with Spark &lt; 3.4</span>
+<div class="viewcode-block" id="is_remote"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.dataframe_api.is_remote">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_remote</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="ConnectColumn"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.dataframe_api.ConnectColumn">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">ConnectColumn</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql.connect</span><span class="w"> </span><span class="kn">import</span> <span class="n">call_sedona_function_connect</span>
+
+
+<span class="n">ColumnOrName</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Column</span><span class="p">,</span> <span class="n">ConnectColumn</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+<span class="n">ColumnOrNameOrNumber</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Column</span><span class="p">,</span> <span class="n">ConnectColumn</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_convert_argument_to_java_column</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Column</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">arg</span><span class="o">.</span><span class="n">_jc</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="o">.</span><span class="n">_jc</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="n">_convert_argument_to_java_column</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">])</span><span class="o">.</span><span class="n">_jc</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="o">.</span><span class="n">_jc</span>
+
+
+<div class="viewcode-block" id="call_sedona_function"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.dataframe_api.call_sedona_function">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">call_sedona_function</span><span class="p">(</span>
+    <span class="n">object_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+    <span class="c1"># apparently a Column is an Iterable so we need to check for it explicitly</span>
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">))</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span>
+        <span class="n">args</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Column</span><span class="p">,</span> <span class="n">ConnectColumn</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">args</span><span class="p">]</span>
+
+    <span class="c1"># in spark-connect environments use connect API</span>
+    <span class="k">if</span> <span class="n">is_remote</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">call_sedona_function_connect</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">_convert_argument_to_java_column</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+    <span class="n">jvm</span> <span class="o">=</span> <span class="n">SparkContext</span><span class="o">.</span><span class="n">_jvm</span>
+    <span class="k">if</span> <span class="n">jvm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;No active spark context was detected. Unable to call sedona function.&quot;</span>
+        <span class="p">)</span>
+    <span class="n">jobject</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">jvm</span><span class="p">,</span> <span class="n">object_name</span><span class="p">)</span>
+    <span class="n">jfunc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">jobject</span><span class="p">,</span> <span class="n">function_name</span><span class="p">)</span>
+
+    <span class="n">jc</span> <span class="o">=</span> <span class="n">jfunc</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Column</span><span class="p">(</span><span class="n">jc</span><span class="p">)</span></div>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_type_list</span><span class="p">(</span><span class="n">annotated_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a type annotation into a tuple of types.</span>
+<span class="sd">    For most types this will be a tuple with a single element, but</span>
+<span class="sd">    for Union a tuple with multiple elements will be returned.</span>
+
+<span class="sd">    :param annotated_type: Type annotation to convert a tuple.</span>
+<span class="sd">    :type annotated_type: Type</span>
+<span class="sd">    :return: Tuple of all types covered by the type annotation.</span>
+<span class="sd">    :rtype: Tuple[Type, ...]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">get_origin</span><span class="p">(</span><span class="n">annotated_type</span><span class="p">)</span> <span class="ow">is</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">:</span>
+        <span class="c1"># again, there is a really nice method for this in 3.8: typing.get_args</span>
+        <span class="n">valid_types</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">get_args</span><span class="p">(</span><span class="n">annotated_type</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">valid_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">annotated_type</span><span class="p">,)</span>
+
+    <span class="c1"># functions accepting a Column should also accept the Spark Connect sort of Column</span>
+    <span class="k">if</span> <span class="n">Column</span> <span class="ow">in</span> <span class="n">valid_types</span><span class="p">:</span>
+        <span class="n">valid_types</span> <span class="o">=</span> <span class="n">valid_types</span> <span class="o">+</span> <span class="p">(</span><span class="n">ConnectColumn</span><span class="p">,)</span>
+
+    <span class="k">return</span> <span class="n">valid_types</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_strip_extra_from_class_name</span><span class="p">(</span><span class="n">class_name</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">class_name</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;&lt;class &#39;&quot;</span><span class="p">)</span> <span class="p">:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;&#39;&gt;&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_readable_name_for_type</span><span class="p">(</span><span class="nb">type</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a human readable name for a type annotation used on a function&#39;s parameter.</span>
+
+<span class="sd">    :param type: Type annotation for a parameter.</span>
+<span class="sd">    :type type: Type</span>
+<span class="sd">    :return: Human readable name for the type annotation.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">_GenericAlias</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">type</span><span class="o">.</span><span class="n">__origin__</span><span class="o">.</span><span class="n">_name</span> <span class="o">==</span> <span class="s2">&quot;Union&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Union[</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_strip_extra_from_class_name</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">type</span><span class="o">.</span><span class="n">__args__</span><span class="p">)</span><span class="si">}</span><span class="s2">]&quot;</span>
+    <span class="k">return</span> <span class="n">_strip_extra_from_class_name</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_bound_arguments</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bind the passed arguments to f with actual parameter names, including defaults.</span>
+
+<span class="sd">    :param f: Function to bind arguments for.</span>
+<span class="sd">    :type f: Callable</span>
+<span class="sd">    :return: Dictionary of parameter names to argument values.</span>
+<span class="sd">    :rtype: Mapping[str, Any]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f_signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">bound_args</span> <span class="o">=</span> <span class="n">f_signature</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">bound_args</span><span class="o">.</span><span class="n">apply_defaults</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">bound_args</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_bound_arguments</span><span class="p">(</span>
+    <span class="n">bound_args</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">type_annotations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">],</span> <span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check bound arguments against type annotations and raise a ValueError if any do not match.</span>
+
+<span class="sd">    :param bound_args: Bound arguments to check.</span>
+<span class="sd">    :type bound_args: Mapping[str, Any]</span>
+<span class="sd">    :param type_annotations: Type annotations to check bound_args against.</span>
+<span class="sd">    :type type_annotations: List[Type]</span>
+<span class="sd">    :param function_name: Name of the function that is being checked for, used in the exception if raised.</span>
+<span class="sd">    :type function_name: str</span>
+<span class="sd">    :raises ValueError: If a bound argument does not match the parameter type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">bound_arg_name</span><span class="p">,</span> <span class="n">bound_arg_value</span> <span class="ow">in</span> <span class="n">bound_args</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">annotated_type</span> <span class="o">=</span> <span class="n">type_annotations</span><span class="p">[</span><span class="n">bound_arg_name</span><span class="p">]</span>
+        <span class="n">valid_type_list</span> <span class="o">=</span> <span class="n">_get_type_list</span><span class="p">(</span><span class="n">annotated_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">bound_arg_value</span><span class="p">,</span> <span class="n">valid_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">valid_type</span> <span class="ow">in</span> <span class="n">valid_type_list</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Incorrect argument type: </span><span class="si">{</span><span class="n">bound_arg_name</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">function_name</span><span class="si">}</span><span class="s2"> should be </span><span class="si">{</span><span class="n">_get_readable_name_for_type</span><span class="p">(</span><span class="n">annotated_type</span><span class="p">)</span><span class="si">}</span><span class="s2"> but received </span><span class="si">{</span><span class="n">_strip_extra_from_class_name</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">bound_arg_value</span><span class="p">)))</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+
+
+<div class="viewcode-block" id="validate_argument_types"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.dataframe_api.validate_argument_types">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">validate_argument_types</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validates types of arguments passed to a dataframe API style function.</span>
+<span class="sd">    Arguments will need to be either strings, columns, or match the typehints of f.</span>
+<span class="sd">    This function is meant to be used a decorator.</span>
+
+<span class="sd">    :param f: Function to validate for.</span>
+<span class="sd">    :type f: Callable</span>
+<span class="sd">    :return: f wrapped with type validation checks.</span>
+<span class="sd">    :rtype: Callable</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">validated_function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+        <span class="c1"># all arguments are Columns or strings are always legal, so only check types when one of the arguments is not a column</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">Column</span><span class="p">,</span> <span class="n">ConnectColumn</span><span class="p">))</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="p">]</span>
+        <span class="p">):</span>
+            <span class="n">bound_args</span> <span class="o">=</span> <span class="n">_get_bound_arguments</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">type_annotations</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">get_type_hints</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">_check_bound_arguments</span><span class="p">(</span><span class="n">bound_args</span><span class="p">,</span> <span class="n">type_annotations</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">update_wrapper</span><span class="p">(</span><span class="n">validated_function</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+    </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Apache Software Foundation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

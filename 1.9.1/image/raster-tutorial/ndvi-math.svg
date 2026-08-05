@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="400" viewBox="0 0 900 400" font-family="Arial, Helvetica, sans-serif">
+  <rect width="900" height="400" fill="white"/>
+  <text x="450" y="28" text-anchor="middle" font-size="18" fill="#333" font-weight="bold">RS_MapAlgebra: per-pixel NDVI from a 2-band raster</text>
+
+  <!-- Input raster: 2 bands shown side-by-side as a stack -->
+  <text x="160" y="68" text-anchor="middle" font-size="13" fill="#333" font-weight="bold">Input raster (2 bands)</text>
+
+  <!-- Band 2 (NIR) - top -->
+  <g transform="translate(50,85)">
+    <rect width="220" height="110" fill="#E8F5E9" stroke="#1B5E20" stroke-width="1.5"/>
+    <text x="110" y="-6" text-anchor="middle" font-size="11" fill="#1B5E20" font-weight="bold">band 2 (NIR) — rast[1]</text>
+    <g stroke="#A5D6A7" stroke-width="0.5">
+      <line x1="55"  y1="0" x2="55"  y2="110"/>
+      <line x1="110" y1="0" x2="110" y2="110"/>
+      <line x1="165" y1="0" x2="165" y2="110"/>
+      <line x1="0"   y1="36" x2="220" y2="36"/>
+      <line x1="0"   y1="73" x2="220" y2="73"/>
+    </g>
+    <rect x="55" y="36" width="55" height="37" fill="#1B5E20" opacity="0.85"/>
+    <text x="83" y="60" text-anchor="middle" font-size="13" fill="white" font-weight="bold">5800</text>
+  </g>
+
+  <!-- Band 1 (Red) - bottom -->
+  <g transform="translate(50,225)">
+    <rect width="220" height="110" fill="#FFEBEE" stroke="#C62828" stroke-width="1.5"/>
+    <text x="110" y="-6" text-anchor="middle" font-size="11" fill="#C62828" font-weight="bold">band 1 (red) — rast[0]</text>
+    <g stroke="#FFCDD2" stroke-width="0.5">
+      <line x1="55"  y1="0" x2="55"  y2="110"/>
+      <line x1="110" y1="0" x2="110" y2="110"/>
+      <line x1="165" y1="0" x2="165" y2="110"/>
+      <line x1="0"   y1="36" x2="220" y2="36"/>
+      <line x1="0"   y1="73" x2="220" y2="73"/>
+    </g>
+    <rect x="55" y="36" width="55" height="37" fill="#C62828" opacity="0.85"/>
+    <text x="83" y="60" text-anchor="middle" font-size="13" fill="white" font-weight="bold">1500</text>
+  </g>
+
+  <!-- Highlighted pixel callout -->
+  <text x="160" y="350" text-anchor="middle" font-size="10" fill="#666">highlighted pixel: same row/col in each band</text>
+
+  <!-- Arrow -->
+  <line x1="290" y1="200" x2="370" y2="200" stroke="#333" stroke-width="2"/>
+  <polygon points="370,200 362,195 362,205" fill="#333"/>
+
+  <!-- Formula box -->
+  <rect x="385" y="120" width="220" height="120" fill="#FFFDE7" stroke="#F57F17" stroke-width="1.5" rx="6"/>
+  <text x="495" y="142" text-anchor="middle" font-size="12" fill="#666">script (per pixel)</text>
+  <text x="495" y="168" text-anchor="middle" font-size="14" fill="#333" font-weight="bold">out[0] =</text>
+  <text x="495" y="190" text-anchor="middle" font-size="14" fill="#333" font-weight="bold">(rast[1] − rast[0])</text>
+  <text x="495" y="210" text-anchor="middle" font-size="14" fill="#333">/ (rast[1] + rast[0])</text>
+  <text x="495" y="230" text-anchor="middle" font-size="10" fill="#666">rast[i] reads band (i+1) — 0-based</text>
+
+  <!-- Computed value box -->
+  <rect x="385" y="255" width="220" height="65" fill="#FFFDE7" stroke="#F57F17" stroke-width="1.5" rx="6"/>
+  <text x="495" y="275" text-anchor="middle" font-size="11" fill="#666">for the highlighted pixel</text>
+  <text x="495" y="300" text-anchor="middle" font-size="13" fill="#333" font-weight="bold">(5800 − 1500) / (5800 + 1500) = 0.59</text>
+
+  <!-- Arrow -->
+  <line x1="625" y1="200" x2="705" y2="200" stroke="#333" stroke-width="2"/>
+  <polygon points="705,200 697,195 697,205" fill="#333"/>
+
+  <!-- Output raster -->
+  <text x="800" y="68" text-anchor="middle" font-size="13" fill="#333" font-weight="bold">Output (1 band, double)</text>
+  <g transform="translate(715,155)">
+    <rect width="170" height="110" fill="white" stroke="#1565C0" stroke-width="1.5"/>
+    <text x="85" y="-6" text-anchor="middle" font-size="11" fill="#1565C0" font-weight="bold">NDVI — out[0]</text>
+    <g stroke="#BBDEFB" stroke-width="0.5">
+      <line x1="42"  y1="0" x2="42"  y2="110"/>
+      <line x1="85"  y1="0" x2="85"  y2="110"/>
+      <line x1="127" y1="0" x2="127" y2="110"/>
+      <line x1="0"   y1="36" x2="170" y2="36"/>
+      <line x1="0"   y1="73" x2="170" y2="73"/>
+    </g>
+    <rect x="42" y="36" width="43" height="37" fill="#388E3C" opacity="0.85"/>
+    <text x="63" y="60" text-anchor="middle" font-size="13" fill="white" font-weight="bold">0.59</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="450" y="380" text-anchor="middle" font-size="12" fill="#333">
+    The same script runs over every pixel of every tile in parallel — no Python loop.
+  </text>
+</svg>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200">
+  <rect width="400" height="200" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_Buffer</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Buffer endcap styles at line ends</text>
+  <path d="M 36 70 L 96 70 A 20 20 0 0 1 96 110 L 36 110 A 20 20 0 0 1 36 70 Z" fill="#2ecc71" fill-opacity="0.15" stroke="#2ecc71" stroke-width="1.5"/>
+  <line x1="36" y1="90" x2="96" y2="90" stroke="#333" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="36" cy="90" r="2.5" fill="#333"/>
+  <circle cx="96" cy="90" r="2.5" fill="#333"/>
+  <text x="66" y="135" font-family="monospace" font-size="10" fill="#2ecc71" text-anchor="middle" font-weight="bold">endcap=round</text>
+  <path d="M 169 70 L 229 70 L 229 110 L 169 110 Z" fill="#FF9800" fill-opacity="0.15" stroke="#FF9800" stroke-width="1.5"/>
+  <line x1="169" y1="90" x2="229" y2="90" stroke="#333" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="169" cy="90" r="2.5" fill="#333"/>
+  <circle cx="229" cy="90" r="2.5" fill="#333"/>
+  <text x="199" y="135" font-family="monospace" font-size="10" fill="#FF9800" text-anchor="middle" font-weight="bold">endcap=flat</text>
+  <path d="M 282 70 L 382 70 L 382 110 L 282 110 Z" fill="#9C27B0" fill-opacity="0.15" stroke="#9C27B0" stroke-width="1.5"/>
+  <line x1="302" y1="90" x2="362" y2="90" stroke="#333" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="302" cy="90" r="2.5" fill="#333"/>
+  <circle cx="362" cy="90" r="2.5" fill="#333"/>
+  <text x="332" y="135" font-family="monospace" font-size="10" fill="#9C27B0" text-anchor="middle" font-weight="bold">endcap=square</text>
+  <text x="200" y="160" font-family="monospace" font-size="9" fill="#333" text-anchor="middle">Buffer style parameter: endcap=round|flat|square</text>
+  <text x="200" y="183" font-family="monospace" font-size="9" fill="#666" text-anchor="middle">Controls how buffer ends are shaped at line endpoints</text>
+</svg>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <radialGradient id="globeGrad" cx="40%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#eaeaf6" />
+      <stop offset="100%" stop-color="#b5b5e0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Title -->
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_DWithin(A, B, d)</text>
+  <rect x="425" y="8" width="60" height="22" rx="4" fill="#c0392b" />
+  <text x="455" y="24" text-anchor="middle" font-size="12" font-weight="bold" fill="white">FALSE</text>
+
+  <!-- Sphere / globe -->
+  <circle cx="250" cy="160" r="110" fill="url(#globeGrad)" stroke="#8e8ed0" stroke-width="1.8" />
+
+  <!-- Latitude/longitude suggestion for 3D depth -->
+  <ellipse cx="250" cy="160" rx="110" ry="28" fill="none" stroke="#8e8ed0" stroke-width="0.8" stroke-opacity="0.5" />
+  <ellipse cx="250" cy="160" rx="38" ry="110" fill="none" stroke="#8e8ed0" stroke-width="0.8" stroke-opacity="0.5" />
+  <ellipse cx="250" cy="160" rx="95" ry="110" fill="none" stroke="#8e8ed0" stroke-width="0.6" stroke-opacity="0.35" />
+
+  <!-- Geodesic cap of radius d around A (same size as the TRUE case) -->
+  <ellipse cx="205" cy="165" rx="42" ry="36" fill="rgba(243,156,18,0.12)" stroke="#f39c12" stroke-width="1.5" stroke-dasharray="6,4" />
+
+  <!-- Geodesic arc from A to B (longer, curves away from the cap) -->
+  <path d="M 205 165 Q 255 110 320 140" fill="none" stroke="#f39c12" stroke-width="1.5" stroke-dasharray="6,4" />
+  <text x="258" y="127" font-size="13" fill="#f39c12" font-style="italic">d</text>
+
+  <!-- Point B on the sphere, clearly outside the cap -->
+  <circle cx="320" cy="140" r="5" fill="#d94a4a" stroke="#ffffff" stroke-width="1.2" />
+  <text x="329" y="134" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+
+  <!-- Point A on the sphere -->
+  <circle cx="205" cy="165" r="5" fill="#4a90d9" stroke="#ffffff" stroke-width="1.2" />
+  <text x="185" y="159" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+
+  <!-- Caption -->
+  <text x="250" y="290" text-anchor="middle" font-size="12" fill="#666666" font-style="italic">Geodesic distance between A and B &gt; d (on sphere)</text>
+</svg>

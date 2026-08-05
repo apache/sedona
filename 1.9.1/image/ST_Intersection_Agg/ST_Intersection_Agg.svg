@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="140" viewBox="0 0 400 140">
+  <rect width="400" height="140" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_Intersection_Agg</text>
+
+  <defs><marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#666"/></marker></defs>
+  <!-- Three overlapping rectangles with a clear shared region -->
+  <rect x="30" y="40" width="60" height="55" rx="2" stroke="#1565C0" stroke-width="1.5" fill="rgba(21,101,192,0.12)"/>
+  <rect x="55" y="30" width="60" height="55" rx="2" stroke="#7B1FA2" stroke-width="1.5" fill="rgba(123,31,162,0.12)"/>
+  <rect x="45" y="55" width="60" height="55" rx="2" stroke="#FF6F00" stroke-width="1.5" fill="rgba(255,111,0,0.12)"/>
+  <!-- Highlight the common overlap region -->
+  <rect x="55" y="55" width="35" height="30" fill="rgba(229,57,53,0.25)" stroke="#E53935" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <!-- Arrow -->
+  <line x1="155" y1="68" x2="215" y2="68" stroke="#666" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+  <text x="185" y="60" font-family="monospace" font-size="9" fill="#666" text-anchor="middle">Intersect</text>
+  <!-- Result: the intersection region shown larger and clearly -->
+  <rect x="250" y="48" width="70" height="50" rx="2" stroke="#E53935" stroke-width="2" fill="rgba(229,57,53,0.20)"/>
+  <text x="285" y="76" font-family="monospace" font-size="9" fill="#E53935" text-anchor="middle">Result</text>
+  <!-- Legend -->
+  <rect x="60" y="122" width="8" height="8" fill="rgba(229,57,53,0.25)" stroke="#E53935" stroke-width="1"/>
+  <text x="72" y="130" font-family="monospace" font-size="9" fill="#E53935">Common overlap → Result</text>
+</svg>

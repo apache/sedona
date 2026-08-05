@@ -1,0 +1,404 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>sedona.spark.stats package &mdash; Apache Sedona Python Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+
+  
+      <script src="_static/jquery.js"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+      <script src="_static/doctools.js"></script>
+      <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="sedona.spark.stats.autocorrelation package" href="sedona.spark.stats.autocorrelation.html" />
+    <link rel="prev" title="sedona.spark.stac package" href="sedona.spark.stac.html" />
+     
+    <!-- Google Fonts for Apache Sedona styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Additional meta tags for better rendering -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1565c0">
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #ff5722" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Apache Sedona Python
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="sedona.flink.html">sedona.flink package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.flink.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.flink.html#module-sedona.flink.context">sedona.flink.context module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.flink.html#sedona.flink.context.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.flink.html#sedona.flink.context.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.flink.html#module-sedona.flink">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="sedona.spark.html">sedona.spark package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="sedona.spark.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.core.html">sedona.spark.core package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.html#module-sedona.spark.core.utils">sedona.spark.core.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.core.html#module-sedona.spark.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.geoarrow.html">sedona.spark.geoarrow package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geoarrow.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geoarrow.html#module-sedona.spark.geoarrow.geoarrow">sedona.spark.geoarrow.geoarrow module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geoarrow.html#module-sedona.spark.geoarrow">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.geopandas.html">sedona.spark.geopandas package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html">sedona.spark.geopandas core</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.io.html">sedona.spark.geopandas.io</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.tools.html">sedona.spark.geopandas.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.maps.html">sedona.spark.maps package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#module-sedona.spark.maps.SedonaKepler">sedona.spark.maps.SedonaKepler module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#module-sedona.spark.maps.SedonaMapUtils">sedona.spark.maps.SedonaMapUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#module-sedona.spark.maps.SedonaPyDeck">sedona.spark.maps.SedonaPyDeck module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.maps.html#module-sedona.spark.maps">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.raster.html">sedona.spark.raster package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-sedona.spark.raster.awt_raster">sedona.spark.raster.awt_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-sedona.spark.raster.data_buffer">sedona.spark.raster.data_buffer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-sedona.spark.raster.meta">sedona.spark.raster.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-sedona.spark.raster.raster_serde">sedona.spark.raster.raster_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-sedona.spark.raster.sample_model">sedona.spark.raster.sample_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-sedona.spark.raster.sedona_raster">sedona.spark.raster.sedona_raster module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster.html#module-sedona.spark.raster">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.raster_utils.html">sedona.spark.raster_utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster_utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster_utils.html#module-sedona.spark.raster_utils.SedonaUtils">sedona.spark.raster_utils.SedonaUtils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.raster_utils.html#module-sedona.spark.raster_utils">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.register.html">sedona.spark.register package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.register.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.register.html#module-sedona.spark.register.geo_registrator">sedona.spark.register.geo_registrator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.register.html#module-sedona.spark.register.java_libs">sedona.spark.register.java_libs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.register.html#module-sedona.spark.register">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.sql.html">sedona.spark.sql package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#sedona-spark-sql-connect-module">sedona.spark.sql.connect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.dataframe_api">sedona.spark.sql.dataframe_api module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.exceptions">sedona.spark.sql.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.functions">sedona.spark.sql.functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.st_aggregates">sedona.spark.sql.st_aggregates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.st_constructors">sedona.spark.sql.st_constructors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.st_functions">sedona.spark.sql.st_functions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.st_predicates">sedona.spark.sql.st_predicates module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql.types">sedona.spark.sql.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.sql.html#module-sedona.spark.sql">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.stac.html">sedona.spark.stac package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stac.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stac.html#module-sedona.spark.stac.client">sedona.spark.stac.client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stac.html#module-sedona.spark.stac.collection_client">sedona.spark.stac.collection_client module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stac.html#module-sedona.spark.stac">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">sedona.spark.stats package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-sedona.spark.stats.weighting">sedona.spark.stats.weighting module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-sedona.spark.stats">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.utils.html">sedona.spark.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.abstract_parser">sedona.spark.utils.abstract_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.adapter">sedona.spark.utils.adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.binary_parser">sedona.spark.utils.binary_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.decorators">sedona.spark.utils.decorators module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.geometry_adapter">sedona.spark.utils.geometry_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.geometry_serde">sedona.spark.utils.geometry_serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.geometry_serde_general">sedona.spark.utils.geometry_serde_general module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.geomserde_speedup">sedona.spark.utils.geomserde_speedup module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.jvm">sedona.spark.utils.jvm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.meta">sedona.spark.utils.meta module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.prep">sedona.spark.utils.prep module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.serde">sedona.spark.utils.serde module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.spatial_rdd_parser">sedona.spark.utils.spatial_rdd_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.structured_adapter">sedona.spark.utils.structured_adapter module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils.types">sedona.spark.utils.types module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.utils.html#module-sedona.spark.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.html#module-sedona.spark.SedonaContext">sedona.spark.SedonaContext module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.html#sedona.spark.SedonaContext.SedonaContext"><code class="docutils literal notranslate"><span class="pre">SedonaContext</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.__init__"><code class="docutils literal notranslate"><span class="pre">SedonaContext.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.builder"><code class="docutils literal notranslate"><span class="pre">SedonaContext.builder()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.create"><code class="docutils literal notranslate"><span class="pre">SedonaContext.create()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.html#module-sedona.spark">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #ff5722" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Apache Sedona Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="sedona.spark.html">sedona.spark package</a></li>
+      <li class="breadcrumb-item active">sedona.spark.stats package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/sedona.spark.stats.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    <div class="sedona-content-wrapper">
+        
+           <div itemprop="articleBody">
+             
+  <section id="sedona-spark-stats-package">
+<h1>sedona.spark.stats package<a class="headerlink" href="#sedona-spark-stats-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html">sedona.spark.stats.autocorrelation package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#module-sedona.spark.stats.autocorrelation.moran">sedona.spark.stats.autocorrelation.moran module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.Moran"><code class="docutils literal notranslate"><span class="pre">Moran</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.Moran.get_global"><code class="docutils literal notranslate"><span class="pre">Moran.get_global()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.MoranResult"><code class="docutils literal notranslate"><span class="pre">MoranResult</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.MoranResult.__init__"><code class="docutils literal notranslate"><span class="pre">MoranResult.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.MoranResult.i"><code class="docutils literal notranslate"><span class="pre">MoranResult.i</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.MoranResult.p_norm"><code class="docutils literal notranslate"><span class="pre">MoranResult.p_norm</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#sedona.spark.stats.autocorrelation.moran.MoranResult.z_norm"><code class="docutils literal notranslate"><span class="pre">MoranResult.z_norm</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.stats.autocorrelation.html#module-sedona.spark.stats.autocorrelation">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.spark.stats.clustering.html">sedona.spark.stats.clustering package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.stats.clustering.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.stats.clustering.html#module-sedona.spark.stats.clustering.dbscan">sedona.spark.stats.clustering.dbscan module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.stats.clustering.html#sedona.spark.stats.clustering.dbscan.dbscan"><code class="docutils literal notranslate"><span class="pre">dbscan()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.stats.clustering.html#module-sedona.spark.stats.clustering">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.spark.stats.hotspot_detection.html">sedona.spark.stats.hotspot_detection package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.stats.hotspot_detection.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.stats.hotspot_detection.html#module-sedona.spark.stats.hotspot_detection.getis_ord">sedona.spark.stats.hotspot_detection.getis_ord module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.stats.hotspot_detection.html#sedona.spark.stats.hotspot_detection.getis_ord.g_local"><code class="docutils literal notranslate"><span class="pre">g_local()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.stats.hotspot_detection.html#module-sedona.spark.stats.hotspot_detection">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sedona.spark.stats.outlier_detection.html">sedona.spark.stats.outlier_detection package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.stats.outlier_detection.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.stats.outlier_detection.html#module-sedona.spark.stats.outlier_detection.local_outlier_factor">sedona.spark.stats.outlier_detection.local_outlier_factor module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.stats.outlier_detection.html#sedona.spark.stats.outlier_detection.local_outlier_factor.local_outlier_factor"><code class="docutils literal notranslate"><span class="pre">local_outlier_factor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sedona.spark.stats.outlier_detection.html#module-sedona.spark.stats.outlier_detection">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-sedona.spark.stats.weighting">
+<span id="sedona-spark-stats-weighting-module"></span><h2>sedona.spark.stats.weighting module<a class="headerlink" href="#module-sedona.spark.stats.weighting" title="Permalink to this heading"></a></h2>
+<p>Weighting functions for spatial data.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.stats.weighting.add_binary_distance_band_column">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.stats.weighting.</span></span><span class="sig-name descname"><span class="pre">add_binary_distance_band_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.html#pyspark.sql.DataFrame" title="(in PySpark vmaster)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_zero_distance_neighbors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_spheroid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saved_attributes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'weights'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.html#pyspark.sql.DataFrame" title="(in PySpark vmaster)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/stats/weighting.html#add_binary_distance_band_column"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.stats.weighting.add_binary_distance_band_column" title="Permalink to this definition"></a></dt>
+<dd><p>Annotates a dataframe with a weights column containing the other records within the threshold and their weight.</p>
+<p>Weights will always be 1.0. The dataframe should contain at least one GeometryType column. Rows must be unique. If
+one geometry column is present it will be used automatically. If two are present, the one named ‘geometry’ will be
+used. If more than one are present and neither is named ‘geometry’, the column name must be provided. The new column
+will be named ‘cluster’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataframe</strong> – DataFrame with geometry column</p></li>
+<li><p><strong>threshold</strong> – Distance threshold for considering neighbors</p></li>
+<li><p><strong>include_zero_distance_neighbors</strong> – whether to include neighbors that are 0 distance. If 0 distance neighbors are
+included and binary is false, values are infinity as per the floating point spec (divide by 0)</p></li>
+<li><p><strong>include_self</strong> – whether to include self in the list of neighbors</p></li>
+<li><p><strong>geometry</strong> – name of the geometry column</p></li>
+<li><p><strong>use_spheroid</strong> – whether to use a cartesian or spheroidal distance calculation. Default is false</p></li>
+<li><p><strong>saved_attributes</strong> – the attributes to save in the neighbor column. Default is all columns.</p></li>
+<li><p><strong>result_name</strong> – the name of the resulting column. Default is ‘weights’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The input DataFrame with a weight column added containing neighbors and their weights (always 1) added to each
+row.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.stats.weighting.add_distance_band_column">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.stats.weighting.</span></span><span class="sig-name descname"><span class="pre">add_distance_band_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.html#pyspark.sql.DataFrame" title="(in PySpark vmaster)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">binary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_zero_distance_neighbors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">self_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_spheroid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saved_attributes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'weights'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.html#pyspark.sql.DataFrame" title="(in PySpark vmaster)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/stats/weighting.html#add_distance_band_column"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.stats.weighting.add_distance_band_column" title="Permalink to this definition"></a></dt>
+<dd><p>Annotates a dataframe with a weights column containing the other records within the threshold and their weight.</p>
+<p>The dataframe should contain at least one GeometryType column. Rows must be unique. If one
+geometry column is present it will be used automatically. If two are present, the one named
+‘geometry’ will be used. If more than one are present and neither is named ‘geometry’, the
+column name must be provided. The new column will be named ‘cluster’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataframe</strong> – DataFrame with geometry column</p></li>
+<li><p><strong>threshold</strong> – Distance threshold for considering neighbors</p></li>
+<li><p><strong>binary</strong> – whether to use binary weights or inverse distance weights for neighbors (dist^alpha)</p></li>
+<li><p><strong>alpha</strong> – alpha to use for inverse distance weights ignored when binary is true</p></li>
+<li><p><strong>include_zero_distance_neighbors</strong> – whether to include neighbors that are 0 distance. If 0 distance neighbors are
+included and binary is false, values are infinity as per the floating point spec (divide by 0)</p></li>
+<li><p><strong>include_self</strong> – whether to include self in the list of neighbors</p></li>
+<li><p><strong>self_weight</strong> – the value to use for the self weight</p></li>
+<li><p><strong>geometry</strong> – name of the geometry column</p></li>
+<li><p><strong>use_spheroid</strong> – whether to use a cartesian or spheroidal distance calculation. Default is false</p></li>
+<li><p><strong>saved_attributes</strong> – the attributes to save in the neighbor column. Default is all columns.</p></li>
+<li><p><strong>result_name</strong> – the name of the resulting column. Default is ‘weights’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The input DataFrame with a weight column added containing neighbors and their weights added to each row.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sedona.spark.stats.weighting.add_weighted_distance_band_column">
+<span class="sig-prename descclassname"><span class="pre">sedona.spark.stats.weighting.</span></span><span class="sig-name descname"><span class="pre">add_weighted_distance_band_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataframe</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.html#pyspark.sql.DataFrame" title="(in PySpark vmaster)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_zero_distance_neighbors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">self_weight</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_spheroid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">saved_attributes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'weights'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.html#pyspark.sql.DataFrame" title="(in PySpark vmaster)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/stats/weighting.html#add_weighted_distance_band_column"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.stats.weighting.add_weighted_distance_band_column" title="Permalink to this definition"></a></dt>
+<dd><p>Annotates a dataframe with a weights column containing the other records within the threshold and their weight.</p>
+<p>Weights will be distance^alpha. The dataframe should contain at least one GeometryType column. Rows must be unique. If
+one geometry column is present it will be used automatically. If two are present, the one named ‘geometry’ will be
+used. If more than one are present and neither is named ‘geometry’, the column name must be provided. The new column
+will be named ‘cluster’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataframe</strong> – DataFrame with geometry column</p></li>
+<li><p><strong>threshold</strong> – Distance threshold for considering neighbors</p></li>
+<li><p><strong>alpha</strong> – alpha to use for inverse distance weights. Computation is dist^alpha. Default is -1.0</p></li>
+<li><p><strong>include_zero_distance_neighbors</strong> – whether to include neighbors that are 0 distance. If 0 distance neighbors are
+included and binary is false, values are infinity as per the floating point spec (divide by 0)</p></li>
+<li><p><strong>include_self</strong> – whether to include self in the list of neighbors</p></li>
+<li><p><strong>self_weight</strong> – the value to use for the self weight. Default is 1.0</p></li>
+<li><p><strong>geometry</strong> – name of the geometry column</p></li>
+<li><p><strong>use_spheroid</strong> – whether to use a cartesian or spheroidal distance calculation. Default is false</p></li>
+<li><p><strong>saved_attributes</strong> – the attributes to save in the neighbor column. Default is all columns.</p></li>
+<li><p><strong>result_name</strong> – the name of the resulting column. Default is ‘weights’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The input DataFrame with a weight column added containing neighbors and their weights (always 1) added to each
+row.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-sedona.spark.stats">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sedona.spark.stats" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+    </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="sedona.spark.stac.html" class="btn btn-neutral float-left" title="sedona.spark.stac package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sedona.spark.stats.autocorrelation.html" class="btn btn-neutral float-right" title="sedona.spark.stats.autocorrelation package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Apache Software Foundation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

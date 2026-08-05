@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowGrev" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <path d="M8,0 L0,3 L8,6" fill="#2ecc71" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_Length2D</text>
+  <polyline points="112.5,218.75 195.0,108.75 305.0,163.75 387.5,81.25" fill="none" stroke="#2ecc71" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="112.5" cy="218.75" r="3" fill="#2ecc71" />
+  <circle cx="195.0" cy="108.75" r="3" fill="#2ecc71" />
+  <circle cx="305.0" cy="163.75" r="3" fill="#2ecc71" />
+  <circle cx="387.5" cy="81.25" r="3" fill="#2ecc71" />
+  <text x="305" y="152" text-anchor="middle" font-size="18" font-weight="bold" fill="#2ecc71" font-style="italic">Length</text>
+  <line x1="112.5" y1="218.75" x2="112.5" y2="218.75" stroke="#2ecc71" stroke-width="0" marker-start="url(#arrowGrev)" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns the 2D length / perimeter of the geometry (alias of ST_Length)</text>
+  <rect x="211" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="227" y="266" font-size="13" fill="#333333">Length</text>
+</svg>

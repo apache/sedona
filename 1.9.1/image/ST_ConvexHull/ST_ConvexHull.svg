@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_ConvexHull</text>
+  <path d="M 184.19 215.81 L 259.4 234.62 L 334.62 197.01 L 315.81 102.99 L 240.6 65.38 L 165.38 121.79 L 184.19 215.81 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="3" fill-rule="evenodd" />
+  <circle cx="184.19" cy="215.81" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <circle cx="259.4" cy="234.62" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <circle cx="334.62" cy="197.01" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <circle cx="315.81" cy="102.99" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <circle cx="240.6" cy="65.38" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <circle cx="165.38" cy="121.79" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <circle cx="240.6" cy="159.4" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <circle cx="278.21" cy="178.21" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns the convex hull of the geometry</text>
+  <rect x="176" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="192" y="266" font-size="13" fill="#333333">Input</text>
+  <rect x="246" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="262" y="266" font-size="13" fill="#333333">Result</text>
+</svg>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowResult" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowA" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5" fill="#4a90d9" />
+    </marker>
+    <marker id="arrowGray" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5" fill="#999999" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_FlipCoordinates</text>
+  <line x1="108.97" y1="291.03" x2="391.03" y2="291.03" stroke="#cccccc" stroke-width="1" marker-end="url(#arrowGray)" />
+  <text x="399.03" y="295.03" font-size="12" fill="#999999">X</text>
+  <line x1="108.97" y1="291.03" x2="108.97" y2="8.97" stroke="#cccccc" stroke-width="1" marker-end="url(#arrowGray)" />
+  <text x="94.97" y="4.970000000000001" font-size="12" fill="#999999">Y</text>
+  <circle cx="165.38" cy="65.38" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <text x="173" y="57" font-size="13" fill="#4a90d9" font-weight="bold">(2, 8)</text>
+  <circle cx="334.62" cy="234.62" r="5" fill="#2ecc71" stroke="#2ecc71" stroke-width="1.5" />
+  <text x="343" y="251" font-size="13" fill="#2ecc71" font-weight="bold">(8, 2)</text>
+  <path d="M 171 67 C 280 150 280 150 341 231" fill="none" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowResult)" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Swaps the X and Y coordinates of a geometry</text>
+  <rect x="128" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="144" y="266" font-size="13" fill="#333333">Input (x,y)</text>
+  <rect x="246" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="262" y="266" font-size="13" fill="#333333">Result (y,x)</text>
+</svg>

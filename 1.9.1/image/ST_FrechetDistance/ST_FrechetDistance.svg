@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowGrev" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <path d="M8,0 L0,3 L8,6" fill="#2ecc71" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_FrechetDistance</text>
+  <polyline points="140.0,183.0 206.0,95.0 272.0,139.0 338.0,73.0" fill="none" stroke="#4a90d9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="140.0" cy="183.0" r="3" fill="#4a90d9" />
+  <circle cx="206.0" cy="95.0" r="3" fill="#4a90d9" />
+  <circle cx="272.0" cy="139.0" r="3" fill="#4a90d9" />
+  <circle cx="338.0" cy="73.0" r="3" fill="#4a90d9" />
+  <text x="278.0" y="131.0" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <polyline points="140.0,227.0 206.0,139.0 272.0,183.0 360.0,117.0" fill="none" stroke="#d94a4a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="140.0" cy="227.0" r="3" fill="#d94a4a" />
+  <circle cx="206.0" cy="139.0" r="3" fill="#d94a4a" />
+  <circle cx="272.0" cy="183.0" r="3" fill="#d94a4a" />
+  <circle cx="360.0" cy="117.0" r="3" fill="#d94a4a" />
+  <text x="278.0" y="175.0" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+  <line x1="140.0" y1="183.0" x2="140.0" y2="227.0" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6" />
+  <line x1="206.0" y1="95.0" x2="206.0" y2="139.0" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6" />
+  <line x1="272.0" y1="139.0" x2="272.0" y2="183.0" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6" />
+  <line x1="338.0" y1="73.0" x2="360.0" y2="117.0" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6" />
+  <line x1="338.0" y1="73.0" x2="360.0" y2="117.0" stroke="#2ecc71" stroke-width="2" stroke-dasharray="6,3" marker-start="url(#arrowGrev)" marker-end="url(#arrowG)" />
+  <text x="357" y="89" font-size="15" font-weight="bold" fill="#2ecc71" font-style="italic">d_F</text>
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns the discrete Fréchet distance between two geometries</text>
+  <rect x="93" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="109" y="266" font-size="13" fill="#333333">Geometry A</text>
+  <rect x="203" y="255" width="12" height="12" rx="2" fill="#d94a4a" stroke="#d94a4a" stroke-width="1" />
+  <text x="219" y="266" font-size="13" fill="#333333">Geometry B</text>
+  <rect x="313" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="329" y="266" font-size="13" fill="#333333">Distance</text>
+</svg>

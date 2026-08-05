@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="180" viewBox="0 0 400 180">
+  <rect width="400" height="180" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_Translate</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">deltaX=2, deltaY=1.5</text>
+  <polygon points="144.3,149.2 211.1,149.2 211.1,126.9 166.6,126.9 166.6,82.3 144.3,82.3 144.3,149.2" stroke="#1565C0" stroke-width="2" fill="rgba(21,101,192,0.12)" stroke-dasharray="6,3"/>
+  <circle cx="144.3" cy="149.2" r="2.5" fill="#1565C0"/>
+  <circle cx="211.1" cy="149.2" r="2.5" fill="#1565C0"/>
+  <circle cx="211.1" cy="126.9" r="2.5" fill="#1565C0"/>
+  <circle cx="166.6" cy="126.9" r="2.5" fill="#1565C0"/>
+  <circle cx="166.6" cy="82.3" r="2.5" fill="#1565C0"/>
+  <circle cx="144.3" cy="82.3" r="2.5" fill="#1565C0"/>
+  <polygon points="188.9,115.7 255.7,115.7 255.7,93.4 211.1,93.4 211.1,48.9 188.9,48.9 188.9,115.7" stroke="#43A047" stroke-width="2" fill="rgba(67,160,71,0.18)"/>
+  <circle cx="188.9" cy="115.7" r="2.5" fill="#43A047"/>
+  <circle cx="255.7" cy="115.7" r="2.5" fill="#43A047"/>
+  <circle cx="255.7" cy="93.4" r="2.5" fill="#43A047"/>
+  <circle cx="211.1" cy="93.4" r="2.5" fill="#43A047"/>
+  <circle cx="211.1" cy="48.9" r="2.5" fill="#43A047"/>
+  <circle cx="188.9" cy="48.9" r="2.5" fill="#43A047"/>
+
+  <rect x="100" y="162" width="8" height="8" fill="rgba(21,101,192,0.12)" stroke="#1565C0" stroke-width="1" stroke-dasharray="2,1"/>
+  <text x="112" y="170" font-family="monospace" font-size="9" fill="#1565C0">Input</text>
+  <rect x="220" y="162" width="8" height="8" fill="rgba(67,160,71,0.18)" stroke="#43A047" stroke-width="1"/>
+  <text x="232" y="170" font-family="monospace" font-size="9" fill="#43A047">Result</text>
+</svg>

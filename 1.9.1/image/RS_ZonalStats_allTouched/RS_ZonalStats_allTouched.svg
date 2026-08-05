@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 410" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="820" height="410" fill="#ffffff"/>
+  <text x="109.0" y="63" text-anchor="middle" font-size="13" font-weight="600" fill="#2c3e50">allTouched = false</text>
+  <text x="109.0" y="79" text-anchor="middle" font-size="10" fill="#7f8c8d">(default — centroid inside)</text>
+  <rect x="25" y="85" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="25" y="85" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="53" y="85" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="81" y="85" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="109" y="85" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="137" y="85" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="165" y="85" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="25" y="113" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="25" y="113" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="53" y="113" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="53" y="113" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="81" y="113" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="81" y="113" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="109" y="113" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="137" y="113" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="165" y="113" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="25" y="141" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="25" y="141" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="53" y="141" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="53" y="141" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="81" y="141" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="81" y="141" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="109" y="141" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="109" y="141" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="137" y="141" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="137" y="141" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="165" y="141" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="165" y="141" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="25" y="169" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="25" y="169" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="53" y="169" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="53" y="169" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="81" y="169" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="81" y="169" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="109" y="169" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="137" y="169" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="165" y="169" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="25" y="197" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="25" y="197" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="53" y="197" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="81" y="197" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="109" y="197" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="137" y="197" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="165" y="197" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="25" y="85" width="168" height="140" fill="none" stroke="#c8cdd0" stroke-width="1.2"/>
+  <polygon points="33.4,93.4 184.6,155.0 33.4,216.6" fill="none" stroke="#E65100" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <circle cx="39.0" cy="99.0" r="3" fill="#E65100" opacity="0.7"/>
+  <circle cx="67.0" cy="99.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="95.0" cy="99.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="123.0" cy="99.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="151.0" cy="99.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="179.0" cy="99.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="39.0" cy="127.0" r="3" fill="#E65100" opacity="0.7"/>
+  <circle cx="67.0" cy="127.0" r="3" fill="#E65100" opacity="0.7"/>
+  <circle cx="95.0" cy="127.0" r="3" fill="#E65100" opacity="0.7"/>
+  <circle cx="123.0" cy="127.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="151.0" cy="127.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="179.0" cy="127.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="39.0" cy="155.0" r="3" fill="#E65100" opacity="0.7"/>
+  <circle cx="67.0" cy="155.0" r="3" fill="#E65100" opacity="0.7"/>
+  <circle cx="95.0" cy="155.0" r="3" fill="#E65100" opacity="0.7"/>
+  <circle cx="123.0" cy="155.0" r="3" fill="#E65100" opacity="0.7"/>
+  <circle cx="151.0" cy="155.0" r="3" fill="#E65100" opacity="0.7"/>
+  <circle cx="179.0" cy="155.0" r="3" fill="#E65100" opacity="0.7"/>
+  <circle cx="39.0" cy="183.0" r="3" fill="#E65100" opacity="0.7"/>
+  <circle cx="67.0" cy="183.0" r="3" fill="#E65100" opacity="0.7"/>
+  <circle cx="95.0" cy="183.0" r="3" fill="#E65100" opacity="0.7"/>
+  <circle cx="123.0" cy="183.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="151.0" cy="183.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="179.0" cy="183.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="39.0" cy="211.0" r="3" fill="#E65100" opacity="0.7"/>
+  <circle cx="67.0" cy="211.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="95.0" cy="211.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="123.0" cy="211.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="151.0" cy="211.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <circle cx="179.0" cy="211.0" r="2" fill="#7f8c8d" opacity="0.35"/>
+  <text x="524.0" y="63" text-anchor="middle" font-size="13" font-weight="600" fill="#2c3e50">allTouched = true</text>
+  <text x="524.0" y="79" text-anchor="middle" font-size="10" fill="#7f8c8d">(any part touches geometry)</text>
+  <rect x="440" y="85" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="85" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="468" y="85" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="468" y="85" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="496" y="85" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="524" y="85" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="552" y="85" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="580" y="85" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="113" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="113" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="468" y="113" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="468" y="113" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="496" y="113" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="496" y="113" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="524" y="113" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="524" y="113" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="552" y="113" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="552" y="113" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="580" y="113" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="141" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="141" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="468" y="141" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="468" y="141" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="496" y="141" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="496" y="141" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="524" y="141" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="524" y="141" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="552" y="141" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="552" y="141" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="580" y="141" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="580" y="141" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="440" y="169" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="169" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="468" y="169" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="468" y="169" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="496" y="169" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="496" y="169" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="524" y="169" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="524" y="169" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="552" y="169" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="552" y="169" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="580" y="169" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="197" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="197" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="468" y="197" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="468" y="197" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <rect x="496" y="197" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="524" y="197" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="552" y="197" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="580" y="197" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="85" width="168" height="140" fill="none" stroke="#c8cdd0" stroke-width="1.2"/>
+  <polygon points="448.4,93.4 599.6,155.0 448.4,216.6" fill="none" stroke="#E65100" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <rect x="553" y="170" width="26" height="26" fill="none" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <rect x="525" y="114" width="26" height="26" fill="none" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <rect x="469" y="198" width="26" height="26" fill="none" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <rect x="525" y="170" width="26" height="26" fill="none" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <rect x="469" y="86" width="26" height="26" fill="none" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <rect x="553" y="114" width="26" height="26" fill="none" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <rect x="25" y="245" width="14" height="14" fill="rgba(255,152,0,0.25)" stroke="#E65100" stroke-width="1"/>
+  <text x="45" y="256" text-anchor="start" font-size="10" fill="#2c3e50">= Selected pixel</text>
+  <circle cx="195" cy="252" r="3" fill="#E65100" opacity="0.7"/>
+  <text x="205" y="256" text-anchor="start" font-size="10" fill="#2c3e50">= Centroid inside geometry</text>
+  <rect x="440" y="245" width="14" height="14" fill="none" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <text x="460" y="256" text-anchor="start" font-size="10" fill="#2c3e50">= Extra pixels when allTouched = true</text>
+  <text x="109.0" y="280" text-anchor="middle" font-size="11" fill="#E65100">14 pixels selected</text>
+  <text x="524.0" y="280" text-anchor="middle" font-size="11" fill="#E65100">20 pixels selected (+6 edge pixels)</text>
+</svg>

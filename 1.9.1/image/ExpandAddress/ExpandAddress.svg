@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="100" viewBox="0 0 400 100">
+  <rect width="400" height="100" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ExpandAddress</text>
+
+  <defs><marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#666"/></marker></defs>
+  <text x="60" y="55" font-family="monospace" font-size="10" fill="#1565C0" text-anchor="middle">"123 Main St"</text>
+  <line x1="115" y1="52" x2="165" y2="52" stroke="#666" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+  <text x="300" y="48" font-family="monospace" font-size="9" fill="#43A047" text-anchor="middle">"123 Main Street"</text>
+  <text x="300" y="62" font-family="monospace" font-size="9" fill="#43A047" text-anchor="middle">"123 Main Str"</text>
+  <text x="300" y="76" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">... (expanded forms)</text>
+</svg>

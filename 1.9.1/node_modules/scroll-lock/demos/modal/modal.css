@@ -1,0 +1,38 @@
+* {
+    box-sizing: border-box;
+}
+
+.modal-backdoor {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px;
+}
+
+.modal-container {
+    margin: 60px auto;
+    width: 100%;
+    max-width: 600px;
+}
+
+.uk-sticky-fixed {
+    width: 100% !important;
+}

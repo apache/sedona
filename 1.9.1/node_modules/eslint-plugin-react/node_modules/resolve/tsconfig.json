@@ -1,0 +1,14 @@
+{
+  "extends": "@ljharb/tsconfig",
+  "compilerOptions": {
+    "target": "ES2021",
+    "checkJs": false,
+    "maxNodeModuleJsDepth": 0,
+    "types": ["node"]
+  },
+  "exclude": [
+    "coverage",
+    "example",
+    "test"
+  ]
+}

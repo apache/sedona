@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="200" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_Intersects(A, B)</text>
+  <rect x="325" y="8" width="60" height="22" rx="4" fill="#27ae60" />
+  <text x="355" y="24" text-anchor="middle" font-size="12" font-weight="bold" fill="white">TRUE</text>
+  <path d="M 173.81 176.19 L 304.76 176.19 L 304.76 71.43 L 173.81 71.43 L 173.81 71.43 L 173.81 176.19 Z" fill="rgba(217,74,74,0.25)" stroke="#d94a4a" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="217.46" y="123.81" text-anchor="middle" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+  <path d="M 95.24 228.57 L 226.19 228.57 L 226.19 123.81 L 95.24 123.81 L 95.24 228.57 Z" fill="rgba(74,144,217,0.25)" stroke="#4a90d9" stroke-width="2.5" fill-rule="evenodd" />
+  <text x="147.62" y="186.67" text-anchor="middle" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <text x="200" y="290" text-anchor="middle" font-size="12" fill="#666666" font-style="italic">A and B share at least one point</text>
+</svg>

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="230" viewBox="0 0 400 230">
+  <rect width="400" height="230" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_BingTilesAround</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">3x3 tile neighborhood around a point</text>
+  <rect x="72" y="45" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="72" y="77" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="72" y="109" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="72" y="141" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="104" y="45" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="104" y="77" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="104" y="109" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="104" y="141" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="136" y="45" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="136" y="77" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="136" y="109" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="136" y="141" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="168" y="45" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="168" y="77" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="168" y="109" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="168" y="141" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="200" y="45" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="200" y="77" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="200" y="109" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="200" y="141" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="232" y="45" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="232" y="77" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="232" y="109" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="232" y="141" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="264" y="45" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="264" y="77" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="264" y="109" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="264" y="141" width="32" height="32" fill="#fff" stroke="#ddd" stroke-width="0.8"/>
+  <rect x="136" y="45" width="32" height="32" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="1"/>
+  <rect x="136" y="77" width="32" height="32" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="1"/>
+  <rect x="136" y="109" width="32" height="32" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="1"/>
+  <rect x="168" y="45" width="32" height="32" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="1"/>
+  <rect x="168" y="77" width="32" height="32" fill="rgba(233,30,99,0.2)" stroke="#C2185B" stroke-width="1.5"/>
+  <rect x="168" y="109" width="32" height="32" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="1"/>
+  <rect x="200" y="45" width="32" height="32" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="1"/>
+  <rect x="200" y="77" width="32" height="32" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="1"/>
+  <rect x="200" y="109" width="32" height="32" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="1"/>
+  <circle cx="184" cy="93" r="4" fill="#E53935" stroke="#fff" stroke-width="1.5"/>
+  <text x="200" y="195" font-family="monospace" font-size="10" fill="#1565C0" text-anchor="middle">Returns 3x3 neighborhood of tiles around the point</text>
+  <rect x="65" y="208" width="10" height="10" fill="rgba(233,30,99,0.2)" stroke="#C2185B" stroke-width="1"/>
+  <text x="79" y="217" font-family="monospace" font-size="8" fill="#C2185B">Center tile</text>
+  <rect x="160" y="208" width="10" height="10" fill="rgba(74,144,217,0.2)" stroke="#1565C0" stroke-width="1"/>
+  <text x="174" y="217" font-family="monospace" font-size="8" fill="#1565C0">Neighbors</text>
+  <circle cx="258" cy="213" r="3.5" fill="#E53935"/>
+  <text x="266" y="217" font-family="monospace" font-size="8" fill="#E53935">Input point</text>
+</svg>

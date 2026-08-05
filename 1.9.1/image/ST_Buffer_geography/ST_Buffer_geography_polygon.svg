@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <radialGradient id="globePoly" cx="42%" cy="38%" r="65%">
+      <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="60%" stop-color="#e7e7f7" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#c5c5eb" stop-opacity="0.95"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Title -->
+  <text x="250" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">ST_Buffer(polygon, distance) on the sphere</text>
+  <text x="250" y="40" text-anchor="middle" font-size="11" fill="#666666">UTM-projected planar buffer; result is unprojected back to lon/lat</text>
+
+  <!-- Globe -->
+  <circle cx="250" cy="160" r="88" fill="url(#globePoly)" stroke="#8e8ed0" stroke-width="1.6"/>
+  <ellipse cx="250" cy="160" rx="88" ry="22" fill="none" stroke="#8e8ed0" stroke-width="0.6" stroke-opacity="0.7"/>
+  <ellipse cx="250" cy="160" rx="22" ry="88" fill="none" stroke="#8e8ed0" stroke-width="0.6" stroke-opacity="0.7"/>
+
+  <!-- Outer buffered polygon (offset outward by ~16px to suggest the buffer band) -->
+  <path d="M 218 121
+           Q 230 110, 248 110
+           L 282 110
+           Q 296 113, 300 130
+           L 305 162
+           Q 304 184, 286 192
+           L 234 200
+           Q 215 199, 210 184
+           L 206 152
+           Q 207 132, 218 121 Z"
+        fill="rgba(46,204,113,0.20)" stroke="#2ecc71" stroke-width="1.8"/>
+
+  <!-- Original polygon -->
+  <polygon points="244,140 280,138 290,162 270,182 244,184 224,160"
+           fill="rgba(74,144,217,0.30)" stroke="#1565C0" stroke-width="1.8"/>
+
+  <!-- Distance arrow from polygon edge to buffer edge -->
+  <line x1="290" y1="162" x2="305" y2="162" stroke="#E53935" stroke-width="1.5"/>
+  <line x1="290" y1="156" x2="290" y2="168" stroke="#E53935" stroke-width="1"/>
+  <line x1="305" y1="154" x2="305" y2="170" stroke="#E53935" stroke-width="1"/>
+  <text x="319" y="166" font-size="11" fill="#E53935" font-weight="bold">d (m)</text>
+
+  <!-- Legend -->
+  <rect x="60" y="265" width="14" height="14" rx="2" fill="url(#globePoly)" stroke="#8e8ed0" stroke-width="1"/>
+  <text x="78" y="276" font-size="11" fill="#333333">Sphere (Earth)</text>
+
+  <rect x="170" y="265" width="14" height="14" rx="2" fill="rgba(74,144,217,0.4)" stroke="#1565C0" stroke-width="1"/>
+  <text x="188" y="276" font-size="11" fill="#1565C0">Input polygon</text>
+
+  <rect x="290" y="265" width="14" height="14" rx="2" fill="rgba(46,204,113,0.4)" stroke="#2ecc71" stroke-width="1"/>
+  <text x="308" y="276" font-size="11" fill="#2ecc71">Buffered polygon</text>
+</svg>

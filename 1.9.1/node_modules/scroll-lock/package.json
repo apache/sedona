@@ -1,0 +1,43 @@
+{
+    "name": "scroll-lock",
+    "version": "2.1.5",
+    "description": "Cross-browser JavaScript library to disable scrolling page.",
+    "main": "dist/scroll-lock.js",
+    "scripts": {
+        "dev": "cross-env NODE_ENV=development webpack",
+        "build": "cross-env NODE_ENV=production webpack",
+        "test": "jest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/FL3NKEY/scroll-lock.git"
+    },
+    "keywords": [
+        "scroll",
+        "scrollbar",
+        "ios",
+        "lock scroll",
+        "disable scroll",
+        "modal",
+        "mobile",
+        "overflow"
+    ],
+    "author": "FL3N",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/FL3NKEY/scroll-lock/issues"
+    },
+    "homepage": "https://github.com/FL3NKEY/scroll-lock#readme",
+    "devDependencies": {
+        "@babel/core": "^7.2.2",
+        "@babel/preset-env": "^7.3.1",
+        "babel-loader": "^8.0.5",
+        "browser-sync": "^2.26.3",
+        "browser-sync-webpack-plugin": "^2.2.2",
+        "cross-env": "^5.2.0",
+        "jest": "^24.1.0",
+        "uglifyjs-webpack-plugin": "^2.1.1",
+        "webpack": "^4.29.1",
+        "webpack-cli": "^3.2.3"
+    }
+}

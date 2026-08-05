@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 370" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="700" height="370" fill="#ffffff"/>
+  <text x="350" y="30" text-anchor="middle" font-size="16" font-weight="600" fill="#2c3e50">RS_PixelAsPolygons</text>
+  <text x="350" y="50" text-anchor="middle" font-size="12" fill="#7f8c8d">Returns bounding polygons for every pixel with values</text>
+  <polygon points="142,82 188,82 188,118 142,118" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="192,82 238,82 238,118 192,118" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="242,82 288,82 288,118 242,118" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="292,82 338,82 338,118 292,118" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="342,82 388,82 388,118 342,118" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="392,82 438,82 438,118 392,118" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="442,82 488,82 488,118 442,118" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="492,82 538,82 538,118 492,118" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="142,122 188,122 188,158 142,158" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="192,122 238,122 238,158 192,158" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="242,122 288,122 288,158 242,158" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="292,122 338,122 338,158 292,158" fill="#4FC3F7" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="342,122 388,122 388,158 342,158" fill="#4FC3F7" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="392,122 438,122 438,158 392,158" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="442,122 488,122 488,158 442,158" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="492,122 538,122 538,158 492,158" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="142,162 188,162 188,198 142,198" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="192,162 238,162 238,198 192,198" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="242,162 288,162 288,198 242,198" fill="#4FC3F7" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="292,162 338,162 338,198 292,198" fill="#4FC3F7" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="342,162 388,162 388,198 342,198" fill="#4FC3F7" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="392,162 438,162 438,198 392,198" fill="#4FC3F7" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="442,162 488,162 488,198 442,198" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="492,162 538,162 538,198 492,198" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="142,202 188,202 188,238 142,238" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="192,202 238,202 238,238 192,238" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="242,202 288,202 288,238 242,238" fill="#4FC3F7" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="292,202 338,202 338,238 292,238" fill="#4FC3F7" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="342,202 388,202 388,238 342,238" fill="#4FC3F7" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="392,202 438,202 438,238 392,238" fill="#4FC3F7" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="442,202 488,202 488,238 442,238" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="492,202 538,202 538,238 492,238" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="142,242 188,242 188,278 142,278" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="192,242 238,242 238,278 192,278" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="242,242 288,242 288,278 242,278" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="292,242 338,242 338,278 292,278" fill="#4FC3F7" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="342,242 388,242 388,278 342,278" fill="#4FC3F7" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="392,242 438,242 438,278 392,278" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="442,242 488,242 488,278 442,278" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="492,242 538,242 538,278 492,278" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="142,282 188,282 188,318 142,318" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="192,282 238,282 238,318 192,318" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="242,282 288,282 288,318 242,318" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="292,282 338,282 338,318 292,318" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="342,282 388,282 388,318 342,318" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="392,282 438,282 438,318 392,318" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="442,282 488,282 488,318 442,318" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <polygon points="492,282 538,282 538,318 492,318" fill="#EEEEEE" stroke="#e74c3c" stroke-width="1.5"/>
+  <rect x="140" y="334" width="12" height="12" fill="#4FC3F7" stroke="#e74c3c" stroke-width="1.5" rx="1"/>
+  <text x="158" y="344" text-anchor="start" font-size="10" fill="#7f8c8d">= individual pixel polygon with (x, y) coordinates</text>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="210" viewBox="0 0 400 210">
+  <rect width="400" height="210" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_Buffer</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Single-sided buffer on linestring</text>
+  <path d="M 50.0 122.7 L 69.0 75.7 L 85.8 97.3 L 98.0 107.5 L 118.5 83.0 L 106.2 72.7 L 63.0 44.3 L 22.0 107.3 L 14.3 121.4 L 42.4 136.7 Z" fill="#2ecc71" fill-opacity="0.15" stroke="#2ecc71" stroke-width="1.5"/>
+  <polyline points="36,115 66,60 96,85" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="51,88 45,91 52,95" fill="#333"/>
+  <text x="66" y="140" font-family="monospace" font-size="10" fill="#2ecc71" text-anchor="middle" font-weight="bold">side=both</text>
+  <path d="M 169.0 115.0 L 183.0 122.7 L 202.0 75.7 L 218.8 97.3 L 229.0 85.0 L 199.0 60.0 L 169.0 115.0 Z" fill="#4a90d9" fill-opacity="0.15" stroke="#4a90d9" stroke-width="1.5"/>
+  <polyline points="169,115 199,60 229,85" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="184,88 178,91 185,95" fill="#333"/>
+  <text x="199" y="140" font-family="monospace" font-size="10" fill="#4a90d9" text-anchor="middle" font-weight="bold">side=left</text>
+  <path d="M 302.0 115.0 L 332.0 60.0 L 362.0 85.0 L 372.2 72.7 L 329.0 44.3 L 288.0 107.3 L 302.0 115.0 Z" fill="#E53935" fill-opacity="0.15" stroke="#E53935" stroke-width="1.5"/>
+  <polyline points="302,115 332,60 362,85" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="317,88 311,91 318,95" fill="#333"/>
+  <text x="332" y="140" font-family="monospace" font-size="10" fill="#E53935" text-anchor="middle" font-weight="bold">side=right</text>
+  <text x="200" y="165" font-family="monospace" font-size="9" fill="#333" text-anchor="middle">Buffer style parameter: side=both|left|right</text>
+  <text x="200" y="188" font-family="monospace" font-size="9" fill="#666" text-anchor="middle">Single-sided buffer aligned to line direction (arrow)</text>
+</svg>

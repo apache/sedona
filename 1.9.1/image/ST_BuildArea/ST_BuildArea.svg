@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_BuildArea</text>
+  <polyline points="150.0,230.0 350.0,230.0 350.0,70.0 150.0,70.0 150.0,230.0" fill="none" stroke="#4a90d9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,3" />
+  <circle cx="150.0" cy="230.0" r="3" fill="#4a90d9" />
+  <circle cx="350.0" cy="230.0" r="3" fill="#4a90d9" />
+  <circle cx="350.0" cy="70.0" r="3" fill="#4a90d9" />
+  <circle cx="150.0" cy="70.0" r="3" fill="#4a90d9" />
+  <circle cx="150.0" cy="230.0" r="3" fill="#4a90d9" />
+  <polyline points="250.0,230.0 250.0,70.0" fill="none" stroke="#4a90d9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,3" />
+  <circle cx="250.0" cy="230.0" r="3" fill="#4a90d9" />
+  <circle cx="250.0" cy="70.0" r="3" fill="#4a90d9" />
+  <path d="M 150.0 230.0 L 250.0 230.0 L 250.0 70.0 L 150.0 70.0 L 150.0 230.0 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="3" fill-rule="evenodd" />
+  <path d="M 250.0 230.0 L 350.0 230.0 L 350.0 70.0 L 250.0 70.0 L 250.0 230.0 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="3" fill-rule="evenodd" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns polygons formed by constituent linework</text>
+  <rect x="176" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="192" y="266" font-size="13" fill="#333333">Input</text>
+  <rect x="246" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="262" y="266" font-size="13" fill="#333333">Result</text>
+</svg>

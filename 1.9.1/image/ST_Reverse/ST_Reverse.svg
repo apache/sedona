@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowResult" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowA" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5" fill="#4a90d9" />
+    </marker>
+    <marker id="arrowGray" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <path d="M0,0 L7,2.5 L0,5" fill="#999999" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_Reverse</text>
+  <polyline points="112.5,218.75 195.0,108.75 305.0,163.75 387.5,81.25" fill="none" stroke="#4a90d9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,3" />
+  <circle cx="112.5" cy="218.75" r="3" fill="#4a90d9" />
+  <circle cx="195.0" cy="108.75" r="3" fill="#4a90d9" />
+  <circle cx="305.0" cy="163.75" r="3" fill="#4a90d9" />
+  <circle cx="387.5" cy="81.25" r="3" fill="#4a90d9" />
+  <line x1="157.3" y1="178.9" x2="169.3" y2="162.9" stroke="#4a90d9" stroke-width="2" marker-end="url(#arrowA)" />
+  <line x1="235.7" y1="142.5" x2="253.6" y2="151.5" stroke="#4a90d9" stroke-width="2" marker-end="url(#arrowA)" />
+  <line x1="347.7" y1="138.1" x2="361.8" y2="123.9" stroke="#4a90d9" stroke-width="2" marker-end="url(#arrowA)" />
+  <polyline points="387.5,81.25 305.0,163.75 195.0,108.75 112.5,218.75" fill="none" stroke="#2ecc71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="387.5" cy="81.25" r="3" fill="#2ecc71" />
+  <circle cx="305.0" cy="163.75" r="3" fill="#2ecc71" />
+  <circle cx="195.0" cy="108.75" r="3" fill="#2ecc71" />
+  <circle cx="112.5" cy="218.75" r="3" fill="#2ecc71" />
+  <line x1="361.8" y1="123.9" x2="347.7" y2="138.1" stroke="#2ecc71" stroke-width="2" marker-end="url(#arrowResult)" />
+  <line x1="253.6" y1="151.5" x2="235.7" y2="142.5" stroke="#2ecc71" stroke-width="2" marker-end="url(#arrowResult)" />
+  <line x1="169.3" y1="162.9" x2="157.3" y2="178.9" stroke="#2ecc71" stroke-width="2" marker-end="url(#arrowResult)" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Reverses the vertex order of the geometry</text>
+  <rect x="144" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="160" y="266" font-size="13" fill="#333333">Input order</text>
+  <rect x="262" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="278" y="266" font-size="13" fill="#333333">Reversed</text>
+</svg>

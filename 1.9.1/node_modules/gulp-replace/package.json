@@ -1,0 +1,42 @@
+{
+  "name": "gulp-replace",
+  "version": "1.1.4",
+  "description": "A string replace plugin for gulp",
+  "dependencies": {
+    "@types/node": "*",
+    "@types/vinyl": "^2.0.4",
+    "istextorbinary": "^3.0.0",
+    "replacestream": "^4.0.3",
+    "yargs-parser": ">=5.0.0-security.0"
+  },
+  "devDependencies": {
+    "concat-stream": "^2.0.0",
+    "mocha": "^10.2.0",
+    "npm-which": "^3.0.1",
+    "should": "^13.2.3",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4",
+    "vinyl": "^2.2.1"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/lazd/gulp-replace.git"
+  },
+  "keywords": [
+    "gulpplugin",
+    "replace"
+  ],
+  "author": "Larry Davis <lazdnet@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lazd/gulp-replace/issues"
+  },
+  "engines": {
+    "node": ">=10"
+  }
+}

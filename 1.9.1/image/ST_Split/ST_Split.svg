@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_Split(A, blade)</text>
+  <path d="M 165.38 213.46 L 334.62 213.46 L 334.62 86.54 L 165.38 86.54 L 165.38 213.46 Z" fill="rgba(74,144,217,0.15)" stroke="#4a90d9" stroke-width="2" fill-rule="evenodd" stroke-dasharray="6,3" />
+  <text x="233.08" y="162.69" text-anchor="middle" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <polyline points="250.0,234.62 250.0,65.38" fill="none" stroke="#d94a4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,3" />
+  <circle cx="250.0" cy="234.62" r="3" fill="#d94a4a" />
+  <circle cx="250.0" cy="65.38" r="3" fill="#d94a4a" />
+  <text x="256.0" y="57.379999999999995" font-size="15" font-weight="bold" fill="#d94a4a">blade</text>
+  <path d="M 165.38 213.46 L 250.0 213.46 L 250.0 86.54 L 165.38 86.54 L 165.38 213.46 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="3" fill-rule="evenodd" />
+  <path d="M 250.0 213.46 L 334.62 213.46 L 334.62 86.54 L 250.0 86.54 L 250.0 213.46 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="3" fill-rule="evenodd" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Splits geometry A using a blade geometry</text>
+  <rect x="85" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="101" y="266" font-size="13" fill="#333333">Geometry A</text>
+  <rect x="195" y="255" width="12" height="12" rx="2" fill="#d94a4a" stroke="#d94a4a" stroke-width="1" />
+  <text x="211" y="266" font-size="13" fill="#333333">Geometry blade</text>
+  <rect x="337" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="353" y="266" font-size="13" fill="#333333">Result</text>
+</svg>

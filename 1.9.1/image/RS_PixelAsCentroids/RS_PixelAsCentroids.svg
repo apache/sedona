@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 380" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="700" height="380" fill="#ffffff"/>
+  <text x="350" y="30" text-anchor="middle" font-size="16" font-weight="600" fill="#2c3e50">RS_PixelAsCentroids</text>
+  <text x="350" y="50" text-anchor="middle" font-size="12" fill="#7f8c8d">Returns centroid points at the center of every pixel</text>
+  <rect x="140" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="80" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="120" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="120" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="120" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="160" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="160" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="160" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="160" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="160" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="160" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="160" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="160" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="200" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="200" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="200" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="200" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="200" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="200" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="200" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="200" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="240" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="240" width="50" height="40" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="240" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="240" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="290" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="340" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="390" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="440" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="490" y="280" width="50" height="40" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="140" y="80" width="400" height="240" fill="none" stroke="#c8cdd0" stroke-width="1.2"/>
+  <circle cx="165.0" cy="100.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="215.0" cy="100.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="265.0" cy="100.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="315.0" cy="100.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="365.0" cy="100.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="415.0" cy="100.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="465.0" cy="100.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="515.0" cy="100.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="165.0" cy="140.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="215.0" cy="140.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="265.0" cy="140.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="315.0" cy="140.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="365.0" cy="140.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="415.0" cy="140.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="465.0" cy="140.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="515.0" cy="140.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="165.0" cy="180.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="215.0" cy="180.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="265.0" cy="180.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="315.0" cy="180.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="365.0" cy="180.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="415.0" cy="180.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="465.0" cy="180.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="515.0" cy="180.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="165.0" cy="220.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="215.0" cy="220.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="265.0" cy="220.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="315.0" cy="220.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="365.0" cy="220.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="415.0" cy="220.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="465.0" cy="220.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="515.0" cy="220.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="165.0" cy="260.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="215.0" cy="260.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="265.0" cy="260.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="315.0" cy="260.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="365.0" cy="260.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="415.0" cy="260.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="465.0" cy="260.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="515.0" cy="260.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="165.0" cy="300.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="215.0" cy="300.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="265.0" cy="300.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="315.0" cy="300.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="365.0" cy="300.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="415.0" cy="300.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="465.0" cy="300.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="515.0" cy="300.0" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <circle cx="365.0" cy="180.0" r="5" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <line x1="370.0" y1="175.0" x2="385.0" y2="162.0" stroke="#e74c3c" stroke-width="1"/>
+  <text x="387.0" y="160.0" text-anchor="start" font-size="9" fill="#e74c3c">(x=5, y=3)</text>
+  <circle cx="140" cy="340" r="3" fill="#e74c3c" stroke="white" stroke-width="1.2"/>
+  <text x="148" y="344" text-anchor="start" font-size="10" fill="#7f8c8d">= centroid (center) point for each pixel</text>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_UnaryUnion(A)</text>
+  <path d="M 145.24 228.57 L 276.19 228.57 L 276.19 123.81 L 145.24 123.81 L 145.24 228.57 Z" fill="rgba(74,144,217,0.15)" stroke="#4a90d9" stroke-width="2" fill-rule="evenodd" stroke-dasharray="6,3" />
+  <text x="197.62" y="186.67" text-anchor="middle" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <path d="M 223.81 176.19 L 354.76 176.19 L 354.76 71.43 L 223.81 71.43 L 223.81 176.19 Z" fill="rgba(74,144,217,0.15)" stroke="#4a90d9" stroke-width="2" fill-rule="evenodd" stroke-dasharray="6,3" />
+  <path d="M 145.24 228.57 L 276.19 228.57 L 276.19 176.19 L 354.76 176.19 L 354.76 71.43 L 223.81 71.43 L 223.81 123.81 L 145.24 123.81 L 145.24 228.57 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="3" fill-rule="evenodd" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns the union of all components of a multi-geometry</text>
+  <rect x="156" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="172" y="266" font-size="13" fill="#333333">Geometry A</text>
+  <rect x="266" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="282" y="266" font-size="13" fill="#333333">Result</text>
+</svg>

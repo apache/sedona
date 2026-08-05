@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#2ecc71" />
+    </marker>
+    <marker id="arrowGrev" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <path d="M8,0 L0,3 L8,6" fill="#2ecc71" />
+    </marker>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_Azimuth</text>
+  <polyline points="182.31,234.62 182.31,65.38" fill="none" stroke="#999999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4,3" />
+  <circle cx="182.31" cy="234.62" r="3" fill="#999999" />
+  <circle cx="182.31" cy="65.38" r="3" fill="#999999" />
+  <text x="170" y="61" font-size="13" fill="#999999" font-weight="bold">N</text>
+  <polyline points="182.31,234.62 317.69,133.08" fill="none" stroke="#4a90d9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="182.31" cy="234.62" r="3" fill="#4a90d9" />
+  <circle cx="317.69" cy="133.08" r="3" fill="#4a90d9" />
+  <circle cx="182.31" cy="234.62" r="5" fill="#4a90d9" stroke="#4a90d9" stroke-width="1.5" />
+  <text x="191.31" y="227.62" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <circle cx="317.69" cy="133.08" r="5" fill="#d94a4a" stroke="#d94a4a" stroke-width="1.5" />
+  <text x="326.69" y="126.08000000000001" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+  <path d="M 182.31 204.62 A 30 30 0 0 1 206.31 216.62" fill="none" stroke="#2ecc71" stroke-width="2" />
+  <text x="202" y="199" text-anchor="middle" font-size="15" font-weight="bold" fill="#2ecc71" font-style="italic">azimuth</text>
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns the azimuth angle from point A to point B (in radians)</text>
+  <rect x="121" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="137" y="266" font-size="13" fill="#333333">Point A</text>
+  <rect x="207" y="255" width="12" height="12" rx="2" fill="#d94a4a" stroke="#d94a4a" stroke-width="1" />
+  <text x="223" y="266" font-size="13" fill="#333333">Point B</text>
+  <rect x="293" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="309" y="266" font-size="13" fill="#333333">Azimuth</text>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200">
+  <rect width="400" height="200" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_BingTileToGeom</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Convert Bing Tile quadkeys to Polygons</text>
+  <text x="60" y="72" font-family="monospace" font-size="10" fill="#666" text-anchor="middle">Quadkeys</text>
+  <rect x="18" y="78" width="84" height="20" rx="3" fill="#e8eaf6" stroke="#7986cb" stroke-width="1"/>
+  <text x="60" y="91" font-family="monospace" font-size="9" fill="#3949ab" text-anchor="middle">0213</text>
+  <rect x="18" y="103" width="84" height="20" rx="3" fill="#e8eaf6" stroke="#7986cb" stroke-width="1"/>
+  <text x="60" y="116" font-family="monospace" font-size="9" fill="#3949ab" text-anchor="middle">0231</text>
+  <rect x="18" y="128" width="84" height="20" rx="3" fill="#e8eaf6" stroke="#7986cb" stroke-width="1"/>
+  <text x="60" y="141" font-family="monospace" font-size="9" fill="#3949ab" text-anchor="middle">1023</text>
+  <defs><marker id="arr3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#666"/></marker></defs>
+  <line x1="120" y1="108" x2="175" y2="108" stroke="#666" stroke-width="1.5" marker-end="url(#arr3)"/>
+  <rect x="195" y="68" width="42" height="42" fill="#4a90d9" fill-opacity="0.2" stroke="#4a90d9" stroke-width="1.5"/>
+  <rect x="240" y="68" width="42" height="42" fill="#d94a4a" fill-opacity="0.2" stroke="#d94a4a" stroke-width="1.5"/>
+  <rect x="195" y="113" width="42" height="42" fill="#2ecc71" fill-opacity="0.2" stroke="#2ecc71" stroke-width="1.5"/>
+  <text x="300" y="100" font-family="monospace" font-size="10" fill="#666">Polygons</text>
+  <text x="200" y="185" font-family="monospace" font-size="10" fill="#333" text-anchor="middle">Returns array of Polygon geometries from quadkeys</text>
+</svg>

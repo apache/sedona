@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Title (two cases) -->
+  <text x="250" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">ST_Contains(A, D) is FALSE</text>
+  <text x="250" y="42" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">ST_Contains(A, E) is FALSE</text>
+
+  <!-- Sphere/globe A: same lavender ellipse -->
+  <ellipse cx="250" cy="160" rx="195" ry="85" fill="#c5c5eb" fill-opacity="0.55" stroke="#8e8ed0" stroke-width="1.8" />
+
+  <!-- Point D on the upper boundary of A (not in interior -> contains returns false) -->
+  <circle cx="195" cy="78.5" r="7" fill="#e74c3c" stroke="#ffffff" stroke-width="1.2" />
+  <text x="204" y="74" font-size="12" font-weight="bold" fill="#c0392b">D</text>
+
+  <!-- Polygon E straddling A's right boundary (partly inside, partly outside -> pokes out) -->
+  <rect x="390" y="143" width="95" height="34" rx="2" fill="#e74c3c" fill-opacity="0.5" stroke="#c0392b" stroke-width="1.6" />
+  <text x="437" y="192" text-anchor="middle" font-size="12" font-weight="bold" fill="#c0392b">E</text>
+
+  <!-- Label A just outside the top of the ellipse -->
+  <text x="82" y="90" font-size="13" font-weight="bold" fill="#6060c8">A</text>
+
+  <!-- Legend -->
+  <rect x="80" y="265" width="14" height="14" rx="2" fill="#c5c5eb" fill-opacity="0.7" stroke="#8e8ed0" stroke-width="1" />
+  <text x="98" y="276" font-size="12" fill="#333333">Polygon A</text>
+
+  <circle cx="180" cy="272" r="6" fill="#e74c3c" stroke="#ffffff" stroke-width="1" />
+  <text x="191" y="276" font-size="12" fill="#333333">Point D (On Boundary)</text>
+
+  <rect x="310" y="265" width="14" height="14" rx="2" fill="#e74c3c" fill-opacity="0.55" stroke="#c0392b" stroke-width="1" />
+  <text x="328" y="276" font-size="12" fill="#333333">Polygon E (Pokes Out)</text>
+</svg>

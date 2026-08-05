@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 420" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <rect width="750" height="420" fill="#ffffff"/>
+  <text x="162" y="47" text-anchor="middle" font-size="16" font-weight="600" fill="#2c3e50">Raster + Zone Geometry</text>
+  <rect x="50" y="65" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="78" y="65" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="106" y="65" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="134" y="65" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="162" y="65" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="65" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="218" y="65" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="246" y="65" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="50" y="93" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="78" y="93" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="106" y="93" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="106" y="93" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <text x="120.0" y="107.0" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#2c3e50">0</text>
+  <rect x="134" y="93" width="28" height="28" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="134" y="93" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <text x="148.0" y="107.0" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#2c3e50">5</text>
+  <rect x="162" y="93" width="28" height="28" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="162" y="93" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <text x="176.0" y="107.0" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#2c3e50">4</text>
+  <rect x="190" y="93" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="218" y="93" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="246" y="93" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="50" y="121" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="78" y="121" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="106" y="121" width="28" height="28" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="106" y="121" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <text x="120.0" y="135.0" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#2c3e50">6</text>
+  <rect x="134" y="121" width="28" height="28" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="134" y="121" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <text x="148.0" y="135.0" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#2c3e50">3</text>
+  <rect x="162" y="121" width="28" height="28" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="162" y="121" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <text x="176.0" y="135.0" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#2c3e50">7</text>
+  <rect x="190" y="121" width="28" height="28" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="121" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <text x="204.0" y="135.0" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#2c3e50">4</text>
+  <rect x="218" y="121" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="246" y="121" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="50" y="149" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="78" y="149" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="106" y="149" width="28" height="28" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="106" y="149" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <text x="120.0" y="163.0" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#2c3e50">5</text>
+  <rect x="134" y="149" width="28" height="28" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="134" y="149" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <text x="148.0" y="163.0" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#2c3e50">8</text>
+  <rect x="162" y="149" width="28" height="28" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="162" y="149" width="28" height="28" fill="rgba(255,152,0,0.25)" stroke="none"/>
+  <text x="176.0" y="163.0" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#2c3e50">3</text>
+  <rect x="190" y="149" width="28" height="28" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="218" y="149" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="246" y="149" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="50" y="177" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="78" y="177" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="106" y="177" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="134" y="177" width="28" height="28" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="162" y="177" width="28" height="28" fill="#4FC3F7" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="177" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="218" y="177" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="246" y="177" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="50" y="205" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="78" y="205" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="106" y="205" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="134" y="205" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="162" y="205" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="190" y="205" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="218" y="205" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="246" y="205" width="28" height="28" fill="#EEEEEE" stroke="#c8cdd0" stroke-width="0.5"/>
+  <rect x="50" y="65" width="224" height="168" fill="none" stroke="#c8cdd0" stroke-width="1.2"/>
+  <polygon points="103,90 193,90 221,118 221,152 193,180 103,180" fill="none" stroke="#E65100" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <rect x="289" y="93" width="12" height="12" fill="rgba(255,152,0,0.25)" stroke="#E65100" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="307" y="103" text-anchor="start" font-size="10" fill="#2c3e50">= Zone region</text>
+  <rect x="78" y="251" width="180" height="120" rx="6" fill="#FFF3E0" stroke="#E65100" stroke-width="1.5"/>
+  <text x="168.0" y="265" text-anchor="middle" font-size="10" fill="#E65100">RS_ZonalStatsAll result:</text>
+  <text x="92" y="281" text-anchor="start" font-size="10" fill="#2c3e50">count: 10</text>
+  <text x="92" y="297" text-anchor="start" font-size="10" fill="#2c3e50">sum: 45</text>
+  <text x="92" y="313" text-anchor="start" font-size="10" fill="#2c3e50">mean: 4.5</text>
+  <text x="92" y="329" text-anchor="start" font-size="10" fill="#2c3e50">median: 4.5</text>
+  <text x="92" y="345" text-anchor="start" font-size="10" fill="#2c3e50">min: 0</text>
+  <text x="92" y="361" text-anchor="start" font-size="10" fill="#2c3e50">max: 8</text>
+</svg>

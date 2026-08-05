@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200">
+  <rect width="400" height="200" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_GeoHashNeighbor</text>
+  <text x="200" y="32" font-family="monospace" font-size="9" fill="#888" text-anchor="middle">Get neighboring GeoHash cell in a direction</text>
+  <rect x="122" y="48" width="38" height="38" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <text x="141" y="71" font-family="monospace" font-size="8" fill="#999" text-anchor="middle">NW</text>
+  <rect x="122" y="86" width="38" height="38" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <text x="141" y="109" font-family="monospace" font-size="8" fill="#999" text-anchor="middle">W</text>
+  <rect x="122" y="124" width="38" height="38" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <text x="141" y="147" font-family="monospace" font-size="8" fill="#999" text-anchor="middle">SW</text>
+  <rect x="160" y="48" width="38" height="38" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <text x="179" y="71" font-family="monospace" font-size="8" fill="#999" text-anchor="middle">N</text>
+  <rect x="160" y="86" width="38" height="38" fill="rgba(74,144,217,0.3)" stroke="#1565C0" stroke-width="2"/>
+  <text x="179" y="109" font-family="monospace" font-size="9" fill="#1565C0" text-anchor="middle" font-weight="bold">center</text>
+  <rect x="160" y="124" width="38" height="38" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <text x="179" y="147" font-family="monospace" font-size="8" fill="#999" text-anchor="middle">S</text>
+  <rect x="198" y="48" width="38" height="38" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <text x="217" y="71" font-family="monospace" font-size="8" fill="#999" text-anchor="middle">NE</text>
+  <rect x="198" y="86" width="38" height="38" fill="rgba(233,30,99,0.25)" stroke="#C2185B" stroke-width="1.5"/>
+  <text x="217" y="109" font-family="monospace" font-size="8" fill="#C2185B" text-anchor="middle" font-weight="bold">E</text>
+  <rect x="198" y="124" width="38" height="38" fill="#fff" stroke="#ccc" stroke-width="0.8"/>
+  <text x="217" y="147" font-family="monospace" font-size="8" fill="#999" text-anchor="middle">SE</text>
+  <text x="200" y="182" font-family="monospace" font-size="10" fill="#C2185B" text-anchor="middle">direction='E' → returns eastern neighbor</text>
+</svg>

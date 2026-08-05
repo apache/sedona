@@ -1,0 +1,15 @@
+// packages/dom-ready/src/index.ts
+function domReady(callback) {
+  if (typeof document === "undefined") {
+    return;
+  }
+  if (document.readyState === "complete" || // DOMContentLoaded + Images/Styles/etc loaded, so we call directly.
+  document.readyState === "interactive") {
+    return void callback();
+  }
+  document.addEventListener("DOMContentLoaded", callback);
+}
+export {
+  domReady as default
+};
+//# sourceMappingURL=index.mjs.map

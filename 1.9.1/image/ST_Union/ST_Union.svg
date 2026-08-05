@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+  <text x="250" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#333333">ST_Union(A, B)</text>
+  <path d="M 121.43 221.43 L 292.86 221.43 L 292.86 107.14 L 121.43 107.14 L 121.43 221.43 Z" fill="rgba(74,144,217,0.15)" stroke="#4a90d9" stroke-width="2" fill-rule="evenodd" stroke-dasharray="6,3" />
+  <text x="190.0" y="175.71" text-anchor="middle" font-size="15" font-weight="bold" fill="#4a90d9">A</text>
+  <path d="M 207.14 192.86 L 378.57 192.86 L 378.57 78.57 L 207.14 78.57 L 207.14 192.86 Z" fill="rgba(217,74,74,0.15)" stroke="#d94a4a" stroke-width="2" fill-rule="evenodd" stroke-dasharray="6,3" />
+  <text x="275.71" y="147.14" text-anchor="middle" font-size="15" font-weight="bold" fill="#d94a4a">B</text>
+  <path d="M 121.43 221.43 L 292.86 221.43 L 292.86 192.86 L 378.57 192.86 L 378.57 78.57 L 207.14 78.57 L 207.14 107.14 L 121.43 107.14 L 121.43 221.43 Z" fill="rgba(46,204,113,0.35)" stroke="#2ecc71" stroke-width="3" fill-rule="evenodd" />
+  <text x="250" y="292" text-anchor="middle" font-size="13" fill="#333333" font-style="italic">Returns the combined area of A and B</text>
+  <rect x="101" y="255" width="12" height="12" rx="2" fill="#4a90d9" stroke="#4a90d9" stroke-width="1" />
+  <text x="117" y="266" font-size="13" fill="#333333">Geometry A</text>
+  <rect x="211" y="255" width="12" height="12" rx="2" fill="#d94a4a" stroke="#d94a4a" stroke-width="1" />
+  <text x="227" y="266" font-size="13" fill="#333333">Geometry B</text>
+  <rect x="321" y="255" width="12" height="12" rx="2" fill="#2ecc71" stroke="#2ecc71" stroke-width="1" />
+  <text x="337" y="266" font-size="13" fill="#333333">Result</text>
+</svg>

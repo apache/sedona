@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="380" viewBox="0 0 900 380" font-family="Arial, Helvetica, sans-serif">
+  <rect width="900" height="380" fill="white"/>
+  <text x="450" y="28" text-anchor="middle" font-size="18" fill="#333" font-weight="bold">Two-step raster write: encode, then save</text>
+
+  <!-- Stage 1: Raster column -->
+  <g transform="translate(20,70)">
+    <text x="120" y="0" text-anchor="middle" font-size="13" fill="#333" font-weight="bold">DataFrame with `rast`</text>
+    <rect x="0" y="20" width="240" height="28" fill="#1565C0"/>
+    <text x="120" y="38" text-anchor="middle" fill="white" font-weight="bold" font-size="11">rast: Raster</text>
+    <rect x="0" y="48" width="240" height="34" fill="#E3F2FD" stroke="#90CAF9"/>
+    <text x="120" y="68" text-anchor="middle" font-size="11" fill="#333">GridCoverage2D["…"]</text>
+    <rect x="0" y="82" width="240" height="34" fill="white" stroke="#90CAF9"/>
+    <text x="120" y="102" text-anchor="middle" font-size="11" fill="#333">GridCoverage2D["…"]</text>
+  </g>
+
+  <!-- Arrow with RS_AsGeoTiff label -->
+  <line x1="270" y1="120" x2="370" y2="120" stroke="#333" stroke-width="2"/>
+  <polygon points="370,120 362,115 362,125" fill="#333"/>
+  <text x="320" y="108" text-anchor="middle" font-size="11" fill="#333" font-weight="bold">RS_AsGeoTiff(rast)</text>
+  <text x="320" y="135" text-anchor="middle" font-size="10" fill="#666">(or RS_AsCOG / RS_AsArcGrid / RS_AsPNG)</text>
+
+  <!-- Stage 2: Binary column -->
+  <g transform="translate(380,70)">
+    <text x="120" y="0" text-anchor="middle" font-size="13" fill="#333" font-weight="bold">DataFrame with binary</text>
+    <rect x="0" y="20" width="240" height="28" fill="#6A1B9A"/>
+    <text x="120" y="38" text-anchor="middle" fill="white" font-weight="bold" font-size="11">raster_binary: BinaryType</text>
+    <rect x="0" y="48" width="240" height="34" fill="#F3E5F5" stroke="#CE93D8"/>
+    <text x="120" y="68" text-anchor="middle" font-size="11" fill="#333">[49 49 2A 00 …]</text>
+    <rect x="0" y="82" width="240" height="34" fill="white" stroke="#CE93D8"/>
+    <text x="120" y="102" text-anchor="middle" font-size="11" fill="#333">[49 49 2A 00 …]</text>
+  </g>
+
+  <!-- Arrow with write.format label -->
+  <line x1="630" y1="120" x2="730" y2="120" stroke="#333" stroke-width="2"/>
+  <polygon points="730,120 722,115 722,125" fill="#333"/>
+  <text x="680" y="108" text-anchor="middle" font-size="11" fill="#333" font-weight="bold">.write.format("raster")</text>
+  <text x="680" y="135" text-anchor="middle" font-size="10" fill="#666">.save("out/")</text>
+
+  <!-- Stage 3: File system -->
+  <g transform="translate(740,55)">
+    <text x="80" y="15" text-anchor="middle" font-size="13" fill="#333" font-weight="bold">Files on disk</text>
+    <rect x="0" y="25" width="160" height="160" fill="#FFF8E1" stroke="#E65100" stroke-width="1.5" rx="3"/>
+    <text x="10" y="45" font-size="10" fill="#666" font-family="monospace">out/</text>
+    <text x="20" y="62" font-size="10" fill="#333" font-family="monospace">├ part-00000/</text>
+    <text x="30" y="78" font-size="10" fill="#666" font-family="monospace">  ├ tile.tiff</text>
+    <text x="30" y="94" font-size="10" fill="#666" font-family="monospace">  └ .tile.tiff.crc</text>
+    <text x="20" y="113" font-size="10" fill="#333" font-family="monospace">├ part-00001/</text>
+    <text x="30" y="129" font-size="10" fill="#666" font-family="monospace">  ├ tile.tiff</text>
+    <text x="30" y="145" font-size="10" fill="#666" font-family="monospace">  └ .tile.tiff.crc</text>
+    <text x="20" y="164" font-size="10" fill="#333" font-family="monospace">└ _SUCCESS</text>
+  </g>
+
+  <!-- Lower section: option callouts -->
+  <text x="450" y="245" text-anchor="middle" font-size="13" fill="#333" font-weight="bold">Writer options</text>
+
+  <g transform="translate(60,260)">
+    <rect width="180" height="80" fill="#F5F5F5" stroke="#666" stroke-width="1" rx="4"/>
+    <text x="90" y="20" text-anchor="middle" font-size="12" fill="#1565C0" font-weight="bold">rasterField</text>
+    <text x="90" y="42" text-anchor="middle" font-size="10" fill="#333">Name of the binary column</text>
+    <text x="90" y="58" text-anchor="middle" font-size="10" fill="#666">required when multiple</text>
+    <text x="90" y="72" text-anchor="middle" font-size="10" fill="#666">binary columns are present</text>
+  </g>
+  <g transform="translate(265,260)">
+    <rect width="180" height="80" fill="#F5F5F5" stroke="#666" stroke-width="1" rx="4"/>
+    <text x="90" y="20" text-anchor="middle" font-size="12" fill="#1565C0" font-weight="bold">pathField</text>
+    <text x="90" y="42" text-anchor="middle" font-size="10" fill="#333">Column with output filenames</text>
+    <text x="90" y="58" text-anchor="middle" font-size="10" fill="#666">basename only; extension</text>
+    <text x="90" y="72" text-anchor="middle" font-size="10" fill="#666">replaced by `fileExtension`</text>
+  </g>
+  <g transform="translate(470,260)">
+    <rect width="180" height="80" fill="#F5F5F5" stroke="#666" stroke-width="1" rx="4"/>
+    <text x="90" y="20" text-anchor="middle" font-size="12" fill="#1565C0" font-weight="bold">fileExtension</text>
+    <text x="90" y="42" text-anchor="middle" font-size="10" fill="#333">Extension on each file</text>
+    <text x="90" y="58" text-anchor="middle" font-size="10" fill="#666">default `.tiff`</text>
+    <text x="90" y="72" text-anchor="middle" font-size="10" fill="#666">e.g. `.png`, `.asc`</text>
+  </g>
+  <g transform="translate(675,260)">
+    <rect width="180" height="80" fill="#F5F5F5" stroke="#666" stroke-width="1" rx="4"/>
+    <text x="90" y="20" text-anchor="middle" font-size="12" fill="#1565C0" font-weight="bold">useDirectCommitter</text>
+    <text x="90" y="42" text-anchor="middle" font-size="10" fill="#333">Skip the temp-location stage</text>
+    <text x="90" y="58" text-anchor="middle" font-size="10" fill="#666">default true; faster on S3</text>
+    <text x="90" y="72" text-anchor="middle" font-size="10" fill="#666">set false for atomicity</text>
+  </g>
+</svg>

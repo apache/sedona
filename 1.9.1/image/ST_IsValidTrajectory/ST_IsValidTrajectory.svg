@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="130" viewBox="0 0 400 130">
+  <rect width="400" height="130" fill="#f5f5f5" rx="5"/>
+  <text x="200" y="18" font-family="monospace" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">ST_IsValidTrajectory</text>
+
+  <polyline points="60.0,90.0 90.0,60.0 120.0,75.0 150.0,45.0" fill="none" stroke="#43A047" stroke-width="2"/>
+  <circle cx="60.0" cy="90.0" r="3" fill="#43A047" stroke="#fff" stroke-width="1"/>
+  <text x="60.0" y="82.0" font-family="monospace" font-size="8" fill="#43A047" text-anchor="middle">M=10</text>
+  <circle cx="90.0" cy="60.0" r="3" fill="#43A047" stroke="#fff" stroke-width="1"/>
+  <text x="90.0" y="52.0" font-family="monospace" font-size="8" fill="#43A047" text-anchor="middle">M=20</text>
+  <circle cx="120.0" cy="75.0" r="3" fill="#43A047" stroke="#fff" stroke-width="1"/>
+  <text x="120.0" y="67.0" font-family="monospace" font-size="8" fill="#43A047" text-anchor="middle">M=30</text>
+  <circle cx="150.0" cy="45.0" r="3" fill="#43A047" stroke="#fff" stroke-width="1"/>
+  <text x="150.0" y="37.0" font-family="monospace" font-size="8" fill="#43A047" text-anchor="middle">M=40</text>
+  <text x="105" y="115" font-family="monospace" font-size="10" fill="#43A047" text-anchor="middle">Valid (true)</text>
+  <polyline points="250.0,90.0 280.0,60.0 310.0,75.0 340.0,45.0" fill="none" stroke="#E53935" stroke-width="2"/>
+  <circle cx="250.0" cy="90.0" r="3" fill="#E53935" stroke="#fff" stroke-width="1"/>
+  <text x="250.0" y="82.0" font-family="monospace" font-size="8" fill="#E53935" text-anchor="middle">M=10</text>
+  <circle cx="280.0" cy="60.0" r="3" fill="#E53935" stroke="#fff" stroke-width="1"/>
+  <text x="280.0" y="52.0" font-family="monospace" font-size="8" fill="#E53935" text-anchor="middle">M=30</text>
+  <circle cx="310.0" cy="75.0" r="3" fill="#E53935" stroke="#fff" stroke-width="1"/>
+  <text x="310.0" y="67.0" font-family="monospace" font-size="8" fill="#E53935" text-anchor="middle">M=20</text>
+  <circle cx="340.0" cy="45.0" r="3" fill="#E53935" stroke="#fff" stroke-width="1"/>
+  <text x="340.0" y="37.0" font-family="monospace" font-size="8" fill="#E53935" text-anchor="middle">M=40</text>
+  <text x="295" y="115" font-family="monospace" font-size="10" fill="#E53935" text-anchor="middle">Invalid (false)</text>
+</svg>

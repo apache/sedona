@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 300" width="500" height="300" style="background:#ffffff">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+    </style>
+    <radialGradient id="globeGrad" cx="40%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#eaeaf6" />
+      <stop offset="100%" stop-color="#b5b5e0" />
+    </radialGradient>
+    <!-- Clip every overlay to the sphere so nothing floats off its surface -->
+    <clipPath id="sphereClipTrue">
+      <circle cx="250" cy="170" r="105" />
+    </clipPath>
+  </defs>
+
+  <!-- Title -->
+  <text x="250" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">ST_Within(A, B) is TRUE</text>
+  <text x="250" y="42" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">ST_Within(P, B) is TRUE</text>
+
+  <!-- Sphere / globe -->
+  <circle cx="250" cy="170" r="105" fill="url(#globeGrad)" stroke="#8e8ed0" stroke-width="1.8" />
+
+  <!-- Latitude/longitude suggestion for 3D depth -->
+  <ellipse cx="250" cy="170" rx="105" ry="27" fill="none" stroke="#8e8ed0" stroke-width="0.8" stroke-opacity="0.5" />
+  <ellipse cx="250" cy="170" rx="36" ry="105" fill="none" stroke="#8e8ed0" stroke-width="0.8" stroke-opacity="0.5" />
+  <ellipse cx="250" cy="170" rx="90" ry="105" fill="none" stroke="#8e8ed0" stroke-width="0.6" stroke-opacity="0.35" />
+
+  <!-- Everything below is clipped to the sphere so each polygon looks painted ON the globe -->
+  <g clip-path="url(#sphereClipTrue)">
+    <!-- Polygon B: large spherical cap (container), tilted slightly to suggest it's ON the curved surface -->
+    <ellipse cx="250" cy="170" rx="80" ry="45" fill="#c5c5eb" fill-opacity="0.65" stroke="#6060c8" stroke-width="1.8" transform="rotate(-12 250 170)" />
+
+    <!-- Polygon A: smaller spherical cap sitting inside B, same tilt so it follows the curvature -->
+    <ellipse cx="245" cy="168" rx="38" ry="20" fill="#5fbf5f" fill-opacity="0.6" stroke="#3c9a3c" stroke-width="1.6" transform="rotate(-12 245 168)" />
+
+    <!-- Point P inside A (and inside B) -->
+    <circle cx="252" cy="172" r="5.5" fill="#4a90d9" stroke="#ffffff" stroke-width="1.2" />
+  </g>
+
+  <!-- Labels (outside the clip so they're readable) -->
+  <text x="316" y="143" font-size="14" font-weight="bold" fill="#6060c8">B</text>
+  <text x="213" y="151" font-size="13" font-weight="bold" fill="#3c9a3c">A</text>
+  <text x="260" y="167" font-size="13" font-weight="bold" fill="#4a90d9">P</text>
+
+  <!-- Legend -->
+  <circle cx="100" cy="272" r="5.5" fill="#4a90d9" stroke="#ffffff" stroke-width="1" />
+  <text x="110" y="276" font-size="12" fill="#333333">Point P (Interior of B)</text>
+
+  <ellipse cx="252" cy="272" rx="8" ry="4" fill="#5fbf5f" fill-opacity="0.7" stroke="#3c9a3c" stroke-width="1" />
+  <text x="263" y="276" font-size="12" fill="#333333">Polygon A (Fully Inside B)</text>
+
+  <ellipse cx="408" cy="272" rx="8" ry="4" fill="#c5c5eb" fill-opacity="0.8" stroke="#6060c8" stroke-width="1" />
+  <text x="420" y="276" font-size="12" fill="#333333">Polygon B</text>
+</svg>
