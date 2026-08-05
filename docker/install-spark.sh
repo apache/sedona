@@ -20,9 +20,8 @@
 set -e
 
 # Define variables
-spark_version=$1
-hadoop_s3_version=$2
-aws_sdk_version=$3
+hadoop_s3_version=$1
+aws_sdk_version=$2
 
 # Helper function to download with throttled progress updates (every 5 seconds)
 download_with_progress() {
@@ -31,7 +30,7 @@ download_with_progress() {
     local description=${3:-"Downloading"}
 
     # Start download in background, redirect progress to /dev/null
-    curl -L --silent --show-error --retry 5 --retry-delay 10 --retry-connrefused "${url}" -o "${output}" &
+    curl -L --fail --silent --show-error --retry 5 --retry-delay 10 --retry-connrefused "${url}" -o "${output}" &
     local curl_pid=$!
 
     # Monitor progress every 5 seconds
@@ -61,24 +60,14 @@ download_with_progress() {
     fi
 }
 
-# Download Spark jar and set up PySpark
-# Download from Lyra Hosting mirror (faster) but verify checksum from Apache archive
-spark_filename="spark-${spark_version}-bin-hadoop3.tgz"
-spark_download_url="https://mirror.lyrahosting.com/apache/spark/spark-${spark_version}/${spark_filename}"
-checksum_url="https://archive.apache.org/dist/spark/spark-${spark_version}/${spark_filename}.sha512"
-
-echo "Downloading Spark ${spark_version} from Lyra Hosting mirror..."
-download_with_progress "${spark_download_url}" "${spark_filename}" "Downloading Spark"
-
-echo "Downloading checksum from Apache archive..."
-curl -L --silent --show-error --retry 5 --retry-delay 10 --retry-connrefused "${checksum_url}" -o "${spark_filename}.sha512"
-
-echo "Verifying checksum..."
-sha512sum -c "${spark_filename}.sha512" || { echo "Checksum verification failed!"; exit 1; }
-
-echo "Checksum verified successfully. Extracting Spark..."
-tar -xf "${spark_filename}" && mv spark-"${spark_version}"-bin-hadoop3/* "${SPARK_HOME}"/
-rm "${spark_filename}" "${spark_filename}.sha512" && rm -rf spark-"${spark_version}"-bin-hadoop3
+# Spark itself is provided by the official apache/spark image via a multi-stage
+# COPY in sedona-docker.dockerfile. That image ships without a conf directory,
+# so create it here. The tgz distribution's conf templates only contain
+# commented-out examples, so empty files are equivalent; start.sh appends the
+# actual settings at container startup.
+mkdir -p "${SPARK_HOME}"/conf
+touch "${SPARK_HOME}"/conf/spark-defaults.conf
+touch "${SPARK_HOME}"/conf/spark-env.sh.template
 
 # Add S3 jars
 echo "Downloading Hadoop AWS S3 jar..."
@@ -87,9 +76,6 @@ download_with_progress "https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-
 # Add AWS SDK v2 bundle (required by spark-extension 2.14.2+)
 echo "Downloading AWS SDK v2 bundle..."
 download_with_progress "https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/${aws_sdk_version}/bundle-${aws_sdk_version}.jar" "${SPARK_HOME}/jars/aws-sdk-v2-bundle-${aws_sdk_version}.jar" "Downloading AWS SDK"
-
-# Set up master IP address and executor memory
-cp "${SPARK_HOME}"/conf/spark-defaults.conf.template "${SPARK_HOME}"/conf/spark-defaults.conf
 
 # Install required libraries for GeoPandas on Apple chip mac
 apt-get install -y gdal-bin libgdal-dev
