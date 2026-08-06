@@ -1211,8 +1211,9 @@ public class TestFunctionsV2 extends TestBase {
     verifySqlSingleRes(
         "SELECT sedona.ST_IsPolygonCW(ST_GeomFromWKT('POLYGON ((20 35, 45 20, 30 5, 10 10, 10 30, 20 35), (30 20, 20 25, 20 15, 30 20))'))",
         true);
-    verifySqlSingleRes("SELECT sedona.ST_IsPolygonCW(ST_GeomFromWKT('POLYGON EMPTY'))", true);
-    verifySqlSingleRes("SELECT sedona.ST_IsPolygonCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY'))", true);
+    // Empty geometries cannot be tested here: Snowflake's native GEOMETRY parses
+    // 'POLYGON EMPTY' to NULL, so the UDF never receives an empty geometry.
+    // Empty inputs are covered by the WKB-based tests in TestFunctions.
   }
 
   @Test
@@ -1244,8 +1245,9 @@ public class TestFunctionsV2 extends TestBase {
     verifySqlSingleRes(
         "SELECT sedona.ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON ((20 35, 10 30, 10 10, 30 5, 45 20, 20 35),(30 20, 20 15, 20 25, 30 20))'))",
         true);
-    verifySqlSingleRes("SELECT sedona.ST_IsPolygonCCW(ST_GeomFromWKT('POLYGON EMPTY'))", true);
-    verifySqlSingleRes("SELECT sedona.ST_IsPolygonCCW(ST_GeomFromWKT('MULTIPOLYGON EMPTY'))", true);
+    // Empty geometries cannot be tested here: Snowflake's native GEOMETRY parses
+    // 'POLYGON EMPTY' to NULL, so the UDF never receives an empty geometry.
+    // Empty inputs are covered by the WKB-based tests in TestFunctions.
   }
 
   @Test
