@@ -18,19 +18,19 @@
 .PHONY: check check-from-ref check-install check-last check-stage clean docsbuild docsinstall install run-docs sync-no-dev update update-deps
 
 check: install ## run all pre-commit checks
-	prek run --all-files
+	uv run prek run --all-files
 
 check-from-ref: install ## will run prek checks for all changes since you branched off
-	prek run --from-ref master
+	uv run prek run --from-ref master
 
 check-install: ## checks for a uv installation
 	@command -v uv >/dev/null 2>&1 || (echo 'uv not found, install via: curl -LsSf https://astral.sh/uv/install.sh | sh' && exit 1)
 
 check-last: install ## will run pre-commit checks on last commit only
-	prek --last-commit
+	uv run prek --last-commit
 
 check-stage: install ## runs check on currently staged changes
-	prek
+	uv run prek
 
 clean:
 	@echo "Cleaning up generated files... (TODO)"
@@ -51,7 +51,7 @@ docsinstall: check-install
 
 install: check-install ## Sync all dependencies (including development) using uv
 	uv sync --all-groups
-	prek install
+	uv run prek install
 
 run-docs:
 	docker build -f docker/docs/Dockerfile -t mkdocs-sedona .
@@ -61,8 +61,8 @@ sync-no-dev: check-install ## Sync non-development dependencies using uv
 	uv sync --no-dev
 
 update: install
-	prek auto-update --freeze
+	uv run prek auto-update --freeze
 
 update-deps: check-install ## Update pre-commit hooks and local dependencies
-	prek auto-update --freeze || :
+	uv run prek auto-update --freeze || :
 	uv sync --all-groups --upgrade
