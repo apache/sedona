@@ -339,9 +339,15 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
 - `make_valid()` - Geometry validation and repair
 - `sample_points()` - Sample polygons by area and lines by length with native
   distributed expressions
+- `GeoDataFrame.explode()` - Expand multipart geometries into rows while
+  retaining their attribute columns and index metadata
 - `cx` - Coordinate-based spatial filtering
 - `clip()` - Distributed geometry clipping
 - `sindex` - Spatial indexing (limited functionality)
+
+`GeoDataFrame.explode()` uses Sedona's native `ST_Dump` expression with
+Spark `posexplode`. Geometry parts and their attributes remain distributed;
+the operation does not collect source rows or use a Python UDF.
 
 ### Distributed Geometry Aggregation
 
