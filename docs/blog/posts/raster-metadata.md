@@ -12,7 +12,7 @@ title: "Index a Million Rasters Without Reading a Pixel"
 
 # Index a Million Rasters Without Reading a Pixel
 
-Every raster team has the bucket. Thousands of GeoTIFFs accumulated from surveys, vendors, and pipelines — and no catalog. Which files cover this area? Which CRS are they in? Which ones were never converted to Cloud Optimized GeoTIFF? Until now, answering meant opening every file.
+Every raster team has the bucket. Thousands of GeoTIFFs accumulated from surveys, vendors, and pipelines — and no catalog. Which files cover this area? Which CRS are they in? Which ones were never converted to Cloud Optimized GeoTIFF? Until now, answering meant crawling the bucket with one-off scripts — or pulling rasters down just to inspect them.
 
 ![Real Sentinel-2 scenes above the metadata card Sedona actually read — index a million rasters, read zero pixels](raster-metadata-cover.png)
 
