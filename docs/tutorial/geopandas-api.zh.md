@@ -311,6 +311,7 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 - `sjoin()` —— 多种谓词的空间连接
 - `cx` —— 基于坐标范围的空间筛选
 - `clip()` —— 使用标量、矩形或分布式掩膜裁剪几何
+- `overlay()` —— 支持全部五种 GeoPandas 模式的分布式数据框叠加
 - `buffer()` —— 几何缓冲
 - `distance()` —— 距离计算
 - `intersects()`、`contains()`、`within()` —— 空间谓词
@@ -340,7 +341,29 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 - `sample_points()` —— 使用原生分布式表达式按面积对多边形采样、按长度对线采样
 - `cx` —— 基于坐标范围的空间筛选
 - `clip()` —— 分布式几何裁剪
+- `overlay()` —— GeoDataFrame 之间的分布式相交、差集、恒等、对称差和并集
 - `sindex` —— 空间索引（功能有限）
+
+`overlay()` 会让两个输入始终保持分布式执行。候选对由 Sedona 空间连接
+生成，差集分支则在 executor 上按源行聚合相匹配的掩膜几何。该实现不会收集
+几何行、创建 Python UDF 或缓存中间候选对。因此组合模式可能执行多次空间
+连接，并且不保证输出行顺序。
+
+与 GeoPandas 一样，每个输入必须只包含一个基本几何族，且默认修复无效多边形。
+JTS 与 GEOS 对拓扑等价的结果可能采用不同的部件或坐标顺序。
+Sedona 的 JTS 结构修复可能与 GeoPandas 的 GEOS 线网修复采用不同方式拆分
+无效多边形；有效输入的拓扑应保持一致。`keep_geom_type=None` 的过滤行为与
+`True` 相同，但 Sedona 不会仅为了在删除
+低维几何时发出 GeoPandas 的条件警告而提前执行完整叠加。MultiIndex 列、
+重复的单级列标签，以及会产生重复输出标签的属性后缀都会被明确拒绝。包括
+MultiIndex 在内的输入行索引会被新的分布式索引替代。除 `difference` 外的
+模式始终把活动输出列命名为 `geometry`，空结果与空间上不相交的结果也不例外，
+从而避免 GeoPandas 的包围盒快速路径产生特殊命名。空的左输入会返回保留类型
+的空结果，而不会像部分 GeoPandas 版本那样在访问第一个几何时抛出异常。
+`identity` 遵循 GeoPandas 1.1+ 的 dtype 语义，保留左侧属性的 dtype，并提升
+可空右侧属性的 dtype。`union` 和 `symmetric_difference` 即使某个逻辑差集
+分支没有输出行，也会使用稳定的可空属性 dtype，从而避免仅为特化 dtype 而
+触发提前执行。
 
 ### 分布式几何聚合
 

@@ -17,10 +17,12 @@
 
 from .clip import clip
 from .collect import collect
+from .overlay import overlay
 from .sjoin import sjoin
 
 __all__ = [
     "clip",
     "collect",
+    "overlay",
     "sjoin",
 ]

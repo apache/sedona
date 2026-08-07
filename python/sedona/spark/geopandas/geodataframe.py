@@ -2341,6 +2341,47 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
     # SPATIAL OPERATIONS
     # ============================================================================
 
+    def overlay(
+        self,
+        right,
+        how="intersection",
+        keep_geom_type=None,
+        make_valid=True,
+    ):
+        """Perform a distributed spatial overlay with another GeoDataFrame.
+
+        Parameters
+        ----------
+        right : GeoDataFrame
+            The GeoDataFrame overlaid with this frame.
+        how : {"intersection", "union", "identity", "symmetric_difference", "difference"}
+            Overlay operation to perform.
+        keep_geom_type : bool, default None
+            Keep only geometries in the family of this frame. ``None`` filters
+            like ``True`` without eagerly evaluating the result to emit
+            GeoPandas' conditional dropped-geometry warning.
+        make_valid : bool, default True
+            Repair invalid polygon inputs before overlay.
+
+        Returns
+        -------
+        GeoDataFrame
+            Lazily evaluated distributed overlay result.
+
+        See Also
+        --------
+        sedona.spark.geopandas.overlay
+        """
+        from sedona.spark.geopandas.tools.overlay import overlay
+
+        return overlay(
+            self,
+            right,
+            how=how,
+            keep_geom_type=keep_geom_type,
+            make_valid=make_valid,
+        )
+
     def sjoin(
         self,
         other,
