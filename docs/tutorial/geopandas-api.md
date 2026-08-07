@@ -311,6 +311,7 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
 - `sjoin()` - Spatial joins with various predicates
 - `cx` - Coordinate-based spatial filtering
 - `clip()` - Clip geometries with scalar, rectangular, or distributed masks
+- `overlay()` - Distributed frame overlay with all five GeoPandas modes
 - `buffer()` - Geometric buffering
 - `distance()` - Distance calculations
 - `intersects()`, `contains()`, `within()` - Spatial predicates
@@ -341,7 +342,37 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
   distributed expressions
 - `cx` - Coordinate-based spatial filtering
 - `clip()` - Distributed geometry clipping
+- `overlay()` - Distributed intersection, difference, identity, symmetric
+  difference, and union between GeoDataFrames
 - `sindex` - Spatial indexing (limited functionality)
+
+`overlay()` keeps both inputs distributed. Candidate pairs are planned as a
+Sedona spatial join, and difference branches aggregate each source row's
+matching mask geometries on executors. It does not collect geometry rows,
+create Python UDFs, or cache an intermediate pair relation. Composite modes
+can therefore execute more than one spatial join. Output row order is not
+guaranteed.
+
+As in GeoPandas, each input must contain a single basic geometry family and
+invalid polygon inputs are repaired by default. JTS and GEOS can return
+different component or coordinate orderings for topologically equivalent
+results. Sedona's JTS structural repair can partition invalid polygons
+differently from GeoPandas' GEOS linework repair; valid-input topology should
+match. `keep_geom_type=None` filters like `True`, but Sedona does not eagerly
+execute the completed overlay solely to issue GeoPandas' conditional warning
+when lower-dimensional geometries are removed. MultiIndex columns, duplicate
+one-level column labels, and attribute suffixes that would create duplicate
+output labels are rejected. Input row indexes, including MultiIndexes, are
+discarded in favor of a fresh distributed index. Non-`difference` modes
+consistently name the active output column `geometry`, including empty and
+spatially disjoint results; this avoids GeoPandas' special bbox-fast-path
+naming behavior. An empty left input returns a typed empty result instead of
+raising in modes where some GeoPandas versions access its first geometry.
+`identity` follows GeoPandas 1.1+ dtype semantics by preserving left-side
+attribute dtypes and promoting nullable right-side attributes. `union` and
+`symmetric_difference` use stable nullable attribute dtypes even when a
+logical difference branch produces no rows, avoiding an eager action solely
+to specialize dtypes.
 
 ### Distributed Geometry Aggregation
 
