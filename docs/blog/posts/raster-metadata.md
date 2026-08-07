@@ -7,14 +7,14 @@ links:
   - Sedona 1.9.1 release notes: https://sedona.apache.org/latest/setup/release-notes/
 authors:
   - jia
-title: "Index a Million Rasters. Open None."
+title: "Index a Million Rasters Without Reading a Pixel"
 ---
 
-# Index a Million Rasters. Open None.
+# Index a Million Rasters Without Reading a Pixel
 
 Every raster team has the bucket. Thousands of GeoTIFFs accumulated from surveys, vendors, and pipelines — and no catalog. Which files cover this area? Which CRS are they in? Which ones were never converted to Cloud Optimized GeoTIFF? Until now, answering meant opening every file.
 
-![A wall of GeoTIFF files with only their header stripes lit — index a million rasters, open none](raster-metadata-cover.svg)
+![Real Sentinel-2 scenes above the metadata card Sedona actually read — index a million rasters, read zero pixels](raster-metadata-cover.png)
 
 <!-- more -->
 
@@ -57,7 +57,7 @@ meta = sedona.read.format("geotiff.metadata").load(
 meta.createOrReplaceTempView("meta")
 ```
 
-That's **289 COGs holding 14.7 GB of imagery, indexed in 70 seconds from a laptop** — network-bound, since only the kilobyte-scale headers travel. What comes back is a table:
+That's **289 COGs holding 14.7 GB of imagery, indexed in 70 seconds** — on a single machine, the worst case for this workload. The scan is an ordinary distributed read: Sedona bin-packs the files across every executor you have, so on a cluster the same line fans out machine-wide and scales with it. What comes back is a table:
 
 ```python
 sedona.sql("""
@@ -92,6 +92,17 @@ True-color composites in UTM zone 10N, tiled, four overview levels each — fact
 +-----+------+-----+
 ```
 
+## Built to fan out
+
+The reader is a native Sedona data source, so the usual distributed-scan machinery applies — and it matters more here than usual, because the cost is per-file I/O:
+
+- **Many machines, one glob.** Files are bin-packed into input partitions and spread across every executor. Ten workers open ten headers at a time; a hundred open a hundred. The 70-second single-machine read above is the floor, not the ceiling.
+- **Projection pushdown.** Header fields are decoded lazily, per column. A query that never touches them — `COUNT(*)`, or a `SELECT path` inventory — skips header I/O entirely. We measured exactly that on the planetary run below: the pruned count finished in **5.7 seconds** while the full header materialization took 12.4 minutes. Select only `cornerCoordinates` and that's all the reader decodes.
+- **Limit pushdown.** The scan implements Spark's limit pushdown, so `.limit(10)` while you're exploring stops after ten files instead of sweeping the bucket.
+- **Partition pruning.** If your lake is laid out Hive-style (`.../year=2026/sensor=s2/...`), those directories surface as columns, and filtering on them skips non-matching files before a single byte is read.
+
+So the honest mental model: listing is nearly free, pruned queries are cheap, and the full header sweep parallelizes to whatever cluster you give it.
+
 ## The footprint index
 
 The quiet superpower is `cornerCoordinates`. One expression turns it into a geometry — and suddenly your bucket has a spatial index:
@@ -111,7 +122,7 @@ footprints = sedona.sql("""
 
 ## And when you point it at a planet
 
-To see where the ceiling is, we ran the same one-liner over the **entire ESA WorldCover archive**: every 3°×3° land-cover COG on Earth, in one glob. All **2,651 files — 124 GB of rasters — indexed in 12.4 minutes from the same laptop**, across an ocean, headers only. (You don't need to reproduce this one; the month-sized read above is the same code.)
+To see where the ceiling is, we ran the same one-liner over the **entire ESA WorldCover archive**: every 3°×3° land-cover COG on Earth, in one glob — all **2,651 files, 124 GB of rasters, headers only**. Even a single machine an ocean away from the bucket finished in 12.4 minutes; the same scan on a cluster spreads those 2,651 header reads across every worker, so wall-time shrinks with the machines you give it. (You don't need to reproduce this one; the month-sized read above is the same code.)
 
 Plotting nothing but each file's `cornerCoordinates` draws the continents:
 
@@ -166,6 +177,6 @@ The sibling `netcdf.metadata` reader does the same for scientific data cubes —
 
 ## The point
 
-Catalogs like STAC are wonderful — when someone has built one for you. For every other bucket of rasters, Sedona 1.9.1 turns the files *themselves* into the catalog: one read for the metadata, one expression for the footprints, plain SQL for the audit. Index a million rasters. Open none.
+Catalogs like STAC are wonderful — when someone has built one for you. For every other bucket of rasters, Sedona 1.9.1 turns the files *themselves* into the catalog: one read for the metadata, one expression for the footprints, plain SQL for the audit. Index a million rasters — and never read a pixel.
 
 *Full option reference in the [GeoTIFF metadata tutorial](https://sedona.apache.org/latest/tutorial/files/geotiffmetadata-sedona-spark/) and [NetCDF metadata tutorial](https://sedona.apache.org/latest/tutorial/files/netcdfmetadata-sedona-spark/).*
