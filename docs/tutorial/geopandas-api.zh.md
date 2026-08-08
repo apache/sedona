@@ -338,9 +338,14 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 - `intersection()` —— 几何相交
 - `make_valid()` —— 几何校验与修复
 - `sample_points()` —— 使用原生分布式表达式按面积对多边形采样、按长度对线采样
+- `GeoDataFrame.explode()` —— 将多部件几何展开为多行，并保留对应的属性列与索引元数据
 - `cx` —— 基于坐标范围的空间筛选
 - `clip()` —— 分布式几何裁剪
 - `sindex` —— 空间索引（功能有限）
+
+`GeoDataFrame.explode()` 使用 Sedona 原生的 `ST_Dump` 表达式与 Spark
+`posexplode`。几何部件及其属性始终保持分布式处理；该操作不会收集源数据行，
+也不会使用 Python UDF。
 
 ### 分布式几何聚合
 

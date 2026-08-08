@@ -55,6 +55,7 @@ from pyspark.sql.types import (
 from pyspark.pandas.utils import log_advice
 
 from sedona.spark.geopandas._crs import copy_crs_metadata, with_crs_metadata
+from sedona.spark.geopandas._explode import expand_geometry_column
 from sedona.spark.geopandas._typing import Label
 from sedona.spark.geopandas.base import GeoFrame
 from sedona.spark.sql import st_aggregates as sta
@@ -1950,6 +1951,106 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         >>> df.plot("BoroName", cmap="Set1")  # doctest: +SKIP
         """
         return self.to_geopandas().plot(*args, **kwargs)
+
+    def explode(
+        self,
+        column=None,
+        ignore_index: bool = False,
+        index_parts: bool = False,
+        **kwargs,
+    ) -> GeoDataFrame:
+        """Explode multi-part geometries into separate rows.
+
+        Attribute columns remain alongside every geometry part. The operation
+        uses Sedona's native ``ST_Dump`` expression and remains distributed.
+
+        Parameters
+        ----------
+        column : column label, default None
+            Column to explode. ``None`` selects the active geometry column. As
+            in GeoPandas, selecting any geometry-typed column explodes the
+            active geometry column; selecting a non-geometry column delegates
+            to pandas-on-Spark.
+        ignore_index : bool, default False
+            If True, label the result index 0, 1, ..., n - 1 and ignore
+            ``index_parts``.
+        index_parts : bool, default False
+            If True, append a zero-based index level identifying each geometry
+            produced from an input row.
+        **kwargs
+            Additional keyword arguments are forwarded when exploding a
+            non-geometry column.
+
+        Returns
+        -------
+        GeoDataFrame
+            A distributed GeoDataFrame with one row per geometry part.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoDataFrame
+        >>> from shapely.geometry import MultiPoint
+        >>> gdf = GeoDataFrame(
+        ...     {
+        ...         "name": ["a", "b"],
+        ...         "geometry": [
+        ...             MultiPoint([(0, 0), (1, 1)]),
+        ...             MultiPoint([(2, 2), (3, 3)]),
+        ...         ],
+        ...     }
+        ... )
+        >>> gdf.explode(index_parts=True)
+            name     geometry
+        0 0    a  POINT (0 0)
+          1    a  POINT (1 1)
+        1 0    b  POINT (2 2)
+          1    b  POINT (3 3)
+        """
+        if column is None:
+            column = self.geometry.name
+
+        selected = self[column]
+        if not isinstance(selected, sgpd.GeoSeries):
+            exploded = super().explode(
+                column,
+                ignore_index=ignore_index,
+                **kwargs,
+            )
+            return _as_geodataframe_with_geometry(
+                exploded,
+                self._geometry_column_name,
+            )
+
+        # GeoPandas explodes the active geometry even when ``column`` names a
+        # different geometry-typed column. Preserve that compatibility quirk.
+        geometry_label = self.geometry._column_label
+        geometry_position = self._internal.column_labels.index(geometry_label)
+        result_internal = expand_geometry_column(
+            self._internal,
+            geometry_position=geometry_position,
+            array_builder=stf.ST_Dump,
+            ignore_index=ignore_index,
+            index_parts=index_parts,
+            temp_prefix="frame_explode",
+        )
+        # GeoPandas rebuilds a geometry explode by dropping the active column
+        # and adding it back after the attributes, so keep that output order.
+        data_order = [
+            position
+            for position in range(len(result_internal.column_labels))
+            if position != geometry_position
+        ] + [geometry_position]
+        result_internal = result_internal.copy(
+            column_labels=[result_internal.column_labels[i] for i in data_order],
+            data_spark_columns=[
+                result_internal.data_spark_columns[i] for i in data_order
+            ],
+            data_fields=[result_internal.data_fields[i] for i in data_order],
+        )
+        return _as_geodataframe_with_geometry(
+            PandasOnSparkDataFrame(result_internal),
+            self._geometry_column_name,
+        )
 
     def dissolve(
         self,

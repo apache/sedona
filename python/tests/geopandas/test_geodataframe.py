@@ -31,6 +31,7 @@ from shapely.geometry import (
 import shapely
 
 from sedona.spark.geopandas import GeoDataFrame, GeoSeries
+from sedona.spark.sql import st_functions as stf
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps
 import pandas as pd
@@ -276,6 +277,136 @@ class TestGeoDataFrame(TestGeopandasBase):
             gdf.to_wkt(rounding_precision=2)
         with pytest.raises(NotImplementedError, match="byte_order"):
             gdf.to_wkb(byte_order=0)
+
+    def test_explode_uses_native_plan_and_preserves_geometry_metadata(self):
+        source = GeoDataFrame(
+            {
+                "name": ["first", "second"],
+                "geometry": [
+                    MultiPoint([(0, 0), (1, 1)]),
+                    GeometryCollection([Point(2, 2), MultiPoint([(3, 3), (4, 4)])]),
+                ],
+            },
+            geometry="geometry",
+            crs="EPSG:3857",
+        )
+
+        result = source.explode(index_parts=True)
+
+        assert isinstance(result, GeoDataFrame)
+        assert result.active_geometry_name == "geometry"
+        assert result.crs.to_epsg() == 3857
+        assert result.index.names == [None, None]
+        assert result.to_geopandas()["name"].tolist() == [
+            "first",
+            "first",
+            "second",
+            "second",
+        ]
+
+        srids = result._internal.spark_frame.select(
+            stf.ST_SRID(result.geometry.spark.column).alias("srid")
+        ).collect()
+        assert {row.srid for row in srids} == {3857}
+
+        spark_frame = result._internal.spark_frame
+        if hasattr(spark_frame, "_jdf"):
+            plan = spark_frame._jdf.queryExecution().executedPlan().toString()
+            assert "Generate" in plan
+            assert "BatchEvalPython" not in plan
+            assert "ArrowEvalPython" not in plan
+            assert "Join" not in plan
+
+    def test_explode_all_rows_dropped_preserves_geometry_metadata(self):
+        source = GeoDataFrame(
+            {
+                "value": [1, 2, 3],
+                "shape": [MultiPoint(), GeometryCollection(), None],
+            },
+            geometry="shape",
+            crs="EPSG:4326",
+        )
+
+        result = source.explode(ignore_index=True)
+
+        assert len(result) == 0
+        assert result.active_geometry_name == "shape"
+        assert isinstance(result["shape"], GeoSeries)
+        assert result.crs.to_epsg() == 4326
+        collected = result.to_geopandas()
+        assert str(collected.dtypes["shape"]) == "geometry"
+        assert collected.crs.to_epsg() == 4326
+
+    def test_explode_non_geometry_column(self):
+        source_gpd = gpd.GeoDataFrame(
+            {
+                "values": [[1, 2], [], [3]],
+                "shape": [Point(0, 0), Point(1, 1), Point(2, 2)],
+            },
+            geometry="shape",
+            crs="EPSG:4326",
+        )
+        result = GeoDataFrame(source_gpd).explode("values", ignore_index=True)
+
+        assert isinstance(result, GeoDataFrame)
+        assert result.active_geometry_name == "shape"
+        assert result.crs.to_epsg() == 4326
+        assert_frame_equal(
+            result.to_geopandas(),
+            source_gpd.explode("values", ignore_index=True),
+            check_dtype=False,
+        )
+
+    def test_explode_geometry_column_uses_active_geometry(self):
+        source_gpd = gpd.GeoDataFrame(
+            {
+                "before": [1],
+                "geometry": [MultiPoint([(0, 0), (1, 1)])],
+                "other": gpd.GeoSeries([MultiPoint([(10, 10), (20, 20)])]),
+                "after": [2],
+            },
+            geometry="geometry",
+            crs="EPSG:4326",
+        )
+
+        expected = source_gpd.explode(column="other", index_parts=True)
+        result = GeoDataFrame(source_gpd).explode(column="other", index_parts=True)
+
+        from geopandas.testing import assert_geodataframe_equal
+
+        assert_geodataframe_equal(
+            result.to_geopandas(),
+            expected,
+            check_index_type=False,
+        )
+
+    def test_explode_internal_name_collisions(self):
+        source_gpd = gpd.GeoDataFrame(
+            {
+                "__frame_explode_index_0__": [1],
+                "__frame_explode_data_0__": [2],
+                "__frame_explode_parent_order__": [3],
+                "__frame_explode_position__": [4],
+                "__frame_explode_value__": [5],
+                "__frame_explode_sequence__": [6],
+                "geometry": [MultiPoint([(0, 0), (1, 1)])],
+            },
+            geometry="geometry",
+        )
+
+        result = GeoDataFrame(source_gpd).explode(index_parts=True).to_geopandas()
+        expected = source_gpd.explode(index_parts=True)
+
+        from geopandas.testing import assert_geodataframe_equal
+
+        assert_geodataframe_equal(result, expected, check_index_type=False)
+
+    def test_explode_docstring_examples_are_syntactically_valid(self):
+        import doctest
+
+        examples = doctest.DocTestParser().get_examples(GeoDataFrame.explode.__doc__)
+        for example in examples:
+            compile(example.source, "<GeoDataFrame.explode>", "single")
 
     def test_getitem(self):
         geoms = [Point(x, x) for x in range(3)]
