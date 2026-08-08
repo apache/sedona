@@ -31,7 +31,7 @@ from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalField, InternalFrame
 from pyspark.pandas.series import first_series
-from pyspark.pandas.utils import same_anchor, scol_for
+from pyspark.pandas.utils import same_anchor, scol_for, verify_temp_column_name
 from pyspark.sql.types import (
     BooleanType,
     DoubleType,
