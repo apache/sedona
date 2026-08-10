@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="360" viewBox="0 0 1180 360" role="img" aria-label="A GeoTIFF file's small header section is read while the large pixel bands are never touched; the header alone becomes a metadata row in a Sedona DataFrame">
+<defs>
+<linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#faf7f0"/><stop offset="1" stop-color="#f3ede0"/></linearGradient>
+</defs>
+<rect width="1180" height="360" rx="18" fill="url(#paper)"/>
+
+<text x="590" y="44" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="20" fill="#3a2418">geotiff.metadata reads <tspan fill="#c05a10" font-weight="700">the header</tspan> — the pixel bands never leave the bucket</text>
+
+<!-- ===== the GeoTIFF file, anatomized ===== -->
+<text x="80" y="96" font-family="ui-monospace, Menlo, monospace" font-size="17" fill="#5a4e42">ESA_WorldCover_..._N51E012_Map.tif</text>
+<rect x="80" y="108" width="460" height="180" rx="12" fill="#fffdf6" stroke="#c9bda2" stroke-width="1.6"/>
+
+<!-- header strip: read -->
+<rect x="80" y="108" width="460" height="46" rx="12" fill="#f0662e"/>
+<rect x="80" y="132" width="460" height="22" fill="#f0662e"/>
+<text x="102" y="138" font-family="ui-monospace, Menlo, monospace" font-size="17" font-weight="700" fill="#fffdf6">header · IFDs · geokeys</text>
+<text x="470" y="138" font-family="ui-monospace, Menlo, monospace" font-size="15" fill="#ffe1cf">READ</text>
+
+<!-- pixel body: untouched -->
+<g fill="#d8cfbc">
+<rect x="98" y="172" width="128" height="30" rx="4"/><rect x="234" y="172" width="128" height="30" rx="4"/><rect x="370" y="172" width="150" height="30" rx="4"/>
+<rect x="98" y="210" width="128" height="30" rx="4"/><rect x="234" y="210" width="128" height="30" rx="4"/><rect x="370" y="210" width="150" height="30" rx="4"/>
+<rect x="98" y="248" width="200" height="26" rx="4"/><rect x="306" y="248" width="214" height="26" rx="4"/>
+</g>
+<text x="310" y="228" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="17" font-weight="700" fill="#8a7c66">pixel bands · NEVER READ</text>
+
+<text x="80" y="322" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" fill="#7a6c58">the megabytes stay put — only the kilobyte-scale header travels</text>
+
+<!-- arrow -->
+<path d="M560,198 L640,198" stroke="#c05a10" stroke-width="3" fill="none"/>
+<path d="M640,198 l-14,-7 0,14 Z" fill="#c05a10"/>
+
+<!-- ===== one metadata row ===== -->
+<text x="664" y="96" font-family="ui-monospace, Menlo, monospace" font-size="17" fill="#5a4e42">one row per file, no pixels</text>
+<rect x="664" y="108" width="446" height="180" rx="12" fill="#fffdf6" stroke="#c05a10" stroke-width="1.8"/>
+<g font-family="ui-monospace, Menlo, monospace" font-size="16.5">
+<text x="688" y="146"><tspan fill="#a06020">width, height</tspan>   <tspan fill="#3a2418">36000 × 36000</tspan></text>
+<text x="688" y="178"><tspan fill="#a06020">srid</tspan>            <tspan fill="#3a2418">4326</tspan></text>
+<text x="688" y="210"><tspan fill="#a06020">cornerCoords</tspan>    <tspan fill="#3a2418">12.0, 51.0 &#8594; 15.0, 54.0</tspan></text>
+<text x="688" y="242"><tspan fill="#a06020">isTiled</tspan>         <tspan fill="#1a7a3c">true</tspan>   <tspan fill="#a06020">overviews</tspan> <tspan fill="#3a2418">6</tspan></text>
+<text x="688" y="274"><tspan fill="#a06020">compression</tspan>     <tspan fill="#3a2418">ZLib</tspan></text>
+</g>
+<text x="664" y="322" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16" fill="#7a6c58">…and cornerCoords &#8594; ST_PolygonFromEnvelope &#8594; a spatial index of your whole lake</text>
+</svg>
