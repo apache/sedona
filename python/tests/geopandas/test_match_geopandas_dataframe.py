@@ -130,6 +130,59 @@ class TestMatchGeopandasDataFrame(TestGeopandasBase):
 
         self.check_sgpd_df_equals_gpd_df(sgpd_df, gpd_df)
 
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {},
+            {"index_parts": True},
+            {"ignore_index": True},
+            {"ignore_index": True, "index_parts": True},
+        ],
+    )
+    def test_explode(self, kwargs):
+        from geopandas.testing import assert_geodataframe_equal
+
+        index = pd.MultiIndex.from_tuples(
+            [
+                ("group-a", 1),
+                ("group-a", 1),
+                ("group-b", 2),
+                ("group-b", 3),
+                ("group-c", 4),
+            ],
+            names=["group", "feature_id"],
+        )
+        expected_source = gpd.GeoDataFrame(
+            {
+                "label": ["multi", "single-empty", "multi-empty", "null", "collection"],
+                "secondary": gpd.GeoSeries(
+                    [Point(i, i) for i in range(5)],
+                    index=index,
+                ),
+                "shape": [
+                    MultiPoint([(0, 0), (1, 1)]),
+                    Point(),
+                    MultiPoint(),
+                    None,
+                    GeometryCollection([Point(2, 2), MultiPoint([(3, 3), (4, 4)])]),
+                ],
+            },
+            index=index,
+            geometry="shape",
+            crs="EPSG:4326",
+        )
+
+        expected = expected_source.explode(**kwargs)
+        actual = GeoDataFrame(expected_source).explode(**kwargs).to_geopandas()
+
+        assert_geodataframe_equal(
+            actual,
+            expected,
+            check_index_type=False,
+            check_geom_type=True,
+        )
+        pd.testing.assert_index_equal(actual.index, expected.index, exact=False)
+
     def test_set_geometry(self):
         sgpd_df = GeoDataFrame(self.geometries)
         gpd_df = gpd.GeoDataFrame(self.geometries)
