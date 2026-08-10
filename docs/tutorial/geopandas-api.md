@@ -340,6 +340,8 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
 - `make_valid()` - Geometry validation and repair
 - `sample_points()` - Sample polygons by area and lines by length with native
   distributed expressions
+- `GeoSeries.explode()` and `GeoDataFrame.explode()` - Expand multipart
+  geometries into rows, with the frame method retaining attribute columns
 - `cx` - Coordinate-based spatial filtering
 - `clip()` - Distributed geometry clipping
 - `overlay()` - Distributed intersection, difference, identity, symmetric
@@ -377,6 +379,13 @@ attribute dtypes and promoting nullable right-side attributes. `union` and
 `symmetric_difference` use stable nullable attribute dtypes even when a
 logical difference branch produces no rows, avoiding an eager action solely
 to specialize dtypes.
+
+`GeoSeries.explode()` and `GeoDataFrame.explode()` use Sedona's native
+`ST_Dump` expression with Spark `posexplode`. Geometry parts and frame
+attributes remain distributed; neither operation collects source rows or uses
+a Python UDF. Preserving GeoPandas row and part ordering and rebuilding the
+distributed index requires a global sort and shuffle. For `GeoDataFrame`, the
+retained attribute columns participate in that shuffle.
 
 ### Distributed Geometry Aggregation
 

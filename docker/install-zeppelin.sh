@@ -30,7 +30,7 @@ download_with_progress() {
     local description=${3:-"Downloading"}
 
     # Start download in background
-    curl -L --silent --show-error --retry 5 --retry-delay 10 --retry-connrefused "${url}" -o "${output}" &
+    curl -L --fail --silent --show-error --retry 5 --retry-delay 10 --retry-connrefused "${url}" -o "${output}" &
     local curl_pid=$!
 
     # Monitor progress every 5 seconds
@@ -61,13 +61,19 @@ download_with_progress() {
 }
 
 # Download and extract Zeppelin
-# Download from Lyra Hosting mirror (faster) but verify checksum from Apache archive
+# Download from the Apache CDN, falling back to the Apache archive (dlcdn only
+# hosts current releases); verify checksum from the Apache archive either way.
 zeppelin_filename="zeppelin-${ZEPPELIN_VERSION}-bin-netinst.tgz"
-zeppelin_download_url="https://mirror.lyrahosting.com/apache/zeppelin/zeppelin-${ZEPPELIN_VERSION}/${zeppelin_filename}"
+zeppelin_download_url="https://dlcdn.apache.org/zeppelin/zeppelin-${ZEPPELIN_VERSION}/${zeppelin_filename}"
+zeppelin_fallback_url="https://archive.apache.org/dist/zeppelin/zeppelin-${ZEPPELIN_VERSION}/${zeppelin_filename}"
 checksum_url="https://archive.apache.org/dist/zeppelin/zeppelin-${ZEPPELIN_VERSION}/${zeppelin_filename}.sha512"
 
-echo "Downloading Zeppelin ${ZEPPELIN_VERSION} from Lyra Hosting mirror..."
-download_with_progress "${zeppelin_download_url}" "${zeppelin_filename}" "Downloading Zeppelin"
+echo "Downloading Zeppelin ${ZEPPELIN_VERSION} from Apache CDN..."
+if ! download_with_progress "${zeppelin_download_url}" "${zeppelin_filename}" "Downloading Zeppelin"; then
+    echo "Apache CDN download failed. Falling back to Apache archive..."
+    rm -f "${zeppelin_filename}"
+    download_with_progress "${zeppelin_fallback_url}" "${zeppelin_filename}" "Downloading Zeppelin"
+fi
 
 echo "Downloading checksum from Apache archive..."
 curl -L --silent --show-error --retry 5 --retry-delay 10 --retry-connrefused "${checksum_url}" -o "${zeppelin_filename}.sha512"
