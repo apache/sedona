@@ -2366,7 +2366,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         Returns
         -------
         GeoDataFrame
-            Lazily evaluated distributed overlay result.
+            Distributed overlay result. Constructing it eagerly runs one
+            distributed validation and metadata aggregation over both inputs;
+            overlay geometry rows remain lazily evaluated.
 
         See Also
         --------

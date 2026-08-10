@@ -25,7 +25,6 @@ import numpy as np
 import pandas as pd
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import (
-    InternalField,
     InternalFrame,
     NATURAL_ORDER_COLUMN_NAME,
     SPARK_DEFAULT_INDEX_NAME,
@@ -255,9 +254,11 @@ def _candidate_pairs(left: _OverlayFrame, right: _OverlayFrame):
 
 
 def _make_valid_polygon_result(geometry, srid):
+    # Match GeoPandas' output repair without extracting or dissolving parts;
+    # unary union would unwrap a valid single-part MultiPolygon to Polygon.
     valid = F.when(
         stf.ST_GeometryType(geometry).isin(*_POLYGON_TYPES),
-        _extract_family(stf.ST_MakeValid(geometry), "polygon"),
+        stf.ST_MakeValid(geometry),
     ).otherwise(geometry)
     return stf.ST_SetSRID(valid, srid)
 
@@ -604,18 +605,17 @@ def _finalize(
     left: _OverlayFrame,
     output_srid,
 ):
-    if output_srid is not None:
-        geometry_name = layout.physical_names[layout.geometry_position]
-        sdf = sdf.select(
-            *[
-                (
-                    stf.ST_SetSRID(scol_for(sdf, name), output_srid).alias(name)
-                    if name == geometry_name
-                    else scol_for(sdf, name)
-                )
-                for name in sdf.columns
-            ]
-        )
+    geometry_name = layout.physical_names[layout.geometry_position]
+    sdf = sdf.select(
+        *[
+            (
+                stf.ST_SetSRID(scol_for(sdf, name), output_srid).alias(name)
+                if name == geometry_name
+                else scol_for(sdf, name)
+            )
+            for name in sdf.columns
+        ]
+    )
     indexed = InternalFrame.attach_distributed_sequence_column(
         sdf, SPARK_DEFAULT_INDEX_NAME
     )
@@ -683,7 +683,10 @@ def overlay(
     Returns
     -------
     GeoDataFrame
-        A lazily evaluated distributed overlay result with a fresh index.
+        A distributed overlay result with a fresh index. Constructing the
+        result eagerly runs one distributed validation and metadata
+        aggregation over both inputs; the overlay geometry rows remain lazily
+        evaluated.
 
     Notes
     -----
@@ -691,8 +694,10 @@ def overlay(
     each source row's matched neighbours on the cluster before applying
     ``ST_Difference``; no geometry rows are collected to the driver. JTS and
     GEOS may choose different component or coordinate ordering for
-    topologically equivalent results. ``identity`` follows GeoPandas 1.1+
-    dtype semantics and preserves left-side attribute dtypes.
+    topologically equivalent results. Composite modes deliberately recompute
+    candidate joins instead of implicitly persisting a potentially large pair
+    relation. ``identity`` follows GeoPandas 1.1+ dtype semantics and preserves
+    left-side attribute dtypes.
     """
     from sedona.spark.geopandas.geodataframe import GeoDataFrame
     from sedona.spark.geopandas.geoseries import GeoSeries

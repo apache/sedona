@@ -39,6 +39,7 @@ class TestDistributedOverlay(TestGeopandasBase):
             return (
                 isinstance(left, BaseGeometry)
                 and isinstance(right, BaseGeometry)
+                and left.geom_type == right.geom_type
                 and left.equals(right)
             )
         if pd.isna(left) and pd.isna(right):
@@ -48,7 +49,9 @@ class TestDistributedOverlay(TestGeopandasBase):
     @classmethod
     def _assert_overlay_equal(cls, actual, expected, check_dtype=True):
         assert isinstance(actual, GeoDataFrame)
-        actual_local = actual.to_geopandas().reset_index(drop=True)
+        actual_local = actual.to_geopandas()
+        assert list(actual_local.index) == list(range(len(actual_local)))
+        actual_local = actual_local.reset_index(drop=True)
         expected_local = expected.reset_index(drop=True)
         assert list(actual_local.columns) == list(expected_local.columns)
         if check_dtype:
@@ -57,7 +60,6 @@ class TestDistributedOverlay(TestGeopandasBase):
             ]
         assert actual.active_geometry_name == expected.geometry.name
         assert actual.crs == expected.crs
-        assert list(actual_local.index) == list(expected_local.index)
         assert len(actual_local) == len(expected_local)
 
         unmatched = list(range(len(actual_local)))
@@ -222,6 +224,23 @@ class TestDistributedOverlay(TestGeopandasBase):
 
         result_local = self._assert_overlay_equal(result, expected)
         assert result_local.geometry.iloc[0].equals(box(2, 0, 3, 5))
+
+    @pytest.mark.parametrize(
+        "how", ["difference", "identity", "symmetric_difference", "union"]
+    )
+    def test_disjoint_single_part_multipolygon_preserves_geometry_type(self, how):
+        left_local = gpd.GeoDataFrame(
+            {"geometry": [MultiPolygon([box(0, 0, 1, 1)])]}, crs=4326
+        )
+        right_local = gpd.GeoDataFrame({"geometry": [box(2, 0, 3, 1)]}, crs=4326)
+
+        result = GeoDataFrame(left_local).overlay(
+            GeoDataFrame(right_local), how=how, keep_geom_type=False
+        )
+        expected = gpd.overlay(left_local, right_local, how=how, keep_geom_type=False)
+
+        result_local = self._assert_overlay_equal(result, expected)
+        assert sorted(result_local.geom_type) == sorted(expected.geom_type)
 
     def test_common_mode_dtype_promotion_matches_geopandas(self):
         left_local = gpd.GeoDataFrame(

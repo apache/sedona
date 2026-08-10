@@ -349,9 +349,13 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
 `overlay()` keeps both inputs distributed. Candidate pairs are planned as a
 Sedona spatial join, and difference branches aggregate each source row's
 matching mask geometries on executors. It does not collect geometry rows,
-create Python UDFs, or cache an intermediate pair relation. Composite modes
-can therefore execute more than one spatial join. Output row order is not
-guaranteed.
+create Python UDFs, or cache an intermediate pair relation. Constructing the
+result first runs one eager, distributed validation and metadata aggregation
+over both complete input lineages; only the bounded summary reaches the
+driver, while overlay geometry rows remain lazy. Composite modes deliberately
+execute more than one spatial join instead of implicitly persisting a
+potentially large candidate-pair relation, trading recomputation for avoiding
+hidden cache memory and lifecycle costs. Output row order is not guaranteed.
 
 As in GeoPandas, each input must contain a single basic geometry family and
 invalid polygon inputs are repaired by default. JTS and GEOS can return
