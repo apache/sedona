@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -6248,6 +6247,59 @@ index containing tuples. pandas-on-Spark cannot represent tuple-valued
 labels in a one-level column index, so Sedona keeps those results as a
 two-level <code class="docutils literal notranslate"><span class="pre">MultiIndex</span></code> and uses <code class="docutils literal notranslate"><span class="pre">(geometry_name,</span> <span class="pre">&quot;&quot;)</span></code> for the
 active geometry label.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoDataFrame.explode">
+<span class="sig-name descname"><span class="pre">explode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_parts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoDataFrame" title="sedona.spark.geopandas.geodataframe.GeoDataFrame"><span class="pre">GeoDataFrame</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geodataframe.html#GeoDataFrame.explode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoDataFrame.explode" title="Permalink to this definition"></a></dt>
+<dd><p>Explode multi-part geometries into separate rows.</p>
+<p>Attribute columns remain alongside every geometry part. The operation
+uses Sedona’s native <code class="docutils literal notranslate"><span class="pre">ST_Dump</span></code> expression and remains distributed.
+Preserving row and part order while rebuilding the distributed index
+requires a global sort and shuffle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>column</strong> (<em>column label</em><em>, </em><em>default None</em>) – Column to explode. <code class="docutils literal notranslate"><span class="pre">None</span></code> selects the active geometry column. As
+in GeoPandas, selecting any geometry-typed column explodes the
+active geometry column; selecting a non-geometry column delegates
+to pandas-on-Spark.</p></li>
+<li><p><strong>ignore_index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default False</em>) – If True, label the result index 0, 1, …, n - 1 and ignore
+<code class="docutils literal notranslate"><span class="pre">index_parts</span></code>.</p></li>
+<li><p><strong>index_parts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default False</em>) – If True, append a zero-based index level identifying each geometry
+produced from an input row. Ignored when exploding a non-geometry
+column, matching GeoPandas.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments are forwarded when exploding a
+non-geometry column.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A distributed GeoDataFrame with one row per geometry part.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoDataFrame" title="sedona.spark.geopandas.GeoDataFrame">GeoDataFrame</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataFrame</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiPoint</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gdf</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">{</span>
+<span class="gp">... </span>        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">],</span>
+<span class="gp">... </span>        <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span>
+<span class="gp">... </span>            <span class="n">MultiPoint</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
+<span class="gp">... </span>            <span class="n">MultiPoint</span><span class="p">([(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]),</span>
+<span class="gp">... </span>        <span class="p">],</span>
+<span class="gp">... </span>    <span class="p">}</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gdf</span><span class="o">.</span><span class="n">explode</span><span class="p">(</span><span class="n">index_parts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">    name     geometry</span>
+<span class="go">0 0    a  POINT (0 0)</span>
+<span class="go">  1    a  POINT (1 1)</span>
+<span class="go">1 0    b  POINT (2 2)</span>
+<span class="go">  1    b  POINT (3 3)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">

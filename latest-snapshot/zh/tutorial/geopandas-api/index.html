@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6630,10 +6629,17 @@
 <li><code>intersection()</code> —— 几何相交</li>
 <li><code>make_valid()</code> —— 几何校验与修复</li>
 <li><code>sample_points()</code> —— 使用原生分布式表达式按面积对多边形采样、按长度对线采样</li>
+<li><code>GeoSeries.explode()</code> 与 <code>GeoDataFrame.explode()</code> —— 将多部件几何展开为多行，
+  其中 GeoDataFrame 方法会保留对应的属性列</li>
 <li><code>cx</code> —— 基于坐标范围的空间筛选</li>
 <li><code>clip()</code> —— 分布式几何裁剪</li>
 <li><code>sindex</code> —— 空间索引（功能有限）</li>
 </ul>
+<p><code>GeoSeries.explode()</code> 与 <code>GeoDataFrame.explode()</code> 使用 Sedona 原生的
+<code>ST_Dump</code> 表达式与 Spark <code>posexplode</code>。几何部件及 GeoDataFrame 属性始终
+保持分布式处理；这两个操作都不会收集源数据行，也不会使用 Python UDF。
+为了保留与 GeoPandas 一致的行顺序和部件顺序并重建分布式索引，需要执行一次
+全局排序与 shuffle；对于 <code>GeoDataFrame</code>，保留的属性列也会参与该 shuffle。</p>
 <h3 id="_16">分布式几何聚合<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
 <ul>
 <li><code>GeoDataFrame.dissolve()</code> —— 对行进行分组，并使用 Sedona 原生分布式聚合
@@ -6744,7 +6750,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年7月29日 06:34:21 UTC">2026年7月29日 06:34:21</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年8月10日 07:48:35 UTC">2026年8月10日 07:48:35</span>
   </span>
 
     

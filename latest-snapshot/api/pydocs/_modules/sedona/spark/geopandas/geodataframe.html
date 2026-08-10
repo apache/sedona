@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geodataframe &mdash; Apache Sedona Python Documentation</title>
@@ -265,6 +264,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_advice</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">copy_crs_metadata</span><span class="p">,</span> <span class="n">with_crs_metadata</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._explode</span><span class="w"> </span><span class="kn">import</span> <span class="n">expand_geometry_column</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">st_aggregates</span> <span class="k">as</span> <span class="n">sta</span>
@@ -2160,6 +2160,109 @@
 <span class="sd">        &gt;&gt;&gt; df.plot(&quot;BoroName&quot;, cmap=&quot;Set1&quot;)  # doctest: +SKIP</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_geopandas</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeoDataFrame.explode"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.explode">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">explode</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ignore_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">index_parts</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Explode multi-part geometries into separate rows.</span>
+
+<span class="sd">        Attribute columns remain alongside every geometry part. The operation</span>
+<span class="sd">        uses Sedona&#39;s native ``ST_Dump`` expression and remains distributed.</span>
+<span class="sd">        Preserving row and part order while rebuilding the distributed index</span>
+<span class="sd">        requires a global sort and shuffle.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        column : column label, default None</span>
+<span class="sd">            Column to explode. ``None`` selects the active geometry column. As</span>
+<span class="sd">            in GeoPandas, selecting any geometry-typed column explodes the</span>
+<span class="sd">            active geometry column; selecting a non-geometry column delegates</span>
+<span class="sd">            to pandas-on-Spark.</span>
+<span class="sd">        ignore_index : bool, default False</span>
+<span class="sd">            If True, label the result index 0, 1, ..., n - 1 and ignore</span>
+<span class="sd">            ``index_parts``.</span>
+<span class="sd">        index_parts : bool, default False</span>
+<span class="sd">            If True, append a zero-based index level identifying each geometry</span>
+<span class="sd">            produced from an input row. Ignored when exploding a non-geometry</span>
+<span class="sd">            column, matching GeoPandas.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Additional keyword arguments are forwarded when exploding a</span>
+<span class="sd">            non-geometry column.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        GeoDataFrame</span>
+<span class="sd">            A distributed GeoDataFrame with one row per geometry part.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from sedona.spark.geopandas import GeoDataFrame</span>
+<span class="sd">        &gt;&gt;&gt; from shapely.geometry import MultiPoint</span>
+<span class="sd">        &gt;&gt;&gt; gdf = GeoDataFrame(</span>
+<span class="sd">        ...     {</span>
+<span class="sd">        ...         &quot;name&quot;: [&quot;a&quot;, &quot;b&quot;],</span>
+<span class="sd">        ...         &quot;geometry&quot;: [</span>
+<span class="sd">        ...             MultiPoint([(0, 0), (1, 1)]),</span>
+<span class="sd">        ...             MultiPoint([(2, 2), (3, 3)]),</span>
+<span class="sd">        ...         ],</span>
+<span class="sd">        ...     }</span>
+<span class="sd">        ... )</span>
+<span class="sd">        &gt;&gt;&gt; gdf.explode(index_parts=True)</span>
+<span class="sd">            name     geometry</span>
+<span class="sd">        0 0    a  POINT (0 0)</span>
+<span class="sd">          1    a  POINT (1 1)</span>
+<span class="sd">        1 0    b  POINT (2 2)</span>
+<span class="sd">          1    b  POINT (3 3)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">column</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">selected</span><span class="p">,</span> <span class="n">sgpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">):</span>
+            <span class="n">exploded</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">explode</span><span class="p">(</span>
+                <span class="n">column</span><span class="p">,</span>
+                <span class="n">ignore_index</span><span class="o">=</span><span class="n">ignore_index</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">_as_geodataframe_with_geometry</span><span class="p">(</span>
+                <span class="n">exploded</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># GeoPandas explodes the active geometry even when ``column`` names a</span>
+        <span class="c1"># different geometry-typed column. Preserve that compatibility quirk.</span>
+        <span class="n">geometry_label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">_column_label</span>
+        <span class="n">geometry_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">column_labels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">geometry_label</span><span class="p">)</span>
+        <span class="n">result_internal</span> <span class="o">=</span> <span class="n">expand_geometry_column</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="p">,</span>
+            <span class="n">geometry_position</span><span class="o">=</span><span class="n">geometry_position</span><span class="p">,</span>
+            <span class="n">array_builder</span><span class="o">=</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_Dump</span><span class="p">,</span>
+            <span class="n">ignore_index</span><span class="o">=</span><span class="n">ignore_index</span><span class="p">,</span>
+            <span class="n">index_parts</span><span class="o">=</span><span class="n">index_parts</span><span class="p">,</span>
+            <span class="n">temp_prefix</span><span class="o">=</span><span class="s2">&quot;frame_explode&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># GeoPandas rebuilds a geometry explode by dropping the active column</span>
+        <span class="c1"># and adding it back after the attributes, so keep that output order.</span>
+        <span class="n">data_order</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">position</span>
+            <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result_internal</span><span class="o">.</span><span class="n">column_labels</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">position</span> <span class="o">!=</span> <span class="n">geometry_position</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">geometry_position</span><span class="p">]</span>
+        <span class="n">result_internal</span> <span class="o">=</span> <span class="n">result_internal</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
+            <span class="n">column_labels</span><span class="o">=</span><span class="p">[</span><span class="n">result_internal</span><span class="o">.</span><span class="n">column_labels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">data_order</span><span class="p">],</span>
+            <span class="n">data_spark_columns</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">result_internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">data_order</span>
+            <span class="p">],</span>
+            <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span><span class="n">result_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">data_order</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">_as_geodataframe_with_geometry</span><span class="p">(</span>
+            <span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">result_internal</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_column_name</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoDataFrame.dissolve"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.dissolve">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">dissolve</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -271,6 +270,7 @@
     <span class="n">read_crs_metadata</span><span class="p">,</span>
     <span class="n">with_crs_metadata</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._explode</span><span class="w"> </span><span class="kn">import</span> <span class="n">expand_geometry_column</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.geodataframe</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataFrame</span>
@@ -279,7 +279,6 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.internal</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">,</span>  <span class="c1"># __index_level_0__</span>
-    <span class="n">SPARK_INDEX_NAME_FORMAT</span><span class="p">,</span>
     <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">,</span>
     <span class="n">SPARK_DEFAULT_SERIES_NAME</span><span class="p">,</span>  <span class="c1"># &#39;0&#39;</span>
 <span class="p">)</span>
@@ -1205,90 +1204,15 @@
         <span class="n">ignore_index</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">index_parts</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">temp_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">InternalFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Expand a geometry-array expression while preserving index metadata.&quot;&quot;&quot;</span>
-        <span class="n">internal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
-        <span class="n">source_sdf</span> <span class="o">=</span> <span class="n">internal</span><span class="o">.</span><span class="n">spark_frame</span>
-        <span class="n">reserved_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">source_sdf</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-
-        <span class="k">def</span><span class="w"> </span><span class="nf">temp_column_name</span><span class="p">(</span><span class="n">base</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-            <span class="n">suffix</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">candidate</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;__</span><span class="si">{</span><span class="n">temp_prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">__&quot;</span>
-            <span class="k">while</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">reserved_names</span><span class="p">:</span>
-                <span class="n">suffix</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">candidate</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;__</span><span class="si">{</span><span class="n">temp_prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">__&quot;</span>
-            <span class="n">reserved_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">typing</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">verify_temp_column_name</span><span class="p">(</span><span class="n">source_sdf</span><span class="p">,</span> <span class="n">candidate</span><span class="p">))</span>
-
-        <span class="n">index_column_names</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">temp_column_name</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;index_</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">))</span>
-        <span class="p">]</span>
-        <span class="n">parent_order_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;parent_order&quot;</span><span class="p">)</span>
-        <span class="n">position_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;position&quot;</span><span class="p">)</span>
-        <span class="n">value_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
-        <span class="n">sequence_col</span> <span class="o">=</span> <span class="n">temp_column_name</span><span class="p">(</span><span class="s2">&quot;sequence&quot;</span><span class="p">)</span>
-
-        <span class="n">expanded_sdf</span> <span class="o">=</span> <span class="n">source_sdf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-            <span class="o">*</span><span class="p">[</span>
-                <span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
-                    <span class="n">internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">,</span> <span class="n">index_column_names</span>
-                <span class="p">)</span>
-            <span class="p">],</span>
-            <span class="n">scol_for</span><span class="p">(</span><span class="n">source_sdf</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">parent_order_col</span><span class="p">),</span>
-            <span class="n">F</span><span class="o">.</span><span class="n">posexplode</span><span class="p">(</span><span class="n">array_builder</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
-                <span class="n">position_col</span><span class="p">,</span> <span class="n">value_col</span>
-            <span class="p">),</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">parent_order_col</span><span class="p">,</span> <span class="n">position_col</span><span class="p">)</span>
-
-        <span class="c1"># The distributed sequence supplies both ignore_index and a stable</span>
-        <span class="c1"># natural-order column without a single-partition row-number window.</span>
-        <span class="n">expanded_sdf</span> <span class="o">=</span> <span class="n">InternalFrame</span><span class="o">.</span><span class="n">attach_distributed_sequence_column</span><span class="p">(</span>
-            <span class="n">expanded_sdf</span><span class="p">,</span> <span class="n">sequence_col</span>
-        <span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">ignore_index</span><span class="p">:</span>
-            <span class="n">output_index_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">]</span>
-            <span class="n">index_names</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
-            <span class="n">index_fields</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">index_expressions</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">scol_for</span><span class="p">(</span><span class="n">expanded_sdf</span><span class="p">,</span> <span class="n">sequence_col</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">)</span>
-            <span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">output_index_cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">index_column_names</span><span class="p">)</span>
-            <span class="n">index_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">)</span>
-            <span class="n">index_fields</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">field</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">index_fields</span><span class="p">,</span> <span class="n">output_index_cols</span><span class="p">)</span>
-            <span class="p">]</span>
-            <span class="n">index_expressions</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">scol_for</span><span class="p">(</span><span class="n">expanded_sdf</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">output_index_cols</span>
-            <span class="p">]</span>
-
-            <span class="k">if</span> <span class="n">index_parts</span><span class="p">:</span>
-                <span class="n">part_index_col</span> <span class="o">=</span> <span class="n">SPARK_INDEX_NAME_FORMAT</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">output_index_cols</span><span class="p">))</span>
-                <span class="n">output_index_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part_index_col</span><span class="p">)</span>
-                <span class="n">index_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-                <span class="n">index_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-                <span class="n">index_expressions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">scol_for</span><span class="p">(</span><span class="n">expanded_sdf</span><span class="p">,</span> <span class="n">position_col</span><span class="p">)</span>
-                    <span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;long&quot;</span><span class="p">)</span>
-                    <span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">part_index_col</span><span class="p">)</span>
-                <span class="p">)</span>
-
-        <span class="n">output_sdf</span> <span class="o">=</span> <span class="n">expanded_sdf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-            <span class="o">*</span><span class="n">index_expressions</span><span class="p">,</span>
-            <span class="n">scol_for</span><span class="p">(</span><span class="n">expanded_sdf</span><span class="p">,</span> <span class="n">value_col</span><span class="p">),</span>
-            <span class="n">scol_for</span><span class="p">(</span><span class="n">expanded_sdf</span><span class="p">,</span> <span class="n">sequence_col</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="n">internal</span><span class="p">,</span>
-            <span class="n">output_sdf</span><span class="p">,</span>
-            <span class="n">output_index_cols</span><span class="p">,</span>
-            <span class="n">index_names</span><span class="p">,</span>
-            <span class="n">index_fields</span><span class="p">,</span>
-            <span class="n">value_col</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">expand_geometry_column</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="p">,</span>
+            <span class="n">geometry_position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">array_builder</span><span class="o">=</span><span class="n">array_builder</span><span class="p">,</span>
+            <span class="n">ignore_index</span><span class="o">=</span><span class="n">ignore_index</span><span class="p">,</span>
+            <span class="n">index_parts</span><span class="o">=</span><span class="n">index_parts</span><span class="p">,</span>
+            <span class="n">temp_prefix</span><span class="o">=</span><span class="n">temp_prefix</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="c1"># ============================================================================</span>
@@ -1473,19 +1397,15 @@
         <span class="o">*</span><span class="p">,</span>
         <span class="n">include_m</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="p">(</span>
-            <span class="n">_</span><span class="p">,</span>
-            <span class="n">expanded_frame</span><span class="p">,</span>
-            <span class="n">index_column_names</span><span class="p">,</span>
-            <span class="n">index_names</span><span class="p">,</span>
-            <span class="n">index_fields</span><span class="p">,</span>
-            <span class="n">point_name</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expand_geometry_array</span><span class="p">(</span>
+        <span class="n">expanded_internal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expand_geometry_array</span><span class="p">(</span>
             <span class="n">stf</span><span class="o">.</span><span class="n">ST_DumpPoints</span><span class="p">,</span>
             <span class="n">ignore_index</span><span class="o">=</span><span class="n">ignore_index</span><span class="p">,</span>
             <span class="n">index_parts</span><span class="o">=</span><span class="n">index_parts</span><span class="p">,</span>
             <span class="n">temp_prefix</span><span class="o">=</span><span class="s2">&quot;coordinates&quot;</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="n">expanded_frame</span> <span class="o">=</span> <span class="n">expanded_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+        <span class="n">index_column_names</span> <span class="o">=</span> <span class="n">expanded_internal</span><span class="o">.</span><span class="n">index_spark_column_names</span>
+        <span class="n">point_name</span> <span class="o">=</span> <span class="n">expanded_internal</span><span class="o">.</span><span class="n">data_spark_column_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="n">coordinate_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span>
         <span class="n">coordinate_columns</span> <span class="o">=</span> <span class="p">[</span>
@@ -1514,8 +1434,8 @@
             <span class="n">index_spark_columns</span><span class="o">=</span><span class="p">[</span>
                 <span class="n">scol_for</span><span class="p">(</span><span class="n">result_frame</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">index_column_names</span>
             <span class="p">],</span>
-            <span class="n">index_names</span><span class="o">=</span><span class="n">index_names</span><span class="p">,</span>
-            <span class="n">index_fields</span><span class="o">=</span><span class="n">index_fields</span><span class="p">,</span>
+            <span class="n">index_names</span><span class="o">=</span><span class="n">expanded_internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">,</span>
+            <span class="n">index_fields</span><span class="o">=</span><span class="n">expanded_internal</span><span class="o">.</span><span class="n">index_fields</span><span class="p">,</span>
             <span class="n">column_labels</span><span class="o">=</span><span class="p">[(</span><span class="n">name</span><span class="p">,)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">coordinate_names</span><span class="p">],</span>
             <span class="n">data_spark_columns</span><span class="o">=</span><span class="p">[</span>
                 <span class="n">scol_for</span><span class="p">(</span><span class="n">result_frame</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">coordinate_names</span>
@@ -4662,40 +4582,11 @@
 <span class="sd">           1    POINT (3 3)</span>
 <span class="sd">        dtype: geometry</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="p">(</span>
-            <span class="n">internal</span><span class="p">,</span>
-            <span class="n">expanded_sdf</span><span class="p">,</span>
-            <span class="n">output_index_cols</span><span class="p">,</span>
-            <span class="n">index_names</span><span class="p">,</span>
-            <span class="n">index_fields</span><span class="p">,</span>
-            <span class="n">geometry_col</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expand_geometry_array</span><span class="p">(</span>
+        <span class="n">result_internal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expand_geometry_array</span><span class="p">(</span>
             <span class="n">stf</span><span class="o">.</span><span class="n">ST_Dump</span><span class="p">,</span>
             <span class="n">ignore_index</span><span class="o">=</span><span class="n">ignore_index</span><span class="p">,</span>
             <span class="n">index_parts</span><span class="o">=</span><span class="n">index_parts</span><span class="p">,</span>
             <span class="n">temp_prefix</span><span class="o">=</span><span class="s2">&quot;explode&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">output_sdf</span> <span class="o">=</span> <span class="n">expanded_sdf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-            <span class="o">*</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">expanded_sdf</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">output_index_cols</span><span class="p">],</span>
-            <span class="n">scol_for</span><span class="p">(</span><span class="n">expanded_sdf</span><span class="p">,</span> <span class="n">geometry_col</span><span class="p">),</span>
-            <span class="n">scol_for</span><span class="p">(</span><span class="n">expanded_sdf</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
-        <span class="p">)</span>
-
-        <span class="n">result_internal</span> <span class="o">=</span> <span class="n">internal</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
-            <span class="n">spark_frame</span><span class="o">=</span><span class="n">output_sdf</span><span class="p">,</span>
-            <span class="n">index_spark_columns</span><span class="o">=</span><span class="p">[</span>
-                <span class="n">scol_for</span><span class="p">(</span><span class="n">output_sdf</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">output_index_cols</span>
-            <span class="p">],</span>
-            <span class="n">index_names</span><span class="o">=</span><span class="n">index_names</span><span class="p">,</span>
-            <span class="n">index_fields</span><span class="o">=</span><span class="n">index_fields</span><span class="p">,</span>
-            <span class="n">data_spark_columns</span><span class="o">=</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">output_sdf</span><span class="p">,</span> <span class="n">geometry_col</span><span class="p">)],</span>
-            <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
-                    <span class="n">name</span><span class="o">=</span><span class="n">geometry_col</span><span class="p">,</span>
-                    <span class="n">spark_type</span><span class="o">=</span><span class="n">output_sdf</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">geometry_col</span><span class="p">]</span><span class="o">.</span><span class="n">dataType</span><span class="p">,</span>
-                    <span class="n">nullable</span><span class="o">=</span><span class="n">output_sdf</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="n">geometry_col</span><span class="p">]</span><span class="o">.</span><span class="n">nullable</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="p">],</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">first_series</span><span class="p">(</span><span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">result_internal</span><span class="p">)))</span></div>
 
