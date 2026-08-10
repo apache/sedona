@@ -1963,6 +1963,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Attribute columns remain alongside every geometry part. The operation
         uses Sedona's native ``ST_Dump`` expression and remains distributed.
+        Preserving row and part order while rebuilding the distributed index
+        requires a global sort and shuffle.
 
         Parameters
         ----------
@@ -1976,7 +1978,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             ``index_parts``.
         index_parts : bool, default False
             If True, append a zero-based index level identifying each geometry
-            produced from an input row.
+            produced from an input row. Ignored when exploding a non-geometry
+            column, matching GeoPandas.
         **kwargs
             Additional keyword arguments are forwarded when exploding a
             non-geometry column.

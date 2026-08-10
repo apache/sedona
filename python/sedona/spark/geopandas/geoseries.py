@@ -995,23 +995,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         ignore_index: bool,
         index_parts: bool,
         temp_prefix: str,
-    ):
+    ) -> InternalFrame:
         """Expand a geometry-array expression while preserving index metadata."""
-        internal = expand_geometry_column(
+        return expand_geometry_column(
             self._internal,
             geometry_position=0,
             array_builder=array_builder,
             ignore_index=ignore_index,
             index_parts=index_parts,
             temp_prefix=temp_prefix,
-        )
-        return (
-            internal,
-            internal.spark_frame,
-            internal.index_spark_column_names,
-            internal.index_names,
-            internal.index_fields,
-            internal.data_spark_column_names[0],
         )
 
     # ============================================================================
@@ -1196,19 +1188,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         *,
         include_m=False,
     ) -> pspd.DataFrame:
-        (
-            _,
-            expanded_frame,
-            index_column_names,
-            index_names,
-            index_fields,
-            point_name,
-        ) = self._expand_geometry_array(
+        expanded_internal = self._expand_geometry_array(
             stf.ST_DumpPoints,
             ignore_index=ignore_index,
             index_parts=index_parts,
             temp_prefix="coordinates",
         )
+        expanded_frame = expanded_internal.spark_frame
+        index_column_names = expanded_internal.index_spark_column_names
+        point_name = expanded_internal.data_spark_column_names[0]
 
         coordinate_names = ["x", "y"]
         coordinate_columns = [
@@ -1237,8 +1225,8 @@ class GeoSeries(GeoFrame, pspd.Series):
             index_spark_columns=[
                 scol_for(result_frame, name) for name in index_column_names
             ],
-            index_names=index_names,
-            index_fields=index_fields,
+            index_names=expanded_internal.index_names,
+            index_fields=expanded_internal.index_fields,
             column_labels=[(name,) for name in coordinate_names],
             data_spark_columns=[
                 scol_for(result_frame, name) for name in coordinate_names
@@ -4385,40 +4373,11 @@ class GeoSeries(GeoFrame, pspd.Series):
            1    POINT (3 3)
         dtype: geometry
         """
-        (
-            internal,
-            expanded_sdf,
-            output_index_cols,
-            index_names,
-            index_fields,
-            geometry_col,
-        ) = self._expand_geometry_array(
+        result_internal = self._expand_geometry_array(
             stf.ST_Dump,
             ignore_index=ignore_index,
             index_parts=index_parts,
             temp_prefix="explode",
-        )
-        output_sdf = expanded_sdf.select(
-            *[scol_for(expanded_sdf, name) for name in output_index_cols],
-            scol_for(expanded_sdf, geometry_col),
-            scol_for(expanded_sdf, NATURAL_ORDER_COLUMN_NAME),
-        )
-
-        result_internal = internal.copy(
-            spark_frame=output_sdf,
-            index_spark_columns=[
-                scol_for(output_sdf, name) for name in output_index_cols
-            ],
-            index_names=index_names,
-            index_fields=index_fields,
-            data_spark_columns=[scol_for(output_sdf, geometry_col)],
-            data_fields=[
-                self._internal.data_fields[0].copy(
-                    name=geometry_col,
-                    spark_type=output_sdf.schema[geometry_col].dataType,
-                    nullable=output_sdf.schema[geometry_col].nullable,
-                )
-            ],
         )
         return GeoSeries(first_series(PandasOnSparkDataFrame(result_internal)))
 

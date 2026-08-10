@@ -52,10 +52,16 @@ def expand_geometry_column(
         reserved_names.add(candidate)
         return typing.cast(str, verify_temp_column_name(source_sdf, candidate))
 
-    index_column_names = [
-        temp_column_name(f"index_{level}")
-        for level in range(len(internal.index_spark_columns))
-    ]
+    # A fresh distributed index is built below when ``ignore_index`` is set,
+    # so the source index does not need to participate in the ordering shuffle.
+    index_column_names = (
+        []
+        if ignore_index
+        else [
+            temp_column_name(f"index_{level}")
+            for level in range(len(internal.index_spark_columns))
+        ]
+    )
     data_column_names = [
         temp_column_name(f"data_{position}")
         for position in range(len(internal.data_spark_columns))

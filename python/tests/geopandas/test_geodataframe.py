@@ -357,23 +357,50 @@ class TestGeoDataFrame(TestGeopandasBase):
             check_dtype=False,
         )
 
-    def test_explode_geometry_column_uses_active_geometry(self):
-        source_gpd = gpd.GeoDataFrame(
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {"index_parts": True},
+            {"ignore_index": True},
+        ],
+    )
+    def test_explode_geometry_column_uses_active_geometry(self, kwargs):
+        expected_source = gpd.GeoDataFrame(
             {
                 "before": [1],
                 "geometry": [MultiPoint([(0, 0), (1, 1)])],
-                "other": gpd.GeoSeries([MultiPoint([(10, 10), (20, 20)])]),
+                "other": gpd.GeoSeries(
+                    [MultiPoint([(10, 10), (20, 20)])],
+                    crs="EPSG:3857",
+                ),
                 "after": [2],
             },
             geometry="geometry",
             crs="EPSG:4326",
         )
 
-        expected = source_gpd.explode(column="other", index_parts=True)
-        result = GeoDataFrame(source_gpd).explode(column="other", index_parts=True)
+        source = GeoDataFrame(
+            {
+                "before": [1],
+                "geometry": [MultiPoint([(0, 0), (1, 1)])],
+                "other": [MultiPoint([(10, 10), (20, 20)])],
+                "after": [2],
+            },
+            geometry="geometry",
+            crs="EPSG:4326",
+        )
+        # Seed the inactive column's CRS through the distributed API so this
+        # test isolates explode's metadata propagation from local conversion.
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            source = source.set_geometry("other", crs="EPSG:3857")
+            source = source.set_geometry("geometry", crs="EPSG:4326")
+
+        expected = expected_source.explode(column="other", **kwargs)
+        result = source.explode(column="other", **kwargs)
 
         from geopandas.testing import assert_geodataframe_equal
 
+        assert result["other"].crs.to_epsg() == 3857
         assert_geodataframe_equal(
             result.to_geopandas(),
             expected,
