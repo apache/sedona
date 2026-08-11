@@ -33,7 +33,7 @@ from pyspark.pandas.utils import scol_for
 from pyspark.sql import functions as F
 from pyspark.sql.types import DoubleType
 
-from sedona.spark.geopandas._crs import copy_crs_metadata
+from sedona.spark.geopandas._crs import copy_crs_metadata, warn_crs_mismatch
 from sedona.spark.sql import st_aggregates as sta
 from sedona.spark.sql import st_functions as stf
 from sedona.spark.sql import st_predicates as stp
@@ -221,24 +221,6 @@ def _repair_frame(frame: _OverlayFrame, invalid_count: int) -> _OverlayFrame:
         ]
     )
     return frame._replace(sdf=repaired_sdf)
-
-
-def _warn_crs_mismatch(left, right):
-    if left.crs == right.crs:
-        return
-    try:
-        from geopandas.array import _crs_mismatch_warn
-    except ImportError:
-        import warnings
-
-        warnings.warn(
-            f"CRS mismatch between the CRS of left geometries ({left.crs}) "
-            f"and right geometries ({right.crs}).",
-            UserWarning,
-            stacklevel=3,
-        )
-    else:
-        _crs_mismatch_warn(left, right, stacklevel=3)
 
 
 def _candidate_pairs(left: _OverlayFrame, right: _OverlayFrame):
@@ -718,7 +700,7 @@ def overlay(
         raise TypeError("'make_valid' must be a boolean")
     make_valid = bool(make_valid)
 
-    _warn_crs_mismatch(df1, df2)
+    warn_crs_mismatch(df1.crs, df2.crs)
     left = _normalize_frame(df1, "left")
     right = _normalize_frame(df2, "right")
     summary = _input_summary(left, right)

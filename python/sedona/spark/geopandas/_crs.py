@@ -19,6 +19,8 @@
 
 from __future__ import annotations
 
+import warnings
+from types import SimpleNamespace
 from typing import Any
 
 from pyproj import CRS
@@ -26,6 +28,36 @@ from pyspark.pandas.internal import InternalField
 
 CRS_METADATA_KEY = "sedona.geopandas.crs_wkt"
 NO_CRS_OVERRIDE = object()
+
+
+def warn_crs_mismatch(left_crs, right_crs, *, stacklevel: int = 3) -> bool:
+    """Emit GeoPandas' standard warning when two geometry CRSs differ.
+
+    ``geopandas.array._crs_mismatch_warn`` adds internal call frames, so its
+    stack level must be higher than the local fallback to attribute both
+    warnings to the same caller.
+    """
+    if left_crs == right_crs:
+        return False
+
+    try:
+        from geopandas.array import _crs_mismatch_warn
+    except ImportError:
+        warnings.warn(
+            f"CRS mismatch between the CRS of left geometries ({left_crs}) "
+            f"and right geometries ({right_crs}).",
+            UserWarning,
+            stacklevel=stacklevel,
+        )
+    else:
+        # GeoPandas' private helper expects objects exposing ``.crs``. Use
+        # immutable values here so distributed objects are never re-inspected.
+        _crs_mismatch_warn(
+            SimpleNamespace(crs=left_crs),
+            SimpleNamespace(crs=right_crs),
+            stacklevel=stacklevel + 1,
+        )
+    return True
 
 
 def read_crs_metadata(field: InternalField) -> tuple[bool, CRS | None]:

@@ -46,6 +46,11 @@ from shapely.geometry import (
 import pytest
 from packaging.version import parse as parse_version
 
+requires_geopandas_shared_paths = pytest.mark.skipif(
+    parse_version(gpd.__version__) < parse_version("1.0.0"),
+    reason=f"Tests require geopandas>=1.0.0, but found v{gpd.__version__}",
+)
+
 
 @pytest.mark.skipif(
     parse_version(shapely.__version__) < parse_version("2.0.0"),
@@ -388,6 +393,11 @@ class TestGeoSeries(TestGeopandasBase):
             ]
         )
         self.check_sgpd_equals_gpd(result, expected)
+
+        numeric_name = sgpd.GeoSeries(gpd.GeoSeries([Point(1, 1), None], name=0))
+        numeric_name_result = numeric_name.fillna(Point(0, 0))
+        numeric_name_expected = gpd.GeoSeries([Point(1, 1), Point(0, 0)], name=0)
+        self.check_sgpd_equals_gpd(numeric_name_result, numeric_name_expected)
         result = s.fillna(Polygon([(0, 1), (2, 1), (1, 2)]))
         expected = gpd.GeoSeries(
             [
@@ -4869,6 +4879,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         self.check_sgpd_equals_gpd(df_result, expected)
 
+    @requires_geopandas_shared_paths
     def test_shared_paths(self):
         reference = LineString([(0, 0), (2, 0), (2, 1)])
         geometries = [
@@ -4946,6 +4957,34 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         with pytest.raises(TypeError, match="'other' must be"):
             source.shared_paths(None)
 
+    def test_shared_paths_avoids_unnecessary_srid_copies(self, monkeypatch):
+        left = GeoSeries(
+            [LineString([(0, 0), (2, 0)])],
+            crs="EPSG:3857",
+        )
+        right = GeoSeries(
+            [LineString([(0, 0), (1, 0)])],
+            crs="EPSG:3857",
+        )
+        reference = LineString([(0, 0), (1, 0)])
+        original_set_srid = stf.ST_SetSRID
+        set_srid_arguments = []
+
+        def recording_set_srid(geometry, srid):
+            set_srid_arguments.append(srid)
+            return original_set_srid(geometry, srid)
+
+        monkeypatch.setattr(stf, "ST_SetSRID", recording_set_srid)
+
+        matching_result = left.shared_paths(right, align=False)
+        assert set_srid_arguments == []
+        assert matching_result.to_geopandas().iloc[0] is not None
+
+        scalar_result = left.shared_paths(reference)
+        assert set_srid_arguments == [3857]
+        assert scalar_result.to_geopandas().iloc[0] is not None
+
+    @requires_geopandas_shared_paths
     def test_shared_paths_duplicate_multiindex_alignment(self):
         left_index = pd.MultiIndex.from_tuples(
             [("a", 1), ("a", 1), ("b", 2)], names=["group", "row"]
@@ -5002,6 +5041,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
                     expected_collection.geoms[component]
                 )
 
+    @requires_geopandas_shared_paths
     def test_shared_paths_default_alignment_warning_and_length_validation(self):
         left = GeoSeries(
             [LineString([(0, 0), (2, 0)])],
@@ -5029,13 +5069,19 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         self.check_sgpd_equals_gpd(result, expected)
 
-        with pytest.warns(UserWarning, match="CRS mismatch"):
+        with pytest.warns(UserWarning, match="CRS mismatch") as warning_info:
             crs_result = GeoSeries(
                 [LineString([(0, 0), (2, 0)])], crs="EPSG:4326"
             ).shared_paths(
                 GeoSeries([LineString([(0, 0), (1, 0)])], crs="EPSG:3857"),
                 align=False,
             )
+        crs_warning = next(
+            warning
+            for warning in warning_info
+            if "CRS mismatch" in str(warning.message)
+        )
+        assert crs_warning.filename == __file__
         assert crs_result.crs.to_epsg() == 4326
         with pytest.warns(UserWarning, match="CRS mismatch"):
             crs_expected = gpd.GeoSeries(
@@ -5358,8 +5404,91 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result = GeoSeries([Point(0, 0), Point(1, 1)], index=index).geom_equals(
             Point(0, 0)
         )
-        expected = pd.Series([True, False], index=pd.Index(["a", "b"], name="group"))
+        expected = pd.Series([True, False], index=index)
         self.check_pd_series_equal(result, expected)
+
+    def test_binary_operation_single_index_alignment_stays_lazy(self, monkeypatch):
+        left_geometries = [box(0, 0, 2, 2), box(3, 3, 5, 5)]
+        right_geometries = [box(1, 1, 4, 4), box(0, 0, 1, 1)]
+        left = GeoSeries(left_geometries, index=["a", "b"])
+        right = GeoSeries(right_geometries, index=["b", "a"])
+        sequence_attachments = []
+        original_attach = InternalFrame.attach_distributed_sequence_column
+
+        def recording_attach(sdf, column_name):
+            sequence_attachments.append(column_name)
+            return original_attach(sdf, column_name)
+
+        monkeypatch.setattr(
+            InternalFrame,
+            "attach_distributed_sequence_column",
+            recording_attach,
+        )
+
+        result = left.intersection(right, align=True)
+        assert sequence_attachments == []
+        expected = gpd.GeoSeries(left_geometries, index=["a", "b"]).intersection(
+            gpd.GeoSeries(right_geometries, index=["b", "a"]), align=True
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+    @pytest.mark.parametrize(
+        ("method", "kwargs"),
+        [
+            ("intersection", {}),
+            ("shortest_line", {}),
+            ("snap", {"tolerance": 0.25}),
+        ],
+    )
+    def test_binary_geometry_operations_preserve_duplicate_multiindex(
+        self, method, kwargs
+    ):
+        left_index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 1), ("b", 2)], names=["group", "row"]
+        )
+        right_index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 1), ("c", 3)], names=["group", "row"]
+        )
+        left = GeoSeries(
+            [
+                LineString([(0, 0), (2, 0)]),
+                LineString([(0, 0), (2, 0)]),
+                LineString([(0, 1), (2, 1)]),
+            ],
+            index=left_index,
+        )
+        right = GeoSeries(
+            [
+                LineString([(0, 0), (1, 0)]),
+                LineString([(1, 0), (2, 0)]),
+                LineString([(0, 3), (2, 3)]),
+            ],
+            index=right_index,
+        )
+
+        result = getattr(left, method)(right, align=True, **kwargs)
+        expected = getattr(gpd.GeoSeries(left.to_geopandas()), method)(
+            gpd.GeoSeries(right.to_geopandas()),
+            align=True,
+            **kwargs,
+        )
+
+        self.check_sgpd_equals_gpd(result, expected)
+        assert len(result) == 6
+
+        identical_right = GeoSeries(
+            right.to_geopandas().array,
+            index=left_index,
+        )
+        identical_result = getattr(left, method)(identical_right, align=True, **kwargs)
+        identical_expected = getattr(gpd.GeoSeries(left.to_geopandas()), method)(
+            gpd.GeoSeries(identical_right.to_geopandas()),
+            align=True,
+            **kwargs,
+        )
+
+        self.check_sgpd_equals_gpd(identical_result, identical_expected)
+        assert len(identical_result) == 3
 
     def test_geom_equals_exact(self):
         s = GeoSeries([Point(0, 1.1), Point(0, 1.0), Point(0, 1.2)])
