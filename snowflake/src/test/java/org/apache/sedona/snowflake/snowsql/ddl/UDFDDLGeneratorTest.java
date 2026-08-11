@@ -20,33 +20,89 @@ package org.apache.sedona.snowflake.snowsql.ddl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.sedona.snowflake.snowsql.UDFsV2;
 import org.junit.Test;
 
 public class UDFDDLGeneratorTest {
 
   @Test
   public void geometryOnlyFunctionsAreNotGeneratedForGeography() {
-    Constants.snowflakeTypeMap.replace("Geometry", "GEOMETRY");
+    String originalGeometryType = Constants.snowflakeTypeMap.put("Geometry", "GEOMETRY");
+
+    try {
+      assertSharedPathsTargets(UDFDDLGenerator.buildAll(configs(), "@ApacheSedona", false, ""));
+    } finally {
+      restoreGeometryType(originalGeometryType);
+    }
+  }
+
+  @Test
+  public void geometryOnlyFunctionsRejectDirectGeographyGeneration() throws NoSuchMethodException {
+    String originalGeometryType = Constants.snowflakeTypeMap.put("Geometry", "GEOGRAPHY");
+
+    try {
+      IllegalArgumentException error =
+          assertThrows(
+              IllegalArgumentException.class,
+              () ->
+                  UDFDDLGenerator.buildUDFDDL(
+                      UDFsV2.class.getMethod("ST_SharedPaths", String.class, String.class),
+                      configs(),
+                      "@ApacheSedona",
+                      false,
+                      ""));
+
+      assertEquals(
+          "Cannot generate GEOGRAPHY DDL for @GeometryOnly method: ST_SharedPaths",
+          error.getMessage());
+    } finally {
+      restoreGeometryType(originalGeometryType);
+    }
+  }
+
+  @Test
+  public void buildAllRestoresGeometryTypeAndCanBeRepeated() {
+    String originalGeometryType = Constants.snowflakeTypeMap.put("Geometry", "GEOMETRY");
+
+    try {
+      assertSharedPathsTargets(UDFDDLGenerator.buildAll(configs(), "@ApacheSedona", false, ""));
+      assertEquals("GEOMETRY", Constants.snowflakeTypeMap.get("Geometry"));
+
+      assertSharedPathsTargets(UDFDDLGenerator.buildAll(configs(), "@ApacheSedona", false, ""));
+      assertEquals("GEOMETRY", Constants.snowflakeTypeMap.get("Geometry"));
+    } finally {
+      restoreGeometryType(originalGeometryType);
+    }
+  }
+
+  private static Map<String, String> configs() {
     Map<String, String> configs = new HashMap<>();
     configs.put(Constants.SEDONA_VERSION, "test");
     configs.put(Constants.GEOTOOLS_VERSION, "test");
+    return configs;
+  }
 
-    try {
-      List<String> ddls = UDFDDLGenerator.buildAll(configs, "@ApacheSedona", false, "");
-      List<String> sharedPathsDdls =
-          ddls.stream()
-              .filter(ddl -> ddl.contains(".ST_SharedPaths "))
-              .collect(Collectors.toList());
+  private static void assertSharedPathsTargets(List<String> ddls) {
+    List<String> sharedPathsDdls =
+        ddls.stream().filter(ddl -> ddl.contains(".ST_SharedPaths ")).collect(Collectors.toList());
 
-      assertEquals(2, sharedPathsDdls.size());
-      assertFalse(sharedPathsDdls.stream().anyMatch(ddl -> ddl.contains(" GEOGRAPHY")));
-    } finally {
-      Constants.snowflakeTypeMap.replace("Geometry", "GEOMETRY");
+    assertEquals(2, sharedPathsDdls.size());
+    assertTrue(sharedPathsDdls.stream().anyMatch(ddl -> ddl.contains(" GEOMETRY")));
+    assertFalse(sharedPathsDdls.stream().anyMatch(ddl -> ddl.contains(" GEOGRAPHY")));
+  }
+
+  private static void restoreGeometryType(String geometryType) {
+    if (geometryType == null) {
+      Constants.snowflakeTypeMap.remove("Geometry");
+    } else {
+      Constants.snowflakeTypeMap.put("Geometry", geometryType);
     }
   }
 }
