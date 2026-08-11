@@ -21,8 +21,10 @@ package org.apache.sedona.common;
 import java.util.List;
 import java.util.Objects;
 import org.apache.sedona.common.utils.GeomUtils;
+import org.junit.Assert;
 import org.junit.Test;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.io.WKTReader;
 
 public class GeometryUtilTest {
   public static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
@@ -53,5 +55,24 @@ public class GeometryUtilTest {
         GeomUtils.getWKT(
             GEOMETRY_FACTORY.createGeometryCollection(geoms.toArray(new Geometry[geoms.size()]))),
         "GEOMETRYCOLLECTION (POLYGON ((0 1, 3 0, 4 3, 0 4, 0 1)), POLYGON ((3 4, 6 3, 5 5, 3 4)), POINT (5 8), POLYGON ((0 1, 3 0, 4 3, 0 4, 0 1)), POLYGON ((3 4, 6 3, 5 5, 3 4)))"));
+  }
+
+  @Test
+  public void dimensionalNestedEmptyWKTRoundTrips() throws Exception {
+    WKTReader reader = new WKTReader();
+    for (String wkt :
+        new String[] {
+          "GEOMETRYCOLLECTION Z (LINESTRING Z (0 0 1, 1 1 2), MULTILINESTRING Z EMPTY)",
+          "GEOMETRYCOLLECTION M (LINESTRING M (0 0 1, 1 1 2), MULTILINESTRING M EMPTY)",
+          "GEOMETRYCOLLECTION ZM (LINESTRING ZM (0 0 1 2, 1 1 3 4), " + "MULTILINESTRING ZM EMPTY)"
+        }) {
+      Geometry geometry = reader.read(wkt);
+      String serialized = GeomUtils.getWKT(geometry);
+
+      Assert.assertFalse(serialized.contains("ZEMPTY"));
+      Assert.assertFalse(serialized.contains("MEMPTY"));
+      Assert.assertFalse(serialized.contains("ZMEMPTY"));
+      Assert.assertTrue(geometry.equalsExact(reader.read(serialized)));
+    }
   }
 }

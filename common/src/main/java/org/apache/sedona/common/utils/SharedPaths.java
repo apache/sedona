@@ -34,6 +34,7 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.geom.util.LineStringExtracter;
+import org.locationtech.jts.index.strtree.ItemDistance;
 import org.locationtech.jts.index.strtree.STRtree;
 import org.locationtech.jts.linearref.LinearLocation;
 import org.locationtech.jts.operation.overlayng.OverlayNG;
@@ -69,7 +70,7 @@ import org.locationtech.jts.operation.overlayng.OverlayNGRobust;
  *      |
  * Stage 3: locate and compare each fragment in both sources
  *      |
- * Stage 4: orient like the first input and restore PostGIS-compatible Z values
+ * Stage 4: orient like the first input and restore source-derived Z values
  *      |
  * Stage 5: assemble the same-direction and opposite-direction buckets
  * </pre>
@@ -88,8 +89,9 @@ public final class SharedPaths {
 
   /**
    * Returns a collection containing same-direction paths followed by opposite-direction paths.
-   * Paths are oriented in the direction of {@code left}. Matching SRIDs are required. The result
-   * retains Z when either input has Z and, like PostGIS, does not retain M.
+   * Paths are oriented in the direction of {@code left}. Matching SRIDs are required. When either
+   * input has Z, the result retains Z only if every returned coordinate resolves to a finite source
+   * Z; otherwise the whole result is XY. Like PostGIS, the result does not retain M.
    */
   public static Geometry compute(Geometry left, Geometry right) {
     // Match null-propagating SQL behavior before attempting type or SRID validation.
@@ -110,17 +112,19 @@ public final class SharedPaths {
     // Stage 1: robust overlay finds the physical shared coverage. Point-only intersections are
     // intentionally ignored later because LineStringExtracter returns only linear components.
     Geometry intersection = OverlayNGRobust.overlay(left, right, OverlayNG.INTERSECTION);
-    List<LineString> sameDirection = new ArrayList<>();
-    List<LineString> oppositeDirection = new ArrayList<>();
-    boolean outputHasZ = hasZ(left) || hasZ(right);
+    boolean retainZ = hasZ(left) || hasZ(right);
 
     @SuppressWarnings("unchecked")
     List<LineString> paths = LineStringExtracter.getLines(intersection);
 
     // Stage 2: build each source index once. Besides avoiding repeated scans, the index preserves
     // source traversal order so repeated or self-overlapping paths have deterministic semantics.
-    SourceSegmentIndex leftSegments = !paths.isEmpty() ? new SourceSegmentIndex(left) : null;
-    SourceSegmentIndex rightSegments = !paths.isEmpty() ? new SourceSegmentIndex(right) : null;
+    double overlayTolerance = overlayTolerance(left.getPrecisionModel());
+    SourceSegmentIndex leftSegments =
+        !paths.isEmpty() ? new SourceSegmentIndex(left, overlayTolerance) : null;
+    SourceSegmentIndex rightSegments =
+        !paths.isEmpty() ? new SourceSegmentIndex(right, overlayTolerance) : null;
+    List<PreparedPath> preparedPaths = new ArrayList<>();
     for (LineString path : paths) {
       if (path.isEmpty()) {
         continue;
@@ -131,17 +135,26 @@ public final class SharedPaths {
       // Stage 4: overlay output direction is not a contract. Normalize it to the direction of the
       // first input before reconstructing ordinates or adding the path to a result bucket.
       LineString orientedPath = direction.forwardOnLeft ? path : (LineString) path.reverse();
-      LineString resultPath =
-          copyWithPostGISOrdinates(
-              orientedPath, resultFactory, outputHasZ, leftSegments, rightSegments);
-      if (direction.same) {
-        sameDirection.add(resultPath);
-      } else {
-        oppositeDirection.add(resultPath);
+      double[] zValues =
+          retainZ ? resolvePostGISZ(orientedPath, leftSegments, rightSegments) : null;
+      if (retainZ && zValues == null) {
+        // WKT and WKB assign one dimensionality to the whole result. If any returned coordinate
+        // has no finite source Z, use XY throughout rather than fabricating a value or emitting
+        // NaN.
+        retainZ = false;
       }
+      preparedPaths.add(new PreparedPath(orientedPath, direction.same, zValues));
     }
 
     // Stage 5: even when one bucket is empty, retain both typed MultiLineString children.
+    List<LineString> sameDirection = new ArrayList<>();
+    List<LineString> oppositeDirection = new ArrayList<>();
+    for (PreparedPath preparedPath : preparedPaths) {
+      LineString resultPath =
+          copyWithOrdinates(
+              preparedPath.path, resultFactory, retainZ ? preparedPath.zValues : null);
+      (preparedPath.same ? sameDirection : oppositeDirection).add(resultPath);
+    }
     MultiLineString same =
         resultFactory.createMultiLineString(sameDirection.toArray(new LineString[0]));
     MultiLineString opposite =
@@ -177,6 +190,15 @@ public final class SharedPaths {
     return factory.createGeometryCollection(new Geometry[] {same, opposite});
   }
 
+  private static double overlayTolerance(PrecisionModel precisionModel) {
+    if (precisionModel.isFloating()) {
+      return 0;
+    }
+    // A fixed-precision overlay may round both ordinates by half a grid cell. Use the diagonal
+    // displacement so the snapped result can still be located on the original source linework.
+    return Math.sqrt(0.5) * precisionModel.gridSize();
+  }
+
   private static Direction direction(
       LineString path, SourceSegmentIndex leftSegments, SourceSegmentIndex rightSegments) {
     CoordinateSequence sequence = path.getCoordinateSequence();
@@ -199,46 +221,45 @@ public final class SharedPaths {
     throw new IllegalArgumentException("Shared path does not contain a non-zero segment");
   }
 
-  private static LineString copyWithPostGISOrdinates(
-      LineString path,
-      GeometryFactory factory,
-      boolean outputHasZ,
-      SourceSegmentIndex leftSegments,
-      SourceSegmentIndex rightSegments) {
+  private static LineString copyWithOrdinates(
+      LineString path, GeometryFactory factory, double[] zValues) {
     CoordinateSequence source = path.getCoordinateSequence();
     CoordinateSequenceFactory sequenceFactory = factory.getCoordinateSequenceFactory();
 
     // Shared-path topology is two-dimensional. Build a fresh XY or XYZ sequence so M is always
-    // removed, while Z is retained when either source geometry declares a Z dimension.
-    CoordinateSequence target = sequenceFactory.create(source.size(), outputHasZ ? 3 : 2, 0);
+    // removed. A non-null zValues array has already been checked to contain only finite values.
+    CoordinateSequence target = sequenceFactory.create(source.size(), zValues != null ? 3 : 2, 0);
 
     for (int i = 0; i < source.size(); i++) {
       double x = source.getX(i);
       double y = source.getY(i);
       target.setOrdinate(i, CoordinateSequence.X, x);
       target.setOrdinate(i, CoordinateSequence.Y, y);
-      if (outputHasZ) {
-        // A self-crossing source can contain the same XY on several traversals with different Z
-        // values. Select the segment adjacent to this particular output path coordinate rather
-        // than accepting the first segment that happens to contain the XY point.
-        SourceSegment leftSegment = leftSegments.findForPathCoordinate(source, i);
-        SourceSegment rightSegment = rightSegments.findForPathCoordinate(source, i);
-        target.setOrdinate(
-            i,
-            CoordinateSequence.Z,
-            postGISZ(x, y, leftSegments, rightSegments, leftSegment, rightSegment));
+      if (zValues != null) {
+        target.setOrdinate(i, CoordinateSequence.Z, zValues[i]);
       }
     }
     return factory.createLineString(target);
   }
 
+  private static double[] resolvePostGISZ(
+      LineString path, SourceSegmentIndex leftSegments, SourceSegmentIndex rightSegments) {
+    CoordinateSequence sequence = path.getCoordinateSequence();
+    double[] zValues = new double[sequence.size()];
+    for (int i = 0; i < sequence.size(); i++) {
+      zValues[i] = postGISZ(sequence, i, leftSegments, rightSegments);
+      if (!Double.isFinite(zValues[i])) {
+        return null;
+      }
+    }
+    return zValues;
+  }
+
   private static double postGISZ(
-      double x,
-      double y,
+      CoordinateSequence path,
+      int coordinateIndex,
       SourceSegmentIndex leftSegments,
-      SourceSegmentIndex rightSegments,
-      SourceSegment leftSegment,
-      SourceSegment rightSegment) {
+      SourceSegmentIndex rightSegments) {
     // Z precedence captures the stable PostGIS/GEOS behavior used by shared paths:
     //
     //   exact vertex in left
@@ -249,6 +270,8 @@ public final class SharedPaths {
     // Exact vertices are indexed globally because a noded overlay coordinate can coincide with a
     // vertex on another traversal of the same non-simple input. Interpolation, by contrast, must
     // use the traversal containing the shared path or it can pick the wrong Z at a crossing.
+    double x = path.getX(coordinateIndex);
+    double y = path.getY(coordinateIndex);
     double exactZ = leftSegments.exactZ(x, y);
     if (Double.isFinite(exactZ)) {
       return exactZ;
@@ -257,11 +280,18 @@ public final class SharedPaths {
     if (Double.isFinite(exactZ)) {
       return exactZ;
     }
-    double leftZ = leftSegment.zAt(x, y);
-    if (Double.isFinite(leftZ)) {
-      return leftZ;
+    // Segment searches are deliberately lazy. Exact vertices are the common case, and a source
+    // with no finite-Z segment can never contribute an interpolated value.
+    if (leftSegments.hasInterpolatableZ()) {
+      double leftZ = leftSegments.findForPathCoordinate(path, coordinateIndex).zAt(x, y);
+      if (Double.isFinite(leftZ)) {
+        return leftZ;
+      }
     }
-    return rightSegment.zAt(x, y);
+    if (rightSegments.hasInterpolatableZ()) {
+      return rightSegments.findForPathCoordinate(path, coordinateIndex).zAt(x, y);
+    }
+    return Double.NaN;
   }
 
   private static boolean hasZ(Geometry geometry) {
@@ -291,6 +321,18 @@ public final class SharedPaths {
     }
   }
 
+  private static final class PreparedPath {
+    private final LineString path;
+    private final boolean same;
+    private final double[] zValues;
+
+    private PreparedPath(LineString path, boolean same, double[] zValues) {
+      this.path = path;
+      this.same = same;
+      this.zValues = zValues;
+    }
+  }
+
   /**
    * Indexes source locations for path direction and segment-aware Z interpolation.
    *
@@ -306,15 +348,31 @@ public final class SharedPaths {
    * selection therefore uses geometric distance first and source traversal order second.
    */
   private static final class SourceSegmentIndex {
+    private static final ItemDistance SEGMENT_TO_POINT_DISTANCE =
+        (first, second) -> {
+          Object firstItem = first.getItem();
+          SourceSegment segment =
+              firstItem instanceof SourceSegment
+                  ? (SourceSegment) firstItem
+                  : (SourceSegment) second.getItem();
+          Coordinate coordinate =
+              firstItem instanceof Coordinate
+                  ? (Coordinate) firstItem
+                  : (Coordinate) second.getItem();
+          return segment.distanceTo(coordinate);
+        };
+
     private final STRtree index = new STRtree();
     private final Map<XYKey, Double> exactZByVertex = new HashMap<>();
+    private boolean hasInterpolatableZ;
 
-    // Overlay interpolation can move a theoretically-on-segment sample by a few ULPs. Track a
-    // tolerance at the scale of the largest source coordinate so the STRtree query envelope still
-    // reaches the true segment before the more precise distance check below.
-    private double queryTolerance = 16 * Math.ulp(1.0);
+    // Overlay interpolation can move a theoretically-on-segment sample by a few ULPs, while a
+    // fixed precision model can move it to the nearest grid point. Track both displacements so the
+    // STRtree query envelope still reaches the true segment before the distance check below.
+    private double queryTolerance;
 
-    private SourceSegmentIndex(Geometry geometry) {
+    private SourceSegmentIndex(Geometry geometry, double overlayTolerance) {
+      queryTolerance = Math.max(16 * Math.ulp(1.0), overlayTolerance);
       // Ordinals flatten component/segment positions into source traversal order. Zero-length
       // segments are omitted because no interior sample can be located on them; omitting them does
       // not change the relative order of usable segments.
@@ -352,9 +410,10 @@ public final class SharedPaths {
             continue;
           }
 
-          // The envelope is only a candidate filter. Collinearity and tolerance are verified by
-          // SourceSegment.contains after querying the tree.
+          // The envelope is only a candidate filter. Actual distance and traversal order rank the
+          // segments after querying the tree.
           SourceSegment sourceSegment = new SourceSegment(start, end, sequence.hasZ(), ordinal++);
+          hasInterpolatableZ |= sourceSegment.hasInterpolatableZ();
           index.insert(new Envelope(start, end), sourceSegment);
         }
       }
@@ -366,6 +425,10 @@ public final class SharedPaths {
       // through to the traversal-aware segment logic.
       Double z = exactZByVertex.get(new XYKey(x, y));
       return z == null ? Double.NaN : z;
+    }
+
+    private boolean hasInterpolatableZ() {
+      return hasInterpolatableZ;
     }
 
     private boolean isForward(CoordinateSequence path) {
@@ -385,41 +448,43 @@ public final class SharedPaths {
     }
 
     private SourceLocation locate(Coordinate coordinate) {
-      SourceLocation earliest = null;
-      double closestDistance = Double.POSITIVE_INFINITY;
-      for (SourceSegment candidate : candidates(coordinate)) {
-        if (!candidate.contains(coordinate)) {
-          continue;
-        }
-        double distance = candidate.distanceTo(coordinate);
-        SourceLocation location =
-            new SourceLocation(candidate.ordinal, candidate.fractionAlong(coordinate));
-        int distanceComparison = Double.compare(distance, closestDistance);
-
-        // Tolerance can admit a nearby parallel segment at large coordinate magnitudes. Prefer the
-        // geometrically closest segment; only exact distance ties use the earliest traversal. At a
-        // true crossing both distances are zero, so the tie-break matches first-occurrence linear
-        // referencing semantics.
-        if (earliest == null
-            || distanceComparison < 0
-            || (distanceComparison == 0 && location.compareTo(earliest) < 0)) {
-          earliest = location;
-          closestDistance = distance;
-        }
+      SourceSegment closest = closestSegment(coordinate, candidates(coordinate), queryTolerance);
+      if (closest == null) {
+        // Robust overlay snapping can move a valid result farther than a predictable number of
+        // ULPs. An indexed nearest-neighbour fallback avoids failing the whole query while keeping
+        // the normal on-source path bounded by the small tolerance above.
+        closest =
+            closestSegment(coordinate, nearestCandidates(coordinate), Double.POSITIVE_INFINITY);
       }
-      if (earliest == null) {
+      if (closest == null) {
         throw new IllegalStateException("Shared path point is not present in source geometry");
       }
-      return earliest;
+      return new SourceLocation(closest, coordinate);
     }
 
     private SourceSegment findForPathCoordinate(CoordinateSequence path, int coordinateIndex) {
       int adjacentIndex = adjacentNonZeroCoordinate(path, coordinateIndex);
       Coordinate coordinate = path.getCoordinateCopy(coordinateIndex);
       Coordinate adjacent = path.getCoordinateCopy(adjacentIndex);
-      SourceSegment earliest = null;
+      SourceSegment closest =
+          closestPathSegment(coordinate, adjacent, candidates(coordinate), true);
+      if (closest == null) {
+        closest = closestPathSegment(coordinate, adjacent, nearestCandidates(coordinate), false);
+      }
+      if (closest == null) {
+        throw new IllegalStateException("Shared path segment is not present in source geometry");
+      }
+      return closest;
+    }
+
+    private SourceSegment closestPathSegment(
+        Coordinate coordinate,
+        Coordinate adjacent,
+        List<SourceSegment> candidates,
+        boolean requireTolerance) {
+      SourceSegment closest = null;
       double closestDistance = Double.POSITIVE_INFINITY;
-      for (SourceSegment candidate : candidates(coordinate)) {
+      for (SourceSegment candidate : candidates) {
         // Overlay can collapse many collinear source vertices into one long output edge. Limit the
         // test samples to the portion of that edge covered by this candidate source segment.
         double sharedFraction = candidate.sharedFractionFrom(coordinate, adjacent);
@@ -434,33 +499,67 @@ public final class SharedPaths {
                 coordinate, adjacent, sharedFraction * END_SAMPLE_FRACTION);
         // Requiring two interior samples, rather than one midpoint, distinguishes the intended
         // traversal when the midpoint itself is a self-intersection with another source segment.
-        if (!candidate.contains(startSample) || !candidate.contains(endSample)) {
+        double startDistance = candidate.distanceTo(startSample);
+        double endDistance = candidate.distanceTo(endSample);
+        if (requireTolerance && (startDistance > queryTolerance || endDistance > queryTolerance)) {
           continue;
         }
-        double distance =
-            Math.max(candidate.distanceTo(startSample), candidate.distanceTo(endSample));
-        int distanceComparison = Double.compare(distance, closestDistance);
+        double distance = Math.max(startDistance, endDistance);
 
         // As in locate(), distance protects against tolerance-admitted nearby segments and ordinal
         // makes repeated coincident traversals deterministic.
-        if (earliest == null
-            || distanceComparison < 0
-            || (distanceComparison == 0 && candidate.ordinal < earliest.ordinal)) {
-          earliest = candidate;
+        if (isBetter(candidate, distance, closest, closestDistance)) {
+          closest = candidate;
           closestDistance = distance;
         }
       }
-      if (earliest == null) {
-        throw new IllegalStateException("Shared path segment is not present in source geometry");
+      return closest;
+    }
+
+    private static SourceSegment closestSegment(
+        Coordinate coordinate, List<SourceSegment> candidates, double maximumDistance) {
+      SourceSegment closest = null;
+      double closestDistance = Double.POSITIVE_INFINITY;
+      for (SourceSegment candidate : candidates) {
+        double distance = candidate.distanceTo(coordinate);
+        if (distance <= maximumDistance
+            && isBetter(candidate, distance, closest, closestDistance)) {
+          closest = candidate;
+          closestDistance = distance;
+        }
       }
-      return earliest;
+      return closest;
+    }
+
+    private static boolean isBetter(
+        SourceSegment candidate, double distance, SourceSegment closest, double closestDistance) {
+      int distanceComparison = Double.compare(distance, closestDistance);
+      return closest == null
+          || distanceComparison < 0
+          || (distanceComparison == 0 && candidate.ordinal < closest.ordinal);
     }
 
     private List<SourceSegment> candidates(Coordinate coordinate) {
-      // Expand before querying; otherwise an interpolated sample infinitesimally outside a segment
-      // envelope would never reach SourceSegment.contains for the tolerance-aware final check.
+      // Expand before querying; otherwise an interpolated or grid-snapped sample just outside a
+      // segment envelope would never reach the tolerance-aware distance check.
       Envelope searchEnvelope = new Envelope(coordinate);
       searchEnvelope.expandBy(queryTolerance);
+      @SuppressWarnings("unchecked")
+      List<SourceSegment> candidates = index.query(searchEnvelope);
+      return candidates;
+    }
+
+    private List<SourceSegment> nearestCandidates(Coordinate coordinate) {
+      SourceSegment nearest =
+          (SourceSegment)
+              index.nearestNeighbour(
+                  new Envelope(coordinate), coordinate, SEGMENT_TO_POINT_DISTANCE);
+      if (nearest == null) {
+        return new ArrayList<>();
+      }
+      double distance = nearest.distanceTo(coordinate);
+      Envelope searchEnvelope = new Envelope(coordinate);
+      searchEnvelope.expandBy(Math.nextUp(distance + queryTolerance));
       @SuppressWarnings("unchecked")
       List<SourceSegment> candidates = index.query(searchEnvelope);
       return candidates;
@@ -531,9 +630,13 @@ public final class SharedPaths {
       return startZ + fraction * (endZ - startZ);
     }
 
+    private boolean hasInterpolatableZ() {
+      return hasZ && Double.isFinite(start.getZ()) && Double.isFinite(end.getZ());
+    }
+
     private double sharedFractionFrom(Coordinate coordinate, Coordinate adjacent) {
       // Project both source endpoints onto the outgoing output edge. The largest positive projected
-      // fraction bounds candidate-local samples; the later containment checks reject candidates
+      // fraction bounds candidate-local samples; the later distance checks reject candidates
       // which are not actually collinear and overlapping. Clamp to one because only the current
       // output edge is relevant.
       double dx = adjacent.getX() - coordinate.getX();
@@ -548,34 +651,6 @@ public final class SharedPaths {
         endFraction = (end.getY() - coordinate.getY()) / dy;
       }
       return Math.min(1.0, Math.max(startFraction, endFraction));
-    }
-
-    private double fractionAlong(Coordinate coordinate) {
-      // This is the linear-reference position used after the segment ordinal. Clamping absorbs the
-      // same tiny roundoff for which the spatial lookup uses an ULP-scaled tolerance.
-      double dx = end.getX() - start.getX();
-      double dy = end.getY() - start.getY();
-      double fraction =
-          Math.abs(dx) >= Math.abs(dy)
-              ? (coordinate.getX() - start.getX()) / dx
-              : (coordinate.getY() - start.getY()) / dy;
-      return Math.max(0.0, Math.min(1.0, fraction));
-    }
-
-    private boolean contains(Coordinate coordinate) {
-      // Use a conservative floating-point tolerance for the containment check. Candidate ranking
-      // still chooses the smallest actual distance, so any admitted nearby parallel line cannot
-      // override the exact shared segment.
-      double scale =
-          Math.max(
-              1.0,
-              Math.max(
-                  Math.max(Math.abs(start.getX()), Math.abs(start.getY())),
-                  Math.max(
-                      Math.max(Math.abs(end.getX()), Math.abs(end.getY())),
-                      Math.max(Math.abs(coordinate.getX()), Math.abs(coordinate.getY())))));
-      double tolerance = 16 * Math.ulp(scale);
-      return distanceTo(coordinate) <= tolerance;
     }
 
     private double distanceTo(Coordinate coordinate) {
@@ -618,32 +693,45 @@ public final class SharedPaths {
   /**
    * Linear-reference position in a source geometry.
    *
-   * <p>The segment ordinal is compared first, then the fraction along that segment:
+   * <p>The segment ordinal is compared first, then the displacement between two samples is
+   * projected onto that segment:
    *
    * <pre>
-   * segment 4 @ 0.9  &lt;  segment 5 @ 0.1
-   * segment 5 @ 0.1  &lt;  segment 5 @ 0.8
+   * segment 4 @ 90  &lt;  segment 5 @ 10
+   * segment 5 moving with the source  &lt;  segment 5 farther along the source
    * </pre>
    *
    * This ordering lets two interior samples reveal whether a source traverses a shared fragment
    * forward or backward without rescanning the original geometry.
    */
   private static final class SourceLocation implements Comparable<SourceLocation> {
-    private final int segmentOrdinal;
-    private final double segmentFraction;
+    private final SourceSegment segment;
+    private final Coordinate coordinate;
 
-    private SourceLocation(int segmentOrdinal, double segmentFraction) {
-      this.segmentOrdinal = segmentOrdinal;
-      this.segmentFraction = segmentFraction;
+    private SourceLocation(SourceSegment segment, Coordinate coordinate) {
+      this.segment = segment;
+      this.coordinate = coordinate;
     }
 
     @Override
     public int compareTo(SourceLocation other) {
-      // Segment order dominates fraction because the flattened ordinal follows source traversal.
-      int segmentComparison = Integer.compare(segmentOrdinal, other.segmentOrdinal);
-      return segmentComparison != 0
-          ? segmentComparison
-          : Double.compare(segmentFraction, other.segmentFraction);
+      // Segment order dominates position because the flattened ordinal follows source traversal.
+      int segmentComparison = Integer.compare(segment.ordinal, other.segment.ordinal);
+      if (segmentComparison != 0) {
+        return segmentComparison;
+      }
+
+      // Compare the two samples directly rather than normalizing each against a possibly distant
+      // segment endpoint. Scaling the source vector avoids overflow without changing the sign of
+      // the projection. Using both axes also handles fixed-precision overlays which change which
+      // axis is dominant after snapping.
+      double sourceDx = segment.end.getX() - segment.start.getX();
+      double sourceDy = segment.end.getY() - segment.start.getY();
+      double scale = Math.max(Math.abs(sourceDx), Math.abs(sourceDy));
+      double sampleDx = coordinate.getX() - other.coordinate.getX();
+      double sampleDy = coordinate.getY() - other.coordinate.getY();
+      double projection = Math.fma(sampleDx, sourceDx / scale, sampleDy * (sourceDy / scale));
+      return projection == 0.0 ? 0 : Double.compare(projection, 0.0);
     }
   }
 }

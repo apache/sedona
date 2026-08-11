@@ -21,6 +21,7 @@ package org.apache.sedona.common.utils;
 import static org.junit.Assert.*;
 
 import org.apache.sedona.common.Functions;
+import org.apache.sedona.common.geometrySerde.GeometrySerializer;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateSequence;
@@ -29,8 +30,10 @@ import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKTReader;
 
 public class SharedPathsTest {
@@ -62,6 +65,58 @@ public class SharedPathsTest {
         "LINESTRING (15 0, 5 0)",
         "LINESTRING (0 0, 10 0)",
         "GEOMETRYCOLLECTION (MULTILINESTRING EMPTY, MULTILINESTRING ((10 0, 5 0)))");
+  }
+
+  @Test
+  public void classifiesShortSharedPathOnLongSourceSegment() throws ParseException {
+    assertSharedPaths(
+        "LINESTRING (-1000000000 0, 1000000000 0)",
+        "LINESTRING (0 0, 0.0000000001 0)",
+        "GEOMETRYCOLLECTION (MULTILINESTRING ((0 0, 0.0000000001 0)), " + "MULTILINESTRING EMPTY)");
+  }
+
+  @Test
+  public void locatesFixedPrecisionOverlayOnOriginalLinework() throws ParseException {
+    GeometryFactory fixedFactory = new GeometryFactory(new PrecisionModel(1.0));
+    LineString left =
+        fixedFactory.createLineString(
+            new Coordinate[] {new Coordinate(0.24, 0.24), new Coordinate(10.24, 0.24)});
+    LineString right =
+        fixedFactory.createLineString(
+            new Coordinate[] {new Coordinate(5.24, 0.24), new Coordinate(15.24, 0.24)});
+
+    Geometry result = Functions.sharedPaths(left, right);
+
+    Geometry expected =
+        reader.read("GEOMETRYCOLLECTION (MULTILINESTRING ((5 0, 10 0)), MULTILINESTRING EMPTY)");
+    assertTrue("Expected " + expected + " but found " + result, expected.equalsExact(result));
+    assertEquals(fixedFactory.getPrecisionModel(), result.getPrecisionModel());
+  }
+
+  @Test
+  public void classifiesDirectionWhenFixedPrecisionChangesTheDominantAxis() throws ParseException {
+    GeometryFactory fixedFactory = new GeometryFactory(new PrecisionModel(1.0));
+    LineString left =
+        fixedFactory.createLineString(
+            new Coordinate[] {new Coordinate(0.49, 0.1), new Coordinate(0.51, 0.4)});
+    LineString sameDirection =
+        fixedFactory.createLineString(
+            new Coordinate[] {new Coordinate(0.49, 0.1), new Coordinate(0.51, 0.4)});
+    LineString oppositeDirection = (LineString) sameDirection.reverse();
+
+    Geometry sameResult = Functions.sharedPaths(left, sameDirection);
+    Geometry oppositeResult = Functions.sharedPaths(left, oppositeDirection);
+
+    Geometry expectedSame =
+        reader.read("GEOMETRYCOLLECTION (MULTILINESTRING ((0 0, 1 0)), MULTILINESTRING EMPTY)");
+    Geometry expectedOpposite =
+        reader.read("GEOMETRYCOLLECTION (MULTILINESTRING EMPTY, MULTILINESTRING ((0 0, 1 0)))");
+    assertTrue(
+        "Expected " + expectedSame + " but found " + sameResult,
+        expectedSame.equalsExact(sameResult));
+    assertTrue(
+        "Expected " + expectedOpposite + " but found " + oppositeResult,
+        expectedOpposite.equalsExact(oppositeResult));
   }
 
   @Test
@@ -139,6 +194,12 @@ public class SharedPathsTest {
               IllegalArgumentException.class,
               () -> Functions.sharedPaths(readUnchecked(invalidWkt), line));
       assertEquals("Geometry is not lineal", error.getMessage());
+
+      error =
+          assertThrows(
+              IllegalArgumentException.class,
+              () -> Functions.sharedPaths(line, readUnchecked(invalidWkt)));
+      assertEquals("Geometry is not lineal", error.getMessage());
     }
   }
 
@@ -187,6 +248,45 @@ public class SharedPathsTest {
     assertFalse(sequence.hasZ());
     assertFalse(sequence.hasM());
     assertEquals(2, sequence.getDimension());
+  }
+
+  @Test
+  public void writesParseableWKTFor3DResultWithEmptyBucket() throws ParseException {
+    Geometry result =
+        Functions.sharedPaths(
+            reader.read("LINESTRING Z (0 0 6, 1 0 7)"), reader.read("LINESTRING Z (0 0 1, 1 0 2)"));
+
+    String wkt = Functions.asWKT(result);
+
+    assertEquals(
+        "GEOMETRYCOLLECTION Z(MULTILINESTRING Z((0 0 6, 1 0 7)), " + "MULTILINESTRING Z EMPTY)",
+        wkt);
+    assertTrue(result.equalsExact(reader.read(wkt)));
+  }
+
+  @Test
+  public void downgradesWholeResultWhenAnySharedPathHasNoSourceZ() throws Exception {
+    Geometry result =
+        Functions.sharedPaths(
+            reader.read("MULTILINESTRING ((0 0 0, 10 0 10), (0 1, 10 1))"),
+            reader.read("MULTILINESTRING ((2 0, 8 0), (2 1, 8 1))"));
+    String expectedWkt =
+        "GEOMETRYCOLLECTION (MULTILINESTRING ((2 0, 8 0), (2 1, 8 1)), " + "MULTILINESTRING EMPTY)";
+    Geometry expected = reader.read(expectedWkt);
+
+    assertEquals(expectedWkt, Functions.asWKT(result));
+    assertFalse(firstPath(result).getCoordinateSequence().hasZ());
+    assertFalse(
+        ((LineString) result.getGeometryN(0).getGeometryN(1)).getCoordinateSequence().hasZ());
+
+    Geometry wktRoundTrip = reader.read(Functions.asWKT(result));
+    assertTrue(expected.equalsExact(wktRoundTrip));
+    Geometry wkbRoundTrip = new WKBReader().read(Functions.asWKB(result));
+    assertTrue(expected.equalsExact(wkbRoundTrip));
+    assertFalse(firstPath(wkbRoundTrip).getCoordinateSequence().hasZ());
+    Geometry serdeRoundTrip = GeometrySerializer.deserialize(GeometrySerializer.serialize(result));
+    assertTrue(expected.equalsExact(serdeRoundTrip));
+    assertFalse(firstPath(serdeRoundTrip).getCoordinateSequence().hasZ());
   }
 
   @Test
