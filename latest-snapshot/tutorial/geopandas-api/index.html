@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6603,6 +6602,7 @@ matching geometries should also be cut to the mask:</p>
 <li><code>sjoin()</code> - Spatial joins with various predicates</li>
 <li><code>cx</code> - Coordinate-based spatial filtering</li>
 <li><code>clip()</code> - Clip geometries with scalar, rectangular, or distributed masks</li>
+<li><code>overlay()</code> - Distributed frame overlay with all five GeoPandas modes</li>
 <li><code>buffer()</code> - Geometric buffering</li>
 <li><code>distance()</code> - Distance calculations</li>
 <li><code>intersects()</code>, <code>contains()</code>, <code>within()</code> - Spatial predicates</li>
@@ -6635,8 +6635,40 @@ matching geometries should also be cut to the mask:</p>
   geometries into rows, with the frame method retaining attribute columns</li>
 <li><code>cx</code> - Coordinate-based spatial filtering</li>
 <li><code>clip()</code> - Distributed geometry clipping</li>
+<li><code>overlay()</code> - Distributed intersection, difference, identity, symmetric
+  difference, and union between GeoDataFrames</li>
 <li><code>sindex</code> - Spatial indexing (limited functionality)</li>
 </ul>
+<p><code>overlay()</code> keeps both inputs distributed. Candidate pairs are planned as a
+Sedona spatial join, and difference branches aggregate each source row's
+matching mask geometries on executors. It does not collect geometry rows,
+create Python UDFs, or cache an intermediate pair relation. Constructing the
+result first runs one eager, distributed validation and metadata aggregation
+over both complete input lineages; only the bounded summary reaches the
+driver, while overlay geometry rows remain lazy. Composite modes deliberately
+execute more than one spatial join instead of implicitly persisting a
+potentially large candidate-pair relation, trading recomputation for avoiding
+hidden cache memory and lifecycle costs. Output row order is not guaranteed.</p>
+<p>As in GeoPandas, each input must contain a single basic geometry family and
+invalid polygon inputs are repaired by default. JTS and GEOS can return
+different component or coordinate orderings for topologically equivalent
+results. Sedona's JTS structural repair can partition invalid polygons
+differently from GeoPandas' GEOS linework repair; valid-input topology should
+match. <code>keep_geom_type=None</code> filters like <code>True</code>, but Sedona does not eagerly
+execute the completed overlay solely to issue GeoPandas' conditional warning
+when lower-dimensional geometries are removed. MultiIndex columns, duplicate
+one-level column labels, and attribute suffixes that would create duplicate
+output labels are rejected. Input row indexes, including MultiIndexes, are
+discarded in favor of a fresh distributed index. Non-<code>difference</code> modes
+consistently name the active output column <code>geometry</code>, including empty and
+spatially disjoint results; this avoids GeoPandas' special bbox-fast-path
+naming behavior. An empty left input returns a typed empty result instead of
+raising in modes where some GeoPandas versions access its first geometry.
+<code>identity</code> follows GeoPandas 1.1+ dtype semantics by preserving left-side
+attribute dtypes and promoting nullable right-side attributes. <code>union</code> and
+<code>symmetric_difference</code> use stable nullable attribute dtypes even when a
+logical difference branch produces no rows, avoiding an eager action solely
+to specialize dtypes.</p>
 <p><code>GeoSeries.explode()</code> and <code>GeoDataFrame.explode()</code> use Sedona's native
 <code>ST_Dump</code> expression with Spark <code>posexplode</code>. Geometry parts and frame
 attributes remain distributed; neither operation collects source rows or uses
@@ -6757,7 +6789,7 @@ collecting them into a MultiPoint.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 10, 2026 07:48:35 UTC">August 10, 2026 07:48:35</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 11, 2026 04:21:05 UTC">August 11, 2026 04:21:05</span>
   </span>
 
     

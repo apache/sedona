@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -6417,6 +6416,36 @@ None. This is required if <code class="docutils literal notranslate"><span class
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoDataFrame.iterfeatures">
 <span class="sig-name descname"><span class="pre">iterfeatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">na</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'null'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_bbox</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generator" title="(in Python v3.14)"><span class="pre">Generator</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geodataframe.html#GeoDataFrame.iterfeatures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoDataFrame.iterfeatures" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoDataFrame.overlay">
+<span class="sig-name descname"><span class="pre">overlay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">right</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">how</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'intersection'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_geom_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_valid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sedona/spark/geopandas/geodataframe.html#GeoDataFrame.overlay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoDataFrame.overlay" title="Permalink to this definition"></a></dt>
+<dd><p>Perform a distributed spatial overlay with another GeoDataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>right</strong> (<a class="reference internal" href="#sedona.spark.geopandas.GeoDataFrame" title="sedona.spark.geopandas.GeoDataFrame"><em>GeoDataFrame</em></a>) – The GeoDataFrame overlaid with this frame.</p></li>
+<li><p><strong>how</strong> (<em>{&quot;intersection&quot;</em><em>, </em><em>&quot;union&quot;</em><em>, </em><em>&quot;identity&quot;</em><em>, </em><em>&quot;symmetric_difference&quot;</em><em>, </em><em>&quot;difference&quot;}</em>) – Overlay operation to perform.</p></li>
+<li><p><strong>keep_geom_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default None</em>) – Keep only geometries in the family of this frame. <code class="docutils literal notranslate"><span class="pre">None</span></code> filters
+like <code class="docutils literal notranslate"><span class="pre">True</span></code> without eagerly evaluating the result to emit
+GeoPandas’ conditional dropped-geometry warning.</p></li>
+<li><p><strong>make_valid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default True</em>) – Repair invalid polygon inputs before overlay.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Distributed overlay result. Constructing it eagerly runs one
+distributed validation and metadata aggregation over both inputs;
+overlay geometry rows remain lazily evaluated.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoDataFrame" title="sedona.spark.geopandas.GeoDataFrame">GeoDataFrame</a></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sedona.spark.geopandas.overlay</span></code></p>
+</div>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoDataFrame.plot">
