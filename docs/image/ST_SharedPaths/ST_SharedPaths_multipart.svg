@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 560" width="940" height="560" role="img" aria-labelledby="title description">
+  <title id="title">ST_SharedPaths with a multipart input and noded output</title>
+  <desc id="description">Input A is a MultiLineString containing a rectangular loop and an inner triangle. Input B shares a vertical section of the loop and a diagonal section of the triangle. The diagonal is split at B's vertex 90 161, so result element zero contains three same-direction paths. Result element one is empty.</desc>
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+      text:not([fill]) { fill: #1f2937; }
+      .panel { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.5; }
+      .grid { stroke: #e2e8f0; stroke-width: 1; }
+      .input-a { fill: none; stroke: #2468b4; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+      .input-b { fill: none; stroke: #d1495b; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 10 6; }
+      .same { fill: none; stroke: #158f7d; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+      .coordinate { font-size: 12px; fill: #475569; }
+    </style>
+    <marker id="arrow-a" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#2468b4"/>
+    </marker>
+    <marker id="arrow-b" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#d1495b"/>
+    </marker>
+    <marker id="arrow-same" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#158f7d"/>
+    </marker>
+  </defs>
+
+  <rect width="940" height="560" fill="#ffffff"/>
+  <text x="470" y="30" text-anchor="middle" font-size="20" font-weight="bold">Multipart input and overlay noding</text>
+  <text x="470" y="53" text-anchor="middle" font-size="13" fill="#475569">Shared paths can come from multiple components and can be split at vertices introduced by either input</text>
+
+  <line x1="42" y1="80" x2="82" y2="80" class="input-a"/>
+  <text x="91" y="85" font-size="13">Input A · MultiLineString</text>
+  <line x1="260" y1="80" x2="300" y2="80" class="input-b"/>
+  <text x="309" y="85" font-size="13">Input B · LineString</text>
+  <line x1="476" y1="80" x2="516" y2="80" class="same"/>
+  <text x="525" y="85" font-size="13">Element 0 · same direction</text>
+
+  <rect x="28" y="105" width="603" height="390" rx="8" class="panel"/>
+  <text x="329" y="132" text-anchor="middle" font-size="15" font-weight="bold">Input geometry and shared fragments</text>
+  <line x1="70" y1="450" x2="592" y2="450" class="grid"/>
+  <line x1="70" y1="350" x2="592" y2="350" class="grid"/>
+  <line x1="70" y1="250" x2="592" y2="250" class="grid"/>
+  <line x1="70" y1="150" x2="592" y2="150" class="grid"/>
+
+  <path d="M83 374 L83 145 L469 145 L469 374 L83 374" class="input-a" marker-end="url(#arrow-a)"/>
+  <path d="M180 298 L373 298 L276 221 L180 298" class="input-a" marker-end="url(#arrow-a)"/>
+  <text x="95" y="165" font-size="13" font-weight="bold" fill="#2468b4">A₁</text>
+  <text x="187" y="288" font-size="13" font-weight="bold" fill="#2468b4">A₂</text>
+
+  <path d="M565 450 L469 279 L469 374 L330 264 L276 221" class="input-b" marker-end="url(#arrow-b)"/>
+  <text x="546" y="471" font-size="13" font-weight="bold" fill="#c24150">B starts</text>
+
+  <path d="M469 279 L469 374" class="same" marker-end="url(#arrow-same)"/>
+  <path d="M373 298 L330 264" class="same" marker-end="url(#arrow-same)"/>
+  <path d="M330 264 L276 221" class="same" marker-end="url(#arrow-same)"/>
+  <circle cx="469" cy="279" r="4" fill="#ffffff" stroke="#158f7d" stroke-width="2"/>
+  <circle cx="469" cy="374" r="4" fill="#ffffff" stroke="#158f7d" stroke-width="2"/>
+  <circle cx="373" cy="298" r="4" fill="#ffffff" stroke="#158f7d" stroke-width="2"/>
+  <circle cx="330" cy="264" r="6" fill="#f4b942" stroke="#8a5a00" stroke-width="2"/>
+  <circle cx="276" cy="221" r="4" fill="#ffffff" stroke="#158f7d" stroke-width="2"/>
+
+  <text x="485" y="331" font-size="12" font-weight="bold" fill="#0f766e">shared loop edge</text>
+  <text x="330" y="338" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f766e">shared triangle edge</text>
+  <path d="M340 250 L385 220" fill="none" stroke="#8a5a00" stroke-width="1.5"/>
+  <text x="390" y="217" font-size="12" font-weight="bold" fill="#8a5a00">B vertex (90 161)</text>
+  <text x="390" y="234" font-size="11" fill="#64748b">splits the result</text>
+
+  <rect x="650" y="105" width="262" height="390" rx="8" class="panel"/>
+  <text x="781" y="132" text-anchor="middle" font-size="15" font-weight="bold">GeometryCollection result</text>
+
+  <rect x="670" y="157" width="222" height="230" rx="7" fill="#ffffff" stroke="#158f7d" stroke-width="2"/>
+  <text x="685" y="184" font-size="13" font-weight="bold" fill="#0f766e">Element 0 · same</text>
+  <path d="M714 215 L714 275" class="same" marker-end="url(#arrow-same)"/>
+  <text x="736" y="249" class="coordinate">(126 156.25 → 126 125)</text>
+  <path d="M850 340 L805 315" class="same" marker-end="url(#arrow-same)"/>
+  <path d="M797 310 L750 284" class="same" marker-end="url(#arrow-same)"/>
+  <circle cx="801" cy="312" r="4" fill="#f4b942" stroke="#8a5a00" stroke-width="1.5"/>
+  <text x="781" y="365" text-anchor="middle" class="coordinate">(101 150 → 90 161)</text>
+  <text x="781" y="381" text-anchor="middle" class="coordinate">(90 161 → 76 175)</text>
+
+  <rect x="670" y="409" width="222" height="58" rx="7" fill="#ffffff" stroke="#7b2cbf" stroke-width="2"/>
+  <text x="685" y="434" font-size="13" font-weight="bold" fill="#7b2cbf">Element 1 · opposite</text>
+  <text x="781" y="454" text-anchor="middle" class="coordinate">MULTILINESTRING EMPTY</text>
+
+  <text x="470" y="530" text-anchor="middle" font-size="12" fill="#334155">The highlighted vertex belongs to B, so one continuous shared diagonal is returned as two paths</text>
+</svg>
