@@ -1161,6 +1161,19 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(actualResult == expectedResult)
     }
 
+    it("Passed ST_SharedPaths") {
+      val lineDf = sparkSession.sql(
+        "SELECT ST_GeomFromWKT('LINESTRING (0 0, 10 0)') AS a, ST_GeomFromWKT('LINESTRING (15 0, 5 0)') AS b")
+      val expectedResult =
+        "GEOMETRYCOLLECTION (MULTILINESTRING EMPTY, MULTILINESTRING ((5 0, 10 0)))"
+
+      val stringResult = lineDf.select(ST_SharedPaths("a", "b")).first().getAs[Geometry](0)
+      assertEquals(expectedResult, stringResult.toText)
+
+      val columnResult = lineDf.select(ST_SharedPaths($"a", $"b")).first().getAs[Geometry](0)
+      assertEquals(expectedResult, columnResult.toText)
+    }
+
     it("Passed ST_Union") {
       val polygonDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON ((-3 -3, 3 -3, 3 3, -3 3, -3 -3))') AS a, ST_GeomFromWKT('POLYGON ((-2 1, 2 1, 2 4, -2 4, -2 1))') AS b")

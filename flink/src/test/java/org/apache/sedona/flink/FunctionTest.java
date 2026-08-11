@@ -835,6 +835,18 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testSharedPaths() {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT ST_SharedPaths(ST_GeomFromWKT('LINESTRING (0 0, 10 0)'), "
+                + "ST_GeomFromWKT('LINESTRING (15 0, 5 0)'))");
+    Geometry result = (Geometry) first(table).getField(0);
+    assertEquals(
+        "GEOMETRYCOLLECTION (MULTILINESTRING EMPTY, MULTILINESTRING ((5 0, 10 0)))",
+        result.toString());
+  }
+
+  @Test
   public void testLength() {
     Table polygonTable = createLineStringTable(1);
     Table resultTable =

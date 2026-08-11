@@ -530,6 +530,14 @@ public class TestFunctions extends TestBase {
   }
 
   @Test
+  public void test_ST_SharedPaths() {
+    registerUDF("ST_SharedPaths", byte[].class, byte[].class);
+    verifySqlSingleRes(
+        "select sedona.ST_AsText(sedona.ST_SharedPaths(sedona.ST_GeomFromText('LINESTRING(0 0, 10 0)'), sedona.ST_GeomFromText('LINESTRING(15 0, 5 0)')))",
+        "GEOMETRYCOLLECTION (MULTILINESTRING EMPTY, MULTILINESTRING ((5 0, 10 0)))");
+  }
+
+  @Test
   public void test_ST_IsClosed() {
     registerUDF("ST_IsClosed", byte[].class);
     verifySqlSingleRes(

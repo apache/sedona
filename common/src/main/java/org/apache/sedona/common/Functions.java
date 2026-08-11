@@ -1362,6 +1362,10 @@ public class Functions {
     return leftGeometry.intersection(rightGeometry);
   }
 
+  public static Geometry sharedPaths(Geometry leftGeometry, Geometry rightGeometry) {
+    return SharedPaths.compute(leftGeometry, rightGeometry);
+  }
+
   public static Geometry makeValid(Geometry geometry, boolean keepCollapsed) {
     GeometryFixer fixer = new GeometryFixer(geometry);
     fixer.setKeepCollapsed(keepCollapsed);

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 220" width="500" height="220" style="background:#ffffff">
+  <defs>
+    <marker id="arrow-a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#4a90d9"/>
+    </marker>
+    <marker id="arrow-b" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#d94a4a"/>
+    </marker>
+  </defs>
+  <text x="250" y="24" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#333333">ST_SharedPaths(A, B)</text>
+  <line x1="55" y1="85" x2="330" y2="85" stroke="#4a90d9" stroke-width="5" marker-end="url(#arrow-a)"/>
+  <text x="45" y="90" text-anchor="end" font-family="Arial, sans-serif" font-size="14" fill="#4a90d9">A</text>
+  <line x1="445" y1="115" x2="175" y2="115" stroke="#d94a4a" stroke-width="5" marker-end="url(#arrow-b)"/>
+  <text x="455" y="120" font-family="Arial, sans-serif" font-size="14" fill="#d94a4a">B</text>
+  <line x1="175" y1="145" x2="330" y2="145" stroke="#7b4ab8" stroke-width="7"/>
+  <text x="250" y="174" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#333333">Opposite-direction shared path</text>
+  <text x="250" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666666">Result coordinates follow A</text>
+</svg>

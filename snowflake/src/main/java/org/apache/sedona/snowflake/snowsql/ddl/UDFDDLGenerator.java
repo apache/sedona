@@ -104,7 +104,8 @@ public class UDFDDLGenerator {
     // Replace Geometry with GEOGRAPHY and generate DDL for UDFsV2 again
     Constants.snowflakeTypeMap.replace("Geometry", "GEOGRAPHY");
     for (Method method : udfV2Methods()) {
-      if (method.getModifiers() == (Modifier.PUBLIC | Modifier.STATIC)) {
+      if (method.getModifiers() == (Modifier.PUBLIC | Modifier.STATIC)
+          && !method.isAnnotationPresent(UDFAnnotations.GeometryOnly.class)) {
         ddlList.add(buildUDFDDL(method, configs, stageName, isNativeApp, appRoleName));
       }
     }

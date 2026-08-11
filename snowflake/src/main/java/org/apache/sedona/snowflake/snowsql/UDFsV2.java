@@ -703,6 +703,17 @@ public class UDFsV2 {
             GeometrySerde.deserGeoJson(leftGeometry), GeometrySerde.deserGeoJson(rightGeometry)));
   }
 
+  @UDFAnnotations.GeometryOnly
+  @UDFAnnotations.ParamMeta(
+      argNames = {"leftGeometry", "rightGeometry"},
+      argTypes = {"Geometry", "Geometry"},
+      returnTypes = "Geometry")
+  public static String ST_SharedPaths(String leftGeometry, String rightGeometry) {
+    return GeometrySerde.serGeoJson(
+        Functions.sharedPaths(
+            GeometrySerde.deserGeoJson(leftGeometry), GeometrySerde.deserGeoJson(rightGeometry)));
+  }
+
   @UDFAnnotations.ParamMeta(
       argNames = {"leftGeometry", "rightGeometry"},
       argTypes = {"Geometry", "Geometry"})
