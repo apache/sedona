@@ -109,6 +109,13 @@ public final class SharedPaths {
       return emptyResult(resultFactory);
     }
 
+    // A shared path requires the envelopes to overlap at overlay precision. Avoid overlay setup,
+    // dimensional scanning, and result assembly when the precision-adjusted envelopes prove the
+    // result is empty.
+    if (envelopesDisjoint(left, right)) {
+      return emptyResult(resultFactory);
+    }
+
     // Stage 1: robust overlay finds the physical shared coverage. Point-only intersections are
     // intentionally ignored later because LineStringExtracter returns only linear components.
     Geometry intersection = OverlayNGRobust.overlay(left, right, OverlayNG.INTERSECTION);
@@ -197,6 +204,26 @@ public final class SharedPaths {
     // A fixed-precision overlay may round both ordinates by half a grid cell. Use the diagonal
     // displacement so the snapped result can still be located on the original source linework.
     return Math.sqrt(0.5) * precisionModel.gridSize();
+  }
+
+  private static boolean envelopesDisjoint(Geometry left, Geometry right) {
+    Envelope leftEnvelope = left.getEnvelopeInternal();
+    Envelope rightEnvelope = right.getEnvelopeInternal();
+    PrecisionModel precisionModel = left.getPrecisionModel();
+    if (precisionModel.isFloating()) {
+      return leftEnvelope.disjoint(rightEnvelope);
+    }
+
+    // Fixed-precision overlay rounds coordinates to the first input's grid. Compare rounded
+    // envelope bounds so nearby raw envelopes are not rejected when rounding makes them overlap.
+    return precisionModel.makePrecise(rightEnvelope.getMinX())
+            > precisionModel.makePrecise(leftEnvelope.getMaxX())
+        || precisionModel.makePrecise(rightEnvelope.getMaxX())
+            < precisionModel.makePrecise(leftEnvelope.getMinX())
+        || precisionModel.makePrecise(rightEnvelope.getMinY())
+            > precisionModel.makePrecise(leftEnvelope.getMaxY())
+        || precisionModel.makePrecise(rightEnvelope.getMaxY())
+            < precisionModel.makePrecise(leftEnvelope.getMinY());
   }
 
   private static Direction direction(

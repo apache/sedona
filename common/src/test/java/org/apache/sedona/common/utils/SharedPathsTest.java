@@ -120,6 +120,24 @@ public class SharedPathsTest {
   }
 
   @Test
+  public void keepsFixedPrecisionPathsThatOverlapAfterRounding() throws ParseException {
+    GeometryFactory fixedFactory = new GeometryFactory(new PrecisionModel(1.0));
+    LineString left =
+        fixedFactory.createLineString(
+            new Coordinate[] {new Coordinate(0, 0.24), new Coordinate(10, 0.24)});
+    LineString right =
+        fixedFactory.createLineString(
+            new Coordinate[] {new Coordinate(5, 0.26), new Coordinate(15, 0.26)});
+
+    assertTrue(left.getEnvelopeInternal().disjoint(right.getEnvelopeInternal()));
+    Geometry result = Functions.sharedPaths(left, right);
+
+    Geometry expected =
+        reader.read("GEOMETRYCOLLECTION (MULTILINESTRING ((5 0, 10 0)), MULTILINESTRING EMPTY)");
+    assertTrue("Expected " + expected + " but found " + result, expected.equalsExact(result));
+  }
+
+  @Test
   public void choosesTheClosestSegmentBeforeTheEarliestTraversal() throws ParseException {
     assertSharedPaths(
         "MULTILINESTRING ((1000000000000010 1, 1000000000000000 1), "
@@ -193,12 +211,18 @@ public class SharedPathsTest {
             reader.read("LINESTRING EMPTY"), reader.read("LINESTRING (0 0, 1 0)"));
     assertBucketsEmpty(emptyResult);
 
-    emptyResult =
-        Functions.sharedPaths(
-            reader.read("LINESTRING Z (0 0 1, 1 0 2)"), reader.read("LINESTRING Z (2 0 3, 3 0 4)"));
+    Geometry disjointLeft = reader.read("LINESTRING Z (0 0 1, 1 0 2)");
+    Geometry disjointRight = reader.read("LINESTRING Z (2 0 3, 3 0 4)");
+    disjointLeft.setSRID(4326);
+    disjointRight.setSRID(4326);
+    emptyResult = Functions.sharedPaths(disjointLeft, disjointRight);
     assertEquals(
         "GEOMETRYCOLLECTION (MULTILINESTRING EMPTY, MULTILINESTRING EMPTY)",
         Functions.asWKT(emptyResult));
+    assertBucketsEmpty(emptyResult);
+    assertEquals(4326, emptyResult.getSRID());
+    assertEquals(4326, emptyResult.getGeometryN(0).getSRID());
+    assertEquals(4326, emptyResult.getGeometryN(1).getSRID());
     assertNull(Functions.sharedPaths(null, reader.read("LINESTRING (0 0, 1 0)")));
     assertNull(Functions.sharedPaths(reader.read("LINESTRING (0 0, 1 0)"), null));
   }
@@ -208,7 +232,7 @@ public class SharedPathsTest {
     Geometry line = reader.read("LINESTRING (0 0, 1 0)");
     for (String invalidWkt :
         new String[] {
-          "POINT (0 0)",
+          "POINT (100 100)",
           "POLYGON ((0 0, 1 0, 1 1, 0 0))",
           "GEOMETRYCOLLECTION (LINESTRING (0 0, 1 0))",
           "GEOMETRYCOLLECTION EMPTY"
@@ -230,7 +254,7 @@ public class SharedPathsTest {
   @Test
   public void rejectsMixedSRIDsAndRetainsMatchingSRID() throws ParseException {
     Geometry left = reader.read("LINESTRING (0 0, 10 0)");
-    Geometry right = reader.read("LINESTRING (0 0, 10 0)");
+    Geometry right = reader.read("LINESTRING (20 0, 30 0)");
     left.setSRID(10);
     right.setSRID(5);
 
