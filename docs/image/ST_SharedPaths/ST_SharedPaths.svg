@@ -1,83 +1,89 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 520" width="940" height="520" role="img" aria-labelledby="title description">
-  <title id="title">ST_SharedPaths with same-direction and opposite-direction results</title>
-  <desc id="description">Input A is a horizontal line from 0 0 to 100 0. Input B follows A from 20 0 to 30 0, leaves A, then returns and follows A backwards from 80 0 to 70 0. Result element zero contains the same-direction segment from 20 0 to 30 0. Result element one contains the opposite-direction segment from 70 0 to 80 0, oriented like A.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 720" width="1100" height="720" role="img" aria-labelledby="shared-paths-title shared-paths-description">
+  <title id="shared-paths-title">ST_SharedPaths with same-direction and opposite-direction results</title>
+  <desc id="shared-paths-description">Four-stage diagram. Input A is shown alone as LINESTRING (0 0, 100 0). Input B is shown alone as LINESTRING (20 0, 30 0, 30 50, 80 0, 70 0). The overlay shows B following A from 20 0 to 30 0 and returning over A from 80 0 to 70 0. The output is GEOMETRYCOLLECTION (MULTILINESTRING ((20 0, 30 0)), MULTILINESTRING ((70 0, 80 0))). Both output paths are oriented like A.</desc>
   <defs>
     <style>
       text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
-      text:not([fill]) { fill: #1f2937; }
-      .panel { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.5; }
-      .input-a { fill: none; stroke: #2468b4; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
-      .input-b { fill: none; stroke: #d1495b; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 10 6; }
-      .same { fill: none; stroke: #158f7d; stroke-width: 8; stroke-linecap: round; }
-      .opposite { fill: none; stroke: #7b2cbf; stroke-width: 8; stroke-linecap: round; }
-      .coordinate { font-size: 12px; fill: #475569; }
+      text:not([fill]) { fill: #172033; }
+      .panel { fill: #f8fafc; stroke: #b8c3d1; stroke-width: 1.5; }
+      .card { fill: #ffffff; stroke-width: 2; }
+      .panel-title { font-size: 15px; font-weight: 700; }
+      .caption { font-size: 12px; fill: #475569; }
+      .wkt { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; fill: #334155; }
+      .input-a { fill: none; stroke: #005ea8; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+      .input-b { fill: none; stroke: #c33c54; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 12 7; }
+      .shared-same-halo { fill: none; stroke: #98dfd2; stroke-width: 18; stroke-linecap: round; }
+      .shared-opposite-halo { fill: none; stroke: #d6b8ec; stroke-width: 18; stroke-linecap: round; }
+      .same { fill: none; stroke: #007a65; stroke-width: 8; stroke-linecap: round; }
+      .opposite { fill: none; stroke: #6f2da8; stroke-width: 8; stroke-linecap: round; }
     </style>
-    <marker id="arrow-a" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L12,6 L0,12 Z" fill="#2468b4"/>
-    </marker>
-    <marker id="arrow-b" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L12,6 L0,12 Z" fill="#d1495b"/>
-    </marker>
-    <marker id="arrow-same" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L12,6 L0,12 Z" fill="#158f7d"/>
-    </marker>
-    <marker id="arrow-opposite" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse">
-      <path d="M0,0 L12,6 L0,12 Z" fill="#7b2cbf"/>
-    </marker>
+    <marker id="main-arrow-a" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L12,6 L0,12 Z" fill="#005ea8"/></marker>
+    <marker id="main-arrow-b" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L12,6 L0,12 Z" fill="#c33c54"/></marker>
+    <marker id="main-arrow-same" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L12,6 L0,12 Z" fill="#007a65"/></marker>
+    <marker id="main-arrow-opposite" markerWidth="12" markerHeight="12" refX="11" refY="6" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L12,6 L0,12 Z" fill="#6f2da8"/></marker>
   </defs>
 
-  <rect width="940" height="520" fill="#ffffff"/>
-  <text x="470" y="30" text-anchor="middle" font-size="20" font-weight="bold">Both result buckets can be populated</text>
-  <text x="470" y="53" text-anchor="middle" font-size="13" fill="#475569">Shared paths are grouped by traversal direction and returned in the direction of input A</text>
+  <rect width="1100" height="720" fill="#ffffff"/>
+  <text x="550" y="30" text-anchor="middle" font-size="21" font-weight="700">Same and opposite shared paths</text>
+  <text x="550" y="54" text-anchor="middle" font-size="13" fill="#475569">See each input separately, then compare the overlay and the two ordered output buckets</text>
 
-  <line x1="42" y1="80" x2="82" y2="80" class="input-a"/>
-  <text x="91" y="85" font-size="13">Input A</text>
-  <line x1="178" y1="80" x2="218" y2="80" class="input-b"/>
-  <text x="227" y="85" font-size="13">Input B</text>
-  <line x1="314" y1="80" x2="354" y2="80" class="same"/>
-  <text x="363" y="85" font-size="13">Element 0: same</text>
-  <line x1="502" y1="80" x2="542" y2="80" class="opposite"/>
-  <text x="551" y="85" font-size="13">Element 1: opposite</text>
+  <rect x="25" y="82" width="510" height="175" rx="9" class="panel"/>
+  <text x="45" y="108" class="panel-title" fill="#005ea8">1 · Input A</text>
+  <text x="45" y="129" class="caption">Reference direction: left → right</text>
+  <path d="M70 184 L490 184" class="input-a" marker-end="url(#main-arrow-a)"/>
+  <circle cx="70" cy="184" r="4" fill="#ffffff" stroke="#005ea8" stroke-width="2"/>
+  <text x="70" y="210" text-anchor="middle" class="caption">(0 0)</text>
+  <text x="490" y="210" text-anchor="middle" class="caption">(100 0)</text>
+  <text x="280" y="238" text-anchor="middle" class="wkt">A = LINESTRING (0 0, 100 0)</text>
 
-  <rect x="28" y="105" width="575" height="335" rx="8" class="panel"/>
-  <text x="315" y="132" text-anchor="middle" font-size="15" font-weight="bold">Inputs and lineal intersection</text>
+  <rect x="565" y="82" width="510" height="175" rx="9" class="panel"/>
+  <text x="585" y="108" class="panel-title" fill="#c33c54">2 · Input B</text>
+  <text x="585" y="129" class="caption">Follows A, leaves it, then returns backwards</text>
+  <path d="M610 210 L655 210 L655 145 L910 210 L865 210" class="input-b" marker-end="url(#main-arrow-b)"/>
+  <circle cx="610" cy="210" r="4" fill="#ffffff" stroke="#c33c54" stroke-width="2"/>
+  <text x="610" y="232" text-anchor="middle" class="caption">start (20 0)</text>
+  <text x="865" y="232" text-anchor="middle" class="caption">end (70 0)</text>
+  <text x="820" y="151" text-anchor="middle" class="caption">off A</text>
+  <text x="820" y="247" text-anchor="middle" class="wkt">B = LINESTRING (20 0, 30 0, 30 50, 80 0, 70 0)</text>
 
-  <path d="M70 330 L540 330" class="input-a" marker-end="url(#arrow-a)"/>
-  <text x="78" y="315" font-size="14" font-weight="bold" fill="#2468b4">A</text>
-  <text x="516" y="352" class="coordinate">(100 0)</text>
-  <text x="56" y="352" class="coordinate">(0 0)</text>
+  <rect x="25" y="282" width="660" height="270" rx="9" class="panel"/>
+  <text x="45" y="309" class="panel-title">3 · Overlay and classify</text>
+  <text x="45" y="330" class="caption">Blue A remains visible between red B's dashes; tinted bands mark the shared portions</text>
+  <path d="M186 432 L242 432" class="shared-same-halo"/>
+  <path d="M463 432 L519 432" class="shared-opposite-halo"/>
+  <path d="M74 432 L632 432" class="input-a" marker-end="url(#main-arrow-a)"/>
+  <path d="M186 432 L242 432 L242 350 L519 432 L463 432" class="input-b" marker-end="url(#main-arrow-b)"/>
+  <path d="M186 432 L242 432" class="same" marker-end="url(#main-arrow-same)"/>
+  <path d="M463 432 L519 432" class="opposite" marker-end="url(#main-arrow-opposite)"/>
+  <text x="214" y="405" text-anchor="middle" font-size="12" font-weight="700" fill="#006b58">same direction</text>
+  <text x="491" y="470" text-anchor="middle" font-size="12" font-weight="700" fill="#6f2da8">B goes ←; result follows A →</text>
+  <text x="74" y="457" text-anchor="middle" class="caption">0</text>
+  <text x="186" y="457" text-anchor="middle" class="caption">20</text>
+  <text x="242" y="457" text-anchor="middle" class="caption">30</text>
+  <text x="463" y="457" text-anchor="middle" class="caption">70</text>
+  <text x="519" y="457" text-anchor="middle" class="caption">80</text>
+  <text x="632" y="457" text-anchor="middle" class="caption">100</text>
+  <line x1="62" y1="516" x2="92" y2="516" class="input-a"/><text x="101" y="521" font-size="12">A</text>
+  <line x1="140" y1="516" x2="170" y2="516" class="input-b"/><text x="179" y="521" font-size="12">B</text>
+  <line x1="218" y1="516" x2="248" y2="516" class="same"/><text x="257" y="521" font-size="12">same bucket</text>
+  <line x1="365" y1="516" x2="395" y2="516" class="opposite"/><text x="404" y="521" font-size="12">opposite bucket</text>
 
-  <path d="M164 330 L211 330 L211 165 L446 330 L399 330" class="input-b" marker-end="url(#arrow-b)"/>
-  <text x="220" y="166" font-size="14" font-weight="bold" fill="#c24150">B leaves A</text>
-  <text x="450" y="313" font-size="13" font-weight="bold" fill="#c24150">B returns backwards</text>
+  <rect x="710" y="282" width="365" height="270" rx="9" class="panel"/>
+  <text x="730" y="309" class="panel-title">4 · GeometryCollection output</text>
+  <rect x="730" y="333" width="325" height="89" rx="7" class="card" stroke="#007a65"/>
+  <text x="746" y="357" font-size="13" font-weight="700" fill="#006b58">Element 0 · same direction</text>
+  <path d="M765 385 L1015 385" class="same" marker-end="url(#main-arrow-same)"/>
+  <text x="892" y="411" text-anchor="middle" class="wkt">MULTILINESTRING ((20 0, 30 0))</text>
+  <rect x="730" y="442" width="325" height="89" rx="7" class="card" stroke="#6f2da8"/>
+  <text x="746" y="466" font-size="13" font-weight="700" fill="#6f2da8">Element 1 · opposite direction</text>
+  <path d="M765 494 L1015 494" class="opposite" marker-end="url(#main-arrow-opposite)"/>
+  <text x="892" y="520" text-anchor="middle" class="wkt">MULTILINESTRING ((70 0, 80 0))</text>
 
-  <path d="M164 330 L211 330" class="same" marker-end="url(#arrow-same)"/>
-  <path d="M399 330 L446 330" class="opposite" marker-end="url(#arrow-opposite)"/>
-  <circle cx="164" cy="330" r="4" fill="#ffffff" stroke="#158f7d" stroke-width="2"/>
-  <circle cx="211" cy="330" r="4" fill="#ffffff" stroke="#158f7d" stroke-width="2"/>
-  <circle cx="399" cy="330" r="4" fill="#ffffff" stroke="#7b2cbf" stroke-width="2"/>
-  <circle cx="446" cy="330" r="4" fill="#ffffff" stroke="#7b2cbf" stroke-width="2"/>
-  <text x="187" y="305" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f766e">same</text>
-  <text x="422" y="380" text-anchor="middle" font-size="12" font-weight="bold" fill="#7b2cbf">opposite</text>
-  <text x="158" y="354" text-anchor="end" class="coordinate">20</text>
-  <text x="216" y="354" class="coordinate">30</text>
-  <text x="393" y="354" text-anchor="end" class="coordinate">70</text>
-  <text x="451" y="354" class="coordinate">80</text>
-
-  <rect x="622" y="105" width="290" height="335" rx="8" class="panel"/>
-  <text x="767" y="132" text-anchor="middle" font-size="15" font-weight="bold">GeometryCollection result</text>
-
-  <rect x="642" y="153" width="250" height="105" rx="7" fill="#ffffff" stroke="#158f7d" stroke-width="2"/>
-  <text x="657" y="178" font-size="13" font-weight="bold" fill="#0f766e">Element 0 · same direction</text>
-  <path d="M670 211 L850 211" class="same" marker-end="url(#arrow-same)"/>
-  <text x="760" y="241" text-anchor="middle" class="coordinate">MULTILINESTRING ((20 0, 30 0))</text>
-
-  <rect x="642" y="285" width="250" height="125" rx="7" fill="#ffffff" stroke="#7b2cbf" stroke-width="2"/>
-  <text x="657" y="310" font-size="13" font-weight="bold" fill="#7b2cbf">Element 1 · opposite direction</text>
-  <path d="M670 345 L850 345" class="opposite" marker-end="url(#arrow-opposite)"/>
-  <text x="760" y="375" text-anchor="middle" class="coordinate">MULTILINESTRING ((70 0, 80 0))</text>
-  <text x="760" y="397" text-anchor="middle" font-size="11" fill="#64748b">coordinates still follow A →</text>
-
-  <text x="470" y="474" text-anchor="middle" font-size="12" fill="#334155">A = LINESTRING (0 0, 100 0)</text>
-  <text x="470" y="496" text-anchor="middle" font-size="12" fill="#334155">B = LINESTRING (20 0, 30 0, 30 50, 80 0, 70 0)</text>
+  <rect x="25" y="577" width="1050" height="116" rx="9" fill="#f8fafc" stroke="#b8c3d1" stroke-width="1.5"/>
+  <text x="45" y="604" font-size="14" font-weight="700">Exact result</text>
+  <text x="45" y="629" class="wkt">GEOMETRYCOLLECTION (</text>
+  <text x="65" y="652" class="wkt" fill="#006b58">MULTILINESTRING ((20 0, 30 0)),</text>
+  <text x="65" y="675" class="wkt" fill="#6f2da8">MULTILINESTRING ((70 0, 80 0)))</text>
+  <text x="650" y="644" font-size="12" fill="#475569">Both elements use A's left-to-right coordinate order.</text>
+  <text x="650" y="667" font-size="12" fill="#475569">Element position—not color—is the SQL result contract.</text>
 </svg>
