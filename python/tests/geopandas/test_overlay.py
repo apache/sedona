@@ -29,17 +29,18 @@ from sedona.spark.sql import st_functions as stf
 from sedona.spark.sql.types import GeometryType
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 
+GEOPANDAS_GE_10 = parse_version(gpd.__version__) >= parse_version("1.0.0")
 GEOPANDAS_GE_11 = parse_version(gpd.__version__) >= parse_version("1.1.0")
 
 
 class TestDistributedOverlay(TestGeopandasBase):
     @staticmethod
-    def _value_equal(left, right):
+    def _value_equal(left, right, check_geom_type=True):
         if isinstance(left, BaseGeometry) or isinstance(right, BaseGeometry):
             return (
                 isinstance(left, BaseGeometry)
                 and isinstance(right, BaseGeometry)
-                and left.geom_type == right.geom_type
+                and (not check_geom_type or left.geom_type == right.geom_type)
                 and left.equals(right)
             )
         if pd.isna(left) and pd.isna(right):
@@ -47,7 +48,9 @@ class TestDistributedOverlay(TestGeopandasBase):
         return left == right
 
     @classmethod
-    def _assert_overlay_equal(cls, actual, expected, check_dtype=True):
+    def _assert_overlay_equal(
+        cls, actual, expected, check_dtype=True, check_geom_type=True
+    ):
         assert isinstance(actual, GeoDataFrame)
         actual_local = actual.to_geopandas()
         assert list(actual_local.index) == list(range(len(actual_local)))
@@ -67,7 +70,11 @@ class TestDistributedOverlay(TestGeopandasBase):
             for position in unmatched:
                 actual_row = actual_local.iloc[position]
                 if all(
-                    cls._value_equal(actual_row[column], expected_row[column])
+                    cls._value_equal(
+                        actual_row[column],
+                        expected_row[column],
+                        check_geom_type=check_geom_type,
+                    )
                     for column in expected_local.columns
                 ):
                     unmatched.remove(position)
@@ -239,8 +246,18 @@ class TestDistributedOverlay(TestGeopandasBase):
         )
         expected = gpd.overlay(left_local, right_local, how=how, keep_geom_type=False)
 
-        result_local = self._assert_overlay_equal(result, expected)
-        assert sorted(result_local.geom_type) == sorted(expected.geom_type)
+        # GeoPandas 0.13 unwraps the single-part MultiPolygon during overlay
+        # output repair. The distributed API follows GeoPandas 1.0+ and must
+        # preserve it, while topology still matches the legacy oracle.
+        result_local = self._assert_overlay_equal(
+            result,
+            expected,
+            check_geom_type=GEOPANDAS_GE_10,
+        )
+        expected_types = ["MultiPolygon"]
+        if how in ("symmetric_difference", "union"):
+            expected_types.append("Polygon")
+        assert sorted(result_local.geom_type) == sorted(expected_types)
 
     def test_common_mode_dtype_promotion_matches_geopandas(self):
         left_local = gpd.GeoDataFrame(
