@@ -32,8 +32,15 @@ a `GeometryCollection` containing exactly two `MultiLineString` elements. The fi
 traversed in the same direction by both inputs; the second contains paths traversed in opposite
 directions. Coordinates in both elements follow the direction of `A`.
 
-The matching input SRID is retained. As in PostGIS, a non-empty result retains a Z dimension when
-either input has Z, while M values are dropped. An empty result is two-dimensional.
+For non-simple inputs that traverse the same path more than once, direction follows the first
+matching source traversal. Consequently, swapping `A` and `B` can change which result element
+contains a path.
+
+The matching input SRID is retained. A non-empty result retains Z only when at least one input has
+Z and every coordinate of every returned shared path resolves to a finite Z from the input
+geometries. If any returned coordinate does not resolve to a finite source Z, the entire result is
+two-dimensional. M values are always dropped. A result with no shared paths is also
+two-dimensional.
 
 When the inputs do not share a path, including when they intersect only at points, both elements
 are empty `MultiLineString` geometries.

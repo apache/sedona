@@ -146,6 +146,30 @@ public class SharedPathsTest {
   }
 
   @Test
+  public void matchesPostGISDirectionBucketsForAmbiguousNonSimpleTraversals()
+      throws ParseException {
+    String left = "LINESTRING (2.5 0.5, 1 2, 2.5 0.5, 0 0.5, 2 1.5)";
+    String right = "LINESTRING (1 2, 2.5 0.5, 2.000678017814481 2.5, 2.5 0.5)";
+
+    // Both lines revisit the same path, so a shared coordinate can belong to more than one source
+    // traversal. PostGIS does not promise operand-order symmetry for this ambiguous case: swapping
+    // the operands changes the direction buckets. Compare bucket topology because a repeated path
+    // also has no unique output orientation.
+    assertSharedPathBuckets(
+        left,
+        right,
+        "GEOMETRYCOLLECTION (MULTILINESTRING ((2.5 0.5, 1.6666666666666667 "
+            + "1.3333333333333333)), MULTILINESTRING ((1.6666666666666667 "
+            + "1.3333333333333333, 1 2)))");
+    assertSharedPathBuckets(
+        right,
+        left,
+        "GEOMETRYCOLLECTION (MULTILINESTRING EMPTY, MULTILINESTRING ((1 2, "
+            + "1.6666666666666667 1.3333333333333333), (1.6666666666666667 "
+            + "1.3333333333333333, 2.5 0.5)))");
+  }
+
+  @Test
   public void ignoresPointIntersections() throws ParseException {
     assertSharedPaths(
         "LINESTRING (0 0, 10 0)",
@@ -399,6 +423,21 @@ public class SharedPathsTest {
     Geometry actual = Functions.sharedPaths(reader.read(leftWkt), reader.read(rightWkt));
     Geometry expected = reader.read(expectedWkt);
     assertTrue("Expected " + expected + " but found " + actual, expected.equalsExact(actual));
+  }
+
+  private void assertSharedPathBuckets(String leftWkt, String rightWkt, String expectedWkt)
+      throws ParseException {
+    Geometry actual = Functions.sharedPaths(reader.read(leftWkt), reader.read(rightWkt));
+    Geometry expected = reader.read(expectedWkt);
+    for (int bucket = 0; bucket < 2; bucket++) {
+      Geometry actualBucket = actual.getGeometryN(bucket);
+      Geometry expectedBucket = expected.getGeometryN(bucket);
+      boolean matches =
+          expectedBucket.isEmpty()
+              ? actualBucket.isEmpty()
+              : expectedBucket.equalsTopo(actualBucket);
+      assertTrue("Expected bucket " + expectedBucket + " but found " + actualBucket, matches);
+    }
   }
 
   private void assertBucketsEmpty(Geometry result) {

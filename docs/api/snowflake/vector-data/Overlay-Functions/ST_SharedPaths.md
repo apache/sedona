@@ -31,11 +31,17 @@ containing exactly two `MultiLineString` elements. The first contains paths trav
 direction by both inputs; the second contains paths traversed in opposite directions. Coordinates
 in both elements follow the direction of `A`.
 
+For non-simple inputs that traverse the same path more than once, direction follows the first
+matching source traversal. Consequently, swapping `A` and `B` can change which result element
+contains a path.
+
 Snowflake's native `GEOMETRY` bridge passes values to Sedona as GeoJSON, which does not carry SRID
 metadata. Consequently, this variant cannot reject mixed input SRIDs or preserve a matching SRID;
-its result has SRID 0. The legacy binary geometry interface preserves matching SRIDs. As in
-PostGIS, a non-empty result retains a Z dimension when either input has Z, while M values are
-dropped. An empty result is two-dimensional.
+its result has SRID 0. The legacy binary geometry interface preserves matching SRIDs. A non-empty
+result retains Z only when at least one input has Z and every coordinate of every returned shared
+path resolves to a finite Z from the input geometries. If any returned coordinate does not resolve
+to a finite source Z, the entire result is two-dimensional. M values are always dropped. A result
+with no shared paths is also two-dimensional.
 
 When the inputs do not share a path, including when they intersect only at points, both elements
 are empty `MultiLineString` geometries.
