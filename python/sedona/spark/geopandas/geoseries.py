@@ -117,6 +117,23 @@ IMPLEMENTATION_PRIORITY = {
 }
 
 
+def _warn_crs_mismatch(left, right) -> None:
+    """Emit GeoPandas' standard warning when two geometry CRSs differ."""
+    if left.crs == right.crs:
+        return
+    try:
+        from geopandas.array import _crs_mismatch_warn
+    except ImportError:
+        warnings.warn(
+            f"CRS mismatch between the CRS of left geometries ({left.crs}) "
+            f"and right geometries ({right.crs}).",
+            UserWarning,
+            stacklevel=3,
+        )
+    else:
+        _crs_mismatch_warn(left, right, stacklevel=3)
+
+
 def _normalize_numeric_scalar(value, error_message: str) -> float:
     """Normalize an operation-wide numeric parameter to a Python float."""
     if (
@@ -2938,6 +2955,47 @@ class GeoSeries(GeoFrame, pspd.Series):
             returns_geom=True,
         )
 
+    def shared_paths(self, other, align=None) -> "GeoSeries":
+        if isinstance(other, BaseGeometry):
+            other_geometry = stc.ST_GeomFromWKB(F.lit(other.wkb))
+            # A standalone Shapely geometry carries no SRID. Assign each row's
+            # SRID before invoking the PostGIS-compatible mixed-SRID check.
+            other_geometry = stf.ST_SetSRID(
+                other_geometry, stf.ST_SRID(self.spark.column)
+            )
+            spark_expr = stf.ST_SharedPaths(self.spark.column, other_geometry)
+            return self._query_geometry_column(spark_expr, returns_geom=True)
+
+        if not isinstance(other, (GeoSeries, GeoDataFrame, PandasOnSparkSeries)):
+            raise TypeError(
+                "'other' must be a GeoSeries, GeoDataFrame, "
+                "pandas-on-Spark Series, or geometry"
+            )
+
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+        if isinstance(other_series, GeoSeries):
+            _warn_crs_mismatch(self, other_series)
+        (
+            aligned_frame,
+            result_index_columns,
+            result_index_fields,
+            result_index_names,
+        ) = self._align_binary_geometry_series(other_series, align)
+
+        # GeoPandas warns for a CRS mismatch but still evaluates coordinates
+        # as-is. Assigning the left SRID here preserves that layer contract;
+        # direct ST_SharedPaths calls remain PostGIS-strict about mixed SRIDs.
+        right_geometry = stf.ST_SetSRID(F.col("R"), stf.ST_SRID(F.col("L")))
+        spark_expr = stf.ST_SharedPaths(F.col("L"), right_geometry)
+        return self._geometry_result_preserving_index(
+            spark_expr,
+            aligned_frame,
+            [scol_for(aligned_frame, name) for name in result_index_columns],
+            result_index_fields,
+            result_index_names,
+        )
+
     def snap(self, other, tolerance, align=None) -> "GeoSeries":
         if not isinstance(tolerance, (float, int)):
             raise NotImplementedError(
@@ -3009,6 +3067,63 @@ class GeoSeries(GeoFrame, pspd.Series):
             column_label_names=[None],
         )
         return first_series(PandasOnSparkDataFrame(internal)).rename(None)
+
+    def _geometry_result_preserving_index(
+        self,
+        spark_col: PySparkColumn,
+        df: pyspark.sql.DataFrame,
+        index_spark_columns: List[PySparkColumn],
+        index_fields: List,
+        index_names: List,
+    ) -> "GeoSeries":
+        """Build a GeoSeries while retaining every result index level."""
+        result_index_names = [
+            f"__index_level_{level}__" for level in range(len(index_spark_columns))
+        ]
+        result_name = SPARK_DEFAULT_SERIES_NAME
+        result_field = self._internal.data_fields[0].copy(name=result_name)
+        sdf = df.select(
+            spark_col.alias(result_name, metadata=result_field.metadata),
+            *[
+                index_col.alias(result_index_name)
+                for index_col, result_index_name in zip(
+                    index_spark_columns, result_index_names
+                )
+            ],
+            scol_for(df, NATURAL_ORDER_COLUMN_NAME),
+        )
+
+        schema_fields = {field.name: field for field in sdf.schema.fields}
+        result_index_fields = [
+            source_field.copy(
+                name=result_index_name,
+                spark_type=schema_fields[result_index_name].dataType,
+                nullable=schema_fields[result_index_name].nullable,
+                metadata=schema_fields[result_index_name].metadata,
+            )
+            for source_field, result_index_name in zip(index_fields, result_index_names)
+        ]
+        result_schema_field = schema_fields[result_name]
+        result_field = result_field.copy(
+            spark_type=result_schema_field.dataType,
+            nullable=result_schema_field.nullable,
+            metadata=result_schema_field.metadata,
+        )
+        internal = InternalFrame(
+            spark_frame=sdf,
+            index_spark_columns=[
+                scol_for(sdf, result_index_name)
+                for result_index_name in result_index_names
+            ],
+            index_names=index_names,
+            index_fields=result_index_fields,
+            column_labels=[(result_name,)],
+            data_spark_columns=[scol_for(sdf, result_name)],
+            data_fields=[result_field],
+            column_label_names=[None],
+        )
+        result = first_series(PandasOnSparkDataFrame(internal)).rename(None)
+        return GeoSeries(result)
 
     def _align_binary_geometry_series(
         self,

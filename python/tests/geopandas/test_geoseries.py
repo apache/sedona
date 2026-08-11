@@ -4869,6 +4869,197 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         )
         self.check_sgpd_equals_gpd(df_result, expected)
 
+    def test_shared_paths(self):
+        reference = LineString([(0, 0), (2, 0), (2, 1)])
+        geometries = [
+            LineString([(0, 0), (2, 0), (2, 2)]),
+            LineString([(2, 2), (2, 0), (0, 0)]),
+            MultiLineString(
+                [
+                    [(0, 0), (2, 0)],
+                    [(2, 2), (2, 1)],
+                ]
+            ),
+            LineString(),
+            None,
+        ]
+        index = pd.MultiIndex.from_tuples(
+            [
+                ("same", 1),
+                ("opposite", 2),
+                ("multi", 3),
+                ("empty", 4),
+                ("null", 5),
+            ],
+            names=["kind", "row"],
+        )
+        source = GeoSeries(
+            geometries,
+            index=index,
+            crs="EPSG:3857",
+            name="roads",
+        )
+        expected = gpd.GeoSeries(
+            geometries,
+            index=index,
+            crs="EPSG:3857",
+            name="roads",
+        ).shared_paths(reference)
+
+        result = source.shared_paths(reference)
+
+        self.check_sgpd_equals_gpd(result, expected)
+        assert result.name is None
+        assert result.crs == source.crs == expected.crs
+        actual = result.to_geopandas()
+        for label in index[:-1]:
+            actual_collection = actual.loc[label]
+            expected_collection = expected.loc[label]
+            assert actual_collection.geom_type == "GeometryCollection"
+            assert len(actual_collection.geoms) == 2
+            for component in range(2):
+                assert actual_collection.geoms[component].equals(
+                    expected_collection.geoms[component]
+                )
+        assert actual.loc[("null", 5)] is None
+
+        srids = result._internal.spark_frame.select(
+            stf.ST_SRID(result.spark.column).alias("srid")
+        ).collect()
+        assert {row.srid for row in srids if row.srid is not None} == {3857}
+
+        frame_source = GeoSeries(
+            geometries,
+            index=pd.Index(["same", "opposite", "multi", "empty", "null"]),
+            crs="EPSG:3857",
+        )
+        frame_expected = gpd.GeoSeries(
+            geometries,
+            index=pd.Index(["same", "opposite", "multi", "empty", "null"]),
+            crs="EPSG:3857",
+        ).shared_paths(reference)
+        frame_result = frame_source.to_geoframe().shared_paths(reference)
+        assert isinstance(frame_result, GeoSeries)
+        self.check_sgpd_equals_gpd(frame_result, frame_expected)
+        assert frame_result.crs == frame_source.crs
+
+        with pytest.raises(TypeError, match="'other' must be"):
+            source.shared_paths(None)
+
+    def test_shared_paths_duplicate_multiindex_alignment(self):
+        left_index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 1), ("b", 2)], names=["group", "row"]
+        )
+        right_index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 1), ("c", 3)], names=["group", "row"]
+        )
+        left_geometries = [
+            LineString([(0, 0), (2, 0)]),
+            LineString([(2, 0), (0, 0)]),
+            LineString([(0, 1), (2, 1)]),
+        ]
+        right_geometries = [
+            LineString([(0, 0), (1, 0)]),
+            LineString([(2, 0), (1, 0)]),
+            LineString([(0, 3), (2, 3)]),
+        ]
+        left = GeoSeries(left_geometries, index=left_index, crs="EPSG:4326")
+        right = GeoSeries(right_geometries, index=right_index, crs="EPSG:4326")
+        expected_left = gpd.GeoSeries(
+            left_geometries, index=left_index, crs="EPSG:4326"
+        )
+        expected_right = gpd.GeoSeries(
+            right_geometries, index=right_index, crs="EPSG:4326"
+        )
+
+        result = left.shared_paths(right, align=True)
+        expected = expected_left.shared_paths(expected_right, align=True)
+
+        actual = result.to_geopandas()
+        assert len(actual) == 6
+        pd.testing.assert_index_equal(actual.index, expected.index)
+        assert result.crs == left.crs
+        for actual_collection, expected_collection in zip(actual, expected):
+            if actual_collection is None or expected_collection is None:
+                assert actual_collection is None and expected_collection is None
+                continue
+            for component in range(2):
+                assert actual_collection.geoms[component].equals(
+                    expected_collection.geoms[component]
+                )
+
+        positional_result = left.shared_paths(right, align=False)
+        positional_expected = expected_left.shared_paths(expected_right, align=False)
+        positional_actual = positional_result.to_geopandas()
+        pd.testing.assert_index_equal(
+            positional_actual.index, positional_expected.index
+        )
+        for actual_collection, expected_collection in zip(
+            positional_actual, positional_expected
+        ):
+            for component in range(2):
+                assert actual_collection.geoms[component].equals(
+                    expected_collection.geoms[component]
+                )
+
+    def test_shared_paths_default_alignment_warning_and_length_validation(self):
+        left = GeoSeries(
+            [LineString([(0, 0), (2, 0)])],
+            index=pd.Index(["left"], name="feature"),
+        )
+        right = GeoSeries(
+            [LineString([(0, 0), (1, 0)])],
+            index=pd.Index(["right"], name="feature"),
+        )
+
+        with pytest.warns(
+            UserWarning,
+            match="The indices of the left and right GeoSeries' are not equal",
+        ):
+            result = left.shared_paths(right)
+        expected = gpd.GeoSeries(
+            [LineString([(0, 0), (2, 0)])],
+            index=pd.Index(["left"], name="feature"),
+        ).shared_paths(
+            gpd.GeoSeries(
+                [LineString([(0, 0), (1, 0)])],
+                index=pd.Index(["right"], name="feature"),
+            ),
+            align=True,
+        )
+        self.check_sgpd_equals_gpd(result, expected)
+
+        with pytest.warns(UserWarning, match="CRS mismatch"):
+            crs_result = GeoSeries(
+                [LineString([(0, 0), (2, 0)])], crs="EPSG:4326"
+            ).shared_paths(
+                GeoSeries([LineString([(0, 0), (1, 0)])], crs="EPSG:3857"),
+                align=False,
+            )
+        assert crs_result.crs.to_epsg() == 4326
+        with pytest.warns(UserWarning, match="CRS mismatch"):
+            crs_expected = gpd.GeoSeries(
+                [LineString([(0, 0), (2, 0)])], crs="EPSG:4326"
+            ).shared_paths(
+                gpd.GeoSeries([LineString([(0, 0), (1, 0)])], crs="EPSG:3857"),
+                align=False,
+            )
+        self.check_sgpd_equals_gpd(crs_result, crs_expected)
+
+        with pytest.raises(
+            ValueError,
+            match=r"Lengths of inputs do not match\. Left: 1, Right: 2",
+        ):
+            left.shared_paths(
+                GeoSeries(
+                    [
+                        LineString([(0, 0), (1, 0)]),
+                        LineString([(0, 1), (1, 1)]),
+                    ]
+                ),
+                align=False,
+            )
+
     def test_intersection_all(self):
         s = GeoSeries([box(0, 0, 2, 2), box(1, 1, 3, 3)])
         result = s.intersection_all()
