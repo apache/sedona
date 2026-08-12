@@ -1969,6 +1969,46 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 )
                 self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
 
+    def test_shared_paths(self):
+        if parse_version(gpd.__version__) < parse_version("1.0.0"):
+            pytest.skip("geopandas < 1.0.0 does not support shared_paths")
+
+        lines = [
+            LineString([(0, 0), (0.5, 0.5), (1, 0)]),
+            LineString([(0, 1), (0.5, 0.5), (1, 1)]),
+            MultiLineString(
+                [
+                    [(0, 0), (0.5, 0.5)],
+                    [(1, 1), (0.5, 0.5)],
+                ]
+            ),
+            LineString(),
+            None,
+        ]
+        reference = LineString([(0, 0), (0.5, 0.5), (0, 1)])
+
+        sgpd_result = GeoSeries(lines, crs="EPSG:3857").shared_paths(reference)
+        gpd_result = gpd.GeoSeries(lines, crs="EPSG:3857").shared_paths(reference)
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
+        other_lines = [
+            LineString([(0, 0), (0.5, 0.5), (1, 0)]),
+            LineString([(1, 1), (0.5, 0.5), (0, 1)]),
+            MultiLineString(
+                [
+                    [(0.5, 0.5), (0, 0)],
+                    [(0.5, 0.5), (1, 1)],
+                ]
+            ),
+            LineString(),
+            None,
+        ]
+        sgpd_result = GeoSeries(lines).shared_paths(GeoSeries(other_lines), align=False)
+        gpd_result = gpd.GeoSeries(lines).shared_paths(
+            gpd.GeoSeries(other_lines), align=False
+        )
+        self.check_sgpd_equals_gpd(sgpd_result, gpd_result)
+
     def test_intersection_all(self):
         pass
 

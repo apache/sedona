@@ -3151,6 +3151,28 @@ public class Functions {
     }
   }
 
+  public static class ST_SharedPaths extends ScalarFunction {
+    @DataTypeHint(
+        value = "RAW",
+        rawSerializer = GeometryTypeSerializer.class,
+        bridgedTo = Geometry.class)
+    public Geometry eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o1,
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o2) {
+      Geometry geom1 = (Geometry) o1;
+      Geometry geom2 = (Geometry) o2;
+      return org.apache.sedona.common.Functions.sharedPaths(geom1, geom2);
+    }
+  }
+
   public static class ST_GeometricMedian extends ScalarFunction {
     @DataTypeHint(
         value = "RAW",

@@ -559,6 +559,13 @@ public class UDFs {
   }
 
   @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"})
+  public static byte[] ST_SharedPaths(byte[] leftGeometry, byte[] rightGeometry) {
+    return GeometrySerde.serialize(
+        Functions.sharedPaths(
+            GeometrySerde.deserialize(leftGeometry), GeometrySerde.deserialize(rightGeometry)));
+  }
+
+  @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"})
   public static boolean ST_Intersects(byte[] leftGeometry, byte[] rightGeometry) {
     return Predicates.intersects(
         GeometrySerde.deserialize(leftGeometry), GeometrySerde.deserialize(rightGeometry));

@@ -38,6 +38,7 @@ from sedona.spark.sql import st_aggregates as sta
 from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
 from sedona.spark.sql import st_predicates as stp
+from sedona.spark.geopandas._crs import warn_crs_mismatch
 
 _POINT_TYPES = ("ST_Point", "ST_MultiPoint")
 _LINE_TYPES = ("ST_LineString", "ST_MultiLineString")
@@ -253,23 +254,6 @@ def _as_distributed_mask(mask):
     return None
 
 
-def _warn_crs_mismatch(obj, mask):
-    if obj.crs == mask.crs:
-        return
-
-    try:
-        from geopandas.array import _crs_mismatch_warn
-    except ImportError:
-        warnings.warn(
-            f"CRS mismatch between the CRS of left geometries ({obj.crs}) "
-            f"and right geometries ({mask.crs}).",
-            UserWarning,
-            stacklevel=3,
-        )
-    else:
-        _crs_mismatch_warn(obj, mask, stacklevel=3)
-
-
 def _mask_expression(source_sdf, mask, reserved):
     """Return a source frame and a mask column expression."""
     rectangle = _mask_is_list_like_rectangle(mask)
@@ -466,7 +450,7 @@ def clip(gdf, mask, keep_geom_type: bool = False, sort: bool = False):
 
     distributed_mask = _as_distributed_mask(mask)
     if distributed_mask is not None:
-        _warn_crs_mismatch(gdf, distributed_mask)
+        warn_crs_mismatch(gdf.crs, distributed_mask.crs)
         mask = distributed_mask
 
     internal, source_sdf, geometry_name = _geometry_context(gdf)

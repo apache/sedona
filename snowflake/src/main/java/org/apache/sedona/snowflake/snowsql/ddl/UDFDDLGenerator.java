@@ -51,6 +51,11 @@ public class UDFDDLGenerator {
     if (!method.isAnnotationPresent(UDFAnnotations.ParamMeta.class)) {
       throw new RuntimeException("Missing ParamMeta annotation for method: " + method.getName());
     }
+    if (method.isAnnotationPresent(UDFAnnotations.GeometryOnly.class)
+        && "GEOGRAPHY".equals(Constants.snowflakeTypeMap.get("Geometry"))) {
+      throw new IllegalArgumentException(
+          "Cannot generate GEOGRAPHY DDL for @GeometryOnly method: " + method.getName());
+    }
     String[] argNames = method.getAnnotation(UDFAnnotations.ParamMeta.class).argNames();
     Parameter[] argTypesRaw = method.getParameters();
     String argTypesCustom[] = method.getAnnotation(UDFAnnotations.ParamMeta.class).argTypes();
@@ -101,11 +106,22 @@ public class UDFDDLGenerator {
         ddlList.add(buildUDFDDL(method, configs, stageName, isNativeApp, appRoleName));
       }
     }
-    // Replace Geometry with GEOGRAPHY and generate DDL for UDFsV2 again
-    Constants.snowflakeTypeMap.replace("Geometry", "GEOGRAPHY");
-    for (Method method : udfV2Methods()) {
-      if (method.getModifiers() == (Modifier.PUBLIC | Modifier.STATIC)) {
-        ddlList.add(buildUDFDDL(method, configs, stageName, isNativeApp, appRoleName));
+    // Replace Geometry with GEOGRAPHY and generate DDL for UDFsV2 again. Restore the shared type
+    // map so repeated generator calls and direct buildUDFDDL calls still target GEOMETRY by
+    // default.
+    String originalGeometryType = Constants.snowflakeTypeMap.put("Geometry", "GEOGRAPHY");
+    try {
+      for (Method method : udfV2Methods()) {
+        if (method.getModifiers() == (Modifier.PUBLIC | Modifier.STATIC)
+            && !method.isAnnotationPresent(UDFAnnotations.GeometryOnly.class)) {
+          ddlList.add(buildUDFDDL(method, configs, stageName, isNativeApp, appRoleName));
+        }
+      }
+    } finally {
+      if (originalGeometryType == null) {
+        Constants.snowflakeTypeMap.remove("Geometry");
+      } else {
+        Constants.snowflakeTypeMap.put("Geometry", originalGeometryType);
       }
     }
     return ddlList;

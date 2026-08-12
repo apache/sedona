@@ -2224,6 +2224,26 @@ def ST_SimplifyPolygonHull(
 
 
 @validate_argument_types
+def ST_SharedPaths(a: ColumnOrName, b: ColumnOrName) -> Column:
+    """Return the paths shared by two lineal Geometry columns.
+
+    The result is a GeometryCollection containing two MultiLineStrings. The first contains paths
+    traversed in the same direction by both inputs; the second contains paths traversed in opposite
+    directions. Path coordinates follow the direction of ``a``. Inputs must have matching SRIDs;
+    the result retains that SRID. As in PostGIS, a non-empty result retains Z when either input has
+    Z, while M values are dropped.
+
+    :param a: LineString or MultiLineString Geometry column.
+    :type a: ColumnOrName
+    :param b: Other LineString or MultiLineString Geometry column.
+    :type b: ColumnOrName
+    :return: Shared paths grouped by direction as a GeometryCollection column.
+    :rtype: Column
+    """
+    return _call_st_function("ST_SharedPaths", (a, b))
+
+
+@validate_argument_types
 def ST_Split(input: ColumnOrName, blade: ColumnOrName) -> Column:
     """Split input geometry by the blade geometry.
 

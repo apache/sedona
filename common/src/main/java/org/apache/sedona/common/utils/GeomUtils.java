@@ -175,14 +175,23 @@ public class GeomUtils {
     if (srid != 0) {
       sridString = "SRID=" + String.valueOf(srid) + ";";
     }
-    return sridString + new WKTWriter(4).write(geometry);
+    return sridString + writeWKT(geometry);
   }
 
   public static String getWKT(Geometry geometry) {
     if (geometry == null) {
       return null;
     }
-    return new WKTWriter(4).write(geometry);
+    return writeWKT(geometry);
+  }
+
+  private static String writeWKT(Geometry geometry) {
+    // JTS 1.20 omits the separator between a dimensional marker and EMPTY for nested empty
+    // geometries (for example, "MULTILINESTRING ZEMPTY"), which its own WKTReader rejects.
+    String wkt = new WKTWriter(4).write(geometry);
+    return wkt.replace("ZMEMPTY", "ZM EMPTY")
+        .replace("ZEMPTY", "Z EMPTY")
+        .replace("MEMPTY", "M EMPTY");
   }
 
   public static String getHexEWKB(Geometry geometry, int endian) {

@@ -754,6 +754,9 @@ object st_functions {
   def ST_SimplifyPreserveTopology(geometry: String, distanceTolerance: Double): Column =
     wrapExpression[ST_SimplifyPreserveTopology](geometry, distanceTolerance)
 
+  def ST_SharedPaths(a: Column, b: Column): Column = wrapExpression[ST_SharedPaths](a, b)
+  def ST_SharedPaths(a: String, b: String): Column = wrapExpression[ST_SharedPaths](a, b)
+
   def ST_Split(input: Column, blade: Column): Column = wrapExpression[ST_Split](input, blade)
   def ST_Split(input: String, blade: String): Column = wrapExpression[ST_Split](input, blade)
 

@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 780" width="1100" height="780" role="img" aria-labelledby="point-title point-description">
+  <title id="point-title">ST_SharedPaths ignores point-only intersections</title>
+  <desc id="point-description">Two four-stage examples, each showing input A alone, input B alone, their overlay, and the output. In the first, LINESTRING (0 0, 10 0) crosses LINESTRING (5 -5, 5 5) at POINT (5 0). In the second, LINESTRING (0 0, 10 0) touches LINESTRING (10 0, 20 0) at POINT (10 0). Neither case has one-dimensional overlap, so both return GEOMETRYCOLLECTION (MULTILINESTRING EMPTY, MULTILINESTRING EMPTY).</desc>
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+      text:not([fill]) { fill: #172033; }
+      .panel { fill: #f8fafc; stroke: #b8c3d1; stroke-width: 1.5; }
+      .heading { font-size: 14px; font-weight: 700; }
+      .caption { font-size: 11.5px; fill: #475569; }
+      .wkt { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; fill: #334155; }
+      .input-a { fill: none; stroke: #005ea8; stroke-width: 6; stroke-linecap: round; }
+      .input-b { fill: none; stroke: #c33c54; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 11 7; }
+    </style>
+    <marker id="point-arrow-a" markerWidth="11" markerHeight="11" refX="10" refY="5.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,5.5 L0,11 Z" fill="#005ea8"/></marker>
+    <marker id="point-arrow-b" markerWidth="11" markerHeight="11" refX="10" refY="5.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,5.5 L0,11 Z" fill="#c33c54"/></marker>
+  </defs>
+
+  <rect width="1100" height="780" fill="#ffffff"/>
+  <text x="550" y="30" text-anchor="middle" font-size="21" font-weight="700">Point contact is not a shared path</text>
+  <text x="550" y="54" text-anchor="middle" font-size="13" fill="#475569">Each input is shown separately before the overlay: only one-dimensional overlap is returned</text>
+
+  <rect x="25" y="79" width="1050" height="31" rx="6" fill="#e8f1fa" stroke="#91b6d5"/>
+  <text x="43" y="100" font-size="14" font-weight="700" fill="#234e70">Case 1 · Lines cross at an interior point</text>
+  <rect x="25" y="122" width="220" height="196" rx="8" class="panel"/>
+  <text x="42" y="147" class="heading" fill="#005ea8">1 · Input A</text>
+  <path d="M55 213 L215 213" class="input-a" marker-end="url(#point-arrow-a)"/>
+  <text x="135" y="247" text-anchor="middle" class="wkt">LINESTRING (0 0, 10 0)</text>
+  <text x="135" y="275" text-anchor="middle" class="caption">left → right</text>
+
+  <rect x="260" y="122" width="220" height="196" rx="8" class="panel"/>
+  <text x="277" y="147" class="heading" fill="#c33c54">2 · Input B</text>
+  <path d="M370 270 L370 161" class="input-b" marker-end="url(#point-arrow-b)"/>
+  <text x="370" y="293" text-anchor="middle" class="wkt">LINESTRING (5 -5, 5 5)</text>
+
+  <rect x="495" y="122" width="300" height="196" rx="8" class="panel"/>
+  <text x="512" y="147" class="heading">3 · Overlay</text>
+  <path d="M525 213 L765 213" class="input-a" marker-end="url(#point-arrow-a)"/>
+  <path d="M645 273 L645 153" class="input-b" marker-end="url(#point-arrow-b)"/>
+  <circle cx="645" cy="213" r="10" fill="#ffd166" stroke="#7c5300" stroke-width="2"/>
+  <text x="645" y="298" text-anchor="middle" class="caption">Intersection = POINT (5 0)</text>
+
+  <rect x="810" y="122" width="265" height="196" rx="8" class="panel"/>
+  <text x="827" y="147" class="heading">4 · Output</text>
+  <text x="942" y="185" text-anchor="middle" class="caption">A point has no shared length.</text>
+  <rect x="829" y="205" width="227" height="78" rx="7" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="942" y="229" text-anchor="middle" class="wkt">Element 0 = MULTILINESTRING EMPTY</text>
+  <text x="942" y="257" text-anchor="middle" class="wkt">Element 1 = MULTILINESTRING EMPTY</text>
+
+  <rect x="25" y="346" width="1050" height="31" rx="6" fill="#e8f1fa" stroke="#91b6d5"/>
+  <text x="43" y="367" font-size="14" font-weight="700" fill="#234e70">Case 2 · Lines touch at one endpoint</text>
+  <rect x="25" y="389" width="220" height="196" rx="8" class="panel"/>
+  <text x="42" y="414" class="heading" fill="#005ea8">1 · Input A</text>
+  <path d="M55 480 L215 480" class="input-a" marker-end="url(#point-arrow-a)"/>
+  <text x="135" y="514" text-anchor="middle" class="wkt">LINESTRING (0 0, 10 0)</text>
+
+  <rect x="260" y="389" width="220" height="196" rx="8" class="panel"/>
+  <text x="277" y="414" class="heading" fill="#c33c54">2 · Input B</text>
+  <path d="M290 480 L450 480" class="input-b" marker-end="url(#point-arrow-b)"/>
+  <text x="370" y="514" text-anchor="middle" class="wkt">LINESTRING (10 0, 20 0)</text>
+
+  <rect x="495" y="389" width="300" height="196" rx="8" class="panel"/>
+  <text x="512" y="414" class="heading">3 · Overlay</text>
+  <path d="M525 480 L645 480" class="input-a" marker-end="url(#point-arrow-a)"/>
+  <path d="M645 480 L765 480" class="input-b" marker-end="url(#point-arrow-b)"/>
+  <circle cx="645" cy="480" r="10" fill="#ffd166" stroke="#7c5300" stroke-width="2"/>
+  <text x="645" y="565" text-anchor="middle" class="caption">Intersection = POINT (10 0)</text>
+
+  <rect x="810" y="389" width="265" height="196" rx="8" class="panel"/>
+  <text x="827" y="414" class="heading">4 · Output</text>
+  <text x="942" y="452" text-anchor="middle" class="caption">An endpoint has no shared length.</text>
+  <rect x="829" y="472" width="227" height="78" rx="7" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+  <text x="942" y="496" text-anchor="middle" class="wkt">Element 0 = MULTILINESTRING EMPTY</text>
+  <text x="942" y="524" text-anchor="middle" class="wkt">Element 1 = MULTILINESTRING EMPTY</text>
+
+  <rect x="25" y="618" width="1050" height="128" rx="9" fill="#f8fafc" stroke="#b8c3d1" stroke-width="1.5"/>
+  <text x="45" y="645" font-size="14" font-weight="700">Exact result for both cases</text>
+  <text x="45" y="673" class="wkt">GEOMETRYCOLLECTION (MULTILINESTRING EMPTY, MULTILINESTRING EMPTY)</text>
+  <text x="45" y="704" font-size="12" fill="#475569">ST_Intersection may return the highlighted point, but ST_SharedPaths deliberately does not.</text>
+  <text x="45" y="728" font-size="12" fill="#475569">Use ST_SharedPaths when shared line length and direction—not simple contact—are the question.</text>
+</svg>

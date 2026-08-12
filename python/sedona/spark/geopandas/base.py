@@ -3622,6 +3622,65 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("intersection", self, other, align)
 
+    def shared_paths(self, other, align=None):
+        """Return the paths shared by each geometry and `other`.
+
+        Input geometries must be ``LineString``, ``LinearRing``, or
+        ``MultiLineString`` geometries. Each result is a
+        ``GeometryCollection`` containing two ``MultiLineString`` geometries.
+        The first contains paths traversed in the same direction by both
+        inputs; the second contains paths traversed in opposite directions.
+
+        The operation works in a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to find shared
+            paths with. It must contain only lineal geometries.
+        align : bool | None (default None)
+            If True, automatically align GeoSeries based on their indices.
+            If False, pair values in their existing order. None defaults to
+            True.
+
+        Returns
+        -------
+        GeoSeries
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import LineString
+        >>> s = GeoSeries(
+        ...     [
+        ...         LineString([(0, 0), (1, 0), (2, 0)]),
+        ...         LineString([(0, 1), (1, 1), (2, 1)]),
+        ...     ]
+        ... )
+        >>> other = LineString([(2, 0), (1, 0), (0, 0)])
+        >>> s.shared_paths(other)
+        0    GEOMETRYCOLLECTION (MULTILINESTRING EMPTY, MUL...
+        1    GEOMETRYCOLLECTION (MULTILINESTRING EMPTY, MUL...
+        dtype: geometry
+
+        Use :meth:`get_geometry` to select the same- or opposite-direction
+        component from each result.
+
+        Notes
+        -----
+        This method follows PostGIS ``ST_SharedPaths`` dimensional semantics:
+        non-empty shared paths retain Z when either input has Z, empty results
+        are two-dimensional, and M coordinates are not retained. The native
+        SQL function rejects mixed SRIDs. At this GeoPandas-compatible layer,
+        differing CRS metadata emits a warning, coordinates are evaluated
+        as-is, and the left CRS is retained.
+
+        See Also
+        --------
+        GeoSeries.get_geometry
+        """
+        return _delegate_to_geometry_column("shared_paths", self, other, align)
+
     def shortest_line(self, other, align=None):
         """Returns the shortest line between each geometry in the ``GeoSeries``
         and `other`.

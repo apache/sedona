@@ -1603,6 +1603,41 @@ class functionTestScala
       expected = "POLYGON ((0.5 10.7, 2.6 20, 12.6 20, 12.6 12.5, 10.1 10, 5.4 8.4, 0.5 10.7))"
       assert(expected.equals(actual))
     }
+
+    it("Should pass ST_SharedPaths") {
+      val result = sparkSession
+        .sql("""
+            |SELECT ST_AsText(ST_SharedPaths(
+            |  ST_GeomFromWKT('LINESTRING (0 0, 10 0)'),
+            |  ST_GeomFromWKT('LINESTRING (5 0, 15 0)')))
+            |""".stripMargin)
+        .first()
+        .getString(0)
+
+      assertEquals(
+        "GEOMETRYCOLLECTION (MULTILINESTRING ((5 0, 10 0)), MULTILINESTRING EMPTY)",
+        result)
+
+      val dimensionalResult = sparkSession
+        .sql("""
+            |WITH shared AS (
+            |  SELECT ST_SharedPaths(
+            |    ST_SetSRID(ST_GeomFromWKT('LINESTRING ZM (0 1 5 4, 0 0 6 5, 1 0 7 6)'), 4326),
+            |    ST_SetSRID(ST_GeomFromWKT('LINESTRING M (0 -1 8, 0 0 9, 1 0 10)'), 4326)
+            |  ) AS geom
+            |)
+            |SELECT
+            |  ST_SRID(geom),
+            |  ST_HasZ(ST_GeometryN(ST_GeometryN(geom, 0), 0)),
+            |  ST_HasM(ST_GeometryN(ST_GeometryN(geom, 0), 0))
+            |FROM shared
+            |""".stripMargin)
+        .first()
+
+      assertEquals(4326, dimensionalResult.getInt(0))
+      assertTrue(dimensionalResult.getBoolean(1))
+      assertFalse(dimensionalResult.getBoolean(2))
+    }
   }
 
   it("Should pass ST_ForcePolygonCW") {

@@ -248,6 +248,7 @@ These functions compute results arising from the overlay of two geometries. Thes
 | :--- | :--- | :--- | :--- |
 | [ST_Difference](Overlay-Functions/ST_Difference.md) | Geometry | Return the difference between geometry A and B (return part of geometry A that does not intersect geometry B) | v1.2.0 |
 | [ST_Intersection](Overlay-Functions/ST_Intersection.md) | Geometry | Return the intersection geometry of A and B | v1.0.0 |
+| [ST_SharedPaths](Overlay-Functions/ST_SharedPaths.md) | Geometry | Returns the paths shared by two lineal geometries, grouped by traversal direction. | v2.0.0 |
 | [ST_Split](Overlay-Functions/ST_Split.md) | Geometry | Split an input geometry by another geometry (called the blade). Linear (LineString or MultiLineString) geometry can be split by a Point, MultiPoint, LineString, MultiLineString, Polygon, or MultiPo... | v1.4.0 |
 | [ST_SubDivide](Overlay-Functions/ST_SubDivide.md) | `Array<Geometry>` | Returns list of geometries divided based of given maximum number of vertices. | v1.1.0 |
 | [ST_SubDivideExplode](Overlay-Functions/ST_SubDivideExplode.md) | Geometry | It works the same as ST_SubDivide but returns new rows with geometries instead of list. | v1.1.0 |

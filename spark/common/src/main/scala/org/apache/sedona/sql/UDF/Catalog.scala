@@ -240,6 +240,7 @@ object Catalog extends AbstractCatalog with Logging {
   val overlayExprs: Seq[FunctionDescription] = Seq(
     function[ST_Difference](),
     function[ST_Intersection](),
+    function[ST_SharedPaths](),
     function[ST_Split](),
     function[ST_SubDivide](),
     function[ST_SubDivideExplode](),

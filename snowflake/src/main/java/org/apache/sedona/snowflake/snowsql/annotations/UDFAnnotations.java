@@ -36,6 +36,11 @@ public class UDFAnnotations {
   @Target(ElementType.METHOD)
   public static @interface Volatile {}
 
+  /** Marks a UDFV2 method that must not be generated for Snowflake GEOGRAPHY arguments. */
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target(ElementType.METHOD)
+  public static @interface GeometryOnly {}
+
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.METHOD)
   public static @interface ParamMeta {

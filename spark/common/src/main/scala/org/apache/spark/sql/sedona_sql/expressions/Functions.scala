@@ -1406,6 +1406,20 @@ private[apache] case class ST_Difference(inputExpressions: Seq[Expression])
 }
 
 /**
+ * Return the paths shared by two lineal geometries, separated into same-direction and
+ * opposite-direction paths.
+ *
+ * @param inputExpressions
+ */
+private[apache] case class ST_SharedPaths(inputExpressions: Seq[Expression])
+    extends InferredExpression(Functions.sharedPaths _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
  * Return the symmetrical difference between geometry A and B
  *
  * @param inputExpressions

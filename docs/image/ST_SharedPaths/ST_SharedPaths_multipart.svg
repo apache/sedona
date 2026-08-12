@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 820" width="1100" height="820" role="img" aria-labelledby="multipart-title multipart-description">
+  <title id="multipart-title">ST_SharedPaths with a multipart input and noded output</title>
+  <desc id="multipart-description">Four-stage diagram. Input A is shown alone as MULTILINESTRING ((26 125, 26 200, 126 200, 126 125, 26 125), (51 150, 101 150, 76 175, 51 150)). Input B is shown alone as LINESTRING (151 100, 126 156.25, 126 125, 90 161, 76 175). The overlay highlights three same-direction shared paths. The output is GEOMETRYCOLLECTION (MULTILINESTRING ((126 156.25, 126 125), (101 150, 90 161), (90 161, 76 175)), MULTILINESTRING EMPTY).</desc>
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+      text:not([fill]) { fill: #172033; }
+      .panel { fill: #f8fafc; stroke: #b8c3d1; stroke-width: 1.5; }
+      .title { font-size: 15px; font-weight: 700; }
+      .caption { font-size: 12px; fill: #475569; }
+      .wkt { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11.5px; fill: #334155; }
+      .input-a { fill: none; stroke: #005ea8; stroke-width: 5.5; stroke-linecap: round; stroke-linejoin: round; }
+      .input-b { fill: none; stroke: #c33c54; stroke-width: 5.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 11 7; }
+      .shared-halo { fill: none; stroke: #98dfd2; stroke-width: 17; stroke-linecap: round; }
+      .same { fill: none; stroke: #007a65; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+    <marker id="multipart-arrow-a" markerWidth="11" markerHeight="11" refX="10" refY="5.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,5.5 L0,11 Z" fill="#005ea8"/></marker>
+    <marker id="multipart-arrow-b" markerWidth="11" markerHeight="11" refX="10" refY="5.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,5.5 L0,11 Z" fill="#c33c54"/></marker>
+    <marker id="multipart-arrow-same" markerWidth="11" markerHeight="11" refX="10" refY="5.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L11,5.5 L0,11 Z" fill="#007a65"/></marker>
+  </defs>
+
+  <rect width="1100" height="820" fill="#ffffff"/>
+  <text x="550" y="30" text-anchor="middle" font-size="21" font-weight="700">Multipart input and overlay noding</text>
+  <text x="550" y="54" text-anchor="middle" font-size="13" fill="#475569">Separate inputs make the components and traversal order visible before they are overlaid</text>
+
+  <rect x="25" y="80" width="510" height="230" rx="9" class="panel"/>
+  <text x="45" y="106" class="title" fill="#005ea8">1 · Input A · MultiLineString</text>
+  <text x="45" y="126" class="caption">A₁ is the outer loop; A₂ is the inner triangle</text>
+  <path d="M70 265 L70 150 L480 150 L480 265 L70 265" class="input-a" marker-end="url(#multipart-arrow-a)"/>
+  <path d="M173 225 L378 225 L275 184 L173 225" class="input-a" marker-end="url(#multipart-arrow-a)"/>
+  <text x="85" y="172" font-size="13" font-weight="700" fill="#005ea8">A₁</text>
+  <text x="184" y="215" font-size="13" font-weight="700" fill="#005ea8">A₂</text>
+  <text x="280" y="292" text-anchor="middle" class="caption">Both components are shown before B can obscure their edges.</text>
+
+  <rect x="565" y="80" width="510" height="230" rx="9" class="panel"/>
+  <text x="585" y="106" class="title" fill="#c33c54">2 · Input B · LineString</text>
+  <text x="585" y="126" class="caption">Start at (151 100); finish at (76 175)</text>
+  <path d="M1023 270 L885 180 L885 230 L687 172 L610 150" class="input-b" marker-end="url(#multipart-arrow-b)"/>
+  <circle cx="1023" cy="270" r="4" fill="#ffffff" stroke="#c33c54" stroke-width="2"/>
+  <circle cx="687" cy="172" r="6" fill="#ffd166" stroke="#7c5300" stroke-width="2"/>
+  <text x="989" y="292" class="caption">start (151 100)</text>
+  <path d="M694 166 L735 145" fill="none" stroke="#7c5300" stroke-width="1.5"/>
+  <text x="741" y="144" font-size="12" font-weight="700" fill="#7c5300">B vertex (90 161)</text>
+
+  <rect x="25" y="335" width="690" height="300" rx="9" class="panel"/>
+  <text x="45" y="362" class="title">3 · Overlay and node</text>
+  <text x="45" y="382" class="caption">Green bands identify the shared portions while blue A remains visible between red B's dashes</text>
+  <path d="M570 486 L570 555" class="shared-halo"/>
+  <path d="M443 500 L387 466" class="shared-halo"/>
+  <path d="M387 466 L315 445" class="shared-halo"/>
+  <path d="M60 555 L60 390 L570 390 L570 555 L60 555" class="input-a" marker-end="url(#multipart-arrow-a)"/>
+  <path d="M188 500 L443 500 L315 445 L188 500" class="input-a" marker-end="url(#multipart-arrow-a)"/>
+  <path d="M698 610 L570 486 L570 555 L387 466 L315 445" class="input-b" marker-end="url(#multipart-arrow-b)"/>
+  <path d="M570 486 L570 555" class="same" marker-end="url(#multipart-arrow-same)"/>
+  <path d="M443 500 L387 466" class="same" marker-end="url(#multipart-arrow-same)"/>
+  <path d="M387 466 L315 445" class="same" marker-end="url(#multipart-arrow-same)"/>
+  <circle cx="387" cy="466" r="7" fill="#ffd166" stroke="#7c5300" stroke-width="2"/>
+  <path d="M394 458 L445 421" fill="none" stroke="#7c5300" stroke-width="1.5"/>
+  <text x="449" y="418" font-size="12" font-weight="700" fill="#7c5300">B's (90 161) vertex splits this edge</text>
+  <text x="585" y="524" font-size="12" font-weight="700" fill="#006b58">shared loop edge</text>
+  <text x="309" y="527" text-anchor="middle" font-size="12" font-weight="700" fill="#006b58">shared triangle edge</text>
+  <line x1="65" y1="606" x2="95" y2="606" class="input-a"/><text x="104" y="611" font-size="12">A</text>
+  <line x1="145" y1="606" x2="175" y2="606" class="input-b"/><text x="184" y="611" font-size="12">B</text>
+  <line x1="225" y1="606" x2="255" y2="606" class="same"/><text x="264" y="611" font-size="12">element 0 · same</text>
+
+  <rect x="740" y="335" width="335" height="300" rx="9" class="panel"/>
+  <text x="760" y="362" class="title">4 · GeometryCollection output</text>
+  <rect x="760" y="387" width="295" height="174" rx="7" fill="#ffffff" stroke="#007a65" stroke-width="2"/>
+  <text x="776" y="412" font-size="13" font-weight="700" fill="#006b58">Element 0 · same direction</text>
+  <path d="M800 435 L800 474" class="same" marker-end="url(#multipart-arrow-same)"/>
+  <text x="820" y="458" class="wkt">(126 156.25, 126 125)</text>
+  <path d="M1015 501 L961 478" class="same" marker-end="url(#multipart-arrow-same)"/>
+  <path d="M949 473 L890 448" class="same" marker-end="url(#multipart-arrow-same)"/>
+  <circle cx="955" cy="476" r="5" fill="#ffd166" stroke="#7c5300" stroke-width="1.5"/>
+  <text x="907" y="525" text-anchor="middle" class="wkt">(101 150, 90 161)</text>
+  <text x="907" y="545" text-anchor="middle" class="wkt">(90 161, 76 175)</text>
+  <rect x="760" y="578" width="295" height="39" rx="7" fill="#ffffff" stroke="#6f2da8" stroke-width="2"/>
+  <text x="776" y="603" font-size="12" font-weight="700" fill="#6f2da8">Element 1 · MULTILINESTRING EMPTY</text>
+
+  <rect x="25" y="660" width="1050" height="135" rx="9" fill="#f8fafc" stroke="#b8c3d1" stroke-width="1.5"/>
+  <text x="45" y="687" font-size="14" font-weight="700">Exact inputs and output</text>
+  <text x="45" y="711" class="wkt">A = MULTILINESTRING ((26 125, 26 200, 126 200, 126 125, 26 125),</text>
+  <text x="69" y="731" class="wkt">(51 150, 101 150, 76 175, 51 150))</text>
+  <text x="45" y="754" class="wkt">B = LINESTRING (151 100, 126 156.25, 126 125, 90 161, 76 175)</text>
+  <text x="45" y="777" class="wkt">Result = GEOMETRYCOLLECTION (MULTILINESTRING ((126 156.25, 126 125), (101 150, 90 161), (90 161, 76 175)), MULTILINESTRING EMPTY)</text>
+</svg>
