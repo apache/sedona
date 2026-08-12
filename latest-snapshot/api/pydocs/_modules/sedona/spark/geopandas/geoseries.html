@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -269,6 +268,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._crs</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">NO_CRS_OVERRIDE</span><span class="p">,</span>
     <span class="n">read_crs_metadata</span><span class="p">,</span>
+    <span class="n">warn_crs_mismatch</span><span class="p">,</span>
     <span class="n">with_crs_metadata</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas._explode</span><span class="w"> </span><span class="kn">import</span> <span class="n">expand_geometry_column</span>
@@ -3148,6 +3148,58 @@
             <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+<div class="viewcode-block" id="GeoSeries.shared_paths"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.shared_paths">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">shared_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
+            <span class="n">other_geometry</span> <span class="o">=</span> <span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromWKB</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">wkb</span><span class="p">))</span>
+            <span class="c1"># A standalone Shapely geometry carries no SRID. When CRS metadata</span>
+            <span class="c1"># is available, use its scalar SRID so Catalyst can fold this whole</span>
+            <span class="c1"># literal expression instead of copying the geometry for every row.</span>
+            <span class="n">has_crs_metadata</span><span class="p">,</span> <span class="n">metadata_crs</span> <span class="o">=</span> <span class="n">read_crs_metadata</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">has_crs_metadata</span><span class="p">:</span>
+                <span class="n">scalar_srid</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="n">metadata_crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">metadata_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="p">)</span>
+                <span class="n">other_geometry</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">other_geometry</span><span class="p">,</span> <span class="n">scalar_srid</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Spark-created geometry columns may carry an SRID without CRS</span>
+                <span class="c1"># metadata, so retain per-row SRID matching for that case.</span>
+                <span class="n">other_geometry</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span>
+                    <span class="n">other_geometry</span><span class="p">,</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SRID</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SharedPaths</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">other_geometry</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span><span class="n">spark_expr</span><span class="p">,</span> <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">GeoSeries</span><span class="p">,</span> <span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;other&#39; must be a GeoSeries, GeoDataFrame, &quot;</span>
+                <span class="s2">&quot;pandas-on-Spark Series, or geometry&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">other_series</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
+        <span class="n">normalize_right_srid</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_series</span><span class="p">,</span> <span class="n">GeoSeries</span><span class="p">):</span>
+            <span class="n">left_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
+            <span class="n">right_crs</span> <span class="o">=</span> <span class="n">other_series</span><span class="o">.</span><span class="n">crs</span>
+            <span class="n">normalize_right_srid</span> <span class="o">=</span> <span class="n">warn_crs_mismatch</span><span class="p">(</span><span class="n">left_crs</span><span class="p">,</span> <span class="n">right_crs</span><span class="p">)</span>
+
+        <span class="c1"># GeoPandas warns for a CRS mismatch but still evaluates coordinates</span>
+        <span class="c1"># as-is. Assigning the left SRID here preserves that layer contract;</span>
+        <span class="c1"># direct ST_SharedPaths calls remain PostGIS-strict about mixed SRIDs.</span>
+        <span class="n">right_geometry</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">normalize_right_srid</span><span class="p">:</span>
+            <span class="n">right_geometry</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">right_geometry</span><span class="p">,</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SRID</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">)))</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SharedPaths</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span> <span class="n">right_geometry</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
+            <span class="n">spark_expr</span><span class="p">,</span>
+            <span class="n">other_series</span><span class="p">,</span>
+            <span class="n">align</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">validate_alignment</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
 <div class="viewcode-block" id="GeoSeries.snap"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.snap">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">snap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tolerance</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
@@ -3170,21 +3222,32 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_boolean_result_preserving_index</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_result_preserving_index</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">spark_col</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
         <span class="n">df</span><span class="p">:</span> <span class="n">pyspark</span><span class="o">.</span><span class="n">sql</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
         <span class="n">index_spark_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">PySparkColumn</span><span class="p">],</span>
         <span class="n">index_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
         <span class="n">index_names</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build a boolean Series while retaining every source index level.&quot;&quot;&quot;</span>
+        <span class="n">returns_geom</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">keep_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;GeoSeries&quot;</span><span class="p">,</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build a Series while retaining every result index level.&quot;&quot;&quot;</span>
         <span class="n">result_index_names</span> <span class="o">=</span> <span class="p">[</span>
             <span class="sa">f</span><span class="s2">&quot;__index_level_</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">__&quot;</span> <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">index_spark_columns</span><span class="p">))</span>
         <span class="p">]</span>
+        <span class="c1"># Series names are arbitrary hashable Python objects, while Spark</span>
+        <span class="c1"># aliases must be strings. Keep the physical name private and apply</span>
+        <span class="c1"># the logical Series name only after rebuilding the result.</span>
         <span class="n">result_name</span> <span class="o">=</span> <span class="n">SPARK_DEFAULT_SERIES_NAME</span>
+        <span class="n">result_field</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">returns_geom</span><span class="p">:</span>
+            <span class="n">result_field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">result_name</span><span class="p">)</span>
+            <span class="n">result_column</span> <span class="o">=</span> <span class="n">spark_col</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">result_name</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">result_field</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result_column</span> <span class="o">=</span> <span class="n">spark_col</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">result_name</span><span class="p">)</span>
         <span class="n">sdf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-            <span class="n">spark_col</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">result_name</span><span class="p">),</span>
+            <span class="n">result_column</span><span class="p">,</span>
             <span class="o">*</span><span class="p">[</span>
                 <span class="n">index_col</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">result_index_name</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">index_col</span><span class="p">,</span> <span class="n">result_index_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
@@ -3204,7 +3267,15 @@
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">source_field</span><span class="p">,</span> <span class="n">result_index_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">index_fields</span><span class="p">,</span> <span class="n">result_index_names</span><span class="p">)</span>
         <span class="p">]</span>
-        <span class="n">result_data_field</span> <span class="o">=</span> <span class="n">InternalField</span><span class="o">.</span><span class="n">from_struct_field</span><span class="p">(</span><span class="n">schema_fields</span><span class="p">[</span><span class="n">result_name</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">result_field</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">result_field</span> <span class="o">=</span> <span class="n">InternalField</span><span class="o">.</span><span class="n">from_struct_field</span><span class="p">(</span><span class="n">schema_fields</span><span class="p">[</span><span class="n">result_name</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result_schema_field</span> <span class="o">=</span> <span class="n">schema_fields</span><span class="p">[</span><span class="n">result_name</span><span class="p">]</span>
+            <span class="n">result_field</span> <span class="o">=</span> <span class="n">result_field</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
+                <span class="n">spark_type</span><span class="o">=</span><span class="n">result_schema_field</span><span class="o">.</span><span class="n">dataType</span><span class="p">,</span>
+                <span class="n">nullable</span><span class="o">=</span><span class="n">result_schema_field</span><span class="o">.</span><span class="n">nullable</span><span class="p">,</span>
+                <span class="n">metadata</span><span class="o">=</span><span class="n">result_schema_field</span><span class="o">.</span><span class="n">metadata</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="n">internal</span> <span class="o">=</span> <span class="n">InternalFrame</span><span class="p">(</span>
             <span class="n">spark_frame</span><span class="o">=</span><span class="n">sdf</span><span class="p">,</span>
             <span class="n">index_spark_columns</span><span class="o">=</span><span class="p">[</span>
@@ -3215,15 +3286,37 @@
             <span class="n">index_fields</span><span class="o">=</span><span class="n">result_index_fields</span><span class="p">,</span>
             <span class="n">column_labels</span><span class="o">=</span><span class="p">[(</span><span class="n">result_name</span><span class="p">,)],</span>
             <span class="n">data_spark_columns</span><span class="o">=</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="n">result_name</span><span class="p">)],</span>
-            <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span><span class="n">result_data_field</span><span class="p">],</span>
+            <span class="n">data_fields</span><span class="o">=</span><span class="p">[</span><span class="n">result_field</span><span class="p">],</span>
             <span class="n">column_label_names</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">],</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">first_series</span><span class="p">(</span><span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">))</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">first_series</span><span class="p">(</span><span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">))</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">keep_name</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="k">if</span> <span class="n">returns_geom</span> <span class="k">else</span> <span class="n">result</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_boolean_result_preserving_index</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">spark_col</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pyspark</span><span class="o">.</span><span class="n">sql</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">index_spark_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">PySparkColumn</span><span class="p">],</span>
+        <span class="n">index_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+        <span class="n">index_names</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build a boolean Series while retaining every result index level.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_preserving_index</span><span class="p">(</span>
+            <span class="n">spark_col</span><span class="p">,</span>
+            <span class="n">df</span><span class="p">,</span>
+            <span class="n">index_spark_columns</span><span class="p">,</span>
+            <span class="n">index_fields</span><span class="p">,</span>
+            <span class="n">index_names</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_align_binary_geometry_series</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">other</span><span class="p">:</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
         <span class="n">align</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+        <span class="n">validate_alignment</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">warning_stacklevel</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Align two geometry Series and preserve every resulting index level.&quot;&quot;&quot;</span>
         <span class="n">position_col</span> <span class="o">=</span> <span class="s2">&quot;__binary_geometry_position__&quot;</span>
@@ -3267,68 +3360,72 @@
             <span class="p">),</span>
             <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">right_present_col</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="n">left_frame</span> <span class="o">=</span> <span class="n">left_frame</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">left_order_col</span><span class="p">)</span>
-        <span class="n">right_frame</span> <span class="o">=</span> <span class="n">right_frame</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">right_order_col</span><span class="p">)</span>
         <span class="n">left_frame</span> <span class="o">=</span> <span class="n">InternalFrame</span><span class="o">.</span><span class="n">attach_distributed_sequence_column</span><span class="p">(</span>
-            <span class="n">left_frame</span><span class="p">,</span> <span class="n">position_col</span>
+            <span class="n">left_frame</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">left_order_col</span><span class="p">),</span> <span class="n">position_col</span>
         <span class="p">)</span>
         <span class="n">right_frame</span> <span class="o">=</span> <span class="n">InternalFrame</span><span class="o">.</span><span class="n">attach_distributed_sequence_column</span><span class="p">(</span>
-            <span class="n">right_frame</span><span class="p">,</span> <span class="n">position_col</span>
+            <span class="n">right_frame</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="n">right_order_col</span><span class="p">),</span> <span class="n">position_col</span>
         <span class="p">)</span>
         <span class="n">positional_join</span> <span class="o">=</span> <span class="n">left_frame</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">right_frame</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">position_col</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">)</span>
 
-        <span class="n">missing_side</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_present_col</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span> <span class="o">|</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present_col</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span>
-        <span class="p">)</span>
-        <span class="n">same_index_structure</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">left_index_aliases</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_index_aliases</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">same_index_structure</span><span class="p">:</span>
-            <span class="n">index_mismatch</span> <span class="o">=</span> <span class="n">missing_side</span>
-            <span class="k">for</span> <span class="n">left_index</span><span class="p">,</span> <span class="n">right_index</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">left_index_aliases</span><span class="p">,</span> <span class="n">right_index_aliases</span><span class="p">):</span>
-                <span class="n">index_mismatch</span> <span class="o">=</span> <span class="n">index_mismatch</span> <span class="o">|</span> <span class="o">~</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_index</span><span class="p">)</span><span class="o">.</span><span class="n">eqNullSafe</span><span class="p">(</span>
-                    <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_index</span><span class="p">)</span>
+        <span class="n">indices_match</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">validate_alignment</span><span class="p">:</span>
+            <span class="n">missing_side</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_present_col</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span> <span class="o">|</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present_col</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="n">same_index_structure</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">left_index_aliases</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_index_aliases</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">same_index_structure</span><span class="p">:</span>
+                <span class="n">index_mismatch</span> <span class="o">=</span> <span class="n">missing_side</span>
+                <span class="k">for</span> <span class="n">left_index</span><span class="p">,</span> <span class="n">right_index</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">left_index_aliases</span><span class="p">,</span> <span class="n">right_index_aliases</span>
+                <span class="p">):</span>
+                    <span class="n">index_mismatch</span> <span class="o">=</span> <span class="n">index_mismatch</span> <span class="o">|</span> <span class="o">~</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_index</span><span class="p">)</span><span class="o">.</span><span class="n">eqNullSafe</span><span class="p">(</span>
+                        <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_index</span><span class="p">)</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index_mismatch</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">status</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">positional_join</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_present_col</span><span class="p">),</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present_col</span><span class="p">),</span>
+                    <span class="n">index_mismatch</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;__index_mismatch__&quot;</span><span class="p">),</span>
                 <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">index_mismatch</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="n">status</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">positional_join</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_present_col</span><span class="p">),</span>
-                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present_col</span><span class="p">),</span>
-                <span class="n">index_mismatch</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;__index_mismatch__&quot;</span><span class="p">),</span>
+                <span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_present_col</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;left_count&quot;</span><span class="p">),</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present_col</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;right_count&quot;</span><span class="p">),</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;__index_mismatch__&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;int&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
+                        <span class="s2">&quot;index_mismatch&quot;</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+                <span class="o">.</span><span class="n">first</span><span class="p">()</span>
             <span class="p">)</span>
-            <span class="o">.</span><span class="n">agg</span><span class="p">(</span>
-                <span class="n">F</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">left_present_col</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;left_count&quot;</span><span class="p">),</span>
-                <span class="n">F</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">right_present_col</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;right_count&quot;</span><span class="p">),</span>
-                <span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;__index_mismatch__&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;int&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;index_mismatch&quot;</span><span class="p">),</span>
-            <span class="p">)</span>
-            <span class="o">.</span><span class="n">first</span><span class="p">()</span>
-        <span class="p">)</span>
-        <span class="n">left_count</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="s2">&quot;left_count&quot;</span><span class="p">]</span>
-        <span class="n">right_count</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="s2">&quot;right_count&quot;</span><span class="p">]</span>
-        <span class="n">lengths_match</span> <span class="o">=</span> <span class="n">left_count</span> <span class="o">==</span> <span class="n">right_count</span>
-        <span class="n">indices_match</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">same_index_structure</span>
-            <span class="ow">and</span> <span class="n">lengths_match</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="s2">&quot;index_mismatch&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">False</span><span class="p">)</span>
-        <span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">align</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">lengths_match</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Lengths of inputs do not match. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Left: </span><span class="si">{</span><span class="n">left_count</span><span class="si">}</span><span class="s2">, Right: </span><span class="si">{</span><span class="n">right_count</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">left_count</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="s2">&quot;left_count&quot;</span><span class="p">]</span>
+            <span class="n">right_count</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="s2">&quot;right_count&quot;</span><span class="p">]</span>
+            <span class="n">lengths_match</span> <span class="o">=</span> <span class="n">left_count</span> <span class="o">==</span> <span class="n">right_count</span>
+            <span class="n">indices_match</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">same_index_structure</span>
+                <span class="ow">and</span> <span class="n">lengths_match</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="s2">&quot;index_mismatch&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">False</span><span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">align</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">indices_match</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;The indices of the left and right GeoSeries&#39; are not equal, &quot;</span>
-                <span class="s2">&quot;and therefore they will be aligned (reordering and/or &quot;</span>
-                <span class="s2">&quot;introducing missing values) before executing the operation. &quot;</span>
-                <span class="s2">&quot;If this alignment is the desired behaviour, you can silence &quot;</span>
-                <span class="s2">&quot;this warning by passing &#39;align=True&#39;. If you don&#39;t want &quot;</span>
-                <span class="s2">&quot;alignment and protect yourself of accidentally aligning, &quot;</span>
-                <span class="s2">&quot;you can pass &#39;align=False&#39;.&quot;</span><span class="p">,</span>
-                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">align</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">lengths_match</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Lengths of inputs do not match. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Left: </span><span class="si">{</span><span class="n">left_count</span><span class="si">}</span><span class="s2">, Right: </span><span class="si">{</span><span class="n">right_count</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">align</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">indices_match</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;The indices of the left and right GeoSeries&#39; are not equal, &quot;</span>
+                    <span class="s2">&quot;and therefore they will be aligned (reordering and/or &quot;</span>
+                    <span class="s2">&quot;introducing missing values) before executing the operation. &quot;</span>
+                    <span class="s2">&quot;If this alignment is the desired behaviour, you can silence &quot;</span>
+                    <span class="s2">&quot;this warning by passing &#39;align=True&#39;. If you don&#39;t want &quot;</span>
+                    <span class="s2">&quot;alignment and protect yourself of accidentally aligning, &quot;</span>
+                    <span class="s2">&quot;you can pass &#39;align=False&#39;.&quot;</span><span class="p">,</span>
+                    <span class="n">stacklevel</span><span class="o">=</span><span class="n">warning_stacklevel</span><span class="p">,</span>
+                <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">align</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">indices_match</span><span class="p">:</span>
             <span class="n">result_index_columns</span> <span class="o">=</span> <span class="p">[</span>
@@ -3565,7 +3662,11 @@
             <span class="n">result_index_columns</span><span class="p">,</span>
             <span class="n">result_index_fields</span><span class="p">,</span>
             <span class="n">result_index_names</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_binary_geometry_series</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_binary_geometry_series</span><span class="p">(</span>
+            <span class="n">other</span><span class="p">,</span>
+            <span class="n">align</span><span class="p">,</span>
+            <span class="n">warning_stacklevel</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stp</span><span class="o">.</span><span class="n">ST_EqualsExact</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">),</span> <span class="n">tolerance</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boolean_result_preserving_index</span><span class="p">(</span>
@@ -3577,6 +3678,70 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">_to_bool</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_align_single_index_series_lazily</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">other</span><span class="p">:</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">align</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retain the established one-join plan for single-level indexes.&quot;&quot;&quot;</span>
+        <span class="n">result_index_column</span> <span class="o">=</span> <span class="s2">&quot;__index_level_0__&quot;</span>
+        <span class="n">left_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+        <span class="n">right_source</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+
+        <span class="k">if</span> <span class="n">align</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="c1"># Natural-order IDs are partition-dependent, so replace them with</span>
+            <span class="c1"># distributed sequence IDs before positional pairing.</span>
+            <span class="n">left_frame</span> <span class="o">=</span> <span class="n">InternalFrame</span><span class="o">.</span><span class="n">attach_distributed_sequence_column</span><span class="p">(</span>
+                <span class="n">left_source</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+                <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">result_index_column</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">right_frame</span> <span class="o">=</span> <span class="n">InternalFrame</span><span class="o">.</span><span class="n">attach_distributed_sequence_column</span><span class="p">(</span>
+                <span class="n">right_source</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+                <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="n">other</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">left_frame</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">right_frame</span><span class="p">,</span>
+                <span class="n">on</span><span class="o">=</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">,</span>
+                <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">result_index_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_names</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">left_frame</span> <span class="o">=</span> <span class="n">left_source</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">result_index_column</span><span class="p">),</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">left_source</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">right_frame</span> <span class="o">=</span> <span class="n">right_source</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+                <span class="n">other</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">),</span>
+                <span class="n">other</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">result_index_column</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">aligned_frame</span> <span class="o">=</span> <span class="n">left_frame</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">right_frame</span><span class="p">,</span>
+                <span class="n">on</span><span class="o">=</span><span class="n">result_index_column</span><span class="p">,</span>
+                <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">result_index_names</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">else</span> <span class="kc">None</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">aligned_frame</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">result_index_column</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_fields</span><span class="p">,</span>
+            <span class="n">result_index_names</span><span class="p">,</span>
+        <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_row_wise_operation</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">spark_col</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
@@ -3585,6 +3750,7 @@
         <span class="n">returns_geom</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">default_val</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">keep_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">validate_alignment</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Helper function to perform a row-wise operation on two GeoSeries.</span>
@@ -3601,46 +3767,41 @@
 
 <span class="sd">        default_val : Any (default None)</span>
 <span class="sd">            The value to use if either L or R is null. If None, nulls are not handled.</span>
+
+<span class="sd">        validate_alignment : bool, default False</span>
+<span class="sd">            If True, validate lengths and index equality eagerly and reproduce</span>
+<span class="sd">            GeoPandas&#39; default-alignment warning. Established single-index</span>
+<span class="sd">            binary APIs retain their lazy execution path.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span>
-
-        <span class="c1"># Note: this is specifically False. None is valid since it defaults to True similar to GeoPandas.</span>
-        <span class="n">index_col</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">NATURAL_ORDER_COLUMN_NAME</span> <span class="k">if</span> <span class="n">align</span> <span class="ow">is</span> <span class="kc">False</span> <span class="k">else</span> <span class="n">SPARK_DEFAULT_INDEX_NAME</span>
-        <span class="p">)</span>
-
-        <span class="c1"># This code assumes there is only one index (SPARK_DEFAULT_INDEX_NAME)</span>
-        <span class="c1"># and would need to be updated if Sedona later supports multi-index.</span>
-
-        <span class="n">sdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
-        <span class="n">other_sdf</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
-
-        <span class="k">if</span> <span class="n">index_col</span> <span class="o">==</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">:</span>
-            <span class="c1"># NATURAL_ORDER_COLUMN_NAME is not deterministic or sequential, so we instead replace it with a</span>
-            <span class="c1"># new column of row_numbers to perform the alignment. This mimics the following code.</span>
-            <span class="c1"># sdf.withColumn(index_col, F.row_number().over(Window.orderBy(NATURAL_ORDER_COLUMN_NAME)))</span>
-            <span class="n">sdf</span> <span class="o">=</span> <span class="n">sdf</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index_col</span><span class="p">)</span>
-            <span class="n">other_sdf</span> <span class="o">=</span> <span class="n">other_sdf</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">index_col</span><span class="p">)</span>
-            <span class="n">sdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">attach_distributed_sequence_column</span><span class="p">(</span><span class="n">sdf</span><span class="p">,</span> <span class="n">index_col</span><span class="p">)</span>
-            <span class="n">other_sdf</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">attach_distributed_sequence_column</span><span class="p">(</span>
-                <span class="n">other_sdf</span><span class="p">,</span> <span class="n">index_col</span>
+        <span class="c1"># Equal duplicate MultiIndexes pair positionally, while unequal ones</span>
+        <span class="c1"># form a Cartesian product per key. Distinguishing those cases needs</span>
+        <span class="c1"># the bounded distributed index-status aggregation.</span>
+        <span class="n">validate_alignment</span> <span class="o">=</span> <span class="n">validate_alignment</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="n">align</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span>
+            <span class="ow">and</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+                <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
             <span class="p">)</span>
-
-        <span class="n">sdf</span> <span class="o">=</span> <span class="n">sdf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">),</span>
-            <span class="c1"># For the left side:</span>
-            <span class="c1"># - We always select NATURAL_ORDER_COLUMN_NAME, to avoid having to regenerate it in the result</span>
-            <span class="c1"># - We always select SPARK_DEFAULT_INDEX_NAME, to retain series index info</span>
-            <span class="n">col</span><span class="p">(</span><span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
-            <span class="n">col</span><span class="p">(</span><span class="n">SPARK_DEFAULT_INDEX_NAME</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="n">other_sdf</span> <span class="o">=</span> <span class="n">other_sdf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-            <span class="n">other</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">),</span>
-            <span class="c1"># for the right side, we only need the column that we are joining on</span>
-            <span class="n">col</span><span class="p">(</span><span class="n">index_col</span><span class="p">),</span>
+        <span class="n">single_index_layout</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
         <span class="p">)</span>
-
-        <span class="n">joined_df</span> <span class="o">=</span> <span class="n">sdf</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">other_sdf</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">index_col</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">validate_alignment</span> <span class="ow">and</span> <span class="n">single_index_layout</span><span class="p">:</span>
+            <span class="n">alignment_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_single_index_series_lazily</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">alignment_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_binary_geometry_series</span><span class="p">(</span>
+                <span class="n">other</span><span class="p">,</span>
+                <span class="n">align</span><span class="p">,</span>
+                <span class="n">validate_alignment</span><span class="o">=</span><span class="n">validate_alignment</span><span class="p">,</span>
+                <span class="n">warning_stacklevel</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">(</span>
+            <span class="n">aligned_frame</span><span class="p">,</span>
+            <span class="n">result_index_columns</span><span class="p">,</span>
+            <span class="n">result_index_fields</span><span class="p">,</span>
+            <span class="n">result_index_names</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">alignment_result</span>
 
         <span class="k">if</span> <span class="n">default_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># ps.Series.fillna() doesn&#39;t always work for the output for some reason</span>
@@ -3650,9 +3811,12 @@
                 <span class="n">default_val</span><span class="p">,</span>
             <span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">spark_col</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_preserving_index</span><span class="p">(</span>
             <span class="n">spark_col</span><span class="p">,</span>
-            <span class="n">joined_df</span><span class="p">,</span>
+            <span class="n">aligned_frame</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">aligned_frame</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">result_index_columns</span><span class="p">],</span>
+            <span class="n">result_index_fields</span><span class="p">,</span>
+            <span class="n">result_index_names</span><span class="p">,</span>
             <span class="n">returns_geom</span><span class="o">=</span><span class="n">returns_geom</span><span class="p">,</span>
             <span class="n">keep_name</span><span class="o">=</span><span class="n">keep_name</span><span class="p">,</span>
         <span class="p">)</span>

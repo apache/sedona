@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_functions &mdash; Apache Sedona Python Documentation</title>
@@ -2431,6 +2430,26 @@
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_SimplifyPolygonHull&quot;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_SharedPaths"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_SharedPaths">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_SharedPaths</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the paths shared by two lineal Geometry columns.</span>
+
+<span class="sd">    The result is a GeometryCollection containing two MultiLineStrings. The first contains paths</span>
+<span class="sd">    traversed in the same direction by both inputs; the second contains paths traversed in opposite</span>
+<span class="sd">    directions. Path coordinates follow the direction of ``a``. Inputs must have matching SRIDs;</span>
+<span class="sd">    the result retains that SRID. As in PostGIS, a non-empty result retains Z when either input has</span>
+<span class="sd">    Z, while M values are dropped.</span>
+
+<span class="sd">    :param a: LineString or MultiLineString Geometry column.</span>
+<span class="sd">    :type a: ColumnOrName</span>
+<span class="sd">    :param b: Other LineString or MultiLineString Geometry column.</span>
+<span class="sd">    :type b: ColumnOrName</span>
+<span class="sd">    :return: Shared paths grouped by direction as a GeometryCollection column.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_SharedPaths&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="ST_Split"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_Split">[docs]</a><span class="nd">@validate_argument_types</span>
