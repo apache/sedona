@@ -571,8 +571,34 @@ class TestGeoDataFrame(TestGeopandasBase):
         assert sgpd_df.crs.to_epsg() == 4326
 
         with ps.option_context("compute.ops_on_diff_frames", True):
-            sgpd_df.set_crs(3857, inplace=True, allow_override=True)
+            legacy = sgpd.GeoDataFrame({"geometry": [Point(0, 0)]}, crs="EPSG:4326")
+        with pytest.warns(FutureWarning, match="former GeoDataFrame.set_crs"):
+            with ps.option_context("compute.ops_on_diff_frames", True):
+                legacy_result = legacy.set_crs(3857, True)
+        assert legacy_result is legacy
+        assert legacy.crs.to_epsg() == 3857
+
+        with pytest.warns(FutureWarning, match="former GeoDataFrame.set_crs"):
+            with pytest.raises(ValueError):
+                legacy.set_crs(4326, False, False)
+
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            inplace_result = sgpd_df.set_crs(
+                epsg=3857, inplace=True, allow_override=True
+            )
+        assert inplace_result is sgpd_df
         assert sgpd_df.crs.to_epsg() == 3857
+
+        with pytest.raises(ValueError):
+            sgpd_df.set_crs(4326)
+
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            equivalent = sgpd_df.set_crs(epsg=3857)
+        assert equivalent.crs.to_epsg() == 3857
+
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            sgpd_df.crs = 4326
+        assert sgpd_df.crs.to_epsg() == 4326
 
         with ps.option_context("compute.ops_on_diff_frames", True):
             sgpd_df = sgpd_df.set_crs(None, allow_override=True)
@@ -612,6 +638,27 @@ class TestGeoDataFrame(TestGeopandasBase):
             custom_result = all_null.set_crs(custom_crs)
         assert custom_result.crs == custom_crs
         assert custom_result.to_geopandas().crs == custom_crs
+
+    def test_estimate_utm_crs(self):
+        from pyproj import CRS
+
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            landmarks = sgpd.GeoDataFrame(
+                {
+                    "name": ["Empire State Building", "Statue of Liberty"],
+                    "geometry": [Point(-73.9847, 40.7484), Point(-74.0446, 40.6893)],
+                },
+                crs="EPSG:4326",
+            )
+
+        assert landmarks.estimate_utm_crs() == CRS("EPSG:32618")
+        assert landmarks.estimate_utm_crs("NAD83") == CRS("EPSG:26918")
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            projected = landmarks.to_crs("EPSG:3857")
+        assert projected.estimate_utm_crs() == CRS("EPSG:32618")
+
+        with pytest.raises(RuntimeError, match="crs must be set"):
+            sgpd.GeoDataFrame({"geometry": [Point(0, 0)]}).estimate_utm_crs()
 
     def test_crs_metadata_survives_frame_selection(self):
         source = GeoSeries([None], name="geometry", crs=4326)
@@ -881,6 +928,12 @@ class TestGeoDataFrame(TestGeopandasBase):
 
         result = GeoDataFrame.from_arrow(gdf.to_arrow())
         self.check_sgpd_df_equals_gpd_df(result, gdf)
+
+        if parse_version(gpd.__version__) >= parse_version("1.1.0"):
+            result = GeoDataFrame.from_arrow(
+                gdf.to_arrow(), to_pandas_kwargs={"use_threads": False}
+            )
+            self.check_sgpd_df_equals_gpd_df(result, gdf)
 
         gdf = gpd.GeoDataFrame(
             {

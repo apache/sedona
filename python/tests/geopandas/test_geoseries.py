@@ -5857,9 +5857,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert geo_series.crs.to_epsg() == 4326
 
         with pytest.raises(ValueError):
-            geo_series.set_crs(4328, allow_override=False)
+            geo_series.set_crs(4328)
         with pytest.raises(ValueError):
-            geo_series.set_crs(None, allow_override=False)
+            geo_series.set_crs(None)
 
         geo_series = geo_series.set_crs(None, allow_override=True)
         assert geo_series.crs == None
@@ -5867,8 +5867,12 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         # Check that the name is preserved for set_crs
         geo_series.name = "geometry"
 
-        geo_series.set_crs(4326, inplace=True)
+        inplace_result = geo_series.set_crs(4326, inplace=True)
+        assert inplace_result is geo_series
         assert geo_series.crs.to_epsg() == 4326
+
+        geo_series.crs = 3857
+        assert geo_series.crs.to_epsg() == 3857
 
         # Check that the name is preserved for set_crs after inplace=True
         geo_series.name = "geometry"

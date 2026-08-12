@@ -660,7 +660,7 @@ class GeoSeries(GeoFrame, pspd.Series):
             )
 
         if crs is not None:
-            self.set_crs(crs, inplace=True)
+            self.set_crs(crs, inplace=True, allow_override=True)
 
     def _is_empty(self) -> bool:
         """Check if this GeoSeries has no rows without triggering a full Spark scan."""
@@ -737,7 +737,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @crs.setter
     def crs(self, value: Union["CRS", None]):
-        self.set_crs(value, inplace=True)
+        self.set_crs(value, inplace=True, allow_override=True)
 
     @typing.overload
     def set_crs(
@@ -746,7 +746,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         epsg: Union[int, None] = None,
         inplace: Literal[True] = True,
         allow_override: bool = False,
-    ) -> None: ...
+    ) -> "GeoSeries": ...
 
     @typing.overload
     def set_crs(
@@ -762,8 +762,8 @@ class GeoSeries(GeoFrame, pspd.Series):
         crs: Union[Any, None] = None,
         epsg: Union[int, None] = None,
         inplace: bool = False,
-        allow_override: bool = True,
-    ) -> Union["GeoSeries", None]:
+        allow_override: bool = False,
+    ) -> "GeoSeries":
         """
         Set the Coordinate Reference System (CRS) of a ``GeoSeries``.
 
@@ -786,11 +786,10 @@ class GeoSeries(GeoFrame, pspd.Series):
             If True, the CRS of the GeoSeries will be changed in place
             (while still returning the result) instead of making a copy of
             the GeoSeries.
-        allow_override : bool, default True
+        allow_override : bool, default False
             If the GeoSeries already has a CRS, allow to replace the
-            existing CRS, even when both are not equal. In Sedona, setting this to True
-            will lead to eager evaluation instead of lazy evaluation. Unlike Geopandas,
-            True is the default value in Sedona for performance reasons.
+            existing CRS, even when both are not equal. Validating an existing
+            CRS when this is False may require eager metadata evaluation.
 
         Returns
         -------
@@ -848,8 +847,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         elif epsg is not None:
             crs = CRS.from_epsg(epsg)
 
-        # The below block for the not allow_override case is eager due to the self.crs call.
-        # This hurts performance and user experience, hence the default being set to True in Sedona.
+        # Reading legacy CRS values without metadata may require eager evaluation.
         if not allow_override:
             curr_crs = self.crs
 
@@ -873,7 +871,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         if inplace:
             self._update_inplace(result, invalidate_sindex=False)
-            return None
+            return self
 
         return result
 

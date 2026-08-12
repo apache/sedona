@@ -347,7 +347,7 @@ class TestGeometryAggregation(TestGeopandasBase):
         assert result.active_geometry_name == "geometry"
 
         empty_geometry = result.geometry
-        empty_geometry.set_crs(None, inplace=True)
+        empty_geometry.set_crs(None, inplace=True, allow_override=True)
         assert empty_geometry.crs is None
 
     def test_dissolve_validation(self):

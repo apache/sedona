@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import builtins
+from functools import wraps
 from typing import Any, Literal, Callable, Union
 import typing
 
@@ -145,6 +146,48 @@ def _not_implemented_error(method_name: str, additional_info: str = "") -> str:
     )
 
     return base_message + workaround
+
+
+def _support_legacy_set_crs_positionals(method):
+    """Preserve the former ``(crs, inplace, allow_override)`` positional form."""
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if len(args) >= 2 and isinstance(args[1], bool):
+            if len(args) > 3:
+                raise TypeError(
+                    "GeoDataFrame.set_crs() accepts at most 3 legacy arguments"
+                )
+            if "epsg" in kwargs or "inplace" in kwargs:
+                raise TypeError(
+                    "GeoDataFrame.set_crs() received duplicate positional and keyword arguments"
+                )
+            if len(args) == 3 and "allow_override" in kwargs:
+                raise TypeError(
+                    "GeoDataFrame.set_crs() got multiple values for 'allow_override'"
+                )
+
+            legacy_allow_override = (
+                args[2] if len(args) == 3 else kwargs.pop("allow_override", True)
+            )
+            warnings.warn(
+                "Passing 'inplace' and 'allow_override' positionally follows "
+                "Sedona's former GeoDataFrame.set_crs signature and is "
+                "deprecated. Use keyword arguments instead.",
+                FutureWarning,
+                stacklevel=2,
+            )
+            return method(
+                self,
+                crs=args[0],
+                inplace=args[1],
+                allow_override=legacy_allow_override,
+                **kwargs,
+            )
+
+        return method(self, *args, **kwargs)
+
+    return wrapper
 
 
 def _normalize_dissolve_aggfunc(aggfunc):
@@ -1206,9 +1249,16 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
     @crs.setter
     def crs(self, value):
         # Since PySpark DataFrames are immutable, we can't modify in place, so we create the new GeoSeries and replace it.
-        self.geometry = self.geometry.set_crs(value)
+        self.geometry = self.geometry.set_crs(value, allow_override=True)
 
-    def set_crs(self, crs, inplace=False, allow_override=True):
+    @_support_legacy_set_crs_positionals
+    def set_crs(
+        self,
+        crs: Any | None = None,
+        epsg: int | None = None,
+        inplace: bool = False,
+        allow_override: bool = False,
+    ) -> GeoDataFrame:
         """
         Set the Coordinate Reference System (CRS) of the ``GeoDataFrame``.
 
@@ -1222,6 +1272,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         The underlying geometries are not transformed to this CRS. To
         transform the geometries to a new CRS, use the ``to_crs`` method.
 
+        A boolean second positional argument is interpreted as ``inplace``
+        for compatibility with the former Sedona signature. This form is
+        deprecated; use keyword arguments instead.
+
         Parameters
         ----------
         crs : pyproj.CRS | None, optional
@@ -1234,11 +1288,10 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             If True, the CRS of the GeoDataFrame will be changed in place
             (while still returning the result) instead of making a copy of
             the GeoDataFrame.
-        allow_override : bool, default True
+        allow_override : bool, default False
             If the GeoDataFrame already has a CRS, allow to replace the
-            existing CRS, even when both are not equal. In Sedona, setting this to True
-            will lead to eager evaluation instead of lazy evaluation. Unlike Geopandas,
-            True is the default value in Sedona for performance reasons.
+            existing CRS, even when both are not equal. Validating an existing
+            CRS when this is False may require eager metadata evaluation.
 
         Examples
         --------
@@ -1284,14 +1337,13 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         --------
         GeoDataFrame.to_crs : re-project to another CRS
         """
-        # Since PySpark DataFrames are immutable, we can't modify in place, so we create the new GeoSeries and replace it.
-        new_geometry = self.geometry.set_crs(crs, allow_override=allow_override)
-        if inplace:
-            self.geometry = new_geometry
-        else:
-            df = self.copy()
-            df.geometry = new_geometry
-            return df
+        df = self if inplace else self.copy()
+        df.geometry = df.geometry.set_crs(
+            crs=crs,
+            epsg=epsg,
+            allow_override=allow_override,
+        )
+        return df
 
     def to_crs(
         self,
@@ -1385,6 +1437,35 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             df.geometry = new_geometry
             return df
 
+    def estimate_utm_crs(self, datum_name: str = "WGS 84") -> CRS:
+        """Return the estimated UTM CRS based on the bounds of the dataset.
+
+        .. versionadded:: 2.0.0
+
+        Parameters
+        ----------
+        datum_name : str, optional
+            The name of the datum to use in the query. Default is ``"WGS 84"``.
+
+        Returns
+        -------
+        pyproj.CRS
+            The UTM coordinate reference system covering the center of the
+            active geometry column's bounds.
+
+        Notes
+        -----
+        Bounds are aggregated across the distributed geometry column. Driver
+        work is bounded to a one-row emptiness probe and four aggregate bound
+        values; the geometry column is not collected.
+
+        See Also
+        --------
+        GeoDataFrame.to_crs
+        GeoSeries.estimate_utm_crs
+        """
+        return self.geometry.estimate_utm_crs(datum_name=datum_name)
+
     @classmethod
     def from_dict(
         cls,
@@ -1449,7 +1530,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             columns. This can be used to control the behavior of the conversion of the
             non-geometry columns to a pandas DataFrame. For example, you can use this
             to control the dtype conversion of the columns. By default, the `to_pandas`
-            method is called with no additional arguments.
+            method is called with no additional arguments. Requires GeoPandas 1.1 or
+            newer when provided.
 
         Returns
         -------
@@ -1478,12 +1560,11 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         1    POLYGON ((0 0, 1 1, 0 1, 0 0))    2      b
         2      LINESTRING (0 0, -1 1, 0 -1)    3      c
         """
-        if to_pandas_kwargs is None:
-            to_pandas_kwargs = {}
+        kwargs: dict[str, Any] = {"geometry": geometry}
+        if to_pandas_kwargs is not None:
+            kwargs["to_pandas_kwargs"] = to_pandas_kwargs
 
-        gpd_df = gpd.GeoDataFrame.from_arrow(
-            table, geometry=geometry, **to_pandas_kwargs
-        )
+        gpd_df = gpd.GeoDataFrame.from_arrow(table, **kwargs)
         return GeoDataFrame(gpd_df)
 
     def to_json(
