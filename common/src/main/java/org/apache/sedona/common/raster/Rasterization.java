@@ -251,6 +251,10 @@ public class Rasterization {
    * + 1) x [j, j + 1). Uses exact cell traversal (Amanatides-Woo): it steps from one cell-boundary
    * crossing to the next, so a cell is burned whenever the segment enters it, however briefly. A
    * fixed-step sampling walk instead misses cells crossed over a distance shorter than the step.
+   *
+   * <p>When an endpoint's pixel coordinate is exactly integral, its cell is selected from the side
+   * containing the segment interior. This avoids burning the neighboring cell that is contacted
+   * only at the endpoint, and it keeps an exact-corner end cell reachable by the traversal.
    */
   private static void traverseSegment(
       RasterizationParams params, double x0, double y0, double x1, double y1, double value) {
@@ -264,10 +268,10 @@ public class Rasterization {
     int stepX = (int) Math.signum(dx);
     int stepY = (int) Math.signum(dy);
 
-    int x = (int) Math.floor(x0);
-    int y = (int) Math.floor(y0);
-    int endX = (int) Math.floor(x1);
-    int endY = (int) Math.floor(y1);
+    int x = interiorCell(x0, dx < 0);
+    int y = interiorCell(y0, dy < 0);
+    int endX = interiorCell(x1, dx > 0);
+    int endY = interiorCell(y1, dy > 0);
 
     // The endpoints are clipped to the geometry extent, so the walk covers at most the grid's
     // width + height cells; the bound also guards against a floating-point overshoot never reaching
@@ -307,6 +311,19 @@ public class Rasterization {
         y += stepY;
       }
     }
+  }
+
+  /**
+   * Grid index of the cell containing the segment interior next to an endpoint. Only an exactly
+   * integral pixel coordinate is biased to the negative-side cell; nearby nonintegral coordinates
+   * and axes with no extent retain the ordinary half-open {@code floor()} result.
+   */
+  private static int interiorCell(double coord, boolean extendsNegative) {
+    int cell = (int) Math.floor(coord);
+    if (extendsNegative && coord == cell) {
+      cell--;
+    }
+    return cell;
   }
 
   private static void burnCell(

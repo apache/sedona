@@ -97,12 +97,15 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     double[] actual = MapAlgebra.bandAsArray(rasterized, 1);
 
+    // Matches GDAL/rasterio all_touched=True exactly: the vertex (24 -25) lies on a pixel row
+    // boundary, and the cell below it is touched only at that point, so it is not burned
+    // (GH-3120).
     double[] expected =
         new double[] {
           3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0,
           3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3093151.0,
           3093151.0, 3093151.0, 3093151.0, 3.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
-          3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3093151.0
+          3093151.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0
         };
 
     assertArrayEquals(expected, actual, 0.1d);
@@ -141,10 +144,13 @@ public class RasterConstructorsTest extends RasterTestBase {
 
     rasterized = RasterConstructors.asRaster(geom, raster, "d", true, 3093151, 3d, true);
     actual = MapAlgebra.bandAsArray(rasterized, 1);
+    // The diamond apexes (9 -3) and (5 -7) land exactly on pixel corners; the cells beyond them
+    // are touched only at those points and are not burned (GH-3120). Matches GDAL/rasterio
+    // all_touched=True exactly.
     expected =
         new double[] {
-          3093151.0, 3093151.0, 3.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
-          3093151.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3.0, 3093151.0, 3093151.0,
+          3093151.0, 3093151.0, 3.0, 3.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0,
+          3093151.0, 3.0, 3093151.0, 3093151.0, 3093151.0, 3093151.0, 3.0, 3.0, 3093151.0,
           3093151.0, 3.0
         };
     assertArrayEquals(expected, actual, 0.1d);
@@ -1027,23 +1033,25 @@ public class RasterConstructorsTest extends RasterTestBase {
         Constructors.geomFromWKT("POLYGON((1.5 1.5, 3.8 3.0, 4.5 4.4, 3.4 3.5, 1.5 1.5))", 0);
     GridCoverage2D rasterized = RasterConstructors.asRaster(geom, raster, "d", true, 612028, 5d);
     double[] actual = Arrays.stream(MapAlgebra.bandAsArray(rasterized, 1)).toArray();
-    // Matches GDAL/rasterio all_touched=True except where a vertex lands exactly on a grid line:
-    // there the geometry touches a cell only at a corner or edge and Sedona burns it (a superset
-    // consistent with "all pixels touched"), while GDAL omits it. Tracked separately; see the PR.
+    // On this 0.25-degree grid the vertices (1.5 1.5), (3.8 3.0), (4.5 4.4) and (3.4 3.5) land
+    // exactly on grid lines ((1.5 1.5) on a pixel corner). Matches GDAL/rasterio all_touched=True
+    // except the corner cell whose only contact with the polygon is the vertex point (1.5 1.5):
+    // GDAL burns it through a quirk of its scan order while Sedona burns only cells the boundary
+    // passes through (GH-3120).
     double[] expected = {
-      5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 612028.0, 5.0, 5.0, 5.0,
-      5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
-      5.0, 5.0, 5.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
-      5.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
-      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
-      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
-      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
-      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
-      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+      5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+      5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+      5.0, 5.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
       612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0,
-      612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0,
-      612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 612028.0, 5.0, 5.0,
-      5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0
+      612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0,
+      612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0,
+      612028.0, 612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0,
+      612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0,
+      612028.0, 612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0,
+      612028.0, 612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 612028.0,
+      612028.0, 612028.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 612028.0, 612028.0, 5.0,
+      5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,
+      5.0, 5.0, 5.0, 5.0, 5.0
     };
     assertArrayEquals(expected, actual, 0.1d);
 

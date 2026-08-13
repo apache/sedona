@@ -30,7 +30,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
-public class RasterizationTests extends RasterTestBase {
+public class RasterizationTest extends RasterTestBase {
   private final WKTReader wktReader = new WKTReader();
 
   @Test
@@ -358,6 +358,167 @@ public class RasterizationTests extends RasterTestBase {
         raster,
         "LINESTRING (13.157894736842104 -20.385964912280702, "
             + "23.157894736842106 -11.052631578947368)");
+  }
+
+  @Test
+  public void testLineEndpointOnGridLineBurnsOnlyCrossedCells()
+      throws ParseException, FactoryException {
+    // GH-3120: the segment's end vertex (3.8 3.0) sits exactly on the horizontal grid line y = 3.
+    // The row below is touched only at that single point, so it must not be burned; GDAL
+    // (rasterio all_touched) agrees. The reversed segment must burn the identical set.
+    GridCoverage2D raster = unitGrid6x6();
+    double[] expected = {
+      0, 0, 0, 0, 0, 0,
+      0, 1, 1, 0, 0, 0,
+      0, 0, 1, 1, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+    };
+    assertRasterizedGrid(raster, "LINESTRING (1.5 4.5, 3.8 3.0)", expected);
+    assertRasterizedGrid(raster, "LINESTRING (3.8 3.0, 1.5 4.5)", expected);
+
+    // Leaving the grid line instead of arriving at it: the start vertex's row has positive-length
+    // overlap and is burned, and only that side of the line.
+    double[] expectedLeaving = {
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 1, 1, 0,
+      0, 0, 0, 0, 1, 0,
+      0, 0, 0, 0, 0, 0,
+    };
+    assertRasterizedGrid(raster, "LINESTRING (3.8 3.0, 4.5 1.6)", expectedLeaving);
+    assertRasterizedGrid(raster, "LINESTRING (4.5 1.6, 3.8 3.0)", expectedLeaving);
+  }
+
+  @Test
+  public void testLineEndingAtLatticeCornerDoesNotStreak() throws ParseException, FactoryException {
+    // GH-3120: this slope -1 segment ends exactly on the lattice corner (3, 3). The floor()-derived
+    // end cell used to sit diagonally off the traversal's path, so the termination check never
+    // fired and the walk burned an anti-diagonal streak across the raster. Only the two cells the
+    // segment passes through may be burned, in both directions.
+    GridCoverage2D raster = unitGrid6x6();
+    double[] expected = {
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 1, 0, 0, 0,
+      0, 1, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+    };
+    assertRasterizedGrid(raster, "LINESTRING (1.5 1.5, 3.0 3.0)", expected);
+    assertRasterizedGrid(raster, "LINESTRING (3.0 3.0, 1.5 1.5)", expected);
+
+    // A segment contained in one cell that ends on the cell's corner burns only that cell.
+    double[] expectedSingle = {
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 1, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+    };
+    assertRasterizedGrid(raster, "LINESTRING (2.2 2.2, 3.0 3.0)", expectedSingle);
+  }
+
+  @Test
+  public void testLineVertexApexOnLatticeCorner() throws ParseException, FactoryException {
+    // A V whose apex vertex lies exactly on the lattice corner (3, 3): the cells above the apex are
+    // touched only at that point and stay unburned, matching GDAL.
+    GridCoverage2D raster = unitGrid6x6();
+    double[] expected = {
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 1, 1, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+    };
+    assertRasterizedGrid(raster, "LINESTRING (2.5 2.5, 3.0 3.0, 3.5 2.5)", expected);
+  }
+
+  @Test
+  public void testLineAlongGridLineBurnsHalfOpenCells() throws ParseException, FactoryException {
+    // Segments lying exactly along a grid line have no extent across it; the half-open floor()
+    // convention keeps the row below / column right of the line, matching GDAL.
+    GridCoverage2D raster = unitGrid6x6();
+    double[] expectedAlongHorizontal = {
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 1, 1, 1, 1, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+    };
+    assertRasterizedGrid(raster, "LINESTRING (1.5 3.0, 4.5 3.0)", expectedAlongHorizontal);
+    double[] expectedAlongVertical = {
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 1, 0, 0,
+      0, 0, 0, 1, 0, 0,
+      0, 0, 0, 1, 0, 0,
+      0, 0, 0, 1, 0, 0,
+      0, 0, 0, 0, 0, 0,
+    };
+    assertRasterizedGrid(raster, "LINESTRING (3.0 1.5, 3.0 4.5)", expectedAlongVertical);
+  }
+
+  @Test
+  public void testLineEndpointRuleDoesNotSnapNearbyCoordinates()
+      throws ParseException, FactoryException {
+    GridCoverage2D raster = unitGrid6x6();
+    double[] expectedCrossing = {
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 1, 1, 0, 0,
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+    };
+
+    // Only an exactly integral pixel coordinate gets endpoint bias. The adjacent doubles cross
+    // the grid line by a positive distance, however small, so both neighboring cells are burned.
+    String nextUp = Double.toString(Math.nextUp(3.0));
+    assertRasterizedGrid(raster, "LINESTRING (2.5 2.5, " + nextUp + " 2.5)", expectedCrossing);
+    assertRasterizedGrid(raster, "LINESTRING (" + nextUp + " 2.5, 2.5 2.5)", expectedCrossing);
+
+    String nextDown = Double.toString(Math.nextDown(3.0));
+    assertRasterizedGrid(raster, "LINESTRING (3.5 2.5, " + nextDown + " 2.5)", expectedCrossing);
+    assertRasterizedGrid(raster, "LINESTRING (" + nextDown + " 2.5, 3.5 2.5)", expectedCrossing);
+  }
+
+  @Test
+  public void testAllTouchedPolygonWithVertexOnGridLine() throws ParseException, FactoryException {
+    // The polygon from GH-3120: vertex (3.8 3.0) lies exactly on a horizontal grid line. The
+    // allTouched result must match GDAL (rasterio all_touched) exactly.
+    GridCoverage2D raster = unitGrid6x6();
+    Geometry geom =
+        Constructors.geomFromWKT("POLYGON ((1.5 1.5, 3.8 3.0, 4.5 4.4, 3.4 3.5, 1.5 1.5))", 0);
+    double[] band =
+        MapAlgebra.bandAsArray(
+            RasterConstructors.asRaster(geom, raster, "d", true, 1d, 0d, false), 1);
+    double[] expected = {
+      0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 1, 0,
+      0, 0, 1, 1, 1, 0,
+      0, 1, 1, 1, 0, 0,
+      0, 1, 1, 0, 0, 0,
+      0, 0, 0, 0, 0, 0,
+    };
+    Assert.assertArrayEquals(expected, band, 0d);
+  }
+
+  private GridCoverage2D unitGrid6x6() throws FactoryException {
+    return RasterConstructors.makeEmptyRaster(1, "d", 6, 6, 0, 6, 1, -1, 0, 0, 0);
+  }
+
+  private void assertRasterizedGrid(GridCoverage2D raster, String wkt, double[] expected)
+      throws ParseException, FactoryException {
+    Geometry geom = Constructors.geomFromWKT(wkt, 0);
+    double[] band =
+        MapAlgebra.bandAsArray(
+            RasterConstructors.asRaster(geom, raster, "d", false, 1d, 0d, false), 1);
+    Assert.assertArrayEquals(wkt, expected, band, 0d);
   }
 
   private void assertLineRasterizationSymmetric(GridCoverage2D raster, String wkt)
