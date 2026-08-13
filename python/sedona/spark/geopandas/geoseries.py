@@ -4646,9 +4646,9 @@ class GeoSeries(GeoFrame, pspd.Series):
         max_float = np.finfo(np.float64).max
 
         def valid_bound(bound):
-            # Empty geometries use +/- Double.MAX_VALUE in JTS envelopes.
-            # Convert those sentinels, nulls, and NaNs to null so Spark's
-            # aggregate functions ignore them.
+            # ST_X/YMin/Max return null for empty geometries. Preserve the
+            # existing bounds behavior by also treating NaNs and
+            # +/- Double.MAX_VALUE as missing.
             return F.when(
                 bound.isNull()
                 | F.isnan(bound)

@@ -25,7 +25,6 @@ import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
 import sedona.spark.geopandas as sgpd
-from pyspark.sql import DataFrame as SparkDataFrame
 from pyspark.pandas.internal import InternalFrame, NATURAL_ORDER_COLUMN_NAME
 from pyspark.pandas.utils import scol_for
 from pyspark.sql import functions as F
@@ -574,7 +573,8 @@ class TestGeoSeries(TestGeopandasBase):
         empty_geoseries = sgpd.GeoSeries([], crs="EPSG:4326")
         all_empty_geoseries = sgpd.GeoSeries([Point(), Polygon()], crs="EPSG:4326")
 
-        original_first = SparkDataFrame.first
+        spark_dataframe_type = type(geoseries._internal.spark_frame)
+        original_first = spark_dataframe_type.first
         action_count = 0
 
         def counting_first(frame):
@@ -582,7 +582,9 @@ class TestGeoSeries(TestGeopandasBase):
             action_count += 1
             return original_first(frame)
 
-        monkeypatch.setattr(SparkDataFrame, "first", counting_first)
+        # Spark 4 uses a classic DataFrame subclass that overrides ``first``.
+        # Patch the runtime class so the assertion works across Spark versions.
+        monkeypatch.setattr(spark_dataframe_type, "first", counting_first)
 
         result = geoseries.total_bounds
         expected = np.array([0.0, -1.0, 3.0, 2.0])
