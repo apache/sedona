@@ -16,6 +16,7 @@
 # under the License.
 import shutil
 import tempfile
+import typing
 
 from shapely.geometry import (
     Point,
@@ -582,6 +583,16 @@ class TestGeoDataFrame(TestGeopandasBase):
             with pytest.raises(ValueError):
                 legacy.set_crs(4326, False, False)
 
+        with pytest.raises(TypeError, match="at most 3 legacy arguments"):
+            legacy.set_crs(4326, False, False, False)
+        for duplicate_keyword in ({"epsg": 3857}, {"inplace": True}):
+            with pytest.raises(
+                TypeError, match="duplicate positional and keyword arguments"
+            ):
+                legacy.set_crs(4326, False, **duplicate_keyword)
+        with pytest.raises(TypeError, match="multiple values for 'allow_override'"):
+            legacy.set_crs(4326, False, False, allow_override=True)
+
         with ps.option_context("compute.ops_on_diff_frames", True):
             inplace_result = sgpd_df.set_crs(
                 epsg=3857, inplace=True, allow_override=True
@@ -641,6 +652,8 @@ class TestGeoDataFrame(TestGeopandasBase):
 
     def test_estimate_utm_crs(self):
         from pyproj import CRS
+
+        assert typing.get_type_hints(GeoDataFrame.estimate_utm_crs)["return"] is CRS
 
         with ps.option_context("compute.ops_on_diff_frames", True):
             landmarks = sgpd.GeoDataFrame(
@@ -934,6 +947,14 @@ class TestGeoDataFrame(TestGeopandasBase):
                 gdf.to_arrow(), to_pandas_kwargs={"use_threads": False}
             )
             self.check_sgpd_df_equals_gpd_df(result, gdf)
+        else:
+            with pytest.raises(
+                NotImplementedError,
+                match="to_pandas_kwargs requires GeoPandas >= 1.1",
+            ):
+                GeoDataFrame.from_arrow(
+                    gdf.to_arrow(), to_pandas_kwargs={"use_threads": False}
+                )
 
         gdf = gpd.GeoDataFrame(
             {

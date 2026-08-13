@@ -16,6 +16,7 @@
 # under the License.
 
 from decimal import Decimal
+import typing
 
 import shapely
 import numpy as np
@@ -24,6 +25,7 @@ import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
 import sedona.spark.geopandas as sgpd
+from pyspark.sql import DataFrame as SparkDataFrame
 from pyspark.pandas.internal import InternalFrame, NATURAL_ORDER_COLUMN_NAME
 from pyspark.pandas.utils import scol_for
 from pyspark.sql import functions as F
@@ -561,7 +563,7 @@ class TestGeoSeries(TestGeopandasBase):
         df_result = geoseries.to_geoframe().bounds
         pd.testing.assert_frame_equal(df_result.to_pandas(), expected)
 
-    def test_total_bounds(self):
+    def test_total_bounds(self, monkeypatch):
         d = [
             Point(3, -1),
             Polygon([(0, 0), (1, 1), (1, 0)]),
@@ -569,17 +571,45 @@ class TestGeoSeries(TestGeopandasBase):
             None,
         ]
         geoseries = sgpd.GeoSeries(d, crs="EPSG:4326")
+        empty_geoseries = sgpd.GeoSeries([], crs="EPSG:4326")
+        all_empty_geoseries = sgpd.GeoSeries([Point(), Polygon()], crs="EPSG:4326")
+
+        original_first = SparkDataFrame.first
+        action_count = 0
+
+        def counting_first(frame):
+            nonlocal action_count
+            action_count += 1
+            return original_first(frame)
+
+        monkeypatch.setattr(SparkDataFrame, "first", counting_first)
+
         result = geoseries.total_bounds
         expected = np.array([0.0, -1.0, 3.0, 2.0])
         np.testing.assert_array_equal(result, expected)
+        assert action_count == 1
 
+        action_count = 0
         df_result = geoseries.to_geoframe().total_bounds
         np.testing.assert_array_equal(df_result, expected)
+        assert action_count == 1
+
+        action_count = 0
+        empty_result = empty_geoseries.total_bounds
+        np.testing.assert_array_equal(empty_result, np.full(4, np.nan))
+        assert action_count == 1
+
+        action_count = 0
+        all_empty_result = all_empty_geoseries.total_bounds
+        np.testing.assert_array_equal(all_empty_result, np.full(4, np.nan))
+        assert action_count == 1
 
     # These tests were taken directly from the TestEstimateUtmCrs class in the geopandas test suite
     # https://github.com/geopandas/geopandas/blob/main/geopandas/tests/test_array.py
     def test_estimate_utm_crs(self):
         from pyproj import CRS
+
+        assert typing.get_type_hints(GeoSeries.estimate_utm_crs)["return"] is CRS
 
         # setup
         esb = Point(-73.9847, 40.7484)

@@ -29,6 +29,8 @@ import geopandas as gpd
 import pandas as pd
 import pyspark.pandas as pspd
 import sedona.spark.geopandas as sgpd
+from packaging.version import parse as parse_version
+from pyproj import CRS
 from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import (
@@ -780,8 +782,6 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             else:
                 # Updating the existing Spark column directly avoids index
                 # alignment, which would multiply rows for duplicate indexes.
-                from pyproj import CRS
-
                 normalized_crs = CRS.from_user_input(crs)
                 new_epsg = normalized_crs.to_epsg() or 0
                 geometry_field = with_crs_metadata(
@@ -1290,8 +1290,15 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             the GeoDataFrame.
         allow_override : bool, default False
             If the GeoDataFrame already has a CRS, allow to replace the
-            existing CRS, even when both are not equal. Validating an existing
-            CRS when this is False may require eager metadata evaluation.
+            existing CRS, even when both are not equal. Validation uses column
+            metadata when available. Without it, validation performs a
+            distributed lookup of the first non-null geometry's SRID.
+
+        Returns
+        -------
+        GeoDataFrame
+            A new GeoDataFrame unless ``inplace=True``, in which case the
+            mutated original is returned.
 
         Examples
         --------
@@ -1455,9 +1462,9 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
         Notes
         -----
-        Bounds are aggregated across the distributed geometry column. Driver
-        work is bounded to a one-row emptiness probe and four aggregate bound
-        values; the geometry column is not collected.
+        Bounds are computed with one distributed aggregation. Only its four
+        aggregate values are materialized on the driver; geometry rows are not
+        collected.
 
         See Also
         --------
@@ -1562,6 +1569,8 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         """
         kwargs: dict[str, Any] = {"geometry": geometry}
         if to_pandas_kwargs is not None:
+            if parse_version(gpd.__version__) < parse_version("1.1.0"):
+                raise NotImplementedError("to_pandas_kwargs requires GeoPandas >= 1.1")
             kwargs["to_pandas_kwargs"] = to_pandas_kwargs
 
         gpd_df = gpd.GeoDataFrame.from_arrow(table, **kwargs)

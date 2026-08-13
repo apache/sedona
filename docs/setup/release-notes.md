@@ -30,6 +30,12 @@
   whose state contains a serialized `ST_MinimumBoundingRadius` result cannot restore from a
   checkpoint or savepoint taken with the previous serializer** — such jobs need to be restarted
   without state, or migrated before upgrading.
+* **GeoPandas `set_crs`**: `GeoSeries.set_crs` and `GeoDataFrame.set_crs` now default to
+  `allow_override=False`, matching GeoPandas. Replacing or removing an existing CRS now requires
+  `allow_override=True`; direct `.crs` assignment remains an explicit override. Calls using the
+  former positional `GeoDataFrame.set_crs(crs, inplace, allow_override)` signature remain
+  temporarily supported with a `FutureWarning`. When CRS metadata is unavailable, validation can
+  require a distributed lookup of the first non-null geometry's SRID.
 
 ## Sedona 1.9.1
 

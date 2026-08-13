@@ -27,6 +27,7 @@ import sedona.spark.geopandas as sgpd
 import pandas as pd
 import pyspark.pandas as pspd
 import pyspark
+from pyproj import CRS
 from pyspark.pandas import Series as PandasOnSparkSeries
 from pyspark.pandas.frame import DataFrame as PandasOnSparkDataFrame
 from pyspark.pandas.internal import InternalField, InternalFrame
@@ -705,16 +706,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.set_crs : assign CRS
         GeoSeries.to_crs : re-project to another CRS
         """
-        from pyproj import CRS
-
         has_crs_metadata, metadata_crs = read_crs_metadata(
             self._internal.data_fields[0]
         )
         if has_crs_metadata:
             return metadata_crs
-
-        if self._is_empty():
-            return None
 
         # F.first is non-deterministic, but it doesn't matter because all non-null values should be the same.
         spark_col = stf.ST_SRID(F.first(self.spark.column, ignorenulls=True))
@@ -738,24 +734,6 @@ class GeoSeries(GeoFrame, pspd.Series):
     @crs.setter
     def crs(self, value: Union["CRS", None]):
         self.set_crs(value, inplace=True, allow_override=True)
-
-    @typing.overload
-    def set_crs(
-        self,
-        crs: Union[Any, None] = None,
-        epsg: Union[int, None] = None,
-        inplace: Literal[True] = True,
-        allow_override: bool = False,
-    ) -> "GeoSeries": ...
-
-    @typing.overload
-    def set_crs(
-        self,
-        crs: Union[Any, None] = None,
-        epsg: Union[int, None] = None,
-        inplace: Literal[False] = False,
-        allow_override: bool = False,
-    ) -> "GeoSeries": ...
 
     def set_crs(
         self,
@@ -788,8 +766,9 @@ class GeoSeries(GeoFrame, pspd.Series):
             the GeoSeries.
         allow_override : bool, default False
             If the GeoSeries already has a CRS, allow to replace the
-            existing CRS, even when both are not equal. Validating an existing
-            CRS when this is False may require eager metadata evaluation.
+            existing CRS, even when both are not equal. Validation uses column
+            metadata when available. Without it, validation performs a
+            distributed lookup of the first non-null geometry's SRID.
 
         Returns
         -------
@@ -840,8 +819,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoSeries.to_crs : re-project to another CRS
 
         """
-        from pyproj import CRS
-
         if crs is not None:
             crs = CRS.from_user_input(crs)
         elif epsg is not None:
@@ -4615,8 +4592,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         """
 
-        from pyproj import CRS
-
         if crs is not None:
             crs = CRS.from_user_input(crs)
         elif epsg is not None:
@@ -4668,33 +4643,44 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def total_bounds(self):
-        import warnings
+        max_float = np.finfo(np.float64).max
 
-        if self._is_empty():
-            # numpy 'min' cannot handle empty arrays
-            # TODO with numpy >= 1.15, the 'initial' argument can be used
-            return np.array([np.nan, np.nan, np.nan, np.nan])
-        ps_df = self.bounds
-        with warnings.catch_warnings():
-            # if all rows are empty geometry / none, nan is expected
-            warnings.filterwarnings(
-                "ignore", r"All-NaN slice encountered", RuntimeWarning
+        def valid_bound(bound):
+            # Empty geometries use +/- Double.MAX_VALUE in JTS envelopes.
+            # Convert those sentinels, nulls, and NaNs to null so Spark's
+            # aggregate functions ignore them.
+            return F.when(
+                bound.isNull()
+                | F.isnan(bound)
+                | (bound == max_float)
+                | (bound == -max_float),
+                F.lit(None).cast("double"),
+            ).otherwise(bound)
+
+        geometry = self.spark.column
+        minx = valid_bound(stf.ST_XMin(geometry))
+        miny = valid_bound(stf.ST_YMin(geometry))
+        maxx = valid_bound(stf.ST_XMax(geometry))
+        maxy = valid_bound(stf.ST_YMax(geometry))
+
+        bounds = (
+            self._internal.spark_frame.agg(
+                F.min(minx).alias("minx"),
+                F.min(miny).alias("miny"),
+                F.max(maxx).alias("maxx"),
+                F.max(maxy).alias("maxy"),
             )
+            .first()
+            .asDict()
+        )
+        return np.array(
+            [
+                np.nan if bounds[name] is None else bounds[name]
+                for name in ("minx", "miny", "maxx", "maxy")
+            ]
+        )
 
-            minx = ps_df["minx"].min(skipna=True)
-            miny = ps_df["miny"].min(skipna=True)
-
-            # skipna=True doesn't work properly for max(), so we use dropna() as a workaround
-            maxx = ps_df["maxx"].dropna()
-            maxy = ps_df["maxy"].dropna()
-
-            maxx = maxx.max(skipna=True) if not maxx.empty else np.nan
-            maxy = maxy.max(skipna=True) if not maxy.empty else np.nan
-
-            return np.array((minx, miny, maxx, maxy))
-
-    # GeoSeries-only (not in GeoDataFrame)
-    def estimate_utm_crs(self, datum_name: str = "WGS 84") -> "CRS":
+    def estimate_utm_crs(self, datum_name: str = "WGS 84") -> CRS:
         """Returns the estimated UTM CRS based on the bounds of the dataset.
 
         Parameters
@@ -4730,7 +4716,6 @@ class GeoSeries(GeoFrame, pspd.Series):
         - Prime Meridian: Greenwich
         """
         import numpy as np
-        from pyproj import CRS
         from pyproj.aoi import AreaOfInterest
         from pyproj.database import query_utm_crs_info
 
@@ -4740,11 +4725,12 @@ class GeoSeries(GeoFrame, pspd.Series):
         # than the GeoPandas implementation. The rest of the implementation always executes on 4 points (minx, miny, maxx, maxy),
         # so the numpy and pyproj implementations are reasonable.
 
-        if not self.crs:
+        source_crs = self.crs
+        if not source_crs:
             raise RuntimeError("crs must be set to estimate UTM CRS.")
 
         minx, miny, maxx, maxy = self.total_bounds
-        if self.crs.is_geographic:
+        if source_crs.is_geographic:
             x_center = np.mean([minx, maxx])
             y_center = np.mean([miny, maxy])
         # ensure using geographic coordinates
@@ -4754,7 +4740,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
             TransformerFromCRS = lru_cache(Transformer.from_crs)
 
-            transformer = TransformerFromCRS(self.crs, "EPSG:4326", always_xy=True)
+            transformer = TransformerFromCRS(source_crs, "EPSG:4326", always_xy=True)
             minx, miny, maxx, maxy = transformer.transform_bounds(
                 minx, miny, maxx, maxy
             )
