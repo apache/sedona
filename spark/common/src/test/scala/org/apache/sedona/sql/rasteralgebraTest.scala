@@ -804,10 +804,11 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
           "RS_BandAsArray(RS_SetValues(raster, 1, ST_GeomFromWKT('LINESTRING(1 -1, 1 -4, 2 -2, 3 -3, 4 -4, 5 -4, 6 -6)'), 255), 1)")
         .first()
         .getSeq(0)
-      // Exact cell traversal also burns the pixel the line touches at a corner
-      // (index 1); this is a superset of GDAL, consistent with "all touched".
-      var expected = Seq(255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 0.0,
-        255.0, 0.0, 0.0, 255.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 0.0, 255.0)
+      // Every vertex of this polyline lands exactly on a pixel corner. Pixels the line touches
+      // only at such a corner point (indices 1 and 15) are not burned (GH-3120), matching GDAL's
+      // treatment of grid-line endpoints.
+      var expected = Seq(255.0, 0.0, 0.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 255.0, 0.0,
+        255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 255.0, 255.0, 0.0, 0.0, 0.0, 0.0, 255.0)
       assert(expected.equals(actual))
 
       actual = inputDf
@@ -1853,10 +1854,12 @@ class rasteralgebraTest extends TestBaseScala with BeforeAndAfter with GivenWhen
       // The left polygon edge is a steep diagonal (slope -3.8) whose grid-line crossings fall very
       // close to lattice corners. The robust orientation predicate resolves each crossing exactly, so
       // the traversal burns every boundary cell the edge truly touches; the earlier floating-point
-      // step comparison rounded past seven of those near-corner cells and dropped them. All seven are
-      // valid (non-nodata) pixels, raising the all-touched count from 14660 to 14667. The count is
-      // direction-independent: rasterizing the ring in reverse order yields the same 14667.
-      assertEquals(14667.0, actual)
+      // step comparison rounded past seven of those near-corner cells and dropped them. Every
+      // polygon vertex also sits exactly on a pixel corner (coordinates are multiples of the
+      // 0.25-degree pixel size), and cells the boundary merely touches at such a corner point are
+      // not burned (GH-3120), which trims twelve pixels against the pre-GH-3120 count. The count is
+      // direction-independent: rasterizing the ring in reverse order yields the same 14655.
+      assertEquals(14655.0, actual)
 
       actual =
         df.selectExpr("RS_ZonalStats(raster, geom, 1, 'mean', false, false)").first().get(0)

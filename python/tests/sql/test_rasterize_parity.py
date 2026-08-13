@@ -140,3 +140,81 @@ class TestRasterizeParity(TestBase):
             dtype="uint8",
         )
         assert np.array_equal(actual, expected)
+
+    def test_as_raster_grid_aligned_vertices_match_gdal(self):
+        """Vertices that land exactly on grid lines (GH-3120): a cell the
+        geometry touches only at such a vertex point is not burned, matching
+        GDAL. Cases where a segment passes exactly through a lattice corner
+        mid-segment are excluded: there GDAL burns one extra off-diagonal cell
+        chosen by its internal scan order, which is slope-dependent and has no
+        consistent reference (see the Java RasterizationTest for Sedona's
+        direction-independent behaviour at those corners)."""
+        cases = [
+            # id, width, height, ulx, uly, sx, sy, wkt
+            # endpoint exactly on a horizontal grid line, arriving and leaving
+            (0, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (1.5 4.5, 3.8 3.0)"),
+            (1, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (3.8 3.0, 1.5 4.5)"),
+            (2, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (3.8 3.0, 4.5 1.6)"),
+            # endpoint exactly on a vertical grid line
+            (3, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (1.5 1.5, 3.0 2.5)"),
+            (4, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (3.0 2.5, 4.5 1.5)"),
+            # V whose apex vertex lies exactly on a lattice corner
+            (5, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (2.5 2.5, 3.0 3.0, 3.5 2.5)"),
+            # segment inside one cell ending on the cell's corner
+            (6, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (2.2 2.2, 3.0 3.0)"),
+            # segments lying exactly along a grid line keep the half-open side
+            (7, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (1.5 3.0, 4.5 3.0)"),
+            (8, 6, 6, 0.0, 6.0, 1.0, -1.0, "LINESTRING (3.0 1.5, 3.0 4.5)"),
+        ]
+        df = self.spark.createDataFrame(
+            cases,
+            "id INT, width INT, height INT, ulx DOUBLE, uly DOUBLE, "
+            "sx DOUBLE, sy DOUBLE, wkt STRING",
+        )
+        rows = df.selectExpr(
+            "id",
+            "RS_BandAsArray(RS_AsRaster(ST_GeomFromWKT(wkt), "
+            "RS_MakeEmptyRaster(1, 'd', width, height, ulx, uly, sx, sy, 0, 0, 0), "
+            "'d', true, 1.0, 0.0, false), 1) as band",
+        ).collect()
+        bands = {row["id"]: row["band"] for row in rows}
+
+        for case_id, width, height, ulx, uly, sx, sy, wkt in cases:
+            actual = np.array(bands[case_id], dtype=float).reshape(height, width)
+            expected = rasterio.features.rasterize(
+                [(wkt_loads(wkt), 1)],
+                out_shape=(height, width),
+                fill=0,
+                transform=Affine(sx, 0, ulx, 0, sy, uly),
+                all_touched=True,
+                dtype="uint8",
+            )
+            assert np.array_equal(actual, expected), f"case {case_id}: {wkt}"
+
+    def test_as_raster_multipolygon_corner_apexes_match_gdal(self):
+        """MultiPolygon whose diamond apex vertices land exactly on pixel
+        corners (GH-3120): the cells beyond the apexes are touched only at
+        those points and are not burned, matching GDAL. The pre-GH-3120
+        traversal also ran off the raster past such corner endpoints, burning
+        a diagonal streak of unrelated pixels."""
+        wkt = (
+            "MULTIPOLYGON (((2 -2, 4 -2, 4 -4, 2 -4, 2 -2)), "
+            "((4 -4, 6 -4, 6 -6, 5 -7, 4 -6, 4 -4)), "
+            "((6 -6, 8 -6, 8 -8, 6 -8, 6 -6)), "
+            "((8 -6, 10 -6, 10 -4, 9 -3, 8 -4, 8 -6)))"
+        )
+        band = self.spark.sql(
+            "SELECT RS_BandAsArray(RS_AsRaster(ST_GeomFromWKT('" + wkt + "'), "
+            "RS_MakeEmptyRaster(1, 'd', 5, 4, 1.0, -1.0, 2.0, -2.0, 0.0, 0.0, 0), "
+            "'d', true, 1.0, 0.0, false), 1)"
+        ).first()[0]
+        actual = np.array(band, dtype=float).reshape(4, 5)
+        expected = rasterio.features.rasterize(
+            [(wkt_loads(wkt), 1)],
+            out_shape=(4, 5),
+            fill=0,
+            transform=Affine(2, 0, 1, 0, -2, -1),
+            all_touched=True,
+            dtype="uint8",
+        )
+        assert np.array_equal(actual, expected)
