@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_functions &mdash; Apache Sedona Python Documentation</title>
@@ -1103,6 +1102,38 @@
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">&quot;ST_GeometryType&quot;</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ST_HilbertDistance"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_HilbertDistance">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_HilbertDistance</span><span class="p">(</span>
+    <span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span>
+    <span class="n">min_x</span><span class="p">:</span> <span class="n">ColumnOrNameOrNumber</span><span class="p">,</span>
+    <span class="n">min_y</span><span class="p">:</span> <span class="n">ColumnOrNameOrNumber</span><span class="p">,</span>
+    <span class="n">max_x</span><span class="p">:</span> <span class="n">ColumnOrNameOrNumber</span><span class="p">,</span>
+    <span class="n">max_y</span><span class="p">:</span> <span class="n">ColumnOrNameOrNumber</span><span class="p">,</span>
+    <span class="n">level</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ColumnOrName</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Map a geometry-envelope midpoint to a Hilbert curve distance.</span>
+
+<span class="sd">    :param geometry: Geometry whose envelope midpoint is encoded.</span>
+<span class="sd">    :type geometry: ColumnOrName</span>
+<span class="sd">    :param min_x: Minimum X of the Hilbert curve extent.</span>
+<span class="sd">    :type min_x: ColumnOrNameOrNumber</span>
+<span class="sd">    :param min_y: Minimum Y of the Hilbert curve extent.</span>
+<span class="sd">    :type min_y: ColumnOrNameOrNumber</span>
+<span class="sd">    :param max_x: Maximum X of the Hilbert curve extent.</span>
+<span class="sd">    :type max_x: ColumnOrNameOrNumber</span>
+<span class="sd">    :param max_y: Maximum Y of the Hilbert curve extent.</span>
+<span class="sd">    :type max_y: ColumnOrNameOrNumber</span>
+<span class="sd">    :param level: Hilbert curve level, at most 16.</span>
+<span class="sd">    :type level: Union[ColumnOrName, int]</span>
+<span class="sd">    :return: Non-negative Hilbert curve distance as a long column.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span>
+        <span class="s2">&quot;ST_HilbertDistance&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">min_x</span><span class="p">,</span> <span class="n">min_y</span><span class="p">,</span> <span class="n">max_x</span><span class="p">,</span> <span class="n">max_y</span><span class="p">,</span> <span class="n">level</span><span class="p">),</span>
+    <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ST_H3CellDistance"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_H3CellDistance">[docs]</a><span class="nd">@validate_argument_types</span>

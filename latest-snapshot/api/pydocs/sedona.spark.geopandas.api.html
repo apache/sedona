@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -2848,6 +2847,47 @@ the segment length is closest to the given fraction.</p></li>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.frechet_distance" title="sedona.spark.geopandas.GeoSeries.frechet_distance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.frechet_distance</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.hilbert_distance">
+<span class="sig-name descname"><span class="pre">hilbert_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.pandas/api/pyspark.pandas.Series.html#pyspark.pandas.Series" title="(in PySpark vmaster)"><span class="pre">pyspark.pandas.Series</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.hilbert_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.hilbert_distance" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the distance along a Hilbert curve.</p>
+<p>Distances are calculated from geometry-envelope midpoints and can be
+used to spatially order a GeoSeries or GeoDataFrame by mapping its
+two-dimensional geometries onto a one-dimensional curve.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>total_bounds</strong> (<em>4-element array-like</em><em>, </em><em>optional</em>) – The spatial extent in which the curve is constructed, used to
+rescale geometry midpoints. By default, the extent of all
+geometry-envelope midpoints is computed. Passing known bounds
+avoids that metadata computation.</p></li>
+<li><p><strong>level</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default 16</em>) – Determines the precision of the curve. Documented levels are 1
+through 16, with grid coordinates in the range
+<code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">2**level</span> <span class="pre">-</span> <span class="pre">1]</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Distributed Series named <code class="docutils literal notranslate"><span class="pre">&quot;hilbert_distance&quot;</span></code>. Spark stores
+the unsigned 32-bit Hilbert values as signed 64-bit integers.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas-on-Spark Series</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The method performs one eager distributed validation and metadata
+aggregation. Geometry rows and the returned values remain distributed;
+no geometry data are collected on the driver.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">([</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">hilbert_distance</span><span class="p">(</span><span class="n">total_bounds</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">level</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+<span class="go">[0, 10, 15]</span>
+</pre></div>
 </div>
 </dd></dl>
 

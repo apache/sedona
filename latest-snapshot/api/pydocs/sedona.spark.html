@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -367,6 +366,7 @@
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.has_sindex"><code class="docutils literal notranslate"><span class="pre">GeoSeries.has_sindex</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.has_z"><code class="docutils literal notranslate"><span class="pre">GeoSeries.has_z</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.hausdorff_distance"><code class="docutils literal notranslate"><span class="pre">GeoSeries.hausdorff_distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.hilbert_distance"><code class="docutils literal notranslate"><span class="pre">GeoSeries.hilbert_distance()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.interiors"><code class="docutils literal notranslate"><span class="pre">GeoSeries.interiors</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.interpolate"><code class="docutils literal notranslate"><span class="pre">GeoSeries.interpolate()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.intersection"><code class="docutils literal notranslate"><span class="pre">GeoSeries.intersection()</span></code></a></li>
@@ -897,6 +897,7 @@
 <li class="toctree-l3"><a class="reference internal" href="sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_HasM"><code class="docutils literal notranslate"><span class="pre">ST_HasM()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_HasZ"><code class="docutils literal notranslate"><span class="pre">ST_HasZ()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_HausdorffDistance"><code class="docutils literal notranslate"><span class="pre">ST_HausdorffDistance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_HilbertDistance"><code class="docutils literal notranslate"><span class="pre">ST_HilbertDistance()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_InteriorRingN"><code class="docutils literal notranslate"><span class="pre">ST_InteriorRingN()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_InterpolatePoint"><code class="docutils literal notranslate"><span class="pre">ST_InterpolatePoint()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="sedona.spark.sql.html#sedona.spark.sql.st_functions.ST_Intersection"><code class="docutils literal notranslate"><span class="pre">ST_Intersection()</span></code></a></li>
@@ -1424,7 +1425,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="sedona.spark.SedonaContext.SedonaContext.builder">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">builder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">&lt;pyspark.sql.session.SparkSession.Builder</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f55e533dc10&gt;</span></span></span><a class="reference internal" href="_modules/sedona/spark/SedonaContext.html#SedonaContext.builder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.SedonaContext.SedonaContext.builder" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">builder</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">&lt;pyspark.sql.session.SparkSession.Builder</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f3875d322d0&gt;</span></span></span><a class="reference internal" href="_modules/sedona/spark/SedonaContext.html#SedonaContext.builder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.SedonaContext.SedonaContext.builder" title="Permalink to this definition"></a></dt>
 <dd><p>This method adds the basic Sedona configuration to the SparkSession builder.
 Usually the user does not need to call this method directly, as it is configured when a cluster is created.
 This method is needed when the user wants to manually configure Sedona

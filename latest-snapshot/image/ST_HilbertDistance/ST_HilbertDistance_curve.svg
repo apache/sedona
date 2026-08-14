@@ -1,0 +1,107 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 680" width="1120" height="680" role="img" aria-labelledby="hilbert-curve-title hilbert-curve-description">
+  <title id="hilbert-curve-title">Level-2 Hilbert grid and its ordered addresses</title>
+  <desc id="hilbert-curve-description">A four-by-four grid shows the continuous Hilbert curve visiting every cell exactly once. The traversal starts with address zero in the lower-left cell, winds through addresses one to fourteen, and ends with address fifteen in the lower-right cell. Explanatory cards state that level two creates four cells per axis and sixteen unsigned ordering addresses.</desc>
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+      text:not([fill]) { fill: #172033; }
+      .panel { fill: #f8fafc; stroke: #b8c3d1; stroke-width: 1.5; }
+      .panel-title { font-size: 16px; font-weight: 700; }
+      .caption { font-size: 13px; fill: #475569; }
+      .small { font-size: 12px; fill: #475569; }
+      .grid { stroke: #94a3b8; stroke-width: 1; }
+      .axis { font-size: 12px; fill: #475569; }
+      .address { font-size: 13px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+      .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 15px; }
+    </style>
+    <marker id="curve-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#6d28d9"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="680" fill="#ffffff"/>
+  <text x="560" y="34" text-anchor="middle" font-size="22" font-weight="700">A Hilbert address turns a 2D grid into one ordered key</text>
+  <text x="560" y="59" text-anchor="middle" class="caption">Level 2 visits all 16 grid cells along one continuous path</text>
+
+  <rect x="25" y="82" width="610" height="570" rx="10" class="panel"/>
+  <text x="48" y="112" class="panel-title">Level-2 curve</text>
+  <text x="48" y="134" class="caption">Cell labels are the values returned for midpoints normalized into those cells.</text>
+
+  <rect x="105" y="155" width="440" height="440" fill="#ffffff" stroke="#64748b" stroke-width="2"/>
+  <path d="M215 155 V595 M325 155 V595 M435 155 V595 M105 265 H545 M105 375 H545 M105 485 H545" class="grid"/>
+
+  <path d="M160 540 L270 540 L270 430 L160 430 L160 320 L160 210 L270 210 L270 320 L380 320 L380 210 L490 210 L490 320 L490 430 L380 430 L380 540 L490 540"
+        fill="none" stroke="#ede9fe" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M160 540 L270 540 L270 430 L160 430 L160 320 L160 210 L270 210 L270 320 L380 320 L380 210 L490 210 L490 320 L490 430 L380 430 L380 540 L490 540"
+        fill="none" stroke="#6d28d9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#curve-arrow)"/>
+
+  <g>
+    <circle cx="160" cy="540" r="19" fill="#dff6ef" stroke="#007a65" stroke-width="3"/><text x="160" y="540" class="address" fill="#006b58">0</text>
+    <circle cx="270" cy="540" r="17" fill="#ffffff" stroke="#6d28d9" stroke-width="2"/><text x="270" y="540" class="address">1</text>
+    <circle cx="270" cy="430" r="17" fill="#ffffff" stroke="#6d28d9" stroke-width="2"/><text x="270" y="430" class="address">2</text>
+    <circle cx="160" cy="430" r="17" fill="#ffffff" stroke="#6d28d9" stroke-width="2"/><text x="160" y="430" class="address">3</text>
+    <circle cx="160" cy="320" r="17" fill="#ffffff" stroke="#6d28d9" stroke-width="2"/><text x="160" y="320" class="address">4</text>
+    <circle cx="160" cy="210" r="17" fill="#ffffff" stroke="#6d28d9" stroke-width="2"/><text x="160" y="210" class="address">5</text>
+    <circle cx="270" cy="210" r="17" fill="#ffffff" stroke="#6d28d9" stroke-width="2"/><text x="270" y="210" class="address">6</text>
+    <circle cx="270" cy="320" r="17" fill="#ffffff" stroke="#6d28d9" stroke-width="2"/><text x="270" y="320" class="address">7</text>
+    <circle cx="380" cy="320" r="17" fill="#ffffff" stroke="#6d28d9" stroke-width="2"/><text x="380" y="320" class="address">8</text>
+    <circle cx="380" cy="210" r="17" fill="#ffffff" stroke="#6d28d9" stroke-width="2"/><text x="380" y="210" class="address">9</text>
+    <circle cx="490" cy="210" r="17" fill="#ffffff" stroke="#6d28d9" stroke-width="2"/><text x="490" y="210" class="address">10</text>
+    <circle cx="490" cy="320" r="17" fill="#ffffff" stroke="#6d28d9" stroke-width="2"/><text x="490" y="320" class="address">11</text>
+    <circle cx="490" cy="430" r="17" fill="#ffffff" stroke="#6d28d9" stroke-width="2"/><text x="490" y="430" class="address">12</text>
+    <circle cx="380" cy="430" r="17" fill="#ffffff" stroke="#6d28d9" stroke-width="2"/><text x="380" y="430" class="address">13</text>
+    <circle cx="380" cy="540" r="17" fill="#ffffff" stroke="#6d28d9" stroke-width="2"/><text x="380" y="540" class="address">14</text>
+    <circle cx="490" cy="540" r="19" fill="#fff1e8" stroke="#c2410c" stroke-width="3"/><text x="490" y="540" class="address" fill="#9a3412">15</text>
+  </g>
+
+  <text x="160" y="617" text-anchor="middle" class="axis">x = 0</text>
+  <text x="270" y="617" text-anchor="middle" class="axis">x = 1</text>
+  <text x="380" y="617" text-anchor="middle" class="axis">x = 2</text>
+  <text x="490" y="617" text-anchor="middle" class="axis">x = 3</text>
+  <text x="87" y="544" text-anchor="end" class="axis">y = 0</text>
+  <text x="87" y="434" text-anchor="end" class="axis">y = 1</text>
+  <text x="87" y="324" text-anchor="end" class="axis">y = 2</text>
+  <text x="87" y="214" text-anchor="end" class="axis">y = 3</text>
+
+  <rect x="660" y="82" width="435" height="172" rx="10" class="panel"/>
+  <text x="684" y="113" class="panel-title">Grid size</text>
+  <text x="684" y="148" class="formula" fill="#5b21b6">cells per axis = 2² = 4</text>
+  <text x="684" y="180" class="formula" fill="#5b21b6">addresses = 4² = 16</text>
+  <text x="684" y="215" class="caption">At level 16, the same rule produces 2³² addresses,</text>
+  <text x="684" y="235" class="caption">represented by a non-negative Long.</text>
+
+  <rect x="660" y="274" width="435" height="186" rx="10" class="panel"/>
+  <text x="684" y="305" class="panel-title">Why the order is useful</text>
+  <path d="M700 342 H1038" stroke="#6d28d9" stroke-width="4" stroke-linecap="round" marker-end="url(#curve-arrow)"/>
+  <circle cx="700" cy="342" r="8" fill="#007a65"/><text x="700" y="370" text-anchor="middle" class="small">0</text>
+  <circle cx="813" cy="342" r="7" fill="#8b5cf6"/><text x="813" y="370" text-anchor="middle" class="small">nearby keys</text>
+  <circle cx="926" cy="342" r="7" fill="#8b5cf6"/><text x="1038" y="370" text-anchor="middle" class="small">15</text>
+  <text x="684" y="405" class="caption">Consecutive addresses always occupy adjacent grid cells.</text>
+  <text x="684" y="427" class="caption">Sorting by the returned value therefore tends to keep spatially</text>
+  <text x="684" y="449" class="caption">nearby records together without turning it into a distance metric.</text>
+
+  <rect x="660" y="480" width="435" height="172" rx="10" fill="#fffbeb" stroke="#d6a838" stroke-width="1.5"/>
+  <text x="684" y="512" class="panel-title">Read the result as an address</text>
+  <text x="684" y="546" class="caption">The curve preserves locality approximately, not perfectly:</text>
+  <text x="684" y="570" class="caption">two nearby cells can be far apart along the curve.</text>
+  <text x="684" y="606" class="caption">Use the key for ordering, clustering, or partitioning.</text>
+  <text x="684" y="630" class="caption">Use spatial predicates for exact geometric relationships.</text>
+</svg>

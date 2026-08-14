@@ -1821,6 +1821,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/flink/Spatial-Indexing/ST_H3ToGeom/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_HilbertDistance/</loc>
+        <lastmod>2026-08-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_HilbertDistance/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/flink/Spatial-Indexing/ST_HilbertDistance/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/api/flink/Spatial-Indexing/ST_S2CellIDs/</loc>
         <lastmod>2026-08-14</lastmod>
         <changefreq>daily</changefreq>
@@ -3345,6 +3352,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_GeoHashNeighbors/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/snowflake/vector-data/Spatial-Indexing/ST_GeoHashNeighbors/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_HilbertDistance/</loc>
+        <lastmod>2026-08-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_HilbertDistance/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/snowflake/vector-data/Spatial-Indexing/ST_HilbertDistance/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/api/snowflake/vector-data/Spatial-Indexing/ST_S2CellIDs/</loc>
@@ -5823,6 +5837,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_H3ToGeom/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Spatial-Indexing/ST_H3ToGeom/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_HilbertDistance/</loc>
+        <lastmod>2026-08-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_HilbertDistance/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/api/sql/Spatial-Indexing/ST_HilbertDistance/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/api/sql/Spatial-Indexing/ST_S2CellIDs/</loc>
@@ -8667,6 +8688,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/flink/Spatial-Indexing/ST_H3ToGeom/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/zh/api/flink/Spatial-Indexing/ST_HilbertDistance/</loc>
+        <lastmod>2026-08-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/flink/Spatial-Indexing/ST_HilbertDistance/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/flink/Spatial-Indexing/ST_HilbertDistance/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/zh/api/flink/Spatial-Indexing/ST_S2CellIDs/</loc>
         <lastmod>2026-08-14</lastmod>
         <changefreq>daily</changefreq>
@@ -10191,6 +10219,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/snowflake/vector-data/Spatial-Indexing/ST_GeoHashNeighbors/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/snowflake/vector-data/Spatial-Indexing/ST_GeoHashNeighbors/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/snowflake/vector-data/Spatial-Indexing/ST_HilbertDistance/</loc>
+        <lastmod>2026-08-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/snowflake/vector-data/Spatial-Indexing/ST_HilbertDistance/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/snowflake/vector-data/Spatial-Indexing/ST_HilbertDistance/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/api/snowflake/vector-data/Spatial-Indexing/ST_S2CellIDs/</loc>
@@ -12669,6 +12704,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/Spatial-Indexing/ST_H3ToGeom/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Spatial-Indexing/ST_H3ToGeom/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/api/sql/Spatial-Indexing/ST_HilbertDistance/</loc>
+        <lastmod>2026-08-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/api/sql/Spatial-Indexing/ST_HilbertDistance/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestapi/sql/Spatial-Indexing/ST_HilbertDistance/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/api/sql/Spatial-Indexing/ST_S2CellIDs/</loc>

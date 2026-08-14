@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -4889,6 +4888,96 @@
                 <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;minx&quot;</span><span class="p">,</span> <span class="s2">&quot;miny&quot;</span><span class="p">,</span> <span class="s2">&quot;maxx&quot;</span><span class="p">,</span> <span class="s2">&quot;maxy&quot;</span><span class="p">)</span>
             <span class="p">]</span>
         <span class="p">)</span>
+
+<div class="viewcode-block" id="GeoSeries.hilbert_distance"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.hilbert_distance">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">hilbert_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;level must be an integer&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+        <span class="k">if</span> <span class="n">level</span> <span class="o">&gt;</span> <span class="mi">16</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Level out of range&quot;</span><span class="p">)</span>
+
+        <span class="n">explicit_bounds</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">total_bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Preserve GeoPandas&#39; ordinary Python unpacking errors for malformed</span>
+            <span class="c1"># inputs instead of silently accepting the wrong extent shape.</span>
+            <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">total_bounds</span>
+            <span class="c1"># Evaluate both ranges before float coercion so invalid values such</span>
+            <span class="c1"># as strings fail instead of being treated as Spark column names.</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span><span class="p">)</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span><span class="p">)</span>
+            <span class="n">explicit_bounds</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">))</span>
+
+        <span class="n">source_internal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
+        <span class="n">source_frame</span> <span class="o">=</span> <span class="n">source_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+        <span class="n">geometry</span> <span class="o">=</span> <span class="n">source_internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">x_midpoint</span> <span class="o">=</span> <span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_XMin</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span> <span class="o">+</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_XMax</span><span class="p">(</span><span class="n">geometry</span><span class="p">))</span> <span class="o">/</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+        <span class="n">y_midpoint</span> <span class="o">=</span> <span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_YMin</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span> <span class="o">+</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_YMax</span><span class="p">(</span><span class="n">geometry</span><span class="p">))</span> <span class="o">/</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+        <span class="n">invalid_geometry</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span> <span class="o">|</span> <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span>
+            <span class="n">stf</span><span class="o">.</span><span class="n">ST_IsEmpty</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">summary_expressions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;row_count&quot;</span><span class="p">),</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span><span class="n">invalid_geometry</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;invalid_geometry_count&quot;</span><span class="p">),</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">explicit_bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">valid_midpoint</span><span class="p">(</span><span class="n">midpoint</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+                    <span class="n">midpoint</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span> <span class="o">|</span> <span class="n">F</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">midpoint</span><span class="p">),</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;double&quot;</span><span class="p">),</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">midpoint</span><span class="p">)</span>
+
+            <span class="n">valid_x</span> <span class="o">=</span> <span class="n">valid_midpoint</span><span class="p">(</span><span class="n">x_midpoint</span><span class="p">)</span>
+            <span class="n">valid_y</span> <span class="o">=</span> <span class="n">valid_midpoint</span><span class="p">(</span><span class="n">y_midpoint</span><span class="p">)</span>
+            <span class="n">summary_expressions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">valid_x</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;xmin&quot;</span><span class="p">),</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">valid_y</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;ymin&quot;</span><span class="p">),</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">valid_x</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;xmax&quot;</span><span class="p">),</span>
+                    <span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">valid_y</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;ymax&quot;</span><span class="p">),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Validation is intentionally eager, matching GeoPandas. Only one</span>
+        <span class="c1"># aggregate row is materialized; geometry rows remain distributed.</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="n">source_frame</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="o">*</span><span class="n">summary_expressions</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;invalid_geometry_count&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Hilbert distance cannot be computed on a GeoSeries with empty or &quot;</span>
+                <span class="s2">&quot;missing geometries.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">explicit_bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;row_count&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Hilbert distance cannot infer total bounds from an empty &quot;</span>
+                    <span class="s2">&quot;GeoSeries.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">if</span> <span class="n">summary</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">summary</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;xmin&quot;</span><span class="p">,</span> <span class="s2">&quot;ymin&quot;</span><span class="p">,</span> <span class="s2">&quot;xmax&quot;</span><span class="p">,</span> <span class="s2">&quot;ymax&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">explicit_bounds</span>
+
+        <span class="c1"># Keep the fixed-width encoder inside the JVM. Expressing its prefix</span>
+        <span class="c1"># scan with higher-order Catalyst lambdas adds per-row array/struct</span>
+        <span class="c1"># allocation and is substantially slower on large distributed inputs.</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_HilbertDistance</span><span class="p">(</span>
+            <span class="n">geometry</span><span class="p">,</span>
+            <span class="n">xmin</span><span class="p">,</span>
+            <span class="n">ymin</span><span class="p">,</span>
+            <span class="n">xmax</span><span class="p">,</span>
+            <span class="n">ymax</span><span class="p">,</span>
+            <span class="n">level</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span>
+            <span class="n">distance</span><span class="p">,</span>
+            <span class="n">source_frame</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;hilbert_distance&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.estimate_utm_crs"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.estimate_utm_crs">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">estimate_utm_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WGS 84&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CRS</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the estimated UTM CRS based on the bounds of the dataset.</span>
