@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.common.raster.cog;
 
+import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,6 +30,8 @@ import javax.media.jai.Interpolation;
 import javax.media.jai.InterpolationBicubic;
 import javax.media.jai.InterpolationBilinear;
 import javax.media.jai.InterpolationNearest;
+import javax.media.jai.TiledImage;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.coverage.grid.GridCoverageWriter;
 import org.geotools.api.parameter.GeneralParameterValue;
 import org.geotools.api.parameter.ParameterValueGroup;
@@ -247,6 +250,29 @@ public class CogWriter {
   }
 
   /**
+   * Retile byte-band coverages to the output tile grid before writing (GH-3245).
+   *
+   * <p>imageio-ext's TIFFDeflater passes {@code (offset, height * scanlineStride)} verbatim to
+   * {@link java.util.zip.Deflater#setInput(byte[], int, int)}. For 8-bit images, TIFFImageWriter's
+   * optimized path hands the compressor the raster's backing array directly; when that raster is a
+   * child of a source tile wider than the output tile (e.g. a JAI overview image with a single
+   * 512x512 tile written as 256x256 tiles), the computed range overruns the array on the last row
+   * of tiles and Deflater throws ArrayIndexOutOfBoundsException. Only byte-band images take the
+   * direct-buffer path, so retiling them to match the output tile grid guarantees every raster the
+   * writer reads starts at offset 0 of a tile-sized buffer. Pixel data and the written TIFF are
+   * unchanged; the copy happens lazily one tile at a time.
+   */
+  private static GridCoverage2D alignTileLayoutForByteBands(GridCoverage2D raster, int tileSize) {
+    RenderedImage image = raster.getRenderedImage();
+    if (image.getSampleModel().getDataType() != DataBuffer.TYPE_BYTE
+        || (image.getTileWidth() == tileSize && image.getTileHeight() == tileSize)) {
+      return raster;
+    }
+    TiledImage retiled = new TiledImage(image, tileSize, tileSize);
+    return RasterUtils.clone(retiled, raster.getSampleDimensions(), raster, null, true);
+  }
+
+  /**
    * Write a GridCoverage2D as a tiled GeoTIFF byte array using GeoTools.
    *
    * @param raster The input raster
@@ -259,6 +285,7 @@ public class CogWriter {
   private static byte[] writeAsTiledGeoTiff(
       GridCoverage2D raster, String compressionType, double compressionQuality, int tileSize)
       throws IOException {
+    raster = alignTileLayoutForByteBands(raster, tileSize);
 
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
       GridCoverageWriter writer = new GeoTiffWriter(out);

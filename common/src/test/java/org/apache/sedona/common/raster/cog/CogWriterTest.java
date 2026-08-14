@@ -20,15 +20,22 @@ package org.apache.sedona.common.raster.cog;
 
 import static org.junit.Assert.*;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import javax.media.jai.TiledImage;
 import org.apache.sedona.common.raster.MapAlgebra;
 import org.apache.sedona.common.raster.RasterConstructors;
 import org.apache.sedona.common.raster.RasterOutputs;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.junit.Test;
 
@@ -204,6 +211,94 @@ public class CogWriterTest {
     assertNotNull(readBack);
     assertEquals(width, readBack.getRenderedImage().getWidth());
     assertEquals(height, readBack.getRenderedImage().getHeight());
+  }
+
+  @Test
+  public void testWriteByteBandRasterAsCog() throws IOException {
+    // GH-3245: byte-band rasters whose overview images end up JAI-tiled wider than the
+    // COG tile size crashed with ArrayIndexOutOfBoundsException in Deflater.setInput
+    // (e.g. any 1024x1024 byte raster with default options).
+    for (int size : new int[] {512, 768, 1024, 1536}) {
+      double[] bandValues = new double[size * size];
+      for (int y = 0; y < size; y++) {
+        for (int x = 0; x < size; x++) {
+          bandValues[y * size + x] = 10 + 20 * (x * 4 / size);
+        }
+      }
+      GridCoverage2D raster =
+          RasterConstructors.makeNonEmptyRaster(
+              1, "b", size, size, 0, 0, 1, -1, 0, 0, 4326, new double[][] {bandValues});
+
+      byte[] cogBytes = RasterOutputs.asCloudOptimizedGeoTiff(raster, CogOptions.defaults());
+
+      GridCoverage2D readBack = RasterConstructors.fromGeoTiff(cogBytes);
+      assertEquals(size, readBack.getRenderedImage().getWidth());
+      assertEquals(size, readBack.getRenderedImage().getHeight());
+      double[] readValues = MapAlgebra.bandAsArray(readBack, 1);
+      assertArrayEquals("size=" + size, bandValues, readValues, 0.0);
+    }
+  }
+
+  @Test
+  public void testByteBandOverviewPixelsSurviveCogEncoding() throws IOException {
+    // GH-3245: besides the overrun crash, the shared-buffer encode path compressed the
+    // inter-row slack of wide source tiles, corrupting overview pixels. Verify overview
+    // content, not just the full-res IFD.
+    int size = 1024;
+    double[] bandValues = new double[size * size];
+    for (int y = 0; y < size; y++) {
+      for (int x = 0; x < size; x++) {
+        // Four constant 256px-wide column bands: 10, 30, 50, 70
+        bandValues[y * size + x] = 10 + 20 * (x / 256);
+      }
+    }
+    GridCoverage2D raster =
+        RasterConstructors.makeNonEmptyRaster(
+            1, "b", size, size, 0, 0, 1, -1, 0, 0, 4326, new double[][] {bandValues});
+
+    byte[] cogBytes = RasterOutputs.asCloudOptimizedGeoTiff(raster, CogOptions.defaults());
+
+    ImageReader reader = ImageIO.getImageReadersByFormatName("tiff").next();
+    try (ImageInputStream iis =
+        ImageIO.createImageInputStream(new ByteArrayInputStream(cogBytes))) {
+      reader.setInput(iis);
+      assertTrue("Expected at least one overview", reader.getNumImages(true) >= 2);
+      BufferedImage overview = reader.read(1);
+      assertEquals(512, overview.getWidth());
+      assertEquals(512, overview.getHeight());
+      // Sample the middle of each column band, away from the downsampled boundaries
+      assertEquals(10, overview.getRaster().getSample(64, 256, 0));
+      assertEquals(30, overview.getRaster().getSample(192, 256, 0));
+      assertEquals(50, overview.getRaster().getSample(320, 256, 0));
+      assertEquals(70, overview.getRaster().getSample(448, 256, 0));
+    } finally {
+      reader.dispose();
+    }
+  }
+
+  @Test
+  public void testWriteTiledByteSourceAsCog() throws IOException {
+    // GH-3245 variant on the full-res path: a byte-band coverage whose own image is
+    // tiled wider than the COG tile size fed the same overrunning encode path.
+    int size = 1024;
+    double[] bandValues = new double[size * size];
+    for (int i = 0; i < bandValues.length; i++) {
+      bandValues[i] = (i * 7) % 256;
+    }
+    GridCoverage2D raster =
+        RasterConstructors.makeNonEmptyRaster(
+            1, "b", size, size, 0, 0, 1, -1, 0, 0, 4326, new double[][] {bandValues});
+    TiledImage tiled = new TiledImage(raster.getRenderedImage(), 512, 512);
+    GridCoverage2D tiledRaster =
+        RasterUtils.clone(tiled, raster.getSampleDimensions(), raster, null, false);
+
+    byte[] cogBytes =
+        RasterOutputs.asCloudOptimizedGeoTiff(
+            tiledRaster, CogOptions.builder().overviewCount(0).build());
+
+    GridCoverage2D readBack = RasterConstructors.fromGeoTiff(cogBytes);
+    double[] readValues = MapAlgebra.bandAsArray(readBack, 1);
+    assertArrayEquals(bandValues, readValues, 0.0);
   }
 
   @Test
