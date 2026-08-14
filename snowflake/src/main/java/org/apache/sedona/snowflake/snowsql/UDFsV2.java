@@ -685,6 +685,15 @@ public class UDFsV2 {
   }
 
   @UDFAnnotations.ParamMeta(
+      argNames = {"geometry", "xmin", "ymin", "xmax", "ymax", "level"},
+      argTypes = {"Geometry", "double", "double", "double", "double", "int"})
+  public static long ST_HilbertDistance(
+      String geometry, double xmin, double ymin, double xmax, double ymax, int level) {
+    return Functions.hilbertDistance(
+        GeometrySerde.deserGeoJson(geometry), xmin, ymin, xmax, ymax, level);
+  }
+
+  @UDFAnnotations.ParamMeta(
       argNames = {"geometry", "n"},
       argTypes = {"Geometry", "int"},
       returnTypes = "Geometry")

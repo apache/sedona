@@ -667,6 +667,13 @@ test_configurations = [
     (stf.ST_GeometryN, ("geom", 0), "multipoint", "", "POINT (0 0)"),
     (stf.ST_GeometryType, ("point",), "point_geom", "", "ST_Point"),
     (
+        stf.ST_HilbertDistance,
+        ("geom", 0.0, 0.0, 1.0, 1.0, 2),
+        "triangle_geom",
+        "",
+        2,
+    ),
+    (
         stf.ST_GeoHashNeighbors,
         ("geohash",),
         "constructor",
@@ -1524,6 +1531,9 @@ wrong_type_configurations = [
     (stf.ST_GeometryN, ("", None)),
     (stf.ST_GeometryN, ("", 0.0)),
     (stf.ST_GeometryType, (None,)),
+    (stf.ST_HilbertDistance, (None, 0.0, 0.0, 1.0, 1.0, 2)),
+    (stf.ST_HilbertDistance, ("", None, 0.0, 1.0, 1.0, 2)),
+    (stf.ST_HilbertDistance, ("", 0.0, 0.0, 1.0, 1.0, 2.0)),
     (stf.ST_GeoHashNeighbors, (None,)),
     (stf.ST_GeoHashNeighbor, (None, "n")),
     (stf.ST_GeoHashNeighbor, ("", None)),

@@ -331,6 +331,8 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
 - `centroid`, `envelope`, `boundary` - Geometric properties
 - `x`, `y`, `z`, `has_z` - Coordinate access
 - `total_bounds`, `estimate_utm_crs` - Bounds and CRS utilities
+- `hilbert_distance()` - Distributed spatial-ordering keys based on geometry
+  envelope midpoints
 
 ### Spatial Operations
 
@@ -348,6 +350,12 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
 - `overlay()` - Distributed intersection, difference, identity, symmetric
   difference, and union between GeoDataFrames
 - `sindex` - Spatial indexing (limited functionality)
+
+`hilbert_distance()` keeps its per-row ordering keys distributed and uses only
+native Spark expressions. When `total_bounds` is omitted, one distributed
+aggregation derives the extent of all envelope midpoints; only that bounded
+summary reaches the driver. Spark returns the GeoPandas-compatible unsigned
+32-bit values in an `int64` Series because Spark has no unsigned integer type.
 
 `overlay()` keeps both inputs distributed. Candidate pairs are planned as a
 Sedona spatial join, and difference branches aggregate each source row's

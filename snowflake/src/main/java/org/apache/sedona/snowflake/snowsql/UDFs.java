@@ -546,6 +546,13 @@ public class UDFs {
         GeometrySerde.deserialize(geom1), GeometrySerde.deserialize(geom2), densifyFrac);
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"geometry", "xmin", "ymin", "xmax", "ymax", "level"})
+  public static long ST_HilbertDistance(
+      byte[] geometry, double xmin, double ymin, double xmax, double ymax, int level) {
+    return Functions.hilbertDistance(
+        GeometrySerde.deserialize(geometry), xmin, ymin, xmax, ymax, level);
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geometry", "n"})
   public static byte[] ST_InteriorRingN(byte[] geometry, int n) {
     return GeometrySerde.serialize(Functions.interiorRingN(GeometrySerde.deserialize(geometry), n));

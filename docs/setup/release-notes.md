@@ -37,6 +37,12 @@
   temporarily supported with a `FutureWarning`. When CRS metadata is unavailable, validation can
   require a distributed lookup of the first non-null geometry's SRID.
 
+### New Features
+
+#### GeoPandas API
+
+* [<a href='https://github.com/apache/sedona/issues/3257'>GH-3257</a>] - Implement distributed GeoSeries and GeoDataFrame Hilbert-distance spatial ordering
+
 ## Sedona 1.9.1
 
 Sedona 1.9.1 is compiled against:

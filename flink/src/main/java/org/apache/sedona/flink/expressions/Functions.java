@@ -2901,6 +2901,33 @@ public class Functions {
     }
   }
 
+  public static class ST_HilbertDistance extends ScalarFunction {
+    @DataTypeHint("BIGINT")
+    public Long eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o,
+        @DataTypeHint("DOUBLE") Double xmin,
+        @DataTypeHint("DOUBLE") Double ymin,
+        @DataTypeHint("DOUBLE") Double xmax,
+        @DataTypeHint("DOUBLE") Double ymax,
+        @DataTypeHint("INT") Integer level) {
+      if (o == null
+          || xmin == null
+          || ymin == null
+          || xmax == null
+          || ymax == null
+          || level == null) {
+        return null;
+      }
+      Geometry geometry = (Geometry) o;
+      return org.apache.sedona.common.Functions.hilbertDistance(
+          geometry, xmin, ymin, xmax, ymax, level);
+    }
+  }
+
   public static class ST_H3KRing extends ScalarFunction {
     @DataTypeHint(value = "ARRAY<BIGINT>")
     public Long[] eval(

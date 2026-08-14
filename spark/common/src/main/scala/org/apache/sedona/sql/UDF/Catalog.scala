@@ -316,6 +316,7 @@ object Catalog extends AbstractCatalog with Logging {
     function[ST_H3CellIDs](),
     function[ST_H3KRing](),
     function[ST_H3ToGeom](),
+    function[ST_HilbertDistance](),
     function[ST_S2CellIDs](),
     function[ST_S2ToGeom](),
     function[ST_KNN]())
