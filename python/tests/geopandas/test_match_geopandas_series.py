@@ -651,6 +651,40 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
             gpd_result = gpd.GeoSeries(geometries).get_coordinates()
             pd.testing.assert_frame_equal(sgpd_result.to_pandas(), gpd_result)
 
+    @pytest.mark.skipif(
+        parse_version(gpd.__version__) < parse_version("0.13.0"),
+        reason="geopandas hilbert_distance requires version 0.13.0 or higher",
+    )
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {},
+            {"level": 2},
+            {"total_bounds": (-100, -100, 100, 100), "level": 16},
+        ],
+    )
+    def test_hilbert_distance(self, kwargs):
+        geometries = [
+            box(-100, -100, 100, 100),
+            Point(10, 10),
+            LineString([(2, 4), (4, 8)]),
+            Polygon([(1, 1), (3, 1), (3, 5), (1, 5)]),
+        ]
+        index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 2), ("b", 1), ("b", 2)],
+            names=["group", "feature_id"],
+        )
+        sgpd_result = GeoSeries(geometries, index=index).hilbert_distance(**kwargs)
+        gpd_result = gpd.GeoSeries(geometries, index=index).hilbert_distance(**kwargs)
+
+        # Spark has no unsigned 32-bit integer type. Sedona uses int64 so the
+        # full GeoPandas uint32 value range remains representable.
+        pd.testing.assert_series_equal(
+            sgpd_result.to_pandas(),
+            gpd_result.astype("int64"),
+            check_index_type=False,
+        )
+
     def test_count_geometries(self):
         for geom in self.geoms:
             sgpd_result = GeoSeries(geom).count_geometries()

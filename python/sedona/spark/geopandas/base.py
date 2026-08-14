@@ -3873,6 +3873,49 @@ class GeoFrame(metaclass=ABCMeta):
         """
         return _delegate_to_geometry_column("total_bounds", self)
 
+    def hilbert_distance(self, total_bounds=None, level=16):
+        """Calculate the distance along a Hilbert curve.
+
+        Distances are calculated from geometry-envelope midpoints and can be
+        used to spatially order a GeoSeries or GeoDataFrame by mapping its
+        two-dimensional geometries onto a one-dimensional curve.
+
+        Parameters
+        ----------
+        total_bounds : 4-element array-like, optional
+            The spatial extent in which the curve is constructed, used to
+            rescale geometry midpoints. By default, the extent of all
+            geometry-envelope midpoints is computed. Passing known bounds
+            avoids that metadata computation.
+        level : int, default 16
+            Determines the precision of the curve. Documented levels are 1
+            through 16, with grid coordinates in the range
+            ``[0, 2**level - 1]``.
+
+        Returns
+        -------
+        pandas-on-Spark Series
+            Distributed Series named ``"hilbert_distance"``. Spark stores
+            the unsigned 32-bit Hilbert values as signed 64-bit integers.
+
+        Notes
+        -----
+        The method performs one eager distributed validation and metadata
+        aggregation. Geometry rows and the returned values remain distributed;
+        no geometry data are collected on the driver.
+
+        Examples
+        --------
+        >>> from shapely.geometry import Point
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> s = GeoSeries([Point(0, 0), Point(1, 1), Point(1, 0)])
+        >>> s.hilbert_distance(total_bounds=(0, 0, 1, 1), level=2).to_list()
+        [0, 10, 15]
+        """
+        return _delegate_to_geometry_column(
+            "hilbert_distance", self, total_bounds, level
+        )
+
     def dwithin(self, other, distance, align=None):
         """Returns a ``Series`` of ``dtype('bool')`` with value ``True`` for
         each aligned geometry that is within a set distance from ``other``.

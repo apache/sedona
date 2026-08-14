@@ -41,6 +41,24 @@ public class TestFunctionsGeography extends TestBase {
   }
 
   @Test
+  public void test_ST_HilbertDistance() {
+    registerUDFGeography(
+        "ST_HilbertDistance",
+        String.class,
+        double.class,
+        double.class,
+        double.class,
+        double.class,
+        int.class);
+    verifySqlSingleRes(
+        "SELECT SEDONA.ST_HilbertDistance(ST_GeographyFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'), 0, 0, 1, 1, 2) = 2",
+        true);
+    verifySqlSingleRes(
+        "SELECT SEDONA.ST_HilbertDistance(ST_GeographyFromWKT('POINT (1 0)'), 0, 0, 1, 1, 16) = 4294967295",
+        true);
+  }
+
+  @Test
   public void test_ST_IsLineStringCCW() {
     registerUDFGeography("ST_IsLineStringCCW", String.class);
     verifySqlSingleRes(

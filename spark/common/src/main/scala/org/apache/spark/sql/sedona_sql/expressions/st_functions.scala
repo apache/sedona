@@ -300,6 +300,24 @@ object st_functions {
 
   def ST_H3ToGeom(cellIds: Array[Long]): Column = wrapExpression[ST_H3ToGeom](cellIds)
 
+  def ST_HilbertDistance(
+      geometry: Column,
+      xmin: Column,
+      ymin: Column,
+      xmax: Column,
+      ymax: Column,
+      level: Column): Column =
+    wrapExpression[ST_HilbertDistance](geometry, xmin, ymin, xmax, ymax, level)
+
+  def ST_HilbertDistance(
+      geometry: String,
+      xmin: Double,
+      ymin: Double,
+      xmax: Double,
+      ymax: Double,
+      level: Int): Column =
+    wrapExpression[ST_HilbertDistance](geometry, xmin, ymin, xmax, ymax, level)
+
   // Bing Tile functions
   def ST_BingTile(tileX: Column, tileY: Column, zoomLevel: Column): Column =
     wrapExpression[ST_BingTile](tileX, tileY, zoomLevel)

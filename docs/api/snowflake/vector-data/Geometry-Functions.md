@@ -320,7 +320,7 @@ These functions produce or operate on bounding boxes and compute extent values.
 
 ## Spatial Indexing
 
-These functions work with spatial indexing systems including Bing Tiles, H3, S2, and GeoHash.
+These functions work with spatial indexing systems including Bing Tiles, Hilbert curves, S2, and GeoHash.
 
 | Function | Description |
 | :--- | :--- |
@@ -335,4 +335,5 @@ These functions work with spatial indexing systems including Bing Tiles, H3, S2,
 | [ST_BingTileZoomLevel](Spatial-Indexing/ST_BingTileZoomLevel.md) | Returns the zoom level of the Bing Tile identified by the given quadkey. |
 | [ST_GeoHashNeighbor](Spatial-Indexing/ST_GeoHashNeighbor.md) | Returns the neighbor geohash cell in the given direction. Valid directions are: `n`, `ne`, `e`, `se`, `s`, `sw`, `w`, `nw` (case-insensitive). |
 | [ST_GeoHashNeighbors](Spatial-Indexing/ST_GeoHashNeighbors.md) | Returns the 8 neighboring geohash cells of a given geohash string. The result is an array of 8 geohash strings in the order: N, NE, E, SE, S, SW, W, NW. |
+| [ST_HilbertDistance](Spatial-Indexing/ST_HilbertDistance.md) | Maps the midpoint of a geometry's envelope to an unsigned Hilbert-curve address within a supplied extent. |
 | [ST_S2CellIDs](Spatial-Indexing/ST_S2CellIDs.md) | Cover the geometry with Google S2 Cells, return the corresponding cell IDs with the given level. The level indicates the [size of cells](https://s2geometry.io/resources/s2cell_statistics.html). With... |

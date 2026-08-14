@@ -110,6 +110,7 @@ public class Catalog {
       new Functions.ST_H3CellIDs(),
       new Functions.ST_H3KRing(),
       new Functions.ST_H3ToGeom(),
+      new Functions.ST_HilbertDistance(),
       new Functions.ST_BingTile(),
       new Functions.ST_BingTileAt(),
       new Functions.ST_BingTilesAround(),

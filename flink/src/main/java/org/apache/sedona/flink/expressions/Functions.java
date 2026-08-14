@@ -36,6 +36,7 @@ import org.apache.flink.table.types.inference.TypeStrategy;
 import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
+import org.apache.sedona.common.utils.HilbertDistance;
 import org.apache.sedona.flink.Box2DTypeSerializer;
 import org.apache.sedona.flink.Box3DTypeSerializer;
 import org.apache.sedona.flink.GeographyTypeSerializer;
@@ -2898,6 +2899,32 @@ public class Functions {
     @DataTypeHint(value = "BIGINT")
     public Long eval(@DataTypeHint("BIGINT") Long cell1, @DataTypeHint("BIGINT") Long cell2) {
       return org.apache.sedona.common.Functions.h3CellDistance(cell1, cell2);
+    }
+  }
+
+  public static class ST_HilbertDistance extends ScalarFunction {
+    @DataTypeHint("BIGINT")
+    public Long eval(
+        @DataTypeHint(
+                value = "RAW",
+                rawSerializer = GeometryTypeSerializer.class,
+                bridgedTo = Geometry.class)
+            Object o,
+        @DataTypeHint("DOUBLE") Double xmin,
+        @DataTypeHint("DOUBLE") Double ymin,
+        @DataTypeHint("DOUBLE") Double xmax,
+        @DataTypeHint("DOUBLE") Double ymax,
+        @DataTypeHint("INT") Integer level) {
+      if (o == null
+          || xmin == null
+          || ymin == null
+          || xmax == null
+          || ymax == null
+          || level == null) {
+        return null;
+      }
+      Geometry geometry = (Geometry) o;
+      return HilbertDistance.compute(geometry, xmin, ymin, xmax, ymax, level);
     }
   }
 

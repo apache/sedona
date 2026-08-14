@@ -847,6 +847,25 @@ public class FunctionTest extends TestBase {
   }
 
   @Test
+  public void testHilbertDistance() {
+    Table result =
+        tableEnv.sqlQuery(
+            "SELECT "
+                + "ST_HilbertDistance(ST_GeomFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'), 0.0, 0.0, 1.0, 1.0, 2), "
+                + "ST_HilbertDistance(ST_GeomFromWKT('POINT (1 0)'), 0.0, 0.0, 1.0, 1.0, 16), "
+                + "ST_HilbertDistance(ST_GeomFromWKT('POINT Z (1 0 42)'), 0.0, 0.0, 1.0, 1.0, 0), "
+                + "ST_HilbertDistance(ST_GeomFromText(CAST(NULL AS STRING)), 0.0, 0.0, 1.0, 1.0, 2), "
+                + "ST_HilbertDistance(ST_GeomFromWKT('POINT (1 0)'), CAST(NULL AS DOUBLE), 0.0, 1.0, 1.0, 2)");
+    Row row = first(result);
+
+    assertEquals(2L, row.getField(0));
+    assertEquals(4294967295L, row.getField(1));
+    assertEquals(0L, row.getField(2));
+    assertNull(row.getField(3));
+    assertNull(row.getField(4));
+  }
+
+  @Test
   public void testLength() {
     Table polygonTable = createLineStringTable(1);
     Table resultTable =

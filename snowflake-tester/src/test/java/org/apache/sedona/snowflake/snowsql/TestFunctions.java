@@ -514,6 +514,24 @@ public class TestFunctions extends TestBase {
   }
 
   @Test
+  public void test_ST_HilbertDistance() {
+    registerUDF(
+        "ST_HilbertDistance",
+        byte[].class,
+        double.class,
+        double.class,
+        double.class,
+        double.class,
+        int.class);
+    verifySqlSingleRes(
+        "select sedona.ST_HilbertDistance(sedona.ST_GeomFromText('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'), 0, 0, 1, 1, 2) = 2",
+        true);
+    verifySqlSingleRes(
+        "select sedona.ST_HilbertDistance(sedona.ST_GeomFromText('POINT (1 0)'), 0, 0, 1, 1, 16) = 4294967295",
+        true);
+  }
+
+  @Test
   public void test_ST_InteriorRingN() {
     registerUDF("ST_InteriorRingN", byte[].class, int.class);
     verifySqlSingleRes(

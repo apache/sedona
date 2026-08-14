@@ -494,6 +494,24 @@ public class TestFunctionsV2 extends TestBase {
   }
 
   @Test
+  public void test_ST_HilbertDistance() {
+    registerUDFV2(
+        "ST_HilbertDistance",
+        String.class,
+        double.class,
+        double.class,
+        double.class,
+        double.class,
+        int.class);
+    verifySqlSingleRes(
+        "select sedona.ST_HilbertDistance(ST_GeometryFromWKT('POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'), 0, 0, 1, 1, 2) = 2",
+        true);
+    verifySqlSingleRes(
+        "select sedona.ST_HilbertDistance(ST_GeometryFromWKT('POINT (1 0)'), 0, 0, 1, 1, 16) = 4294967295",
+        true);
+  }
+
+  @Test
   public void test_ST_InteriorRingN() {
     registerUDFV2("ST_InteriorRingN", String.class, int.class);
     verifySqlSingleRes(

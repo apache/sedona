@@ -331,6 +331,7 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 - `centroid`、`envelope`、`boundary` —— 几何属性
 - `x`、`y`、`z`、`has_z` —— 坐标访问
 - `total_bounds`、`estimate_utm_crs` —— 包围盒与 CRS 工具
+- `hilbert_distance()` —— 基于几何包围盒中点生成分布式空间排序键
 
 ### 空间运算
 
@@ -346,6 +347,11 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 - `clip()` —— 分布式几何裁剪
 - `overlay()` —— GeoDataFrame 之间的分布式相交、差集、恒等、对称差和并集
 - `sindex` —— 空间索引（功能有限）
+
+`hilbert_distance()` 使用原生 Spark 表达式，并让逐行排序键保持分布式执行。
+未提供 `total_bounds` 时，该方法会通过一次分布式聚合计算所有包围盒中点的
+范围，只有这个有界摘要会返回 driver。由于 Spark 没有无符号整数类型，
+与 GeoPandas 无符号 32 位值相同的结果会存储在 `int64` Series 中。
 
 `overlay()` 会让两个输入始终保持分布式执行。候选对由 Sedona 空间连接
 生成，差集分支则在 executor 上按源行聚合相匹配的掩膜几何。该实现不会收集

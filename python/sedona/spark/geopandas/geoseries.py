@@ -4680,6 +4680,96 @@ class GeoSeries(GeoFrame, pspd.Series):
             ]
         )
 
+    def hilbert_distance(self, total_bounds=None, level=16) -> pspd.Series:
+        try:
+            level = operator.index(level)
+        except TypeError as exc:
+            raise TypeError("level must be an integer") from exc
+        if level > 16:
+            raise ValueError("Level out of range")
+
+        explicit_bounds = None
+        if total_bounds is not None:
+            # Preserve GeoPandas' ordinary Python unpacking errors for malformed
+            # inputs instead of silently accepting the wrong extent shape.
+            xmin, ymin, xmax, ymax = total_bounds
+            # Evaluate both ranges before float coercion so invalid values such
+            # as strings fail instead of being treated as Spark column names.
+            float(xmax - xmin)
+            float(ymax - ymin)
+            explicit_bounds = tuple(float(value) for value in (xmin, ymin, xmax, ymax))
+
+        source_internal = self._internal.resolved_copy
+        source_frame = source_internal.spark_frame
+        geometry = source_internal.data_spark_columns[0]
+        x_midpoint = (stf.ST_XMin(geometry) + stf.ST_XMax(geometry)) / F.lit(2.0)
+        y_midpoint = (stf.ST_YMin(geometry) + stf.ST_YMax(geometry)) / F.lit(2.0)
+        invalid_geometry = geometry.isNull() | F.coalesce(
+            stf.ST_IsEmpty(geometry), F.lit(False)
+        )
+
+        summary_expressions = [
+            F.count(F.lit(1)).alias("row_count"),
+            F.count(F.when(invalid_geometry, F.lit(1))).alias("invalid_geometry_count"),
+        ]
+        if explicit_bounds is None:
+
+            def valid_midpoint(midpoint):
+                return F.when(
+                    midpoint.isNull() | F.isnan(midpoint),
+                    F.lit(None).cast("double"),
+                ).otherwise(midpoint)
+
+            valid_x = valid_midpoint(x_midpoint)
+            valid_y = valid_midpoint(y_midpoint)
+            summary_expressions.extend(
+                [
+                    F.min(valid_x).alias("xmin"),
+                    F.min(valid_y).alias("ymin"),
+                    F.max(valid_x).alias("xmax"),
+                    F.max(valid_y).alias("ymax"),
+                ]
+            )
+
+        # Validation is intentionally eager, matching GeoPandas. Only one
+        # aggregate row is materialized; geometry rows remain distributed.
+        summary = source_frame.agg(*summary_expressions).first()
+        if summary["invalid_geometry_count"]:
+            raise ValueError(
+                "Hilbert distance cannot be computed on a GeoSeries with empty or "
+                "missing geometries."
+            )
+
+        if explicit_bounds is None:
+            if summary["row_count"] == 0:
+                raise ValueError(
+                    "Hilbert distance cannot infer total bounds from an empty "
+                    "GeoSeries."
+                )
+            xmin, ymin, xmax, ymax = (
+                np.nan if summary[name] is None else summary[name]
+                for name in ("xmin", "ymin", "xmax", "ymax")
+            )
+        else:
+            xmin, ymin, xmax, ymax = explicit_bounds
+
+        # Keep the fixed-width encoder inside the JVM. Expressing its prefix
+        # scan with higher-order Catalyst lambdas adds per-row array/struct
+        # allocation and is substantially slower on large distributed inputs.
+        distance = stf.ST_HilbertDistance(
+            geometry,
+            xmin,
+            ymin,
+            xmax,
+            ymax,
+            level,
+        )
+        return self._query_geometry_column(
+            distance,
+            source_frame,
+            returns_geom=False,
+        ).rename("hilbert_distance")
+
     def estimate_utm_crs(self, datum_name: str = "WGS 84") -> CRS:
         """Returns the estimated UTM CRS based on the bounds of the dataset.
 

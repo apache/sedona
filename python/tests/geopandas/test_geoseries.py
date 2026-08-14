@@ -606,6 +606,178 @@ class TestGeoSeries(TestGeopandasBase):
         np.testing.assert_array_equal(all_empty_result, np.full(4, np.nan))
         assert action_count == 1
 
+    @pytest.mark.parametrize(
+        ("level", "expected"),
+        [
+            (2, [0, 10, 15, 2]),
+            (3, [0, 42, 63, 10]),
+            (16, [0, 2863311530, 4294967295, 715827882]),
+        ],
+    )
+    def test_hilbert_distance(self, level, expected):
+        geometries = [
+            Point(0, 0),
+            Point(1, 1),
+            Point(1, 0),
+            Polygon([(0, 0), (0, 1), (1, 1), (1, 0)]),
+        ]
+        index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 2), ("b", 1), ("b", 2)],
+            names=["group", "feature_id"],
+        )
+        source = GeoSeries(
+            geometries,
+            index=index,
+            name="source_geometry",
+            crs="EPSG:4326",
+        )
+
+        result = source.hilbert_distance(
+            total_bounds=(0, 0, 1, 1),
+            level=level,
+        )
+        pd.testing.assert_series_equal(
+            result.to_pandas(),
+            pd.Series(
+                expected,
+                index=index,
+                name="hilbert_distance",
+                dtype="int64",
+            ),
+            check_index_type=False,
+        )
+
+        # GeoDataFrame delegates to the active geometry column, not to the
+        # first geometry-typed column in the frame.
+        if level == 2:
+            frame = GeoDataFrame(
+                gpd.GeoDataFrame(
+                    {
+                        "decoy": gpd.GeoSeries(
+                            [Point(0, 0)] * len(geometries),
+                            index=index,
+                            crs="EPSG:4326",
+                        ),
+                        "active": gpd.GeoSeries(
+                            geometries,
+                            index=index,
+                            crs="EPSG:4326",
+                        ),
+                    },
+                    index=index,
+                    geometry="active",
+                    crs="EPSG:4326",
+                )
+            )
+            pd.testing.assert_series_equal(
+                frame.hilbert_distance(
+                    total_bounds=(0, 0, 1, 1),
+                    level=level,
+                ).to_pandas(),
+                pd.Series(
+                    expected,
+                    index=index,
+                    name="hilbert_distance",
+                    dtype="int64",
+                ),
+                check_index_type=False,
+            )
+
+    def test_hilbert_distance_uses_envelope_midpoint_extent(self):
+        source = GeoSeries(
+            [box(-100, -100, 100, 100), Point(10, 10)],
+            index=pd.Index(["large", "point"], name="feature"),
+        )
+
+        # The inferred extent is (0, 0, 10, 10), based on envelope
+        # midpoints. It is deliberately different from source.total_bounds.
+        expected = pd.Series(
+            [0, 2863311530],
+            index=pd.Index(["large", "point"], name="feature"),
+            name="hilbert_distance",
+            dtype="int64",
+        )
+        pd.testing.assert_series_equal(
+            source.hilbert_distance().to_pandas(),
+            expected,
+            check_index_type=False,
+        )
+
+        zero_width = GeoSeries([Point(0, 0), Point(0, 2), Point(0, 1)])
+        pd.testing.assert_series_equal(
+            zero_width.hilbert_distance(level=2).to_pandas(),
+            pd.Series([0, 5, 3], name="hilbert_distance", dtype="int64"),
+        )
+
+    @pytest.mark.parametrize("total_bounds", [None, (0, 0, 1, 1)])
+    def test_hilbert_distance_uses_one_native_summary_action(
+        self,
+        monkeypatch,
+        total_bounds,
+    ):
+        source = GeoSeries([Point(0, 0), Point(1, 1)])
+        spark_dataframe_type = type(source._internal.spark_frame)
+        original_first = spark_dataframe_type.first
+        action_count = 0
+
+        def counting_first(frame):
+            nonlocal action_count
+            action_count += 1
+            return original_first(frame)
+
+        monkeypatch.setattr(spark_dataframe_type, "first", counting_first)
+
+        result = source.hilbert_distance(total_bounds=total_bounds, level=3)
+        assert action_count == 1
+
+        spark_frame = result._internal.spark_frame
+        if hasattr(spark_frame, "_jdf"):
+            plan = spark_frame._jdf.queryExecution().optimizedPlan().toString()
+            assert "BatchEvalPython" not in plan
+            assert "ArrowEvalPython" not in plan
+            assert "PythonUDF" not in plan
+
+    def test_hilbert_distance_rejects_missing_and_empty_geometries(self):
+        source = GeoSeries(
+            [
+                Point(0, 0),
+                None,
+                Point(),
+                LineString(),
+                Polygon(),
+                MultiPoint(),
+                MultiLineString(),
+                MultiPolygon(),
+                GeometryCollection(),
+            ]
+        )
+        with pytest.raises(
+            ValueError,
+            match="cannot be computed on a GeoSeries with empty or missing",
+        ):
+            source.hilbert_distance(total_bounds=(0, 0, 1, 1))
+
+        empty = GeoSeries([], crs="EPSG:4326")
+        with pytest.raises(ValueError, match="cannot infer total bounds"):
+            empty.hilbert_distance()
+
+        explicit_empty = empty.hilbert_distance(total_bounds=(0, 0, 1, 1))
+        assert explicit_empty.name == "hilbert_distance"
+        assert explicit_empty.to_pandas().empty
+
+    def test_hilbert_distance_validates_level(self):
+        source = GeoSeries([Point(0, 0), Point(1, 1)])
+
+        with pytest.raises(ValueError, match="Level out of range"):
+            source.hilbert_distance(level=17)
+        with pytest.raises(TypeError, match="level must be an integer"):
+            source.hilbert_distance(level=1.5)
+
+        pd.testing.assert_series_equal(
+            source.hilbert_distance(level=0).to_pandas(),
+            pd.Series([0, 0], name="hilbert_distance", dtype="int64"),
+        )
+
     # These tests were taken directly from the TestEstimateUtmCrs class in the geopandas test suite
     # https://github.com/geopandas/geopandas/blob/main/geopandas/tests/test_array.py
     def test_estimate_utm_crs(self):

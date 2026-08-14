@@ -1,0 +1,145 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" width="1200" height="760" role="img" aria-labelledby="hilbert-workflow-title hilbert-workflow-description">
+  <title id="hilbert-workflow-title">How geometry envelopes become Hilbert sort keys</title>
+  <desc id="hilbert-workflow-description">A three-stage diagram. Five geometries labeled A through E are shown inside or beside the supplied extent from zero to one hundred. Dashed rectangles identify each geometry envelope, and crosshairs identify envelope midpoints. The midpoints are normalized onto a level-two four-by-four grid; the outside point E is clipped to the nearest edge. The resulting rows sort by Hilbert addresses zero, two, four, thirteen, and fifteen.</desc>
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+      text:not([fill]) { fill: #172033; }
+      .panel { fill: #f8fafc; stroke: #b8c3d1; stroke-width: 1.5; }
+      .panel-title { font-size: 16px; font-weight: 700; }
+      .caption { font-size: 12px; fill: #475569; }
+      .small { font-size: 11px; fill: #475569; }
+      .axis { font-size: 11px; fill: #475569; }
+      .grid { stroke: #cbd5e1; stroke-width: 1; }
+      .envelope { fill: none; stroke-width: 1.7; stroke-dasharray: 7 5; }
+      .row { fill: #ffffff; stroke: #d4dbe5; stroke-width: 1; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    </style>
+    <marker id="flow-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748b"/>
+    </marker>
+    <marker id="clip-arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#6f2da8"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="760" fill="#ffffff"/>
+  <text x="600" y="34" text-anchor="middle" font-size="22" font-weight="700">From geometry envelope to sortable Hilbert address</text>
+  <text x="600" y="59" text-anchor="middle" class="caption">Example extent: (xmin, ymin, xmax, ymax) = (0, 0, 100, 100), level = 2</text>
+
+  <rect x="25" y="82" width="590" height="608" rx="10" class="panel"/>
+  <text x="48" y="112" class="panel-title">1 · Find each envelope midpoint</text>
+  <text x="48" y="134" class="caption">Dashed boxes are envelopes; circled crosses are their midpoints, not centroids.</text>
+
+  <rect x="105" y="160" width="400" height="400" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+  <path d="M205 160 V560 M305 160 V560 M405 160 V560 M105 260 H505 M105 360 H505 M105 460 H505" class="grid"/>
+  <text x="105" y="582" text-anchor="middle" class="axis">0</text><text x="205" y="582" text-anchor="middle" class="axis">25</text><text x="305" y="582" text-anchor="middle" class="axis">50</text><text x="405" y="582" text-anchor="middle" class="axis">75</text><text x="505" y="582" text-anchor="middle" class="axis">100</text>
+  <text x="92" y="564" text-anchor="end" class="axis">0</text><text x="92" y="464" text-anchor="end" class="axis">25</text><text x="92" y="364" text-anchor="end" class="axis">50</text><text x="92" y="264" text-anchor="end" class="axis">75</text><text x="92" y="164" text-anchor="end" class="axis">100</text>
+  <text x="305" y="607" text-anchor="middle" class="caption">supplied X extent</text>
+  <text x="60" y="360" text-anchor="middle" class="caption" transform="rotate(-90 60 360)">supplied Y extent</text>
+
+  <!-- A: triangle, midpoint (12.5, 12.5) -->
+  <rect x="125" y="480" width="60" height="60" class="envelope" stroke="#0072b2"/>
+  <polygon points="125,540 185,540 155,480" fill="#0072b2" fill-opacity="0.16" stroke="#0072b2" stroke-width="2.5"/>
+  <circle cx="155" cy="510" r="8" fill="#ffffff" stroke="#0072b2" stroke-width="2"/><path d="M150 510 H160 M155 505 V515" stroke="#0072b2" stroke-width="2"/>
+  <text x="130" y="471" font-size="13" font-weight="700" fill="#005b8f">A</text>
+
+  <!-- B: line, midpoint (37.5, 37.5) -->
+  <rect x="225" y="380" width="60" height="60" class="envelope" stroke="#d55e00"/>
+  <path d="M225 437 L242 400 L261 424 L285 380" fill="none" stroke="#d55e00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="255" cy="410" r="8" fill="#ffffff" stroke="#d55e00" stroke-width="2"/><path d="M250 410 H260 M255 405 V415" stroke="#d55e00" stroke-width="2"/>
+  <text x="230" y="371" font-size="13" font-weight="700" fill="#a94700">B</text>
+
+  <!-- C: polygon, midpoint (12.5, 87.5) -->
+  <rect x="125" y="180" width="60" height="60" class="envelope" stroke="#009e73"/>
+  <path d="M125 230 L137 184 L175 180 L185 220 L162 240 Z" fill="#009e73" fill-opacity="0.16" stroke="#009e73" stroke-width="2.5"/>
+  <circle cx="155" cy="210" r="8" fill="#ffffff" stroke="#009e73" stroke-width="2"/><path d="M150 210 H160 M155 205 V215" stroke="#009e73" stroke-width="2"/>
+  <text x="130" y="171" font-size="13" font-weight="700" fill="#007a58">C</text>
+
+  <!-- D: polygon, midpoint (87.5, 62.5) -->
+  <rect x="425" y="280" width="60" height="60" class="envelope" stroke="#c23b75"/>
+  <path d="M425 330 L437 286 L466 280 L485 305 L473 340 L445 329 Z" fill="#c23b75" fill-opacity="0.16" stroke="#c23b75" stroke-width="2.5"/>
+  <circle cx="455" cy="310" r="8" fill="#ffffff" stroke="#c23b75" stroke-width="2"/><path d="M450 310 H460 M455 305 V315" stroke="#c23b75" stroke-width="2"/>
+  <text x="430" y="271" font-size="13" font-weight="700" fill="#9d255c">D</text>
+
+  <!-- E: point outside the extent, midpoint (120, 12.5) -->
+  <circle cx="585" cy="510" r="9" fill="#6f2da8" stroke="#ffffff" stroke-width="3"/>
+  <path d="M575 510 H595 M585 500 V520" stroke="#6f2da8" stroke-width="2"/>
+  <text x="572" y="490" font-size="13" font-weight="700" fill="#5b238b">E</text>
+  <path d="M572 510 H508" fill="none" stroke="#6f2da8" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#clip-arrow)"/>
+  <text x="545" y="535" text-anchor="middle" class="small" fill="#5b238b">outside X → clip</text>
+
+  <rect x="84" y="626" width="507" height="43" rx="7" fill="#eef6fb" stroke="#96bfd9"/>
+  <text x="337" y="644" text-anchor="middle" class="small">Envelope midpoint = ((minX + maxX) / 2, (minY + maxY) / 2)</text>
+  <text x="337" y="660" text-anchor="middle" class="small">Geometry vertices, area, and centroid do not otherwise affect the key.</text>
+
+  <path d="M623 374 H647" stroke="#64748b" stroke-width="2.5" marker-end="url(#flow-arrow)"/>
+
+  <rect x="650" y="82" width="250" height="608" rx="10" class="panel"/>
+  <text x="673" y="112" class="panel-title">2 · Normalize to the grid</text>
+  <text x="673" y="134" class="caption">Scale each axis, clip, then truncate.</text>
+
+  <rect x="680" y="170" width="180" height="180" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+  <path d="M725 170 V350 M770 170 V350 M815 170 V350 M680 215 H860 M680 260 H860 M680 305 H860" class="grid"/>
+  <text x="702.5" y="366" text-anchor="middle" class="axis">x0</text><text x="747.5" y="366" text-anchor="middle" class="axis">x1</text><text x="792.5" y="366" text-anchor="middle" class="axis">x2</text><text x="837.5" y="366" text-anchor="middle" class="axis">x3</text>
+  <text x="669" y="331" text-anchor="end" class="axis">y0</text><text x="669" y="286" text-anchor="end" class="axis">y1</text><text x="669" y="241" text-anchor="end" class="axis">y2</text><text x="669" y="196" text-anchor="end" class="axis">y3</text>
+
+  <circle cx="702.5" cy="327.5" r="14" fill="#0072b2"/><text x="702.5" y="332" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">A</text>
+  <circle cx="747.5" cy="282.5" r="14" fill="#d55e00"/><text x="747.5" y="287" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">B</text>
+  <circle cx="702.5" cy="237.5" r="14" fill="#009e73"/><text x="702.5" y="242" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">C</text>
+  <circle cx="792.5" cy="282.5" r="14" fill="#c23b75"/><text x="792.5" y="287" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">D</text>
+  <circle cx="837.5" cy="327.5" r="14" fill="#6f2da8"/><text x="837.5" y="332" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">E</text>
+  <path d="M881 327.5 H854" stroke="#6f2da8" stroke-width="2" marker-end="url(#clip-arrow)"/>
+  <text x="880" y="311" text-anchor="end" class="small" fill="#5b238b">clipped</text>
+
+  <rect x="670" y="395" width="210" height="240" rx="8" fill="#ffffff" stroke="#d4dbe5"/>
+  <text x="688" y="422" font-size="13" font-weight="700">Normalized cell → address</text>
+  <text x="690" y="454" font-size="12" fill="#005b8f">A  (0, 0)</text><text x="854" y="454" text-anchor="end" class="mono" font-size="13">0</text>
+  <text x="690" y="490" font-size="12" fill="#a94700">B  (1, 1)</text><text x="854" y="490" text-anchor="end" class="mono" font-size="13">2</text>
+  <text x="690" y="526" font-size="12" fill="#007a58">C  (0, 2)</text><text x="854" y="526" text-anchor="end" class="mono" font-size="13">4</text>
+  <text x="690" y="562" font-size="12" fill="#9d255c">D  (2, 1)</text><text x="854" y="562" text-anchor="end" class="mono" font-size="13">13</text>
+  <text x="690" y="598" font-size="12" fill="#5b238b">E  (3, 0)</text><text x="854" y="598" text-anchor="end" class="mono" font-size="13">15</text>
+  <text x="775" y="624" text-anchor="middle" class="small">Level-2 Hilbert lookup</text>
+
+  <path d="M908 374 H932" stroke="#64748b" stroke-width="2.5" marker-end="url(#flow-arrow)"/>
+
+  <rect x="935" y="82" width="240" height="608" rx="10" class="panel"/>
+  <text x="958" y="112" class="panel-title">3 · Sort by the Long key</text>
+  <text x="958" y="134" class="caption">Ascending address gives this row order.</text>
+
+  <rect x="955" y="164" width="200" height="42" rx="7" fill="#e8f3fa" stroke="#96bfd9"/>
+  <text x="977" y="190" font-size="12" font-weight="700">row</text><text x="1134" y="190" text-anchor="end" font-size="12" font-weight="700">address</text>
+
+  <rect x="955" y="216" width="200" height="62" rx="7" class="row"/><circle cx="982" cy="247" r="14" fill="#0072b2"/><text x="982" y="251" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">A</text><text x="1134" y="252" text-anchor="end" class="mono" font-size="15">0</text>
+  <rect x="955" y="288" width="200" height="62" rx="7" class="row"/><circle cx="982" cy="319" r="14" fill="#d55e00"/><text x="982" y="323" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">B</text><text x="1134" y="324" text-anchor="end" class="mono" font-size="15">2</text>
+  <rect x="955" y="360" width="200" height="62" rx="7" class="row"/><circle cx="982" cy="391" r="14" fill="#009e73"/><text x="982" y="395" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">C</text><text x="1134" y="396" text-anchor="end" class="mono" font-size="15">4</text>
+  <rect x="955" y="432" width="200" height="62" rx="7" class="row"/><circle cx="982" cy="463" r="14" fill="#c23b75"/><text x="982" y="467" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">D</text><text x="1134" y="468" text-anchor="end" class="mono" font-size="15">13</text>
+  <rect x="955" y="504" width="200" height="62" rx="7" class="row"/><circle cx="982" cy="535" r="14" fill="#6f2da8"/><text x="982" y="539" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">E</text><text x="1134" y="540" text-anchor="end" class="mono" font-size="15">15</text>
+
+  <path d="M1119 229 V552" stroke="#64748b" stroke-width="1.8" marker-end="url(#flow-arrow)"/>
+  <rect x="955" y="595" width="200" height="70" rx="7" fill="#fffbeb" stroke="#d6a838"/>
+  <text x="1055" y="618" text-anchor="middle" class="small">Useful for distributed</text>
+  <text x="1055" y="637" text-anchor="middle" font-size="12" font-weight="700">ORDER BY · clustering</text>
+  <text x="1055" y="655" text-anchor="middle" font-size="12" font-weight="700">range partitioning</text>
+
+  <rect x="25" y="712" width="1150" height="32" rx="7" fill="#eef2ff" stroke="#b7b9e6"/>
+  <text x="600" y="733" text-anchor="middle" font-size="12" fill="#4338ca">The result orders envelope midpoints approximately by locality; it is not the distance between geometries.</text>
+</svg>

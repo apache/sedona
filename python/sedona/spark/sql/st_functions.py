@@ -896,6 +896,38 @@ def ST_GeometryType(geometry: ColumnOrName) -> Column:
 
 
 @validate_argument_types
+def ST_HilbertDistance(
+    geometry: ColumnOrName,
+    min_x: ColumnOrNameOrNumber,
+    min_y: ColumnOrNameOrNumber,
+    max_x: ColumnOrNameOrNumber,
+    max_y: ColumnOrNameOrNumber,
+    level: Union[ColumnOrName, int],
+) -> Column:
+    """Map a geometry-envelope midpoint to a Hilbert curve distance.
+
+    :param geometry: Geometry whose envelope midpoint is encoded.
+    :type geometry: ColumnOrName
+    :param min_x: Minimum X of the Hilbert curve extent.
+    :type min_x: ColumnOrNameOrNumber
+    :param min_y: Minimum Y of the Hilbert curve extent.
+    :type min_y: ColumnOrNameOrNumber
+    :param max_x: Maximum X of the Hilbert curve extent.
+    :type max_x: ColumnOrNameOrNumber
+    :param max_y: Maximum Y of the Hilbert curve extent.
+    :type max_y: ColumnOrNameOrNumber
+    :param level: Hilbert curve level, at most 16.
+    :type level: Union[ColumnOrName, int]
+    :return: Non-negative Hilbert curve distance as a long column.
+    :rtype: Column
+    """
+    return _call_st_function(
+        "ST_HilbertDistance",
+        (geometry, min_x, min_y, max_x, max_y, level),
+    )
+
+
+@validate_argument_types
 def ST_H3CellDistance(
     cell1: Union[ColumnOrName, int], cell2: Union[ColumnOrName, int]
 ) -> Column:
