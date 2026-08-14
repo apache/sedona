@@ -5525,6 +5525,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#seven-lines-of-numpy-121-million-pixels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seven Lines of NumPy, 121 Million Pixels
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#index-a-million-rasters-without-reading-a-pixel" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5623,17 +5634,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#spatial-query-benchmarking-on-databricks-with-spatialbench" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Spatial Query Benchmarking on Databricks with SpatialBench
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -5648,6 +5648,51 @@
       <header class="md-typeset">
         <h1 id="2026">八月 2026<a class="headerlink" href="#2026" title="Permanent link">&para;</a></h1>
       </header>
+      
+        <article class="md-post md-post--excerpt">
+  <header class="md-post__header">
+    
+      <nav class="md-post__authors md-typeset">
+        
+          <span class="md-author">
+            <img src="../../../../assets/authors/jia.jpeg" alt="Jia Yu">
+          </span>
+        
+      </nav>
+    
+    <div class="md-post__meta md-meta">
+      <ul class="md-meta__list">
+        <li class="md-meta__item">
+          <time datetime="2026-08-14 00:00:00+00:00">2026年8月14日星期五</time></li>
+        
+        
+          
+          <li class="md-meta__item">
+            
+              需要 5 分钟阅读时间
+            
+          </li>
+        
+        
+      </ul>
+      
+    </div>
+  </header>
+  <div class="md-post__content md-typeset">
+    <h2 id="seven-lines-of-numpy-121-million-pixels"><a class="toclink" href="../../2026/08/14/seven-lines-of-numpy-121-million-pixels/">Seven Lines of NumPy, 121 Million Pixels</a></h2>
+<p>Those deep-green grids are California's Central Valley — some of the most intensively farmed land on Earth, not as a camera sees it but as the NDVI vegetation index does: computed, pixel by pixel, by seven lines of NumPy. Sedona ran those seven lines on 484 satellite tiles in parallel, straight out of a public S3 bucket, and wrote the answer back as Cloud Optimized GeoTIFFs. That's the new move in Sedona 1.9.1: a plain Python UDF can take raster columns <em>and return rasters</em>. If the raster function you need isn't built in — your index, your QA rule, your model — write it.</p>
+<p><img alt="Five NDVI tiles computed by the seven-line Python UDF — deep-green field grids, blue canals, sandy rangeland, a city — above the UDF's code on a card" src="../../raster-python-udfs-cover.png" /></p>
+
+    
+      <nav class="md-post__action">
+        <a href="../../2026/08/14/seven-lines-of-numpy-121-million-pixels/">
+          继续阅读
+        </a>
+      </nav>
+    
+    
+  </div>
+</article>
       
         <article class="md-post md-post--excerpt">
   <header class="md-post__header">
@@ -6136,79 +6181,6 @@ simplicity and speed that distributed systems often cannot.</p>
   </div>
 </article>
       
-        <article class="md-post md-post--excerpt">
-  <header class="md-post__header">
-    
-      <nav class="md-post__authors md-typeset">
-        
-          <span class="md-author">
-            <img src="../../../../assets/authors/jia.jpeg" alt="Jia Yu">
-          </span>
-        
-          <span class="md-author">
-            <img src="../../../../assets/authors/james.jpeg" alt="James Willis">
-          </span>
-        
-          <span class="md-author">
-            <img src="../../../../assets/authors/pranav.jpeg" alt="Pranav Toggi">
-          </span>
-        
-      </nav>
-    
-    <div class="md-post__meta md-meta">
-      <ul class="md-meta__list">
-        <li class="md-meta__item">
-          <time datetime="2026-01-08 00:00:00+00:00">2026年1月8日星期四</time></li>
-        
-        
-          
-          <li class="md-meta__item">
-            
-              需要 6 分钟阅读时间
-            
-          </li>
-        
-        
-      </ul>
-      
-    </div>
-  </header>
-  <div class="md-post__content md-typeset">
-    <h2 id="spatial-query-benchmarking-on-databricks-with-spatialbench"><a class="toclink" href="../../2026/01/08/spatial-query-benchmarking-databricks/">Spatial Query Benchmarking on Databricks with SpatialBench</a></h2>
-<!--
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
--->
-
-<p><a href="https://www.databricks.com/blog/databricks-spatial-joins-now-17x-faster-out-box">Recently Databricks announced</a> that Serverless SQL users "will see up to 17x faster performance compared to classic clusters with Apache Sedona installed." Unfortunately, Databricks didn’t speak to the cost of the results. It is also an apples-to-oranges comparison because the serverless compute shape and quantity that Databricks deployed to generate the 17x performance difference was not shared. Their result was also limited to specific query configurations.</p>
-<p>We saw an opportunity to address these issues using <a href="https://sedona.apache.org/spatialbench/">SpatialBench</a>, a new benchmarking framework for spatial queries. Because we are comparing different infrastructure types, our benchmark normalizes on price-performance rather than performance alone, while providing what we believe is a more comprehensive benchmarking result.</p>
-<p>We found that only one of the simpler SpatialBench queries (#2) tested on Databricks SQL Serverless had price-performance aligned with the Databricks claim. However, we found that Sedona excelled in most other queries, delivering up to 6x better price-performance, while offering more query coverage.</p>
-
-    
-      <nav class="md-post__action">
-        <a href="../../2026/01/08/spatial-query-benchmarking-databricks/">
-          继续阅读
-        </a>
-      </nav>
-    
-    
-  </div>
-</article>
-      
       
         
           
@@ -6216,7 +6188,7 @@ simplicity and speed that distributed systems often cannot.</p>
 
 
 <nav class="md-pagination">
-  
+  <span class="md-pagination__current">1</span> <a class="md-pagination__link" href="page/2/">2</a>
 </nav>
         
       
