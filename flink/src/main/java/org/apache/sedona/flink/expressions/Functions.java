@@ -36,6 +36,7 @@ import org.apache.flink.table.types.inference.TypeStrategy;
 import org.apache.sedona.common.S2Geography.Geography;
 import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
+import org.apache.sedona.common.utils.HilbertDistance;
 import org.apache.sedona.flink.Box2DTypeSerializer;
 import org.apache.sedona.flink.Box3DTypeSerializer;
 import org.apache.sedona.flink.GeographyTypeSerializer;
@@ -2923,8 +2924,7 @@ public class Functions {
         return null;
       }
       Geometry geometry = (Geometry) o;
-      return org.apache.sedona.common.Functions.hilbertDistance(
-          geometry, xmin, ymin, xmax, ymax, level);
+      return HilbertDistance.compute(geometry, xmin, ymin, xmax, ymax, level);
     }
   }
 

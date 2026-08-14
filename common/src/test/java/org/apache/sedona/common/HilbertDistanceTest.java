@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.common;
 
+import static org.apache.sedona.common.utils.HilbertDistance.compute;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -44,39 +45,38 @@ public class HilbertDistanceTest {
         GEOMETRY_FACTORY.createLineString(
             new Coordinate[] {new Coordinate(0.0, 0.0), new Coordinate(2.0, 2.0)});
 
-    assertEquals(2L, Functions.hilbertDistance(line, 0.0, 0.0, 2.0, 2.0, 2));
+    assertEquals(2L, compute(line, 0.0, 0.0, 2.0, 2.0, 2));
   }
 
   @Test
   public void clipsCoordinatesOutsideTheExtent() {
     Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(2.0, -1.0));
 
-    assertEquals(15L, Functions.hilbertDistance(point, 0.0, 0.0, 1.0, 1.0, 2));
+    assertEquals(15L, compute(point, 0.0, 0.0, 1.0, 1.0, 2));
   }
 
   @Test
   public void mapsZeroWidthAndNanAxesToZero() {
     Geometry zeroWidthPoint = GEOMETRY_FACTORY.createPoint(new Coordinate(5.0, 1.0));
-    assertEquals(5L, Functions.hilbertDistance(zeroWidthPoint, 5.0, 0.0, 5.0, 1.0, 2));
+    assertEquals(5L, compute(zeroWidthPoint, 5.0, 0.0, 5.0, 1.0, 2));
 
     Geometry nanBoundsPoint = GEOMETRY_FACTORY.createPoint(new Coordinate(0.5, 0.5));
-    assertEquals(
-        3L, Functions.hilbertDistance(nanBoundsPoint, Double.NaN, 0.0, Double.NaN, 1.0, 2));
+    assertEquals(3L, compute(nanBoundsPoint, Double.NaN, 0.0, Double.NaN, 1.0, 2));
   }
 
   @Test
   public void mapsNonPositiveLevelsToZero() {
     Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(1.0, 0.0));
 
-    assertEquals(0L, Functions.hilbertDistance(point, 0.0, 0.0, 1.0, 1.0, 0));
-    assertEquals(0L, Functions.hilbertDistance(point, 0.0, 0.0, 1.0, 1.0, -4));
+    assertEquals(0L, compute(point, 0.0, 0.0, 1.0, 1.0, 0));
+    assertEquals(0L, compute(point, 0.0, 0.0, 1.0, 1.0, -4));
   }
 
   @Test
   public void rejectsEmptyGeometryBeforeCollapsingNonPositiveLevels() {
     Geometry emptyPoint = GEOMETRY_FACTORY.createPoint();
     try {
-      Functions.hilbertDistance(emptyPoint, 0.0, 0.0, 1.0, 1.0, 0);
+      compute(emptyPoint, 0.0, 0.0, 1.0, 1.0, 0);
       fail("Expected empty geometry to be rejected");
     } catch (IllegalArgumentException exception) {
       assertEquals(
@@ -87,11 +87,11 @@ public class HilbertDistanceTest {
   @Test(expected = IllegalArgumentException.class)
   public void rejectsLevelsAboveSixteen() {
     Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(0.0, 0.0));
-    Functions.hilbertDistance(point, 0.0, 0.0, 1.0, 1.0, 17);
+    compute(point, 0.0, 0.0, 1.0, 1.0, 17);
   }
 
   private static long distance(double x, double y, int level) {
     Geometry point = GEOMETRY_FACTORY.createPoint(new Coordinate(x, y));
-    return Functions.hilbertDistance(point, 0.0, 0.0, 1.0, 1.0, level);
+    return compute(point, 0.0, 0.0, 1.0, 1.0, level);
   }
 }

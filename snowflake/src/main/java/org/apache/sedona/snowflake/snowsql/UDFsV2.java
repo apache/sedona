@@ -24,6 +24,7 @@ import org.apache.sedona.common.FunctionsProj4;
 import org.apache.sedona.common.Predicates;
 import org.apache.sedona.common.sphere.Haversine;
 import org.apache.sedona.common.sphere.Spheroid;
+import org.apache.sedona.common.utils.HilbertDistance;
 import org.apache.sedona.snowflake.snowsql.annotations.UDFAnnotations;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
@@ -689,7 +690,7 @@ public class UDFsV2 {
       argTypes = {"Geometry", "double", "double", "double", "double", "int"})
   public static long ST_HilbertDistance(
       String geometry, double xmin, double ymin, double xmax, double ymax, int level) {
-    return Functions.hilbertDistance(
+    return HilbertDistance.compute(
         GeometrySerde.deserGeoJson(geometry), xmin, ymin, xmax, ymax, level);
   }
 

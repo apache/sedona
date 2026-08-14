@@ -21,7 +21,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 import org.apache.sedona.common.{Functions, FunctionsGeoTools, FunctionsProj4}
 import org.apache.sedona.common.geometryObjects.{Box2D, Box3D}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
-import org.apache.sedona.common.utils.{InscribedCircle, ValidDetail}
+import org.apache.sedona.common.utils.{HilbertDistance, InscribedCircle, ValidDetail}
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
@@ -1675,7 +1675,7 @@ private[apache] case class ST_S2ToGeom(inputExpressions: Seq[Expression])
 }
 
 private[apache] case class ST_HilbertDistance(inputExpressions: Seq[Expression])
-    extends InferredExpression(Functions.hilbertDistance _) {
+    extends InferredExpression(HilbertDistance.compute _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

@@ -31,6 +31,20 @@ The envelope midpoint is scaled independently on each axis to the integer grid f
 
 Levels from 1 through 16 provide increasingly fine ordering keys. A level at or below zero returns zero, while a level above 16 raises an error. The result is an unsigned value of up to 32 bits represented by `Long`; at level 16 it can be as large as `4294967295`. If any argument is null, the result is null. An empty geometry raises an error because it has no envelope midpoint.
 
+## How addresses are assigned
+
+At level 2, the extent becomes a 4-by-4 grid. The Hilbert curve visits every cell once and assigns addresses from 0 through 15 along that continuous path:
+
+![Level-2 Hilbert curve visiting a 4-by-4 grid in address order from 0 through 15](../../../image/ST_HilbertDistance/ST_HilbertDistance_curve.svg "Level-2 Hilbert grid and ordered addresses")
+
+*Consecutive addresses share a grid edge, which is why sorting by the returned key tends to keep nearby records together. The key is an ordering address, not a geometric distance.*
+
+For each input geometry, the function uses the midpoint of its envelope, normalizes that point into the supplied extent, and looks up the cell's Hilbert address. This example also shows how a midpoint outside the extent is clipped before lookup:
+
+![Five geometry envelopes and midpoints normalized onto a Hilbert grid, then sorted by addresses 0, 2, 4, 13, and 15](../../../image/ST_HilbertDistance/ST_HilbertDistance_workflow.svg "Geometry envelope midpoint to Hilbert sort key")
+
+*Only the envelope midpoint determines the address. Different geometries with midpoints in the same grid cell receive the same value at that level.*
+
 SQL example:
 
 ```sql
