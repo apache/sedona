@@ -19,7 +19,10 @@
 
 # ST_Force_2D
 
-Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force2D](ST_Force2D.md).
+!!!warning
+    `ST_Force_2D` is deprecated since `v2.0.0` and will be removed in a future release. Use [ST_Force2D](ST_Force2D.md) instead.
+
+Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is a deprecated alias of [ST_Force2D](ST_Force2D.md).
 
 ![ST_Force_2D](../../../image/ST_Force_2D/ST_Force_2D.svg "ST_Force_2D")
 

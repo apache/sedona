@@ -244,7 +244,9 @@ object st_functions {
   def ST_FlipCoordinates(geometry: Column): Column = wrapExpression[ST_FlipCoordinates](geometry)
   def ST_FlipCoordinates(geometry: String): Column = wrapExpression[ST_FlipCoordinates](geometry)
 
+  @deprecated("Use ST_Force2D instead", "2.0.0")
   def ST_Force_2D(geometry: Column): Column = wrapExpression[ST_Force_2D](geometry)
+  @deprecated("Use ST_Force2D instead", "2.0.0")
   def ST_Force_2D(geometry: String): Column = wrapExpression[ST_Force_2D](geometry)
 
   def ST_Force2D(geometry: Column): Column = wrapExpression[ST_Force2D](geometry)
@@ -926,10 +928,14 @@ object st_functions {
   def ST_Force3DM(geometry: String, zValue: Double): Column =
     wrapExpression[ST_Force3DM](geometry, zValue)
 
+  @deprecated("Use ST_Force3D instead", "2.0.0")
   def ST_Force3DZ(geometry: Column): Column = wrapExpression[ST_Force3DZ](geometry, 0.0)
+  @deprecated("Use ST_Force3D instead", "2.0.0")
   def ST_Force3DZ(geometry: String): Column = wrapExpression[ST_Force3DZ](geometry, 0.0)
+  @deprecated("Use ST_Force3D instead", "2.0.0")
   def ST_Force3DZ(geometry: Column, zValue: Column): Column =
     wrapExpression[ST_Force3DZ](geometry, zValue)
+  @deprecated("Use ST_Force3D instead", "2.0.0")
   def ST_Force3DZ(geometry: String, zValue: Double): Column =
     wrapExpression[ST_Force3DZ](geometry, zValue)
 

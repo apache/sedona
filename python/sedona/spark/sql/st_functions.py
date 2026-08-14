@@ -16,6 +16,7 @@
 # under the License.
 import inspect
 import sys
+import warnings
 from functools import partial
 from typing import Optional, Union
 
@@ -750,11 +751,19 @@ def ST_FlipCoordinates(geometry: ColumnOrName) -> Column:
 def ST_Force_2D(geometry: ColumnOrName) -> Column:
     """Force the geometry column to only output two dimensional representations.
 
+    .. deprecated:: 2.0.0
+        Use :py:func:`ST_Force2D` instead.
+
     :param geometry: Geometry column to force to be 2D.
     :type geometry: ColumnOrName
     :return: Geometry column identical to geometry except with only X and Y coordinates.
     :rtype: Column
     """
+    warnings.warn(
+        "ST_Force_2D is deprecated. Use ST_Force2D instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return _call_st_function("ST_Force_2D", geometry)
 
 
@@ -2548,10 +2557,19 @@ def ST_Force3DZ(
 ) -> Column:
     """
     Return a geometry with a 3D coordinate of value 'zValue' forced upon it. No change happens if the geometry is already 3D
+
+    .. deprecated:: 2.0.0
+        Use :py:func:`ST_Force3D` instead.
+
     :param zValue: Optional value of z coordinate to be potentially added, default value is 0.0
     :param geometry: Geometry column to make 3D
     :return: 3D geometry with either already present z coordinate if any, or zcoordinate with given zValue
     """
+    warnings.warn(
+        "ST_Force3DZ is deprecated. Use ST_Force3D instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     args = (geometry, zValue)
     return _call_st_function("ST_Force3DZ", args)
 
