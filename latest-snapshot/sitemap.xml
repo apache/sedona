@@ -6798,6 +6798,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/08/07/index-a-million-rasters-without-reading-a-pixel/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/blog/2026/08/14/seven-lines-of-numpy-121-million-pixels/</loc>
+        <lastmod>2026-08-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/2026/08/14/seven-lines-of-numpy-121-million-pixels/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/2026/08/14/seven-lines-of-numpy-121-million-pixels/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/blog/2026/07/10/open-huge-geotiffs-without-the-2-gb-wall/</loc>
         <lastmod>2026-08-14</lastmod>
         <changefreq>daily</changefreq>
@@ -6866,6 +6873,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/page/2/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/page/2/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/blog/archive/2026/page/2/</loc>
+        <lastmod>2026-08-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latest/blog/archive/2026/page/2/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latestzh/blog/archive/2026/page/2/"/>
     </url>
     <url>
         <loc>https://sedona.apache.org/latest/zh/</loc>
@@ -13665,6 +13679,13 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/08/07/index-a-million-rasters-without-reading-a-pixel/"/>
     </url>
     <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/2026/08/14/seven-lines-of-numpy-121-million-pixels/</loc>
+        <lastmod>2026-08-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/2026/08/14/seven-lines-of-numpy-121-million-pixels/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/2026/08/14/seven-lines-of-numpy-121-million-pixels/"/>
+    </url>
+    <url>
         <loc>https://sedona.apache.org/latest/zh/blog/2026/07/10/open-huge-geotiffs-without-the-2-gb-wall/</loc>
         <lastmod>2026-08-14</lastmod>
         <changefreq>daily</changefreq>
@@ -13733,5 +13754,12 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/page/2/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/page/2/"/>
+    </url>
+    <url>
+        <loc>https://sedona.apache.org/latest/zh/blog/archive/2026/page/2/</loc>
+        <lastmod>2026-08-14</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://sedona.apache.org/latest/zh/blog/archive/2026/page/2/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://sedona.apache.org/latestblog/archive/2026/page/2/"/>
     </url>
 </urlset>
