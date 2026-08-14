@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -237,6 +236,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pspd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyspark</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Series</span> <span class="k">as</span> <span class="n">PandasOnSparkSeries</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">PandasOnSparkDataFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.internal</span><span class="w"> </span><span class="kn">import</span> <span class="n">InternalField</span><span class="p">,</span> <span class="n">InternalFrame</span>
@@ -870,7 +870,7 @@
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allow_override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if this GeoSeries has no rows without triggering a full Spark scan.&quot;&quot;&quot;</span>
@@ -915,16 +915,11 @@
 <span class="sd">        GeoSeries.set_crs : assign CRS</span>
 <span class="sd">        GeoSeries.to_crs : re-project to another CRS</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
-
         <span class="n">has_crs_metadata</span><span class="p">,</span> <span class="n">metadata_crs</span> <span class="o">=</span> <span class="n">read_crs_metadata</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">has_crs_metadata</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">metadata_crs</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_empty</span><span class="p">():</span>
-            <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># F.first is non-deterministic, but it doesn&#39;t matter because all non-null values should be the same.</span>
         <span class="n">spark_col</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_SRID</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">first</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span> <span class="n">ignorenulls</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
@@ -947,33 +942,15 @@
 
     <span class="nd">@crs</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;CRS&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="nd">@typing</span><span class="o">.</span><span class="n">overload</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_crs</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">crs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">epsg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">inplace</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">allow_override</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
-
-    <span class="nd">@typing</span><span class="o">.</span><span class="n">overload</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_crs</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">crs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">epsg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">inplace</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">allow_override</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span> <span class="o">...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allow_override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GeoSeries.set_crs"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.set_crs">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">set_crs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">crs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">epsg</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">allow_override</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;GeoSeries&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="n">allow_override</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeoSeries&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the Coordinate Reference System (CRS) of a ``GeoSeries``.</span>
 
@@ -996,11 +973,11 @@
 <span class="sd">            If True, the CRS of the GeoSeries will be changed in place</span>
 <span class="sd">            (while still returning the result) instead of making a copy of</span>
 <span class="sd">            the GeoSeries.</span>
-<span class="sd">        allow_override : bool, default True</span>
+<span class="sd">        allow_override : bool, default False</span>
 <span class="sd">            If the GeoSeries already has a CRS, allow to replace the</span>
-<span class="sd">            existing CRS, even when both are not equal. In Sedona, setting this to True</span>
-<span class="sd">            will lead to eager evaluation instead of lazy evaluation. Unlike Geopandas,</span>
-<span class="sd">            True is the default value in Sedona for performance reasons.</span>
+<span class="sd">            existing CRS, even when both are not equal. Validation uses column</span>
+<span class="sd">            metadata when available. Without it, validation performs a</span>
+<span class="sd">            distributed lookup of the first non-null geometry&#39;s SRID.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1051,15 +1028,12 @@
 <span class="sd">        GeoSeries.to_crs : re-project to another CRS</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
-
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">epsg</span><span class="p">)</span>
 
-        <span class="c1"># The below block for the not allow_override case is eager due to the self.crs call.</span>
-        <span class="c1"># This hurts performance and user experience, hence the default being set to True in Sedona.</span>
+        <span class="c1"># Reading legacy CRS values without metadata may require eager evaluation.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">allow_override</span><span class="p">:</span>
             <span class="n">curr_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
 
@@ -1083,7 +1057,7 @@
 
         <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_update_inplace</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">invalidate_sindex</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="bp">self</span>
 
         <span class="k">return</span> <span class="n">result</span></div>
 
@@ -4827,8 +4801,6 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
-
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -4880,33 +4852,44 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">total_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+        <span class="n">max_float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_empty</span><span class="p">():</span>
-            <span class="c1"># numpy &#39;min&#39; cannot handle empty arrays</span>
-            <span class="c1"># TODO with numpy &gt;= 1.15, the &#39;initial&#39; argument can be used</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">])</span>
-        <span class="n">ps_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span>
-        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
-            <span class="c1"># if all rows are empty geometry / none, nan is expected</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span>
-                <span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;All-NaN slice encountered&quot;</span><span class="p">,</span> <span class="ne">RuntimeWarning</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">valid_bound</span><span class="p">(</span><span class="n">bound</span><span class="p">):</span>
+            <span class="c1"># ST_X/YMin/Max return null for empty geometries. Preserve the</span>
+            <span class="c1"># existing bounds behavior by also treating NaNs and</span>
+            <span class="c1"># +/- Double.MAX_VALUE as missing.</span>
+            <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+                <span class="n">bound</span><span class="o">.</span><span class="n">isNull</span><span class="p">()</span>
+                <span class="o">|</span> <span class="n">F</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">bound</span><span class="p">)</span>
+                <span class="o">|</span> <span class="p">(</span><span class="n">bound</span> <span class="o">==</span> <span class="n">max_float</span><span class="p">)</span>
+                <span class="o">|</span> <span class="p">(</span><span class="n">bound</span> <span class="o">==</span> <span class="o">-</span><span class="n">max_float</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">&quot;double&quot;</span><span class="p">),</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">bound</span><span class="p">)</span>
+
+        <span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span>
+        <span class="n">minx</span> <span class="o">=</span> <span class="n">valid_bound</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_XMin</span><span class="p">(</span><span class="n">geometry</span><span class="p">))</span>
+        <span class="n">miny</span> <span class="o">=</span> <span class="n">valid_bound</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_YMin</span><span class="p">(</span><span class="n">geometry</span><span class="p">))</span>
+        <span class="n">maxx</span> <span class="o">=</span> <span class="n">valid_bound</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_XMax</span><span class="p">(</span><span class="n">geometry</span><span class="p">))</span>
+        <span class="n">maxy</span> <span class="o">=</span> <span class="n">valid_bound</span><span class="p">(</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_YMax</span><span class="p">(</span><span class="n">geometry</span><span class="p">))</span>
+
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">minx</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;minx&quot;</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">miny</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;miny&quot;</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">maxx</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;maxx&quot;</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">maxy</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;maxy&quot;</span><span class="p">),</span>
             <span class="p">)</span>
+            <span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">asDict</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">if</span> <span class="n">bounds</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">bounds</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;minx&quot;</span><span class="p">,</span> <span class="s2">&quot;miny&quot;</span><span class="p">,</span> <span class="s2">&quot;maxx&quot;</span><span class="p">,</span> <span class="s2">&quot;maxy&quot;</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
 
-            <span class="n">minx</span> <span class="o">=</span> <span class="n">ps_df</span><span class="p">[</span><span class="s2">&quot;minx&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">miny</span> <span class="o">=</span> <span class="n">ps_df</span><span class="p">[</span><span class="s2">&quot;miny&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-            <span class="c1"># skipna=True doesn&#39;t work properly for max(), so we use dropna() as a workaround</span>
-            <span class="n">maxx</span> <span class="o">=</span> <span class="n">ps_df</span><span class="p">[</span><span class="s2">&quot;maxx&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
-            <span class="n">maxy</span> <span class="o">=</span> <span class="n">ps_df</span><span class="p">[</span><span class="s2">&quot;maxy&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
-
-            <span class="n">maxx</span> <span class="o">=</span> <span class="n">maxx</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">maxx</span><span class="o">.</span><span class="n">empty</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-            <span class="n">maxy</span> <span class="o">=</span> <span class="n">maxy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">maxy</span><span class="o">.</span><span class="n">empty</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span><span class="p">))</span>
-
-    <span class="c1"># GeoSeries-only (not in GeoDataFrame)</span>
-<div class="viewcode-block" id="GeoSeries.estimate_utm_crs"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.estimate_utm_crs">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">estimate_utm_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WGS 84&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CRS&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="GeoSeries.estimate_utm_crs"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.estimate_utm_crs">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">estimate_utm_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WGS 84&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CRS</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the estimated UTM CRS based on the bounds of the dataset.</span>
 
 <span class="sd">        Parameters</span>
@@ -4942,7 +4925,6 @@
 <span class="sd">        - Prime Meridian: Greenwich</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj.aoi</span><span class="w"> </span><span class="kn">import</span> <span class="n">AreaOfInterest</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj.database</span><span class="w"> </span><span class="kn">import</span> <span class="n">query_utm_crs_info</span>
 
@@ -4952,11 +4934,12 @@
         <span class="c1"># than the GeoPandas implementation. The rest of the implementation always executes on 4 points (minx, miny, maxx, maxy),</span>
         <span class="c1"># so the numpy and pyproj implementations are reasonable.</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
+        <span class="n">source_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">source_crs</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;crs must be set to estimate UTM CRS.&quot;</span><span class="p">)</span>
 
         <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_bounds</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">source_crs</span><span class="o">.</span><span class="n">is_geographic</span><span class="p">:</span>
             <span class="n">x_center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">])</span>
             <span class="n">y_center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">])</span>
         <span class="c1"># ensure using geographic coordinates</span>
@@ -4966,7 +4949,7 @@
 
             <span class="n">TransformerFromCRS</span> <span class="o">=</span> <span class="n">lru_cache</span><span class="p">(</span><span class="n">Transformer</span><span class="o">.</span><span class="n">from_crs</span><span class="p">)</span>
 
-            <span class="n">transformer</span> <span class="o">=</span> <span class="n">TransformerFromCRS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span> <span class="n">always_xy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">transformer</span> <span class="o">=</span> <span class="n">TransformerFromCRS</span><span class="p">(</span><span class="n">source_crs</span><span class="p">,</span> <span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span> <span class="n">always_xy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">transform_bounds</span><span class="p">(</span>
                 <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span>
             <span class="p">)</span>

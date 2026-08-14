@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geodataframe &mdash; Apache Sedona Python Documentation</title>
@@ -227,6 +226,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">builtins</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">wraps</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
 
@@ -238,6 +238,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pspd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sgpd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">packaging.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span> <span class="k">as</span> <span class="n">parse_version</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">Series</span> <span class="k">as</span> <span class="n">PandasOnSparkSeries</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.frame</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">PandasOnSparkDataFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.internal</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -355,6 +357,48 @@
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">base_message</span> <span class="o">+</span> <span class="n">workaround</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_support_legacy_set_crs_positionals</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Preserve the former ``(crs, inplace, allow_override)`` positional form.&quot;&quot;&quot;</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;GeoDataFrame.set_crs() accepts at most 3 legacy arguments&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;epsg&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="s2">&quot;inplace&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;GeoDataFrame.set_crs() received duplicate positional and keyword arguments&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="s2">&quot;allow_override&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;GeoDataFrame.set_crs() got multiple values for &#39;allow_override&#39;&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">legacy_allow_override</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;allow_override&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Passing &#39;inplace&#39; and &#39;allow_override&#39; positionally follows &quot;</span>
+                <span class="s2">&quot;Sedona&#39;s former GeoDataFrame.set_crs signature and is &quot;</span>
+                <span class="s2">&quot;deprecated. Use keyword arguments instead.&quot;</span><span class="p">,</span>
+                <span class="ne">FutureWarning</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">method</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">crs</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">inplace</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">allow_override</span><span class="o">=</span><span class="n">legacy_allow_override</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_dissolve_aggfunc</span><span class="p">(</span><span class="n">aggfunc</span><span class="p">):</span>
@@ -947,8 +991,6 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Updating the existing Spark column directly avoids index</span>
                 <span class="c1"># alignment, which would multiply rows for duplicate indexes.</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
-
                 <span class="n">normalized_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
                 <span class="n">new_epsg</span> <span class="o">=</span> <span class="n">normalized_crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span>
                 <span class="n">geometry_field</span> <span class="o">=</span> <span class="n">with_crs_metadata</span><span class="p">(</span>
@@ -1416,9 +1458,16 @@
     <span class="nd">@crs</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="c1"># Since PySpark DataFrames are immutable, we can&#39;t modify in place, so we create the new GeoSeries and replace it.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">allow_override</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GeoDataFrame.set_crs"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.set_crs">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">set_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_override</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="GeoDataFrame.set_crs"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.set_crs">[docs]</a>    <span class="nd">@_support_legacy_set_crs_positionals</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_crs</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">crs</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">epsg</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">allow_override</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeoDataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the Coordinate Reference System (CRS) of the ``GeoDataFrame``.</span>
 
@@ -1432,6 +1481,10 @@
 <span class="sd">        The underlying geometries are not transformed to this CRS. To</span>
 <span class="sd">        transform the geometries to a new CRS, use the ``to_crs`` method.</span>
 
+<span class="sd">        A boolean second positional argument is interpreted as ``inplace``</span>
+<span class="sd">        for compatibility with the former Sedona signature. This form is</span>
+<span class="sd">        deprecated; use keyword arguments instead.</span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        crs : pyproj.CRS | None, optional</span>
@@ -1444,11 +1497,17 @@
 <span class="sd">            If True, the CRS of the GeoDataFrame will be changed in place</span>
 <span class="sd">            (while still returning the result) instead of making a copy of</span>
 <span class="sd">            the GeoDataFrame.</span>
-<span class="sd">        allow_override : bool, default True</span>
+<span class="sd">        allow_override : bool, default False</span>
 <span class="sd">            If the GeoDataFrame already has a CRS, allow to replace the</span>
-<span class="sd">            existing CRS, even when both are not equal. In Sedona, setting this to True</span>
-<span class="sd">            will lead to eager evaluation instead of lazy evaluation. Unlike Geopandas,</span>
-<span class="sd">            True is the default value in Sedona for performance reasons.</span>
+<span class="sd">            existing CRS, even when both are not equal. Validation uses column</span>
+<span class="sd">            metadata when available. Without it, validation performs a</span>
+<span class="sd">            distributed lookup of the first non-null geometry&#39;s SRID.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        GeoDataFrame</span>
+<span class="sd">            A new GeoDataFrame unless ``inplace=True``, in which case the</span>
+<span class="sd">            mutated original is returned.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -1494,14 +1553,13 @@
 <span class="sd">        --------</span>
 <span class="sd">        GeoDataFrame.to_crs : re-project to another CRS</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Since PySpark DataFrames are immutable, we can&#39;t modify in place, so we create the new GeoSeries and replace it.</span>
-        <span class="n">new_geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">allow_override</span><span class="o">=</span><span class="n">allow_override</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">new_geometry</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="n">df</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">new_geometry</span>
-            <span class="k">return</span> <span class="n">df</span></div>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">inplace</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span>
+            <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
+            <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span>
+            <span class="n">allow_override</span><span class="o">=</span><span class="n">allow_override</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
 
 <div class="viewcode-block" id="GeoDataFrame.to_crs"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_crs">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_crs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1595,6 +1653,35 @@
             <span class="n">df</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">new_geometry</span>
             <span class="k">return</span> <span class="n">df</span></div>
 
+<div class="viewcode-block" id="GeoDataFrame.estimate_utm_crs"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.estimate_utm_crs">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">estimate_utm_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;WGS 84&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CRS</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the estimated UTM CRS based on the bounds of the dataset.</span>
+
+<span class="sd">        .. versionadded:: 2.0.0</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        datum_name : str, optional</span>
+<span class="sd">            The name of the datum to use in the query. Default is ``&quot;WGS 84&quot;``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pyproj.CRS</span>
+<span class="sd">            The UTM coordinate reference system covering the center of the</span>
+<span class="sd">            active geometry column&#39;s bounds.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Bounds are computed with one distributed aggregation. Only its four</span>
+<span class="sd">        aggregate values are materialized on the driver; geometry rows are not</span>
+<span class="sd">        collected.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+<span class="sd">        GeoDataFrame.to_crs</span>
+<span class="sd">        GeoSeries.estimate_utm_crs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">estimate_utm_crs</span><span class="p">(</span><span class="n">datum_name</span><span class="o">=</span><span class="n">datum_name</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="GeoDataFrame.from_dict"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
@@ -1659,7 +1746,8 @@
 <span class="sd">            columns. This can be used to control the behavior of the conversion of the</span>
 <span class="sd">            non-geometry columns to a pandas DataFrame. For example, you can use this</span>
 <span class="sd">            to control the dtype conversion of the columns. By default, the `to_pandas`</span>
-<span class="sd">            method is called with no additional arguments.</span>
+<span class="sd">            method is called with no additional arguments. Requires GeoPandas 1.1 or</span>
+<span class="sd">            newer when provided.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1688,12 +1776,13 @@
 <span class="sd">        1    POLYGON ((0 0, 1 1, 0 1, 0 0))    2      b</span>
 <span class="sd">        2      LINESTRING (0 0, -1 1, 0 -1)    3      c</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">to_pandas_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">to_pandas_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="n">geometry</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">to_pandas_kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">parse_version</span><span class="p">(</span><span class="n">gpd</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">parse_version</span><span class="p">(</span><span class="s2">&quot;1.1.0&quot;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;to_pandas_kwargs requires GeoPandas &gt;= 1.1&quot;</span><span class="p">)</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;to_pandas_kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_pandas_kwargs</span>
 
-        <span class="n">gpd_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_arrow</span><span class="p">(</span>
-            <span class="n">table</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span> <span class="o">**</span><span class="n">to_pandas_kwargs</span>
-        <span class="p">)</span>
+        <span class="n">gpd_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_arrow</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">gpd_df</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoDataFrame.to_json"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoDataFrame.to_json">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span>
