@@ -16,6 +16,7 @@
 # under the License.
 
 from decimal import Decimal
+import typing
 
 import shapely
 import numpy as np
@@ -561,7 +562,7 @@ class TestGeoSeries(TestGeopandasBase):
         df_result = geoseries.to_geoframe().bounds
         pd.testing.assert_frame_equal(df_result.to_pandas(), expected)
 
-    def test_total_bounds(self):
+    def test_total_bounds(self, monkeypatch):
         d = [
             Point(3, -1),
             Polygon([(0, 0), (1, 1), (1, 0)]),
@@ -569,17 +570,48 @@ class TestGeoSeries(TestGeopandasBase):
             None,
         ]
         geoseries = sgpd.GeoSeries(d, crs="EPSG:4326")
+        empty_geoseries = sgpd.GeoSeries([], crs="EPSG:4326")
+        all_empty_geoseries = sgpd.GeoSeries([Point(), Polygon()], crs="EPSG:4326")
+
+        spark_dataframe_type = type(geoseries._internal.spark_frame)
+        original_first = spark_dataframe_type.first
+        action_count = 0
+
+        def counting_first(frame):
+            nonlocal action_count
+            action_count += 1
+            return original_first(frame)
+
+        # Spark 4 uses a classic DataFrame subclass that overrides ``first``.
+        # Patch the runtime class so the assertion works across Spark versions.
+        monkeypatch.setattr(spark_dataframe_type, "first", counting_first)
+
         result = geoseries.total_bounds
         expected = np.array([0.0, -1.0, 3.0, 2.0])
         np.testing.assert_array_equal(result, expected)
+        assert action_count == 1
 
+        action_count = 0
         df_result = geoseries.to_geoframe().total_bounds
         np.testing.assert_array_equal(df_result, expected)
+        assert action_count == 1
+
+        action_count = 0
+        empty_result = empty_geoseries.total_bounds
+        np.testing.assert_array_equal(empty_result, np.full(4, np.nan))
+        assert action_count == 1
+
+        action_count = 0
+        all_empty_result = all_empty_geoseries.total_bounds
+        np.testing.assert_array_equal(all_empty_result, np.full(4, np.nan))
+        assert action_count == 1
 
     # These tests were taken directly from the TestEstimateUtmCrs class in the geopandas test suite
     # https://github.com/geopandas/geopandas/blob/main/geopandas/tests/test_array.py
     def test_estimate_utm_crs(self):
         from pyproj import CRS
+
+        assert typing.get_type_hints(GeoSeries.estimate_utm_crs)["return"] is CRS
 
         # setup
         esb = Point(-73.9847, 40.7484)
@@ -5857,9 +5889,9 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert geo_series.crs.to_epsg() == 4326
 
         with pytest.raises(ValueError):
-            geo_series.set_crs(4328, allow_override=False)
+            geo_series.set_crs(4328)
         with pytest.raises(ValueError):
-            geo_series.set_crs(None, allow_override=False)
+            geo_series.set_crs(None)
 
         geo_series = geo_series.set_crs(None, allow_override=True)
         assert geo_series.crs == None
@@ -5867,8 +5899,12 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         # Check that the name is preserved for set_crs
         geo_series.name = "geometry"
 
-        geo_series.set_crs(4326, inplace=True)
+        inplace_result = geo_series.set_crs(4326, inplace=True)
+        assert inplace_result is geo_series
         assert geo_series.crs.to_epsg() == 4326
+
+        geo_series.crs = 3857
+        assert geo_series.crs.to_epsg() == 3857
 
         # Check that the name is preserved for set_crs after inplace=True
         geo_series.name = "geometry"

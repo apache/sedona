@@ -244,9 +244,10 @@ contains_result = left_df.sjoin(right_df, predicate="contains")
 Transform geometries between different coordinate reference systems:
 
 ```python
-# Set initial CRS
+# GeoParquet normally preserves CRS metadata. Assign it only when absent.
 buildings = gpd.read_parquet("buildings.parquet")
-buildings = buildings.set_crs("EPSG:4326")
+if buildings.crs is None:
+    buildings = buildings.set_crs("EPSG:4326")
 
 # Transform to projected CRS for area calculations
 buildings_projected = buildings.to_crs("EPSG:3857")
@@ -465,8 +466,9 @@ overture_path = DATA_DIR + overture_size + "/" + "overture-buildings/"
 postal_codes = gpd.read_parquet(postal_codes_path)
 buildings = gpd.read_parquet(overture_path)
 
-# Spatial analysis
-buildings = buildings.set_crs("EPSG:4326")
+# Spatial analysis (GeoParquet normally preserves CRS metadata)
+if buildings.crs is None:
+    buildings = buildings.set_crs("EPSG:4326")
 buildings_projected = buildings.to_crs("EPSG:3857")
 
 # Calculate areas and filter

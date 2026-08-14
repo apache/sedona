@@ -244,9 +244,10 @@ contains_result = left_df.sjoin(right_df, predicate="contains")
 在不同坐标参考系（CRS）之间转换几何对象：
 
 ```python
-# 设置初始 CRS
+# GeoParquet 通常会保留 CRS 元数据，仅在缺失时进行设置
 buildings = gpd.read_parquet("buildings.parquet")
-buildings = buildings.set_crs("EPSG:4326")
+if buildings.crs is None:
+    buildings = buildings.set_crs("EPSG:4326")
 
 # 转换为投影坐标系以便计算面积
 buildings_projected = buildings.to_crs("EPSG:3857")
@@ -450,8 +451,9 @@ overture_path = DATA_DIR + overture_size + "/" + "overture-buildings/"
 postal_codes = gpd.read_parquet(postal_codes_path)
 buildings = gpd.read_parquet(overture_path)
 
-# 空间分析
-buildings = buildings.set_crs("EPSG:4326")
+# 空间分析（GeoParquet 通常会保留 CRS 元数据）
+if buildings.crs is None:
+    buildings = buildings.set_crs("EPSG:4326")
 buildings_projected = buildings.to_crs("EPSG:3857")
 
 # 计算面积并过滤
