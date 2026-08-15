@@ -21,6 +21,7 @@ package org.apache.sedona.common;
 import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
 import org.apache.sedona.common.sphere.Spheroid;
+import org.apache.sedona.common.utils.GeometryEquality;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.operation.distance3d.Distance3DOp;
 import org.locationtech.jts.operation.relate.RelateOp;
@@ -161,6 +162,10 @@ public class Predicates {
   public static boolean equalsExact(
       Geometry leftGeometry, Geometry rightGeometry, double tolerance) {
     return leftGeometry.equalsExact(rightGeometry, tolerance);
+  }
+
+  public static boolean equalsIdentical(Geometry leftGeometry, Geometry rightGeometry) {
+    return GeometryEquality.equalsIdentical(leftGeometry, rightGeometry);
   }
 
   public static boolean disjoint(Geometry leftGeometry, Geometry rightGeometry) {

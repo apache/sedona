@@ -115,6 +115,24 @@ def ST_EqualsExact(
 
 
 @validate_argument_types
+def ST_EqualsIdentical(a: ColumnOrName, b: ColumnOrName) -> Column:
+    """Check whether two geometries are structurally identical in every dimension.
+
+    Geometry types, component ordering, vertex ordering, dimensionality, and all
+    coordinate values must match exactly. NaN ordinate values compare equal to
+    other NaN values.
+
+    :param a: One geometry column to check.
+    :type a: ColumnOrName
+    :param b: Other geometry column to check.
+    :type b: ColumnOrName
+    :return: True if a and b are identical, otherwise False.
+    :rtype: Column
+    """
+    return _call_predicate_function("ST_EqualsIdentical", (a, b))
+
+
+@validate_argument_types
 def ST_Intersects(a: ColumnOrName, b: ColumnOrName) -> Column:
     """Check whether a and b intersect. Polymorphic over input type:
 

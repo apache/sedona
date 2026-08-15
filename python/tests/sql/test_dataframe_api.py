@@ -1287,6 +1287,16 @@ test_configurations = [
         "",
         True,
     ),
+    (
+        stp.ST_EqualsIdentical,
+        (
+            lambda: f.expr("ST_GeomFromWKT('POINT Z (1 2 3)')"),
+            lambda: f.expr("ST_GeomFromWKT('POINT Z (1 2 3)')"),
+        ),
+        "triangle_geom",
+        "",
+        True,
+    ),
     (stp.ST_Intersects, ("a", "b"), "overlapping_polys", "", True),
     (
         stp.ST_OrderingEquals,
@@ -1682,6 +1692,8 @@ wrong_type_configurations = [
     (stp.ST_EqualsExact, (None, "", 0.0)),
     (stp.ST_EqualsExact, ("", None, 0.0)),
     (stp.ST_EqualsExact, ("", "", None)),
+    (stp.ST_EqualsIdentical, (None, "")),
+    (stp.ST_EqualsIdentical, ("", None)),
     (stp.ST_Overlaps, (None, "")),
     (stp.ST_Overlaps, ("", None)),
     (stp.ST_Touches, (None, "")),

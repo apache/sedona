@@ -37,7 +37,9 @@ public class UDFDDLGeneratorTest {
     String originalGeometryType = Constants.snowflakeTypeMap.put("Geometry", "GEOMETRY");
 
     try {
-      assertSharedPathsTargets(UDFDDLGenerator.buildAll(configs(), "@ApacheSedona", false, ""));
+      List<String> ddls = UDFDDLGenerator.buildAll(configs(), "@ApacheSedona", false, "");
+      assertGeometryOnlyTargets(ddls, "ST_SharedPaths");
+      assertGeometryOnlyTargets(ddls, "ST_EqualsIdentical");
     } finally {
       restoreGeometryType(originalGeometryType);
     }
@@ -48,20 +50,8 @@ public class UDFDDLGeneratorTest {
     String originalGeometryType = Constants.snowflakeTypeMap.put("Geometry", "GEOGRAPHY");
 
     try {
-      IllegalArgumentException error =
-          assertThrows(
-              IllegalArgumentException.class,
-              () ->
-                  UDFDDLGenerator.buildUDFDDL(
-                      UDFsV2.class.getMethod("ST_SharedPaths", String.class, String.class),
-                      configs(),
-                      "@ApacheSedona",
-                      false,
-                      ""));
-
-      assertEquals(
-          "Cannot generate GEOGRAPHY DDL for @GeometryOnly method: ST_SharedPaths",
-          error.getMessage());
+      assertGeographyGenerationRejected("ST_SharedPaths", String.class, String.class);
+      assertGeographyGenerationRejected("ST_EqualsIdentical", String.class, String.class);
     } finally {
       restoreGeometryType(originalGeometryType);
     }
@@ -72,10 +62,14 @@ public class UDFDDLGeneratorTest {
     String originalGeometryType = Constants.snowflakeTypeMap.put("Geometry", "GEOMETRY");
 
     try {
-      assertSharedPathsTargets(UDFDDLGenerator.buildAll(configs(), "@ApacheSedona", false, ""));
+      List<String> firstDdls = UDFDDLGenerator.buildAll(configs(), "@ApacheSedona", false, "");
+      assertGeometryOnlyTargets(firstDdls, "ST_SharedPaths");
+      assertGeometryOnlyTargets(firstDdls, "ST_EqualsIdentical");
       assertEquals("GEOMETRY", Constants.snowflakeTypeMap.get("Geometry"));
 
-      assertSharedPathsTargets(UDFDDLGenerator.buildAll(configs(), "@ApacheSedona", false, ""));
+      List<String> secondDdls = UDFDDLGenerator.buildAll(configs(), "@ApacheSedona", false, "");
+      assertGeometryOnlyTargets(secondDdls, "ST_SharedPaths");
+      assertGeometryOnlyTargets(secondDdls, "ST_EqualsIdentical");
       assertEquals("GEOMETRY", Constants.snowflakeTypeMap.get("Geometry"));
     } finally {
       restoreGeometryType(originalGeometryType);
@@ -89,13 +83,33 @@ public class UDFDDLGeneratorTest {
     return configs;
   }
 
-  private static void assertSharedPathsTargets(List<String> ddls) {
-    List<String> sharedPathsDdls =
-        ddls.stream().filter(ddl -> ddl.contains(".ST_SharedPaths ")).collect(Collectors.toList());
+  private static void assertGeographyGenerationRejected(
+      String functionName, Class<?>... parameterTypes) throws NoSuchMethodException {
+    IllegalArgumentException error =
+        assertThrows(
+            IllegalArgumentException.class,
+            () ->
+                UDFDDLGenerator.buildUDFDDL(
+                    UDFsV2.class.getMethod(functionName, parameterTypes),
+                    configs(),
+                    "@ApacheSedona",
+                    false,
+                    ""));
 
-    assertEquals(2, sharedPathsDdls.size());
-    assertTrue(sharedPathsDdls.stream().anyMatch(ddl -> ddl.contains(" GEOMETRY")));
-    assertFalse(sharedPathsDdls.stream().anyMatch(ddl -> ddl.contains(" GEOGRAPHY")));
+    assertEquals(
+        "Cannot generate GEOGRAPHY DDL for @GeometryOnly method: " + functionName,
+        error.getMessage());
+  }
+
+  private static void assertGeometryOnlyTargets(List<String> ddls, String functionName) {
+    List<String> functionDdls =
+        ddls.stream()
+            .filter(ddl -> ddl.contains("." + functionName + " "))
+            .collect(Collectors.toList());
+
+    assertEquals(2, functionDdls.size());
+    assertTrue(functionDdls.stream().anyMatch(ddl -> ddl.contains(" GEOMETRY")));
+    assertFalse(functionDdls.stream().anyMatch(ddl -> ddl.contains(" GEOGRAPHY")));
   }
 
   private static void restoreGeometryType(String geometryType) {

@@ -79,6 +79,17 @@ public class TestPredicatesV2 extends TestBase {
   }
 
   @Test
+  public void test_ST_EqualsIdentical() {
+    registerUDFV2("ST_EqualsIdentical", String.class, String.class);
+    verifySqlSingleRes(
+        "SELECT SEDONA.ST_EqualsIdentical(ST_GeometryFromWKT('LINESTRING (0 0, 1 1)'), ST_GeometryFromWKT('LINESTRING (0 0, 1 1)'))",
+        true);
+    verifySqlSingleRes(
+        "SELECT SEDONA.ST_EqualsIdentical(ST_GeometryFromWKT('LINESTRING (0 0, 1 1)'), ST_GeometryFromWKT('LINESTRING (1 1, 0 0)'))",
+        false);
+  }
+
+  @Test
   public void test_ST_Intersects() {
     registerUDFV2("ST_Intersects", String.class, String.class);
     verifySqlSingleRes(

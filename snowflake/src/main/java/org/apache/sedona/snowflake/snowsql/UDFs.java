@@ -412,6 +412,12 @@ public class UDFs {
         tolerance);
   }
 
+  @UDFAnnotations.ParamMeta(argNames = {"leftGeometry", "rightGeometry"})
+  public static boolean ST_EqualsIdentical(byte[] leftGeometry, byte[] rightGeometry) {
+    return Predicates.equalsIdentical(
+        GeometrySerde.deserialize(leftGeometry), GeometrySerde.deserialize(rightGeometry));
+  }
+
   @UDFAnnotations.ParamMeta(argNames = {"geometry"})
   public static byte[] ST_ExteriorRing(byte[] geometry) {
     return GeometrySerde.serialize(Functions.exteriorRing(GeometrySerde.deserialize(geometry)));

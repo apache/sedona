@@ -575,6 +575,15 @@ public class UDFsV2 {
         tolerance);
   }
 
+  @UDFAnnotations.GeometryOnly
+  @UDFAnnotations.ParamMeta(
+      argNames = {"leftGeometry", "rightGeometry"},
+      argTypes = {"Geometry", "Geometry"})
+  public static boolean ST_EqualsIdentical(String leftGeometry, String rightGeometry) {
+    return Predicates.equalsIdentical(
+        GeometrySerde.deserGeoJson(leftGeometry), GeometrySerde.deserGeoJson(rightGeometry));
+  }
+
   @UDFAnnotations.ParamMeta(
       argNames = {"geometry"},
       argTypes = {"Geometry"},

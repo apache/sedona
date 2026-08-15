@@ -170,6 +170,7 @@ These functions test spatial relationships between geometries, returning boolean
 | [ST_3DDWithin](Predicates/ST_3DDWithin.md) | Boolean | Returns true if A and B are within a specified 3D Euclidean 'distance'. Accepts Geometry or Box3D inputs. | v1.9.1 |
 | [ST_Equals](Predicates/ST_Equals.md) | Boolean | Return true if A equals to B | v1.0.0 |
 | [ST_EqualsExact](Predicates/ST_EqualsExact.md) | Boolean | Return true if A and B have matching structures and corresponding coordinates within a tolerance | v1.9.1 |
+| [ST_EqualsIdentical](Predicates/ST_EqualsIdentical.md) | Boolean | Return true if A and B have identical structures, dimensions, and coordinate values | v2.0.0 |
 | [ST_Intersects](Predicates/ST_Intersects.md) | Boolean | Return true if A intersects B | v1.0.0 |
 | [ST_OrderingEquals](Predicates/ST_OrderingEquals.md) | Boolean | Returns true if the geometries are equal and the coordinates are in the same order | v1.2.1 |
 | [ST_Overlaps](Predicates/ST_Overlaps.md) | Boolean | Return true if A overlaps B | v1.0.0 |
