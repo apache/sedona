@@ -316,6 +316,7 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 - `buffer()` —— 几何缓冲
 - `distance()` —— 距离计算
 - `intersects()`、`contains()`、`within()` —— 空间谓词
+- `geom_equals_identical()` —— 对所有已存储坐标维度执行精确的结构相等性比较
 - `sindex` —— 空间索引（功能有限）
 
 ### CRS 操作

@@ -3425,6 +3425,77 @@ class GeoFrame(metaclass=ABCMeta):
             "geom_equals_exact", self, other, tolerance, align
         )
 
+    def geom_equals_identical(self, other, align=None):
+        """Return ``True`` for geometries that are identical to aligned
+        `other`, otherwise ``False``.
+
+        Equality is structural: geometry types, component ordering, ring
+        ordering, vertex ordering, coordinate dimensions, and every ordinate
+        value must match. Unlike :meth:`geom_equals_exact`, this method checks
+        Z and M coordinates and does not accept a tolerance. NaN ordinates in
+        the same position are considered equal.
+
+        The operation works in a 1-to-1 row-wise manner.
+
+        Parameters
+        ----------
+        other : GeoSeries or geometric object
+            The GeoSeries (elementwise) or geometric object to compare to.
+        align : bool | None (default None)
+            If True, automatically align GeoSeries based on their indices.
+            If False, compare values in their existing order. None defaults
+            to True.
+
+        Returns
+        -------
+        Series (bool)
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoSeries
+        >>> from shapely.geometry import Point
+        >>> s = GeoSeries(
+        ...     [
+        ...         Point(0, 1.1),
+        ...         Point(0, 1.0),
+        ...         Point(0, 1.2),
+        ...     ]
+        ... )
+        >>> s.geom_equals_identical(Point(0, 1))
+        0    False
+        1     True
+        2    False
+        dtype: bool
+
+        Notes
+        -----
+        This method checks geometries row by row; it does not compare each
+        geometry with every value in `other`.
+
+        As elsewhere in Sedona's GeoPandas compatibility layer, standalone
+        ``LinearRing`` geometries are serialized as ``LineString`` geometries.
+        Consequently, this method cannot distinguish those two standalone
+        input types when their coordinates match.
+
+        Values are compared using the representation stored in Spark. JTS
+        cannot distinguish ordinary XY from declared XYZ when every Z
+        ordinate is NaN, including empty XYZ values and zero-member
+        collections. Shapely inputs with mixed coordinate layouts inside a
+        Polygon or same-type multi-geometry may be normalized to one layout
+        by Python GeometryUDT serialization; JVM-created mixed layouts are
+        rejected when their layouts remain distinguishable in JTS. Use a
+        GeometryCollection when members need independent layouts. Passing
+        Shapely M and ZM objects through GeometryUDT requires Sedona's native
+        geometry serializer with GEOS 3.12 or newer; the pure-Python fallback
+        rejects them instead of silently discarding measures.
+
+        See also
+        --------
+        GeoSeries.geom_equals
+        GeoSeries.geom_equals_exact
+        """
+        return _delegate_to_geometry_column("geom_equals_identical", self, other, align)
+
     def interpolate(self, distance, normalized=False):
         """Return a point at the specified distance along each geometry.
 

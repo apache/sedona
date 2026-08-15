@@ -48,6 +48,7 @@
 #### GeoPandas API
 
 * [<a href='https://github.com/apache/sedona/issues/3257'>GH-3257</a>] - Implement distributed GeoSeries and GeoDataFrame Hilbert-distance spatial ordering
+* [<a href='https://github.com/apache/sedona/issues/3260'>GH-3260</a>] - Implement distributed GeoSeries and GeoDataFrame identical-geometry equality
 
 ## Sedona 1.9.1
 

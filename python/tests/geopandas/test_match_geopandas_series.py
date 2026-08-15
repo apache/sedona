@@ -42,6 +42,27 @@ from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps
 from packaging.version import parse as parse_version
 
+requires_geopandas_geom_equals_identical = pytest.mark.skipif(
+    parse_version(gpd.__version__) < parse_version("1.1.0")
+    or parse_version(shapely.__version__) < parse_version("2.1.0"),
+    reason=(
+        "Tests require geopandas>=1.1.0 and shapely>=2.1.0, but found "
+        f"geopandas {gpd.__version__} and shapely {shapely.__version__}"
+    ),
+)
+
+requires_geopandas_geom_equals_identical_m = pytest.mark.skipif(
+    parse_version(gpd.__version__) < parse_version("1.1.0")
+    or parse_version(shapely.__version__) < parse_version("2.1.0")
+    or getattr(shapely, "geos_version", (0, 0, 0)) < (3, 12, 0),
+    reason=(
+        "M/ZM parity requires geopandas>=1.1.0, shapely>=2.1.0, and "
+        "GEOS>=3.12.0, but found "
+        f"geopandas {gpd.__version__}, shapely {shapely.__version__}, and "
+        f"GEOS {getattr(shapely, 'geos_version_string', 'unknown')}"
+    ),
+)
+
 
 @pytest.mark.skipif(
     parse_version(shapely.__version__) < parse_version("2.0.0"),
@@ -2284,6 +2305,97 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
         gpd_result = gpd.GeoSeries(geometries).geom_equals_exact(
             gpd.GeoSeries(geometries), tolerance=tolerance, align=False
         )
+        self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    @requires_geopandas_geom_equals_identical_m
+    def test_geom_equals_identical(self):
+        left_wkts = [
+            "POINT (0 0)",
+            "POINT Z (1 2 3)",
+            "POINT M (1 2 3)",
+            "POINT ZM (1 2 3 4)",
+            "LINESTRING Z (0 0 1, 1 1 NaN)",
+            "LINESTRING (0 0, 1 1)",
+            "POLYGON ((0 0, 2 0, 0 2, 0 0))",
+            "GEOMETRYCOLLECTION (POINT (0 0), LINESTRING (0 0, 1 1))",
+            "POINT EMPTY",
+            None,
+        ]
+        right_wkts = [
+            "POINT (0 0)",
+            "POINT Z (1 2 4)",
+            "POINT M (1 2 3)",
+            "POINT ZM (1 2 3 4)",
+            "LINESTRING Z (0 0 1, 1 1 NaN)",
+            "LINESTRING (1 1, 0 0)",
+            "POLYGON ((2 0, 0 2, 0 0, 2 0))",
+            "GEOMETRYCOLLECTION (LINESTRING (0 0, 1 1), POINT (0 0))",
+            "LINESTRING EMPTY",
+            None,
+        ]
+        index = pd.Index(
+            [
+                "xy",
+                "z",
+                "m",
+                "zm",
+                "nan",
+                "line-order",
+                "ring-order",
+                "part-order",
+                "empty-type",
+                "missing",
+            ],
+            name="case",
+        )
+
+        left_geometries = shapely.from_wkt(left_wkts)
+        right_geometries = shapely.from_wkt(right_wkts)
+        sgpd_result = GeoSeries(
+            left_geometries, index=index, name="left"
+        ).geom_equals_identical(
+            GeoSeries(right_geometries, index=index, name="right"),
+            align=False,
+        )
+        gpd_result = gpd.GeoSeries(
+            left_geometries, index=index, name="left"
+        ).geom_equals_identical(
+            gpd.GeoSeries(right_geometries, index=index, name="right"),
+            align=False,
+        )
+
+        self.check_pd_series_equal(sgpd_result, gpd_result)
+
+    @requires_geopandas_geom_equals_identical
+    def test_geom_equals_identical_duplicate_multiindex_alignment(self):
+        left_index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 1), ("b", 2)], names=["group", "row"]
+        )
+        right_index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 1), ("c", 3)], names=["group", "row"]
+        )
+        left_wkts = ["POINT Z (0 0 1)", "POINT Z (1 1 2)", None]
+        right_wkts = ["POINT Z (0 0 1)", "POINT Z (9 9 9)", None]
+
+        with pytest.warns(
+            UserWarning,
+            match="The indices of the left and right GeoSeries' are not equal",
+        ):
+            sgpd_result = GeoSeries(
+                shapely.from_wkt(left_wkts), index=left_index
+            ).geom_equals_identical(
+                GeoSeries(shapely.from_wkt(right_wkts), index=right_index)
+            )
+        with pytest.warns(
+            UserWarning,
+            match="The indices of the left and right GeoSeries' are not equal",
+        ):
+            gpd_result = gpd.GeoSeries(
+                shapely.from_wkt(left_wkts), index=left_index
+            ).geom_equals_identical(
+                gpd.GeoSeries(shapely.from_wkt(right_wkts), index=right_index)
+            )
+
         self.check_pd_series_equal(sgpd_result, gpd_result)
 
     def test_interpolate(self):

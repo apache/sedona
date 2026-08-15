@@ -52,6 +52,25 @@ requires_geopandas_shared_paths = pytest.mark.skipif(
     reason=f"Tests require geopandas>=1.0.0, but found v{gpd.__version__}",
 )
 
+requires_geopandas_geom_equals_identical = pytest.mark.skipif(
+    parse_version(gpd.__version__) < parse_version("1.1.0")
+    or parse_version(shapely.__version__) < parse_version("2.1.0"),
+    reason=(
+        "Tests require geopandas>=1.1.0 and shapely>=2.1.0, but found "
+        f"geopandas {gpd.__version__} and shapely {shapely.__version__}"
+    ),
+)
+
+requires_shapely_m_support = pytest.mark.skipif(
+    parse_version(shapely.__version__) < parse_version("2.1.0")
+    or getattr(shapely, "geos_version", (0, 0, 0)) < (3, 12, 0),
+    reason=(
+        "M and ZM geometry tests require shapely>=2.1.0 and GEOS>=3.12.0, "
+        f"but found shapely {shapely.__version__} and GEOS "
+        f"{getattr(shapely, 'geos_version_string', 'unknown')}"
+    ),
+)
+
 
 @pytest.mark.skipif(
     parse_version(shapely.__version__) < parse_version("2.0.0"),
@@ -5977,6 +5996,378 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         s = GeoSeries([Point(0, 0)])
         with pytest.raises(TypeError, match="'other' must be"):
             s.geom_equals_exact(other, tolerance=0)
+
+    @requires_shapely_m_support
+    def test_geom_equals_identical_structure_dimensions_and_nan(self):
+        left_wkts = [
+            "POINT Z (1 2 3)",
+            "POINT Z (1 2 3)",
+            "POINT M (1 2 3)",
+            "POINT M (1 2 3)",
+            "POINT Z (1 2 3)",
+            "POINT ZM (1 2 3 4)",
+            "POINT ZM (1 2 3 4)",
+            "LINESTRING Z (0 0 1, 1 1 NaN)",
+            "LINESTRING Z (0 0 1, 1 1 NaN)",
+            "LINESTRING (0 0, 1 1)",
+            "POLYGON ((0 0, 2 0, 0 2, 0 0))",
+            "GEOMETRYCOLLECTION (POINT (0 0), LINESTRING (0 0, 1 1))",
+            "POINT EMPTY",
+            "POINT EMPTY",
+            None,
+        ]
+        right_wkts = [
+            "POINT Z (1 2 3)",
+            "POINT Z (1 2 4)",
+            "POINT M (1 2 3)",
+            "POINT M (1 2 4)",
+            "POINT M (1 2 3)",
+            "POINT ZM (1 2 3 4)",
+            "POINT ZM (1 2 3 5)",
+            "LINESTRING Z (0 0 1, 1 1 NaN)",
+            "LINESTRING Z (0 0 1, 1 1 2)",
+            "LINESTRING (1 1, 0 0)",
+            "POLYGON ((2 0, 0 2, 0 0, 2 0))",
+            "GEOMETRYCOLLECTION (LINESTRING (0 0, 1 1), POINT (0 0))",
+            "POINT EMPTY",
+            "LINESTRING EMPTY",
+            None,
+        ]
+        index = pd.Index(
+            [
+                "z-same",
+                "z-different",
+                "m-same",
+                "m-different",
+                "z-versus-m",
+                "zm-same",
+                "zm-different",
+                "nan-same",
+                "nan-different",
+                "line-order",
+                "ring-order",
+                "part-order",
+                "empty-same",
+                "empty-type",
+                "missing",
+            ],
+            name="case",
+        )
+        left = GeoSeries(shapely.from_wkt(left_wkts), index=index, name="left")
+        right = GeoSeries(shapely.from_wkt(right_wkts), index=index, name="right")
+
+        result = left.geom_equals_identical(right, align=False)
+
+        self.check_pd_series_equal(
+            result,
+            pd.Series(
+                [
+                    True,
+                    False,
+                    True,
+                    False,
+                    False,
+                    True,
+                    False,
+                    True,
+                    False,
+                    False,
+                    False,
+                    False,
+                    True,
+                    False,
+                    False,
+                ],
+                index=index,
+                dtype=bool,
+            ),
+        )
+        assert result.name is None
+
+    def test_geom_equals_identical_scalar_multiindex_geodataframe_and_plan(self):
+        index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("b", 2), ("c", 3)], names=["group", "row"]
+        )
+        source = GeoSeries(
+            [Point(1, 2, 3), Point(1, 2), None],
+            index=index,
+            name="source",
+        )
+
+        result = source.geom_equals_identical(Point(1, 2, 3))
+        self.check_pd_series_equal(
+            result,
+            pd.Series([True, False, False], index=index, dtype=bool),
+        )
+        assert result.name is None
+
+        if hasattr(result._internal.spark_frame, "_jdf"):
+            plan = (
+                result._internal.spark_frame._jdf.queryExecution()
+                .optimizedPlan()
+                .toString()
+            )
+            assert "BatchEvalPython" not in plan
+            assert "ArrowEvalPython" not in plan
+            assert "PythonUDF" not in plan
+
+        frame_source = GeoSeries(
+            [Point(1, 2, 3), Point(1, 2), None],
+            index=pd.Index(["z", "xy", "missing"], name="kind"),
+        )
+        frame_result = frame_source.to_geoframe().geom_equals_identical(Point(1, 2, 3))
+        self.check_pd_series_equal(
+            frame_result,
+            pd.Series(
+                [True, False, False],
+                index=pd.Index(["z", "xy", "missing"], name="kind"),
+                dtype=bool,
+            ),
+        )
+
+    @requires_shapely_m_support
+    @pytest.mark.parametrize(
+        ("other_wkt", "expected"),
+        [
+            ("POINT M (1 2 3)", [True, False, False, False, False]),
+            ("POINT ZM (1 2 3 4)", [False, False, False, True, False]),
+        ],
+    )
+    def test_geom_equals_identical_scalar_m_and_zm(self, other_wkt, expected):
+        source = GeoSeries(
+            shapely.from_wkt(
+                [
+                    "POINT M (1 2 3)",
+                    "POINT M (1 2 4)",
+                    "POINT Z (1 2 3)",
+                    "POINT ZM (1 2 3 4)",
+                    "POINT ZM (1 2 3 5)",
+                ]
+            )
+        )
+
+        result = source.geom_equals_identical(shapely.from_wkt(other_wkt))
+
+        self.check_pd_series_equal(result, pd.Series(expected, dtype=bool))
+
+    @requires_shapely_m_support
+    @pytest.mark.parametrize(
+        ("dimensional_wkt", "xy_wkt"),
+        [
+            ("POINT M EMPTY", "POINT EMPTY"),
+            ("LINESTRING M EMPTY", "LINESTRING EMPTY"),
+            ("POLYGON M EMPTY", "POLYGON EMPTY"),
+            ("POINT ZM EMPTY", "POINT EMPTY"),
+            ("LINESTRING ZM EMPTY", "LINESTRING EMPTY"),
+            ("POLYGON ZM EMPTY", "POLYGON EMPTY"),
+            ("LINEARRING M EMPTY", "LINEARRING EMPTY"),
+            ("LINEARRING ZM EMPTY", "LINEARRING EMPTY"),
+        ],
+    )
+    def test_geom_equals_identical_scalar_typed_empty(self, dimensional_wkt, xy_wkt):
+        source = GeoSeries(shapely.from_wkt([dimensional_wkt, xy_wkt]))
+
+        result = source.geom_equals_identical(shapely.from_wkt(dimensional_wkt))
+
+        self.check_pd_series_equal(result, pd.Series([True, False], dtype=bool))
+
+    def test_geom_equals_identical_alignment_and_duplicates(self):
+        left_geometries = [Point(0, 0), Point(1, 1), None]
+        right_geometries = [Point(1, 1), Point(0, 0), Point(9, 9)]
+        left = GeoSeries(left_geometries, index=["a", "b", "c"])
+        right = GeoSeries(right_geometries, index=["b", "a", "d"])
+
+        with pytest.warns(
+            UserWarning,
+            match="The indices of the left and right GeoSeries' are not equal",
+        ) as warning_records:
+            default_result = left.geom_equals_identical(right)
+        alignment_warning = next(
+            warning
+            for warning in warning_records
+            if "indices of the left and right GeoSeries" in str(warning.message)
+        )
+        assert alignment_warning.filename == __file__
+        aligned_expected = pd.Series(
+            [True, True, False, False],
+            index=pd.Index(["a", "b", "c", "d"]),
+            dtype=bool,
+        )
+        self.check_pd_series_equal(default_result, aligned_expected)
+        self.check_pd_series_equal(
+            left.geom_equals_identical(right, align=True), aligned_expected
+        )
+        self.check_pd_series_equal(
+            left.geom_equals_identical(right, align=False),
+            pd.Series(
+                [False, False, False],
+                index=pd.Index(["a", "b", "c"]),
+                dtype=bool,
+            ),
+        )
+
+        duplicate_index = ["a", "a"]
+        equal_duplicate_result = GeoSeries(
+            [Point(0, 0), Point(1, 1)], index=duplicate_index
+        ).geom_equals_identical(
+            GeoSeries([Point(0, 0), Point(9, 9)], index=duplicate_index),
+            align=True,
+        )
+        self.check_pd_series_equal(
+            equal_duplicate_result,
+            pd.Series([True, False], index=duplicate_index, dtype=bool),
+        )
+
+        unequal_duplicate_result = GeoSeries(
+            [Point(0, 0), Point(1, 1), Point(2, 2)], index=["a", "a", "c"]
+        ).geom_equals_identical(
+            GeoSeries(
+                [Point(0, 0), Point(9, 9), Point(3, 3)],
+                index=["a", "a", "b"],
+            ),
+            align=True,
+        )
+        self.check_pd_series_equal(
+            unequal_duplicate_result,
+            pd.Series(
+                [True, False, False, False, False, False],
+                index=pd.Index(["a", "a", "a", "a", "b", "c"]),
+                dtype=bool,
+            ),
+        )
+
+        with pytest.raises(
+            ValueError,
+            match=r"Lengths of inputs do not match\. Left: 1, Right: 2",
+        ):
+            GeoSeries([Point(0, 0)]).geom_equals_identical(
+                GeoSeries([Point(0, 0), Point(1, 1)]), align=False
+            )
+
+    def test_geom_equals_identical_preserves_named_multiindex(self):
+        left_index = pd.MultiIndex.from_tuples(
+            [("b", 2), ("a", 1)], names=["group", "row"]
+        )
+        right_index = pd.MultiIndex.from_tuples(
+            [("a", 1), ("c", 3)], names=["group", "row"]
+        )
+        result = GeoSeries(
+            [Point(2, 2), Point(1, 1)], index=left_index
+        ).geom_equals_identical(
+            GeoSeries([Point(1, 1), Point(3, 3)], index=right_index),
+            align=True,
+        )
+        self.check_pd_series_equal(
+            result,
+            pd.Series(
+                [True, False, False],
+                index=pd.MultiIndex.from_tuples(
+                    [("a", 1), ("b", 2), ("c", 3)], names=["group", "row"]
+                ),
+                dtype=bool,
+            ),
+        )
+
+        unrelated_left = pd.MultiIndex.from_tuples(
+            [("a", 1)], names=["left_group", "left_row"]
+        )
+        unrelated_right = pd.MultiIndex.from_tuples(
+            [("b", 2)], names=["right_group", "right_row"]
+        )
+        with pytest.raises(
+            ValueError, match="cannot join with no overlapping index names"
+        ):
+            GeoSeries([Point(0, 0)], index=unrelated_left).geom_equals_identical(
+                GeoSeries([Point(0, 0)], index=unrelated_right), align=True
+            )
+
+    @requires_geopandas_geom_equals_identical
+    def test_geom_equals_identical_warns_on_crs_mismatch(self):
+        left = GeoSeries([Point(0, 0)], crs="EPSG:4326")
+        right = GeoSeries([Point(0, 0)], crs="EPSG:3857")
+
+        with pytest.warns(UserWarning, match="CRS mismatch"):
+            result = left.geom_equals_identical(right, align=False)
+        with pytest.warns(UserWarning, match="CRS mismatch"):
+            expected = gpd.GeoSeries(
+                [Point(0, 0)], crs="EPSG:4326"
+            ).geom_equals_identical(
+                gpd.GeoSeries([Point(0, 0)], crs="EPSG:3857"), align=False
+            )
+        self.check_pd_series_equal(result, expected)
+
+    def test_geom_equals_identical_serialization_boundaries(self):
+        empty_2d = GeoSeries.from_wkt(
+            [
+                "POINT EMPTY",
+                "LINESTRING EMPTY",
+                "POLYGON EMPTY",
+                "POINT EMPTY",
+                "POINT EMPTY",
+            ]
+        )
+        empty_dimensional = GeoSeries.from_wkt(
+            [
+                "POINT Z EMPTY",
+                "LINESTRING Z EMPTY",
+                "POLYGON Z EMPTY",
+                "POINT M EMPTY",
+                "POINT ZM EMPTY",
+            ]
+        )
+
+        # JTS cannot distinguish empty XY and XYZ sequences. M and ZM sequence
+        # metadata is explicit, so the GeometryUDT serializers retain it.
+        self.check_pd_series_equal(
+            empty_2d.geom_equals_identical(empty_dimensional, align=False),
+            pd.Series([True, True, True, False, False], dtype=bool),
+        )
+
+        nan_first_z = GeoSeries.from_wkt(["LINESTRING Z (0 0 NaN, 1 1 2)"])
+        two_dimensional = GeoSeries.from_wkt(["LINESTRING (0 0, 1 1)"])
+
+        # A later non-NaN Z now establishes and preserves the XYZ layout.
+        self.check_pd_series_equal(
+            nan_first_z.geom_equals_identical(two_dimensional, align=False),
+            pd.Series([False], dtype=bool),
+        )
+
+        all_nan_z = GeoSeries.from_wkt(["LINESTRING Z (0 0 NaN, 1 1 NaN)"])
+
+        # An all-NaN Z sequence remains indistinguishable from ordinary XY in JTS.
+        self.check_pd_series_equal(
+            all_nan_z.geom_equals_identical(two_dimensional, align=False),
+            pd.Series([True], dtype=bool),
+        )
+
+        mixed_dimension = GeoSeries([MultiPoint([Point(0, 0), Point(1, 1, 2)])])
+        normalized_dimension = GeoSeries(
+            [shapely.from_wkt("MULTIPOINT Z ((0 0 NaN), (1 1 2))")]
+        )
+
+        # Shapely's homogeneous multi-geometry encoding selects one layout
+        # before the value reaches the JVM, promoting the XY child to XYZ/NaN.
+        self.check_pd_series_equal(
+            mixed_dimension.geom_equals_identical(normalized_dimension, align=False),
+            pd.Series([True], dtype=bool),
+        )
+
+        ring = LinearRing([(0, 0), (1, 0), (1, 1), (0, 0)])
+        line = LineString(ring.coords)
+        # Standalone LinearRings use the LineString representation in this layer.
+        self.check_pd_series_equal(
+            GeoSeries([ring]).geom_equals_identical(line),
+            pd.Series([True], dtype=bool),
+        )
+        self.check_pd_series_equal(
+            GeoSeries([LinearRing()]).geom_equals_identical(LinearRing()),
+            pd.Series([True], dtype=bool),
+        )
+
+    @pytest.mark.parametrize("other", [None, 1, "POINT (0 0)", [Point(0, 0)]])
+    def test_geom_equals_identical_rejects_non_geometry_other(self, other):
+        with pytest.raises(TypeError, match="'other' must be"):
+            GeoSeries([Point(0, 0)]).geom_equals_identical(other)
 
     def test_interpolate(self):
         s = GeoSeries(
