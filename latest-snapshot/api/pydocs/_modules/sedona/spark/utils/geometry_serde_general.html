@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.geometry_serde_general &mdash; Apache Sedona Python Documentation</title>
@@ -231,6 +230,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">GeometryCollection</span><span class="p">,</span>
     <span class="n">LinearRing</span><span class="p">,</span>
@@ -393,6 +393,17 @@
     <span class="k">if</span> <span class="n">geom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
 
+    <span class="c1"># Shapely 2.1 exposes ``has_m`` even when linked against GEOS &lt; 3.12,</span>
+    <span class="c1"># but evaluating that property then raises for every geometry. Avoid the</span>
+    <span class="c1"># property entirely when the linked GEOS cannot represent measures.</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">shapely</span><span class="p">,</span> <span class="s2">&quot;geos_version&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span>
+        <span class="n">geom</span><span class="p">,</span> <span class="s2">&quot;has_m&quot;</span><span class="p">,</span> <span class="kc">False</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Serializing M or ZM geometries requires geomserde_speedup &quot;</span>
+            <span class="s2">&quot;with GEOS 3.12 or newer&quot;</span>
+        <span class="p">)</span>
+
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">Point</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">serialize_point</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">LineString</span><span class="p">):</span>
@@ -424,6 +435,11 @@
     <span class="n">preamble_byte</span> <span class="o">=</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">geom_type</span> <span class="o">=</span> <span class="p">(</span><span class="n">preamble_byte</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x0F</span>
     <span class="n">coord_type</span> <span class="o">=</span> <span class="p">(</span><span class="n">preamble_byte</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x07</span>
+    <span class="k">if</span> <span class="n">coord_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">CoordinateType</span><span class="o">.</span><span class="n">XYM</span><span class="p">,</span> <span class="n">CoordinateType</span><span class="o">.</span><span class="n">XYZM</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Deserializing M or ZM geometries requires geomserde_speedup &quot;</span>
+            <span class="s2">&quot;with GEOS 3.12 or newer&quot;</span>
+        <span class="p">)</span>
     <span class="n">num_coords</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack_from</span><span class="p">(</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="mi">4</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">num_coords</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;num_coords cannot be larger than buffer size&quot;</span><span class="p">)</span>
