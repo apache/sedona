@@ -17,6 +17,7 @@
 
 import pytest
 import shapely
+from packaging.version import parse as parse_version
 from shapely.geometry import (
     GeometryCollection,
     LineString,
@@ -30,6 +31,7 @@ from shapely.geometry.base import BaseGeometry
 from shapely.wkt import loads as wkt_loads
 
 from sedona.spark.utils import geometry_serde
+from sedona.spark.utils import geometry_serde_general
 
 
 class TestGeomSerdeSpeedup:
@@ -48,6 +50,14 @@ class TestGeomSerdeSpeedup:
             LineString([(10, 20, 30), (30, 40, 50), (50, 60, 70)]),
         ]
         self._test_serde_roundtrip(linestrings)
+
+    def test_nan_first_z_serialization_keeps_dimension(self):
+        geometry = wkt_loads("LINESTRING Z (0 0 NaN, 1 1 2)")
+
+        buffer = geometry_serde.serialize(geometry)
+        coordinate_type = (buffer[0] & 0x0F) >> 1
+
+        assert coordinate_type == geometry_serde_general.CoordinateType.XYZ
 
     def test_multi_point(self):
         multi_points = [
@@ -145,6 +155,77 @@ class TestGeomSerdeSpeedup:
         point = shapely.set_srid(point, 1000)
         point2 = TestGeomSerdeSpeedup.serde_roundtrip(point)
         assert shapely.get_srid(point2) == 1000
+
+    @pytest.mark.skipif(
+        parse_version(shapely.__version__) < parse_version("2.1")
+        or getattr(shapely, "geos_version", (0, 0, 0)) < (3, 12, 0),
+        reason="M coordinates require Shapely 2.1 and GEOS 3.12 or newer",
+    )
+    @pytest.mark.parametrize(
+        "wkt",
+        [
+            "POINT M (1 2 3)",
+            "POINT ZM (1 2 3 4)",
+            "LINESTRING M (0 0 1, 2 3 4)",
+            "LINESTRING ZM (0 0 1 2, 3 4 5 6)",
+            "POLYGON M ((0 0 1, 2 0 2, 0 2 3, 0 0 1))",
+            "GEOMETRYCOLLECTION ZM (POINT ZM (1 2 3 4), "
+            "LINESTRING ZM (0 0 1 2, 3 4 5 6))",
+        ],
+    )
+    def test_m_roundtrip(self, wkt):
+        geometry = shapely.from_wkt(wkt)
+        actual = TestGeomSerdeSpeedup.serde_roundtrip(geometry)
+
+        assert shapely.to_wkt(actual) == shapely.to_wkt(geometry)
+        assert actual.has_z == geometry.has_z
+        assert actual.has_m == geometry.has_m
+
+    @pytest.mark.skipif(
+        parse_version(shapely.__version__) < parse_version("2.1")
+        or getattr(shapely, "geos_version", (0, 0, 0)) < (3, 12, 0),
+        reason="M coordinates require Shapely 2.1 and GEOS 3.12 or newer",
+    )
+    @pytest.mark.parametrize("wkt", ["POINT M (1 2 3)", "POINT ZM (1 2 3 4)"])
+    def test_general_serializer_rejects_m_instead_of_losing_it(self, wkt):
+        geometry = shapely.from_wkt(wkt)
+
+        with pytest.raises(ValueError, match="requires geomserde_speedup"):
+            geometry_serde_general.serialize(geometry)
+
+    @pytest.mark.parametrize(
+        "coord_type",
+        [
+            geometry_serde_general.CoordinateType.XYM,
+            geometry_serde_general.CoordinateType.XYZM,
+        ],
+    )
+    def test_general_deserializer_rejects_m_instead_of_losing_it(self, coord_type):
+        buffer = geometry_serde_general.create_buffer_for_geom(
+            geometry_serde_general.GeometryTypeID.POINT,
+            coord_type,
+            8 + geometry_serde_general.CoordinateType.bytes_per_coord(coord_type),
+            1,
+        )
+
+        with pytest.raises(ValueError, match="requires geomserde_speedup"):
+            geometry_serde_general.deserialize(buffer)
+
+    def test_general_serializer_does_not_query_m_on_older_geos(self, monkeypatch):
+        def fail_if_queried(_geometry):
+            raise AssertionError("has_m should not be queried with GEOS < 3.12")
+
+        monkeypatch.setattr(shapely, "geos_version", (3, 11, 0), raising=False)
+        monkeypatch.setattr(
+            BaseGeometry, "has_m", property(fail_if_queried), raising=False
+        )
+        monkeypatch.setattr(
+            geometry_serde_general, "serialize_point", lambda _geometry: b"xy"
+        )
+
+        buffer = geometry_serde_general.serialize(Point(1, 2))
+
+        assert buffer == b"xy"
 
     @staticmethod
     def _test_serde_roundtrip(geoms):

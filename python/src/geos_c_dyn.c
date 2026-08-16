@@ -156,6 +156,11 @@ int load_geos_c_from_handle(void *handle, char *err_msg, int len) {
   dyn_GEOSCoordSeq_copyToBuffer_r =
       try_load_geos_c_symbol(handle, "GEOSCoordSeq_copyToBuffer_r");
 
+  /* GEOSHasM_r was added in GEOS 3.12. Keep it optional so the extension
+   * remains compatible with the older GEOS versions bundled by supported
+   * Shapely releases. */
+  dyn_GEOSHasM_r = try_load_geos_c_symbol(handle, "GEOSHasM_r");
+
   /* Deliberately load GEOS_init_r after all other functions, so that we can
    * check if all functions were loaded by checking if GEOS_init_r was
    * loaded. */

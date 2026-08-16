@@ -21,6 +21,7 @@ import struct
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
+import shapely
 from shapely.geometry import (
     GeometryCollection,
     LinearRing,
@@ -183,6 +184,17 @@ def serialize(geom: BaseGeometry) -> Optional[Union[bytes, bytearray]]:
     if geom is None:
         return None
 
+    # Shapely 2.1 exposes ``has_m`` even when linked against GEOS < 3.12,
+    # but evaluating that property then raises for every geometry. Avoid the
+    # property entirely when the linked GEOS cannot represent measures.
+    if getattr(shapely, "geos_version", (0, 0, 0)) >= (3, 12, 0) and getattr(
+        geom, "has_m", False
+    ):
+        raise ValueError(
+            "Serializing M or ZM geometries requires geomserde_speedup "
+            "with GEOS 3.12 or newer"
+        )
+
     if isinstance(geom, Point):
         return serialize_point(geom)
     elif isinstance(geom, LineString):
@@ -214,6 +226,11 @@ def deserialize(buffer: bytes) -> Optional[BaseGeometry]:
     preamble_byte = buffer[0]
     geom_type = (preamble_byte >> 4) & 0x0F
     coord_type = (preamble_byte >> 1) & 0x07
+    if coord_type in (CoordinateType.XYM, CoordinateType.XYZM):
+        raise ValueError(
+            "Deserializing M or ZM geometries requires geomserde_speedup "
+            "with GEOS 3.12 or newer"
+        )
     num_coords = struct.unpack_from("i", buffer, 4)[0]
     if num_coords > len(buffer):
         raise ValueError("num_coords cannot be larger than buffer size")

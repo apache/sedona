@@ -34,6 +34,9 @@ GEOS_FP_QUALIFIER int (*dyn_GEOSGeomTypeId_r)(GEOSContextHandle_t handle,
 GEOS_FP_QUALIFIER char (*dyn_GEOSHasZ_r)(GEOSContextHandle_t handle,
                                          const GEOSGeometry *g);
 
+GEOS_FP_QUALIFIER char (*dyn_GEOSHasM_r)(GEOSContextHandle_t handle,
+                                         const GEOSGeometry *g);
+
 GEOS_FP_QUALIFIER int (*dyn_GEOSGetSRID_r)(GEOSContextHandle_t handle,
                                            const GEOSGeometry *g);
 
