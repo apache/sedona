@@ -21,7 +21,13 @@ package org.apache.sedona.common.raster.cog;
 import static org.junit.Assert.*;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.awt.image.PixelInterleavedSampleModel;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -30,13 +36,20 @@ import java.nio.file.Paths;
 import java.util.List;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
+import javax.imageio.ImageWriteParam;
 import javax.imageio.stream.ImageInputStream;
+import javax.media.jai.PlanarImage;
 import javax.media.jai.TiledImage;
 import org.apache.sedona.common.raster.MapAlgebra;
 import org.apache.sedona.common.raster.RasterConstructors;
 import org.apache.sedona.common.raster.RasterOutputs;
 import org.apache.sedona.common.utils.RasterUtils;
+import org.geotools.api.parameter.GeneralParameterValue;
+import org.geotools.api.parameter.ParameterValueGroup;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.io.AbstractGridFormat;
+import org.geotools.gce.geotiff.GeoTiffWriteParams;
+import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.junit.Test;
 
 public class CogWriterTest {
@@ -278,8 +291,9 @@ public class CogWriterTest {
 
   @Test
   public void testWriteTiledByteSourceAsCog() throws IOException {
-    // GH-3245 variant on the full-res path: a byte-band coverage whose own image is
-    // tiled wider than the COG tile size fed the same overrunning encode path.
+    // GH-3245 variant on the full-res path: a byte-band coverage read from a 512-tiled
+    // GeoTIFF is backed by a deferred JAI image with 512x512 tiles, which fed the same
+    // overrunning encode path when written as 256x256 COG tiles.
     int size = 1024;
     double[] bandValues = new double[size * size];
     for (int i = 0; i < bandValues.length; i++) {
@@ -288,17 +302,69 @@ public class CogWriterTest {
     GridCoverage2D raster =
         RasterConstructors.makeNonEmptyRaster(
             1, "b", size, size, 0, 0, 1, -1, 0, 0, 4326, new double[][] {bandValues});
-    TiledImage tiled = new TiledImage(raster.getRenderedImage(), 512, 512);
-    GridCoverage2D tiledRaster =
-        RasterUtils.clone(tiled, raster.getSampleDimensions(), raster, null, false);
+    GridCoverage2D fromFile = RasterConstructors.fromGeoTiff(writeTiledGeoTiff(raster, 512));
+    // The regression relies on the reader exposing the file's 512px tile grid
+    assertEquals(512, fromFile.getRenderedImage().getTileWidth());
+    assertEquals(512, fromFile.getRenderedImage().getTileHeight());
 
-    byte[] cogBytes =
-        RasterOutputs.asCloudOptimizedGeoTiff(
-            tiledRaster, CogOptions.builder().overviewCount(0).build());
+    byte[] cogBytes = RasterOutputs.asCloudOptimizedGeoTiff(fromFile, CogOptions.defaults());
 
     GridCoverage2D readBack = RasterConstructors.fromGeoTiff(cogBytes);
     double[] readValues = MapAlgebra.bandAsArray(readBack, 1);
     assertArrayEquals(bandValues, readValues, 0.0);
+  }
+
+  @Test
+  public void testWriteWideStrideByteSourceAsCog() throws Exception {
+    // GH-3245: matching 256x256 tile dimensions are not sufficient — a legal byte sample
+    // model whose scanline stride is wider than the tile still overruns in the writer's
+    // direct-buffer path, so the layout check must validate the backing stride too.
+    int size = 512;
+    SampleModel wideSm =
+        new PixelInterleavedSampleModel(DataBuffer.TYPE_BYTE, 256, 256, 1, 512, new int[] {0});
+    TiledImage image =
+        new TiledImage(0, 0, size, size, 0, 0, wideSm, PlanarImage.createColorModel(wideSm));
+    double[] bandValues = new double[size * size];
+    WritableRaster values =
+        Raster.createWritableRaster(wideSm.createCompatibleSampleModel(size, size), null);
+    for (int y = 0; y < size; y++) {
+      for (int x = 0; x < size; x++) {
+        bandValues[y * size + x] = (x + y) % 256;
+        values.setSample(x, y, 0, (x + y) % 256);
+      }
+    }
+    image.setData(values);
+
+    GridCoverage2D reference =
+        RasterConstructors.makeEmptyRaster(
+            1, "B", size, size, 10.0, 52.0, 0.001, -0.001, 0, 0, 4326);
+    GridCoverage2D coverage =
+        RasterUtils.clone(image, reference.getSampleDimensions(), reference, null, false);
+
+    byte[] cogBytes = RasterOutputs.asCloudOptimizedGeoTiff(coverage, CogOptions.defaults());
+
+    GridCoverage2D readBack = RasterConstructors.fromGeoTiff(cogBytes);
+    double[] readValues = MapAlgebra.bandAsArray(readBack, 1);
+    assertArrayEquals(bandValues, readValues, 0.0);
+  }
+
+  private static byte[] writeTiledGeoTiff(GridCoverage2D raster, int tileSize) throws IOException {
+    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+      GeoTiffWriter writer = new GeoTiffWriter(out);
+      try {
+        ParameterValueGroup params = writer.getFormat().getWriteParameters();
+        GeoTiffWriteParams wp = new GeoTiffWriteParams();
+        wp.setTilingMode(ImageWriteParam.MODE_EXPLICIT);
+        wp.setTiling(tileSize, tileSize);
+        params
+            .parameter(AbstractGridFormat.GEOTOOLS_WRITE_PARAMS.getName().toString())
+            .setValue(wp);
+        writer.write(raster, params.values().toArray(new GeneralParameterValue[0]));
+      } finally {
+        writer.dispose();
+      }
+      return out.toByteArray();
+    }
   }
 
   @Test

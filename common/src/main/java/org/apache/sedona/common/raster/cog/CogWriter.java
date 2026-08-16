@@ -18,19 +18,26 @@
  */
 package org.apache.sedona.common.raster.cog;
 
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.image.ComponentSampleModel;
 import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageWriteParam;
+import javax.media.jai.ImageLayout;
 import javax.media.jai.Interpolation;
 import javax.media.jai.InterpolationBicubic;
 import javax.media.jai.InterpolationBilinear;
 import javax.media.jai.InterpolationNearest;
-import javax.media.jai.TiledImage;
+import javax.media.jai.PlanarImage;
 import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.coverage.grid.GridCoverageWriter;
 import org.geotools.api.parameter.GeneralParameterValue;
@@ -254,22 +261,84 @@ public class CogWriter {
    *
    * <p>imageio-ext's TIFFDeflater passes {@code (offset, height * scanlineStride)} verbatim to
    * {@link java.util.zip.Deflater#setInput(byte[], int, int)}. For 8-bit images, TIFFImageWriter's
-   * optimized path hands the compressor the raster's backing array directly; when that raster is a
-   * child of a source tile wider than the output tile (e.g. a JAI overview image with a single
-   * 512x512 tile written as 256x256 tiles), the computed range overruns the array on the last row
-   * of tiles and Deflater throws ArrayIndexOutOfBoundsException. Only byte-band images take the
-   * direct-buffer path, so retiling them to match the output tile grid guarantees every raster the
-   * writer reads starts at offset 0 of a tile-sized buffer. Pixel data and the written TIFF are
-   * unchanged; the copy happens lazily one tile at a time.
+   * optimized path hands the compressor the raster's backing array directly; when that raster
+   * shares a buffer wider than the output tile (e.g. a JAI overview image with a single 512x512
+   * tile written as 256x256 tiles, or 256x256 tiles carrying a wider scanline stride), the computed
+   * range overruns the array and Deflater throws ArrayIndexOutOfBoundsException. Only byte-band
+   * images take the direct-buffer path, so rewrap them unless the layout is already tight: every
+   * raster the writer reads must start at offset 0 of a tile-sized, tightly-strided buffer. Pixel
+   * data and the written TIFF are unchanged; tiles are materialized one at a time and never cached,
+   * so no second copy of the raster is retained.
    */
   private static GridCoverage2D alignTileLayoutForByteBands(GridCoverage2D raster, int tileSize) {
     RenderedImage image = raster.getRenderedImage();
     if (image.getSampleModel().getDataType() != DataBuffer.TYPE_BYTE
-        || (image.getTileWidth() == tileSize && image.getTileHeight() == tileSize)) {
+        || hasTightTileLayout(image, tileSize)) {
       return raster;
     }
-    TiledImage retiled = new TiledImage(image, tileSize, tileSize);
+    RenderedImage retiled = new RetilingImage(image, tileSize);
     return RasterUtils.clone(retiled, raster.getSampleDimensions(), raster, null, true);
+  }
+
+  /**
+   * Whether the image's tiles already match the output tile grid AND are backed by tight,
+   * zero-offset buffers, so the TIFF writer's direct-buffer path cannot overrun. Declared tile
+   * dimensions alone are not enough: a 256x256 tile whose sample model carries a wider scanline
+   * stride (a legal layout for views over larger buffers) still overruns.
+   */
+  private static boolean hasTightTileLayout(RenderedImage image, int tileSize) {
+    if (image.getTileWidth() != tileSize || image.getTileHeight() != tileSize) {
+      return false;
+    }
+    SampleModel sm = image.getSampleModel();
+    if (!(sm instanceof ComponentSampleModel)
+        || sm.getWidth() != tileSize
+        || sm.getHeight() != tileSize) {
+      return false;
+    }
+    ComponentSampleModel csm = (ComponentSampleModel) sm;
+    return csm.getScanlineStride() == tileSize * csm.getPixelStride()
+        && csm.getBandOffsets()[0] == 0;
+  }
+
+  /**
+   * A retiling view over a source image: each tile is materialized on demand as a tight,
+   * zero-offset raster and is not cached, so writing does not retain a second copy of the raster's
+   * pixel data (unlike {@link javax.media.jai.TiledImage}, which holds every realized tile
+   * strongly).
+   */
+  private static final class RetilingImage extends PlanarImage {
+    private final RenderedImage source;
+
+    RetilingImage(RenderedImage source, int tileSize) {
+      super(
+          new ImageLayout(
+              source.getMinX(),
+              source.getMinY(),
+              source.getWidth(),
+              source.getHeight(),
+              source.getMinX(),
+              source.getMinY(),
+              tileSize,
+              tileSize,
+              source.getSampleModel().createCompatibleSampleModel(tileSize, tileSize),
+              source.getColorModel()),
+          null,
+          null);
+      this.source = source;
+    }
+
+    @Override
+    public Raster getTile(int tileX, int tileY) {
+      WritableRaster tile =
+          Raster.createWritableRaster(
+              getSampleModel(), new Point(tileXToX(tileX), tileYToY(tileY)));
+      Rectangle bounds = tile.getBounds().intersection(getBounds());
+      if (!bounds.isEmpty()) {
+        tile.setRect(source.getData(bounds));
+      }
+      return tile;
+    }
   }
 
   /**
