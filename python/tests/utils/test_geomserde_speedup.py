@@ -17,6 +17,7 @@
 
 import pytest
 import shapely
+from packaging.version import parse as parse_version
 from shapely.geometry import (
     GeometryCollection,
     LineString,
@@ -156,7 +157,7 @@ class TestGeomSerdeSpeedup:
         assert shapely.get_srid(point2) == 1000
 
     @pytest.mark.skipif(
-        shapely.__version__ < "2.1"
+        parse_version(shapely.__version__) < parse_version("2.1")
         or getattr(shapely, "geos_version", (0, 0, 0)) < (3, 12, 0),
         reason="M coordinates require Shapely 2.1 and GEOS 3.12 or newer",
     )
@@ -181,15 +182,34 @@ class TestGeomSerdeSpeedup:
         assert actual.has_m == geometry.has_m
 
     @pytest.mark.skipif(
-        shapely.__version__ < "2.1"
+        parse_version(shapely.__version__) < parse_version("2.1")
         or getattr(shapely, "geos_version", (0, 0, 0)) < (3, 12, 0),
         reason="M coordinates require Shapely 2.1 and GEOS 3.12 or newer",
     )
-    def test_general_serializer_rejects_m_instead_of_losing_it(self):
+    @pytest.mark.parametrize("wkt", ["POINT M (1 2 3)", "POINT ZM (1 2 3 4)"])
+    def test_general_serializer_rejects_m_instead_of_losing_it(self, wkt):
+        geometry = shapely.from_wkt(wkt)
+
         with pytest.raises(ValueError, match="requires geomserde_speedup"):
-            geometry_serde_general.serialize(shapely.from_wkt("POINT M (1 2 3)"))
+            geometry_serde_general.serialize(geometry)
+
+    @pytest.mark.parametrize(
+        "coord_type",
+        [
+            geometry_serde_general.CoordinateType.XYM,
+            geometry_serde_general.CoordinateType.XYZM,
+        ],
+    )
+    def test_general_deserializer_rejects_m_instead_of_losing_it(self, coord_type):
+        buffer = geometry_serde_general.create_buffer_for_geom(
+            geometry_serde_general.GeometryTypeID.POINT,
+            coord_type,
+            8 + geometry_serde_general.CoordinateType.bytes_per_coord(coord_type),
+            1,
+        )
+
         with pytest.raises(ValueError, match="requires geomserde_speedup"):
-            geometry_serde_general.serialize(shapely.from_wkt("POINT ZM (1 2 3 4)"))
+            geometry_serde_general.deserialize(buffer)
 
     def test_general_serializer_does_not_query_m_on_older_geos(self, monkeypatch):
         def fail_if_queried(_geometry):

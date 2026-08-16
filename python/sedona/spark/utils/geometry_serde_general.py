@@ -226,6 +226,11 @@ def deserialize(buffer: bytes) -> Optional[BaseGeometry]:
     preamble_byte = buffer[0]
     geom_type = (preamble_byte >> 4) & 0x0F
     coord_type = (preamble_byte >> 1) & 0x07
+    if coord_type in (CoordinateType.XYM, CoordinateType.XYZM):
+        raise ValueError(
+            "Deserializing M or ZM geometries requires geomserde_speedup "
+            "with GEOS 3.12 or newer"
+        )
     num_coords = struct.unpack_from("i", buffer, 4)[0]
     if num_coords > len(buffer):
         raise ValueError("num_coords cannot be larger than buffer size")
