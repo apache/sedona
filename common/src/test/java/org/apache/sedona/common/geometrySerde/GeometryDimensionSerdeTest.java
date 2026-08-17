@@ -180,6 +180,35 @@ public class GeometryDimensionSerdeTest {
     assertThrows(IllegalArgumentException.class, () -> GeometrySerializer.serialize(mixedM));
   }
 
+  @Test
+  public void rejectsHeterogeneousPolygonRingLayouts() {
+    LinearRing shell =
+        FACTORY.createLinearRing(
+            new Coordinate[] {
+              new Coordinate(0, 0, 1),
+              new Coordinate(10, 0, 1),
+              new Coordinate(0, 10, 1),
+              new Coordinate(0, 0, 1)
+            });
+    LinearRing hole =
+        FACTORY.createLinearRing(
+            new Coordinate[] {
+              new CoordinateXY(1, 1),
+              new CoordinateXY(2, 1),
+              new CoordinateXY(1, 2),
+              new CoordinateXY(1, 1)
+            });
+    Polygon polygon = FACTORY.createPolygon(shell, new LinearRing[] {hole});
+
+    IllegalArgumentException error =
+        assertThrows(IllegalArgumentException.class, () -> GeometrySerializer.serialize(polygon));
+
+    assertEquals(
+        "GeometrySerializer cannot encode heterogeneous dimensional layouts in one Polygon "
+            + "or multipart geometry. Use homogeneous components or a GeometryCollection.",
+        error.getMessage());
+  }
+
   private static void assertLineRoundTrip(
       LineString input,
       CoordinateType expectedType,

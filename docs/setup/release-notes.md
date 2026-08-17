@@ -36,6 +36,12 @@
   former positional `GeoDataFrame.set_crs(crs, inplace, allow_override)` signature remain
   temporarily supported with a `FutureWarning`. When CRS metadata is unavailable, validation can
   require a distributed lookup of the first non-null geometry's SRID.
+* **Mixed coordinate layouts in polygons and multi-geometries**: Serializing a `Polygon`,
+  `MultiPoint`, `MultiLineString`, or `MultiPolygon` whose parts mix XY, XYZ, XYM, or XYZM layouts
+  now raises `IllegalArgumentException` instead of silently losing or corrupting ordinates based on
+  part order. This can affect `ST_Collect` when same-type inputs use different layouts. Normalize
+  all parts to one layout, or use a `GeometryCollection`, whose members are serialized
+  independently.
 
 ### New Features
 
