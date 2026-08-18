@@ -1,0 +1,154 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 970" width="1200" height="970" role="img" aria-labelledby="equals-identical-dimensions-title equals-identical-dimensions-description">
+  <title id="equals-identical-dimensions-title">ST_EqualsIdentical compares every coordinate dimension and ordinate value</title>
+  <desc id="equals-identical-dimensions-description">Four point comparisons with input A and input B in separate panels. Matching XYZ points return true. A different Z value returns false. Equal numeric triples interpreted as XYZ and XYM return false because Z and M are different ordinate roles. Two XYZM points with different M values return false.</desc>
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+      text:not([fill]) { fill: #172033; }
+      .comparison { fill: #f8fafc; stroke: #b8c3d1; stroke-width: 1.5; }
+      .input-card { fill: #ffffff; stroke-width: 2; }
+      .input-a-card { stroke: #005ea8; }
+      .input-b-card { stroke: #b8324a; stroke-dasharray: 8 5; }
+      .row-title { font-size: 15px; font-weight: 700; }
+      .input-title { font-size: 13px; font-weight: 700; }
+      .caption { font-size: 12px; fill: #475569; }
+      .small { font-size: 11px; fill: #475569; }
+      .wkt { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; fill: #334155; }
+      .slot { fill: #eef3f8; stroke: #8291a5; stroke-width: 1.4; }
+      .slot-different { fill: #fff7ed; stroke: #a84d00; stroke-width: 2; stroke-dasharray: 5 3; }
+      .slot-name { font-size: 11px; font-weight: 700; fill: #475569; }
+      .slot-value { font-size: 16px; font-weight: 700; }
+      .signature { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700; }
+      .result-true { fill: #e6f5ef; stroke: #08775f; stroke-width: 2; }
+      .result-false { fill: #fff0f1; stroke: #a92e43; stroke-width: 2; }
+      .result-word { font-size: 20px; font-weight: 800; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="970" fill="#ffffff"/>
+  <text x="600" y="32" text-anchor="middle" font-size="22" font-weight="700">Every coordinate dimension is part of identity</text>
+  <text x="600" y="57" text-anchor="middle" class="caption">X, Y, Z, and M roles and values must match exactly; a dashed slot identifies the stored difference.</text>
+
+  <!-- Matching XYZ points: true. -->
+  <rect x="25" y="80" width="1150" height="195" rx="10" class="comparison"/>
+  <text x="45" y="108" class="row-title">1 · Matching XYZ layout and values</text>
+
+  <rect x="45" y="124" width="420" height="130" rx="8" class="input-card input-a-card"/>
+  <text x="62" y="147" class="input-title" fill="#005ea8">Input A · POINT Z</text>
+  <rect x="330" y="133" width="115" height="23" rx="11" fill="#eef6fb" stroke="#96bfd9"/><text x="387" y="149" text-anchor="middle" class="signature" fill="#005ea8">layout XYZ</text>
+  <rect x="75" y="163" width="92" height="53" rx="7" class="slot"/><text x="121" y="181" text-anchor="middle" class="slot-name">X</text><text x="121" y="205" text-anchor="middle" class="slot-value">1</text>
+  <rect x="188" y="163" width="92" height="53" rx="7" class="slot"/><text x="234" y="181" text-anchor="middle" class="slot-name">Y</text><text x="234" y="205" text-anchor="middle" class="slot-value">2</text>
+  <rect x="301" y="163" width="92" height="53" rx="7" class="slot"/><text x="347" y="181" text-anchor="middle" class="slot-name">Z</text><text x="347" y="205" text-anchor="middle" class="slot-value">3</text>
+  <text x="255" y="241" text-anchor="middle" class="wkt">POINT Z (1 2 3)</text>
+
+  <rect x="490" y="124" width="420" height="130" rx="8" class="input-card input-b-card"/>
+  <text x="507" y="147" class="input-title" fill="#a92e43">Input B · POINT Z</text>
+  <rect x="775" y="133" width="115" height="23" rx="11" fill="#fff5f5" stroke="#e0a4ae"/><text x="832" y="149" text-anchor="middle" class="signature" fill="#a92e43">layout XYZ</text>
+  <rect x="520" y="163" width="92" height="53" rx="7" class="slot"/><text x="566" y="181" text-anchor="middle" class="slot-name">X</text><text x="566" y="205" text-anchor="middle" class="slot-value">1</text>
+  <rect x="633" y="163" width="92" height="53" rx="7" class="slot"/><text x="679" y="181" text-anchor="middle" class="slot-name">Y</text><text x="679" y="205" text-anchor="middle" class="slot-value">2</text>
+  <rect x="746" y="163" width="92" height="53" rx="7" class="slot"/><text x="792" y="181" text-anchor="middle" class="slot-name">Z</text><text x="792" y="205" text-anchor="middle" class="slot-value">3</text>
+  <text x="700" y="241" text-anchor="middle" class="wkt">POINT Z (1 2 3)</text>
+
+  <rect x="935" y="139" width="220" height="100" rx="9" class="result-true"/>
+  <text x="1045" y="166" text-anchor="middle" class="small">ST_EqualsIdentical(A, B)</text>
+  <text x="1045" y="200" text-anchor="middle" class="result-word" fill="#08775f">TRUE</text>
+  <text x="1045" y="222" text-anchor="middle" class="small">layout and values match</text>
+
+  <!-- Z value differs: false. -->
+  <rect x="25" y="290" width="1150" height="195" rx="10" class="comparison"/>
+  <text x="45" y="318" class="row-title">2 · Same XYZ layout, different Z value</text>
+
+  <rect x="45" y="334" width="420" height="130" rx="8" class="input-card input-a-card"/>
+  <text x="62" y="357" class="input-title" fill="#005ea8">Input A · POINT Z</text>
+  <rect x="330" y="343" width="115" height="23" rx="11" fill="#eef6fb" stroke="#96bfd9"/><text x="387" y="359" text-anchor="middle" class="signature" fill="#005ea8">layout XYZ</text>
+  <rect x="75" y="373" width="92" height="53" rx="7" class="slot"/><text x="121" y="391" text-anchor="middle" class="slot-name">X</text><text x="121" y="415" text-anchor="middle" class="slot-value">1</text>
+  <rect x="188" y="373" width="92" height="53" rx="7" class="slot"/><text x="234" y="391" text-anchor="middle" class="slot-name">Y</text><text x="234" y="415" text-anchor="middle" class="slot-value">2</text>
+  <rect x="301" y="373" width="92" height="53" rx="7" class="slot-different"/><text x="347" y="391" text-anchor="middle" class="slot-name">Z · differs</text><text x="347" y="415" text-anchor="middle" class="slot-value">3</text>
+  <text x="255" y="451" text-anchor="middle" class="wkt">POINT Z (1 2 3)</text>
+
+  <rect x="490" y="334" width="420" height="130" rx="8" class="input-card input-b-card"/>
+  <text x="507" y="357" class="input-title" fill="#a92e43">Input B · POINT Z</text>
+  <rect x="775" y="343" width="115" height="23" rx="11" fill="#fff5f5" stroke="#e0a4ae"/><text x="832" y="359" text-anchor="middle" class="signature" fill="#a92e43">layout XYZ</text>
+  <rect x="520" y="373" width="92" height="53" rx="7" class="slot"/><text x="566" y="391" text-anchor="middle" class="slot-name">X</text><text x="566" y="415" text-anchor="middle" class="slot-value">1</text>
+  <rect x="633" y="373" width="92" height="53" rx="7" class="slot"/><text x="679" y="391" text-anchor="middle" class="slot-name">Y</text><text x="679" y="415" text-anchor="middle" class="slot-value">2</text>
+  <rect x="746" y="373" width="92" height="53" rx="7" class="slot-different"/><text x="792" y="391" text-anchor="middle" class="slot-name">Z · differs</text><text x="792" y="415" text-anchor="middle" class="slot-value">4</text>
+  <text x="700" y="451" text-anchor="middle" class="wkt">POINT Z (1 2 4)</text>
+
+  <rect x="935" y="349" width="220" height="100" rx="9" class="result-false"/>
+  <text x="1045" y="376" text-anchor="middle" class="small">ST_EqualsIdentical(A, B)</text>
+  <text x="1045" y="410" text-anchor="middle" class="result-word" fill="#a92e43">FALSE</text>
+  <text x="1045" y="432" text-anchor="middle" class="small">Z: 3 ≠ 4</text>
+
+  <!-- Same number, different third-ordinate role: false. -->
+  <rect x="25" y="500" width="1150" height="195" rx="10" class="comparison"/>
+  <text x="45" y="528" class="row-title">3 · Same numeric triple, different third-ordinate role</text>
+
+  <rect x="45" y="544" width="420" height="130" rx="8" class="input-card input-a-card"/>
+  <text x="62" y="567" class="input-title" fill="#005ea8">Input A · elevation (Z)</text>
+  <rect x="330" y="553" width="115" height="23" rx="11" fill="#eef6fb" stroke="#96bfd9"/><text x="387" y="569" text-anchor="middle" class="signature" fill="#005ea8">layout XYZ</text>
+  <rect x="75" y="583" width="92" height="53" rx="7" class="slot"/><text x="121" y="601" text-anchor="middle" class="slot-name">X</text><text x="121" y="625" text-anchor="middle" class="slot-value">1</text>
+  <rect x="188" y="583" width="92" height="53" rx="7" class="slot"/><text x="234" y="601" text-anchor="middle" class="slot-name">Y</text><text x="234" y="625" text-anchor="middle" class="slot-value">2</text>
+  <rect x="301" y="583" width="92" height="53" rx="7" class="slot-different"/><text x="347" y="601" text-anchor="middle" class="slot-name">role Z</text><text x="347" y="625" text-anchor="middle" class="slot-value">3</text>
+  <text x="255" y="661" text-anchor="middle" class="wkt">POINT Z (1 2 3)</text>
+
+  <rect x="490" y="544" width="420" height="130" rx="8" class="input-card input-b-card"/>
+  <text x="507" y="567" class="input-title" fill="#a92e43">Input B · measure (M)</text>
+  <rect x="775" y="553" width="115" height="23" rx="11" fill="#fff5f5" stroke="#e0a4ae"/><text x="832" y="569" text-anchor="middle" class="signature" fill="#a92e43">layout XYM</text>
+  <rect x="520" y="583" width="92" height="53" rx="7" class="slot"/><text x="566" y="601" text-anchor="middle" class="slot-name">X</text><text x="566" y="625" text-anchor="middle" class="slot-value">1</text>
+  <rect x="633" y="583" width="92" height="53" rx="7" class="slot"/><text x="679" y="601" text-anchor="middle" class="slot-name">Y</text><text x="679" y="625" text-anchor="middle" class="slot-value">2</text>
+  <rect x="746" y="583" width="92" height="53" rx="7" class="slot-different"/><text x="792" y="601" text-anchor="middle" class="slot-name">role M</text><text x="792" y="625" text-anchor="middle" class="slot-value">3</text>
+  <text x="700" y="661" text-anchor="middle" class="wkt">POINT M (1 2 3)</text>
+
+  <rect x="935" y="559" width="220" height="100" rx="9" class="result-false"/>
+  <text x="1045" y="586" text-anchor="middle" class="small">ST_EqualsIdentical(A, B)</text>
+  <text x="1045" y="620" text-anchor="middle" class="result-word" fill="#a92e43">FALSE</text>
+  <text x="1045" y="642" text-anchor="middle" class="small">XYZ ≠ XYM</text>
+
+  <!-- XYZM measure differs: false. -->
+  <rect x="25" y="710" width="1150" height="195" rx="10" class="comparison"/>
+  <text x="45" y="738" class="row-title">4 · Same XYZ values, different M value</text>
+
+  <rect x="45" y="754" width="420" height="130" rx="8" class="input-card input-a-card"/>
+  <text x="62" y="777" class="input-title" fill="#005ea8">Input A · POINT ZM</text>
+  <rect x="325" y="763" width="120" height="23" rx="11" fill="#eef6fb" stroke="#96bfd9"/><text x="385" y="779" text-anchor="middle" class="signature" fill="#005ea8">layout XYZM</text>
+  <rect x="67" y="793" width="73" height="53" rx="7" class="slot"/><text x="103" y="811" text-anchor="middle" class="slot-name">X</text><text x="103" y="835" text-anchor="middle" class="slot-value">1</text>
+  <rect x="153" y="793" width="73" height="53" rx="7" class="slot"/><text x="189" y="811" text-anchor="middle" class="slot-name">Y</text><text x="189" y="835" text-anchor="middle" class="slot-value">2</text>
+  <rect x="239" y="793" width="73" height="53" rx="7" class="slot"/><text x="275" y="811" text-anchor="middle" class="slot-name">Z</text><text x="275" y="835" text-anchor="middle" class="slot-value">3</text>
+  <rect x="325" y="793" width="73" height="53" rx="7" class="slot-different"/><text x="361" y="811" text-anchor="middle" class="slot-name">M · differs</text><text x="361" y="835" text-anchor="middle" class="slot-value">4</text>
+  <text x="255" y="871" text-anchor="middle" class="wkt">POINT ZM (1 2 3 4)</text>
+
+  <rect x="490" y="754" width="420" height="130" rx="8" class="input-card input-b-card"/>
+  <text x="507" y="777" class="input-title" fill="#a92e43">Input B · POINT ZM</text>
+  <rect x="770" y="763" width="120" height="23" rx="11" fill="#fff5f5" stroke="#e0a4ae"/><text x="830" y="779" text-anchor="middle" class="signature" fill="#a92e43">layout XYZM</text>
+  <rect x="512" y="793" width="73" height="53" rx="7" class="slot"/><text x="548" y="811" text-anchor="middle" class="slot-name">X</text><text x="548" y="835" text-anchor="middle" class="slot-value">1</text>
+  <rect x="598" y="793" width="73" height="53" rx="7" class="slot"/><text x="634" y="811" text-anchor="middle" class="slot-name">Y</text><text x="634" y="835" text-anchor="middle" class="slot-value">2</text>
+  <rect x="684" y="793" width="73" height="53" rx="7" class="slot"/><text x="720" y="811" text-anchor="middle" class="slot-name">Z</text><text x="720" y="835" text-anchor="middle" class="slot-value">3</text>
+  <rect x="770" y="793" width="73" height="53" rx="7" class="slot-different"/><text x="806" y="811" text-anchor="middle" class="slot-name">M · differs</text><text x="806" y="835" text-anchor="middle" class="slot-value">9</text>
+  <text x="700" y="871" text-anchor="middle" class="wkt">POINT ZM (1 2 3 9)</text>
+
+  <rect x="935" y="769" width="220" height="100" rx="9" class="result-false"/>
+  <text x="1045" y="796" text-anchor="middle" class="small">ST_EqualsIdentical(A, B)</text>
+  <text x="1045" y="830" text-anchor="middle" class="result-word" fill="#a92e43">FALSE</text>
+  <text x="1045" y="852" text-anchor="middle" class="small">M: 4 ≠ 9</text>
+
+  <rect x="25" y="920" width="1150" height="32" rx="7" fill="#eef2ff" stroke="#b7b9e6"/>
+  <text x="600" y="941" text-anchor="middle" class="small" fill="#4338ca">Z is elevation and M is a measure; equal numbers in different ordinate roles are not identical.</text>
+</svg>

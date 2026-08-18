@@ -230,6 +230,30 @@ public class PredicateTest extends TestBase {
   }
 
   @Test
+  public void testEqualsIdentical() {
+    Table table =
+        tableEnv.sqlQuery(
+            "SELECT"
+                + " ST_EqualsIdentical(ST_GeomFromWKT('POINT Z (1 2 3)'),"
+                + " ST_GeomFromWKT('POINT Z (1 2 3)')) AS identical,"
+                + " ST_EqualsIdentical(ST_GeomFromWKT('POINT Z (1 2 3)'),"
+                + " ST_GeomFromWKT('POINT Z (1 2 4)')) AS different_z,"
+                + " ST_EqualsIdentical(ST_GeomFromWKT('POINT Z (1 2 3)'),"
+                + " ST_GeomFromWKT('POINT M (1 2 3)')) AS different_dimension,"
+                + " ST_EqualsIdentical("
+                + " ST_GeomFromWKT('LINESTRING (0 0, 1 1)'),"
+                + " ST_GeomFromWKT('LINESTRING (1 1, 0 0)')) AS different_order,"
+                + " ST_EqualsIdentical(ST_GeomFromWKT(CAST(NULL AS STRING)),"
+                + " ST_Point(0.0, 0.0)) AS null_left");
+    org.apache.flink.types.Row row = first(table);
+    assertEquals(true, row.getField(0));
+    assertEquals(false, row.getField(1));
+    assertEquals(false, row.getField(2));
+    assertEquals(false, row.getField(3));
+    assertNull(row.getField(4));
+  }
+
+  @Test
   public void testOrderingEquals() {
     Table lineStringTable = createLineStringTable(testDataSize);
     String lineString = createLineStringWKT(testDataSize).get(0).getField(0).toString();

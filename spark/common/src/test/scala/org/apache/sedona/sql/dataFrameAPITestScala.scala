@@ -1915,6 +1915,22 @@ class dataFrameAPITestScala extends TestBaseScala {
       assert(!result.getBoolean(1))
     }
 
+    it("Passed ST_EqualsIdentical") {
+      val baseDf = sparkSession.sql("""
+        SELECT
+          ST_GeomFromWKT('POINT Z (1 2 3)') AS a,
+          ST_GeomFromWKT('POINT Z (1 2 3)') AS identical,
+          ST_GeomFromWKT('POINT M (1 2 3)') AS different_dimension
+      """)
+      val result = baseDf
+        .select(
+          ST_EqualsIdentical("a", "identical").alias("identical"),
+          ST_EqualsIdentical(col("a"), col("different_dimension")).alias("different"))
+        .first()
+      assert(result.getBoolean(0))
+      assert(!result.getBoolean(1))
+    }
+
     it("Passed ST_Covers") {
       val baseDf = sparkSession.sql(
         "SELECT ST_GeomFromWKT('POLYGON ((0 0, 1 0, 1 1, 0 0))') AS a, ST_Point(1.0, 0.0) AS b, ST_Point(0.0, 1.0) AS c")

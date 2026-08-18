@@ -19,7 +19,7 @@
 package org.apache.sedona.sql
 
 import org.apache.spark.sql.catalyst.expressions.{EmptyRow, Literal}
-import org.apache.spark.sql.sedona_sql.expressions.{ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Disjoint, ST_Equals, ST_EqualsExact, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Point, ST_Touches, ST_Within}
+import org.apache.spark.sql.sedona_sql.expressions.{ST_Contains, ST_CoveredBy, ST_Covers, ST_Crosses, ST_DWithin, ST_Disjoint, ST_Equals, ST_EqualsExact, ST_EqualsIdentical, ST_Intersects, ST_OrderingEquals, ST_Overlaps, ST_Point, ST_Touches, ST_Within}
 
 class predicateTestScala extends TestBaseScala {
 
@@ -374,6 +374,32 @@ class predicateTestScala extends TestBaseScala {
       assert(result.isNullAt(3))
     }
 
+    it("Passed ST_EqualsIdentical") {
+      val result = sparkSession
+        .sql("""
+          SELECT
+            ST_EqualsIdentical(
+              ST_GeomFromWKT('POINT Z (1 2 3)'),
+              ST_GeomFromWKT('POINT Z (1 2 3)')),
+            ST_EqualsIdentical(
+              ST_GeomFromWKT('POINT Z (1 2 3)'),
+              ST_GeomFromWKT('POINT Z (1 2 4)')),
+            ST_EqualsIdentical(
+              ST_GeomFromWKT('POINT Z (1 2 3)'),
+              ST_GeomFromWKT('POINT M (1 2 3)')),
+            ST_EqualsIdentical(
+              ST_GeomFromWKT('GEOMETRYCOLLECTION (POINT (0 0), POINT (1 1))'),
+              ST_GeomFromWKT('GEOMETRYCOLLECTION (POINT (1 1), POINT (0 0))')),
+            ST_EqualsIdentical(NULL, ST_Point(0.0, 0.0))
+        """)
+        .first()
+      assert(result.getBoolean(0))
+      assert(!result.getBoolean(1))
+      assert(!result.getBoolean(2))
+      assert(!result.getBoolean(3))
+      assert(result.isNullAt(4))
+    }
+
     it("Passed edge cases of ST_Contains and ST_Covers") {
       val testtable = sparkSession.sql(
         "select ST_GeomFromWKT('POLYGON((2 0, 0 2, -2 0, 2 0))') AS a, ST_GeomFromWKT('POINT(2 0)') AS b")
@@ -426,6 +452,7 @@ class predicateTestScala extends TestBaseScala {
       ST_Overlaps,
       ST_Touches,
       ST_Equals,
+      ST_EqualsIdentical,
       ST_Disjoint,
       ST_OrderingEquals).foreach { predicate =>
       it(s"Passed null handling in $predicate") {

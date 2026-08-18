@@ -26,8 +26,14 @@ import org.apache.sedona.common.geometryObjects.Box2D;
 import org.apache.sedona.common.geometryObjects.Box3D;
 import org.junit.Test;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateSequence;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory;
+import org.locationtech.jts.geom.impl.PackedCoordinateSequenceFactory;
 import org.locationtech.jts.io.ParseException;
 
 public class PredicatesTest extends TestBase {
@@ -375,6 +381,146 @@ public class PredicatesTest extends TestBase {
   }
 
   @Test
+  public void testEqualsIdenticalDimensionsAndOrdinateValues() {
+    // Construct explicit coordinate sequences here so the predicate receives the dimensional
+    // metadata being compared. Default JTS sequences cannot distinguish ordinary XY from declared
+    // XYZ when every Z ordinate is NaN after some serialization boundaries.
+    GeometryFactory factory = coordinateArrayFactory(0);
+    Point xy = point(factory, false, false, 1, 2, Double.NaN, Double.NaN);
+    Point xyz = point(factory, true, false, 1, 2, 3, Double.NaN);
+    Point xym = point(factory, false, true, 1, 2, Double.NaN, 3);
+    Point xyzm = point(factory, true, true, 1, 2, 3, 4);
+
+    assertTrue(Predicates.equalsIdentical(xy, xy.copy()));
+    assertFalse(Predicates.equalsIdentical(xy, xyz));
+    assertFalse(Predicates.equalsIdentical(xyz, xym));
+    Point xyzNaN = point(factory, true, false, 1, 2, Double.NaN, Double.NaN);
+    assertTrue(Predicates.equalsIdentical(xyzNaN, xyzNaN.copy()));
+    assertFalse(Predicates.equalsIdentical(xy, xyzNaN));
+    assertFalse(Predicates.equalsIdentical(xyz, point(factory, true, false, 1, 2, 4, Double.NaN)));
+    assertFalse(Predicates.equalsIdentical(xym, point(factory, false, true, 1, 2, Double.NaN, 4)));
+    assertTrue(Predicates.equalsIdentical(xyzm, xyzm.copy()));
+    assertFalse(Predicates.equalsIdentical(xyzm, point(factory, true, true, 1, 2, 3, 5)));
+
+    Point nan = point(factory, false, false, Double.NaN, 2, Double.NaN, Double.NaN);
+    assertTrue(Predicates.equalsIdentical(nan, nan.copy()));
+    assertTrue(
+        Predicates.equalsIdentical(
+            point(factory, false, false, 1, 0.0, Double.NaN, Double.NaN),
+            point(factory, false, false, 1, -0.0, Double.NaN, Double.NaN)));
+    assertTrue(
+        Predicates.equalsIdentical(
+            point(factory, false, false, 1, Double.POSITIVE_INFINITY, Double.NaN, Double.NaN),
+            point(factory, false, false, 1, Double.POSITIVE_INFINITY, Double.NaN, Double.NaN)));
+    assertFalse(
+        Predicates.equalsIdentical(
+            point(factory, false, false, 1, Double.POSITIVE_INFINITY, Double.NaN, Double.NaN),
+            point(factory, false, false, 1, Double.NEGATIVE_INFINITY, Double.NaN, Double.NaN)));
+
+    Point wgs84 = point(coordinateArrayFactory(4326), false, false, 1, 2, 0, 0);
+    Point webMercator = point(coordinateArrayFactory(3857), false, false, 1, 2, 0, 0);
+    assertTrue(Predicates.equalsIdentical(wgs84, webMercator));
+    assertFalse(Predicates.equalsIdentical(null, null));
+    assertFalse(Predicates.equalsIdentical(xy, null));
+  }
+
+  @Test
+  public void testEqualsIdenticalComparesRepresentedEmptyDimensions() {
+    // These empty geometries retain explicit sequence dimensions in memory. Some empty and
+    // zero-member values do not retain that declaration after serialization.
+    GeometryFactory factory = coordinateArrayFactory(0);
+    Point emptyXY = emptyPoint(factory, false, false);
+    Point emptyXYZ = emptyPoint(factory, true, false);
+    Point emptyXYM = emptyPoint(factory, false, true);
+
+    assertTrue(Predicates.equalsIdentical(emptyXY, emptyXY.copy()));
+    assertTrue(Predicates.equalsIdentical(emptyXYZ, emptyXYZ.copy()));
+    assertFalse(Predicates.equalsIdentical(emptyXY, emptyXYZ));
+    assertFalse(Predicates.equalsIdentical(emptyXYZ, emptyXYM));
+    assertFalse(
+        Predicates.equalsIdentical(
+            emptyXY,
+            factory.createLineString(factory.getCoordinateSequenceFactory().create(0, 2, 0))));
+    assertFalse(
+        Predicates.equalsIdentical(
+            factory.createLineString(coordinateSequence(factory, 0, false, false)),
+            factory.createLineString(coordinateSequence(factory, 0, true, false))));
+    assertFalse(
+        Predicates.equalsIdentical(
+            factory.createPolygon(
+                factory.createLinearRing(coordinateSequence(factory, 0, false, false))),
+            factory.createPolygon(
+                factory.createLinearRing(coordinateSequence(factory, 0, true, false)))));
+  }
+
+  @Test
+  public void testEqualsIdenticalRequiresMatchingStructureAndOrder() throws ParseException {
+    Geometry line = geomFromEWKT("LINESTRING(0 0, 1 1, 2 0)");
+    assertTrue(Predicates.equalsIdentical(line, line.copy()));
+    assertFalse(Predicates.equalsIdentical(line, geomFromEWKT("LINESTRING(2 0, 1 1, 0 0)")));
+    assertFalse(Predicates.equalsIdentical(line, geomFromEWKT("LINESTRING(0 0, 1 1, 1 1, 2 0)")));
+    assertFalse(
+        Predicates.equalsIdentical(
+            GEOMETRY_FACTORY.createLinearRing(coordArray(0, 0, 1, 1, 2, 0, 0, 0)),
+            GEOMETRY_FACTORY.createLineString(coordArray(0, 0, 1, 1, 2, 0, 0, 0))));
+
+    Geometry polygon =
+        geomFromEWKT(
+            "POLYGON((0 0, 10 0, 10 10, 0 10, 0 0),"
+                + "(1 1, 2 1, 1 2, 1 1),(3 3, 4 3, 3 4, 3 3))");
+    Geometry holesReordered =
+        geomFromEWKT(
+            "POLYGON((0 0, 10 0, 10 10, 0 10, 0 0),"
+                + "(3 3, 4 3, 3 4, 3 3),(1 1, 2 1, 1 2, 1 1))");
+    Geometry shellRotated =
+        geomFromEWKT(
+            "POLYGON((10 0, 10 10, 0 10, 0 0, 10 0),"
+                + "(1 1, 2 1, 1 2, 1 1),(3 3, 4 3, 3 4, 3 3))");
+    assertTrue(Predicates.equalsIdentical(polygon, polygon.copy()));
+    assertFalse(Predicates.equalsIdentical(polygon, holesReordered));
+    assertFalse(Predicates.equalsIdentical(polygon, shellRotated));
+  }
+
+  @Test
+  public void testEqualsIdenticalCollectionsAndMixedDimensions() throws ParseException {
+    GeometryFactory factory = coordinateArrayFactory(0);
+    Geometry xy = point(factory, false, false, 0, 0, 0, 0);
+    Geometry xyz = point(factory, true, false, 1, 1, 2, 0);
+    Geometry xym = point(factory, false, true, 2, 2, 0, 3);
+    GeometryCollection mixed = factory.createGeometryCollection(new Geometry[] {xy, xyz, xym});
+    GeometryCollection same =
+        factory.createGeometryCollection(new Geometry[] {xy.copy(), xyz.copy(), xym.copy()});
+    GeometryCollection dimensionChanged =
+        factory.createGeometryCollection(
+            new Geometry[] {xy.copy(), point(factory, false, true, 1, 1, 0, 2), xym.copy()});
+
+    assertTrue(Predicates.equalsIdentical(mixed, same));
+    assertFalse(Predicates.equalsIdentical(mixed, dimensionChanged));
+    assertFalse(
+        Predicates.equalsIdentical(
+            mixed,
+            factory.createGeometryCollection(new Geometry[] {xym.copy(), xyz.copy(), xy.copy()})));
+    assertFalse(
+        Predicates.equalsIdentical(
+            geomFromEWKT("MULTIPOINT((0 0))"), geomFromEWKT("GEOMETRYCOLLECTION(POINT(0 0))")));
+  }
+
+  @Test
+  public void testEqualsIdenticalIgnoresCoordinateSequenceImplementation() {
+    GeometryFactory arrayFactory = coordinateArrayFactory(0);
+    GeometryFactory packedFactory =
+        new GeometryFactory(
+            new PrecisionModel(), 0, PackedCoordinateSequenceFactory.DOUBLE_FACTORY);
+
+    Point arrayPoint = point(arrayFactory, true, true, 1, 2, 3, 4);
+    Point packedPoint = point(packedFactory, true, true, 1, 2, 3, 4);
+    assertNotEquals(
+        arrayPoint.getCoordinateSequence().getClass(),
+        packedPoint.getCoordinateSequence().getClass());
+    assertTrue(Predicates.equalsIdentical(arrayPoint, packedPoint));
+  }
+
+  @Test
   public void testRelateBoolean() throws ParseException {
     Geometry geom1 = geomFromEWKT("POINT(1 2)");
     Geometry geom2 = Functions.buffer(geomFromEWKT("POINT(1 2)"), 2);
@@ -450,5 +596,35 @@ public class PredicatesTest extends TestBase {
     assertEquals(true, crossesDateLine(multiGeom2));
     assertEquals(false, crossesDateLine(multiGeom3));
     assertEquals(false, crossesDateLine(multiGeom4));
+  }
+
+  private static GeometryFactory coordinateArrayFactory(int srid) {
+    return new GeometryFactory(
+        new PrecisionModel(), srid, CoordinateArraySequenceFactory.instance());
+  }
+
+  private static Point point(
+      GeometryFactory factory, boolean hasZ, boolean hasM, double x, double y, double z, double m) {
+    CoordinateSequence coordinates = coordinateSequence(factory, 1, hasZ, hasM);
+    coordinates.setOrdinate(0, CoordinateSequence.X, x);
+    coordinates.setOrdinate(0, CoordinateSequence.Y, y);
+    if (hasZ) {
+      coordinates.setOrdinate(0, CoordinateSequence.Z, z);
+    }
+    if (hasM) {
+      coordinates.setOrdinate(0, coordinates.getDimension() - coordinates.getMeasures(), m);
+    }
+    return factory.createPoint(coordinates);
+  }
+
+  private static Point emptyPoint(GeometryFactory factory, boolean hasZ, boolean hasM) {
+    return factory.createPoint(coordinateSequence(factory, 0, hasZ, hasM));
+  }
+
+  private static CoordinateSequence coordinateSequence(
+      GeometryFactory factory, int size, boolean hasZ, boolean hasM) {
+    int measures = hasM ? 1 : 0;
+    int dimension = 2 + (hasZ ? 1 : 0) + measures;
+    return factory.getCoordinateSequenceFactory().create(size, dimension, measures);
   }
 }
