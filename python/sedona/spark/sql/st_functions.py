@@ -2557,19 +2557,10 @@ def ST_Force3DZ(
 ) -> Column:
     """
     Return a geometry with a 3D coordinate of value 'zValue' forced upon it. No change happens if the geometry is already 3D
-
-    .. deprecated:: 2.0.0
-        Use :py:func:`ST_Force3D` instead.
-
     :param zValue: Optional value of z coordinate to be potentially added, default value is 0.0
     :param geometry: Geometry column to make 3D
     :return: 3D geometry with either already present z coordinate if any, or zcoordinate with given zValue
     """
-    warnings.warn(
-        "ST_Force3DZ is deprecated. Use ST_Force3D instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     args = (geometry, zValue)
     return _call_st_function("ST_Force3DZ", args)
 

@@ -19,13 +19,10 @@
 
 # ST_Force3DZ
 
-!!!warning
-    `ST_Force3DZ` is deprecated since `v2.0.0` and will be removed in a future release. Use [ST_Force3D](ST_Force3D.md) instead.
-
 Introduction: Forces the geometry into a 3-dimensional model so that all output representations will have X, Y and Z coordinates.
 An optionally given zValue is tacked onto the geometry if the geometry is 2-dimensional. Default value of zValue is 0.0
 If the given geometry is 3-dimensional, no change is performed on it.
-If the given geometry is empty, no change is performed on it. This function is a deprecated alias of [ST_Force3D](ST_Force3D.md).
+If the given geometry is empty, no change is performed on it. This function is an alias for [ST_Force3D](ST_Force3D.md).
 
 !!!Note
     Example output is after calling ST_AsText() on returned geometry, which adds Z for in the WKT for 3D geometries

@@ -928,14 +928,10 @@ object st_functions {
   def ST_Force3DM(geometry: String, zValue: Double): Column =
     wrapExpression[ST_Force3DM](geometry, zValue)
 
-  @deprecated("Use ST_Force3D instead", "2.0.0")
   def ST_Force3DZ(geometry: Column): Column = wrapExpression[ST_Force3DZ](geometry, 0.0)
-  @deprecated("Use ST_Force3D instead", "2.0.0")
   def ST_Force3DZ(geometry: String): Column = wrapExpression[ST_Force3DZ](geometry, 0.0)
-  @deprecated("Use ST_Force3D instead", "2.0.0")
   def ST_Force3DZ(geometry: Column, zValue: Column): Column =
     wrapExpression[ST_Force3DZ](geometry, zValue)
-  @deprecated("Use ST_Force3D instead", "2.0.0")
   def ST_Force3DZ(geometry: String, zValue: Double): Column =
     wrapExpression[ST_Force3DZ](geometry, zValue)
 

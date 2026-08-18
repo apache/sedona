@@ -1887,7 +1887,6 @@ private[apache] case class ST_Force3D(inputExpressions: Seq[Expression])
 
 private[apache] case class ST_Force3DZ(inputExpressions: Seq[Expression])
     extends InferredExpression(inferrableFunction2(Functions.force3D)) {
-  DeprecationWarning.warnOnce("ST_Force3DZ", "ST_Force3D")
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)
