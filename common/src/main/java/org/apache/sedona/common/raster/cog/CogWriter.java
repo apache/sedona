@@ -18,6 +18,7 @@
  */
 package org.apache.sedona.common.raster.cog;
 
+import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,6 +30,7 @@ import javax.media.jai.Interpolation;
 import javax.media.jai.InterpolationBicubic;
 import javax.media.jai.InterpolationBilinear;
 import javax.media.jai.InterpolationNearest;
+import org.apache.sedona.common.utils.RasterUtils;
 import org.geotools.api.coverage.grid.GridCoverageWriter;
 import org.geotools.api.parameter.GeneralParameterValue;
 import org.geotools.api.parameter.ParameterValueGroup;
@@ -247,6 +249,30 @@ public class CogWriter {
   }
 
   /**
+   * Rebuild byte-band coverages on the output tile grid before writing (GH-3245).
+   *
+   * <p>imageio-ext's TIFFDeflater passes {@code (offset, height * scanlineStride)} verbatim to
+   * {@link java.util.zip.Deflater#setInput(byte[], int, int)}. For 8-bit images, TIFFImageWriter's
+   * optimized path hands the compressor the raster's backing array directly, ignoring both the
+   * layout of that array (a buffer wider than the output tile overruns and throws
+   * ArrayIndexOutOfBoundsException) and the DataBuffer's own offset (a nonzero offset silently
+   * shifts every pixel). Whether a given tile is safe depends on its DataBuffer, which cannot be
+   * verified up front, so every byte-band image is wrapped unconditionally. The wrapper vets each
+   * tile as it is requested: a tile whose concrete raster is already writer-safe passes through
+   * unchanged, and only unsafe tiles are materialized into fresh tiles backed by tight, zero-offset
+   * buffers. Pixel data and the written TIFF are unchanged; materialized tiles are copied one at a
+   * time and never cached, so no second copy of the raster is retained.
+   */
+  private static GridCoverage2D alignTileLayoutForByteBands(GridCoverage2D raster, int tileSize) {
+    RenderedImage image = raster.getRenderedImage();
+    if (image.getSampleModel().getDataType() != DataBuffer.TYPE_BYTE) {
+      return raster;
+    }
+    RenderedImage retiled = new ByteBandRetilingImage(image, tileSize);
+    return RasterUtils.clone(retiled, raster.getSampleDimensions(), raster, null, true);
+  }
+
+  /**
    * Write a GridCoverage2D as a tiled GeoTIFF byte array using GeoTools.
    *
    * @param raster The input raster
@@ -259,6 +285,7 @@ public class CogWriter {
   private static byte[] writeAsTiledGeoTiff(
       GridCoverage2D raster, String compressionType, double compressionQuality, int tileSize)
       throws IOException {
+    raster = alignTileLayoutForByteBands(raster, tileSize);
 
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
       GridCoverageWriter writer = new GeoTiffWriter(out);
