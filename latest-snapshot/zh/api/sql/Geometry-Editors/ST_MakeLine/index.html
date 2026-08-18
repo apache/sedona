@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5579,7 +5578,7 @@
 <div class="highlight"><pre><span></span><code>LINESTRING(1 2,3 4)
 </code></pre></div>
 <p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="w"> </span><span class="n">ST_MakeLine</span><span class="p">(</span><span class="w"> </span><span class="s1">&#39;LINESTRING(0 0, 1 1)&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;LINESTRING(2 2, 3 3)&#39;</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="w"> </span><span class="n">ST_MakeLine</span><span class="p">(</span><span class="w"> </span><span class="s1">'LINESTRING(0 0, 1 1)'</span><span class="p">,</span><span class="w"> </span><span class="s1">'LINESTRING(2 2, 3 3)'</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">);</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code> LINESTRING(0 0,1 1,2 2,3 3)

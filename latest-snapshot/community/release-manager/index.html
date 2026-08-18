@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5801,13 +5800,13 @@
 <li>Open it in the terminal (with <code>sudo</code> if needed). It will be like this</li>
 </ol>
 <div class="highlight"><pre><span></span><code>#!/bin/bash
-JAVA_HOME=&quot;${JAVA_HOME:-$(/usr/libexec/java_home)}&quot; exec &quot;/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn&quot; &quot;$@&quot;
+JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home)}" exec "/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn" "$@"
 </code></pre></div>
 <ol>
 <li>Change <code>JAVA_HOME:-$(/usr/libexec/java_home)}</code> to <code>JAVA_HOME:-$(/usr/libexec/java_home -v 11)}</code> or <code>JAVA_HOME:-$(/usr/libexec/java_home -v 17)}</code>. The resulting content will be like this:</li>
 </ol>
 <div class="highlight"><pre><span></span><code>#!/bin/bash
-JAVA_HOME=&quot;${JAVA_HOME:-$(/usr/libexec/java_home -v 11)}&quot; exec &quot;/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn&quot; &quot;$@&quot;
+JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 11)}" exec "/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn" "$@"
 </code></pre></div>
 <ol>
 <li>Run <code>mvn --version</code> again. It should now point to JDK 11 or 17.</li>
@@ -5861,8 +5860,8 @@ svn<span class="w"> </span>checkout<span class="w"> </span>https://dist.apache.o
 <li>Paste your armored key to the end of both files. Note: There must be an empty line between <code>-----BEGIN PGP PUBLIC KEY BLOCK-----</code> and the actual key.</li>
 <li>Commit both KEYS. SVN might ask you to enter your ASF ID and password. Make sure you do it so SVN can always store your ID and password locally.</li>
 </ol>
-<div class="highlight"><pre><span></span><code>svn<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Update KEYS&quot;</span><span class="w"> </span>sedona-dev/KEYS
-svn<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Update KEYS&quot;</span><span class="w"> </span>sedona-release/KEYS
+<div class="highlight"><pre><span></span><code>svn<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Update KEYS"</span><span class="w"> </span>sedona-dev/KEYS
+svn<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Update KEYS"</span><span class="w"> </span>sedona-release/KEYS
 </code></pre></div>
 <ol>
 <li>Then remove both svn folders</li>

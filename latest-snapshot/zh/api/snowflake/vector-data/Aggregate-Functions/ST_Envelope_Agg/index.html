@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5575,9 +5574,9 @@
 </div>
 <p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">WITH</span><span class="w"> </span><span class="n">src_tbl</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span>
+<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span>
 <span class="w">    </span><span class="k">UNION</span>
-<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON ((0.5 0.5, 0.5 1.5, 1.5 1.5, 1.5 0.5, 0.5 0.5))&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span>
+<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON ((0.5 0.5, 0.5 1.5, 1.5 1.5, 1.5 0.5, 0.5 0.5))'</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span>
 <span class="p">)</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">envelope</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">src_tbl</span><span class="p">,</span>

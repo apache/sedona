@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5783,17 +5782,17 @@
 <h2 id="from-bucket-to-vegetation-map">From bucket to vegetation map<a class="headerlink" href="#from-bucket-to-vegetation-map" title="Permanent link">&para;</a></h2>
 <p>NDVI needs a red band and a near-infrared band. Our scene is a cloud-free July capture of the valley around Fresno — irrigated fields, summer-gold rangeland, Sierra foothills — from the <a href="https://registry.opendata.aws/sentinel-2-l2a-cogs/">Sentinel-2 COG archive</a>, the same one <a href="https://sedona.apache.org/latest/blog/2026/07/17/join-the-sky-to-the-ground-spatial-joins-over-stac-catalogs/">our STAC post</a> searched by catalog. The two bands are separate 230 MB files of 10,980 × 10,980 pixels each — so we read them with the tiled <code>raster</code> reader <a href="https://sedona.apache.org/latest/blog/2026/07/10/open-huge-geotiffs-without-the-2-gb-wall/">from our 2 GB wall post</a>, which turns each file into 484 tile rows, and pair the bands with a join on tile position:</p>
 <div class="highlight"><pre><span></span><code><span class="n">scene</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">&quot;s3a://sentinel-cogs/sentinel-s2-l2a-cogs/10/S/GF/2026/7/&quot;</span>
-    <span class="s2">&quot;S2C_10SGF_20260709_0_L2A&quot;</span>
+    <span class="s2">"s3a://sentinel-cogs/sentinel-s2-l2a-cogs/10/S/GF/2026/7/"</span>
+    <span class="s2">"S2C_10SGF_20260709_0_L2A"</span>
 <span class="p">)</span>
 <span class="n">reader</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tileWidth&quot;</span><span class="p">,</span> <span class="s2">&quot;512&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tileHeight&quot;</span><span class="p">,</span> <span class="s2">&quot;512&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"raster"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"tileWidth"</span><span class="p">,</span> <span class="s2">"512"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"tileHeight"</span><span class="p">,</span> <span class="s2">"512"</span><span class="p">)</span>
 <span class="p">)</span>
-<span class="n">red_df</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">scene</span><span class="si">}</span><span class="s2">/B04.tif&quot;</span><span class="p">)</span>
-<span class="n">nir_df</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">scene</span><span class="si">}</span><span class="s2">/B08.tif&quot;</span><span class="p">)</span>
+<span class="n">red_df</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">scene</span><span class="si">}</span><span class="s2">/B04.tif"</span><span class="p">)</span>
+<span class="n">nir_df</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">scene</span><span class="si">}</span><span class="s2">/B08.tif"</span><span class="p">)</span>
 
-<span class="n">tiles</span> <span class="o">=</span> <span class="n">red_df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;rast&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;red&quot;</span><span class="p">),</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-    <span class="n">nir_df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;rast&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;nir&quot;</span><span class="p">),</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">),</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">]</span>
+<span class="n">tiles</span> <span class="o">=</span> <span class="n">red_df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"rast"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"red"</span><span class="p">),</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="n">nir_df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"rast"</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"nir"</span><span class="p">),</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">),</span> <span class="p">[</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">]</span>
 <span class="p">)</span>
 </code></pre></div>
 <details class="example">
@@ -5805,19 +5804,19 @@
 
 <span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">&quot;local[4]&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.driver.memory&quot;</span><span class="p">,</span> <span class="s2">&quot;8g&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[4]"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.driver.memory"</span><span class="p">,</span> <span class="s2">"8g"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span>
-        <span class="s2">&quot;spark.jars.packages&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;org.apache.sedona:sedona-spark-shaded-3.5_2.12:1.9.1,&quot;</span>
-        <span class="s2">&quot;org.datasyslab:geotools-wrapper:1.9.1-33.5,&quot;</span>
-        <span class="s2">&quot;org.apache.hadoop:hadoop-aws:3.3.4&quot;</span><span class="p">,</span>
+        <span class="s2">"spark.jars.packages"</span><span class="p">,</span>
+        <span class="s2">"org.apache.sedona:sedona-spark-shaded-3.5_2.12:1.9.1,"</span>
+        <span class="s2">"org.datasyslab:geotools-wrapper:1.9.1-33.5,"</span>
+        <span class="s2">"org.apache.hadoop:hadoop-aws:3.3.4"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span>
-        <span class="s2">&quot;spark.hadoop.fs.s3a.aws.credentials.provider&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider&quot;</span><span class="p">,</span>
+        <span class="s2">"spark.hadoop.fs.s3a.aws.credentials.provider"</span><span class="p">,</span>
+        <span class="s2">"org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider"</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.hadoop.fs.s3a.bucket.sentinel-cogs.endpoint.region&quot;</span><span class="p">,</span> <span class="s2">&quot;us-west-2&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.hadoop.fs.s3a.bucket.sentinel-cogs.endpoint.region"</span><span class="p">,</span> <span class="s2">"us-west-2"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
@@ -5833,19 +5832,19 @@
     <span class="k">return</span> <span class="n">red_tile</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=-</span><span class="mf">9999.0</span><span class="p">)</span>
 
 
-<span class="n">result</span> <span class="o">=</span> <span class="n">tiles</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;ndvi&quot;</span><span class="p">,</span> <span class="n">ndvi</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;red&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;nir&quot;</span><span class="p">)))</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">tiles</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"ndvi"</span><span class="p">,</span> <span class="n">ndvi</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"red"</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"nir"</span><span class="p">)))</span>
 </code></pre></div>
 <p>Note it takes <em>two</em> raster columns — any number works — and that NODATA is handled honestly: <code>as_numpy_masked()</code> turns missing pixels into <code>NaN</code> so they can't masquerade as numbers, and <code>nodata=-9999.0</code> declares what "invalid" means in the output. (One habit to keep: check your archive's radiometric conventions. This bucket pre-applies the Sentinel-2 reflectance offset — <code>earthsearch:boa_offset_applied: true</code> in its STAC metadata — so the plain ratio is correct as-is; elsewhere it's one extra line of NumPy.)</p>
 <p>The output is an ordinary raster column, so writing it out as Cloud Optimized GeoTIFFs is the stock raster writer:</p>
 <div class="highlight"><pre><span></span><code><span class="p">(</span>
-    <span class="n">result</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;RS_AsCOG(ndvi) AS raster_binary&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="n">format_string</span><span class="p">(</span><span class="s2">&quot;ndvi_x</span><span class="si">%02d</span><span class="s2">_y</span><span class="si">%02d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)))</span>
-    <span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;rasterField&quot;</span><span class="p">,</span> <span class="s2">&quot;raster_binary&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;pathField&quot;</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;fileExtension&quot;</span><span class="p">,</span> <span class="s2">&quot;.tif&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;/data/ndvi-tiles&quot;</span><span class="p">)</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_AsCOG(ndvi) AS raster_binary"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"path"</span><span class="p">,</span> <span class="n">format_string</span><span class="p">(</span><span class="s2">"ndvi_x</span><span class="si">%02d</span><span class="s2">_y</span><span class="si">%02d</span><span class="s2">"</span><span class="p">,</span> <span class="n">col</span><span class="p">(</span><span class="s2">"x"</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"y"</span><span class="p">)))</span>
+    <span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"raster"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"rasterField"</span><span class="p">,</span> <span class="s2">"raster_binary"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"pathField"</span><span class="p">,</span> <span class="s2">"path"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"fileExtension"</span><span class="p">,</span> <span class="s2">".tif"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"overwrite"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"/data/ndvi-tiles"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>That one action pulls 460 MB of COGs from S3, joins 484 tile pairs, runs the UDF over 121 million pixel pairs, and writes 484 NDVI tiles that are themselves proper COGs — internally tiled, with overviews, deflate-compressed — in <strong>76 seconds on a laptop</strong>. And the laptop is the floor, not the ceiling: every step is rows moving through a distributed engine.</p>

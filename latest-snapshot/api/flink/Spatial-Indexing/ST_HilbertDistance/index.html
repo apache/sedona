@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5599,7 +5598,7 @@
 <p><em>Only the envelope midpoint determines the address. Different geometries with midpoints in the same grid cell receive the same value at that level.</em></p>
 <p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_HilbertDistance</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))'</span><span class="p">),</span>
 <span class="w">    </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -5609,7 +5608,7 @@
 <p>The polygon's envelope midpoint is <code>(0.5, 0.5)</code>. At level 2, the supplied unit-square extent is divided into a 4-by-4 Hilbert grid and that midpoint has curve address <code>2</code>.</p>
 <p>The maximum level-16 address remains non-negative because the function returns a <code>Long</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_HilbertDistance</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT (1 0)&#39;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'POINT (1 0)'</span><span class="p">),</span>
 <span class="w">    </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span>
 <span class="p">)</span>
 </code></pre></div>

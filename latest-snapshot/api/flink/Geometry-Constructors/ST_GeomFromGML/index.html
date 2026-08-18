@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5575,15 +5574,15 @@
 <p>Return type: <code>Geometry</code></p>
 <p>Since: <code>v1.3.0</code></p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromGML</span><span class="p">(</span><span class="s1">&#39;</span>
-<span class="s1">    &lt;gml:LineString srsName=&quot;EPSG:4269&quot;&gt;</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromGML</span><span class="p">(</span><span class="s1">'</span>
+<span class="s1">    &lt;gml:LineString srsName="EPSG:4269"&gt;</span>
 <span class="s1">        &lt;gml:coordinates&gt;</span>
 <span class="s1">            -71.16028,42.258729</span>
 <span class="s1">            -71.160837,42.259112</span>
 <span class="s1">            -71.161143,42.25932</span>
 <span class="s1">        &lt;/gml:coordinates&gt;</span>
 <span class="s1">    &lt;/gml:LineString&gt;</span>
-<span class="s1">&#39;</span><span class="p">)</span>
+<span class="s1">'</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>LINESTRING (-71.16028 42.258729, -71.160837 42.259112, -71.161143 42.25932)

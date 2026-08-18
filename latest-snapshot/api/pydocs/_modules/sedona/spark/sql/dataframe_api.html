@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.dataframe_api &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -283,7 +282,7 @@
     <span class="n">jvm</span> <span class="o">=</span> <span class="n">SparkContext</span><span class="o">.</span><span class="n">_jvm</span>
     <span class="k">if</span> <span class="n">jvm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;No active spark context was detected. Unable to call sedona function.&quot;</span>
+            <span class="s2">"No active spark context was detected. Unable to call sedona function."</span>
         <span class="p">)</span>
     <span class="n">jobject</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">jvm</span><span class="p">,</span> <span class="n">object_name</span><span class="p">)</span>
     <span class="n">jfunc</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">jobject</span><span class="p">,</span> <span class="n">function_name</span><span class="p">)</span>
@@ -293,7 +292,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_type_list</span><span class="p">(</span><span class="n">annotated_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a type annotation into a tuple of types.</span>
+<span class="w">    </span><span class="sd">"""Convert a type annotation into a tuple of types.</span>
 <span class="sd">    For most types this will be a tuple with a single element, but</span>
 <span class="sd">    for Union a tuple with multiple elements will be returned.</span>
 
@@ -301,7 +300,7 @@
 <span class="sd">    :type annotated_type: Type</span>
 <span class="sd">    :return: Tuple of all types covered by the type annotation.</span>
 <span class="sd">    :rtype: Tuple[Type, ...]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">get_origin</span><span class="p">(</span><span class="n">annotated_type</span><span class="p">)</span> <span class="ow">is</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">:</span>
         <span class="c1"># again, there is a really nice method for this in 3.8: typing.get_args</span>
         <span class="n">valid_types</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">get_args</span><span class="p">(</span><span class="n">annotated_type</span><span class="p">)</span>
@@ -316,30 +315,30 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_strip_extra_from_class_name</span><span class="p">(</span><span class="n">class_name</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">class_name</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;&lt;class &#39;&quot;</span><span class="p">)</span> <span class="p">:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;&#39;&gt;&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">class_name</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s2">"&lt;class '"</span><span class="p">)</span> <span class="p">:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">"'&gt;"</span><span class="p">)]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_readable_name_for_type</span><span class="p">(</span><span class="nb">type</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a human readable name for a type annotation used on a function&#39;s parameter.</span>
+<span class="w">    </span><span class="sd">"""Get a human readable name for a type annotation used on a function's parameter.</span>
 
 <span class="sd">    :param type: Type annotation for a parameter.</span>
 <span class="sd">    :type type: Type</span>
 <span class="sd">    :return: Human readable name for the type annotation.</span>
 <span class="sd">    :rtype: str</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">_GenericAlias</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">type</span><span class="o">.</span><span class="n">__origin__</span><span class="o">.</span><span class="n">_name</span> <span class="o">==</span> <span class="s2">&quot;Union&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Union[</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_strip_extra_from_class_name</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">type</span><span class="o">.</span><span class="n">__args__</span><span class="p">)</span><span class="si">}</span><span class="s2">]&quot;</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">_GenericAlias</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">type</span><span class="o">.</span><span class="n">__origin__</span><span class="o">.</span><span class="n">_name</span> <span class="o">==</span> <span class="s2">"Union"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Union[</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_strip_extra_from_class_name</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">type</span><span class="o">.</span><span class="n">__args__</span><span class="p">)</span><span class="si">}</span><span class="s2">]"</span>
     <span class="k">return</span> <span class="n">_strip_extra_from_class_name</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">))</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_bound_arguments</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bind the passed arguments to f with actual parameter names, including defaults.</span>
+<span class="w">    </span><span class="sd">"""Bind the passed arguments to f with actual parameter names, including defaults.</span>
 
 <span class="sd">    :param f: Function to bind arguments for.</span>
 <span class="sd">    :type f: Callable</span>
 <span class="sd">    :return: Dictionary of parameter names to argument values.</span>
 <span class="sd">    :rtype: Mapping[str, Any]</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">f_signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
     <span class="n">bound_args</span> <span class="o">=</span> <span class="n">f_signature</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="n">bound_args</span><span class="o">.</span><span class="n">apply_defaults</span><span class="p">()</span>
@@ -349,7 +348,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_check_bound_arguments</span><span class="p">(</span>
     <span class="n">bound_args</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">type_annotations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">],</span> <span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check bound arguments against type annotations and raise a ValueError if any do not match.</span>
+<span class="w">    </span><span class="sd">"""Check bound arguments against type annotations and raise a ValueError if any do not match.</span>
 
 <span class="sd">    :param bound_args: Bound arguments to check.</span>
 <span class="sd">    :type bound_args: Mapping[str, Any]</span>
@@ -358,7 +357,7 @@
 <span class="sd">    :param function_name: Name of the function that is being checked for, used in the exception if raised.</span>
 <span class="sd">    :type function_name: str</span>
 <span class="sd">    :raises ValueError: If a bound argument does not match the parameter type.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">for</span> <span class="n">bound_arg_name</span><span class="p">,</span> <span class="n">bound_arg_value</span> <span class="ow">in</span> <span class="n">bound_args</span><span class="o">.</span><span class="n">arguments</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">annotated_type</span> <span class="o">=</span> <span class="n">type_annotations</span><span class="p">[</span><span class="n">bound_arg_name</span><span class="p">]</span>
         <span class="n">valid_type_list</span> <span class="o">=</span> <span class="n">_get_type_list</span><span class="p">(</span><span class="n">annotated_type</span><span class="p">)</span>
@@ -366,12 +365,12 @@
             <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">bound_arg_value</span><span class="p">,</span> <span class="n">valid_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">valid_type</span> <span class="ow">in</span> <span class="n">valid_type_list</span><span class="p">]</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Incorrect argument type: </span><span class="si">{</span><span class="n">bound_arg_name</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">function_name</span><span class="si">}</span><span class="s2"> should be </span><span class="si">{</span><span class="n">_get_readable_name_for_type</span><span class="p">(</span><span class="n">annotated_type</span><span class="p">)</span><span class="si">}</span><span class="s2"> but received </span><span class="si">{</span><span class="n">_strip_extra_from_class_name</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">bound_arg_value</span><span class="p">)))</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="sa">f</span><span class="s2">"Incorrect argument type: </span><span class="si">{</span><span class="n">bound_arg_name</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">function_name</span><span class="si">}</span><span class="s2"> should be </span><span class="si">{</span><span class="n">_get_readable_name_for_type</span><span class="p">(</span><span class="n">annotated_type</span><span class="p">)</span><span class="si">}</span><span class="s2"> but received </span><span class="si">{</span><span class="n">_strip_extra_from_class_name</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">bound_arg_value</span><span class="p">)))</span><span class="si">}</span><span class="s2">."</span>
             <span class="p">)</span>
 
 
 <div class="viewcode-block" id="validate_argument_types"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.dataframe_api.validate_argument_types">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">validate_argument_types</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validates types of arguments passed to a dataframe API style function.</span>
+<span class="w">    </span><span class="sd">"""Validates types of arguments passed to a dataframe API style function.</span>
 <span class="sd">    Arguments will need to be either strings, columns, or match the typehints of f.</span>
 <span class="sd">    This function is meant to be used a decorator.</span>
 
@@ -379,7 +378,7 @@
 <span class="sd">    :type f: Callable</span>
 <span class="sd">    :return: f wrapped with type validation checks.</span>
 <span class="sd">    :rtype: Callable</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">validated_function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
         <span class="c1"># all arguments are Columns or strings are always legal, so only check types when one of the arguments is not a column</span>

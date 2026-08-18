@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5569,7 +5568,7 @@
 <p>Return type: <code>Raster</code></p>
 <p>Since: <code>v1.5.0</code></p>
 <p>Format:</p>
-<div class="highlight"><pre><span></span><code>RS_MakeEmptyRaster(numBands: Integer, bandDataType: String = &#39;D&#39;, width: Integer, height: Integer, upperleftX: Double, upperleftY: Double, cellSize: Double)
+<div class="highlight"><pre><span></span><code>RS_MakeEmptyRaster(numBands: Integer, bandDataType: String = 'D', width: Integer, height: Integer, upperleftX: Double, upperleftY: Double, cellSize: Double)
 </code></pre></div>
 <ul>
 <li>NumBands: The number of bands in the raster. If not specified, the raster will have a single band.</li>
@@ -5591,7 +5590,7 @@ Accepts one of:<ol>
 </ul>
 <p>It uses the default Cartesian coordinate system.</p>
 <p>Format:</p>
-<div class="highlight"><pre><span></span><code>RS_MakeEmptyRaster(numBands: Integer, bandDataType: String = &#39;D&#39;, width: Integer, height: Integer, upperleftX: Double, upperleftY: Double, scaleX: Double, scaleY: Double, skewX: Double, skewY: Double, srid: Integer)
+<div class="highlight"><pre><span></span><code>RS_MakeEmptyRaster(numBands: Integer, bandDataType: String = 'D', width: Integer, height: Integer, upperleftX: Double, upperleftY: Double, scaleX: Double, scaleY: Double, skewX: Double, skewY: Double, srid: Integer)
 </code></pre></div>
 <ul>
 <li>NumBands: The number of bands in the raster. If not specified, the raster will have a single band.</li>
@@ -5627,17 +5626,17 @@ Accepts one of:<ol>
 <div class="highlight"><pre><span></span><code>+--------------------------------------------+
 |rs_makeemptyraster(2, 10, 10, 0.0, 0.0, 1.0)|
 +--------------------------------------------+
-|                        GridCoverage2D[&quot;g...|
+|                        GridCoverage2D["g...|
 +--------------------------------------------+
 </code></pre></div>
 <p>Spark SQL example 2 (with 2 bands and dataType):</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;I&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">Create</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">raster</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="nb">integer</span><span class="w"> </span><span class="n">datatype</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s1">'I'</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">Create</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">raster</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="nb">integer</span><span class="w"> </span><span class="n">datatype</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>+--------------------------------------------+
 |rs_makeemptyraster(2, 10, 10, 0.0, 0.0, 1.0)|
 +--------------------------------------------+
-|                        GridCoverage2D[&quot;g...|
+|                        GridCoverage2D["g...|
 +--------------------------------------------+
 </code></pre></div>
 <p>Spark SQL example 3 (with 2 bands, scale, skew, and SRID):</p>
@@ -5647,17 +5646,17 @@ Accepts one of:<ol>
 <div class="highlight"><pre><span></span><code>+------------------------------------------------------------------+
 |rs_makeemptyraster(2, 10, 10, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 4326)|
 +------------------------------------------------------------------+
-|                                              GridCoverage2D[&quot;g...|
+|                                              GridCoverage2D["g...|
 +------------------------------------------------------------------+
 </code></pre></div>
 <p>Spark SQL example 4 (with 2 bands, scale, skew, and SRID):</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;F&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">Create</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">raster</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="nb">float</span><span class="w"> </span><span class="n">datatype</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s1">'F'</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">Create</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">raster</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="nb">float</span><span class="w"> </span><span class="n">datatype</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>+------------------------------------------------------------------+
 |rs_makeemptyraster(2, 10, 10, 0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 4326)|
 +------------------------------------------------------------------+
-|                                              GridCoverage2D[&quot;g...|
+|                                              GridCoverage2D["g...|
 +------------------------------------------------------------------+
 </code></pre></div>
 

@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5738,8 +5737,8 @@
 <h3 id="geometry-map"><strong>几何对象地图（Geometry Map）</strong><a class="headerlink" href="#geometry-map" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_geometry_map</span><span class="p">(</span>
     <span class="n">df</span><span class="p">,</span>
-    <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span>
-    <span class="n">line_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span>
+    <span class="n">fill_color</span><span class="o">=</span><span class="s2">"[85, 183, 177, 255]"</span><span class="p">,</span>
+    <span class="n">line_color</span><span class="o">=</span><span class="s2">"[85, 183, 177, 255]"</span><span class="p">,</span>
     <span class="n">elevation_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -5773,7 +5772,7 @@
 <div class="highlight"><pre><span></span><code><span class="n">fill_color</span> <span class="o">=</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">250</span><span class="p">]</span>
 <span class="n">fill_color</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">255</span><span class="p">]</span>
 <span class="n">fill_color</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">&quot;[0, 12, 240, AirportCount * 10]&quot;</span>  <span class="c1">## AirportCount is a column in the passed df</span>
+    <span class="s2">"[0, 12, 240, AirportCount * 10]"</span>  <span class="c1">## AirportCount is a column in the passed df</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>除传入 <code>fill_color</code> 参数外，也可以传入 'plot_col'，指定用于决定分级统计的列。
@@ -5784,7 +5783,7 @@
 <h3 id="scatterplot"><strong>散点图（Scatterplot）</strong><a class="headerlink" href="#scatterplot" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_scatterplot_map</span><span class="p">(</span>
     <span class="n">df</span><span class="p">,</span>
-    <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[255, 140, 0]&quot;</span><span class="p">,</span>
+    <span class="n">fill_color</span><span class="o">=</span><span class="s2">"[255, 140, 0]"</span><span class="p">,</span>
     <span class="n">radius_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">radius_min_pixels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">radius_max_pixels</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
@@ -5807,7 +5806,7 @@
     <span class="n">df</span><span class="p">,</span>
     <span class="n">color_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">aggregation</span><span class="o">=</span><span class="s2">&quot;SUM&quot;</span><span class="p">,</span>
+    <span class="n">aggregation</span><span class="o">=</span><span class="s2">"SUM"</span><span class="p">,</span>
     <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>

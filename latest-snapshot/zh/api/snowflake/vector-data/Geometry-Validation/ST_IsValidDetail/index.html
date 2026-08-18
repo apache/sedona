@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5580,7 +5579,7 @@
 <p>Return type: <code>Struct&lt;valid: Boolean, reason: String, location: Geometry&gt;</code></p>
 <p>SQL Example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="k">valid</span><span class="p">,</span><span class="w"> </span><span class="n">reason</span><span class="p">,</span><span class="w"> </span><span class="n">Sedonm</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="k">location</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="k">location</span>
-<span class="w">     </span><span class="k">FROM</span><span class="w"> </span><span class="k">table</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_IsValidDetail</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON ((30 10, 40 40, 20 40, 30 10, 10 20, 30 10))&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span>
+<span class="w">     </span><span class="k">FROM</span><span class="w"> </span><span class="k">table</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_IsValidDetail</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'POLYGON ((30 10, 40 40, 20 40, 30 10, 10 20, 30 10))'</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>+-----+---------------------------------------------------------+-------------+

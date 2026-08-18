@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5574,7 +5573,7 @@ FROM table(SEDONA.ST_SubDivideExplode(geom: geometry, maxVertices: int))`</p>
 <p>Example:</p>
 <p>Query:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">GEOM</span><span class="p">)</span>
-<span class="k">FROM</span><span class="w"> </span><span class="k">table</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_SubDivideExplode</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 85 85, 100 100, 120 120, 21 21, 10 10, 5 5)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">5</span><span class="p">));</span>
+<span class="k">FROM</span><span class="w"> </span><span class="k">table</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_SubDivideExplode</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'LINESTRING(0 0, 85 85, 100 100, 120 120, 21 21, 10 10, 5 5)'</span><span class="p">),</span><span class="w"> </span><span class="mi">5</span><span class="p">));</span>
 </code></pre></div>
 <p>Result:</p>
 <div class="highlight"><pre><span></span><code>+-----------------------------+

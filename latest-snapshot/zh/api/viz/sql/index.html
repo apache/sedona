@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5837,9 +5836,9 @@
 <li>声明你的 Spark Session</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">().</span>
-<span class="n">config</span><span class="p">(</span><span class="s">&quot;spark.serializer&quot;</span><span class="p">,</span><span class="s">&quot;org.apache.spark.serializer.KryoSerializer&quot;</span><span class="p">).</span>
-<span class="n">config</span><span class="p">(</span><span class="s">&quot;spark.kryo.registrator&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator&quot;</span><span class="p">).</span>
-<span class="n">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">).</span><span class="n">appName</span><span class="p">(</span><span class="s">&quot;mySedonaVizDemo&quot;</span><span class="p">).</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="n">config</span><span class="p">(</span><span class="s">"spark.serializer"</span><span class="p">,</span><span class="s">"org.apache.spark.serializer.KryoSerializer"</span><span class="p">).</span>
+<span class="n">config</span><span class="p">(</span><span class="s">"spark.kryo.registrator"</span><span class="p">,</span><span class="w"> </span><span class="s">"org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator"</span><span class="p">).</span>
+<span class="n">master</span><span class="p">(</span><span class="s">"local[*]"</span><span class="p">).</span><span class="n">appName</span><span class="p">(</span><span class="s">"mySedonaVizDemo"</span><span class="p">).</span><span class="n">getOrCreate</span><span class="p">()</span>
 </code></pre></div>
 <ol>
 <li>在 SparkSession 声明之后加上以下代码：</li>
@@ -5867,14 +5866,14 @@
 <h4 id="_4">生成统一颜色 —— 散点图<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h4>
 <p>如果将一个强制颜色名作为第三个输入参数传入，该函数会直接输出该颜色，而忽略权重。这种情况下，所有像素都使用同一个颜色。</p>
 <p>SQL 示例</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">pixels</span><span class="p">.</span><span class="n">px</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Colorize</span><span class="p">(</span><span class="n">pixels</span><span class="p">.</span><span class="n">weight</span><span class="p">,</span><span class="w"> </span><span class="mi">999</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;red&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">color</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">pixels</span><span class="p">.</span><span class="n">px</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Colorize</span><span class="p">(</span><span class="n">pixels</span><span class="p">.</span><span class="n">weight</span><span class="p">,</span><span class="w"> </span><span class="mi">999</span><span class="p">,</span><span class="w"> </span><span class="s1">'red'</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">color</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">pixels</span>
 </code></pre></div>
 <p>下面是一些可输入的颜色名示例：</p>
-<div class="highlight"><pre><span></span><code>&quot;firebrick&quot;
-&quot;#aa38e0&quot;
-&quot;0x40A8CC&quot;
-&quot;rgba(112,36,228,0.9)&quot;
+<div class="highlight"><pre><span></span><code>"firebrick"
+"#aa38e0"
+"0x40A8CC"
+"rgba(112,36,228,0.9)"
 </code></pre></div>
 <p>预定义颜色的完整列表请参见 <a href="https://static.javadoc.io/org.beryx/awt-color-factory/1.0.0/org/beryx/awt/color/ColorFactory.html">AWT Colors</a>。</p>
 <h3 id="st_encodeimage">ST_EncodeImage<a class="headerlink" href="#st_encodeimage" title="Permanent link">&para;</a></h3>

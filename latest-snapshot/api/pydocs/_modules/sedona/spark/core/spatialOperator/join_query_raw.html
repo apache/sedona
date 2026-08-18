@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.spatialOperator.join_query_raw &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -234,7 +233,7 @@
 <div class="viewcode-block" id="JoinQueryRaw"><a class="viewcode-back" href="../../../../../sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_query_raw.JoinQueryRaw">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">JoinQueryRaw</span><span class="p">:</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;JoinQuery&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"JoinQuery"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">SpatialJoinQuery</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">spatialRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span>
@@ -252,7 +251,7 @@
         <span class="k">return</span> <span class="n">SedonaPairRDDList</span><span class="p">(</span><span class="n">srdd</span><span class="p">,</span> <span class="n">sc</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;JoinQuery&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"JoinQuery"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">DistanceJoinQuery</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">spatialRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span>
@@ -269,7 +268,7 @@
         <span class="k">return</span> <span class="n">SedonaPairRDDList</span><span class="p">(</span><span class="n">srdd</span><span class="p">,</span> <span class="n">sc</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;JoinQuery&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"JoinQuery"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">spatialJoin</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">queryWindowRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span> <span class="n">objectRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span> <span class="n">joinParams</span><span class="p">:</span> <span class="n">JoinParams</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SedonaPairRDD</span><span class="p">:</span>
@@ -286,7 +285,7 @@
         <span class="k">return</span> <span class="n">SedonaPairRDD</span><span class="p">(</span><span class="n">srdd</span><span class="p">,</span> <span class="n">sc</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;JoinQuery&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"JoinQuery"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">DistanceJoinQueryFlat</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">spatialRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span>
@@ -305,7 +304,7 @@
         <span class="k">return</span> <span class="n">SedonaPairRDD</span><span class="p">(</span><span class="n">srdd</span><span class="p">,</span> <span class="n">sc</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;JoinQuery&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"JoinQuery"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">SpatialJoinQueryFlat</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">spatialRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span>

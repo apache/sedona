@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5890,7 +5889,7 @@ https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.5.1-28.2/geotoo
 <p>In the notebook, you can install the jars by running the following code. Please replace the <code>jars</code> with the download links of the 2 jars from the previous step.</p>
 <div class="highlight"><pre><span></span><code>%%configure -f
 {
-    &quot;jars&quot;: [&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.5.1-28.2/geotools-wrapper-1.5.1-28.2.jar&quot;, &quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.4_2.12/1.5.1/sedona-spark-shaded-3.4_2.12-1.5.1.jar&quot;]
+    "jars": ["https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.5.1-28.2/geotools-wrapper-1.5.1-28.2.jar", "https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.4_2.12/1.5.1/sedona-spark-shaded-3.4_2.12-1.5.1.jar"]
 }
 </code></pre></div>
 <h2 id="step-9-verify-the-installation">Step 9: Verify the installation<a class="headerlink" href="#step-9-verify-the-installation" title="Permanent link">&para;</a></h2>
@@ -5900,7 +5899,7 @@ https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.5.1-28.2/geotoo
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
 
 
-<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT ST_GeomFromEWKT(&#39;SRID=4269;POINT(40.7128 -74.0060)&#39;)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT ST_GeomFromEWKT('SRID=4269;POINT(40.7128 -74.0060)')"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>If you see the output of the point, then the installation is successful.</p>
 <p><img alt="Verify the installation" src="../../image/fabric/fabric-10.png" /></p>
@@ -5917,8 +5916,8 @@ abfss://9e9d4196-870a-4901-8fa5-e24841492ab8@onelake.dfs.fabric.microsoft.com/e1
 <p>If you use this option, the config files in your notebook should be</p>
 <div class="highlight"><pre><span></span><code>%%configure -f
 {
-    &quot;conf&quot;: {
-        &quot;spark.jars&quot;: &quot;abfss://XXX/Files/sedona-spark-shaded-3.4_2.12-1.5.1.jar,abfss://XXX/Files/geotools-wrapper-1.5.1-28.2.jar&quot;,
+    "conf": {
+        "spark.jars": "abfss://XXX/Files/sedona-spark-shaded-3.4_2.12-1.5.1.jar,abfss://XXX/Files/geotools-wrapper-1.5.1-28.2.jar",
     }
 }
 </code></pre></div>

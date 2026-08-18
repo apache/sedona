@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5724,10 +5723,10 @@
 <li>通过 SparkConf 设置：</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">().</span>
-<span class="w">      </span><span class="n">config</span><span class="p">(</span><span class="s">&quot;spark.serializer&quot;</span><span class="p">,</span><span class="s">&quot;org.apache.spark.serializer.KryoSerializer&quot;</span><span class="p">).</span>
-<span class="w">      </span><span class="n">config</span><span class="p">(</span><span class="s">&quot;spark.kryo.registrator&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;org.apache.sedona.core.serde.SedonaKryoRegistrator&quot;</span><span class="p">).</span>
-<span class="w">      </span><span class="n">config</span><span class="p">(</span><span class="s">&quot;sedona.global.index&quot;</span><span class="p">,</span><span class="s">&quot;true&quot;</span><span class="p">)</span>
-<span class="w">      </span><span class="n">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">).</span><span class="n">appName</span><span class="p">(</span><span class="s">&quot;mySedonaSQLdemo&quot;</span><span class="p">).</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="w">      </span><span class="n">config</span><span class="p">(</span><span class="s">"spark.serializer"</span><span class="p">,</span><span class="s">"org.apache.spark.serializer.KryoSerializer"</span><span class="p">).</span>
+<span class="w">      </span><span class="n">config</span><span class="p">(</span><span class="s">"spark.kryo.registrator"</span><span class="p">,</span><span class="w"> </span><span class="s">"org.apache.sedona.core.serde.SedonaKryoRegistrator"</span><span class="p">).</span>
+<span class="w">      </span><span class="n">config</span><span class="p">(</span><span class="s">"sedona.global.index"</span><span class="p">,</span><span class="s">"true"</span><span class="p">)</span>
+<span class="w">      </span><span class="n">master</span><span class="p">(</span><span class="s">"local[*]"</span><span class="p">).</span><span class="n">appName</span><span class="p">(</span><span class="s">"mySedonaSQLdemo"</span><span class="p">).</span><span class="n">getOrCreate</span><span class="p">()</span>
 </code></pre></div>
 <ol>
 <li>查看当前的 SedonaSQL 配置：</li>
@@ -5738,10 +5737,10 @@
 <ol>
 <li>Sedona 参数可以在运行时动态修改：</li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;sedona.global.index&quot;</span><span class="p">,</span><span class="s">&quot;false&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="s">"sedona.global.index"</span><span class="p">,</span><span class="s">"false"</span><span class="p">)</span>
 </code></pre></div>
 <p>此外，你也可以在参数名前添加 <code>spark</code> 前缀，例如：</p>
-<div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;spark.sedona.global.index&quot;</span><span class="p">,</span><span class="s">&quot;false&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="s">"spark.sedona.global.index"</span><span class="p">,</span><span class="s">"false"</span><span class="p">)</span>
 </code></pre></div>
 <p>不过，所有通过 <code>spark</code> 前缀设置的参数都会被 Spark 所识别，这意味着你可以提前通过 <code>spark-defaults.conf</code> 或 Spark on Kubernetes 的配置来设定这些参数。</p>
 <p>如果同一个参数同时通过 <code>sedona</code> 和 <code>spark.sedona</code> 两种前缀进行设置，则 <code>sedona</code> 前缀设置的值会覆盖 <code>spark.sedona</code> 前缀设置的值。</p>

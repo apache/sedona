@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5770,7 +5769,7 @@
 <li><code>noDataValue</code>：（非可选）输出栅格的 nodata 值，允许传 <code>null</code>。</li>
 </ul>
 <p>双栅格输入的 <code>RS_MapAlgebra</code> 的 Spark SQL 示例：</p>
-<div class="highlight"><pre><span></span><code><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast0</span><span class="p">,</span><span class="w"> </span><span class="n">rast1</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;out = rast0[0] * 0.5 + rast1[0] * 0.5;&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">null</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast0</span><span class="p">,</span><span class="w"> </span><span class="n">rast1</span><span class="p">,</span><span class="w"> </span><span class="s1">'D'</span><span class="p">,</span><span class="w"> </span><span class="s1">'out = rast0[0] * 0.5 + rast1[0] * 0.5;'</span><span class="p">,</span><span class="w"> </span><span class="k">null</span><span class="p">)</span>
 </code></pre></div>
 <p><code>RS_MapAlgebra</code> 的性能也很不错，因为它由 <a href="https://github.com/geosolutions-it/jai-ext/wiki/Jiffle">Jiffle</a> 提供支持，可以被编译为 Java 字节码以
 执行。下面我们将演示如何用这两种方式实现常见的地图代数运算。</p>
@@ -5796,7 +5795,7 @@
 </code></pre></div>
 <p>其中 NIR 表示近红外波段，Red 表示红光波段。</p>
 <p>假设我们有若干个 4 波段的栅格，分别对应红、绿、蓝、近红外四个波段。我们希望为每个栅格计算 NDVI。可以使用 <code>RS_MapAlgebra</code> 函数来实现：</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;out = (rast[3] - rast[0]) / (rast[3] + rast[0]);&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">ndvi</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">'D'</span><span class="p">,</span><span class="w"> </span><span class="s1">'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);'</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">ndvi</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 </code></pre></div>
 <p>这里的 Jiffle 脚本是 <code>out = (rast[3] - rast[0]) / (rast[3] + rast[0]);</code>。<code>rast</code> 变量始终绑定到输入栅格，
 而 <code>out</code> 变量绑定到输出栅格。Jiffle 会迭代输入栅格的每个像素，并为每个像素执行该脚本。<code>rast[3]</code> 与 <code>rast[0]</code>
@@ -5817,7 +5816,7 @@
 </code></pre></div>
 <p>使用 <code>RS_MapAlgebra</code> 可以很容易地实现 AWEI：</p>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Assume that the raster includes all 13 Sentinel-2 bands</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;out = 4 * (rast[2] - rast[11]) - (0.25 * rast[7] + 2.75 * rast[12]);&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">awei</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">'D'</span><span class="p">,</span><span class="w"> </span><span class="s1">'out = 4 * (rast[2] - rast[11]) - (0.25 * rast[7] + 2.75 * rast[12]);'</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">awei</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 </code></pre></div>
 <p>也可以使用基于数组的地图代数函数实现同样的 AWEI 计算，代码看起来更冗长：</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_Subtract</span><span class="p">(</span>

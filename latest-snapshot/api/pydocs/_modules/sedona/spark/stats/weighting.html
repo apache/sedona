@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stats.weighting &mdash; Apache Sedona Python Documentation</title>
@@ -213,19 +212,19 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
 
-<span class="sd">&quot;&quot;&quot;Weighting functions for spatial data.&quot;&quot;&quot;</span>
+<span class="sd">"""Weighting functions for spatial data."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
 
@@ -243,14 +242,14 @@
     <span class="n">geometry</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_spheroid</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">saved_attributes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">result_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;weights&quot;</span><span class="p">,</span>
+    <span class="n">result_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"weights"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Annotates a dataframe with a weights column containing the other records within the threshold and their weight.</span>
+<span class="w">    </span><span class="sd">"""Annotates a dataframe with a weights column containing the other records within the threshold and their weight.</span>
 
 <span class="sd">    The dataframe should contain at least one GeometryType column. Rows must be unique. If one</span>
 <span class="sd">    geometry column is present it will be used automatically. If two are present, the one named</span>
-<span class="sd">    &#39;geometry&#39; will be used. If more than one are present and neither is named &#39;geometry&#39;, the</span>
-<span class="sd">    column name must be provided. The new column will be named &#39;cluster&#39;.</span>
+<span class="sd">    'geometry' will be used. If more than one are present and neither is named 'geometry', the</span>
+<span class="sd">    column name must be provided. The new column will be named 'cluster'.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        dataframe: DataFrame with geometry column</span>
@@ -264,11 +263,11 @@
 <span class="sd">        geometry: name of the geometry column</span>
 <span class="sd">        use_spheroid: whether to use a cartesian or spheroidal distance calculation. Default is false</span>
 <span class="sd">        saved_attributes: the attributes to save in the neighbor column. Default is all columns.</span>
-<span class="sd">        result_name: the name of the resulting column. Default is &#39;weights&#39;.</span>
+<span class="sd">        result_name: the name of the resulting column. Default is 'weights'.</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        The input DataFrame with a weight column added containing neighbors and their weights added to each row.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">sedona</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">getActiveSession</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">DataFrame</span><span class="p">(</span>
         <span class="n">sedona</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">sedona</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">Weighting</span><span class="o">.</span><span class="n">addDistanceBandColumnPython</span><span class="p">(</span>
@@ -296,14 +295,14 @@
     <span class="n">geometry</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_spheroid</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">saved_attributes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">result_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;weights&quot;</span><span class="p">,</span>
+    <span class="n">result_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"weights"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Annotates a dataframe with a weights column containing the other records within the threshold and their weight.</span>
+<span class="w">    </span><span class="sd">"""Annotates a dataframe with a weights column containing the other records within the threshold and their weight.</span>
 
 <span class="sd">    Weights will always be 1.0. The dataframe should contain at least one GeometryType column. Rows must be unique. If</span>
-<span class="sd">    one geometry column is present it will be used automatically. If two are present, the one named &#39;geometry&#39; will be</span>
-<span class="sd">    used. If more than one are present and neither is named &#39;geometry&#39;, the column name must be provided. The new column</span>
-<span class="sd">    will be named &#39;cluster&#39;.</span>
+<span class="sd">    one geometry column is present it will be used automatically. If two are present, the one named 'geometry' will be</span>
+<span class="sd">    used. If more than one are present and neither is named 'geometry', the column name must be provided. The new column</span>
+<span class="sd">    will be named 'cluster'.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        dataframe: DataFrame with geometry column</span>
@@ -314,13 +313,13 @@
 <span class="sd">        geometry: name of the geometry column</span>
 <span class="sd">        use_spheroid: whether to use a cartesian or spheroidal distance calculation. Default is false</span>
 <span class="sd">        saved_attributes: the attributes to save in the neighbor column. Default is all columns.</span>
-<span class="sd">        result_name: the name of the resulting column. Default is &#39;weights&#39;.</span>
+<span class="sd">        result_name: the name of the resulting column. Default is 'weights'.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The input DataFrame with a weight column added containing neighbors and their weights (always 1) added to each</span>
 <span class="sd">        row.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">sedona</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">getActiveSession</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">DataFrame</span><span class="p">(</span>
@@ -351,14 +350,14 @@
     <span class="n">geometry</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_spheroid</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">saved_attributes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">result_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;weights&quot;</span><span class="p">,</span>
+    <span class="n">result_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"weights"</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Annotates a dataframe with a weights column containing the other records within the threshold and their weight.</span>
+<span class="w">    </span><span class="sd">"""Annotates a dataframe with a weights column containing the other records within the threshold and their weight.</span>
 
 <span class="sd">    Weights will be distance^alpha. The dataframe should contain at least one GeometryType column. Rows must be unique. If</span>
-<span class="sd">    one geometry column is present it will be used automatically. If two are present, the one named &#39;geometry&#39; will be</span>
-<span class="sd">    used. If more than one are present and neither is named &#39;geometry&#39;, the column name must be provided. The new column</span>
-<span class="sd">    will be named &#39;cluster&#39;.</span>
+<span class="sd">    one geometry column is present it will be used automatically. If two are present, the one named 'geometry' will be</span>
+<span class="sd">    used. If more than one are present and neither is named 'geometry', the column name must be provided. The new column</span>
+<span class="sd">    will be named 'cluster'.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        dataframe: DataFrame with geometry column</span>
@@ -371,13 +370,13 @@
 <span class="sd">        geometry: name of the geometry column</span>
 <span class="sd">        use_spheroid: whether to use a cartesian or spheroidal distance calculation. Default is false</span>
 <span class="sd">        saved_attributes: the attributes to save in the neighbor column. Default is all columns.</span>
-<span class="sd">        result_name: the name of the resulting column. Default is &#39;weights&#39;.</span>
+<span class="sd">        result_name: the name of the resulting column. Default is 'weights'.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The input DataFrame with a weight column added containing neighbors and their weights (always 1) added to each</span>
 <span class="sd">        row.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">sedona</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">getActiveSession</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">DataFrame</span><span class="p">(</span>

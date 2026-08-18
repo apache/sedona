@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5572,17 +5571,17 @@
 <p>Return type: <code>Geometry</code></p>
 <p>SQL Example:</p>
 <p><img alt="ST_OffsetCurve Positive" src="../../../../../../image/ST_OffsetCurve/ST_OffsetCurve_positive.svg" title="ST_OffsetCurve Positive Offset" /></p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_OffsetCurve</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 10 0, 10 10)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">5</span><span class="p">.</span><span class="mi">0</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_OffsetCurve</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING(0 0, 10 0, 10 10)'</span><span class="p">),</span><span class="w"> </span><span class="mi">5</span><span class="p">.</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
 <p>Output: <code>LINESTRING (0 5, 5 5, 5 10)</code></p>
 <p>SQL Example:</p>
 <p><img alt="ST_OffsetCurve Negative" src="../../../../../../image/ST_OffsetCurve/ST_OffsetCurve_negative.svg" title="ST_OffsetCurve Negative Offset" /></p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_NPoints</span><span class="p">(</span><span class="n">ST_OffsetCurve</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 10 0, 10 10)&#39;</span><span class="p">),</span><span class="w"> </span><span class="o">-</span><span class="mi">3</span><span class="p">.</span><span class="mi">0</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_NPoints</span><span class="p">(</span><span class="n">ST_OffsetCurve</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING(0 0, 10 0, 10 10)'</span><span class="p">),</span><span class="w"> </span><span class="o">-</span><span class="mi">3</span><span class="p">.</span><span class="mi">0</span><span class="p">))</span>
 </code></pre></div>
 <p>Output: <code>11</code></p>
 <p>SQL Example:</p>
 <p><img alt="ST_OffsetCurve QuadrantSegments" src="../../../../../../image/ST_OffsetCurve/ST_OffsetCurve_quadrant.svg" title="ST_OffsetCurve with quadrantSegments" /></p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_NPoints</span><span class="p">(</span><span class="n">ST_OffsetCurve</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 10 0, 10 10)&#39;</span><span class="p">),</span><span class="w"> </span><span class="o">-</span><span class="mi">3</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_NPoints</span><span class="p">(</span><span class="n">ST_OffsetCurve</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING(0 0, 10 0, 10 10)'</span><span class="p">),</span><span class="w"> </span><span class="o">-</span><span class="mi">3</span><span class="p">.</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">))</span>
 </code></pre></div>
 <p>Output: <code>19</code></p>
 

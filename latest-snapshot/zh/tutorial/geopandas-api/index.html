@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6430,8 +6429,8 @@
 <span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span>
-        <span class="s2">&quot;spark.hadoop.fs.s3a.bucket.bucket-name.aws.credentials.provider&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider&quot;</span><span class="p">,</span>
+        <span class="s2">"spark.hadoop.fs.s3a.bucket.bucket-name.aws.credentials.provider"</span><span class="p">,</span>
+        <span class="s2">"org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
@@ -6443,8 +6442,8 @@
 <span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span>
-        <span class="s2">&quot;spark.hadoop.fs.s3a.aws.credentials.provider&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;com.amazonaws.auth.InstanceProfileCredentialsProvider&quot;</span><span class="p">,</span>
+        <span class="s2">"spark.hadoop.fs.s3a.aws.credentials.provider"</span><span class="p">,</span>
+        <span class="s2">"com.amazonaws.auth.InstanceProfileCredentialsProvider"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
@@ -6452,8 +6451,8 @@
 <span class="c1"># 使用 access key（不推荐用于生产环境）</span>
 <span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.hadoop.fs.s3a.access.key&quot;</span><span class="p">,</span> <span class="s2">&quot;your-access-key&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.hadoop.fs.s3a.secret.key&quot;</span><span class="p">,</span> <span class="s2">&quot;your-secret-key&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.hadoop.fs.s3a.access.key"</span><span class="p">,</span> <span class="s2">"your-access-key"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.hadoop.fs.s3a.secret.key"</span><span class="p">,</span> <span class="s2">"your-secret-key"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -6477,8 +6476,8 @@
 <span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span>
-        <span class="s2">&quot;spark.hadoop.fs.s3a.bucket.wherobots-examples.aws.credentials.provider&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider&quot;</span><span class="p">,</span>
+        <span class="s2">"spark.hadoop.fs.s3a.bucket.wherobots-examples.aws.credentials.provider"</span><span class="p">,</span>
+        <span class="s2">"org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
@@ -6486,12 +6485,12 @@
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
 <span class="c1"># 直接从 S3 加载 GeoParquet 文件</span>
-<span class="n">s3_path</span> <span class="o">=</span> <span class="s2">&quot;s3://wherobots-examples/data/onboarding_1/nyc_buildings.parquet&quot;</span>
+<span class="n">s3_path</span> <span class="o">=</span> <span class="s2">"s3://wherobots-examples/data/onboarding_1/nyc_buildings.parquet"</span>
 <span class="n">nyc_buildings</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">s3_path</span><span class="p">)</span>
 
 <span class="c1"># 显示基本信息</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dataset shape: </span><span class="si">{</span><span class="n">nyc_buildings</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Columns: </span><span class="si">{</span><span class="n">nyc_buildings</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Dataset shape: </span><span class="si">{</span><span class="n">nyc_buildings</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Columns: </span><span class="si">{</span><span class="n">nyc_buildings</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">nyc_buildings</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="_6">空间过滤<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
@@ -6518,42 +6517,42 @@
 
 <span class="c1"># 显示结果</span>
 <span class="nb">print</span><span class="p">(</span>
-    <span class="n">central_park_buildings</span><span class="p">[[</span><span class="s2">&quot;BUILD_ID&quot;</span><span class="p">,</span> <span class="s2">&quot;PROP_ADDR&quot;</span><span class="p">,</span> <span class="s2">&quot;height_val&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+    <span class="n">central_park_buildings</span><span class="p">[[</span><span class="s2">"BUILD_ID"</span><span class="p">,</span> <span class="s2">"PROP_ADDR"</span><span class="p">,</span> <span class="s2">"height_val"</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="p">)</span>
 </code></pre></div>
 <p><strong>针对大规模数据的替代方案——使用空间连接：</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 用边界框创建一个 GeoDataFrame</span>
-<span class="n">bbox_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span> <span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">central_park_bbox</span><span class="p">],</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+<span class="n">bbox_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">"id"</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]},</span> <span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">central_park_bbox</span><span class="p">],</span> <span class="n">crs</span><span class="o">=</span><span class="s2">"EPSG:4326"</span><span class="p">)</span>
 
 <span class="c1"># 使用空间连接筛选边界框内的建筑</span>
-<span class="n">central_park_buildings</span> <span class="o">=</span> <span class="n">nyc_buildings</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">bbox_gdf</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;intersects&quot;</span><span class="p">)</span>
+<span class="n">central_park_buildings</span> <span class="o">=</span> <span class="n">nyc_buildings</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">bbox_gdf</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">"intersects"</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="_7">高级操作<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <h3 id="_8">空间连接<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
 <p>可使用与 GeoPandas 相同的语法执行空间连接：</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 加载两份数据集</span>
-<span class="n">left_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s2">&quot;s3://bucket/left_data.parquet&quot;</span><span class="p">)</span>
-<span class="n">right_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s2">&quot;s3://bucket/right_data.parquet&quot;</span><span class="p">)</span>
+<span class="n">left_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s2">"s3://bucket/left_data.parquet"</span><span class="p">)</span>
+<span class="n">right_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s2">"s3://bucket/right_data.parquet"</span><span class="p">)</span>
 
 <span class="c1"># 使用 distance 谓词的空间连接</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">right_df</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;dwithin&quot;</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">right_df</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">"dwithin"</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
 
 <span class="c1"># 其他空间谓词</span>
-<span class="n">intersects_result</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">right_df</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;intersects&quot;</span><span class="p">)</span>
-<span class="n">contains_result</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">right_df</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;contains&quot;</span><span class="p">)</span>
+<span class="n">intersects_result</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">right_df</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">"intersects"</span><span class="p">)</span>
+<span class="n">contains_result</span> <span class="o">=</span> <span class="n">left_df</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">right_df</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">"contains"</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="_9">坐标参考系操作<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
 <p>在不同坐标参考系（CRS）之间转换几何对象：</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># GeoParquet 通常会保留 CRS 元数据，仅在缺失时进行设置</span>
-<span class="n">buildings</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s2">&quot;buildings.parquet&quot;</span><span class="p">)</span>
+<span class="n">buildings</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s2">"buildings.parquet"</span><span class="p">)</span>
 <span class="k">if</span> <span class="n">buildings</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">buildings</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+    <span class="n">buildings</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="s2">"EPSG:4326"</span><span class="p">)</span>
 
 <span class="c1"># 转换为投影坐标系以便计算面积</span>
-<span class="n">buildings_projected</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s2">&quot;EPSG:3857&quot;</span><span class="p">)</span>
+<span class="n">buildings_projected</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s2">"EPSG:3857"</span><span class="p">)</span>
 
 <span class="c1"># 计算面积</span>
-<span class="n">buildings_projected</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings_projected</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">area</span>
+<span class="n">buildings_projected</span><span class="p">[</span><span class="s2">"area"</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings_projected</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">area</span>
 </code></pre></div>
 <h3 id="_10">几何运算<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
 <p>应用几何变换与分析：</p>
@@ -6561,20 +6560,20 @@
 <span class="n">buffered</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>  <span class="c1"># 100 米缓冲</span>
 
 <span class="c1"># 几何属性</span>
-<span class="n">buildings</span><span class="p">[</span><span class="s2">&quot;is_valid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">is_valid</span>
-<span class="n">buildings</span><span class="p">[</span><span class="s2">&quot;is_simple&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">is_simple</span>
-<span class="n">buildings</span><span class="p">[</span><span class="s2">&quot;bounds&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">bounds</span>
+<span class="n">buildings</span><span class="p">[</span><span class="s2">"is_valid"</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">is_valid</span>
+<span class="n">buildings</span><span class="p">[</span><span class="s2">"is_simple"</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">is_simple</span>
+<span class="n">buildings</span><span class="p">[</span><span class="s2">"bounds"</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">bounds</span>
 
 <span class="c1"># 距离计算</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
 
 <span class="n">reference_point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="o">-</span><span class="mf">73.9857</span><span class="p">,</span> <span class="mf">40.7484</span><span class="p">)</span>  <span class="c1"># 时代广场</span>
-<span class="n">buildings</span><span class="p">[</span><span class="s2">&quot;distance_to_times_square&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">reference_point</span><span class="p">)</span>
+<span class="n">buildings</span><span class="p">[</span><span class="s2">"distance_to_times_square"</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">reference_point</span><span class="p">)</span>
 
 <span class="c1"># 面积与周长（需要使用投影 CRS）</span>
-<span class="n">buildings_projected</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s2">&quot;EPSG:3857&quot;</span><span class="p">)</span>  <span class="c1"># Web Mercator</span>
-<span class="n">buildings_projected</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings_projected</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">area</span>
-<span class="n">buildings_projected</span><span class="p">[</span><span class="s2">&quot;perimeter&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings_projected</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">length</span>
+<span class="n">buildings_projected</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s2">"EPSG:3857"</span><span class="p">)</span>  <span class="c1"># Web Mercator</span>
+<span class="n">buildings_projected</span><span class="p">[</span><span class="s2">"area"</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings_projected</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">area</span>
+<span class="n">buildings_projected</span><span class="p">[</span><span class="s2">"perimeter"</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings_projected</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">length</span>
 </code></pre></div>
 <h2 id="_11">性能考虑<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
 <h3 id="geopandas">何时仍使用传统 GeoPandas：<a class="headerlink" href="#geopandas" title="Permanent link">&para;</a></h3>
@@ -6681,8 +6680,8 @@ MultiIndex 在内的输入行索引会被新的分布式索引替代。除 <code
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">collect</span>
 
 <span class="n">by_region</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">dissolve</span><span class="p">(</span>
-    <span class="n">by</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">,</span>
-    <span class="n">aggfunc</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;population&quot;</span><span class="p">:</span> <span class="s2">&quot;sum&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;first&quot;</span><span class="p">},</span>
+    <span class="n">by</span><span class="o">=</span><span class="s2">"region"</span><span class="p">,</span>
+    <span class="n">aggfunc</span><span class="o">=</span><span class="p">{</span><span class="s2">"population"</span><span class="p">:</span> <span class="s2">"sum"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"first"</span><span class="p">},</span>
 <span class="p">)</span>
 <span class="n">all_building_parts</span> <span class="o">=</span> <span class="n">collect</span><span class="p">(</span><span class="n">buildings</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
 </code></pre></div>
@@ -6721,8 +6720,8 @@ MultiIndex 在内的输入行索引会被新的分布式索引替代。除 <code
 <span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span>
-        <span class="s2">&quot;spark.hadoop.fs.s3a.bucket.wherobots-examples.aws.credentials.provider&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider&quot;</span><span class="p">,</span>
+        <span class="s2">"spark.hadoop.fs.s3a.bucket.wherobots-examples.aws.credentials.provider"</span><span class="p">,</span>
+        <span class="s2">"org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
@@ -6730,30 +6729,30 @@ MultiIndex 在内的输入行索引会被新的分布式索引替代。除 <code
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
 <span class="c1"># 加载数据</span>
-<span class="n">DATA_DIR</span> <span class="o">=</span> <span class="s2">&quot;s3://wherobots-examples/data/geopandas_blog/&quot;</span>
-<span class="n">overture_size</span> <span class="o">=</span> <span class="s2">&quot;1M&quot;</span>
-<span class="n">postal_codes_path</span> <span class="o">=</span> <span class="n">DATA_DIR</span> <span class="o">+</span> <span class="s2">&quot;postal-code/&quot;</span>
-<span class="n">overture_path</span> <span class="o">=</span> <span class="n">DATA_DIR</span> <span class="o">+</span> <span class="n">overture_size</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;overture-buildings/&quot;</span>
+<span class="n">DATA_DIR</span> <span class="o">=</span> <span class="s2">"s3://wherobots-examples/data/geopandas_blog/"</span>
+<span class="n">overture_size</span> <span class="o">=</span> <span class="s2">"1M"</span>
+<span class="n">postal_codes_path</span> <span class="o">=</span> <span class="n">DATA_DIR</span> <span class="o">+</span> <span class="s2">"postal-code/"</span>
+<span class="n">overture_path</span> <span class="o">=</span> <span class="n">DATA_DIR</span> <span class="o">+</span> <span class="n">overture_size</span> <span class="o">+</span> <span class="s2">"/"</span> <span class="o">+</span> <span class="s2">"overture-buildings/"</span>
 
 <span class="n">postal_codes</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">postal_codes_path</span><span class="p">)</span>
 <span class="n">buildings</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">overture_path</span><span class="p">)</span>
 
 <span class="c1"># 空间分析（GeoParquet 通常会保留 CRS 元数据）</span>
 <span class="k">if</span> <span class="n">buildings</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">buildings</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
-<span class="n">buildings_projected</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s2">&quot;EPSG:3857&quot;</span><span class="p">)</span>
+    <span class="n">buildings</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="s2">"EPSG:4326"</span><span class="p">)</span>
+<span class="n">buildings_projected</span> <span class="o">=</span> <span class="n">buildings</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s2">"EPSG:3857"</span><span class="p">)</span>
 
 <span class="c1"># 计算面积并过滤</span>
-<span class="n">buildings_projected</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings_projected</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">area</span>
-<span class="n">large_buildings</span> <span class="o">=</span> <span class="n">buildings_projected</span><span class="p">[</span><span class="n">buildings_projected</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">]</span>
+<span class="n">buildings_projected</span><span class="p">[</span><span class="s2">"area"</span><span class="p">]</span> <span class="o">=</span> <span class="n">buildings_projected</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">area</span>
+<span class="n">large_buildings</span> <span class="o">=</span> <span class="n">buildings_projected</span><span class="p">[</span><span class="n">buildings_projected</span><span class="p">[</span><span class="s2">"area"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">]</span>
 
-<span class="n">result</span> <span class="o">=</span> <span class="n">large_buildings</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">postal_codes</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;intersects&quot;</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">large_buildings</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">postal_codes</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">"intersects"</span><span class="p">)</span>
 
 <span class="c1"># 按邮政编码聚合</span>
 <span class="n">summary</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">result</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;postal_code&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s2">&quot;area&quot;</span><span class="p">:</span> <span class="s2">&quot;sum&quot;</span><span class="p">,</span> <span class="s2">&quot;BUILD_ID&quot;</span><span class="p">:</span> <span class="s2">&quot;count&quot;</span><span class="p">})</span>
-    <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;BUILD_ID&quot;</span><span class="p">:</span> <span class="s2">&quot;building_count&quot;</span><span class="p">})</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"postal_code"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s2">"area"</span><span class="p">:</span> <span class="s2">"sum"</span><span class="p">,</span> <span class="s2">"BUILD_ID"</span><span class="p">:</span> <span class="s2">"count"</span><span class="p">})</span>
+    <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"BUILD_ID"</span><span class="p">:</span> <span class="s2">"building_count"</span><span class="p">})</span>
 <span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">summary</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>

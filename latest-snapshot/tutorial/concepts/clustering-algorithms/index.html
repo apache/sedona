@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5694,9 +5693,9 @@
             <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">),</span>
             <span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">),</span>
         <span class="p">],</span>
-        <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">],</span>
     <span class="p">)</span>
-<span class="p">)</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;point&quot;</span><span class="p">,</span> <span class="n">ST_Point</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)))</span>
+<span class="p">)</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"point"</span><span class="p">,</span> <span class="n">ST_Point</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"x"</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"y"</span><span class="p">)))</span>
 </code></pre></div>
 <p>Here are the contents of the DataFrame:</p>
 <div class="highlight"><pre><span></span><code>+---+----+---+----------------+
@@ -5720,7 +5719,7 @@
 <p>Here’s how to run the DBSCAN algorithm:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">dbscan</span>
 
-<span class="n">dbscan</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">dbscan</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"id"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>Here are the results of the computation:</p>
 <div class="highlight"><pre><span></span><code>+---+----+---+----------------+------+-------+

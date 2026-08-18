@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5571,7 +5570,7 @@
 <p>Format: <code>ST_SubDivide(geom: geometry, maxVertices: int)</code></p>
 <p>Return type: <code>Array&lt;Geometry&gt;</code></p>
 <p>SQL example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_SubDivide</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 85 85, 100 100, 120 120, 21 21, 10 10, 5 5)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">5</span><span class="p">));</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_SubDivide</span><span class="p">(</span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'LINESTRING(0 0, 85 85, 100 100, 120 120, 21 21, 10 10, 5 5)'</span><span class="p">),</span><span class="w"> </span><span class="mi">5</span><span class="p">));</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>MULTILINESTRING ((0 0, 5 5), (5 5, 10 10), (10 10, 21 21), (21 21, 60 60), (60 60, 85 85), (85 85, 100 100), (100 100, 120 120))

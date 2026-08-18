@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5808,13 +5807,13 @@
 <h2 id="one-line-to-raw-osm">One line to raw OSM<a class="headerlink" href="#one-line-to-raw-osm" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaContext</span>
 
-<span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">&quot;local[*]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">())</span>
+<span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">())</span>
 
-<span class="c1"># a regional extract from Geofabrik, or Sedona&#39;s bundled Monaco sample</span>
-<span class="n">osm</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;osmpbf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-    <span class="s2">&quot;spark/common/src/test/resources/osmpbf/monaco-latest.osm.pbf&quot;</span>
+<span class="c1"># a regional extract from Geofabrik, or Sedona's bundled Monaco sample</span>
+<span class="n">osm</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"osmpbf"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="s2">"spark/common/src/test/resources/osmpbf/monaco-latest.osm.pbf"</span>
 <span class="p">)</span>
-<span class="n">osm</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;osm&quot;</span><span class="p">)</span>
+<span class="n">osm</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"osm"</span><span class="p">)</span>
 <span class="n">osm</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 </code></pre></div>
 <p>The reader gives you the raw OSM element model, one row per element:</p>
@@ -5828,7 +5827,7 @@
  |-- changeset / timestamp / uid / user / version / visible   -- edit metadata
 </code></pre></div>
 <p>Monaco is small but complete — three element kinds, one table:</p>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT kind, COUNT(*) AS n FROM osm GROUP BY kind ORDER BY n DESC&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT kind, COUNT(*) AS n FROM osm GROUP BY kind ORDER BY n DESC"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+--------+-----+
 |kind    |n    |
@@ -5840,13 +5839,13 @@
 </code></pre></div>
 <h2 id="nodes-are-points">Nodes are points<a class="headerlink" href="#nodes-are-points" title="Permanent link">&para;</a></h2>
 <p>A <strong>node</strong> is the only element with a coordinate, so points are immediate. Here are Monaco's amenities:</p>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">    SELECT id, tags[&#39;amenity&#39;] AS amenity, tags[&#39;name&#39;] AS name,</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
+<span class="s2">    SELECT id, tags['amenity'] AS amenity, tags['name'] AS name,</span>
 <span class="s2">           ST_ReducePrecision(ST_Point(location.longitude, location.latitude), 5) AS geom</span>
 <span class="s2">    FROM   osm</span>
-<span class="s2">    WHERE  kind = &#39;node&#39; AND tags[&#39;amenity&#39;] IS NOT NULL</span>
+<span class="s2">    WHERE  kind = 'node' AND tags['amenity'] IS NOT NULL</span>
 <span class="s2">    ORDER BY id LIMIT 5</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+--------+-------+------------------------------+------------------------+
 |id      |amenity|name                          |geom                    |
@@ -5862,15 +5861,15 @@
 <p>Here's the part that trips people up. A <strong>way</strong> (a road, a river, a building outline) has <strong>no coordinates of its own</strong> — only <code>refs</code>, an <em>ordered</em> list of the node IDs it passes through. To get a geometry you resolve those IDs back to node coordinates, in order, and connect them.</p>
 <p><img alt="An OSM way stores an ordered list of node references; joining refs back to node coordinates and connecting them in sequence reconstructs the LineString" src="../../../../osm-pbf-reader-assembly.svg" /></p>
 <p>That's a <code>posexplode</code> to keep the ordering, a join to the nodes, and a rebuild in sequence:</p>
-<div class="highlight"><pre><span></span><code><span class="n">roads</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">roads</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    WITH nodes AS (</span>
 <span class="s2">        SELECT id, location.longitude AS lon, location.latitude AS lat</span>
-<span class="s2">        FROM osm WHERE kind = &#39;node&#39;</span>
+<span class="s2">        FROM osm WHERE kind = 'node'</span>
 <span class="s2">    ),</span>
 <span class="s2">    way_pts AS (                               -- one row per (way, vertex), ordered</span>
 <span class="s2">        SELECT w.id AS way_id, w.highway, w.pos AS seq, n.lon, n.lat</span>
-<span class="s2">        FROM (SELECT id, tags[&#39;highway&#39;] AS highway, posexplode(refs) AS (pos, ref)</span>
-<span class="s2">              FROM osm WHERE kind = &#39;way&#39; AND tags[&#39;highway&#39;] IS NOT NULL) w</span>
+<span class="s2">        FROM (SELECT id, tags['highway'] AS highway, posexplode(refs) AS (pos, ref)</span>
+<span class="s2">              FROM osm WHERE kind = 'way' AND tags['highway'] IS NOT NULL) w</span>
 <span class="s2">        JOIN nodes n ON n.id = w.ref</span>
 <span class="s2">    )</span>
 <span class="s2">    SELECT way_id, highway,</span>
@@ -5881,11 +5880,11 @@
 <span class="s2">    FROM   way_pts</span>
 <span class="s2">    GROUP BY way_id, highway</span>
 <span class="s2">    HAVING count(*) &gt;= 2</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
-<span class="n">roads</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;roads&quot;</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span>
+<span class="n">roads</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"roads"</span><span class="p">)</span>
 </code></pre></div>
 <p><code>array_sort</code> on <code>(seq, …)</code> guarantees the vertices land in the way's declared order, and <code>ST_MakeLine</code> connects the sorted points into the geometry — no string assembly. Note the tag filter sits <em>before</em> the join, so only road vertices are ever shuffled. Now the ways are real <code>LineString</code>s and the full Spatial SQL toolkit applies. How much road is in Monaco?</p>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT highway,</span>
 <span class="s2">           COUNT(*) AS ways,</span>
 <span class="s2">           ROUND(SUM(ST_LengthSpheroid(geom)) / 1000, 1) AS km</span>
@@ -5893,7 +5892,7 @@
 <span class="s2">    GROUP BY highway</span>
 <span class="s2">    ORDER BY km DESC</span>
 <span class="s2">    LIMIT 5</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+-----------+----+----+
 |highway    |ways|km  |
@@ -5908,11 +5907,11 @@
 <p><strong>3,334 road ways, 163.9 km</strong> of it — reconstructed from raw node references, no preprocessing. (The same pattern builds rivers, boundaries, or coastlines; you just filter a different tag.)</p>
 <h2 id="every-element-carries-its-history">Every element carries its history<a class="headerlink" href="#every-element-carries-its-history" title="Permanent link">&para;</a></h2>
 <p>OSM elements are versioned. Each row keeps a <code>version</code> and an edit <code>timestamp</code>, so you can measure how <em>alive</em> a map is — no separate history file. When was Monaco mapped?</p>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT YEAR(timestamp) AS yr, COUNT(*) AS edits</span>
 <span class="s2">    FROM   osm WHERE timestamp IS NOT NULL</span>
 <span class="s2">    GROUP BY YEAR(timestamp) ORDER BY edits DESC LIMIT 5</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+----+-----+
 |  yr|edits|
@@ -5925,17 +5924,17 @@
 +----+-----+
 </code></pre></div>
 <p>And which features have been revised the most? <code>version</code> tells you — the big administrative-boundary relations churn constantly:</p>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">    SELECT kind, tags[&#39;name&#39;] AS name, version</span>
-<span class="s2">    FROM   osm WHERE tags[&#39;name&#39;] IS NOT NULL</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
+<span class="s2">    SELECT kind, tags['name'] AS name, version</span>
+<span class="s2">    FROM   osm WHERE tags['name'] IS NOT NULL</span>
 <span class="s2">    ORDER BY version DESC LIMIT 3</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+--------+--------------------------+-------+
 |kind    |name                      |version|
 +--------+--------------------------+-------+
 |relation|France métropolitaine     |800    |
-|relation|Provence-Alpes-Côte d&#39;Azur|774    |
+|relation|Provence-Alpes-Côte d'Azur|774    |
 |relation|France (terres)           |614    |
 +--------+--------------------------+-------+
 </code></pre></div>

@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6473,8 +6472,8 @@
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">sedona</span><span class="p">.</span><span class="nn">spark</span><span class="p">.</span><span class="nc">SedonaContext</span>
 
 <span class="kd">val</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SedonaContext</span><span class="p">.</span><span class="n">builder</span><span class="p">()</span>
-<span class="w">  </span><span class="p">.</span><span class="n">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// 在集群上运行时请删除此行</span>
-<span class="w">  </span><span class="p">.</span><span class="n">appName</span><span class="p">(</span><span class="s">&quot;rasterTutorial&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">master</span><span class="p">(</span><span class="s">"local[*]"</span><span class="p">)</span><span class="w"> </span><span class="c1">// 在集群上运行时请删除此行</span>
+<span class="w">  </span><span class="p">.</span><span class="n">appName</span><span class="p">(</span><span class="s">"rasterTutorial"</span><span class="p">)</span>
 <span class="w">  </span><span class="p">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="kd">val</span><span class="w"> </span><span class="n">sedona</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SedonaContext</span><span class="p">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </code></pre></div>
@@ -6483,8 +6482,8 @@
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">org.apache.sedona.spark.SedonaContext</span><span class="p">;</span>
 
 <span class="n">SparkSession</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SedonaContext</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-<span class="w">  </span><span class="p">.</span><span class="na">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// 在集群上运行时请删除此行</span>
-<span class="w">  </span><span class="p">.</span><span class="na">appName</span><span class="p">(</span><span class="s">&quot;rasterTutorial&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="na">master</span><span class="p">(</span><span class="s">"local[*]"</span><span class="p">)</span><span class="w"> </span><span class="c1">// 在集群上运行时请删除此行</span>
+<span class="w">  </span><span class="p">.</span><span class="na">appName</span><span class="p">(</span><span class="s">"rasterTutorial"</span><span class="p">)</span>
 <span class="w">  </span><span class="p">.</span><span class="na">getOrCreate</span><span class="p">();</span>
 <span class="n">SparkSession</span><span class="w"> </span><span class="n">sedona</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SedonaContext</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
 </code></pre></div>
@@ -6495,9 +6494,9 @@
 <span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span>
-        <span class="s2">&quot;spark.jars.packages&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;org.apache.sedona:sedona-spark-shaded-3.3_2.12:1.9.1,&quot;</span>
-        <span class="s2">&quot;org.datasyslab:geotools-wrapper:1.9.1-33.5&quot;</span><span class="p">,</span>
+        <span class="s2">"spark.jars.packages"</span><span class="p">,</span>
+        <span class="s2">"org.apache.sedona:sedona-spark-shaded-3.3_2.12:1.9.1,"</span>
+        <span class="s2">"org.datasyslab:geotools-wrapper:1.9.1-33.5"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
@@ -6537,7 +6536,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.transform</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_bounds</span>
 
-<span class="n">WORK</span> <span class="o">=</span> <span class="s2">&quot;/tmp/sedona-raster-tutorial&quot;</span>
+<span class="n">WORK</span> <span class="o">=</span> <span class="s2">"/tmp/sedona-raster-tutorial"</span>
 <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">WORK</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">AOI</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">91.10</span><span class="p">,</span> <span class="mf">41.50</span><span class="p">,</span> <span class="o">-</span><span class="mf">91.00</span><span class="p">,</span> <span class="mf">41.60</span><span class="p">)</span>  <span class="c1"># xmin, ymin, xmax, ymax，EPSG:4326</span>
@@ -6548,28 +6547,28 @@
 <span class="n">ys</span><span class="p">,</span> <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">H</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="n">W</span><span class="p">]</span>
 <span class="n">field</span> <span class="o">=</span> <span class="p">((</span><span class="n">xs</span> <span class="o">-</span> <span class="mi">96</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">ys</span> <span class="o">-</span> <span class="mi">160</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="o">**</span><span class="mi">2</span>  <span class="c1"># 圆形植被田</span>
 
-<span class="n">red</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1500</span> <span class="o">+</span> <span class="mi">200</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">)))</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;uint16&quot;</span><span class="p">)</span>
+<span class="n">red</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1500</span> <span class="o">+</span> <span class="mi">200</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">)))</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">"uint16"</span><span class="p">)</span>
 <span class="n">nir</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1800</span> <span class="o">+</span> <span class="mi">200</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="n">H</span><span class="p">,</span> <span class="n">W</span><span class="p">)))</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10000</span><span class="p">)</span>
-<span class="n">nir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">nir</span> <span class="o">+</span> <span class="mi">4000</span><span class="p">,</span> <span class="n">nir</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;uint16&quot;</span><span class="p">)</span>
+<span class="n">nir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">nir</span> <span class="o">+</span> <span class="mi">4000</span><span class="p">,</span> <span class="n">nir</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">"uint16"</span><span class="p">)</span>
 
 <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">WORK</span><span class="si">}</span><span class="s2">/scene.tif&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;w&quot;</span><span class="p">,</span>
-    <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;GTiff&quot;</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">WORK</span><span class="si">}</span><span class="s2">/scene.tif"</span><span class="p">,</span>
+    <span class="s2">"w"</span><span class="p">,</span>
+    <span class="n">driver</span><span class="o">=</span><span class="s2">"GTiff"</span><span class="p">,</span>
     <span class="n">tiled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">blockxsize</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
     <span class="n">blockysize</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
     <span class="n">height</span><span class="o">=</span><span class="n">H</span><span class="p">,</span>
     <span class="n">width</span><span class="o">=</span><span class="n">W</span><span class="p">,</span>
     <span class="n">count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-    <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;uint16&quot;</span><span class="p">,</span>
-    <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="o">=</span><span class="s2">"uint16"</span><span class="p">,</span>
+    <span class="n">crs</span><span class="o">=</span><span class="s2">"EPSG:4326"</span><span class="p">,</span>
     <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span>
 <span class="p">)</span> <span class="k">as</span> <span class="n">dst</span><span class="p">:</span>
     <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">red</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">dst</span><span class="o">.</span><span class="n">set_band_description</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">)</span>
+    <span class="n">dst</span><span class="o">.</span><span class="n">set_band_description</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">"red"</span><span class="p">)</span>
     <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">nir</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">dst</span><span class="o">.</span><span class="n">set_band_description</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;nir&quot;</span><span class="p">)</span>
+    <span class="n">dst</span><span class="o">.</span><span class="n">set_band_description</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"nir"</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="2-raster">2. 使用 <code>raster</code> 数据源加载<a class="headerlink" href="#2-raster" title="Permanent link">&para;</a></h3>
 <p><code>raster</code> 数据源可以加载 GeoTIFF 并自动将文件切成多个 tile。每一个 tile 在结果 DataFrame 中对应一行，<code>Raster</code> 类型保存于其中的一列。</p>
@@ -6577,21 +6576,21 @@
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="c1">// 把路径替换为 scene.tif 的实际位置，例如对象存储 URL。</span>
-<span class="kd">val</span><span class="w"> </span><span class="n">rasterDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/tmp/sedona-raster-tutorial/scene.tif&quot;</span><span class="p">)</span>
-<span class="n">rasterDf</span><span class="p">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s">&quot;rasterDf&quot;</span><span class="p">)</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">rasterDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"raster"</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">"/tmp/sedona-raster-tutorial/scene.tif"</span><span class="p">)</span>
+<span class="n">rasterDf</span><span class="p">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s">"rasterDf"</span><span class="p">)</span>
 <span class="n">rasterDf</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="c1">// 把路径替换为 scene.tif 的实际位置，例如对象存储 URL。</span>
-<span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">rasterDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">&quot;/tmp/sedona-raster-tutorial/scene.tif&quot;</span><span class="p">);</span>
-<span class="n">rasterDf</span><span class="p">.</span><span class="na">createOrReplaceTempView</span><span class="p">(</span><span class="s">&quot;rasterDf&quot;</span><span class="p">);</span>
+<span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">rasterDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">"raster"</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">"/tmp/sedona-raster-tutorial/scene.tif"</span><span class="p">);</span>
+<span class="n">rasterDf</span><span class="p">.</span><span class="na">createOrReplaceTempView</span><span class="p">(</span><span class="s">"rasterDf"</span><span class="p">);</span>
 <span class="n">rasterDf</span><span class="p">.</span><span class="na">show</span><span class="p">();</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">rasterDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">WORK</span><span class="si">}</span><span class="s2">/scene.tif&quot;</span><span class="p">)</span>
-<span class="n">rasterDf</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;rasterDf&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">rasterDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"raster"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">WORK</span><span class="si">}</span><span class="s2">/scene.tif"</span><span class="p">)</span>
+<span class="n">rasterDf</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"rasterDf"</span><span class="p">)</span>
 <span class="n">rasterDf</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
@@ -6600,7 +6599,7 @@
 <div class="highlight"><pre><span></span><code>+--------------------+---+---+----------+
 |                rast|  x|  y|      name|
 +--------------------+---+---+----------+
-|GridCoverage2D[&quot;g...|  0|  0| scene.tif|
+|GridCoverage2D["g...|  0|  0| scene.tif|
 +--------------------+---+---+----------+
 </code></pre></div>
 <p>各列含义：</p>
@@ -6614,14 +6613,14 @@
 <p>更多内容见下文的 <a href="#loading-options">加载选项</a>：包括 tile 大小覆盖、目录递归读取、以及 NetCDF / Arc Grid 等非 GeoTIFF 格式。</p>
 <h3 id="3">3. 检视元数据<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
 <p>在做任何处理之前，先确认像素维度、地理参考与坐标系：</p>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT RS_Width(rast)       AS width,</span>
 <span class="s2">           RS_Height(rast)      AS height,</span>
 <span class="s2">           RS_NumBands(rast)    AS bands,</span>
 <span class="s2">           RS_SRID(rast)        AS srid,</span>
 <span class="s2">           RS_GeoReference(rast) AS world_file</span>
 <span class="s2">    FROM rasterDf</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+-----+------+-----+----+----------------------------------------------------------+
 |width|height|bands|srid|world_file                                                 |
@@ -6638,10 +6637,10 @@
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaUtils</span>
 
 <span class="n">SedonaUtils</span><span class="o">.</span><span class="n">display_image</span><span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT RS_Band(rast, ARRAY(1)) AS rast FROM rasterDf&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT RS_Band(rast, ARRAY(1)) AS rast FROM rasterDf"</span><span class="p">)</span>
 <span class="p">)</span>
 <span class="n">SedonaUtils</span><span class="o">.</span><span class="n">display_image</span><span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT RS_Band(rast, ARRAY(2)) AS rast FROM rasterDf&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT RS_Band(rast, ARRAY(2)) AS rast FROM rasterDf"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>波段 1 是红光通道 —— 大体是没什么特征的裸地。波段 2 (NIR) 在植被田上明显变亮：</p>
@@ -6665,14 +6664,14 @@
 <div class="highlight"><pre><span></span><code>NDVI = (NIR − Red) / (NIR + Red)
 </code></pre></div>
 <p><a href="../../api/sql/Raster-map-algebra/"><code>RS_MapAlgebra</code></a> 在一个或多个波段上按像素运行一段脚本。输出类型 <code>'D'</code>（double）保留 NDVI 的负值范围：</p>
-<div class="highlight"><pre><span></span><code><span class="n">ndviDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">ndviDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT RS_MapAlgebra(</span>
-<span class="s2">               rast, &#39;D&#39;,</span>
-<span class="s2">               &#39;out[0] = (rast[1] - rast[0]) / (rast[1] + rast[0] + 1e-6);&#39;</span>
+<span class="s2">               rast, 'D',</span>
+<span class="s2">               'out[0] = (rast[1] - rast[0]) / (rast[1] + rast[0] + 1e-6);'</span>
 <span class="s2">           ) AS rast</span>
 <span class="s2">    FROM rasterDf</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
-<span class="n">ndviDf</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;ndviDf&quot;</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span>
+<span class="n">ndviDf</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"ndviDf"</span><span class="p">)</span>
 </code></pre></div>
 <p><img alt="NDVI map algebra 示意" src="../../../image/raster-tutorial/ndvi-math.svg" /></p>
 <p>Map algebra 是最通用的处理原语 —— 裁剪、遮罩、阈值过滤、不同波段或不同栅格之间的算术运算，都可以用同样的 <code>RS_MapAlgebra(rast, pixelType, script)</code>（或双栅格版本）写出来。脚本语法见 <a href="../../api/sql/Raster-map-algebra/">Map algebra</a>；其他备选算子（<code>RS_Clip</code>、<code>RS_Resample</code>、<code>RS_SetValues</code>）见下文的 <a href="#raster-processing-reference">栅格处理参考</a>。</p>
@@ -6696,41 +6695,41 @@ scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原�
 <span class="n">parcels</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
     <span class="p">[</span>
         <span class="n">Row</span><span class="p">(</span>
-            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">&quot;Orchard&quot;</span><span class="p">,</span>
-            <span class="n">wkt</span><span class="o">=</span><span class="s2">&quot;POLYGON((-91.085 41.515, -91.045 41.510, -91.030 41.530, &quot;</span>
-            <span class="s2">&quot;-91.040 41.560, -91.075 41.572, -91.085 41.555, -91.085 41.515))&quot;</span><span class="p">,</span>
+            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">"Orchard"</span><span class="p">,</span>
+            <span class="n">wkt</span><span class="o">=</span><span class="s2">"POLYGON((-91.085 41.515, -91.045 41.510, -91.030 41.530, "</span>
+            <span class="s2">"-91.040 41.560, -91.075 41.572, -91.085 41.555, -91.085 41.515))"</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="n">Row</span><span class="p">(</span>
-            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">&quot;EastFarm&quot;</span><span class="p">,</span>
-            <span class="n">wkt</span><span class="o">=</span><span class="s2">&quot;POLYGON((-91.025 41.512, -91.005 41.512, -91.005 41.572, &quot;</span>
-            <span class="s2">&quot;-91.035 41.572, -91.025 41.535, -91.025 41.512))&quot;</span><span class="p">,</span>
+            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">"EastFarm"</span><span class="p">,</span>
+            <span class="n">wkt</span><span class="o">=</span><span class="s2">"POLYGON((-91.025 41.512, -91.005 41.512, -91.005 41.572, "</span>
+            <span class="s2">"-91.035 41.572, -91.025 41.535, -91.025 41.512))"</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="n">Row</span><span class="p">(</span>
-            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">&quot;WestFarm&quot;</span><span class="p">,</span>
-            <span class="n">wkt</span><span class="o">=</span><span class="s2">&quot;POLYGON((-91.095 41.520, -91.087 41.520, -91.080 41.555, &quot;</span>
-            <span class="s2">&quot;-91.080 41.572, -91.095 41.572, -91.095 41.520))&quot;</span><span class="p">,</span>
+            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">"WestFarm"</span><span class="p">,</span>
+            <span class="n">wkt</span><span class="o">=</span><span class="s2">"POLYGON((-91.095 41.520, -91.087 41.520, -91.080 41.555, "</span>
+            <span class="s2">"-91.080 41.572, -91.095 41.572, -91.095 41.520))"</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="n">Row</span><span class="p">(</span>
-            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">&quot;NorthBlock&quot;</span><span class="p">,</span>
-            <span class="n">wkt</span><span class="o">=</span><span class="s2">&quot;POLYGON((-91.095 41.580, -91.005 41.580, -91.005 41.598, &quot;</span>
-            <span class="s2">&quot;-91.095 41.598, -91.095 41.580))&quot;</span><span class="p">,</span>
+            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">"NorthBlock"</span><span class="p">,</span>
+            <span class="n">wkt</span><span class="o">=</span><span class="s2">"POLYGON((-91.095 41.580, -91.005 41.580, -91.005 41.598, "</span>
+            <span class="s2">"-91.095 41.598, -91.095 41.580))"</span><span class="p">,</span>
         <span class="p">),</span>
         <span class="n">Row</span><span class="p">(</span>
-            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">&quot;SouthStrip&quot;</span><span class="p">,</span>
-            <span class="n">wkt</span><span class="o">=</span><span class="s2">&quot;POLYGON((-91.095 41.502, -91.005 41.502, -91.005 41.508, &quot;</span>
-            <span class="s2">&quot;-91.095 41.508, -91.095 41.502))&quot;</span><span class="p">,</span>
+            <span class="n">parcel_id</span><span class="o">=</span><span class="s2">"SouthStrip"</span><span class="p">,</span>
+            <span class="n">wkt</span><span class="o">=</span><span class="s2">"POLYGON((-91.095 41.502, -91.005 41.502, -91.005 41.508, "</span>
+            <span class="s2">"-91.095 41.508, -91.095 41.502))"</span><span class="p">,</span>
         <span class="p">),</span>
     <span class="p">]</span>
-<span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;parcel_id&quot;</span><span class="p">,</span> <span class="s2">&quot;ST_GeomFromText(wkt) AS geom&quot;</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"parcel_id"</span><span class="p">,</span> <span class="s2">"ST_GeomFromText(wkt) AS geom"</span><span class="p">)</span>
 
-<span class="n">parcels</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;parcels&quot;</span><span class="p">)</span>
+<span class="n">parcels</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"parcels"</span><span class="p">)</span>
 
-<span class="n">ranked</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">ranked</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT p.parcel_id,</span>
-<span class="s2">           ROUND(RS_ZonalStats(n.rast, p.geom, &#39;mean&#39;), 4) AS mean_ndvi</span>
+<span class="s2">           ROUND(RS_ZonalStats(n.rast, p.geom, 'mean'), 4) AS mean_ndvi</span>
 <span class="s2">    FROM parcels p, ndviDf n</span>
 <span class="s2">    ORDER BY mean_ndvi DESC</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span>
 <span class="n">ranked</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+----------+---------+
@@ -6757,26 +6756,26 @@ scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原�
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">spark</span><span class="p">.</span><span class="nn">sql</span><span class="p">.</span><span class="nn">functions</span><span class="p">.</span><span class="n">expr</span>
 
-<span class="n">ndviDf</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;raster_binary&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;RS_AsGeoTiff(rast)&quot;</span><span class="p">))</span>
-<span class="w">  </span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">).</span><span class="n">mode</span><span class="p">(</span><span class="s">&quot;overwrite&quot;</span><span class="p">).</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/tmp/sedona-raster-tutorial/ndvi_out&quot;</span><span class="p">)</span>
+<span class="n">ndviDf</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">"raster_binary"</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"RS_AsGeoTiff(rast)"</span><span class="p">))</span>
+<span class="w">  </span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"raster"</span><span class="p">).</span><span class="n">mode</span><span class="p">(</span><span class="s">"overwrite"</span><span class="p">).</span><span class="n">save</span><span class="p">(</span><span class="s">"/tmp/sedona-raster-tutorial/ndvi_out"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">expr</span>
 
 <span class="p">(</span>
-    <span class="n">ndviDf</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;raster_binary&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;RS_AsGeoTiff(rast)&quot;</span><span class="p">))</span>
-    <span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">WORK</span><span class="si">}</span><span class="s2">/ndvi_out&quot;</span><span class="p">)</span>
+    <span class="n">ndviDf</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"raster_binary"</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">"RS_AsGeoTiff(rast)"</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"raster"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"overwrite"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">WORK</span><span class="si">}</span><span class="s2">/ndvi_out"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 </div>
 </div>
 </div>
 <p>输出目录中，每一行对应一个 part 子目录中的一个文件，再加上 Spark 的 <code>_SUCCESS</code> 标记。读回方式：</p>
-<div class="highlight"><pre><span></span><code><span class="n">roundtrip</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">WORK</span><span class="si">}</span><span class="s2">/ndvi_out/*/*.tiff&quot;</span><span class="p">)</span>
-<span class="n">roundtrip</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;RS_Width(rast) AS w&quot;</span><span class="p">,</span> <span class="s2">&quot;RS_Height(rast) AS h&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">roundtrip</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"raster"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">WORK</span><span class="si">}</span><span class="s2">/ndvi_out/*/*.tiff"</span><span class="p">)</span>
+<span class="n">roundtrip</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_Width(rast) AS w"</span><span class="p">,</span> <span class="s2">"RS_Height(rast) AS h"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>完整的 writer 选项（<code>rasterField</code>、<code>pathField</code>、<code>fileExtension</code>、<code>useDirectCommitter</code>）与可选的二进制格式（<code>RS_AsGeoTiff</code>、<code>RS_AsCOG</code>、<code>RS_AsArcGrid</code>、<code>RS_AsPNG</code>）见下文 <a href="#writing-rasters-reference">写出栅格参考</a>。</p>
 <hr />
@@ -6819,10 +6818,10 @@ scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原�
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">rasterDf</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tileWidth&quot;</span><span class="p">,</span> <span class="s2">&quot;256&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tileHeight&quot;</span><span class="p">,</span> <span class="s2">&quot;256&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/some/path/*.tif&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"raster"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"tileWidth"</span><span class="p">,</span> <span class="s2">"256"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"tileHeight"</span><span class="p">,</span> <span class="s2">"256"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/some/path/*.tif"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 </div>
@@ -6838,10 +6837,10 @@ scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原�
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">rasterDf</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;recursiveFileLookup&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;pathGlobFilter&quot;</span><span class="p">,</span> <span class="s2">&quot;*.tif*&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/raster_folder&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"raster"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"recursiveFileLookup"</span><span class="p">,</span> <span class="s2">"true"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"pathGlobFilter"</span><span class="p">,</span> <span class="s2">"*.tif*"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/path/to/raster_folder"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 </div>
@@ -6856,8 +6855,8 @@ scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原�
 <div class="tabbed-set tabbed-alternate" data-tabs="7:1"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">rawDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;binaryFile&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/file.asc&quot;</span><span class="p">)</span>
-<span class="n">rawDf</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;rawdf&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">rawDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"binaryFile"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/path/to/file.asc"</span><span class="p">)</span>
+<span class="n">rawDf</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"rawdf"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 </div>
@@ -6975,9 +6974,9 @@ scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原�
 <span class="c1"># ndvi_after 与 ndvi_before 是两个日期的 NDVI 栅格，位于同一网格上，</span>
 <span class="c1"># 并各自带有 raster 数据源生成的 x、y tile 索引列。</span>
 <span class="p">(</span>
-    <span class="n">ndvi_after</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;after&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ndvi_before</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;before&quot;</span><span class="p">),</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">])</span>
-    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">delta</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;after.rast&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;before.rast&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;delta&quot;</span><span class="p">))</span>
+    <span class="n">ndvi_after</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"after"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ndvi_before</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"before"</span><span class="p">),</span> <span class="p">[</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">])</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">delta</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"after.rast"</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"before.rast"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"delta"</span><span class="p">))</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>单栅格写法、NDVI 的两种写法对照，以及需要注意的限制，见<a href="../../api/sql/Raster-UDF/">栅格 UDF</a>。</p>
@@ -6985,9 +6984,9 @@ scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原�
 <h3 id="_9">几何栅格化<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
 <p><a href="../../api/sql/Raster-Operators/RS_AsRaster/"><code>RS_AsRaster</code></a> 将矢量几何渲染到栅格网格上：</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_AsRaster</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON((150 150, 220 260, 190 300, 300 220, 150 150))&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;b&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">&#39;b&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">,</span><span class="w"> </span><span class="mi">230</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'POLYGON((150 150, 220 260, 190 300, 300 220, 150 150))'</span><span class="p">),</span>
+<span class="w">    </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s1">'b'</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'b'</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="p">,</span><span class="w"> </span><span class="mi">230</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span>
 <span class="p">)</span>
 </code></pre></div>
 <p><img alt="矢量栅格化结果" src="../../../image/rasterized-image.png" /></p>
@@ -6995,7 +6994,7 @@ scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原�
 <p>栅格谓词既可用于 <code>WHERE</code> 子句，也可作为连接条件：</p>
 <div class="highlight"><pre><span></span><code><span class="c1">-- 范围查询：保留与 AOI 相交的 tile</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">rast</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">rasterDf</span>
-<span class="k">WHERE</span><span class="w"> </span><span class="n">RS_Intersects</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))&#39;</span><span class="p">))</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">RS_Intersects</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))'</span><span class="p">))</span>
 
 <span class="c1">-- 空间连接：把每个 tile 与覆盖到它的矢量要素配对</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="k">g</span><span class="p">.</span><span class="n">geom</span>
@@ -7082,26 +7081,26 @@ scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原�
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">spark</span><span class="p">.</span><span class="nn">sql</span><span class="p">.</span><span class="nn">functions</span><span class="p">.</span><span class="n">expr</span>
 
-<span class="n">rasterDf</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;raster_binary&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;RS_AsGeoTiff(rast)&quot;</span><span class="p">))</span>
-<span class="w">  </span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;raster&quot;</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;rasterField&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;raster_binary&quot;</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;pathField&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;name&quot;</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;fileExtension&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;.tiff&quot;</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">mode</span><span class="p">(</span><span class="s">&quot;overwrite&quot;</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;my_raster_file&quot;</span><span class="p">)</span>
+<span class="n">rasterDf</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">"raster_binary"</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"RS_AsGeoTiff(rast)"</span><span class="p">))</span>
+<span class="w">  </span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"raster"</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"rasterField"</span><span class="p">,</span><span class="w"> </span><span class="s">"raster_binary"</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"pathField"</span><span class="p">,</span><span class="w"> </span><span class="s">"name"</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"fileExtension"</span><span class="p">,</span><span class="w"> </span><span class="s">".tiff"</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">mode</span><span class="p">(</span><span class="s">"overwrite"</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"my_raster_file"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">expr</span>
 
 <span class="p">(</span>
-    <span class="n">rasterDf</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;raster_binary&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;RS_AsGeoTiff(rast)&quot;</span><span class="p">))</span>
-    <span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;rasterField&quot;</span><span class="p">,</span> <span class="s2">&quot;raster_binary&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;pathField&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;fileExtension&quot;</span><span class="p">,</span> <span class="s2">&quot;.tiff&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;my_raster_file&quot;</span><span class="p">)</span>
+    <span class="n">rasterDf</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"raster_binary"</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">"RS_AsGeoTiff(rast)"</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"raster"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"rasterField"</span><span class="p">,</span> <span class="s2">"raster_binary"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"pathField"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"fileExtension"</span><span class="p">,</span> <span class="s2">".tiff"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"overwrite"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"my_raster_file"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 </div>
@@ -7118,7 +7117,7 @@ scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原�
 └── _SUCCESS
 </code></pre></div>
 <p>使用同一 <code>raster</code> 数据源读回：</p>
-<div class="highlight"><pre><span></span><code><span class="n">rasterDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;my_raster_file/*/*.tiff&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">rasterDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"raster"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"my_raster_file/*/*.tiff"</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="working-with-raster-dataframes-in-python">在 Python 中处理栅格 DataFrame<a class="headerlink" href="#working-with-raster-dataframes-in-python" title="Permanent link">&para;</a></h2>
 <p>自 <code>v1.6.0</code> 起，可以把含栅格列的 DataFrame 拉到 Python driver 端本地处理。被收集回的栅格元素表现为 <code>SedonaRaster</code> 对象。</p>
@@ -7127,7 +7126,7 @@ scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原�
 <p>在 Jupyter 中若只是想快速可视化栅格，优先使用 <code>SedonaUtils.display_image(df)</code>，无需 collect。</p>
 </div>
 <div class="highlight"><pre><span></span><code><span class="n">df_raster</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;raster&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;retile&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/raster.tif&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"raster"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"retile"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/path/to/raster.tif"</span><span class="p">)</span>
 <span class="p">)</span>
 <span class="n">rows</span> <span class="o">=</span> <span class="n">df_raster</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
 <span class="n">raster</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rast</span>
@@ -7158,13 +7157,13 @@ scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原�
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
 
 
-<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mean_udf&quot;</span><span class="p">,</span> <span class="n">mean_udf</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
-<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;mean_udf(rast)&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"mean_udf"</span><span class="p">,</span> <span class="n">mean_udf</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"mean"</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">"mean_udf(rast)"</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+--------------------+------------------+
 |                rast|              mean|
 +--------------------+------------------+
-|GridCoverage2D[&quot;g...|1542.8092886117788|
+|GridCoverage2D["g...|1542.8092886117788|
 +--------------------+------------------+
 </code></pre></div>
 <h3 id="_14">栅格 → 栅格<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
@@ -7180,13 +7179,13 @@ scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原�
     <span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>  <span class="c1"># 1 个波段，位于输入的网格上</span>
 
 
-<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mask_udf&quot;</span><span class="p">,</span> <span class="n">mask_udf</span><span class="p">,</span> <span class="n">RasterType</span><span class="p">())</span>
-<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mask_rast&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;mask_udf(rast)&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"mask_udf"</span><span class="p">,</span> <span class="n">mask_udf</span><span class="p">,</span> <span class="n">RasterType</span><span class="p">())</span>
+<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"mask_rast"</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">"mask_udf(rast)"</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+--------------------+--------------------+
 |                rast|           mask_rast|
 +--------------------+--------------------+
-|GridCoverage2D[&quot;g...|GridCoverage2D[&quot;g...|
+|GridCoverage2D["g...|GridCoverage2D["g...|
 +--------------------+--------------------+
 </code></pre></div>
 <p><code>with_bands()</code> 接受 NumPy 数组：CHW 顺序（波段 × 高 × 宽），或单波段输出时的 HW 顺序（高 × 宽）。返回的 <code>SedonaRaster</code> 在 UDF 返回时会自动序列化回 JVM 端，因此输出就是一个普通栅格列。</p>
@@ -7211,12 +7210,12 @@ scikit-learn 与 rasterio。该函数目前仍然可用，所以本教程照原�
         <span class="n">filled</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">fill</span><span class="o">.</span><span class="n">fillnodata</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">mask</span><span class="o">=</span><span class="n">valid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">))</span>
     <span class="c1"># fillnodata 只在距有效数据 max_search_distance（默认 100 像素）内插值，更深处</span>
     <span class="c1"># 的像素仍保留哨兵值，因此保留 NODATA 声明。只有确定所有空洞都能被完全填充时，</span>
-    <span class="c1"># 才改用 nodata=float(&quot;nan&quot;)。</span>
+    <span class="c1"># 才改用 nodata=float("nan")。</span>
     <span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">filled</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">)</span>
 
 
-<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;fill_udf&quot;</span><span class="p">,</span> <span class="n">fill_udf</span><span class="p">,</span> <span class="n">RasterType</span><span class="p">())</span>
-<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;filled&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;fill_udf(rast)&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"fill_udf"</span><span class="p">,</span> <span class="n">fill_udf</span><span class="p">,</span> <span class="n">RasterType</span><span class="p">())</span>
+<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"filled"</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">"fill_udf(rast)"</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>这适用于任何不改变网格的 rasterio 运算。warp 与重投影会改变网格，无法这样返回 —— 请改用 <a href="../../api/sql/Raster-Operators/RS_Resample/"><code>RS_Resample</code></a> 或 <a href="../../api/sql/Raster-Operators/RS_ReprojectMatch/"><code>RS_ReprojectMatch</code></a>。</p>
 <h2 id="_15">性能优化<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h2>

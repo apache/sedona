@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5844,13 +5843,13 @@
 <h2 id="example-spatial-query">Example spatial query<a class="headerlink" href="#example-spatial-query" title="Permanent link">&para;</a></h2>
 <p>Here’s an example query that computes monthly statistics for ride-sharing trips originating within 15 kilometers of Sedona, Arizona, a city in the US.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span>
-<span class="w">    </span><span class="n">DATE_TRUNC</span><span class="p">(</span><span class="s1">&#39;month&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">t_pickuptime</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">pickup_month</span><span class="p">,</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">t_tripkey</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">total_trips</span><span class="p">,</span>
+<span class="w">    </span><span class="n">DATE_TRUNC</span><span class="p">(</span><span class="s1">'month'</span><span class="p">,</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">t_pickuptime</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">pickup_month</span><span class="p">,</span><span class="w"> </span><span class="k">COUNT</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">t_tripkey</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">total_trips</span><span class="p">,</span>
 <span class="w">    </span><span class="k">AVG</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">t_distance</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">avg_distance</span><span class="p">,</span><span class="w"> </span><span class="k">AVG</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">t_dropofftime</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t</span><span class="p">.</span><span class="n">t_pickuptime</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">avg_duration</span><span class="p">,</span>
 <span class="w">    </span><span class="k">AVG</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">t_fare</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">avg_fare</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">trip</span><span class="w"> </span><span class="n">t</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_DWithin</span><span class="p">(</span>
 <span class="w">    </span><span class="n">ST_GeomFromWKB</span><span class="p">(</span><span class="n">t</span><span class="p">.</span><span class="n">t_pickuploc</span><span class="p">),</span>
-<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((-111.9060 34.7347, -111.6160 34.7347, -111.6160 35.0047, -111.9060 35.0047, -111.9060 34.7347))&#39;</span><span class="p">),</span><span class="w"> </span><span class="c1">-- 10km bounding box around Sedona</span>
+<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON((-111.9060 34.7347, -111.6160 34.7347, -111.6160 35.0047, -111.9060 35.0047, -111.9060 34.7347))'</span><span class="p">),</span><span class="w"> </span><span class="c1">-- 10km bounding box around Sedona</span>
 <span class="w">    </span><span class="mi">0</span><span class="p">.</span><span class="mi">045</span><span class="w"> </span><span class="c1">-- Additional 5km buffer</span>
 <span class="p">)</span>
 <span class="k">GROUP</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">pickup_month</span>

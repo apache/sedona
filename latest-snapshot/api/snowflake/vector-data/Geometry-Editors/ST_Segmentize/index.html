@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5572,13 +5571,13 @@
 <p>Return type: <code>Geometry</code></p>
 <p>SQL Example
 Long segments are split evenly into subsegments no longer than the specified length. Shorter segments are not modified.</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_Segmentize</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;MULTILINESTRING((0 0, 0 1, 0 9),(1 10, 1 18))&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">5</span><span class="p">));</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_Segmentize</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'MULTILINESTRING((0 0, 0 1, 0 9),(1 10, 1 18))'</span><span class="p">),</span><span class="w"> </span><span class="mi">5</span><span class="p">));</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>MULTILINESTRING((0 0,0 1,0 5,0 9),(1 10,1 14,1 18))
 </code></pre></div>
 <p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_Segmentize</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 8, 30 0, 0 0))&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">10</span><span class="p">));</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_Segmentize</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON((0 0, 0 8, 30 0, 0 0))'</span><span class="p">),</span><span class="w"> </span><span class="mi">10</span><span class="p">));</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>POLYGON((0 0,0 8,7.5 6,15 4,22.5 2,30 0,20 0,10 0,0 0))

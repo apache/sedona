@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.geom.shapely1.envelope &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -260,7 +259,7 @@
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">isClose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maxy</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">maxy</span><span class="p">)</span>
         <span class="p">)</span>
 
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;Envelope&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"Envelope"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_jvm_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jvm</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">jvm</span><span class="o">.</span><span class="n">Envelope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">miny</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxy</span><span class="p">)</span>
 
@@ -317,10 +316,10 @@
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-        <span class="n">minx</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;minx&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="n">maxx</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;maxx&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">miny</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;miny&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="n">maxy</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;maxy&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">minx</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"minx"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">maxx</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"maxx"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">miny</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"miny"</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">maxy</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"maxy"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">minx</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxy</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -338,7 +337,7 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Envelope(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">minx</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">maxx</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">miny</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">maxy</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"Envelope(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">minx</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">maxx</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">miny</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">maxy</span><span class="si">}</span><span class="s2">)"</span>
 
 <div class="viewcode-block" id="Envelope.serialize_for_java"><a class="viewcode-back" href="../../../../../../sedona.spark.core.geom.shapely1.html#sedona.spark.core.geom.shapely1.envelope.Envelope.serialize_for_java">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">serialize_for_java</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">envelopes</span><span class="p">):</span>

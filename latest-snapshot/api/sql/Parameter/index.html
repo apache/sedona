@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5724,10 +5723,10 @@
 <li>Set it through SparkConf:</li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SparkSession</span><span class="p">.</span><span class="n">builder</span><span class="p">().</span>
-<span class="w">      </span><span class="n">config</span><span class="p">(</span><span class="s">&quot;spark.serializer&quot;</span><span class="p">,</span><span class="s">&quot;org.apache.spark.serializer.KryoSerializer&quot;</span><span class="p">).</span>
-<span class="w">      </span><span class="n">config</span><span class="p">(</span><span class="s">&quot;spark.kryo.registrator&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;org.apache.sedona.core.serde.SedonaKryoRegistrator&quot;</span><span class="p">).</span>
-<span class="w">      </span><span class="n">config</span><span class="p">(</span><span class="s">&quot;sedona.global.index&quot;</span><span class="p">,</span><span class="s">&quot;true&quot;</span><span class="p">)</span>
-<span class="w">      </span><span class="n">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">).</span><span class="n">appName</span><span class="p">(</span><span class="s">&quot;mySedonaSQLdemo&quot;</span><span class="p">).</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="w">      </span><span class="n">config</span><span class="p">(</span><span class="s">"spark.serializer"</span><span class="p">,</span><span class="s">"org.apache.spark.serializer.KryoSerializer"</span><span class="p">).</span>
+<span class="w">      </span><span class="n">config</span><span class="p">(</span><span class="s">"spark.kryo.registrator"</span><span class="p">,</span><span class="w"> </span><span class="s">"org.apache.sedona.core.serde.SedonaKryoRegistrator"</span><span class="p">).</span>
+<span class="w">      </span><span class="n">config</span><span class="p">(</span><span class="s">"sedona.global.index"</span><span class="p">,</span><span class="s">"true"</span><span class="p">)</span>
+<span class="w">      </span><span class="n">master</span><span class="p">(</span><span class="s">"local[*]"</span><span class="p">).</span><span class="n">appName</span><span class="p">(</span><span class="s">"mySedonaSQLdemo"</span><span class="p">).</span><span class="n">getOrCreate</span><span class="p">()</span>
 </code></pre></div>
 <ol>
 <li>Check your current SedonaSQL configuration:</li>
@@ -5738,10 +5737,10 @@
 <ol>
 <li>Sedona parameters can be changed at runtime:</li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;sedona.global.index&quot;</span><span class="p">,</span><span class="s">&quot;false&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="s">"sedona.global.index"</span><span class="p">,</span><span class="s">"false"</span><span class="p">)</span>
 </code></pre></div>
 <p>In addition, you can also add <code>spark</code> prefix to the parameter name, for example:</p>
-<div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="s">&quot;spark.sedona.global.index&quot;</span><span class="p">,</span><span class="s">&quot;false&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">sparkSession</span><span class="p">.</span><span class="n">conf</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="s">"spark.sedona.global.index"</span><span class="p">,</span><span class="s">"false"</span><span class="p">)</span>
 </code></pre></div>
 <p>However, any parameter set through <code>spark</code> prefix will be honored by Spark, which means you can set these parameters before hand via <code>spark-defaults.conf</code> or Spark on Kubernetes configuration.</p>
 <p>If you set the same parameter through both <code>sedona</code> and <code>spark.sedona</code> prefixes, the parameter set through <code>sedona</code> prefix will override the parameter set through <code>spark.sedona</code> prefix.</p>

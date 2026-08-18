@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5570,7 +5569,7 @@ Default format is <code>GDAL</code>. If all 6 parameters are not provided then w
 <p>For more information about ScaleX, ScaleY, SkewX, SkewY, please refer to the <a href="../../Raster-affine-transformation/">Affine Transformations</a> section.</p>
 <p><img alt="RS_SetGeoReference" src="../../../../../image/RS_SetGeoReference/RS_SetGeoReference.svg" title="RS_SetGeoReference" /></p>
 <p>Format:</p>
-<div class="highlight"><pre><span></span><code>RS_SetGeoReference(raster: Raster, geoRefCoord: String, format: String = &quot;GDAL&quot;)
+<div class="highlight"><pre><span></span><code>RS_SetGeoReference(raster: Raster, geoRefCoord: String, format: String = "GDAL")
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>RS_SetGeoReference(raster: Raster, upperLeftX: Double, upperLeftY: Double, scaleX: Double, scaleY: Double, skewX: Double, skewY: Double)
 </code></pre></div>
@@ -5587,7 +5586,7 @@ Default format is <code>GDAL</code>. If all 6 parameters are not provided then w
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_GeoReference</span><span class="p">(</span>
 <span class="w">        </span><span class="n">RS_SetGeoReference</span><span class="p">(</span>
 <span class="w">            </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
-<span class="w">            </span><span class="s1">&#39;3 1.5 1.5 2 22 3&#39;</span>
+<span class="w">            </span><span class="s1">'3 1.5 1.5 2 22 3'</span>
 <span class="w">        </span><span class="p">)</span>
 <span class="w">    </span><span class="p">)</span>
 </code></pre></div>
@@ -5603,7 +5602,7 @@ Default format is <code>GDAL</code>. If all 6 parameters are not provided then w
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_GeoReference</span><span class="p">(</span>
 <span class="w">        </span><span class="n">RS_SetGeoReference</span><span class="p">(</span>
 <span class="w">            </span><span class="n">RS_MakeEmptyRaster</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">22</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span>
-<span class="w">            </span><span class="s1">&#39;3 1.5 1.5 2 22 3&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;ESRI&#39;</span>
+<span class="w">            </span><span class="s1">'3 1.5 1.5 2 22 3'</span><span class="p">,</span><span class="w"> </span><span class="s1">'ESRI'</span>
 <span class="w">        </span><span class="p">)</span>
 <span class="w">    </span><span class="p">)</span>
 </code></pre></div>

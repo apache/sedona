@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5569,13 +5568,13 @@
 <p>Format: <code>ST_AsHEXEWKB(geom: Geometry, endian: String = NDR)</code></p>
 <p>Return type: <code>String</code></p>
 <p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsHEXEWKB</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT(1 2)&#39;</span><span class="p">),</span><span class="w"> </span><span class="s1">&#39;XDR&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsHEXEWKB</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'POINT(1 2)'</span><span class="p">),</span><span class="w"> </span><span class="s1">'XDR'</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>00000000013FF00000000000004000000000000000
 </code></pre></div>
 <p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsHEXEWKB</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (30 20, 20 25, 20 15, 30 20)&#39;</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsHEXEWKB</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING (30 20, 20 25, 20 15, 30 20)'</span><span class="p">))</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>0102000000040000000000000000003E4000000000000034400000000000003440000000000000394000000000000034400000000000002E400000000000003E400000000000003440

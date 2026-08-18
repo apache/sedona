@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5578,7 +5577,7 @@
 <p>Return type: <code>Geometry</code></p>
 <p>Since: <code>v1.9.1</code></p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ReducePrecision</span><span class="p">(</span><span class="n">ST_GeogToGeometry</span><span class="p">(</span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">&#39;MULTILINESTRING ((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">)),</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ReducePrecision</span><span class="p">(</span><span class="n">ST_GeogToGeometry</span><span class="p">(</span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">'MULTILINESTRING ((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))'</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">)),</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>MULTILINESTRING ((90 90, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))

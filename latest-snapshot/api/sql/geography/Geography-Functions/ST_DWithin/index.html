@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5574,8 +5573,8 @@
 <p>Since: <code>v1.9.1</code></p>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_DWithin</span><span class="p">(</span>
-<span class="w">  </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT (0 0)&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
-<span class="w">  </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT (0 1)&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
+<span class="w">  </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">'POINT (0 0)'</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
+<span class="w">  </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">'POINT (0 1)'</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
 <span class="w">  </span><span class="mi">200000</span><span class="p">.</span><span class="mi">0</span>
 <span class="p">);</span>
 </code></pre></div>
@@ -5584,8 +5583,8 @@
 </code></pre></div>
 <p>The same pair of points with a tighter threshold:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_DWithin</span><span class="p">(</span>
-<span class="w">  </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT (0 0)&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
-<span class="w">  </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT (0 1)&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
+<span class="w">  </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">'POINT (0 0)'</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
+<span class="w">  </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">'POINT (0 1)'</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
 <span class="w">  </span><span class="mi">100000</span><span class="p">.</span><span class="mi">0</span>
 <span class="p">);</span>
 </code></pre></div>

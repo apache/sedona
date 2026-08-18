@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5570,8 +5569,8 @@
 <p>Return type: <code>String</code></p>
 <p>Since: <code>1.5.1</code></p>
 <p>Spark Example:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;binaryFile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/test.nc&quot;</span><span class="p">)</span>
-<span class="n">recordInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">&quot;RS_NetCDFInfo(content) as record_info&quot;</span><span class="p">).</span><span class="n">first</span><span class="p">().</span><span class="n">getString</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"binaryFile"</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">"/some/path/test.nc"</span><span class="p">)</span>
+<span class="n">recordInfo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">"RS_NetCDFInfo(content) as record_info"</span><span class="p">).</span><span class="n">first</span><span class="p">().</span><span class="n">getString</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">print</span><span class="p">(</span><span class="n">recordInfo</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>

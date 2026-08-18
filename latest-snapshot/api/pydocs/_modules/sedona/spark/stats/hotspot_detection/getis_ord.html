@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stats.hotspot_detection.getis_ord &mdash; Apache Sedona Python Documentation</title>
@@ -213,23 +212,23 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
 
-<span class="sd">&quot;&quot;&quot;Getis Ord functions. From the 1992 paper by Getis &amp; Ord.</span>
+<span class="sd">"""Getis Ord functions. From the 1992 paper by Getis &amp; Ord.</span>
 
 <span class="sd">Getis, A., &amp; Ord, J. K. (1992). The analysis of spatial association by use of distance statistics.</span>
 <span class="sd">Geographical Analysis, 24(3), 189-206. https://doi.org/10.1111/j.1538-4632.1992.tb00261.x</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">SparkSession</span>
 
@@ -239,12 +238,12 @@
 <div class="viewcode-block" id="g_local"><a class="viewcode-back" href="../../../../../sedona.spark.stats.hotspot_detection.html#sedona.spark.stats.hotspot_detection.getis_ord.g_local">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">g_local</span><span class="p">(</span>
     <span class="n">dataframe</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">weights</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;weights&quot;</span><span class="p">,</span>
+    <span class="n">weights</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"weights"</span><span class="p">,</span>
     <span class="n">permutations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">star</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">island_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs the Gi or Gi* statistic on the x column of the dataframe.</span>
+<span class="w">    </span><span class="sd">"""Performs the Gi or Gi* statistic on the x column of the dataframe.</span>
 
 <span class="sd">    Weights should be the neighbors of this row. The members of the weights should be comprised of structs containing a</span>
 <span class="sd">    value column and a neighbor column. The neighbor column should be the contents of the neighbors with the same types</span>
@@ -265,7 +264,7 @@
 <span class="sd">        island_weight: Not used. The weight for the simulated neighbor used for records without a neighbor in perm tests</span>
 <span class="sd">    Returns:</span>
 <span class="sd">        A dataframe with the original columns plus the columns G, E[G], V[G], Z, P.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">sedona</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">getActiveSession</span><span class="p">()</span>
 
     <span class="n">result_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">org</span><span class="o">.</span><span class="n">apache</span><span class="o">.</span><span class="n">sedona</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">hotspotDetection</span><span class="o">.</span><span class="n">GetisOrd</span><span class="o">.</span><span class="n">gLocal</span><span class="p">(</span>

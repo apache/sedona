@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5705,11 +5704,11 @@
 </div>
 <p>可以使用 Apache Zeppelin 绘制少量空间对象，例如 1000 个点。假设您已经有一个空间 DataFrame，需要在 Zeppelin 的 Spark notebook 中通过 Scala paragraph 将几何列转换为 WKT 字符串列：</p>
 <div class="highlight"><pre><span></span><code><span class="n">spark</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span>
-<span class="w">  </span><span class="s">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="s">"""</span>
 <span class="s">    |CREATE OR REPLACE TEMP VIEW wktpoint AS</span>
 <span class="s">    |SELECT ST_AsText(shape) as geom</span>
 <span class="s">    |FROM pointtable</span>
-<span class="s">  &quot;&quot;&quot;</span><span class="p">.</span><span class="n">stripMargin</span><span class="p">)</span>
+<span class="s">  """</span><span class="p">.</span><span class="n">stripMargin</span><span class="p">)</span>
 </code></pre></div>
 <p>然后再创建一个 SQL paragraph 拉取数据：</p>
 <div class="highlight"><pre><span></span><code><span class="o">%</span><span class="k">sql</span>
@@ -5723,15 +5722,15 @@
 <p>可以借助 Sedona-Zeppelin 让 Zeppelin 把 SedonaViz 的图像叠加到地图上，从而轻松可视化 10 亿乃至更多的空间对象（取决于集群规模）。</p>
 <p>首先，在 Zeppelin Spark notebook 的 Scala paragraph 中对 SedonaViz DataFrame 中的图像进行编码：</p>
 <div class="highlight"><pre><span></span><code>spark.sql(
-  &quot;&quot;&quot;
+  """
     |CREATE OR REPLACE TEMP VIEW images AS
     |SELECT ST_EncodeImage(image) AS image, (SELECT ST_AsText(bound) FROM boundtable) AS boundary
     |FROM images
-  &quot;&quot;&quot;.stripMargin)
+  """.stripMargin)
 </code></pre></div>
 <p>然后创建 SQL paragraph 拉取数据：</p>
 <div class="highlight"><pre><span></span><code><span class="o">%</span><span class="k">sql</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;I am the map center!&#39;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="s1">'I am the map center!'</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">images</span>
 </code></pre></div>
 <p>选择图像与对应的地理边界：</p>

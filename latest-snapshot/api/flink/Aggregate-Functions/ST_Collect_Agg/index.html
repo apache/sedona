@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5581,9 +5580,9 @@ has no non-null values. All <code>Geography</code> values in a group must have t
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Collect_Agg</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="p">(</span>
 <span class="w">    </span><span class="k">VALUES</span>
-<span class="w">        </span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT(1 2)&#39;</span><span class="p">)),</span>
-<span class="w">        </span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT(3 4)&#39;</span><span class="p">)),</span>
-<span class="w">        </span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT(1 2)&#39;</span><span class="p">))</span>
+<span class="w">        </span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'POINT(1 2)'</span><span class="p">)),</span>
+<span class="w">        </span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'POINT(3 4)'</span><span class="p">)),</span>
+<span class="w">        </span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'POINT(1 2)'</span><span class="p">))</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">observations</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>

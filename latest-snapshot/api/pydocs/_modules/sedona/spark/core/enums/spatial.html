@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.enums.spatial &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -229,19 +228,19 @@
 
 
 <div class="viewcode-block" id="SpatialType"><a class="viewcode-back" href="../../../../../sedona.spark.core.enums.html#sedona.spark.core.enums.spatial.SpatialType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SpatialType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-    <span class="n">LINESTRING</span> <span class="o">=</span> <span class="s2">&quot;LINESTRING&quot;</span>
-    <span class="n">POLYGON</span> <span class="o">=</span> <span class="s2">&quot;POLYGON&quot;</span>
-    <span class="n">RECTANGLE</span> <span class="o">=</span> <span class="s2">&quot;RECTANGLE&quot;</span>
-    <span class="n">POINT</span> <span class="o">=</span> <span class="s2">&quot;POINT&quot;</span>
-    <span class="n">SPATIAL</span> <span class="o">=</span> <span class="s2">&quot;SPATIAL&quot;</span>
-    <span class="n">CIRCLE</span> <span class="o">=</span> <span class="s2">&quot;CIRCLE&quot;</span>
+    <span class="n">LINESTRING</span> <span class="o">=</span> <span class="s2">"LINESTRING"</span>
+    <span class="n">POLYGON</span> <span class="o">=</span> <span class="s2">"POLYGON"</span>
+    <span class="n">RECTANGLE</span> <span class="o">=</span> <span class="s2">"RECTANGLE"</span>
+    <span class="n">POINT</span> <span class="o">=</span> <span class="s2">"POINT"</span>
+    <span class="n">SPATIAL</span> <span class="o">=</span> <span class="s2">"SPATIAL"</span>
+    <span class="n">CIRCLE</span> <span class="o">=</span> <span class="s2">"CIRCLE"</span>
 
 <div class="viewcode-block" id="SpatialType.from_str"><a class="viewcode-back" href="../../../../../sedona.spark.core.enums.html#sedona.spark.core.enums.spatial.SpatialType.from_str">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">from_str</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spatial</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SpatialType&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_str</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spatial</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"SpatialType"</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">spatial</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spatial</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no </span><span class="si">{</span><span class="n">spatial</span><span class="si">}</span><span class="s2"> attribute&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no </span><span class="si">{</span><span class="n">spatial</span><span class="si">}</span><span class="s2"> attribute"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">spatial</span></div></div>
 </pre></div>
 

@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6005,20 +6004,20 @@
 <h2 id="_1">用法<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <p>要使用 STAC 数据源，可使用 <code>stac</code> 格式将 STAC catalog 加载到 Sedona DataFrame。<code>load</code> 的路径可以是本地的 STAC collection JSON 文件，也可以是 HTTP/HTTPS 端点。</p>
 <p>从本地 collection 文件加载 STAC collection：</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;stac&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/user/stac_collection.json&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"stac"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/user/stac_collection.json"</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>从 S3 上的 collection 文件加载：</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;stac&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-    <span class="s2">&quot;s3a://example.com/stac_bucket/stac_collection.json&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"stac"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="s2">"s3a://example.com/stac_bucket/stac_collection.json"</span>
 <span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>也可以从 HTTP/HTTPS 端点加载：</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;stac&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-    <span class="s2">&quot;https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"stac"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="s2">"https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a"</span>
 <span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -6094,13 +6093,13 @@
 <h3 id="sql-select_1">带时间过滤的 SQL Select<a class="headerlink" href="#sql-select_1" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">dt</span><span class="p">,</span><span class="w"> </span><span class="n">geometry</span><span class="p">,</span><span class="w"> </span><span class="n">bbox</span>
 <span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">STAC_TABLE</span>
-<span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="n">datetime</span><span class="w"> </span><span class="k">BETWEEN</span><span class="w"> </span><span class="s1">&#39;2020-01-01&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="s1">&#39;2020-12-13&#39;</span>
+<span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="n">datetime</span><span class="w"> </span><span class="k">BETWEEN</span><span class="w"> </span><span class="s1">'2020-01-01'</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="s1">'2020-12-13'</span>
 </code></pre></div>
 <p>该例中，数据源会把时间过滤下推到底层数据源。</p>
 <h3 id="sql-select_2">带空间过滤的 SQL Select<a class="headerlink" href="#sql-select_2" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="k">SELECT</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">geometry</span>
 <span class="w">  </span><span class="k">FROM</span><span class="w"> </span><span class="n">STAC_TABLE</span>
-<span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="n">st_intersects</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))&#39;</span><span class="p">),</span><span class="w"> </span><span class="n">geometry</span><span class="p">)</span>
+<span class="w">  </span><span class="k">WHERE</span><span class="w"> </span><span class="n">st_intersects</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON((17 10, 18 10, 18 11, 17 11, 17 10))'</span><span class="p">),</span><span class="w"> </span><span class="n">geometry</span><span class="p">)</span>
 </code></pre></div>
 <p>该例中，数据源会把空间过滤下推到底层数据源。</p>
 <h3 id="eo-sql-select">带 EO 扩展过滤的 SQL Select<a class="headerlink" href="#eo-sql-select" title="Permanent link">&para;</a></h3>
@@ -6136,24 +6135,24 @@
 </ul>
 <p>可以将这些配置合并到一个 <code>Map[String, String]</code> 中传给 STAC 读取器：</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="k">def</span><span class="w"> </span><span class="nf">defaultSparkConfig</span><span class="p">:</span><span class="w"> </span><span class="nc">Map</span><span class="p">[</span><span class="nc">String</span><span class="p">,</span><span class="w"> </span><span class="nc">String</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Map</span><span class="p">(</span>
-<span class="w">    </span><span class="s">&quot;spark.sedona.stac.load.maxPartitionItemFiles&quot;</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">&quot;100&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;spark.sedona.stac.load.numPartitions&quot;</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">&quot;10&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s">&quot;spark.sedona.stac.load.itemsLimitMax&quot;</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">&quot;20&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="s">"spark.sedona.stac.load.maxPartitionItemFiles"</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">"100"</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"spark.sedona.stac.load.numPartitions"</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">"10"</span><span class="p">,</span>
+<span class="w">    </span><span class="s">"spark.sedona.stac.load.itemsLimitMax"</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">"20"</span><span class="p">)</span>
 
 <span class="w">  </span><span class="kd">val</span><span class="w"> </span><span class="n">sparkSession</span><span class="p">:</span><span class="w"> </span><span class="nc">SparkSession</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">val</span><span class="w"> </span><span class="n">builder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SedonaContext</span>
 <span class="w">            </span><span class="p">.</span><span class="n">builder</span><span class="p">()</span>
-<span class="w">            </span><span class="p">.</span><span class="n">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="n">master</span><span class="p">(</span><span class="s">"local[*]"</span><span class="p">)</span>
 <span class="w">    </span><span class="n">defaultSparkConfig</span><span class="p">.</span><span class="n">foreach</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">builder</span><span class="p">.</span><span class="n">config</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
 <span class="w">    </span><span class="n">builder</span><span class="p">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span>
-<span class="w">      </span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;stac&quot;</span><span class="p">)</span>
-<span class="w">      </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;itemsLimitMax&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;100&quot;</span><span class="p">)</span>
-<span class="w">      </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;itemsLoadProcessReportThreshold&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;2000000&quot;</span><span class="p">)</span>
-<span class="w">      </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;itemsLimitPerRequest&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;100&quot;</span><span class="p">)</span>
-<span class="w">      </span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a&quot;</span><span class="p">)</span>
+<span class="w">      </span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"stac"</span><span class="p">)</span>
+<span class="w">      </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"itemsLimitMax"</span><span class="p">,</span><span class="w"> </span><span class="s">"100"</span><span class="p">)</span>
+<span class="w">      </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"itemsLoadProcessReportThreshold"</span><span class="p">,</span><span class="w"> </span><span class="s">"2000000"</span><span class="p">)</span>
+<span class="w">      </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"itemsLimitPerRequest"</span><span class="p">,</span><span class="w"> </span><span class="s">"100"</span><span class="p">)</span>
+<span class="w">      </span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">"https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a"</span><span class="p">)</span>
 </code></pre></div>
 <p>通过以上选项，可以对 Sedona 中 STAC 数据的读取与处理过程进行细粒度的控制。</p>
 <h2 id="python-api">Python API<a class="headerlink" href="#python-api" title="Permanent link">&para;</a></h2>
@@ -6163,45 +6162,45 @@
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span>
 
 <span class="c1"># 初始化客户端</span>
-<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://planetarycomputer.microsoft.com/api/stac/v1&quot;</span><span class="p">)</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"https://planetarycomputer.microsoft.com/api/stac/v1"</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="collection">在某个 collection 中按年份搜索<a class="headerlink" href="#collection" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="n">items</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
-    <span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;aster-l1t&quot;</span><span class="p">,</span> <span class="n">datetime</span><span class="o">=</span><span class="s2">&quot;2020&quot;</span><span class="p">,</span> <span class="n">return_dataframe</span><span class="o">=</span><span class="kc">False</span>
+    <span class="n">collection_id</span><span class="o">=</span><span class="s2">"aster-l1t"</span><span class="p">,</span> <span class="n">datetime</span><span class="o">=</span><span class="s2">"2020"</span><span class="p">,</span> <span class="n">return_dataframe</span><span class="o">=</span><span class="kc">False</span>
 <span class="p">)</span>
 </code></pre></div>
 <h4 id="collection_1">在某个 collection 中按月份搜索并限制最大返回数<a class="headerlink" href="#collection_1" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="n">items</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
-    <span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;aster-l1t&quot;</span><span class="p">,</span> <span class="n">datetime</span><span class="o">=</span><span class="s2">&quot;2020-05&quot;</span><span class="p">,</span> <span class="n">return_dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">5</span>
+    <span class="n">collection_id</span><span class="o">=</span><span class="s2">"aster-l1t"</span><span class="p">,</span> <span class="n">datetime</span><span class="o">=</span><span class="s2">"2020-05"</span><span class="p">,</span> <span class="n">return_dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">5</span>
 <span class="p">)</span>
 </code></pre></div>
 <h4 id="bbox">按 bbox 与时间区间搜索<a class="headerlink" href="#bbox" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="n">items</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
-    <span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;aster-l1t&quot;</span><span class="p">,</span>
-    <span class="n">ids</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;AST_L1T_00312272006020322_20150518201805&quot;</span><span class="p">],</span>
+    <span class="n">collection_id</span><span class="o">=</span><span class="s2">"aster-l1t"</span><span class="p">,</span>
+    <span class="n">ids</span><span class="o">=</span><span class="p">[</span><span class="s2">"AST_L1T_00312272006020322_20150518201805"</span><span class="p">],</span>
     <span class="n">bbox</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">180.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">90.0</span><span class="p">,</span> <span class="mf">180.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">],</span>
-    <span class="n">datetime</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;2006-01-01T00:00:00Z&quot;</span><span class="p">,</span> <span class="s2">&quot;2007-01-01T00:00:00Z&quot;</span><span class="p">],</span>
+    <span class="n">datetime</span><span class="o">=</span><span class="p">[</span><span class="s2">"2006-01-01T00:00:00Z"</span><span class="p">,</span> <span class="s2">"2007-01-01T00:00:00Z"</span><span class="p">],</span>
     <span class="n">return_dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
 <h4 id="bbox_1">按多个 bbox 搜索<a class="headerlink" href="#bbox_1" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="n">bbox_list</span> <span class="o">=</span> <span class="p">[[</span><span class="o">-</span><span class="mf">180.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">90.0</span><span class="p">,</span> <span class="mf">180.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">100.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">50.0</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">]]</span>
-<span class="n">items</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;aster-l1t&quot;</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox_list</span><span class="p">,</span> <span class="n">return_dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">items</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">"aster-l1t"</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox_list</span><span class="p">,</span> <span class="n">return_dataframe</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="dataframe">在多个时间区间内搜索并以 DataFrame 返回<a class="headerlink" href="#dataframe" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="n">interval_list</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">[</span><span class="s2">&quot;2020-01-01T00:00:00Z&quot;</span><span class="p">,</span> <span class="s2">&quot;2020-06-01T00:00:00Z&quot;</span><span class="p">],</span>
-    <span class="p">[</span><span class="s2">&quot;2020-07-01T00:00:00Z&quot;</span><span class="p">,</span> <span class="s2">&quot;2021-01-01T00:00:00Z&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"2020-01-01T00:00:00Z"</span><span class="p">,</span> <span class="s2">"2020-06-01T00:00:00Z"</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"2020-07-01T00:00:00Z"</span><span class="p">,</span> <span class="s2">"2021-01-01T00:00:00Z"</span><span class="p">],</span>
 <span class="p">]</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
-    <span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;aster-l1t&quot;</span><span class="p">,</span> <span class="n">datetime</span><span class="o">=</span><span class="n">interval_list</span><span class="p">,</span> <span class="n">return_dataframe</span><span class="o">=</span><span class="kc">True</span>
+    <span class="n">collection_id</span><span class="o">=</span><span class="s2">"aster-l1t"</span><span class="p">,</span> <span class="n">datetime</span><span class="o">=</span><span class="n">interval_list</span><span class="p">,</span> <span class="n">return_dataframe</span><span class="o">=</span><span class="kc">True</span>
 <span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <h4 id="bbox-item-geoparquet">同时使用 bbox 与时间将 item 写入 GeoParquet<a class="headerlink" href="#bbox-item-geoparquet" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><span class="c1"># 将 DataFrame 中的 item 写入 GeoParquet，同时指定 bbox 与时间</span>
-<span class="n">client</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="s2">&quot;aster-l1t&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save_to_geoparquet</span><span class="p">(</span>
-    <span class="n">output_path</span><span class="o">=</span><span class="s2">&quot;/path/to/output&quot;</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox_list</span><span class="p">,</span> <span class="n">datetime</span><span class="o">=</span><span class="s2">&quot;2020-05&quot;</span>
+<span class="n">client</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="s2">"aster-l1t"</span><span class="p">)</span><span class="o">.</span><span class="n">save_to_geoparquet</span><span class="p">(</span>
+    <span class="n">output_path</span><span class="o">=</span><span class="s2">"/path/to/output"</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox_list</span><span class="p">,</span> <span class="n">datetime</span><span class="o">=</span><span class="s2">"2020-05"</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>以上示例演示了如何使用 Client 类按各种条件检索 STAC collection，并以 PyStacItem 迭代器或 Spark DataFrame 的形式返回。</p>
@@ -6212,25 +6211,25 @@
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span>
 
 <span class="c1"># 示例 1：使用 API key（常见模式）</span>
-<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://api.example.com/stac/v1&quot;</span><span class="p">)</span>
-<span class="n">client</span><span class="o">.</span><span class="n">with_basic_auth</span><span class="p">(</span><span class="s2">&quot;your_api_key_here&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"https://api.example.com/stac/v1"</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">with_basic_auth</span><span class="p">(</span><span class="s2">"your_api_key_here"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
 
 <span class="c1"># 在认证状态下搜索 item</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;example-collection&quot;</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">"example-collection"</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
 <span class="c1"># 示例 2：使用用户名与密码</span>
-<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://api.example.com/stac/v1&quot;</span><span class="p">)</span>
-<span class="n">client</span><span class="o">.</span><span class="n">with_basic_auth</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">,</span> <span class="s2">&quot;password&quot;</span><span class="p">)</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"https://api.example.com/stac/v1"</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">with_basic_auth</span><span class="p">(</span><span class="s2">"username"</span><span class="p">,</span> <span class="s2">"password"</span><span class="p">)</span>
 
-<span class="n">df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;example-collection&quot;</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">"example-collection"</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
 <span class="c1"># 示例 3：链式调用</span>
 <span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://api.example.com/stac/v1&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">with_basic_auth</span><span class="p">(</span><span class="s2">&quot;your_api_key&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;example-collection&quot;</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"https://api.example.com/stac/v1"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">with_basic_auth</span><span class="p">(</span><span class="s2">"your_api_key"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">"example-collection"</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
@@ -6239,17 +6238,17 @@
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span>
 
 <span class="c1"># 使用 bearer token</span>
-<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://api.example.com/stac/v1&quot;</span><span class="p">)</span>
-<span class="n">client</span><span class="o">.</span><span class="n">with_bearer_token</span><span class="p">(</span><span class="s2">&quot;your_access_token_here&quot;</span><span class="p">)</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"https://api.example.com/stac/v1"</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">with_bearer_token</span><span class="p">(</span><span class="s2">"your_access_token_here"</span><span class="p">)</span>
 
-<span class="n">df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;example-collection&quot;</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">"example-collection"</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
 <span class="c1"># 链式调用</span>
 <span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://api.example.com/stac/v1&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">with_bearer_token</span><span class="p">(</span><span class="s2">&quot;your_token&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;example-collection&quot;</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"https://api.example.com/stac/v1"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">with_bearer_token</span><span class="p">(</span><span class="s2">"your_token"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">"example-collection"</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
@@ -6258,10 +6257,10 @@
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span>
 
 <span class="c1"># 使用自定义 HTTP 头</span>
-<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="s2">&quot;Bearer your_token_here&quot;</span><span class="p">,</span> <span class="s2">&quot;X-Custom-Header&quot;</span><span class="p">:</span> <span class="s2">&quot;custom_value&quot;</span><span class="p">}</span>
-<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://api.example.com/stac/v1&quot;</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"Authorization"</span><span class="p">:</span> <span class="s2">"Bearer your_token_here"</span><span class="p">,</span> <span class="s2">"X-Custom-Header"</span><span class="p">:</span> <span class="s2">"custom_value"</span><span class="p">}</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"https://api.example.com/stac/v1"</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
 
-<span class="n">df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;example-collection&quot;</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="s2">"example-collection"</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <h4 id="scala-datasource">在 Scala DataSource 中使用鉴权<a class="headerlink" href="#scala-datasource" title="Permanent link">&para;</a></h4>
@@ -6270,25 +6269,25 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparkSession</span>
 
 <span class="c1"># 准备鉴权 HTTP 头</span>
-<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="s2">&quot;Basic &lt;base64_encoded_credentials&gt;&quot;</span><span class="p">}</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"Authorization"</span><span class="p">:</span> <span class="s2">"Basic &lt;base64_encoded_credentials&gt;"</span><span class="p">}</span>
 <span class="n">headers_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
 
 <span class="c1"># 在鉴权状态下加载 STAC 数据</span>
 <span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;stac&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;headers&quot;</span><span class="p">,</span> <span class="n">headers_json</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;https://api.example.com/stac/v1/collections/example-collection&quot;</span><span class="p">)</span>
+    <span class="n">spark</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"stac"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"headers"</span><span class="p">,</span> <span class="n">headers_json</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"https://api.example.com/stac/v1/collections/example-collection"</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1">// Scala 示例</span>
-<span class="kd">val</span><span class="w"> </span><span class="n">headersJson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;&quot;{&quot;Authorization&quot;:&quot;Basic &lt;base64_encoded_credentials&gt;&quot;}&quot;&quot;&quot;</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">headersJson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"""{"Authorization":"Basic &lt;base64_encoded_credentials&gt;"}"""</span>
 
 <span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sparkSession</span><span class="p">.</span><span class="n">read</span>
-<span class="w">  </span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;stac&quot;</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;headers&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">headersJson</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;https://api.example.com/stac/v1/collections/example-collection&quot;</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"stac"</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"headers"</span><span class="p">,</span><span class="w"> </span><span class="n">headersJson</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="s">"https://api.example.com/stac/v1/collections/example-collection"</span><span class="p">)</span>
 
 <span class="n">df</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>

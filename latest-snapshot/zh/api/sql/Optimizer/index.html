@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6094,7 +6093,7 @@ DistanceJoin pointshape1#12: geometry, pointshape2#33: geometry, 2.0, true
 <li>Left outer —— 广播右侧</li>
 <li>Right outer —— 广播左侧</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="n">pointDf</span><span class="p">.</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;pointDf&quot;</span><span class="p">).</span><span class="n">join</span><span class="p">(</span><span class="n">broadcast</span><span class="p">(</span><span class="n">polygonDf</span><span class="p">).</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;polygonDf&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_Contains(polygonDf.polygonshape, pointDf.pointshape)&quot;</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="n">pointDf</span><span class="p">.</span><span class="n">alias</span><span class="p">(</span><span class="s">"pointDf"</span><span class="p">).</span><span class="n">join</span><span class="p">(</span><span class="n">broadcast</span><span class="p">(</span><span class="n">polygonDf</span><span class="p">).</span><span class="n">alias</span><span class="p">(</span><span class="s">"polygonDf"</span><span class="p">),</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"</span><span class="p">))</span>
 </code></pre></div>
 <p>在 SQL 中指定 broadcast 提示，使用以下语法：</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="cm">/*+ BROADCAST(polygonDf) */</span>
@@ -6114,7 +6113,7 @@ BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildRight, false ST_Con
       +- FileScan csv
 </code></pre></div>
 <p>这同样适用于使用 <code>ST_Distance</code>、<code>ST_DistanceSpheroid</code>、<code>ST_DistanceSphere</code>、<code>ST_HausdorffDistance</code> 或 <code>ST_FrechetDistance</code> 的距离连接：</p>
-<div class="highlight"><pre><span></span><code><span class="n">pointDf1</span><span class="p">.</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;pointDf1&quot;</span><span class="p">).</span><span class="n">join</span><span class="p">(</span><span class="n">broadcast</span><span class="p">(</span><span class="n">pointDf2</span><span class="p">).</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;pointDf2&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_Distance(pointDf1.pointshape, pointDf2.pointshape) &lt;= 2&quot;</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="n">pointDf1</span><span class="p">.</span><span class="n">alias</span><span class="p">(</span><span class="s">"pointDf1"</span><span class="p">).</span><span class="n">join</span><span class="p">(</span><span class="n">broadcast</span><span class="p">(</span><span class="n">pointDf2</span><span class="p">).</span><span class="n">alias</span><span class="p">(</span><span class="s">"pointDf2"</span><span class="p">),</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"ST_Distance(pointDf1.pointshape, pointDf2.pointshape) &lt;= 2"</span><span class="p">))</span>
 </code></pre></div>
 <p>Spark SQL 物理计划：</p>
 <div class="highlight"><pre><span></span><code>== Physical Plan ==

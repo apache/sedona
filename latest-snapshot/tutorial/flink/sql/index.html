@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6152,7 +6151,7 @@
 
 <p>The page outlines the steps to manage spatial data using SedonaSQL. <mark>The example code is written in Java but also works for Scala</mark>.</p>
 <p>SedonaSQL supports SQL/MM Part3 Spatial SQL Standard. It includes four kinds of SQL operators as follows. All these operators can be directly called through:</p>
-<div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">myTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tableEnv</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">&quot;YOUR_SQL&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">myTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tableEnv</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">"YOUR_SQL"</span><span class="p">)</span>
 </code></pre></div>
 <p>Detailed SedonaSQL APIs are available here: <a href="../../../api/flink/Overview/">SedonaSQL API</a></p>
 <h2 id="set-up-dependencies">Set up dependencies<a class="headerlink" href="#set-up-dependencies" title="Permanent link">&para;</a></h2>
@@ -6203,8 +6202,8 @@
 10 rows in set
 </code></pre></div>
 <p>You can create a Table with a Geometry type column as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="p">.</span><span class="na">createTemporaryView</span><span class="p">(</span><span class="s">&quot;myTable&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">tbl</span><span class="p">)</span>
-<span class="n">Table</span><span class="w"> </span><span class="n">geomTbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">&quot;SELECT ST_GeomFromWKT(geom_polygon) as geom_polygon, name_polygon FROM myTable&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="p">.</span><span class="na">createTemporaryView</span><span class="p">(</span><span class="s">"myTable"</span><span class="p">,</span><span class="w"> </span><span class="n">tbl</span><span class="p">)</span>
+<span class="n">Table</span><span class="w"> </span><span class="n">geomTbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">"SELECT ST_GeomFromWKT(geom_polygon) as geom_polygon, name_polygon FROM myTable"</span><span class="p">)</span>
 <span class="n">geomTbl</span><span class="p">.</span><span class="na">execute</span><span class="p">().</span><span class="na">print</span><span class="p">()</span>
 </code></pre></div>
 <p>The output will be:</p>
@@ -6230,7 +6229,7 @@
 </code></pre></div>
 <p>The output will be like this:</p>
 <div class="highlight"><pre><span></span><code>(
-  `geom_polygon` RAW(&#39;org.locationtech.jts.geom.Geometry&#39;, &#39;...&#39;),
+  `geom_polygon` RAW('org.locationtech.jts.geom.Geometry', '...'),
   `name_polygon` STRING
 )
 </code></pre></div>
@@ -6241,7 +6240,7 @@
 <h2 id="transform-the-coordinate-reference-system">Transform the Coordinate Reference System<a class="headerlink" href="#transform-the-coordinate-reference-system" title="Permanent link">&para;</a></h2>
 <p>Sedona doesn't control the coordinate unit (degree-based or meter-based) of all geometries in a Geometry column. The unit of all related distances in SedonaSQL is same as the unit of all geometries in a Geometry column.</p>
 <p>To convert Coordinate Reference System of the Geometry column created before, use the following code:</p>
-<div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">geomTbl3857</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">&quot;SELECT ST_Transform(countyshape, &quot;</span><span class="n">epsg</span><span class="p">:</span><span class="mi">4326</span><span class="s">&quot;, &quot;</span><span class="n">epsg</span><span class="p">:</span><span class="mi">3857</span><span class="s">&quot;) AS geom_polygon, name_polygon FROM myTable&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">geomTbl3857</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">"SELECT ST_Transform(countyshape, "</span><span class="n">epsg</span><span class="p">:</span><span class="mi">4326</span><span class="s">", "</span><span class="n">epsg</span><span class="p">:</span><span class="mi">3857</span><span class="s">") AS geom_polygon, name_polygon FROM myTable"</span><span class="p">)</span>
 <span class="n">geomTbl3857</span><span class="p">.</span><span class="na">execute</span><span class="p">().</span><span class="na">print</span><span class="p">()</span>
 </code></pre></div>
 <p>The first EPSG code EPSG:4326 in <code>ST_Transform</code> is the source CRS of the geometries. It is WGS84, the most common degree-based CRS.</p>
@@ -6289,11 +6288,11 @@
 <p>Use <mark>ST_Contains</mark>, <mark>ST_Intersects</mark> and so on to run a range query over a single column.</p>
 <p>The following example finds all counties that are within the given polygon:</p>
 <div class="highlight"><pre><span></span><code><span class="n">geomTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span>
-<span class="w">  </span><span class="s">&quot;</span>
+<span class="w">  </span><span class="s">"</span>
 <span class="s">    SELECT *</span>
 <span class="s">    FROM spatialdf</span>
 <span class="s">    WHERE ST_Contains (ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), newcountyshape)</span>
-<span class="s">  &quot;</span><span class="p">)</span>
+<span class="s">  "</span><span class="p">)</span>
 <span class="n">geomTable</span><span class="p">.</span><span class="na">execute</span><span class="p">().</span><span class="na">print</span><span class="p">()</span>
 </code></pre></div>
 <div class="admonition note">
@@ -6304,12 +6303,12 @@
 <p>Use <mark>ST_Distance</mark> to calculate the distance and rank the distance.</p>
 <p>The following code returns the 5 nearest neighbor of the given polygon.</p>
 <div class="highlight"><pre><span></span><code><span class="n">geomTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span>
-<span class="w">  </span><span class="s">&quot;</span>
+<span class="w">  </span><span class="s">"</span>
 <span class="s">    SELECT countyname, ST_Distance(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), newcountyshape) AS distance</span>
 <span class="s">    FROM geomTable</span>
 <span class="s">    ORDER BY distance DESC</span>
 <span class="s">    LIMIT 5</span>
-<span class="s">  &quot;</span><span class="p">)</span>
+<span class="s">  "</span><span class="p">)</span>
 <span class="n">geomTable</span><span class="p">.</span><span class="na">execute</span><span class="p">().</span><span class="na">print</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="join-query">Join query<a class="headerlink" href="#join-query" title="Permanent link">&para;</a></h2>
@@ -6464,7 +6463,7 @@ FROM rights CROSS JOIN UNNEST(rights.idarray) AS tmpTbl2(cellId)
 <span class="w">            </span><span class="nd">@Override</span>
 <span class="w">            </span><span class="kd">public</span><span class="w"> </span><span class="n">Geometry</span><span class="w"> </span><span class="nf">map</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span>
 <span class="w">            </span><span class="p">{</span>
-<span class="w">                </span><span class="n">FormatUtils</span><span class="o">&lt;</span><span class="n">Geometry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">formatUtils</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FormatUtils</span><span class="p">(</span><span class="s">&quot;,&quot;</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">GeometryType</span><span class="p">.</span><span class="na">POINT</span><span class="p">);</span>
+<span class="w">                </span><span class="n">FormatUtils</span><span class="o">&lt;</span><span class="n">Geometry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">formatUtils</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FormatUtils</span><span class="p">(</span><span class="s">","</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">GeometryType</span><span class="p">.</span><span class="na">POINT</span><span class="p">);</span>
 <span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">formatUtils</span><span class="p">.</span><span class="na">readGeometry</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">        </span><span class="p">})</span>
@@ -6504,13 +6503,13 @@ FROM rights CROSS JOIN UNNEST(rights.idarray) AS tmpTbl2(cellId)
 <span class="w">            </span><span class="kd">public</span><span class="w"> </span><span class="n">Row</span><span class="w"> </span><span class="nf">map</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span>
 <span class="w">            </span><span class="p">{</span>
 <span class="w">                </span><span class="n">FormatUtils</span><span class="w"> </span><span class="n">formatUtils</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FormatUtils</span><span class="p">(</span><span class="n">FileDataSplitter</span><span class="p">.</span><span class="na">WKT</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span>
-<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">Row</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">formatUtils</span><span class="p">.</span><span class="na">readGeometry</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;myName&quot;</span><span class="p">);</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">Row</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">formatUtils</span><span class="p">.</span><span class="na">readGeometry</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="w"> </span><span class="s">"myName"</span><span class="p">);</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">        </span><span class="p">})</span>
 </code></pre></div>
 <h3 id="get-spatial-table">Get Spatial Table<a class="headerlink" href="#get-spatial-table" title="Permanent link">&para;</a></h3>
 <p>Use TableEnv's fromDataStream function, with two column names <code>geom</code> and <code>geom_name</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">geomTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">fromDataStream</span><span class="p">(</span><span class="n">geomStream</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;geom&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;geom_name&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">geomTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">fromDataStream</span><span class="p">(</span><span class="n">geomStream</span><span class="p">,</span><span class="w"> </span><span class="s">"geom"</span><span class="p">,</span><span class="w"> </span><span class="s">"geom_name"</span><span class="p">)</span>
 </code></pre></div>
 
 

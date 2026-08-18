@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5662,11 +5661,11 @@ docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </
 <li><code>JAVA_HOME</code> pointing at a JDK 17 install</li>
 </ul>
 <p>Then export the Sedona Maven coordinates (the docker image bakes the JAR in directly; locally you let Maven pull it):</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">PYSPARK_SUBMIT_ARGS</span><span class="o">=</span><span class="s2">&quot;--packages org.apache.sedona:sedona-spark-shaded-4.0_2.13:1.9.1,org.datasyslab:geotools-wrapper:1.9.1-33.5 --driver-memory 4g pyspark-shell&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">PYSPARK_SUBMIT_ARGS</span><span class="o">=</span><span class="s2">"--packages org.apache.sedona:sedona-spark-shaded-4.0_2.13:1.9.1,org.datasyslab:geotools-wrapper:1.9.1-33.5 --driver-memory 4g pyspark-shell"</span>
 </code></pre></div>
 <p>Convert and run:</p>
 <div class="highlight"><pre><span></span><code>jupyter<span class="w"> </span>nbconvert<span class="w"> </span>--to<span class="w"> </span>python<span class="w"> </span>docs/usecases/&lt;your-notebook&gt;.ipynb<span class="w"> </span>--stdout<span class="w"> </span>&gt;<span class="w"> </span>/tmp/run.py
-sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;&#39;</span><span class="w"> </span><span class="s1">&#39;s|\.master(&quot;spark://[^&quot;]*&quot;)|.master(&quot;local[*]&quot;)|g&#39;</span><span class="w"> </span>/tmp/run.py
+sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">''</span><span class="w"> </span><span class="s1">'s|\.master("spark://[^"]*")|.master("local[*]")|g'</span><span class="w"> </span>/tmp/run.py
 <span class="o">(</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>docs/usecases<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>python<span class="w"> </span>/tmp/run.py<span class="w"> </span><span class="o">)</span>
 </code></pre></div>
 <p>Successful runs match what <code>docker/test-notebooks.sh</code> will see in CI.</p>

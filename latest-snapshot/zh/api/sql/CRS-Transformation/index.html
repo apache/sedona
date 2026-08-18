@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6195,9 +6194,9 @@
 </table>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Transform from WGS84 (EPSG:4326) to Web Mercator (EPSG:3857)</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(-122.4194 37.7749)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">,</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:3857&#39;</span>
+<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-122.4194 37.7749)'</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'EPSG:4326'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'EPSG:3857'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
 <p>输出：</p>
@@ -6205,16 +6204,16 @@
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Transform using ESRI authority code (North America Albers Equal Area Conic)</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(-122.4194 37.7749)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">,</span>
-<span class="w">    </span><span class="s1">&#39;ESRI:102008&#39;</span>
+<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-122.4194 37.7749)'</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'EPSG:4326'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'ESRI:102008'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Transform from WGS84 to UTM Zone 10N (EPSG:32610)</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((-122.5 37.5, -122.5 38.0, -122.0 38.0, -122.0 37.5, -122.5 37.5))&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">,</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:32610&#39;</span>
+<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON((-122.5 37.5, -122.5 38.0, -122.0 38.0, -122.0 37.5, -122.5 37.5))'</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'EPSG:4326'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'EPSG:32610'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_polygon</span>
 </code></pre></div>
 <p>你可以在 <a href="https://spatialreference.org/projjson_index.json">spatialreference.org</a> 或 <a href="https://epsg.io/">EPSG.io</a> 上浏览可用的 CRS 代码。</p>
@@ -6222,111 +6221,111 @@
 <p>WKT1 是 OGC 提供的 CRS 定义的 Well-Known Text 格式。投影 CRS 以 <code>PROJCS[...]</code> 开头，地理 CRS 以 <code>GEOGCS[...]</code> 开头。</p>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Transform using WKT1 format for target CRS</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(-122.4194 37.7749)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">,</span>
-<span class="w">    </span><span class="s1">&#39;PROJCS[&quot;WGS 84 / Pseudo-Mercator&quot;,</span>
-<span class="s1">        GEOGCS[&quot;WGS 84&quot;,</span>
-<span class="s1">            DATUM[&quot;WGS_1984&quot;,</span>
-<span class="s1">                SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563]],</span>
-<span class="s1">            PRIMEM[&quot;Greenwich&quot;,0],</span>
-<span class="s1">            UNIT[&quot;degree&quot;,0.0174532925199433]],</span>
-<span class="s1">        PROJECTION[&quot;Mercator_1SP&quot;],</span>
-<span class="s1">        PARAMETER[&quot;central_meridian&quot;,0],</span>
-<span class="s1">        PARAMETER[&quot;scale_factor&quot;,1],</span>
-<span class="s1">        PARAMETER[&quot;false_easting&quot;,0],</span>
-<span class="s1">        PARAMETER[&quot;false_northing&quot;,0],</span>
-<span class="s1">        UNIT[&quot;metre&quot;,1],</span>
-<span class="s1">        AUTHORITY[&quot;EPSG&quot;,&quot;3857&quot;]]&#39;</span>
+<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-122.4194 37.7749)'</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'EPSG:4326'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'PROJCS["WGS 84 / Pseudo-Mercator",</span>
+<span class="s1">        GEOGCS["WGS 84",</span>
+<span class="s1">            DATUM["WGS_1984",</span>
+<span class="s1">                SPHEROID["WGS 84",6378137,298.257223563]],</span>
+<span class="s1">            PRIMEM["Greenwich",0],</span>
+<span class="s1">            UNIT["degree",0.0174532925199433]],</span>
+<span class="s1">        PROJECTION["Mercator_1SP"],</span>
+<span class="s1">        PARAMETER["central_meridian",0],</span>
+<span class="s1">        PARAMETER["scale_factor",1],</span>
+<span class="s1">        PARAMETER["false_easting",0],</span>
+<span class="s1">        PARAMETER["false_northing",0],</span>
+<span class="s1">        UNIT["metre",1],</span>
+<span class="s1">        AUTHORITY["EPSG","3857"]]'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
 <h3 id="wkt2iso-191622019">WKT2（ISO 19162:2019）<a class="headerlink" href="#wkt2iso-191622019" title="Permanent link">&para;</a></h3>
 <p>WKT2 是现代的 ISO 19162:2019 标准格式。投影 CRS 以 <code>PROJCRS[...]</code> 开头，地理 CRS 以 <code>GEOGCRS[...]</code> 开头。</p>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Transform using WKT2 format for target CRS</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(-122.4194 37.7749)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">,</span>
-<span class="w">    </span><span class="s1">&#39;PROJCRS[&quot;WGS 84 / UTM zone 10N&quot;,</span>
-<span class="s1">        BASEGEOGCRS[&quot;WGS 84&quot;,</span>
-<span class="s1">            DATUM[&quot;World Geodetic System 1984&quot;,</span>
-<span class="s1">                ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563]]],</span>
-<span class="s1">        CONVERSION[&quot;UTM zone 10N&quot;,</span>
-<span class="s1">            METHOD[&quot;Transverse Mercator&quot;],</span>
-<span class="s1">            PARAMETER[&quot;Latitude of natural origin&quot;,0],</span>
-<span class="s1">            PARAMETER[&quot;Longitude of natural origin&quot;,-123],</span>
-<span class="s1">            PARAMETER[&quot;Scale factor at natural origin&quot;,0.9996],</span>
-<span class="s1">            PARAMETER[&quot;False easting&quot;,500000],</span>
-<span class="s1">            PARAMETER[&quot;False northing&quot;,0]],</span>
+<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-122.4194 37.7749)'</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'EPSG:4326'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'PROJCRS["WGS 84 / UTM zone 10N",</span>
+<span class="s1">        BASEGEOGCRS["WGS 84",</span>
+<span class="s1">            DATUM["World Geodetic System 1984",</span>
+<span class="s1">                ELLIPSOID["WGS 84",6378137,298.257223563]]],</span>
+<span class="s1">        CONVERSION["UTM zone 10N",</span>
+<span class="s1">            METHOD["Transverse Mercator"],</span>
+<span class="s1">            PARAMETER["Latitude of natural origin",0],</span>
+<span class="s1">            PARAMETER["Longitude of natural origin",-123],</span>
+<span class="s1">            PARAMETER["Scale factor at natural origin",0.9996],</span>
+<span class="s1">            PARAMETER["False easting",500000],</span>
+<span class="s1">            PARAMETER["False northing",0]],</span>
 <span class="s1">        CS[Cartesian,2],</span>
-<span class="s1">            AXIS[&quot;easting&quot;,east],</span>
-<span class="s1">            AXIS[&quot;northing&quot;,north],</span>
-<span class="s1">        UNIT[&quot;metre&quot;,1],</span>
-<span class="s1">        ID[&quot;EPSG&quot;,32610]]&#39;</span>
+<span class="s1">            AXIS["easting",east],</span>
+<span class="s1">            AXIS["northing",north],</span>
+<span class="s1">        UNIT["metre",1],</span>
+<span class="s1">        ID["EPSG",32610]]'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
 <h3 id="proj">PROJ 字符串<a class="headerlink" href="#proj" title="Permanent link">&para;</a></h3>
 <p>PROJ 字符串提供一种使用投影参数紧凑地定义 CRS 的方式。它以 <code>+proj=</code> 开头。</p>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Transform using PROJ string for UTM Zone 10N</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(-122.4194 37.7749)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">&#39;+proj=longlat +datum=WGS84 +no_defs&#39;</span><span class="p">,</span>
-<span class="w">    </span><span class="s1">&#39;+proj=utm +zone=10 +datum=WGS84 +units=m +no_defs&#39;</span>
+<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-122.4194 37.7749)'</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'+proj=longlat +datum=WGS84 +no_defs'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'+proj=utm +zone=10 +datum=WGS84 +units=m +no_defs'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Transform using PROJ string for Lambert Conformal Conic</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(-122.4194 37.7749)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">,</span>
-<span class="w">    </span><span class="s1">&#39;+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs&#39;</span>
+<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-122.4194 37.7749)'</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'EPSG:4326'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
 <h3 id="projjson">PROJJSON<a class="headerlink" href="#projjson" title="Permanent link">&para;</a></h3>
 <p>PROJJSON 是 CRS 的 JSON 表示形式，便于在基于 JSON 的工作流中使用。</p>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Transform using PROJJSON for target CRS</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(-122.4194 37.7749)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">,</span>
-<span class="w">    </span><span class="s1">&#39;{</span>
-<span class="s1">        &quot;type&quot;: &quot;ProjectedCRS&quot;,</span>
-<span class="s1">        &quot;name&quot;: &quot;WGS 84 / UTM zone 10N&quot;,</span>
-<span class="s1">        &quot;base_crs&quot;: {</span>
-<span class="s1">            &quot;name&quot;: &quot;WGS 84&quot;,</span>
-<span class="s1">            &quot;datum&quot;: {</span>
-<span class="s1">                &quot;type&quot;: &quot;GeodeticReferenceFrame&quot;,</span>
-<span class="s1">                &quot;name&quot;: &quot;World Geodetic System 1984&quot;,</span>
-<span class="s1">                &quot;ellipsoid&quot;: {</span>
-<span class="s1">                    &quot;name&quot;: &quot;WGS 84&quot;,</span>
-<span class="s1">                    &quot;semi_major_axis&quot;: 6378137,</span>
-<span class="s1">                    &quot;inverse_flattening&quot;: 298.257223563</span>
+<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-122.4194 37.7749)'</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'EPSG:4326'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'{</span>
+<span class="s1">        "type": "ProjectedCRS",</span>
+<span class="s1">        "name": "WGS 84 / UTM zone 10N",</span>
+<span class="s1">        "base_crs": {</span>
+<span class="s1">            "name": "WGS 84",</span>
+<span class="s1">            "datum": {</span>
+<span class="s1">                "type": "GeodeticReferenceFrame",</span>
+<span class="s1">                "name": "World Geodetic System 1984",</span>
+<span class="s1">                "ellipsoid": {</span>
+<span class="s1">                    "name": "WGS 84",</span>
+<span class="s1">                    "semi_major_axis": 6378137,</span>
+<span class="s1">                    "inverse_flattening": 298.257223563</span>
 <span class="s1">                }</span>
 <span class="s1">            },</span>
-<span class="s1">            &quot;coordinate_system&quot;: {</span>
-<span class="s1">                &quot;subtype&quot;: &quot;ellipsoidal&quot;,</span>
-<span class="s1">                &quot;axis&quot;: [</span>
-<span class="s1">                    {&quot;name&quot;: &quot;Longitude&quot;, &quot;abbreviation&quot;: &quot;lon&quot;, &quot;direction&quot;: &quot;east&quot;, &quot;unit&quot;: &quot;degree&quot;},</span>
-<span class="s1">                    {&quot;name&quot;: &quot;Latitude&quot;, &quot;abbreviation&quot;: &quot;lat&quot;, &quot;direction&quot;: &quot;north&quot;, &quot;unit&quot;: &quot;degree&quot;}</span>
+<span class="s1">            "coordinate_system": {</span>
+<span class="s1">                "subtype": "ellipsoidal",</span>
+<span class="s1">                "axis": [</span>
+<span class="s1">                    {"name": "Longitude", "abbreviation": "lon", "direction": "east", "unit": "degree"},</span>
+<span class="s1">                    {"name": "Latitude", "abbreviation": "lat", "direction": "north", "unit": "degree"}</span>
 <span class="s1">                ]</span>
 <span class="s1">            }</span>
 <span class="s1">        },</span>
-<span class="s1">        &quot;conversion&quot;: {</span>
-<span class="s1">            &quot;name&quot;: &quot;UTM zone 10N&quot;,</span>
-<span class="s1">            &quot;method&quot;: {&quot;name&quot;: &quot;Transverse Mercator&quot;},</span>
-<span class="s1">            &quot;parameters&quot;: [</span>
-<span class="s1">                {&quot;name&quot;: &quot;Latitude of natural origin&quot;, &quot;value&quot;: 0, &quot;unit&quot;: &quot;degree&quot;},</span>
-<span class="s1">                {&quot;name&quot;: &quot;Longitude of natural origin&quot;, &quot;value&quot;: -123, &quot;unit&quot;: &quot;degree&quot;},</span>
-<span class="s1">                {&quot;name&quot;: &quot;Scale factor at natural origin&quot;, &quot;value&quot;: 0.9996},</span>
-<span class="s1">                {&quot;name&quot;: &quot;False easting&quot;, &quot;value&quot;: 500000, &quot;unit&quot;: &quot;metre&quot;},</span>
-<span class="s1">                {&quot;name&quot;: &quot;False northing&quot;, &quot;value&quot;: 0, &quot;unit&quot;: &quot;metre&quot;}</span>
+<span class="s1">        "conversion": {</span>
+<span class="s1">            "name": "UTM zone 10N",</span>
+<span class="s1">            "method": {"name": "Transverse Mercator"},</span>
+<span class="s1">            "parameters": [</span>
+<span class="s1">                {"name": "Latitude of natural origin", "value": 0, "unit": "degree"},</span>
+<span class="s1">                {"name": "Longitude of natural origin", "value": -123, "unit": "degree"},</span>
+<span class="s1">                {"name": "Scale factor at natural origin", "value": 0.9996},</span>
+<span class="s1">                {"name": "False easting", "value": 500000, "unit": "metre"},</span>
+<span class="s1">                {"name": "False northing", "value": 0, "unit": "metre"}</span>
 <span class="s1">            ]</span>
 <span class="s1">        },</span>
-<span class="s1">        &quot;coordinate_system&quot;: {</span>
-<span class="s1">            &quot;subtype&quot;: &quot;Cartesian&quot;,</span>
-<span class="s1">            &quot;axis&quot;: [</span>
-<span class="s1">                {&quot;name&quot;: &quot;Easting&quot;, &quot;abbreviation&quot;: &quot;E&quot;, &quot;direction&quot;: &quot;east&quot;, &quot;unit&quot;: &quot;metre&quot;},</span>
-<span class="s1">                {&quot;name&quot;: &quot;Northing&quot;, &quot;abbreviation&quot;: &quot;N&quot;, &quot;direction&quot;: &quot;north&quot;, &quot;unit&quot;: &quot;metre&quot;}</span>
+<span class="s1">        "coordinate_system": {</span>
+<span class="s1">            "subtype": "Cartesian",</span>
+<span class="s1">            "axis": [</span>
+<span class="s1">                {"name": "Easting", "abbreviation": "E", "direction": "east", "unit": "metre"},</span>
+<span class="s1">                {"name": "Northing", "abbreviation": "N", "direction": "north", "unit": "metre"}</span>
 <span class="s1">            ]</span>
 <span class="s1">        },</span>
-<span class="s1">        &quot;id&quot;: {&quot;authority&quot;: &quot;EPSG&quot;, &quot;code&quot;: 32610}</span>
-<span class="s1">    }&#39;</span>
+<span class="s1">        "id": {"authority": "EPSG", "code": 32610}</span>
+<span class="s1">    }'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
 <h2 id="url-crs-provider">URL CRS Provider<a class="headerlink" href="#url-crs-provider" title="Permanent link">&para;</a></h2>
@@ -6343,9 +6342,9 @@
 <p>在创建 Sedona 会话时设置以下 Spark 配置属性：</p>
 <div class="highlight"><pre><span></span><code><span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.base&quot;</span><span class="p">,</span> <span class="s2">&quot;https://crs.example.com&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.pathTemplate&quot;</span><span class="p">,</span> <span class="s2">&quot;/</span><span class="si">{authority}</span><span class="s2">/</span><span class="si">{code}</span><span class="s2">.json&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.format&quot;</span><span class="p">,</span> <span class="s2">&quot;projjson&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sedona.crs.url.base"</span><span class="p">,</span> <span class="s2">"https://crs.example.com"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sedona.crs.url.pathTemplate"</span><span class="p">,</span> <span class="s2">"/</span><span class="si">{authority}</span><span class="s2">/</span><span class="si">{code}</span><span class="s2">.json"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sedona.crs.url.format"</span><span class="p">,</span> <span class="s2">"projjson"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
@@ -6400,83 +6399,83 @@
 <div class="highlight"><pre><span></span><code><span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span>
-        <span class="s2">&quot;spark.sedona.crs.url.base&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;https://raw.githubusercontent.com/myorg/crs-definitions/main&quot;</span><span class="p">,</span>
+        <span class="s2">"spark.sedona.crs.url.base"</span><span class="p">,</span>
+        <span class="s2">"https://raw.githubusercontent.com/myorg/crs-definitions/main"</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.pathTemplate&quot;</span><span class="p">,</span> <span class="s2">&quot;/epsg/</span><span class="si">{code}</span><span class="s2">.proj&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.format&quot;</span><span class="p">,</span> <span class="s2">&quot;proj&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sedona.crs.url.pathTemplate"</span><span class="p">,</span> <span class="s2">"/epsg/</span><span class="si">{code}</span><span class="s2">.proj"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sedona.crs.url.format"</span><span class="p">,</span> <span class="s2">"proj"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
 <span class="c1"># Resolves EPSG:990001 from:</span>
 <span class="c1"># https://raw.githubusercontent.com/myorg/crs-definitions/main/epsg/990001.proj</span>
-<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT ST_Transform(</span>
-<span class="s2">        ST_GeomFromText(&#39;POINT(-122.4194 37.7749)&#39;),</span>
-<span class="s2">        &#39;EPSG:4326&#39;,</span>
-<span class="s2">        &#39;EPSG:990001&#39;</span>
+<span class="s2">        ST_GeomFromText('POINT(-122.4194 37.7749)'),</span>
+<span class="s2">        'EPSG:4326',</span>
+<span class="s2">        'EPSG:990001'</span>
 <span class="s2">    ) AS transformed_point</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="crs_3">示例：自建 CRS 服务器<a class="headerlink" href="#crs_3" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.base&quot;</span><span class="p">,</span> <span class="s2">&quot;https://crs.mycompany.com&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.pathTemplate&quot;</span><span class="p">,</span> <span class="s2">&quot;/epsg/</span><span class="si">{code}</span><span class="s2">.proj&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.format&quot;</span><span class="p">,</span> <span class="s2">&quot;proj&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sedona.crs.url.base"</span><span class="p">,</span> <span class="s2">"https://crs.mycompany.com"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sedona.crs.url.pathTemplate"</span><span class="p">,</span> <span class="s2">"/epsg/</span><span class="si">{code}</span><span class="s2">.proj"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sedona.crs.url.format"</span><span class="p">,</span> <span class="s2">"proj"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
 <span class="c1"># Now ST_Transform will try https://crs.mycompany.com/epsg/3857.proj</span>
 <span class="c1"># before falling back to built-in definitions</span>
-<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT ST_Transform(</span>
-<span class="s2">        ST_GeomFromText(&#39;POINT(-122.4194 37.7749)&#39;),</span>
-<span class="s2">        &#39;EPSG:4326&#39;,</span>
-<span class="s2">        &#39;EPSG:3857&#39;</span>
+<span class="s2">        ST_GeomFromText('POINT(-122.4194 37.7749)'),</span>
+<span class="s2">        'EPSG:4326',</span>
+<span class="s2">        'EPSG:3857'</span>
 <span class="s2">    ) AS transformed_point</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="_3">示例：自定义权威机构代码<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <p>URL 提供者对于不存在于任何公开数据库中的自定义或内部权威机构代码尤其有用。使用默认的路径模板 <code>/{authority}/{code}.json</code> 时，<code>{authority}</code> 占位符会被 CRS 字符串中的权威机构名称（小写）替换：</p>
 <div class="highlight"><pre><span></span><code><span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.base&quot;</span><span class="p">,</span> <span class="s2">&quot;https://crs.mycompany.com&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.format&quot;</span><span class="p">,</span> <span class="s2">&quot;proj&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sedona.crs.url.base"</span><span class="p">,</span> <span class="s2">"https://crs.mycompany.com"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sedona.crs.url.format"</span><span class="p">,</span> <span class="s2">"proj"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
 <span class="c1"># Resolves MYORG:1001 from:</span>
 <span class="c1"># https://crs.mycompany.com/myorg/1001.json</span>
-<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT ST_Transform(</span>
-<span class="s2">        ST_GeomFromText(&#39;POINT(-122.4194 37.7749)&#39;),</span>
-<span class="s2">        &#39;EPSG:4326&#39;,</span>
-<span class="s2">        &#39;MYORG:1001&#39;</span>
+<span class="s2">        ST_GeomFromText('POINT(-122.4194 37.7749)'),</span>
+<span class="s2">        'EPSG:4326',</span>
+<span class="s2">        'MYORG:1001'</span>
 <span class="s2">    ) AS transformed_point</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="srid-url">示例：将几何对象的 SRID 与 URL 提供者一起使用<a class="headerlink" href="#srid-url" title="Permanent link">&para;</a></h3>
 <p>如果几何对象已设置了 SRID（例如通过 <code>ST_SetSRID</code>），可以省略源 CRS 参数。此时源 CRS 会从几何对象的 SRID 推导为 EPSG 代码：</p>
 <div class="highlight"><pre><span></span><code><span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.base&quot;</span><span class="p">,</span> <span class="s2">&quot;https://crs.mycompany.com&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.sedona.crs.url.format&quot;</span><span class="p">,</span> <span class="s2">&quot;proj&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sedona.crs.url.base"</span><span class="p">,</span> <span class="s2">"https://crs.mycompany.com"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.sedona.crs.url.format"</span><span class="p">,</span> <span class="s2">"proj"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
-<span class="c1"># The source CRS is taken from the geometry&#39;s SRID (4326 → EPSG:4326).</span>
+<span class="c1"># The source CRS is taken from the geometry's SRID (4326 → EPSG:4326).</span>
 <span class="c1"># Only the target CRS string is needed.</span>
-<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT ST_Transform(</span>
-<span class="s2">        ST_SetSRID(ST_GeomFromText(&#39;POINT(-122.4194 37.7749)&#39;), 4326),</span>
-<span class="s2">        &#39;EPSG:3857&#39;</span>
+<span class="s2">        ST_SetSRID(ST_GeomFromText('POINT(-122.4194 37.7749)'), 4326),</span>
+<span class="s2">        'EPSG:3857'</span>
 <span class="s2">    ) AS transformed_point</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="url">禁用 URL 提供者<a class="headerlink" href="#url" title="Permanent link">&para;</a></h3>
 <p>要避免启用 URL 提供者，可以省略 <code>spark.sedona.crs.url.base</code> 或保持其为空字符串（默认值）。注意，一旦 URL 提供者已在某个 executor JVM 中注册，它在该 JVM 的生命周期内会一直保持激活。</p>
@@ -6520,32 +6519,32 @@
 <h3 id="sql">使用网格文件的 SQL 示例<a class="headerlink" href="#sql" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Transform NAD27 to NAD83 using PROJ CDN grid (optional)</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(-122.4194 37.7749)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">&#39;+proj=longlat +datum=NAD27 +no_defs +nadgrids=@us_noaa_conus.tif&#39;</span><span class="p">,</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:4269&#39;</span>
+<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-122.4194 37.7749)'</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'+proj=longlat +datum=NAD27 +no_defs +nadgrids=@us_noaa_conus.tif'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'EPSG:4269'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Transform using mandatory grid file (error if not found)</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(-122.4194 37.7749)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">&#39;+proj=longlat +datum=NAD27 +no_defs +nadgrids=us_noaa_conus.tif&#39;</span><span class="p">,</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:4269&#39;</span>
+<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-122.4194 37.7749)'</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'+proj=longlat +datum=NAD27 +no_defs +nadgrids=us_noaa_conus.tif'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'EPSG:4269'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Transform OSGB36 to ETRS89 using UK grid</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(-0.1276 51.5074)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">&#39;+proj=longlat +datum=OSGB36 +nadgrids=@uk_os_OSTN15_NTv2_OSGBtoETRS.gsb +no_defs&#39;</span><span class="p">,</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:4258&#39;</span>
+<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-0.1276 51.5074)'</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'+proj=longlat +datum=OSGB36 +nadgrids=@uk_os_OSTN15_NTv2_OSGBtoETRS.gsb +no_defs'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'EPSG:4258'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
 <h2 id="_7">坐标顺序<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <p>Sedona 期望几何对象使用 <strong>经度/纬度（lon/lat）</strong> 顺序。如果你的数据是 lat/lon 顺序，请在转换前使用 <code>ST_FlipCoordinates</code> 交换坐标。</p>
 <div class="highlight"><pre><span></span><code><span class="c1">-- If your data is in lat/lon order, flip first</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_FlipCoordinates</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(37.7749 -122.4194)&#39;</span><span class="p">)),</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">,</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:3857&#39;</span>
+<span class="w">    </span><span class="n">ST_FlipCoordinates</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(37.7749 -122.4194)'</span><span class="p">)),</span>
+<span class="w">    </span><span class="s1">'EPSG:4326'</span><span class="p">,</span>
+<span class="w">    </span><span class="s1">'EPSG:3857'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
 <p>Sedona 会自动处理 CRS 定义中的坐标顺序，确保源 CRS 与目标 CRS 在内部都使用 lon/lat 顺序。</p>
@@ -6553,8 +6552,8 @@
 <p>如果几何对象已经设置了 SRID，可以省略源 CRS 参数：</p>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Set SRID on geometry and transform using only target CRS</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(-122.4194 37.7749)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
-<span class="w">    </span><span class="s1">&#39;EPSG:3857&#39;</span>
+<span class="w">    </span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(-122.4194 37.7749)'</span><span class="p">),</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
+<span class="w">    </span><span class="s1">'EPSG:3857'</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">transformed_point</span>
 </code></pre></div>
 <h2 id="_8">参见<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>

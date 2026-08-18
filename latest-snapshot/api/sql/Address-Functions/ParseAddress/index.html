@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5581,7 +5580,7 @@
 <p>Return type: <code>Array&lt;Struct&lt;label: String, value: String&gt;&gt;</code></p>
 <p>Since: <code>v1.8.0</code></p>
 <p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ParseAddress</span><span class="p">(</span><span class="ss">&quot;100 W 1st St, Los Angeles, CA 90012&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ParseAddress</span><span class="p">(</span><span class="ss">"100 W 1st St, Los Angeles, CA 90012"</span><span class="p">);</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>[{house_number, 100}, {road, w 1st st}, {city, los angeles}, {state, ca}, {postcode, 90012}]

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.raster.meta &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -230,12 +229,12 @@
 
 
 <div class="viewcode-block" id="PixelAnchor"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.meta.PixelAnchor">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PixelAnchor</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Anchor of the pixel cell. GeoTools anchors the coordinates at the center</span>
+<span class="w">    </span><span class="sd">"""Anchor of the pixel cell. GeoTools anchors the coordinates at the center</span>
 <span class="sd">    of pixels, while GDAL anchors the coordinates at the upper-left corner of</span>
 <span class="sd">    the pixels. This difference requires us to convert the affine</span>
 <span class="sd">    transformation between these conventions.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">CENTER</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">UPPER_LEFT</span> <span class="o">=</span> <span class="mi">2</span></div>
@@ -314,14 +313,14 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;[ </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_x</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">skew_x</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ip_x</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">skew_y</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_y</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ip_y</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;   0  0  1 ]&quot;</span>
+            <span class="sa">f</span><span class="s2">"[ </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_x</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">skew_x</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ip_x</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">skew_y</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_y</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ip_y</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="o">+</span> <span class="s2">"   0  0  1 ]"</span>
         <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SampleDimension"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.meta.SampleDimension">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SampleDimension</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raster band metadata.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Raster band metadata."""</span>
 
     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span>

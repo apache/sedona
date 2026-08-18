@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5572,7 +5571,7 @@
 <p>Return type: <code>Geometry</code></p>
 <p>SQL example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">Sedona</span><span class="p">.</span><span class="n">ST_ApproximateMedialAxis</span><span class="p">(</span>
-<span class="w">  </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))&#39;</span><span class="p">)</span>
+<span class="w">  </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">'POLYGON ((45 0, 55 0, 55 40, 70 40, 70 50, 30 50, 30 40, 45 40, 45 0))'</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Output: <code>MULTILINESTRING ((50 45, 50 5), (50 45, 35 45), (65 45, 50 45), (35 45, 65 45))</code></p>

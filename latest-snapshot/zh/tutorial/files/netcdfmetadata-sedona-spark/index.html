@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5990,17 +5989,17 @@ kilobytes of transfer for multi-gigabyte files.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Scala</label><label for="__tabbed_1_2">Java</label><label for="__tabbed_1_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;netcdf.metadata&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/path/to/data.nc&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"netcdf.metadata"</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">"/path/to/data.nc"</span><span class="p">)</span>
 <span class="n">df</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;netcdf.metadata&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">&quot;/path/to/data.nc&quot;</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">"netcdf.metadata"</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">"/path/to/data.nc"</span><span class="p">);</span>
 <span class="n">df</span><span class="p">.</span><span class="na">show</span><span class="p">();</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;netcdf.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/data.nc&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"netcdf.metadata"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/path/to/data.nc"</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
@@ -6008,10 +6007,10 @@ kilobytes of transfer for multi-gigabyte files.</p>
 </div>
 <p>Load one or more directories, which are scanned recursively for all
 <code>.nc</code>/<code>.nc4</code>/<code>.netcdf</code> files:</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;netcdf.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;s3a://bucket/climate-data/&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"netcdf.metadata"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"s3a://bucket/climate-data/"</span><span class="p">)</span>
 </code></pre></div>
 <p>Or use a glob pattern:</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;netcdf.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/*.nc&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"netcdf.metadata"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/path/to/*.nc"</span><span class="p">)</span>
 </code></pre></div>
 <p>Glob paths keep native Spark semantics: a file glob such as <code>/dir/a*.nc</code> matches
 direct children of <code>/dir</code> only, and a glob that matches nothing is an error, as in
@@ -6022,9 +6021,9 @@ every other Spark file source.</p>
 particular, set <code>recursiveFileLookup=false</code> to keep Hive-style partition discovery
 (e.g. <code>year=2020/</code> subdirectories become a <code>year</code> column):</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;netcdf.metadata&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;recursiveFileLookup&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/data/climate/&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"netcdf.metadata"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"recursiveFileLookup"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/data/climate/"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>The data source is read-only; writing is not supported, and neither are catalog
@@ -6158,16 +6157,16 @@ translation does not cover (e.g. <code>rotated_latitude_longitude</code>).</p>
 <p><code>RS_FromNetCDF</code> does not georeference the rasters it loads (their SRID is 0), so
 the columns reported here are the practical way to attach a CRS:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Common case: carry the integer SRID</span>
-<span class="n">meta</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;netcdf.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;srid&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-<span class="n">rast</span> <span class="o">=</span> <span class="n">file_df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;RS_FromNetCDF(content, &#39;O3&#39;) as rast&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;RS_SetSRID(rast, </span><span class="si">{</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;srid&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">) as rast&quot;</span>
+<span class="n">meta</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"netcdf.metadata"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"srid"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="n">rast</span> <span class="o">=</span> <span class="n">file_df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_FromNetCDF(content, 'O3') as rast"</span><span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">"RS_SetSRID(rast, </span><span class="si">{</span><span class="n">meta</span><span class="p">[</span><span class="s1">'srid'</span><span class="p">]</span><span class="si">}</span><span class="s2">) as rast"</span>
 <span class="p">)</span>
 
 <span class="c1"># Full-fidelity case (non-EPSG or custom CRS): carry the WKT.</span>
 <span class="c1"># RS_SetCRS accepts EPSG codes, WKT1, WKT2, PROJ strings, and PROJJSON.</span>
-<span class="n">meta</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;netcdf.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;crs&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-<span class="n">rast</span> <span class="o">=</span> <span class="n">file_df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;RS_FromNetCDF(content, &#39;O3&#39;) as rast&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
-    <span class="s2">&quot;RS_SetCRS(rast, &#39;&quot;</span> <span class="o">+</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;&#39;) as rast&quot;</span>
+<span class="n">meta</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"netcdf.metadata"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"crs"</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="n">rast</span> <span class="o">=</span> <span class="n">file_df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_FromNetCDF(content, 'O3') as rast"</span><span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"RS_SetCRS(rast, '"</span> <span class="o">+</span> <span class="n">meta</span><span class="p">[</span><span class="s2">"crs"</span><span class="p">]</span> <span class="o">+</span> <span class="s2">"') as rast"</span>
 <span class="p">)</span>
 </code></pre></div>
 <h3 id="geotransform-struct">geoTransform struct<a class="headerlink" href="#geotransform-struct" title="Permanent link">&para;</a></h3>
@@ -6345,43 +6344,43 @@ finite, collision-free decoded-domain sentinel for the loaded band. Therefore th
 <code>RS_FromNetCDF</code>.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
 <h3 id="discover-the-variables-in-a-collection-of-files">Discover the variables in a collection of files<a class="headerlink" href="#discover-the-variables-in-a-collection-of-files" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;netcdf.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;s3a://bucket/climate/*.nc&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
-    <span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;explode(variables) as v&quot;</span>
-<span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;NOT v.isCoordinate&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
-    <span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;v.name&quot;</span><span class="p">,</span> <span class="s2">&quot;v.dataType&quot;</span><span class="p">,</span> <span class="s2">&quot;v.shape&quot;</span><span class="p">,</span> <span class="s2">&quot;v.units&quot;</span><span class="p">,</span> <span class="s2">&quot;v.longName&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"netcdf.metadata"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"s3a://bucket/climate/*.nc"</span><span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"path"</span><span class="p">,</span> <span class="s2">"explode(variables) as v"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">"NOT v.isCoordinate"</span><span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"path"</span><span class="p">,</span> <span class="s2">"v.name"</span><span class="p">,</span> <span class="s2">"v.dataType"</span><span class="p">,</span> <span class="s2">"v.shape"</span><span class="p">,</span> <span class="s2">"v.units"</span><span class="p">,</span> <span class="s2">"v.longName"</span>
 <span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span>
     <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>The variable names discovered this way can be passed to <code>RS_FromNetCDF</code> to load a
 specific variable as a raster:</p>
-<div class="highlight"><pre><span></span><code><span class="n">file_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;binaryFile&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;s3a://bucket/climate/2024-01.nc&quot;</span><span class="p">)</span>
-<span class="n">raster_df</span> <span class="o">=</span> <span class="n">file_df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;RS_FromNetCDF(content, &#39;O3&#39;) as raster&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">file_df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"binaryFile"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"s3a://bucket/climate/2024-01.nc"</span><span class="p">)</span>
+<span class="n">raster_df</span> <span class="o">=</span> <span class="n">file_df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_FromNetCDF(content, 'O3') as raster"</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="filter-files-by-spatial-extent">Filter files by spatial extent<a class="headerlink" href="#filter-files-by-spatial-extent" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;netcdf.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/data/netcdf/&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-    <span class="s2">&quot;cornerCoordinates.minX &lt;= 15 AND cornerCoordinates.maxX &gt;= 5 &quot;</span>
-    <span class="s2">&quot;AND cornerCoordinates.minY &lt;= 55 AND cornerCoordinates.maxY &gt;= 45&quot;</span>
-<span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"netcdf.metadata"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/data/netcdf/"</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+    <span class="s2">"cornerCoordinates.minX &lt;= 15 AND cornerCoordinates.maxX &gt;= 5 "</span>
+    <span class="s2">"AND cornerCoordinates.minY &lt;= 55 AND cornerCoordinates.maxY &gt;= 45"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"path"</span><span class="p">,</span> <span class="s2">"width"</span><span class="p">,</span> <span class="s2">"height"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>Files whose spatial extent cannot be computed (no gridded variable, or no 1-D
 coordinate variables for the grid dimensions) have a null <code>cornerCoordinates</code> and are
 therefore excluded by a predicate like the one above.</p>
 <h3 id="inspect-dimensions-and-global-attributes">Inspect dimensions and global attributes<a class="headerlink" href="#inspect-dimensions-and-global-attributes" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;netcdf.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/data/netcdf/test.nc&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
-    <span class="s2">&quot;explode(dimensions) as d&quot;</span>
-<span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;d.name&quot;</span><span class="p">,</span> <span class="s2">&quot;d.length&quot;</span><span class="p">,</span> <span class="s2">&quot;d.isUnlimited&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"netcdf.metadata"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/data/netcdf/test.nc"</span><span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
+    <span class="s2">"explode(dimensions) as d"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"d.name"</span><span class="p">,</span> <span class="s2">"d.length"</span><span class="p">,</span> <span class="s2">"d.isUnlimited"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-<span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;netcdf.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/data/netcdf/test.nc&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-    <span class="s2">&quot;globalAttributes&quot;</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"netcdf.metadata"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/data/netcdf/test.nc"</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+    <span class="s2">"globalAttributes"</span>
 <span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="select-specific-columns">Select specific columns<a class="headerlink" href="#select-specific-columns" title="Permanent link">&para;</a></h3>
 <p>Column pruning reduces I/O: <code>path</code>, <code>driver</code>, and <code>fileSize</code> are served from the file
 listing without opening the file at all, and the coordinate arrays are only read when
 <code>geoTransform</code> or <code>cornerCoordinates</code> is selected.</p>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;netcdf.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/data/netcdf/&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-    <span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"netcdf.metadata"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/data/netcdf/"</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+    <span class="s2">"path"</span><span class="p">,</span> <span class="s2">"width"</span><span class="p">,</span> <span class="s2">"height"</span>
 <span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 

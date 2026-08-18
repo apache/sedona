@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5799,10 +5798,10 @@
 <p>Point the <code>stac</code> format at any STAC endpoint — a public API, an <code>s3a://</code> object, or a local <code>collection.json</code>. Here we open Element 84's public <code>earth-search</code> catalog and pull the live Sentinel-2 archive:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaContext</span>
 
-<span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">&quot;local[*]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">())</span>
+<span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">())</span>
 
-<span class="n">base</span> <span class="o">=</span> <span class="s2">&quot;https://earth-search.aws.element84.com/v1&quot;</span>
-<span class="n">scenes</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;stac&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">/collections/sentinel-2-l2a&quot;</span><span class="p">)</span>
+<span class="n">base</span> <span class="o">=</span> <span class="s2">"https://earth-search.aws.element84.com/v1"</span>
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"stac"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">/collections/sentinel-2-l2a"</span><span class="p">)</span>
 
 <span class="n">scenes</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 </code></pre></div>
@@ -5820,10 +5819,10 @@
 </code></pre></div>
 <p>A peek at the rows — a live descending pass captured the day this ran:</p>
 <div class="highlight"><pre><span></span><code><span class="n">scenes</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
-    <span class="s2">&quot;id&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;datetime&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;`eo:cloud_cover` AS cloud&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;ST_GeometryType(geometry) AS shape&quot;</span><span class="p">,</span>
+    <span class="s2">"id"</span><span class="p">,</span>
+    <span class="s2">"datetime"</span><span class="p">,</span>
+    <span class="s2">"`eo:cloud_cover` AS cloud"</span><span class="p">,</span>
+    <span class="s2">"ST_GeometryType(geometry) AS shape"</span><span class="p">,</span>
 <span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+--------------------------+-------------------------+------+-----------+
@@ -5839,22 +5838,22 @@
 <p>The Sentinel-2 archive is tens of millions of scenes. You never want all of them. When you filter on <strong>space</strong>, <strong>time</strong>, or <strong>cloud cover</strong>, Sedona pushes those predicates <em>down to the STAC API itself</em> — only the matching tiles ever cross the network. Apply the spatial predicate <em>on the read</em> (not buried in a join) and it becomes an API-side bounding query.</p>
 <p><img alt="The full Sentinel-2 archive filtered by spatial, temporal and cloud predicates that are pushed down to the STAC API, leaving only a few hundred matching scenes" src="../../../../stac-catalog-reader-pushdown.svg" /></p>
 <div class="highlight"><pre><span></span><code><span class="n">sf</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">&quot;POLYGON((-122.52 37.70, -122.36 37.70, &quot;</span>
-    <span class="s2">&quot;-122.36 37.83, -122.52 37.83, -122.52 37.70))&quot;</span>
+    <span class="s2">"POLYGON((-122.52 37.70, -122.36 37.70, "</span>
+    <span class="s2">"-122.36 37.83, -122.52 37.83, -122.52 37.70))"</span>
 <span class="p">)</span>
 
 <span class="n">sf_scenes</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;stac&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">/collections/sentinel-2-l2a&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"stac"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">/collections/sentinel-2-l2a"</span><span class="p">)</span>
     <span class="c1"># spatial + temporal + cloud predicates, all pushed to the STAC /search API</span>
-    <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ST_Intersects(ST_GeomFromText(&#39;</span><span class="si">{</span><span class="n">sf</span><span class="si">}</span><span class="s2">&#39;), geometry)&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s2">&quot;datetime BETWEEN &#39;2026-05-01&#39; AND &#39;2026-06-30&#39;&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s2">&quot;`eo:cloud_cover` &lt; 20&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="sa">f</span><span class="s2">"ST_Intersects(ST_GeomFromText('</span><span class="si">{</span><span class="n">sf</span><span class="si">}</span><span class="s2">'), geometry)"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s2">"datetime BETWEEN '2026-05-01' AND '2026-06-30'"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s2">"`eo:cloud_cover` &lt; 20"</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="n">sf_scenes</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span>
-    <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;date(datetime) AS day&quot;</span><span class="p">,</span> <span class="s2">&quot;round(`eo:cloud_cover`, 1) AS cloud&quot;</span>
-<span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">&quot;day&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="s2">"id"</span><span class="p">,</span> <span class="s2">"date(datetime) AS day"</span><span class="p">,</span> <span class="s2">"round(`eo:cloud_cover`, 1) AS cloud"</span>
+<span class="p">)</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"day"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 </code></pre></div>
 <p>Only tile <code>10SEG</code> — the one covering San Francisco — comes back, at sub-1% cloud:</p>
 <div class="highlight"><pre><span></span><code>+--------------------------+------------+------+
@@ -5870,32 +5869,32 @@
 <p>This is the payoff. Because <code>geometry</code> is a real geometry column, the catalog is just another spatial table — and it joins against your vector layer with the same <code>ST_Intersects</code> predicate you'd use anywhere else in Sedona. Your areas of interest on the left, the imagery footprints on the right, and the join is the overlap.</p>
 <p><img alt="Vector areas of interest joined to raster footprints with ST_Intersects, producing the overlapping region as the result" src="../../../../stac-catalog-reader-join.svg" /></p>
 <p>Let's make it concrete. The Apache Sedona source tree ships a tiny sample STAC collection under <code>spark/common/src/test/resources/datasource_stac/</code> — clone the repo and point at it, or swap in any <code>collection.json</code> of your own. We load those scene footprints, define three analyst-drawn AOIs as a vector layer, and ask: <strong>which scenes cover each AOI, and how much of the AOI do they cover?</strong></p>
-<div class="highlight"><pre><span></span><code><span class="c1"># 1 — the imagery layer (Sedona&#39;s sample STAC collection, from the source tree)</span>
-<span class="n">scenes</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;stac&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-    <span class="s2">&quot;spark/common/src/test/resources/datasource_stac/collection.json&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># 1 — the imagery layer (Sedona's sample STAC collection, from the source tree)</span>
+<span class="n">scenes</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"stac"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="s2">"spark/common/src/test/resources/datasource_stac/collection.json"</span>
 <span class="p">)</span>
-<span class="n">scenes</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;scenes&quot;</span><span class="p">)</span>
+<span class="n">scenes</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"scenes"</span><span class="p">)</span>
 
 <span class="c1"># 2 — the vector layer: your areas of interest (load from GeoParquet /</span>
 <span class="c1">#     Shapefile in production; inline WKT here so the example is self-contained)</span>
-<span class="n">aoi</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">aoi</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT aoi_name, ST_GeomFromText(wkt) AS geom FROM VALUES</span>
-<span class="s2">      (&#39;Kanton Reef&#39;,      &#39;POLYGON((172.91 1.34, 172.95 1.34, 172.95 1.37, 172.91 1.37, 172.91 1.34))&#39;),</span>
-<span class="s2">      (&#39;Offshore Buoy&#39;,    &#39;POLYGON((172.93 1.35, 172.97 1.35, 172.97 1.39, 172.93 1.39, 172.93 1.35))&#39;),</span>
-<span class="s2">      (&#39;Null Island Park&#39;, &#39;POLYGON((-0.01 -0.01, 0.01 -0.01, 0.01 0.01, -0.01 0.01, -0.01 -0.01))&#39;)</span>
+<span class="s2">      ('Kanton Reef',      'POLYGON((172.91 1.34, 172.95 1.34, 172.95 1.37, 172.91 1.37, 172.91 1.34))'),</span>
+<span class="s2">      ('Offshore Buoy',    'POLYGON((172.93 1.35, 172.97 1.35, 172.97 1.39, 172.93 1.39, 172.93 1.35))'),</span>
+<span class="s2">      ('Null Island Park', 'POLYGON((-0.01 -0.01, 0.01 -0.01, 0.01 0.01, -0.01 0.01, -0.01 -0.01))')</span>
 <span class="s2">    AS t(aoi_name, wkt)</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
-<span class="n">aoi</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;aoi&quot;</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span>
+<span class="n">aoi</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"aoi"</span><span class="p">)</span>
 
 <span class="c1"># 3 — the spatial join + how much of each AOI is covered</span>
-<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT DISTINCT a.aoi_name, s.id AS scene_id,</span>
 <span class="s2">           ROUND(ST_Area(ST_Intersection(a.geom, s.geometry))</span>
 <span class="s2">                 / ST_Area(a.geom) * 100, 1) AS aoi_covered_pct</span>
 <span class="s2">    FROM   aoi a</span>
 <span class="s2">    JOIN   scenes s ON ST_Intersects(a.geom, s.geometry)</span>
 <span class="s2">    ORDER BY aoi_covered_pct DESC</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+--------------+---------------------+-----------------+
 |aoi_name      |scene_id             |aoi_covered_pct  |
@@ -5905,11 +5904,11 @@
 +--------------+---------------------+-----------------+
 </code></pre></div>
 <p>Kanton Reef is 80.2% inside the scene footprint; Offshore Buoy only 29.4%. Null Island didn't match at all — and that's the point of the inverse query. <strong>Which AOIs have no coverage?</strong> is a <code>LEFT ANTI JOIN</code> on the same predicate — perfect for <em>"where are the gaps, and where do we need to task a new capture?"</em></p>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT a.aoi_name</span>
 <span class="s2">    FROM   aoi a</span>
 <span class="s2">    LEFT ANTI JOIN scenes s ON ST_Intersects(a.geom, s.geometry)</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+------------------+
 |aoi_name          |
@@ -5924,10 +5923,10 @@
 <p>For interactive work there's a Pythonic client that wraps the reader — open a catalog, search a collection with a bbox and a time range, get a Sedona DataFrame back. Same engine underneath, so the result drops into the exact same join:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Client</span>
 
-<span class="n">df</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;https://planetarycomputer.microsoft.com/api/stac/v1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
-    <span class="n">collection_id</span><span class="o">=</span><span class="s2">&quot;aster-l1t&quot;</span><span class="p">,</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"https://planetarycomputer.microsoft.com/api/stac/v1"</span><span class="p">)</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+    <span class="n">collection_id</span><span class="o">=</span><span class="s2">"aster-l1t"</span><span class="p">,</span>
     <span class="n">bbox</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">122.6</span><span class="p">,</span> <span class="mf">37.6</span><span class="p">,</span> <span class="o">-</span><span class="mf">122.3</span><span class="p">,</span> <span class="mf">37.9</span><span class="p">],</span>
-    <span class="n">datetime</span><span class="o">=</span><span class="s2">&quot;2020&quot;</span><span class="p">,</span>  <span class="c1"># a whole year</span>
+    <span class="n">datetime</span><span class="o">=</span><span class="s2">"2020"</span><span class="p">,</span>  <span class="c1"># a whole year</span>
     <span class="n">max_items</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  <span class="c1"># -&gt; a Sedona DataFrame, ready to join</span>

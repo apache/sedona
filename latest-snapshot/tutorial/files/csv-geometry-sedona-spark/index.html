@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5774,13 +5773,13 @@
 <p>Let’s start by creating a DataFrame with Sedona and Spark:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
     <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(2.0 5.0,6.0 1.0)&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;POINT(1.0 2.0)&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;POLYGON((7.0 1.0,7.0 3.0,9.0 3.0,7.0 1.0))&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"LINESTRING(2.0 5.0,6.0 1.0)"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"POINT(1.0 2.0)"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"POLYGON((7.0 1.0,7.0 3.0,9.0 3.0,7.0 1.0))"</span><span class="p">),</span>
     <span class="p">],</span>
-    <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">],</span>
 <span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)))</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)))</span>
 </code></pre></div>
 <p>Here are the contents of the DataFrame:</p>
 <div class="highlight"><pre><span></span><code>+---+------------------------------+
@@ -5792,27 +5791,27 @@
 +---+------------------------------+
 </code></pre></div>
 <p>Now write the DataFrame to a CSV file:</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geom_wkt&quot;</span><span class="p">,</span> <span class="n">ST_AsText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)))</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
-<span class="n">df</span><span class="o">.</span><span class="n">repartition</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;header&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
-    <span class="s2">&quot;/tmp/my_csvs&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geom_wkt"</span><span class="p">,</span> <span class="n">ST_AsText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)))</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">repartition</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"overwrite"</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+    <span class="s2">"/tmp/my_csvs"</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Notice that we’re using <code>repartition(1)</code> to output the DataFrame as a single file.  It’s usually better to output many files in parallel, making the write operation faster.  We’re just writing to a single file for the simplicity of this example.</p>
 <p>Here are the contents of the CSV file:</p>
 <div class="highlight"><pre><span></span><code>id,geom_wkt
-a,&quot;LINESTRING (2 5, 6 1)&quot;
+a,"LINESTRING (2 5, 6 1)"
 b,POINT (1 2)
-c,&quot;POLYGON ((7 1, 7 3, 9 3, 7 1))&quot;
+c,"POLYGON ((7 1, 7 3, 9 3, 7 1))"
 </code></pre></div>
 <p>This file stores the <code>geom_wkt</code> column as plain text, making it easily human-readable.  It follows a standard format, so any engine that knows how to parse WKT can read the column.</p>
 <h2 id="read-csv-with-geometry-using-sedona-and-spark">Read CSV with geometry using Sedona and Spark<a class="headerlink" href="#read-csv-with-geometry-using-sedona-and-spark" title="Permanent link">&para;</a></h2>
 <p>Now read the CSV file into a DataFrame:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;header&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;CSV&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/tmp/my_csvs&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geom_wkt&quot;</span><span class="p">)))</span>
-    <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;geom_wkt&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"CSV"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/my_csvs"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"geom_wkt"</span><span class="p">)))</span>
+    <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"geom_wkt"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>This file stores the <code>geom_wkt</code> column as text.  When you read the data, you must convert it to a geometry column with the <code>ST_GeomFromText</code> function.  Here are the contents of the DataFrame:</p>
@@ -5831,27 +5830,27 @@ c,&quot;POLYGON ((7 1, 7 3, 9 3, 7 1))&quot;
 </code></pre></div>
 <h2 id="readwrite-csv-files-with-extended-well-known-text-ewkt">Read/write CSV files with Extended Well-Known Text (EWKT)<a class="headerlink" href="#readwrite-csv-files-with-extended-well-known-text-ewkt" title="Permanent link">&para;</a></h2>
 <p>Let’s see how to write the DataFrame to CSV with EWKT.  Start by adding the SRID to the geometry column.</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">),</span> <span class="mi">4326</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">),</span> <span class="mi">4326</span><span class="p">))</span>
 </code></pre></div>
 <p>Now write out the DataFrame with an EWKT column:</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geom_ewkt&quot;</span><span class="p">,</span> <span class="n">ST_AsEWKT</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)))</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
-<span class="n">df</span><span class="o">.</span><span class="n">repartition</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;header&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
-    <span class="s2">&quot;/tmp/my_ewkt_csvs&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geom_ewkt"</span><span class="p">,</span> <span class="n">ST_AsEWKT</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)))</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">repartition</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"overwrite"</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+    <span class="s2">"/tmp/my_ewkt_csvs"</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Here are the contents of the CSV file:</p>
 <div class="highlight"><pre><span></span><code>id,geom_ewkt
-a,&quot;SRID=4326;LINESTRING (2 5, 6 1)&quot;
+a,"SRID=4326;LINESTRING (2 5, 6 1)"
 b,SRID=4326;POINT (1 2)
-c,&quot;SRID=4326;POLYGON ((7 1, 7 3, 9 3, 7 1))&quot;
+c,"SRID=4326;POLYGON ((7 1, 7 3, 9 3, 7 1))"
 </code></pre></div>
 <p>Here’s how to read the CSV file with an EWKT column into a Sedona DataFrame:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;header&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;csv&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/tmp/my_ewkt_csvs&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">ST_GeomFromEWKT</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geom_ewkt&quot;</span><span class="p">)))</span>
-    <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;geom_ewkt&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/my_ewkt_csvs"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">ST_GeomFromEWKT</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"geom_ewkt"</span><span class="p">)))</span>
+    <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"geom_ewkt"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Here are the contents of the DataFrame:</p>

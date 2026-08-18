@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.geometry_adapter &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -236,11 +235,11 @@
 
 <div class="viewcode-block" id="GeometryAdapter.create_jvm_geometry_from_base_geometry"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_adapter.GeometryAdapter.create_jvm_geometry_from_base_geometry">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_jvm_geometry_from_base_geometry</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">jvm</span><span class="p">,</span> <span class="n">geom</span><span class="p">:</span> <span class="n">BaseGeometry</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        :param jvm:</span>
 <span class="sd">        :param geom:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">Envelope</span><span class="p">):</span>
             <span class="n">jvm_geom</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">create_jvm_instance</span><span class="p">(</span><span class="n">jvm</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

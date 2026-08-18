@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5730,13 +5729,13 @@
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Java</label><label for="__tabbed_1_2">PyFlink</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="p">.</span><span class="na">createTemporaryView</span><span class="p">(</span><span class="s">&quot;myTable&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">tbl</span><span class="p">)</span>
-<span class="n">Table</span><span class="w"> </span><span class="n">geomTbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">&quot;SELECT ST_GeomFromWKT(geom_polygon) as geom_polygon, name_polygon FROM myTable&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="p">.</span><span class="na">createTemporaryView</span><span class="p">(</span><span class="s">"myTable"</span><span class="p">,</span><span class="w"> </span><span class="n">tbl</span><span class="p">)</span>
+<span class="n">Table</span><span class="w"> </span><span class="n">geomTbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">"SELECT ST_GeomFromWKT(geom_polygon) as geom_polygon, name_polygon FROM myTable"</span><span class="p">)</span>
 <span class="n">geomTbl</span><span class="p">.</span><span class="na">execute</span><span class="p">().</span><span class="na">print</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">table_env</span><span class="o">.</span><span class="n">sql_query</span><span class="p">(</span><span class="s2">&quot;SELECT ST_ASBinary(ST_Point(1.0, 2.0))&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="n">table_env</span><span class="o">.</span><span class="n">sql_query</span><span class="p">(</span><span class="s2">"SELECT ST_ASBinary(ST_Point(1.0, 2.0))"</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>

@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5893,22 +5892,22 @@
 <p>Here’s how to create a <code>customers</code> table with <code>id</code> and <code>first_name</code> columns:</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">local</span><span class="p">.</span><span class="n">db</span><span class="p">.</span><span class="n">customers</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">first_name</span><span class="w"> </span><span class="n">string</span><span class="p">)</span>
 <span class="k">USING</span><span class="w"> </span><span class="n">iceberg</span>
-<span class="n">TBLPROPERTIES</span><span class="p">(</span><span class="s1">&#39;format-version&#39;</span><span class="o">=</span><span class="s1">&#39;3&#39;</span><span class="p">);</span>
+<span class="n">TBLPROPERTIES</span><span class="p">(</span><span class="s1">'format-version'</span><span class="o">=</span><span class="s1">'3'</span><span class="p">);</span>
 </code></pre></div>
 <p>Let’s append some data to the table:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
     <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;Mary&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;Sue&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"Bob"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"Mary"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"Sue"</span><span class="p">),</span>
     <span class="p">],</span>
-    <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;first_name&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"first_name"</span><span class="p">],</span>
 <span class="p">)</span>
 
-<span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">&quot;local.db.customers&quot;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"iceberg"</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span><span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">"local.db.customers"</span><span class="p">)</span>
 </code></pre></div>
 <p>Let’s see how to run a query on the table:</p>
-<div class="highlight"><pre><span></span><code>sedona.table(&quot;local.db.customers&quot;).show()
+<div class="highlight"><pre><span></span><code>sedona.table("local.db.customers").show()
 
 +---+----------+
 | id|first_name|
@@ -5924,7 +5923,7 @@
 <p>Here’s how to create this spatial table with Iceberg:</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">local</span><span class="p">.</span><span class="n">db</span><span class="p">.</span><span class="n">customer_purchases</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">price</span><span class="w"> </span><span class="n">double</span><span class="p">,</span><span class="w"> </span><span class="n">geometry</span><span class="w"> </span><span class="n">geometry</span><span class="p">)</span>
 <span class="k">USING</span><span class="w"> </span><span class="n">iceberg</span>
-<span class="n">TBLPROPERTIES</span><span class="p">(</span><span class="s1">&#39;format-version&#39;</span><span class="o">=</span><span class="s1">&#39;3&#39;</span><span class="p">);</span>
+<span class="n">TBLPROPERTIES</span><span class="p">(</span><span class="s1">'format-version'</span><span class="o">=</span><span class="s1">'3'</span><span class="p">);</span>
 </code></pre></div>
 <p>Now append some spatial data with longitude/latitude coordinates to the table:</p>
 <div class="highlight"><pre><span></span><code><span class="n">coords</span> <span class="o">=</span> <span class="p">[</span>
@@ -5936,23 +5935,23 @@
 <span class="p">]</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
     <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="mf">10.99</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">coords</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">,</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="mf">1.95</span><span class="p">,</span> <span class="n">Point</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="mf">10.99</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">coords</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">,</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="mf">1.95</span><span class="p">,</span> <span class="n">Point</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)),</span>
     <span class="p">],</span>
-    <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;price&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"price"</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">],</span>
 <span class="p">)</span>
 
-<span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">&quot;local.db.customer_purchases&quot;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"iceberg"</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span><span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">"local.db.customer_purchases"</span><span class="p">)</span>
 </code></pre></div>
 <p>The spatial table contains points and polygons. Some purchases have an exact location, and others occur in a region.</p>
 <p>Let’s see how to join the tabular table with the spatial table.</p>
 <h2 id="joining-an-iceberg-tabular-table-with-a-spatial-table">Joining an Iceberg tabular table with a spatial table<a class="headerlink" href="#joining-an-iceberg-tabular-table-with-a-spatial-table" title="Permanent link">&para;</a></h2>
 <p>Here’s how to join the <code>customers</code> and <code>customer_purchases</code> tables.</p>
-<div class="highlight"><pre><span></span><code>customers = sedona.table(&quot;local.db.customers&quot;)
-purchases = sedona.table(&quot;local.db.customer_purchases&quot;)
+<div class="highlight"><pre><span></span><code>customers = sedona.table("local.db.customers")
+purchases = sedona.table("local.db.customer_purchases")
 
-joined = customers.join(purchases, &quot;id&quot;)
+joined = customers.join(purchases, "id")
 joined.show()
 
 +---+----------+-----+--------------------+
@@ -5970,44 +5969,44 @@ joined.show()
 <p>This section shows how queries can run faster on Iceberg tables.</p>
 <p>Let’s query the Overture Maps Foundation buildings dataset stored in GeoParquet files.</p>
 <div class="highlight"><pre><span></span><code><span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="s2">&quot;open_data.overture_2025_03_19_1.buildings_building&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">ST_GeomFromWKB</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)))</span>
-    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="s2">&quot;num_floors&quot;</span><span class="p">,</span> <span class="s2">&quot;roof_color&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;my_fun_view&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="s2">"open_data.overture_2025_03_19_1.buildings_building"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">ST_GeomFromWKB</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)))</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">,</span> <span class="s2">"num_floors"</span><span class="p">,</span> <span class="s2">"roof_color"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"my_fun_view"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Using this GeoParquet dataset, let’s run a filtering query to get the number of buildings in a small region near Gainesville, Florida.</p>
-<div class="highlight"><pre><span></span><code><span class="n">spot</span> <span class="o">=</span> <span class="s2">&quot;POLYGON((-82.258759 29.129371, -82.180481 29.136569, -82.202454 29.173747, -82.258759 29.129371))&quot;</span>
-<span class="n">sql</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">spot</span> <span class="o">=</span> <span class="s2">"POLYGON((-82.258759 29.129371, -82.180481 29.136569, -82.202454 29.173747, -82.258759 29.129371))"</span>
+<span class="n">sql</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"""</span>
 <span class="s2">select * from my_fun_view</span>
-<span class="s2">where ST_Contains(ST_GeomFromWKT(&#39;</span><span class="si">{</span><span class="n">spot</span><span class="si">}</span><span class="s2">&#39;), geometry)</span>
-<span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">where ST_Contains(ST_GeomFromWKT('</span><span class="si">{</span><span class="n">spot</span><span class="si">}</span><span class="s2">'), geometry)</span>
+<span class="s2">"""</span>
 <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 </code></pre></div>
 <p>This query runs in 45 seconds.</p>
 <p>Let’s convert this dataset to Iceberg:</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="s2">&quot;open_data.overture_2025_03_19_1.buildings_building&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="s2">"open_data.overture_2025_03_19_1.buildings_building"</span><span class="p">)</span>
 
-<span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="n">sql</span> <span class="o">=</span> <span class="s2">"""</span>
 <span class="s2">CREATE TABLE local.db.overture_2025_03_19_1_buildings_building (id string, geometry geometry, num_floors integer, roof_color string)</span>
 <span class="s2">USING iceberg</span>
-<span class="s2">TBLPROPERTIES(&#39;format-version&#39;=&#39;3&#39;);</span>
-<span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">TBLPROPERTIES('format-version'='3');</span>
+<span class="s2">"""</span>
 <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
 
 <span class="p">(</span>
-    <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="s2">&quot;num_floors&quot;</span><span class="p">,</span> <span class="s2">&quot;roof_color&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">&quot;local.db.overture_2025_03_19_1_buildings_building&quot;</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">,</span> <span class="s2">"num_floors"</span><span class="p">,</span> <span class="s2">"roof_color"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"iceberg"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"overwrite"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">"local.db.overture_2025_03_19_1_buildings_building"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Now let's rerun the same query on the Iceberg table:</p>
-<div class="highlight"><pre><span></span><code><span class="n">spot</span> <span class="o">=</span> <span class="s2">&quot;POLYGON((-82.258759 29.129371, -82.180481 29.136569, -82.202454 29.173747, -82.258759 29.129371))&quot;</span>
-<span class="n">sql</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">spot</span> <span class="o">=</span> <span class="s2">"POLYGON((-82.258759 29.129371, -82.180481 29.136569, -82.202454 29.173747, -82.258759 29.129371))"</span>
+<span class="n">sql</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"""</span>
 <span class="s2">select * from local.db.overture_2025_03_19_1_buildings_building</span>
-<span class="s2">where ST_Contains(ST_GeomFromWKT(&#39;</span><span class="si">{</span><span class="n">spot</span><span class="si">}</span><span class="s2">&#39;), geometry)</span>
-<span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">where ST_Contains(ST_GeomFromWKT('</span><span class="si">{</span><span class="n">spot</span><span class="si">}</span><span class="s2">'), geometry)</span>
+<span class="s2">"""</span>
 <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 </code></pre></div>
 <p>This query executes in 4 seconds.</p>
@@ -6018,25 +6017,25 @@ joined.show()
 <p>You can start by creating the Iceberg table:</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">some_catalog</span><span class="p">.</span><span class="n">matt</span><span class="p">.</span><span class="n">icegeometries</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">geometry</span><span class="w"> </span><span class="n">geometry</span><span class="p">)</span>
 <span class="k">USING</span><span class="w"> </span><span class="n">iceberg</span>
-<span class="n">TBLPROPERTIES</span><span class="p">(</span><span class="s1">&#39;format-version&#39;</span><span class="o">=</span><span class="s1">&#39;3&#39;</span><span class="p">);</span>
+<span class="n">TBLPROPERTIES</span><span class="p">(</span><span class="s1">'format-version'</span><span class="o">=</span><span class="s1">'3'</span><span class="p">);</span>
 </code></pre></div>
 <p>Append objects <code>a</code>, <code>b</code>, <code>c</code>, <code>d</code>, and <code>e</code> to the table:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
     <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(1.0 3.0,3.0 1.0)&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(2.0 5.0,6.0 1.0)&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;POLYGON((7.0 4.0,9.0 4.0,9.0 3.0,7.0 3.0,7.0 4.0))&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(2.0 7.0,4.0 9.0,7.0 8.0)&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(10.0 9.0,10.0 6.0)&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"LINESTRING(1.0 3.0,3.0 1.0)"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"LINESTRING(2.0 5.0,6.0 1.0)"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"POLYGON((7.0 4.0,9.0 4.0,9.0 3.0,7.0 3.0,7.0 4.0))"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"d"</span><span class="p">,</span> <span class="s2">"LINESTRING(2.0 7.0,4.0 9.0,7.0 8.0)"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"e"</span><span class="p">,</span> <span class="s2">"LINESTRING(10.0 9.0,10.0 6.0)"</span><span class="p">),</span>
     <span class="p">],</span>
-    <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">],</span>
 <span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)))</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)))</span>
 
-<span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">&quot;some_catalog.matt.icegeometries&quot;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"iceberg"</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span><span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">"some_catalog.matt.icegeometries"</span><span class="p">)</span>
 </code></pre></div>
 <p>Check the content of the table:</p>
-<div class="highlight"><pre><span></span><code>sedona.sql(&quot;SELECT * FROM some_catalog.matt.icegeometries;&quot;).show(truncate=False)
+<div class="highlight"><pre><span></span><code>sedona.sql("SELECT * FROM some_catalog.matt.icegeometries;").show(truncate=False)
 
 +---+-----------------------------------+
 |id |geometry                           |
@@ -6052,33 +6051,33 @@ joined.show()
 <p>Now create a table with the polygons.  Start by creating the Iceberg table:</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">some_catalog</span><span class="p">.</span><span class="n">matt</span><span class="p">.</span><span class="n">icepolygons</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">geometry</span><span class="w"> </span><span class="n">geometry</span><span class="p">)</span>
 <span class="k">USING</span><span class="w"> </span><span class="n">iceberg</span>
-<span class="n">TBLPROPERTIES</span><span class="p">(</span><span class="s1">&#39;format-version&#39;</span><span class="o">=</span><span class="s1">&#39;3&#39;</span><span class="p">);</span>
+<span class="n">TBLPROPERTIES</span><span class="p">(</span><span class="s1">'format-version'</span><span class="o">=</span><span class="s1">'3'</span><span class="p">);</span>
 </code></pre></div>
 <p>Append objects <code>polygon_x</code> and <code>polygon_y</code> to the table:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
     <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;polygon_x&quot;</span><span class="p">,</span> <span class="s2">&quot;POLYGON((3.0 5.0,8.0 5.0,8.0 2.0,3.0 2.0,3.0 5.0))&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;polygon_y&quot;</span><span class="p">,</span> <span class="s2">&quot;POLYGON((5.0 9.0,8.0 9.0,8.0 7.0,5.0 7.0,5.0 9.0))&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"polygon_x"</span><span class="p">,</span> <span class="s2">"POLYGON((3.0 5.0,8.0 5.0,8.0 2.0,3.0 2.0,3.0 5.0))"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"polygon_y"</span><span class="p">,</span> <span class="s2">"POLYGON((5.0 9.0,8.0 9.0,8.0 7.0,5.0 7.0,5.0 9.0))"</span><span class="p">),</span>
     <span class="p">],</span>
-    <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">],</span>
 <span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)))</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)))</span>
 
-<span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">&quot;some_catalog.matt.icepolygons&quot;</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"iceberg"</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span><span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">"some_catalog.matt.icepolygons"</span><span class="p">)</span>
 </code></pre></div>
 <p>Here’s how you can delete all the linestrings that cross any polygon.</p>
-<div class="highlight"><pre><span></span><code><span class="n">sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sql</span> <span class="o">=</span> <span class="s2">"""</span>
 <span class="s2">DELETE FROM some_catalog.matt.icegeometries</span>
 <span class="s2">WHERE EXISTS (</span>
 <span class="s2">    SELECT 1</span>
 <span class="s2">    FROM some_catalog.matt.icepolygons</span>
 <span class="s2">    WHERE ST_Intersects(icegeometries.geometry, icepolygons.geometry)</span>
 <span class="s2">)</span>
-<span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">"""</span>
 <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="n">sql</span><span class="p">)</span>
 </code></pre></div>
 <p>Check the table to see that geometries <code>b</code>, <code>c</code>, and <code>d</code> are deleted from the table.</p>
-<div class="highlight"><pre><span></span><code>sedona.sql(&quot;SELECT * FROM some_catalog.matt.icegeometries;&quot;).show(truncate=False)
+<div class="highlight"><pre><span></span><code>sedona.sql("SELECT * FROM some_catalog.matt.icegeometries;").show(truncate=False)
 
 +---+-----------------------+
 |id |geometry               |
@@ -6088,7 +6087,7 @@ joined.show()
 +---+-----------------------+
 </code></pre></div>
 <p>Iceberg also allows for time travel between different versions of a table.  Let’s see all the current versions of the Iceberg table:</p>
-<div class="highlight"><pre><span></span><code>sql = &quot;SELECT snapshot_id, committed_at, operation FROM some_catalog.matt.icegeometries.snapshots;&quot;
+<div class="highlight"><pre><span></span><code>sql = "SELECT snapshot_id, committed_at, operation FROM some_catalog.matt.icegeometries.snapshots;"
 sedona.sql(sql).show(truncate=False)
 
 +-------------------+-----------------------+---------+
@@ -6099,7 +6098,7 @@ sedona.sql(sql).show(truncate=False)
 +-------------------+-----------------------+---------+
 </code></pre></div>
 <p>Let’s check the contents of the table before the delete operation is run:</p>
-<div class="highlight"><pre><span></span><code>sql = &quot;SELECT * FROM some_catalog.matt.icegeometries FOR SYSTEM_VERSION AS OF 1643575804253593143;&quot;
+<div class="highlight"><pre><span></span><code>sql = "SELECT * FROM some_catalog.matt.icegeometries FOR SYSTEM_VERSION AS OF 1643575804253593143;"
 sedona.sql(sql).show(truncate=False)
 
 +---+-----------------------------------+
@@ -6139,7 +6138,7 @@ sedona.sql(sql).show(truncate=False)
 <li>Duplicate data should be ignored</li>
 </ul>
 <p>Here’s the code to execute this operation:</p>
-<div class="highlight"><pre><span></span><code><span class="n">merge_sql</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">merge_sql</span> <span class="o">=</span> <span class="s2">"""</span>
 <span class="s2">MERGE INTO some_catalog.matt.icegeometries target</span>
 <span class="s2">USING source</span>
 <span class="s2">ON target.id = source.id</span>
@@ -6148,7 +6147,7 @@ sedona.sql(sql).show(truncate=False)
 <span class="s2">        target.geometry = source.geometry</span>
 <span class="s2">WHEN NOT MATCHED THEN</span>
 <span class="s2">    INSERT (id, geometry) VALUES (source.id, source.geometry)</span>
-<span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">"""</span>
 <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="n">merge_sql</span><span class="p">)</span>
 </code></pre></div>
 <p>Here are the contents of the table after running this operation:</p>
@@ -6166,15 +6165,15 @@ sedona.sql(sql).show(truncate=False)
 <p>Let’s create a DataFrame with a different schema than the existing Iceberg table:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
     <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(8.0 8.0,3.0 3.0)&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(5.0 5.0,1.0 1.0)&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"x"</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"LINESTRING(8.0 8.0,3.0 3.0)"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"y"</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"LINESTRING(5.0 5.0,1.0 1.0)"</span><span class="p">),</span>
     <span class="p">],</span>
-    <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;num&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"num"</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">],</span>
 <span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)))</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)))</span>
 </code></pre></div>
 <p>Now attempt to append the DataFrame to the table:</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;iceberg&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;append&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">&quot;some_catalog.matt.icegeometries&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"iceberg"</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"append"</span><span class="p">)</span><span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">"some_catalog.matt.icegeometries"</span><span class="p">)</span>
 </code></pre></div>
 <p>Here is the error:</p>
 <div class="highlight"><pre><span></span><code>AnalysisException: [INSERT_COLUMN_ARITY_MISMATCH.TOO_MANY_DATA_COLUMNS] Cannot write to `some_catalog`.`matt`.`icegeometries`, the reason is too many data columns:

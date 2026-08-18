@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.maps.SedonaMapUtils &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -235,14 +234,14 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__convert_to_gdf_or_pdf__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">rename</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">geometry_col</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Converts a SedonaDataFrame to a GeoPandasDataFrame and also renames geometry column to a standard name of</span>
-<span class="sd">        &#39;geometry&#39;</span>
+<span class="sd">        'geometry'</span>
 <span class="sd">        However, if no geometry column is found even after traversing schema, returns a Pandas Dataframe</span>
 <span class="sd">        :param df: SedonaDataFrame to convert</span>
 <span class="sd">        :param geometry_col: [Optional]</span>
 <span class="sd">        :return: GeoPandas Dataframe or Pandas Dataframe</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">geometry_col</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">geometry_col</span> <span class="o">=</span> <span class="n">SedonaMapUtils</span><span class="o">.</span><span class="n">__get_geometry_col__</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
@@ -259,25 +258,25 @@
             <span class="c1"># packaging is a dependency of geopandas</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">packaging.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;GeoPandas is missing. You can install it manually or via apache-sedona[kepler-map] or apache-sedona[pydeck-map].&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">"GeoPandas is missing. You can install it manually or via apache-sedona[kepler-map] or apache-sedona[pydeck-map]."</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
         <span class="c1"># From GeoPandas 1.0.0 onwards, the from_arrow method is available</span>
-        <span class="k">if</span> <span class="n">parse</span><span class="p">(</span><span class="n">gpd</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">parse</span><span class="p">(</span><span class="s2">&quot;1.0.0&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">parse</span><span class="p">(</span><span class="n">gpd</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">parse</span><span class="p">(</span><span class="s2">"1.0.0"</span><span class="p">):</span>
             <span class="n">data_pyarrow</span> <span class="o">=</span> <span class="n">dataframe_to_arrow</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
             <span class="n">geo_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_arrow</span><span class="p">(</span><span class="n">data_pyarrow</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">geo_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">toPandas</span><span class="p">(),</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geometry_col</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">geometry_col</span> <span class="o">!=</span> <span class="s2">&quot;geometry&quot;</span> <span class="ow">and</span> <span class="n">rename</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">geo_df</span><span class="o">.</span><span class="n">rename_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">geometry_col</span> <span class="o">!=</span> <span class="s2">"geometry"</span> <span class="ow">and</span> <span class="n">rename</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">geo_df</span><span class="o">.</span><span class="n">rename_geometry</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">geo_df</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__convert_to_geojson__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Converts a SedonaDataFrame to GeoJSON</span>
 <span class="sd">        :param df: SedonaDataFrame to convert</span>
 <span class="sd">        :return: GeoJSON object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">gdf</span> <span class="o">=</span> <span class="n">SedonaMapUtils</span><span class="o">.</span><span class="n">__convert_to_gdf_or_pdf__</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
         <span class="n">gjson_str</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
         <span class="n">gjson</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">gjson_str</span><span class="p">)</span>
@@ -298,14 +297,14 @@
             <span class="n">geom_type</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">geom_type</span>
         <span class="k">if</span> <span class="n">geom_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">type_list</span><span class="p">:</span>
             <span class="n">type_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">geom_type</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;Polygon&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"Polygon"</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">geom</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">geom</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__extract_point_coordinate__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">geom</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">geom</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;Point&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">geom</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"Point"</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">geom</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="nd">@classmethod</span>
@@ -317,10 +316,10 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__is_geom_collection__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">geom_type</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;MultiPolygon&quot;</span>
-            <span class="ow">or</span> <span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;MultiLineString&quot;</span>
-            <span class="ow">or</span> <span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;MultiPoint&quot;</span>
-            <span class="ow">or</span> <span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;GeometryCollection&quot;</span>
+            <span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"MultiPolygon"</span>
+            <span class="ow">or</span> <span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"MultiLineString"</span>
+            <span class="ow">or</span> <span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"MultiPoint"</span>
+            <span class="ow">or</span> <span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"GeometryCollection"</span>
         <span class="p">)</span></div>
 </pre></div>
 

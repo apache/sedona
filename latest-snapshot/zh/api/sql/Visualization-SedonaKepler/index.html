@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5733,7 +5732,7 @@
 <h3 id="sedonakeplercreate_map"><strong>使用 SedonaKepler.create_map 创建地图对象</strong><a class="headerlink" href="#sedonakeplercreate_map" title="Permanent link">&para;</a></h3>
 <p>SedonaKepler 暴露的 create_map API 的签名如下：</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_map</span><span class="p">(</span>
-    <span class="n">df</span><span class="p">:</span> <span class="n">SedonaDataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;unnamed&quot;</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">df</span><span class="p">:</span> <span class="n">SedonaDataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"unnamed"</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">map</span><span class="p">:</span> <span class="o">...</span>
 </code></pre></div>
 <p>参数 'name' 用于在地图对象中关联传入的 SedonaDataFrame，应用到该地图上的任何配置都会与该名称绑定。建议为 dataframe 传入唯一的标识符。</p>
@@ -5748,7 +5747,7 @@
 <div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nb">map</span> <span class="o">=</span> <span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">groupedresult</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;AirportCount&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="nb">map</span> <span class="o">=</span> <span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">groupedresult</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"AirportCount"</span><span class="p">)</span>
 <span class="nb">map</span>
 </code></pre></div>
 </div>
@@ -5757,7 +5756,7 @@
 </div>
 <h3 id="sedonakepleradd_df-sedonadataframe"><strong>使用 SedonaKepler.add_df 向地图对象添加 SedonaDataFrame</strong><a class="headerlink" href="#sedonakepleradd_df-sedonadataframe" title="Permanent link">&para;</a></h3>
 <p>SedonaKepler 暴露的 add_df API 的签名如下：</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_df</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">SedonaDataFrame</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;unnamed&quot;</span><span class="p">):</span> <span class="o">...</span>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_df</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">SedonaDataFrame</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"unnamed"</span><span class="p">):</span> <span class="o">...</span>
 </code></pre></div>
 <p>该 API 可用于向已经创建的地图对象添加一个 SedonaDataFrame。传入的 map 对象会被直接修改，不返回任何值。</p>
 <p>参数 name 的约束条件与 'create_map' 相同。</p>
@@ -5773,7 +5772,7 @@
 </div>
 </div>
 <div class="highlight"><pre><span></span><code><span class="nb">map</span> <span class="o">=</span> <span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">()</span>
-<span class="n">SedonaKepler</span><span class="o">.</span><span class="n">add_df</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span> <span class="n">groupedresult</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;AirportCount&quot;</span><span class="p">)</span>
+<span class="n">SedonaKepler</span><span class="o">.</span><span class="n">add_df</span><span class="p">(</span><span class="nb">map</span><span class="p">,</span> <span class="n">groupedresult</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"AirportCount"</span><span class="p">)</span>
 <span class="nb">map</span>
 </code></pre></div>
 </div>

@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5574,13 +5573,13 @@
 <p>If any other geometry is provided as an argument, an IllegalArgumentException is thrown.</p>
 </div>
 <p>SQL Example:</p>
-<div class="highlight"><pre><span></span><code>SELECT ST_NumPoints(ST_GeomFromWKT(&#39;MULTIPOINT ((0 0), (1 1), (0 1), (2 2))&#39;))
+<div class="highlight"><pre><span></span><code>SELECT ST_NumPoints(ST_GeomFromWKT('MULTIPOINT ((0 0), (1 1), (0 1), (2 2))'))
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>IllegalArgumentException: Unsupported geometry type: MultiPoint, only LineString geometry is supported.
 </code></pre></div>
 <p>SQL Example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_NumPoints</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 1, 1 0, 2 0)&#39;</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_NumPoints</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'LINESTRING(0 1, 1 0, 2 0)'</span><span class="p">))</span>
 </code></pre></div>
 <p>Output: <code>3</code></p>
 

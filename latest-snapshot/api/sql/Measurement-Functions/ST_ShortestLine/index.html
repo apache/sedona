@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5573,8 +5572,8 @@
 <p>SQL Example:</p>
 <p><img alt="ST_ShortestLine Point to Point" src="../../../../image/ST_ShortestLine/ST_ShortestLine_point_point.svg" title="ST_ShortestLine Point to Point" /></p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ShortestLine</span><span class="p">(</span>
-<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT (0 0)&#39;</span><span class="p">),</span>
-<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT (3 4)&#39;</span><span class="p">)</span>
+<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT (0 0)'</span><span class="p">),</span>
+<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT (3 4)'</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
@@ -5583,8 +5582,8 @@
 <p>SQL Example:</p>
 <p><img alt="ST_ShortestLine Point to LineString" src="../../../../image/ST_ShortestLine/ST_ShortestLine_point_linestring.svg" title="ST_ShortestLine Point to LineString" /></p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ShortestLine</span><span class="p">(</span>
-<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT (0 1)&#39;</span><span class="p">),</span>
-<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)&#39;</span><span class="p">)</span>
+<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT (0 1)'</span><span class="p">),</span>
+<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'LINESTRING (0 0, 1 0, 2 0, 3 0, 4 0, 5 0)'</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>

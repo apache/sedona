@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.decorators &mdash; Apache Sedona Python Documentation</title>
@@ -213,21 +212,21 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypeVar</span>
 
-<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"T"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="classproperty"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.decorators.classproperty">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">classproperty</span><span class="p">:</span>
@@ -265,8 +264,8 @@
                 <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ModuleNotFoundError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Did not found </span><span class="si">{</span><span class="n">has_all_libs</span><span class="p">[</span><span class="n">first_not_fulfill_value</span><span class="p">]</span><span class="si">}</span><span class="s2">, make sure that was correctly imported via py4j&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;Did you use SedonaRegistrator.registerAll, Your jars were properly copied to $SPARK_HOME/jars ? &quot;</span>
+                    <span class="sa">f</span><span class="s2">"Did not found </span><span class="si">{</span><span class="n">has_all_libs</span><span class="p">[</span><span class="n">first_not_fulfill_value</span><span class="p">]</span><span class="si">}</span><span class="s2">, make sure that was correctly imported via py4j"</span>
+                    <span class="sa">f</span><span class="s2">"Did you use SedonaRegistrator.registerAll, Your jars were properly copied to $SPARK_HOME/jars ? "</span>
                 <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">run_function</span>

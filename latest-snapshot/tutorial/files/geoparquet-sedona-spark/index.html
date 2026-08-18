@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5926,16 +5925,16 @@
 <p>Start by creating a Sedona DataFrame:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
     <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(2.0 5.0,6.0 1.0)&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(7.0 4.0,9.0 2.0)&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(1.0 3.0,3.0 1.0)&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"LINESTRING(2.0 5.0,6.0 1.0)"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"LINESTRING(7.0 4.0,9.0 2.0)"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"LINESTRING(1.0 3.0,3.0 1.0)"</span><span class="p">),</span>
     <span class="p">],</span>
-    <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">],</span>
 <span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)))</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)))</span>
 </code></pre></div>
 <p>Now write the DataFrame to GeoParquet files:</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geoparquet&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;/tmp/somewhere&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"overwrite"</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"/tmp/somewhere"</span><span class="p">)</span>
 </code></pre></div>
 <p>Here are the files created in storage:</p>
 <div class="highlight"><pre><span></span><code>somewhere/
@@ -5948,7 +5947,7 @@
 <p>Sedona writes many Parquet files in parallel because that's much faster than writing a single file.</p>
 <h2 id="read-geoparquet-files-into-sedona-dataframe-with-spark">Read GeoParquet files into Sedona DataFrame with Spark<a class="headerlink" href="#read-geoparquet-files-into-sedona-dataframe-with-spark" title="Permanent link">&para;</a></h2>
 <p>Let's read the GeoParquet files into a Sedona DataFrame:</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geoparquet&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/tmp/somewhere&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/somewhere"</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <p>Here are the results:</p>
@@ -5975,7 +5974,7 @@ the "geo" metadata for each input file.</p>
 <div class="tabbed-block"></div>
 </div>
 </div>
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet.metadata&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet.metadata"</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
 <span class="n">df</span><span class="p">.</span><span class="n">printSchema</span><span class="p">()</span>
 </code></pre></div>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Java</label></div>
@@ -5983,7 +5982,7 @@ the "geo" metadata for each input file.</p>
 <div class="tabbed-block"></div>
 </div>
 </div>
-<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;geoparquet.metadata&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">"geoparquet.metadata"</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
 <span class="n">df</span><span class="p">.</span><span class="na">printSchema</span><span class="p">()</span>
 </code></pre></div>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:1"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Python</label></div>
@@ -5991,7 +5990,7 @@ the "geo" metadata for each input file.</p>
 <div class="tabbed-block"></div>
 </div>
 </div>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geoparquet.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet.metadata"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 </code></pre></div>
 <p>The output will be as follows:</p>
@@ -6035,21 +6034,21 @@ the "geo" metadata for each input file.</p>
 <h2 id="write-geoparquet-with-crs-metadata">Write GeoParquet with CRS Metadata<a class="headerlink" href="#write-geoparquet-with-crs-metadata" title="Permanent link">&para;</a></h2>
 <p>Since v<code>1.5.1</code>, Sedona supports writing GeoParquet files with custom GeoParquet spec version and crs.
 The default GeoParquet spec version is <code>1.1.0</code> (since <code>v1.9.0</code>) and the default crs is <code>null</code>. You can specify the GeoParquet spec version and crs as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">projjson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{...}&quot;</span><span class="w"> </span><span class="c1">// PROJJSON string for all geometry columns</span>
-<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.version&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.crs&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">projjson</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="n">geoparquetoutputlocation</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/GeoParquet_File_Name.parquet&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">projjson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"{...}"</span><span class="w"> </span><span class="c1">// PROJJSON string for all geometry columns</span>
+<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.version"</span><span class="p">,</span><span class="w"> </span><span class="s">"1.0.0"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.crs"</span><span class="p">,</span><span class="w"> </span><span class="n">projjson</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="n">geoparquetoutputlocation</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"/GeoParquet_File_Name.parquet"</span><span class="p">)</span>
 </code></pre></div>
 <p>If you have multiple geometry columns written to the GeoParquet file, you can specify the CRS for each column.
 For example, <code>g0</code> and <code>g1</code> are two geometry columns in the DataFrame <code>df</code>, and you want to specify the CRS for each column as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">projjson_g0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{...}&quot;</span><span class="w"> </span><span class="c1">// PROJJSON string for g0</span>
-<span class="kd">val</span><span class="w"> </span><span class="n">projjson_g1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{...}&quot;</span><span class="w"> </span><span class="c1">// PROJJSON string for g1</span>
-<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.version&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.crs.g0&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">projjson_g0</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.crs.g1&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">projjson_g1</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="n">geoparquetoutputlocation</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/GeoParquet_File_Name.parquet&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">projjson_g0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"{...}"</span><span class="w"> </span><span class="c1">// PROJJSON string for g0</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">projjson_g1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"{...}"</span><span class="w"> </span><span class="c1">// PROJJSON string for g1</span>
+<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.version"</span><span class="p">,</span><span class="w"> </span><span class="s">"1.0.0"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.crs.g0"</span><span class="p">,</span><span class="w"> </span><span class="n">projjson_g0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.crs.g1"</span><span class="p">,</span><span class="w"> </span><span class="n">projjson_g1</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="n">geoparquetoutputlocation</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"/GeoParquet_File_Name.parquet"</span><span class="p">)</span>
 </code></pre></div>
 <p>The value of <code>geoparquet.crs</code> and <code>geoparquet.crs.&lt;column_name&gt;</code> can be one of the following:</p>
 <ul>
@@ -6072,14 +6071,14 @@ coordinates while reading or writing GeoParquet. You can use
 coordinates themselves need to be swapped.</p>
 <h2 id="save-geoparquet-with-covering-metadata">Save GeoParquet with Covering Metadata<a class="headerlink" href="#save-geoparquet-with-covering-metadata" title="Permanent link">&para;</a></h2>
 <p>Since <code>v1.6.1</code>, Sedona supports writing the <a href="https://github.com/opengeospatial/geoparquet/blob/v1.1.0/format-specs/geoparquet.md#covering"><code>covering</code> field</a> to geometry column metadata. The <code>covering</code> field specifies a bounding box column to help accelerate spatial data retrieval. The bounding box column should be a top-level struct column containing <code>xmin</code>, <code>ymin</code>, <code>xmax</code>, <code>ymax</code> columns. If the DataFrame you are writing contains such columns, you can specify <code>.option("geoparquet.covering.&lt;geometryColumnName&gt;", "&lt;coveringColumnName&gt;")</code> option to write <code>covering</code> metadata to GeoParquet files:</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering.geometry&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bbox&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.covering.geometry"</span><span class="p">,</span><span class="w"> </span><span class="s">"bbox"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"/path/to/saved_geoparquet.parquet"</span><span class="p">)</span>
 </code></pre></div>
 <p>If the DataFrame has only one geometry column, you can simply specify the <code>geoparquet.covering</code> option and omit the geometry column name:</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bbox&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.covering"</span><span class="p">,</span><span class="w"> </span><span class="s">"bbox"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"/path/to/saved_geoparquet.parquet"</span><span class="p">)</span>
 </code></pre></div>
 <p>If you don't set a <code>geoparquet.covering</code> option, Sedona will automatically populate covering metadata for GeoParquet <code>1.1.0</code>.</p>
 <p>For each geometry column, Sedona uses <code>&lt;geometryColumnName&gt;_bbox</code> as the covering column:</p>
@@ -6093,13 +6092,13 @@ coordinates themselves need to be swapped.</p>
 <li><code>auto</code> (default): enable automatic covering metadata/column generation for GeoParquet <code>1.1.0</code>.</li>
 <li><code>legacy</code>: disable automatic covering generation.</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering.mode&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;legacy&quot;</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.covering.mode"</span><span class="p">,</span><span class="w"> </span><span class="s">"legacy"</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"/path/to/saved_geoparquet.parquet"</span><span class="p">)</span>
 </code></pre></div>
 <p>If the DataFrame does not have a covering column, you can construct one using Sedona's SQL functions:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df_bbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;bbox&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;struct(ST_XMin(geometry) AS xmin, ST_YMin(geometry) AS ymin, ST_XMax(geometry) AS xmax, ST_YMax(geometry) AS ymax)&quot;</span><span class="p">))</span>
-<span class="n">df_bbox</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering.geometry&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bbox&quot;</span><span class="p">).</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df_bbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">"bbox"</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"struct(ST_XMin(geometry) AS xmin, ST_YMin(geometry) AS ymin, ST_XMax(geometry) AS xmax, ST_YMax(geometry) AS ymax)"</span><span class="p">))</span>
+<span class="n">df_bbox</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.covering.geometry"</span><span class="p">,</span><span class="w"> </span><span class="s">"bbox"</span><span class="p">).</span><span class="n">save</span><span class="p">(</span><span class="s">"/path/to/saved_geoparquet.parquet"</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="sort-then-save-geoparquet">Sort then Save GeoParquet<a class="headerlink" href="#sort-then-save-geoparquet" title="Permanent link">&para;</a></h2>
 <p>To maximize the performance of Sedona GeoParquet filter pushdown, we suggest that you sort the data by their geohash values (see <a href="../../../api/sql/Geometry-Output/ST_GeoHash/">ST_GeoHash</a>) and then save as a GeoParquet file. An example is as follows:</p>
@@ -6110,8 +6109,8 @@ ORDER BY geohash
 <p>Let's look closer at how Sedona uses the GeoParquet bbox metadata to optimize queries.</p>
 <h2 id="compression-of-geoparquet-file">Compression of GeoParquet file<a class="headerlink" href="#compression-of-geoparquet-file" title="Permanent link">&para;</a></h2>
 <p>There are different options to compress Parquet and GeoParquet files. Using <code>zstd</code> is a good choice if you want to distribute your GeoParquet file, see <a href="https://github.com/opengeospatial/geoparquet/blob/main/format-specs/distributing-geoparquet.md">Best Practices for Distributing GeoParquet</a> and <a href="https://github.com/apache/sedona/discussions/3109#discussioncomment-17666620">discussion thread</a> for details. Example:</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geoparquet&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;compression&quot;</span><span class="p">,</span> <span class="s2">&quot;zstd&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
-    <span class="s2">&quot;path/to/output&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"compression"</span><span class="p">,</span> <span class="s2">"zstd"</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"overwrite"</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+    <span class="s2">"path/to/output"</span>
 <span class="p">)</span>
 </code></pre></div>
 <h2 id="how-sedona-uses-geoparquet-bounding-box-bbox-metadata-with-spark">How Sedona uses GeoParquet bounding box (bbox) metadata with Spark<a class="headerlink" href="#how-sedona-uses-geoparquet-bounding-box-bbox-metadata-with-spark" title="Permanent link">&para;</a></h2>
@@ -6122,13 +6121,13 @@ ORDER BY geohash
 <p>Now, let’s apply a spatial filter to read points within a particular area:</p>
 <p><img alt="GeoParquet bbox filter" src="../../../image/tutorial/files/geoparquet_bbox2.png" /></p>
 <p>Here is the query:</p>
-<div class="highlight"><pre><span></span><code><span class="n">my_shape</span> <span class="o">=</span> <span class="s2">&quot;POLYGON((4.0 3.5, 4.0 6.0, 8.0 6.0, 8.0 4.5, 4.0 3.5))&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">my_shape</span> <span class="o">=</span> <span class="s2">"POLYGON((4.0 3.5, 4.0 6.0, 8.0 6.0, 8.0 4.5, 4.0 3.5))"</span>
 
-<span class="n">res</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="sa">f</span><span class="s2">"""</span>
 <span class="s2">select *</span>
 <span class="s2">from points</span>
-<span class="s2">where st_intersects(geometry, ST_GeomFromWKT(&#39;</span><span class="si">{</span><span class="n">my_shape</span><span class="si">}</span><span class="s2">&#39;))</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="s2">where st_intersects(geometry, ST_GeomFromWKT('</span><span class="si">{</span><span class="n">my_shape</span><span class="si">}</span><span class="s2">'))</span>
+<span class="s2">"""</span><span class="p">)</span>
 <span class="n">res</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <p>Here are the results:</p>

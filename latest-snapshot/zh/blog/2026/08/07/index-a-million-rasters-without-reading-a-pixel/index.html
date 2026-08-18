@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5823,36 +5822,36 @@
 
 <span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">&quot;local[*]&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span>
-        <span class="s2">&quot;spark.jars.packages&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;org.apache.sedona:sedona-spark-shaded-3.5_2.12:1.9.1,&quot;</span>
-        <span class="s2">&quot;org.datasyslab:geotools-wrapper:1.9.1-33.5,&quot;</span>
-        <span class="s2">&quot;org.apache.hadoop:hadoop-aws:3.3.4&quot;</span><span class="p">,</span>
+        <span class="s2">"spark.jars.packages"</span><span class="p">,</span>
+        <span class="s2">"org.apache.sedona:sedona-spark-shaded-3.5_2.12:1.9.1,"</span>
+        <span class="s2">"org.datasyslab:geotools-wrapper:1.9.1-33.5,"</span>
+        <span class="s2">"org.apache.hadoop:hadoop-aws:3.3.4"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1"># the demo bucket is public — read it anonymously</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span>
-        <span class="s2">&quot;spark.hadoop.fs.s3a.aws.credentials.provider&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider&quot;</span><span class="p">,</span>
+        <span class="s2">"spark.hadoop.fs.s3a.aws.credentials.provider"</span><span class="p">,</span>
+        <span class="s2">"org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </code></pre></div>
 <p>For data, we point at a public bucket you have seen before on this blog: <code>s3://sentinel-cogs</code>, the Sentinel-2 COG archive that our STAC post's asset links resolve to. One tile, one month — no catalog service involved, just files:</p>
-<div class="highlight"><pre><span></span><code><span class="n">meta</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geotiff.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-    <span class="s2">&quot;s3a://sentinel-cogs/sentinel-s2-l2a-cogs/10/S/EG/2026/6&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">meta</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geotiff.metadata"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="s2">"s3a://sentinel-cogs/sentinel-s2-l2a-cogs/10/S/EG/2026/6"</span>
 <span class="p">)</span>
-<span class="n">meta</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;meta&quot;</span><span class="p">)</span>
+<span class="n">meta</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"meta"</span><span class="p">)</span>
 </code></pre></div>
 <p>That's <strong>289 COGs holding 14.7 GB of imagery, indexed in 70 seconds</strong> — on a single machine, the worst case for this workload. The scan is an ordinary distributed read: Sedona bin-packs the files across every executor you have, so on a cluster the same line fans out machine-wide and scales with it. What comes back is a table:</p>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">    SELECT regexp_extract(path, &#39;([^/]+)$&#39;, 1) AS file,</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
+<span class="s2">    SELECT regexp_extract(path, '([^/]+)$', 1) AS file,</span>
 <span class="s2">           width, height, numBands, srid, isTiled,</span>
 <span class="s2">           size(overviews) AS ov, compression,</span>
 <span class="s2">           ROUND(fileSize / 1048576, 1) AS mb</span>
 <span class="s2">    FROM meta ORDER BY fileSize DESC LIMIT 3</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+-------+-----+------+--------+-----+-------+---+-----------+-----+
 |file   |width|height|numBands|srid |isTiled|ov |compression|mb   |
@@ -5883,14 +5882,14 @@
 <p>So the honest mental model: listing is nearly free, pruned queries are cheap, and the full header sweep parallelizes to whatever cluster you give it.</p>
 <h2 id="the-footprint-index">The footprint index<a class="headerlink" href="#the-footprint-index" title="Permanent link">&para;</a></h2>
 <p>The quiet superpower is <code>cornerCoordinates</code>. One expression turns it into a geometry — and suddenly your bucket has a spatial index:</p>
-<div class="highlight"><pre><span></span><code><span class="n">footprints</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">footprints</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT path,</span>
 <span class="s2">           ST_PolygonFromEnvelope(</span>
 <span class="s2">               cornerCoordinates.minX, cornerCoordinates.minY,</span>
 <span class="s2">               cornerCoordinates.maxX, cornerCoordinates.maxY</span>
 <span class="s2">           ) AS footprint</span>
 <span class="s2">    FROM meta</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span>
 </code></pre></div>
 <p><code>WHERE ST_Intersects(footprint, my_aoi)</code> now answers <em>"which files cover this area?"</em> over the whole bucket — the question that used to require a catalog nobody built.</p>
 <h2 id="and-when-you-point-it-at-a-planet">And when you point it at a planet<a class="headerlink" href="#and-when-you-point-it-at-a-planet" title="Permanent link">&para;</a></h2>
@@ -5907,18 +5906,18 @@
 <h2 id="audit-your-raster-lake">Audit your raster lake<a class="headerlink" href="#audit-your-raster-lake" title="Permanent link">&para;</a></h2>
 <p>Metadata is also where data problems hide. To show the audit workflow end to end — reproducibly, offline — we had Sedona <em>generate</em> a deliberately messy 400-file lake with its own raster writers (<code>RS_MakeEmptyRaster</code> → <code>RS_AsGeoTiff</code> / the new <code>RS_AsCOG</code>): 320 plain untiled files, 60 proper COGs, and 20 strays a "web tool" exported in EPSG:3857. Then we indexed it back:</p>
 <div class="highlight"><pre><span></span><code><span class="n">lake</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geotiff.metadata&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;recursiveFileLookup&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/data/raster-lake&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geotiff.metadata"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"recursiveFileLookup"</span><span class="p">,</span> <span class="s2">"true"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/data/raster-lake"</span><span class="p">)</span>
 <span class="p">)</span>
-<span class="n">lake</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;lake&quot;</span><span class="p">)</span>
+<span class="n">lake</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"lake"</span><span class="p">)</span>
 
-<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT COUNT(*) AS files,</span>
 <span class="s2">           SUM(CASE WHEN isTiled AND size(overviews) &gt; 0 THEN 1 ELSE 0 END) AS cog_ready,</span>
 <span class="s2">           SUM(CASE WHEN srid &lt;&gt; 4326 THEN 1 ELSE 0 END) AS crs_strays</span>
 <span class="s2">    FROM lake</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+-----+---------+----------+
 |files|cog_ready|crs_strays|

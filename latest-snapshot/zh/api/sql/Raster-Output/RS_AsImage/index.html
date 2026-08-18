@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5604,7 +5603,7 @@
 <span class="k">SELECT</span><span class="w"> </span><span class="n">RS_AsImage</span><span class="p">(</span><span class="n">raster</span><span class="p">)</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">rasters</span>
 </code></pre></div>
 <p>Output:</p>
-<div class="highlight"><pre><span></span><code>&quot;<span class="p">&lt;</span><span class="nt">img</span> <span class="na">src</span><span class="o">=</span><span class="s">\&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAECAAAAABjWKqcAAAAIElEQVR42mPgPfGfkYUhhfcBNw+DT1KihS6DqLKztjcATWMFp9rkkJgAAAAASUVORK5CYII=\&quot;</span> <span class="na">width</span><span class="o">=</span><span class="s">\&quot;200\&quot;</span> <span class="p">/&gt;</span>&quot;;
+<div class="highlight"><pre><span></span><code>"<span class="p">&lt;</span><span class="nt">img</span> <span class="na">src</span><span class="o">=</span><span class="s">\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAECAAAAABjWKqcAAAAIElEQVR42mPgPfGfkYUhhfcBNw+DT1KihS6DqLKztjcATWMFp9rkkJgAAAAASUVORK5CYII=\"</span> <span class="na">width</span><span class="o">=</span><span class="s">\"200\"</span> <span class="p">/&gt;</span>";
 </code></pre></div>
 <h2 id="display-raster-in-jupyter">Display raster in Jupyter<a class="headerlink" href="#display-raster-in-jupyter" title="Permanent link">&para;</a></h2>
 <p>Introduction: <code>SedonaUtils.display_image(df)</code> is a Python wrapper that renders raster images directly in a Jupyter notebook. It automatically detects raster columns in the DataFrame and applies <code>RS_AsImage</code> under the hood, so you don't need to call <code>RS_AsImage</code> yourself. You can also pass a DataFrame with pre-applied <code>RS_AsImage</code> HTML.</p>
@@ -5613,16 +5612,16 @@
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaUtils</span>
 
 <span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;binaryFile&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">+</span> <span class="s2">&quot;raster.tiff&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;RS_FromGeoTiff(content) as raster&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"binaryFile"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">+</span> <span class="s2">"raster.tiff"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_FromGeoTiff(content) as raster"</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="c1"># Pass the raw raster DataFrame directly — RS_AsImage is applied automatically</span>
 <span class="n">SedonaUtils</span><span class="o">.</span><span class="n">display_image</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 </code></pre></div>
 <p>Example — with explicit RS_AsImage:</p>
-<div class="highlight"><pre><span></span><code><span class="n">htmlDF</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;RS_AsImage(raster, 500) as raster_image&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">htmlDF</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"RS_AsImage(raster, 500) as raster_image"</span><span class="p">)</span>
 <span class="n">SedonaUtils</span><span class="o">.</span><span class="n">display_image</span><span class="p">(</span><span class="n">htmlDF</span><span class="p">)</span>
 </code></pre></div>
 <p><img alt="Output" src="../../../../../image/DisplayImage.png" /></p>

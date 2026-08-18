@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.SpatialRDD.spatial_rdd &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -253,18 +252,18 @@
     <span class="n">jvm_partitioner</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">()</span>
 
 <div class="viewcode-block" id="SpatialPartitioner.from_java_class_name"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialPartitioner.from_java_class_name">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">from_java_class_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">jvm_partitioner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SpatialPartitioner&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_java_class_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">jvm_partitioner</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"SpatialPartitioner"</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">jvm_partitioner</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">jvm_full_name</span> <span class="o">=</span> <span class="n">jvm_partitioner</span><span class="o">.</span><span class="n">toString</span><span class="p">()</span>
-            <span class="n">full_class_name</span> <span class="o">=</span> <span class="n">jvm_full_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;@&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">partitioner</span> <span class="o">=</span> <span class="n">full_class_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">full_class_name</span> <span class="o">=</span> <span class="n">jvm_full_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"@"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">partitioner</span> <span class="o">=</span> <span class="n">full_class_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">partitioner</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">partitioner</span><span class="p">,</span> <span class="n">jvm_partitioner</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SpatialPartitioner.getGrids"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialPartitioner.getGrids">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getGrids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Envelope</span><span class="p">]:</span>
-        <span class="n">jvm_grids</span> <span class="o">=</span> <span class="n">get_method</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jvm_partitioner</span><span class="p">,</span> <span class="s2">&quot;getGrids&quot;</span><span class="p">)()</span>
+        <span class="n">jvm_grids</span> <span class="o">=</span> <span class="n">get_method</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jvm_partitioner</span><span class="p">,</span> <span class="s2">"getGrids"</span><span class="p">)()</span>
         <span class="n">number_of_grids</span> <span class="o">=</span> <span class="n">jvm_grids</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
         <span class="n">envelopes</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">Envelope</span><span class="o">.</span><span class="n">from_jvm_instance</span><span class="p">(</span><span class="n">jvm_grids</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
@@ -314,7 +313,7 @@
         <span class="k">if</span> <span class="n">sc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">session</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">_instantiatedSession</span>
             <span class="k">if</span> <span class="n">session</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">session</span><span class="o">.</span><span class="n">_sc</span><span class="o">.</span><span class="n">_jsc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Please initialize spark session&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Please initialize spark session"</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">sc</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">_sc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sc</span> <span class="o">=</span> <span class="n">sc</span>
@@ -324,21 +323,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_analyzed</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="SpatialRDD.analyze"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.analyze">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Analyze SpatialRDD</span>
 <span class="sd">        :return: bool,</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">analyze</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_is_analyzed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_analyzed</span></div>
 
 <div class="viewcode-block" id="SpatialRDD.CRSTransform"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.CRSTransform">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">CRSTransform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sourceEpsgCRSCode</span><span class="p">:</span> <span class="n">crs</span><span class="p">,</span> <span class="n">targetEpsgCRSCode</span><span class="p">:</span> <span class="n">crs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Function transforms coordinates from one crs to another one</span>
 <span class="sd">        :param sourceEpsgCRSCode: crs,  Coordinate Reference System to transform from</span>
 <span class="sd">        :param targetEpsgCRSCode: crs, Coordinate Reference System to transform to</span>
 <span class="sd">        :return: bool, True if transforming was correct</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">CRSTransform</span><span class="p">(</span><span class="n">sourceEpsgCRSCode</span><span class="p">,</span> <span class="n">targetEpsgCRSCode</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SpatialRDD.flipCoordinates"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.flipCoordinates">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">flipCoordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -349,17 +348,17 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">approximateTotalCount</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">&quot;approximateTotalCount&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">"approximateTotalCount"</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SpatialRDD.boundary"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.boundary">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Envelope</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">jvm_boundary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">boundary</span><span class="p">()</span>
 
@@ -368,24 +367,24 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">boundaryEnvelope</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Envelope</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_analyzed</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Please use analyze before&quot;</span><span class="p">)</span>
-        <span class="n">java_boundary_envelope</span> <span class="o">=</span> <span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">&quot;boundaryEnvelope&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Please use analyze before"</span><span class="p">)</span>
+        <span class="n">java_boundary_envelope</span> <span class="o">=</span> <span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">"boundaryEnvelope"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Envelope</span><span class="o">.</span><span class="n">from_jvm_instance</span><span class="p">(</span><span class="n">java_boundary_envelope</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SpatialRDD.buildIndex"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.buildIndex">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">buildIndex</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">indexType</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">IndexType</span><span class="p">],</span> <span class="n">buildIndexOnSpatialPartitionedRDD</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param indexType:</span>
 <span class="sd">        :param buildIndexOnSpatialPartitionedRDD:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spatial_partitioned</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">buildIndexOnSpatialPartitionedRDD</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">indexType</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
@@ -393,106 +392,106 @@
             <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">indexType</span><span class="p">)</span> <span class="o">==</span> <span class="n">IndexType</span><span class="p">:</span>
                 <span class="n">index_type</span> <span class="o">=</span> <span class="n">IndexTypeJvm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="p">,</span> <span class="n">indexType</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;indexType should be str or IndexType&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"indexType should be str or IndexType"</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">buildIndex</span><span class="p">(</span>
                 <span class="n">index_type</span><span class="o">.</span><span class="n">jvm_instance</span><span class="p">,</span> <span class="n">buildIndexOnSpatialPartitionedRDD</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Please run spatial partitioning before&quot;</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">"Please run spatial partitioning before"</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SpatialRDD.countWithoutDuplicates"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.countWithoutDuplicates">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">countWithoutDuplicates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">countWithoutDuplicates</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="SpatialRDD.countWithoutDuplicatesSPRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.countWithoutDuplicatesSPRDD">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">countWithoutDuplicatesSPRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">countWithoutDuplicatesSPRDD</span><span class="p">()</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fieldNames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">field_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">&quot;fieldNames&quot;</span><span class="p">))</span>
+            <span class="n">field_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">"fieldNames"</span><span class="p">))</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="n">field_names</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">return</span> <span class="n">field_names</span>
 
 <div class="viewcode-block" id="SpatialRDD.getCRStransformation"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getCRStransformation">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getCRStransformation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">getCRStransformation</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="SpatialRDD.getPartitioner"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getPartitioner">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getPartitioner</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpatialPartitioner</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">SpatialPartitioner</span><span class="o">.</span><span class="n">from_java_class_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">getPartitioner</span><span class="p">())</span></div>
 
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;GeoSerializerData&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"GeoSerializerData"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">getRawSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">serialized_spatial_rdd</span> <span class="o">=</span> <span class="n">SedonaPythonConverter</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span>
         <span class="p">)</span><span class="o">.</span><span class="n">translate_spatial_rdd_to_python</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">getRawSpatialRDD</span><span class="p">())</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_raw_spatial_rdd&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_raw_spatial_rdd"</span><span class="p">):</span>
             <span class="n">RDD</span><span class="o">.</span><span class="n">saveAsObjectFile</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">_jrdd</span><span class="o">.</span><span class="n">saveAsObjectFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
             <span class="nb">setattr</span><span class="p">(</span>
                 <span class="bp">self</span><span class="p">,</span>
-                <span class="s2">&quot;_raw_spatial_rdd&quot;</span><span class="p">,</span>
+                <span class="s2">"_raw_spatial_rdd"</span><span class="p">,</span>
                 <span class="n">RDD</span><span class="p">(</span><span class="n">serialized_spatial_rdd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sc</span><span class="p">,</span> <span class="n">SedonaPickler</span><span class="p">()),</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_raw_spatial_rdd</span><span class="o">.</span><span class="n">_jrdd</span> <span class="o">=</span> <span class="n">serialized_spatial_rdd</span>
 
-        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_raw_spatial_rdd&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_raw_spatial_rdd"</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SpatialRDD.getSampleNumber"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getSampleNumber">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getSampleNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">getSampleNumber</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="SpatialRDD.getSourceEpsgCode"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getSourceEpsgCode">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getSourceEpsgCode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Function which returns source EPSG code when it is assigned. If not an empty String is returned.</span>
 <span class="sd">        :return: str, source epsg code.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">getSourceEpsgCode</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="SpatialRDD.getTargetEpsgCode"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getTargetEpsgCode">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getTargetEpsgCode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Function which returns target EPSG code when it is assigned. If not an empty String is returned.</span>
 <span class="sd">        :return: str, target epsg code.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">getTargetEpgsgCode</span><span class="p">()</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">grids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Envelope</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns grids for SpatialRDD, it is a list of Envelopes.</span>
 
 <span class="sd">        &gt;&gt; spatial_rdd.grids</span>
 <span class="sd">        &gt;&gt; [Envelope(minx=10.0, maxx=12.0, miny=10.0, maxy=12.0)]</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">jvm_grids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jvm_grids</span><span class="o">.</span><span class="n">jgrid</span>
         <span class="k">if</span> <span class="n">jvm_grids</span><span class="p">:</span>
             <span class="n">number_of_grids</span> <span class="o">=</span> <span class="n">jvm_grids</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
@@ -508,7 +507,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">jvm_grids</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JvmGrids</span><span class="p">:</span>
-        <span class="n">jvm_grids</span> <span class="o">=</span> <span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">&quot;grids&quot;</span><span class="p">)</span>
+        <span class="n">jvm_grids</span> <span class="o">=</span> <span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">"grids"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">JvmGrids</span><span class="p">(</span><span class="n">jgrid</span><span class="o">=</span><span class="n">jvm_grids</span><span class="p">,</span> <span class="n">sc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sc</span><span class="p">)</span>
 
     <span class="nd">@jvm_grids</span><span class="o">.</span><span class="n">setter</span>
@@ -517,37 +516,37 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">indexedRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">jrdd</span> <span class="o">=</span> <span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">&quot;indexedRDD&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_indexed_rdd&quot;</span><span class="p">):</span>
+<span class="sd">        """</span>
+        <span class="n">jrdd</span> <span class="o">=</span> <span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">"indexedRDD"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_indexed_rdd"</span><span class="p">):</span>
             <span class="n">RDD</span><span class="o">.</span><span class="n">saveAsObjectFile</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">_jrdd</span><span class="o">.</span><span class="n">saveAsObjectFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
             <span class="n">RDD</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">_jrdd</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_indexed_rdd&quot;</span><span class="p">,</span> <span class="n">RDD</span><span class="p">(</span><span class="n">jrdd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sc</span><span class="p">))</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_indexed_rdd"</span><span class="p">,</span> <span class="n">RDD</span><span class="p">(</span><span class="n">jrdd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sc</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_indexed_rdd</span><span class="o">.</span><span class="n">_jrdd</span> <span class="o">=</span> <span class="n">jrdd</span>
-        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_indexed_rdd&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_indexed_rdd"</span><span class="p">)</span>
 
     <span class="nd">@indexedRDD</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">indexedRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indexed_rdd</span><span class="p">:</span> <span class="n">RDD</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_indexed_rdd</span> <span class="o">=</span> <span class="n">indexed_rdd</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">indexedRawRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">jrdd</span> <span class="o">=</span> <span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">&quot;indexedRawRDD&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_indexed_raw_rdd&quot;</span><span class="p">):</span>
+        <span class="n">jrdd</span> <span class="o">=</span> <span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">"indexedRawRDD"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_indexed_raw_rdd"</span><span class="p">):</span>
             <span class="n">RDD</span><span class="o">.</span><span class="n">saveAsObjectFile</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">_jrdd</span><span class="o">.</span><span class="n">saveAsObjectFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
             <span class="n">RDD</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">_jrdd</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_indexed_raw_rdd&quot;</span><span class="p">,</span> <span class="n">RDD</span><span class="p">(</span><span class="n">jrdd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sc</span><span class="p">))</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_indexed_raw_rdd"</span><span class="p">,</span> <span class="n">RDD</span><span class="p">(</span><span class="n">jrdd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sc</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_indexed_raw_rdd</span><span class="o">.</span><span class="n">_jrdd</span> <span class="o">=</span> <span class="n">jrdd</span>
-        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_indexed_raw_rdd&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_indexed_raw_rdd"</span><span class="p">)</span>
 
     <span class="nd">@indexedRawRDD</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">indexedRawRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indexed_raw_rdd</span><span class="p">:</span> <span class="n">RDD</span><span class="p">):</span>
@@ -555,10 +554,10 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">rawSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRawSpatialRDD</span><span class="p">()</span>
 
     <span class="nd">@rawSpatialRDD</span><span class="o">.</span><span class="n">setter</span>
@@ -577,74 +576,74 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">setRawSpatialRDD</span><span class="p">(</span><span class="n">spatial_rdd</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SpatialRDD.saveAsGeoJSON"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.saveAsGeoJSON">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">saveAsGeoJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param path:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">saveAsGeoJSON</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SpatialRDD.saveAsWKB"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.saveAsWKB">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">saveAsWKB</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param path:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">saveAsWKB</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SpatialRDD.saveAsWKT"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.saveAsWKT">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">saveAsWKT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param path:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">saveAsWKT</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SpatialRDD.setRawSpatialRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.setRawSpatialRDD">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setRawSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jrdd</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">setRawSpatialRDD</span><span class="p">(</span><span class="n">jrdd</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SpatialRDD.setSampleNumber"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.setSampleNumber">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setSampleNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampleNumber</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">setSampleNumber</span><span class="p">(</span><span class="n">sampleNumber</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">spatialPartitionedRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.utils.spatial_rdd_parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaPickler</span>
 
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">serialized_spatial_rdd</span> <span class="o">=</span> <span class="n">SedonaPythonConverter</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span>
         <span class="p">)</span><span class="o">.</span><span class="n">translate_spatial_rdd_to_python</span><span class="p">(</span>
-            <span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">&quot;spatialPartitionedRDD&quot;</span><span class="p">)</span>
+            <span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">"spatialPartitionedRDD"</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_spatial_partitioned_rdd&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_spatial_partitioned_rdd"</span><span class="p">):</span>
             <span class="nb">setattr</span><span class="p">(</span>
                 <span class="bp">self</span><span class="p">,</span>
-                <span class="s2">&quot;_spatial_partitioned_rdd&quot;</span><span class="p">,</span>
+                <span class="s2">"_spatial_partitioned_rdd"</span><span class="p">,</span>
                 <span class="n">RDD</span><span class="p">(</span><span class="n">serialized_spatial_rdd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sc</span><span class="p">,</span> <span class="n">SedonaPickler</span><span class="p">()),</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_spatial_partitioned_rdd</span><span class="o">.</span><span class="n">_jrdd</span> <span class="o">=</span> <span class="n">serialized_spatial_rdd</span>
 
-        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_spatial_partitioned_rdd&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_spatial_partitioned_rdd"</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SpatialRDD.spatialPartitioning"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.spatialPartitioning">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">spatialPartitioning</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">partitioning</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">GridType</span><span class="p">,</span> <span class="n">SpatialPartitioner</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Envelope</span><span class="p">]],</span>
         <span class="n">num_partitions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Calculate partitions and assign items in this RDD to a partition.</span>
 
 <span class="sd">        :param partitioning: Partitioning type or existing SpatialPartitioner</span>
@@ -653,7 +652,7 @@
 <span class="sd">        :param num_partitions: If partitioning is a GridType, the target</span>
 <span class="sd">          number of partitions into which the RDD should be split.</span>
 <span class="sd">        :return: True on success</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spatial_partitioning_impl</span><span class="p">(</span>
             <span class="n">partitioning</span><span class="p">,</span> <span class="n">num_partitions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="o">.</span><span class="n">spatialPartitioning</span>
         <span class="p">)</span></div>
@@ -663,7 +662,7 @@
         <span class="n">partitioning</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">GridType</span><span class="p">,</span> <span class="n">SpatialPartitioner</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Envelope</span><span class="p">]],</span>
         <span class="n">num_partitions</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Calculate partitions and assign items in this RDD to a partition without</span>
 <span class="sd">        introducing duplicates. This is not the desired behaviour for</span>
 <span class="sd">        executing joins but is the correct option when partitioning in</span>
@@ -675,7 +674,7 @@
 <span class="sd">        :param num_partitions: If partitioning is a GridType, the target</span>
 <span class="sd">          number of partitions into which the RDD should be split.</span>
 <span class="sd">        :return: True on success</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spatial_partitioning_impl</span><span class="p">(</span>
             <span class="n">partitioning</span><span class="p">,</span>
             <span class="n">num_partitions</span><span class="p">,</span>
@@ -700,9 +699,9 @@
                 <span class="n">jvm_envelopes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">EnvelopeAdapter</span><span class="o">.</span><span class="n">getFromPython</span><span class="p">(</span><span class="n">bytes_data</span><span class="p">)</span>
                 <span class="n">grid</span> <span class="o">=</span> <span class="n">jvm_envelopes</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;List should consists of Envelopes&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">"List should consists of Envelopes"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Grid does not have correct type&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Grid does not have correct type"</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_spatial_partitioned</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -732,7 +731,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">rawJvmSpatialRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsrdd_p</span><span class="p">:</span> <span class="n">JvmSpatialRDD</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">jsrdd_p</span><span class="o">.</span><span class="n">tp</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;value should be type </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> but </span><span class="si">{</span><span class="n">jsrdd_p</span><span class="o">.</span><span class="n">tp</span><span class="si">}</span><span class="s2"> was found&quot;</span>
+                <span class="sa">f</span><span class="s2">"value should be type </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> but </span><span class="si">{</span><span class="n">jsrdd_p</span><span class="o">.</span><span class="n">tp</span><span class="si">}</span><span class="s2"> was found"</span>
             <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_sc</span> <span class="o">=</span> <span class="n">jsrdd_p</span><span class="o">.</span><span class="n">sc</span>
@@ -742,7 +741,7 @@
 
 <div class="viewcode-block" id="SpatialRDD.getJvmSpatialPartitionedRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.spatial_rdd.SpatialRDD.getJvmSpatialPartitionedRDD">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getJvmSpatialPartitionedRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JvmSpatialRDD</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">JvmSpatialRDD</span><span class="p">(</span>
-            <span class="n">jsrdd</span><span class="o">=</span><span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">&quot;spatialPartitionedRDD&quot;</span><span class="p">),</span>
+            <span class="n">jsrdd</span><span class="o">=</span><span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span><span class="p">,</span> <span class="s2">"spatialPartitionedRDD"</span><span class="p">),</span>
             <span class="n">sc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sc</span><span class="p">,</span>
             <span class="n">tp</span><span class="o">=</span><span class="n">SpatialType</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
         <span class="p">)</span></div>
@@ -755,7 +754,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">jvmSpatialPartitionedRDD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsrdd_p</span><span class="p">:</span> <span class="n">JvmSpatialRDD</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">jsrdd_p</span><span class="o">.</span><span class="n">tp</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;value should be type </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> but </span><span class="si">{</span><span class="n">jsrdd_p</span><span class="o">.</span><span class="n">tp</span><span class="si">}</span><span class="s2"> was found&quot;</span>
+                <span class="sa">f</span><span class="s2">"value should be type </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> but </span><span class="si">{</span><span class="n">jsrdd_p</span><span class="o">.</span><span class="n">tp</span><span class="si">}</span><span class="s2"> was found"</span>
             <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_sc</span> <span class="o">=</span> <span class="n">jsrdd_p</span><span class="o">.</span><span class="n">sc</span>
@@ -766,7 +765,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
-        <span class="k">return</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;RDD&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"RDD"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_jvm_spatial_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

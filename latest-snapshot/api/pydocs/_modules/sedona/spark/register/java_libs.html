@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.register.java_libs &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -229,60 +228,60 @@
 
 
 <div class="viewcode-block" id="SedonaJvmLib"><a class="viewcode-back" href="../../../../sedona.spark.register.html#sedona.spark.register.java_libs.SedonaJvmLib">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SedonaJvmLib</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-    <span class="n">JoinParams</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.python.wrapper.adapters.JoinParamsAdapter&quot;</span>
-    <span class="n">Adapter</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.sql.utils.Adapter&quot;</span>
-    <span class="n">StructuredAdapter</span> <span class="o">=</span> <span class="s2">&quot;org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter&quot;</span>
-    <span class="n">JoinQuery</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.core.spatialOperator.JoinQuery&quot;</span>
-    <span class="n">KNNQuery</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.core.spatialOperator.KNNQuery&quot;</span>
-    <span class="n">RangeQuery</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.core.spatialOperator.RangeQuery&quot;</span>
-    <span class="n">Envelope</span> <span class="o">=</span> <span class="s2">&quot;org.locationtech.jts.geom.Envelope&quot;</span>
-    <span class="n">Geography</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.common.geometryObjects.Geography&quot;</span>
+    <span class="n">JoinParams</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.python.wrapper.adapters.JoinParamsAdapter"</span>
+    <span class="n">Adapter</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.sql.utils.Adapter"</span>
+    <span class="n">StructuredAdapter</span> <span class="o">=</span> <span class="s2">"org.apache.spark.sql.sedona_sql.adapters.StructuredAdapter"</span>
+    <span class="n">JoinQuery</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.core.spatialOperator.JoinQuery"</span>
+    <span class="n">KNNQuery</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.core.spatialOperator.KNNQuery"</span>
+    <span class="n">RangeQuery</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.core.spatialOperator.RangeQuery"</span>
+    <span class="n">Envelope</span> <span class="o">=</span> <span class="s2">"org.locationtech.jts.geom.Envelope"</span>
+    <span class="n">Geography</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.common.geometryObjects.Geography"</span>
     <span class="n">GeoSerializerData</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="s2">&quot;org.apache.sedona.python.wrapper.adapters.GeoSparkPythonConverter&quot;</span>
+        <span class="s2">"org.apache.sedona.python.wrapper.adapters.GeoSparkPythonConverter"</span>
     <span class="p">)</span>
-    <span class="n">GeometryAdapter</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.python.wrapper.adapters.GeometryAdapter&quot;</span>
-    <span class="n">PointRDD</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.core.spatialRDD.PointRDD&quot;</span>
-    <span class="n">PolygonRDD</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.core.spatialRDD.PolygonRDD&quot;</span>
-    <span class="n">CircleRDD</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.core.spatialRDD.CircleRDD&quot;</span>
-    <span class="n">LineStringRDD</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.core.spatialRDD.LineStringRDD&quot;</span>
-    <span class="n">RectangleRDD</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.core.spatialRDD.RectangleRDD&quot;</span>
-    <span class="n">SpatialRDD</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.core.spatialRDD.SpatialRDD&quot;</span>
-    <span class="n">FileDataSplitter</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.common.enums.FileDataSplitter&quot;</span>
-    <span class="n">GeoJsonReader</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.core.formatMapper.GeoJsonReader&quot;</span>
+    <span class="n">GeometryAdapter</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.python.wrapper.adapters.GeometryAdapter"</span>
+    <span class="n">PointRDD</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.core.spatialRDD.PointRDD"</span>
+    <span class="n">PolygonRDD</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.core.spatialRDD.PolygonRDD"</span>
+    <span class="n">CircleRDD</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.core.spatialRDD.CircleRDD"</span>
+    <span class="n">LineStringRDD</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.core.spatialRDD.LineStringRDD"</span>
+    <span class="n">RectangleRDD</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.core.spatialRDD.RectangleRDD"</span>
+    <span class="n">SpatialRDD</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.core.spatialRDD.SpatialRDD"</span>
+    <span class="n">FileDataSplitter</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.common.enums.FileDataSplitter"</span>
+    <span class="n">GeoJsonReader</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.core.formatMapper.GeoJsonReader"</span>
     <span class="n">ShapeFileReader</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="s2">&quot;org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader&quot;</span>
+        <span class="s2">"org.apache.sedona.core.formatMapper.shapefileParser.ShapefileReader"</span>
     <span class="p">)</span>
-    <span class="n">SedonaSQLRegistrator</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.sql.utils.SedonaSQLRegistrator&quot;</span>
-    <span class="n">StorageLevel</span> <span class="o">=</span> <span class="s2">&quot;org.apache.spark.storage.StorageLevel&quot;</span>
-    <span class="n">GridType</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.core.enums.GridType&quot;</span>
-    <span class="n">IndexType</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.core.enums.IndexType&quot;</span>
-    <span class="n">AdapterWrapper</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.python.wrapper.utils.PythonAdapterWrapper&quot;</span>
-    <span class="n">WktReader</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.core.formatMapper.WktReader&quot;</span>
+    <span class="n">SedonaSQLRegistrator</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.sql.utils.SedonaSQLRegistrator"</span>
+    <span class="n">StorageLevel</span> <span class="o">=</span> <span class="s2">"org.apache.spark.storage.StorageLevel"</span>
+    <span class="n">GridType</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.core.enums.GridType"</span>
+    <span class="n">IndexType</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.core.enums.IndexType"</span>
+    <span class="n">AdapterWrapper</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.python.wrapper.utils.PythonAdapterWrapper"</span>
+    <span class="n">WktReader</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.core.formatMapper.WktReader"</span>
     <span class="n">RawJvmIndexRDDSetter</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="s2">&quot;org.apache.sedona.python.wrapper.adapters.RawJvmIndexRDDSetter&quot;</span>
+        <span class="s2">"org.apache.sedona.python.wrapper.adapters.RawJvmIndexRDDSetter"</span>
     <span class="p">)</span>
     <span class="n">SpatialObjectLoaderAdapter</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="s2">&quot;org.apache.sedona.python.wrapper.adapters.SpatialObjectLoaderAdapter&quot;</span>
+        <span class="s2">"org.apache.sedona.python.wrapper.adapters.SpatialObjectLoaderAdapter"</span>
     <span class="p">)</span>
-    <span class="n">WkbReader</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.core.formatMapper.WkbReader&quot;</span>
-    <span class="n">EnvelopeAdapter</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.python.wrapper.adapters.EnvelopeAdapter&quot;</span>
-    <span class="n">PythonConverter</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.python.wrapper.adapters.PythonConverter&quot;</span>
+    <span class="n">WkbReader</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.core.formatMapper.WkbReader"</span>
+    <span class="n">EnvelopeAdapter</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.python.wrapper.adapters.EnvelopeAdapter"</span>
+    <span class="n">PythonConverter</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.python.wrapper.adapters.PythonConverter"</span>
     <span class="n">PythonRddToJavaRDDAdapter</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="s2">&quot;org.apache.sedona.python.wrapper.adapters.PythonRddToJavaRDDAdapter&quot;</span>
+        <span class="s2">"org.apache.sedona.python.wrapper.adapters.PythonRddToJavaRDDAdapter"</span>
     <span class="p">)</span>
-    <span class="n">st_constructors</span> <span class="o">=</span> <span class="s2">&quot;org.apache.spark.sql.sedona_sql.expressions.st_constructors&quot;</span>
-    <span class="n">st_functions</span> <span class="o">=</span> <span class="s2">&quot;org.apache.spark.sql.sedona_sql.expressions.st_functions&quot;</span>
-    <span class="n">st_predicates</span> <span class="o">=</span> <span class="s2">&quot;org.apache.spark.sql.sedona_sql.expressions.st_predicates&quot;</span>
-    <span class="n">st_aggregates</span> <span class="o">=</span> <span class="s2">&quot;org.apache.spark.sql.sedona_sql.expressions.st_aggregates&quot;</span>
-    <span class="n">SedonaContext</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.spark.SedonaContext&quot;</span>
-    <span class="n">Moran</span> <span class="o">=</span> <span class="s2">&quot;org.apache.sedona.stats.autocorrelation.Moran&quot;</span>
+    <span class="n">st_constructors</span> <span class="o">=</span> <span class="s2">"org.apache.spark.sql.sedona_sql.expressions.st_constructors"</span>
+    <span class="n">st_functions</span> <span class="o">=</span> <span class="s2">"org.apache.spark.sql.sedona_sql.expressions.st_functions"</span>
+    <span class="n">st_predicates</span> <span class="o">=</span> <span class="s2">"org.apache.spark.sql.sedona_sql.expressions.st_predicates"</span>
+    <span class="n">st_aggregates</span> <span class="o">=</span> <span class="s2">"org.apache.spark.sql.sedona_sql.expressions.st_aggregates"</span>
+    <span class="n">SedonaContext</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.spark.SedonaContext"</span>
+    <span class="n">Moran</span> <span class="o">=</span> <span class="s2">"org.apache.sedona.stats.autocorrelation.Moran"</span>
 
 <div class="viewcode-block" id="SedonaJvmLib.from_str"><a class="viewcode-back" href="../../../../sedona.spark.register.html#sedona.spark.register.java_libs.SedonaJvmLib.from_str">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">from_str</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">geo_lib</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SedonaJvmLib&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_str</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">geo_lib</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"SedonaJvmLib"</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">lib</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">geo_lib</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no </span><span class="si">{</span><span class="n">geo_lib</span><span class="si">}</span><span class="s2"> attribute&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> has no </span><span class="si">{</span><span class="n">geo_lib</span><span class="si">}</span><span class="s2"> attribute"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">lib</span></div></div>
 </pre></div>
 

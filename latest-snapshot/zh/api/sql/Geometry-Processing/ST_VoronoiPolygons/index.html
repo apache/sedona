@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5574,7 +5573,7 @@
 <p>Return type: <code>Geometry</code></p>
 <p>Since: <code>v1.5.0</code></p>
 <p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">st_astext</span><span class="p">(</span><span class="n">ST_VoronoiPolygons</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;MULTIPOINT ((0 0), (1 1))&#39;</span><span class="p">)));</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">st_astext</span><span class="p">(</span><span class="n">ST_VoronoiPolygons</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'MULTIPOINT ((0 0), (1 1))'</span><span class="p">)));</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>GEOMETRYCOLLECTION(POLYGON((-1 2,2 -1,-1 -1,-1 2)),POLYGON((-1 2,2 2,2 -1,-1 2)))

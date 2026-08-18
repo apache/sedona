@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5643,14 +5642,14 @@
 </table>
 <h2 id="sql-examples">SQL Examples<a class="headerlink" href="#sql-examples" title="Permanent link">&para;</a></h2>
 <p>Setting CRS with an EPSG code:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_SetCRS</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_SetCRS</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="s1">'EPSG:4326'</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 </code></pre></div>
 <p>Setting CRS with a PROJ string (useful for custom projections):</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_SetCRS</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_SetCRS</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="s1">'+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs'</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 </code></pre></div>
 <p>Setting CRS with a WKT1 string:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_SetCRS</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;GEOGCS[&quot;WGS 84&quot;,DATUM[&quot;WGS_1984&quot;,SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563]],PRIMEM[&quot;Greenwich&quot;,0],UNIT[&quot;degree&quot;,0.0174532925199433]]&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_SetCRS</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span><span class="w"> </span><span class="s1">'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'</span><span class="p">)</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 </code></pre></div>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>

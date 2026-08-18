@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5571,7 +5570,7 @@
 <p>Return type: <code>Geography</code></p>
 <p>Since: <code>v1.8.0</code></p>
 <p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Envelope</span><span class="p">(</span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">&#39;MULTIPOLYGON (((177.285 -18.28799, 180 -18.28799, 180 -16.02088, 177.285 -16.02088, 177.285 -18.28799)), ((-180 -18.28799, -179.7933 -18.28799, -179.7933 -16.02088, -180 -16.02088, -180 -18.28799)))&#39;</span><span class="p">),</span><span class="w"> </span><span class="k">false</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Envelope</span><span class="p">(</span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">'MULTIPOLYGON (((177.285 -18.28799, 180 -18.28799, 180 -16.02088, 177.285 -16.02088, 177.285 -18.28799)), ((-180 -18.28799, -179.7933 -18.28799, -179.7933 -16.02088, -180 -16.02088, -180 -18.28799)))'</span><span class="p">),</span><span class="w"> </span><span class="k">false</span><span class="p">);</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>POLYGON ((177.3 -18.3, -179.8 -18.3, -179.8 -16, 177.3 -16, 177.3 -18.3))

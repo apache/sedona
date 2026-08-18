@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5590,17 +5589,17 @@ as input and returns a raster of the same size as output. The script can be used
 <p>Calculate the NDVI of a raster with 4 bands (R, G, B, NIR):</p>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Assume that the input raster has 4 bands: R, G, B, NIR</span>
 <span class="c1">-- rast[0] refers to the R band, rast[3] refers to the NIR band.</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;out = (rast[3] - rast[0]) / (rast[3] + rast[0]);&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">ndvi</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">'D'</span><span class="p">,</span><span class="w"> </span><span class="s1">'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);'</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">ndvi</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>+--------------------+
 |              raster|
 +--------------------+
-|GridCoverage2D[&quot;g...|
+|GridCoverage2D["g...|
 +--------------------+
 </code></pre></div>
 <p>Spark SQL Example for two raster input <code>RS_MapAlgebra</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast0</span><span class="p">,</span><span class="w"> </span><span class="n">rast1</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;out = rast0[0] * 0.5 + rast1[0] * 0.5;&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">null</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast0</span><span class="p">,</span><span class="w"> </span><span class="n">rast1</span><span class="p">,</span><span class="w"> </span><span class="s1">'D'</span><span class="p">,</span><span class="w"> </span><span class="s1">'out = rast0[0] * 0.5 + rast1[0] * 0.5;'</span><span class="p">,</span><span class="w"> </span><span class="k">null</span><span class="p">)</span>
 </code></pre></div>
 <p>For more details and examples about <code>RS_MapAlgebra</code>, please refer to the <a href="../../Raster-map-algebra/">Map Algebra documentation</a>.
 To learn how to write map algebra script, please refer to <a href="https://github.com/geosolutions-it/jai-ext/wiki/Jiffle---language-summary">Jiffle language summary</a>.

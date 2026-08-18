@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6149,8 +6148,8 @@
 <h2 id="create-a-sample-table">Create a sample table<a class="headerlink" href="#create-a-sample-table" title="Permanent link">&para;</a></h2>
 <p>Let's create a <code>city_tbl</code> that contains the locations and names of cities. Each location is a WKT string.</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">city_tbl</span><span class="w"> </span><span class="p">(</span><span class="n">wkt</span><span class="w"> </span><span class="n">STRING</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span><span class="w"> </span><span class="n">STRING</span><span class="p">);</span>
-<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">city_tbl</span><span class="p">(</span><span class="n">wkt</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;POINT (-122.33 47.61)&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Seattle&#39;</span><span class="p">);</span>
-<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">city_tbl</span><span class="p">(</span><span class="n">wkt</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;POINT (-122.42 37.76)&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;San Francisco&#39;</span><span class="p">);</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">city_tbl</span><span class="p">(</span><span class="n">wkt</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">'POINT (-122.33 47.61)'</span><span class="p">,</span><span class="w"> </span><span class="s1">'Seattle'</span><span class="p">);</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">city_tbl</span><span class="p">(</span><span class="n">wkt</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">'POINT (-122.42 37.76)'</span><span class="p">,</span><span class="w"> </span><span class="s1">'San Francisco'</span><span class="p">);</span>
 </code></pre></div>
 <p>Then we can show the content of this table:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
@@ -6240,7 +6239,7 @@ POINT (37.76 -122.42)   San Francisco
 <p>This function follows lon/order in 1.5.0+ and lat/lon order in 1.4.1 and before. You can use <code>SEDONA.ST_FlipCoordinates</code> to swap X and Y.</p>
 </div>
 <p>We can transform our sample data as follows</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;epsg:4326&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;epsg:3857&#39;</span><span class="p">)),</span><span class="w"> </span><span class="n">city_name</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="s1">'epsg:4326'</span><span class="p">,</span><span class="w"> </span><span class="s1">'epsg:3857'</span><span class="p">)),</span><span class="w"> </span><span class="n">city_name</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl_geom</span>
 </code></pre></div>
 <p>The output will be like this:</p>
@@ -6248,28 +6247,28 @@ POINT (37.76 -122.42)   San Francisco
 POINT (4545577.120361927 -13627732.06291255)  San Francisco
 </code></pre></div>
 <p><code>SEDONA.ST_Transform</code> also supports the CRS string in OGC WKT format. For example, the following query generates the same output but with a OGC WKT CRS string.</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;epsg:4326&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;PROJCS[&quot;WGS 84 / Pseudo-Mercator&quot;,</span>
-<span class="s1">     GEOGCS[&quot;WGS 84&quot;,</span>
-<span class="s1">         DATUM[&quot;WGS_1984&quot;,</span>
-<span class="s1">             SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563,</span>
-<span class="s1">                 AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],</span>
-<span class="s1">             AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],</span>
-<span class="s1">         PRIMEM[&quot;Greenwich&quot;,0,</span>
-<span class="s1">             AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]],</span>
-<span class="s1">         UNIT[&quot;degree&quot;,0.0174532925199433,</span>
-<span class="s1">             AUTHORITY[&quot;EPSG&quot;,&quot;9122&quot;]],</span>
-<span class="s1">         AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]],</span>
-<span class="s1">     PROJECTION[&quot;Mercator_1SP&quot;],</span>
-<span class="s1">     PARAMETER[&quot;central_meridian&quot;,0],</span>
-<span class="s1">     PARAMETER[&quot;scale_factor&quot;,1],</span>
-<span class="s1">     PARAMETER[&quot;false_easting&quot;,0],</span>
-<span class="s1">     PARAMETER[&quot;false_northing&quot;,0],</span>
-<span class="s1">     UNIT[&quot;metre&quot;,1,</span>
-<span class="s1">         AUTHORITY[&quot;EPSG&quot;,&quot;9001&quot;]],</span>
-<span class="s1">     AXIS[&quot;Easting&quot;,EAST],</span>
-<span class="s1">     AXIS[&quot;Northing&quot;,NORTH],</span>
-<span class="s1">     EXTENSION[&quot;PROJ4&quot;,&quot;+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs&quot;],</span>
-<span class="s1">     AUTHORITY[&quot;EPSG&quot;,&quot;3857&quot;]]&#39;</span><span class="p">)),</span><span class="w"> </span><span class="n">city_name</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="s1">'epsg:4326'</span><span class="p">,</span><span class="w"> </span><span class="s1">'PROJCS["WGS 84 / Pseudo-Mercator",</span>
+<span class="s1">     GEOGCS["WGS 84",</span>
+<span class="s1">         DATUM["WGS_1984",</span>
+<span class="s1">             SPHEROID["WGS 84",6378137,298.257223563,</span>
+<span class="s1">                 AUTHORITY["EPSG","7030"]],</span>
+<span class="s1">             AUTHORITY["EPSG","6326"]],</span>
+<span class="s1">         PRIMEM["Greenwich",0,</span>
+<span class="s1">             AUTHORITY["EPSG","8901"]],</span>
+<span class="s1">         UNIT["degree",0.0174532925199433,</span>
+<span class="s1">             AUTHORITY["EPSG","9122"]],</span>
+<span class="s1">         AUTHORITY["EPSG","4326"]],</span>
+<span class="s1">     PROJECTION["Mercator_1SP"],</span>
+<span class="s1">     PARAMETER["central_meridian",0],</span>
+<span class="s1">     PARAMETER["scale_factor",1],</span>
+<span class="s1">     PARAMETER["false_easting",0],</span>
+<span class="s1">     PARAMETER["false_northing",0],</span>
+<span class="s1">     UNIT["metre",1,</span>
+<span class="s1">         AUTHORITY["EPSG","9001"]],</span>
+<span class="s1">     AXIS["Easting",EAST],</span>
+<span class="s1">     AXIS["Northing",NORTH],</span>
+<span class="s1">     EXTENSION["PROJ4","+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs"],</span>
+<span class="s1">     AUTHORITY["EPSG","3857"]]'</span><span class="p">)),</span><span class="w"> </span><span class="n">city_name</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl_geom</span>
 </code></pre></div>
 <h2 id="range-query">Range query<a class="headerlink" href="#range-query" title="Permanent link">&para;</a></h2>
@@ -6300,10 +6299,10 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <p>Example:</p>
 <p>Create the illustrative tables:</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">polygondf</span><span class="w"> </span><span class="k">AS</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">polygonshape</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'</span><span class="p">)</span><span class="w"> </span><span class="n">polygonshape</span><span class="p">;</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">pointdf</span><span class="w"> </span><span class="k">AS</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(0.5 0.5)&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">pointshape</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(0.5 0.5)'</span><span class="p">)</span><span class="w"> </span><span class="n">pointshape</span><span class="p">;</span>
 </code></pre></div>
 <p>Now run the following queries with different spatial predicates:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
@@ -6320,10 +6319,10 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 </code></pre></div>
 <p>The corresponding (faster) spatial joins use only native Snowflake functions:</p>
 <div class="highlight"><pre><span></span><code><span class="k">WITH</span><span class="w"> </span><span class="n">polygondf</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">polygonshape</span>
+<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'</span><span class="p">)</span><span class="w"> </span><span class="n">polygonshape</span>
 <span class="p">),</span>
 <span class="n">pointdf</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(0.5 0.5)&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">pointshape</span>
+<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(0.5 0.5)'</span><span class="p">)</span><span class="w"> </span><span class="n">pointshape</span>
 <span class="p">)</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span><span class="p">,</span><span class="w"> </span><span class="n">pointdf</span>
@@ -6338,10 +6337,10 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <p>Introduction: Find geometries from A and geometries from B such that the distance of each geometry pair is less or equal than a certain distance. It supports the planar Euclidean distance calculators <code>SEDONA.ST_Distance</code>, <code>SEDONA.ST_HausdorffDistance</code>, <code>SEDONA.ST_FrechetDistance</code> and the meter-based geodesic distance calculators <code>SEDONA.ST_DistanceSpheroid</code> and <code>SEDONA.ST_DistanceSphere</code>. Snowflake only natively supports <code>ST_Distance</code>.</p>
 <p>First create two new illustrative tables with a single geometry.</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">pointdf2</span><span class="w"> </span><span class="k">AS</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(0 0)&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">pointshape</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(0 0)'</span><span class="p">)</span><span class="w"> </span><span class="n">pointshape</span><span class="p">;</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">polygondf2</span><span class="w"> </span><span class="k">AS</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0.5 0.5, 0.5 1, 1 1, 1 0.5, 0.5 0.5))&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">polygonshape</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON((0.5 0.5, 0.5 1, 1 1, 1 0.5, 0.5 0.5))'</span><span class="p">)</span><span class="w"> </span><span class="n">polygonshape</span><span class="p">;</span>
 </code></pre></div>
 <p>Examples for planar Euclidean distances:</p>
 <p>The usual l2 Euclidean distance between <code>POINT(0 0)</code> and <code>POINT(0.5 0.5)</code> points is the square root of 0.5, so the following returns the single pair of points.</p>
@@ -6457,7 +6456,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <span class="k">with</span><span class="w"> </span><span class="n">lefts</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
 <span class="w">  </span><span class="k">SELECT</span><span class="w"> </span><span class="k">index</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">poly_id_left</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">wkt</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">TABLE</span><span class="p">(</span>
 <span class="w">      </span><span class="n">SPLIT_TO_TABLE</span><span class="w"> </span><span class="p">(</span>
-<span class="w">          </span><span class="s1">&#39;POLYGON ((-74.64966372842101805 44.92318068906040196, -73.05513946490677313 44.92318068906040196, -73.05513946490677313 45.9127817308399031, -74.64966372842101805 45.9127817308399031, -74.64966372842101805 44.92318068906040196))|POLYGON ((-71.72125014775386376 46.58534825561803672, -70.72763860520016976 46.58534825561803672, -70.72763860520016976 47.26007441306773416, -71.72125014775386376 47.26007441306773416, -71.72125014775386376 46.58534825561803672))&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;|&#39;</span>
+<span class="w">          </span><span class="s1">'POLYGON ((-74.64966372842101805 44.92318068906040196, -73.05513946490677313 44.92318068906040196, -73.05513946490677313 45.9127817308399031, -74.64966372842101805 45.9127817308399031, -74.64966372842101805 44.92318068906040196))|POLYGON ((-71.72125014775386376 46.58534825561803672, -70.72763860520016976 46.58534825561803672, -70.72763860520016976 47.26007441306773416, -71.72125014775386376 47.26007441306773416, -71.72125014775386376 46.58534825561803672))'</span><span class="p">,</span><span class="w"> </span><span class="s1">'|'</span>
 <span class="w">          </span><span class="p">)</span>
 <span class="w">      </span><span class="p">)</span>
 
@@ -6471,7 +6470,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <span class="n">rights</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
 <span class="w">  </span><span class="k">SELECT</span><span class="w"> </span><span class="k">index</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">poly_id_right</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">wkt</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">TABLE</span><span class="p">(</span>
 <span class="w">      </span><span class="n">SPLIT_TO_TABLE</span><span class="w"> </span><span class="p">(</span>
-<span class="w">          </span><span class="s1">&#39;POLYGON ((-73.51160030163114811 45.54300066590783302, -71.31736631503980561 45.54300066590783302, -71.31736631503980561 46.82515071005796869, -73.51160030163114811 46.82515071005796869, -73.51160030163114811 45.54300066590783302))|POLYGON ((-75.26522832 44.23585380, -69.77500453509208 44.23585380, -69.77500453509208 47.59180373699041411, -75.26522832 47.59180373699041411, -75.26522832 44.23585380))|POLYGON ((-73.82001807503861812 45.0759163125215423, -73.34011383205873358 45.0759163125215423, -73.34011383205873358 45.35768613572972185, -73.82001807503861812 45.35768613572972185, -73.82001807503861812 45.0759163125215423))|POLYGON ((-74.64966372842101805 44.92318068906040196, -75.26522832 44.92318068906040196, -75.26522832 44.23585380, -74.64966372842101805 44.23585380, -74.64966372842101805 44.92318068906040196))|POLYGON ((-71.65791191749059408 44.19369241163229844, -70.2497216546401404 44.19369241163229844, -70.2497216546401404 44.96946189775351144, -71.65791191749059408 44.96946189775351144, -71.65791191749059408 44.19369241163229844))&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;|&#39;</span>
+<span class="w">          </span><span class="s1">'POLYGON ((-73.51160030163114811 45.54300066590783302, -71.31736631503980561 45.54300066590783302, -71.31736631503980561 46.82515071005796869, -73.51160030163114811 46.82515071005796869, -73.51160030163114811 45.54300066590783302))|POLYGON ((-75.26522832 44.23585380, -69.77500453509208 44.23585380, -69.77500453509208 47.59180373699041411, -75.26522832 47.59180373699041411, -75.26522832 44.23585380))|POLYGON ((-73.82001807503861812 45.0759163125215423, -73.34011383205873358 45.0759163125215423, -73.34011383205873358 45.35768613572972185, -73.82001807503861812 45.35768613572972185, -73.82001807503861812 45.0759163125215423))|POLYGON ((-74.64966372842101805 44.92318068906040196, -75.26522832 44.92318068906040196, -75.26522832 44.23585380, -74.64966372842101805 44.23585380, -74.64966372842101805 44.92318068906040196))|POLYGON ((-71.65791191749059408 44.19369241163229844, -70.2497216546401404 44.19369241163229844, -70.2497216546401404 44.96946189775351144, -71.65791191749059408 44.96946189775351144, -71.65791191749059408 44.19369241163229844))'</span><span class="p">,</span><span class="w"> </span><span class="s1">'|'</span>
 <span class="w">          </span><span class="p">)</span>
 <span class="w">      </span><span class="p">)</span>
 <span class="p">),</span>
@@ -6526,11 +6525,11 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <p>In this case, Sedona uses EWKB type as the input/output type for geometry. If you have datasets of built-in Snowflake GEOMETRY/GEOGRAPHY type, you can easily transform them into EWKB through this function.</p>
 <h4 id="from-snowflake-native-functions-to-sedona-functions">From Snowflake native functions to Sedona functions<a class="headerlink" href="#from-snowflake-native-functions-to-sedona-functions" title="Permanent link">&para;</a></h4>
 <p>In this example, <code>SEDONA.ST_X</code> is a Sedona function, <code>ST_GeommetryFromWkt</code> and <code>ST_AsEWKB</code> are Snowflake native functions.</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_X</span><span class="p">(</span><span class="n">ST_AsEWKB</span><span class="p">(</span><span class="n">ST_GeometryFromWkt</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">)))</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="n">geometry_table</span><span class="w"> </span><span class="err">}}</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_X</span><span class="p">(</span><span class="n">ST_AsEWKB</span><span class="p">(</span><span class="n">ST_GeometryFromWkt</span><span class="p">(</span><span class="s1">'POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'</span><span class="p">)))</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="n">geometry_table</span><span class="w"> </span><span class="err">}}</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="from-sedona-functions-to-snowflake-native-functions">From Sedona functions to Snowflake native functions<a class="headerlink" href="#from-sedona-functions-to-snowflake-native-functions" title="Permanent link">&para;</a></h4>
 <p>In this example, <code>SEDONA.ST_GeomFromText</code> is a Sedona function, <code>ST_AREA</code> and <code>to_geometry</code> are Snowflake native functions.</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AREA</span><span class="p">(</span><span class="n">to_geometry</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">)));</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AREA</span><span class="p">(</span><span class="n">to_geometry</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'</span><span class="p">)));</span>
 </code></pre></div>
 <h4 id="pros">Pros:<a class="headerlink" href="#pros" title="Permanent link">&para;</a></h4>
 <p>Sedona geometry constructors are more powerful than Snowflake native functions. It has the following advantages:</p>
@@ -6541,7 +6540,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 </ul>
 <h3 id="geometry-geography-created-by-snowflake-geometry-geography-constructors">Geometry / Geography created by Snowflake Geometry / Geography constructors<a class="headerlink" href="#geometry-geography-created-by-snowflake-geometry-geography-constructors" title="Permanent link">&para;</a></h3>
 <p>In this case, Sedona uses Snowflake native GEOMETRY/GEOGRAPHY type as the input/output type for geometry. The serialization format is GeoJSON string.</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AREA</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_Buffer</span><span class="p">(</span><span class="n">ST_GeometryFromWkt</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AREA</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_Buffer</span><span class="p">(</span><span class="n">ST_GeometryFromWkt</span><span class="p">(</span><span class="s1">'POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span>
 </code></pre></div>
 <p>In this example, <code>SEDONA.ST_Buffer</code> is a Sedona function, <code>ST_GeommetryFromWkt</code> and <code>ST_AREA</code> are Snowflake native functions.</p>
 <p>As you can see, you can use Sedona functions and Snowflake native functions together without explicit conversion.</p>
@@ -6551,7 +6550,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 </ul>
 <p>Note that: Snowflake natively serializes Geometry type data to GeoJSON String and sends to UDF as input. GeoJSON spec does not include SRID. So the SRID information will be lost if you mix-match Snowflake functions and Sedona functions directly without using <code>WKB</code>.</p>
 <p>In the example below, the SRID=4326 information is lost.</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsEWKT</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT(1 2)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">4326</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsEWKT</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">'POINT(1 2)'</span><span class="p">),</span><span class="w"> </span><span class="mi">4326</span><span class="p">))</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>SRID=0;POINT(1 2)

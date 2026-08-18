@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6655,18 +6654,18 @@
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Scala</label><label for="__tabbed_1_2">Java</label><label for="__tabbed_1_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">myDataFrame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;YOUR_SQL&quot;</span><span class="p">)</span>
-<span class="n">myDataFrame</span><span class="p">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s">&quot;spatialDf&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">myDataFrame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">"YOUR_SQL"</span><span class="p">)</span>
+<span class="n">myDataFrame</span><span class="p">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s">"spatialDf"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myDataFrame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sql</span><span class="p">(</span><span class="s">&quot;YOUR_SQL&quot;</span><span class="p">)</span>
-<span class="n">myDataFrame</span><span class="p">.</span><span class="na">createOrReplaceTempView</span><span class="p">(</span><span class="s">&quot;spatialDf&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">myDataFrame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sql</span><span class="p">(</span><span class="s">"YOUR_SQL"</span><span class="p">)</span>
+<span class="n">myDataFrame</span><span class="p">.</span><span class="na">createOrReplaceTempView</span><span class="p">(</span><span class="s">"spatialDf"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">myDataFrame</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;YOUR_SQL&quot;</span><span class="p">)</span>
-<span class="n">myDataFrame</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;spatialDf&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">myDataFrame</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"YOUR_SQL"</span><span class="p">)</span>
+<span class="n">myDataFrame</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"spatialDf"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 </div>
@@ -6699,33 +6698,33 @@
 <p><div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">sedona</span><span class="p">.</span><span class="nn">spark</span><span class="p">.</span><span class="nc">SedonaContext</span>
 
 <span class="kd">val</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SedonaContext</span><span class="p">.</span><span class="n">builder</span><span class="p">()</span>
-<span class="p">.</span><span class="n">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// 集群模式下请删除此行</span>
-<span class="p">.</span><span class="n">appName</span><span class="p">(</span><span class="s">&quot;readTestScala&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// 改成合适的名字</span>
+<span class="p">.</span><span class="n">master</span><span class="p">(</span><span class="s">"local[*]"</span><span class="p">)</span><span class="w"> </span><span class="c1">// 集群模式下请删除此行</span>
+<span class="p">.</span><span class="n">appName</span><span class="p">(</span><span class="s">"readTestScala"</span><span class="p">)</span><span class="w"> </span><span class="c1">// 改成合适的名字</span>
 <span class="p">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 </code></pre></div>
 如果同时使用 SedonaViz 与 SedonaSQL，请在 <code>SedonaContext.builder()</code> 之后追加以下行启用 Sedona Kryo 序列化器：
-<div class="highlight"><pre><span></span><code><span class="p">.</span><span class="n">config</span><span class="p">(</span><span class="s">&quot;spark.kryo.registrator&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">classOf</span><span class="p">[</span><span class="nc">SedonaVizKryoRegistrator</span><span class="p">].</span><span class="n">getName</span><span class="p">)</span><span class="w"> </span><span class="c1">// org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator</span>
+<div class="highlight"><pre><span></span><code><span class="p">.</span><span class="n">config</span><span class="p">(</span><span class="s">"spark.kryo.registrator"</span><span class="p">,</span><span class="w"> </span><span class="k">classOf</span><span class="p">[</span><span class="nc">SedonaVizKryoRegistrator</span><span class="p">].</span><span class="n">getName</span><span class="p">)</span><span class="w"> </span><span class="c1">// org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator</span>
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
 <p><div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">org.apache.sedona.spark.SedonaContext</span><span class="p">;</span>
 
 <span class="n">SparkSession</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SedonaContext</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-<span class="p">.</span><span class="na">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// 集群模式下请删除此行</span>
-<span class="p">.</span><span class="na">appName</span><span class="p">(</span><span class="s">&quot;readTestJava&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// 改成合适的名字</span>
+<span class="p">.</span><span class="na">master</span><span class="p">(</span><span class="s">"local[*]"</span><span class="p">)</span><span class="w"> </span><span class="c1">// 集群模式下请删除此行</span>
+<span class="p">.</span><span class="na">appName</span><span class="p">(</span><span class="s">"readTestJava"</span><span class="p">)</span><span class="w"> </span><span class="c1">// 改成合适的名字</span>
 <span class="p">.</span><span class="na">getOrCreate</span><span class="p">()</span>
 </code></pre></div>
 如果同时使用 SedonaViz 与 SedonaSQL，请在 <code>SedonaContext.builder()</code> 之后追加以下行启用 Sedona Kryo 序列化器：
-<div class="highlight"><pre><span></span><code><span class="p">.</span><span class="na">config</span><span class="p">(</span><span class="s">&quot;spark.kryo.registrator&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">SedonaVizKryoRegistrator</span><span class="p">.</span><span class="na">class</span><span class="p">.</span><span class="na">getName</span><span class="p">())</span><span class="w"> </span><span class="c1">// org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator</span>
+<div class="highlight"><pre><span></span><code><span class="p">.</span><span class="na">config</span><span class="p">(</span><span class="s">"spark.kryo.registrator"</span><span class="p">,</span><span class="w"> </span><span class="n">SedonaVizKryoRegistrator</span><span class="p">.</span><span class="na">class</span><span class="p">.</span><span class="na">getName</span><span class="p">())</span><span class="w"> </span><span class="c1">// org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator</span>
 </code></pre></div></p>
 </div>
 <div class="tabbed-block">
 <p><div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">config</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span> <span class="o">.</span>\
-    <span class="n">config</span><span class="p">(</span><span class="s1">&#39;spark.jars.packages&#39;</span><span class="p">,</span>
-           <span class="s1">&#39;org.apache.sedona:sedona-spark-shaded-3.3_2.12:1.9.1,&#39;</span>
-           <span class="s1">&#39;org.datasyslab:geotools-wrapper:1.9.1-33.5&#39;</span><span class="p">)</span><span class="o">.</span> \
+    <span class="n">config</span><span class="p">(</span><span class="s1">'spark.jars.packages'</span><span class="p">,</span>
+           <span class="s1">'org.apache.sedona:sedona-spark-shaded-3.3_2.12:1.9.1,'</span>
+           <span class="s1">'org.datasyslab:geotools-wrapper:1.9.1-33.5'</span><span class="p">)</span><span class="o">.</span> \
     <span class="n">getOrCreate</span><span class="p">()</span>
 </code></pre></div>
 如使用其他 Spark 版本，请将 sedona-spark-shaded 包名中的 <code>3.3</code> 替换为对应的 Spark major.minor 版本，例如 <code>sedona-spark-shaded-3.4_2.12:1.9.1</code>。</p>
@@ -6770,20 +6769,20 @@ POLYGON (..., ...)  Lancaster County
 <div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Scala</label><label for="__tabbed_5_2">Java</label><label for="__tabbed_5_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">rawDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;csv&quot;</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;delimiter&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;\t&quot;</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;header&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/Download/usa-county.tsv&quot;</span><span class="p">)</span>
-<span class="n">rawDf</span><span class="p">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s">&quot;rawdf&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">rawDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"csv"</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">"delimiter"</span><span class="p">,</span><span class="w"> </span><span class="s">"\t"</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">"header"</span><span class="p">,</span><span class="w"> </span><span class="s">"false"</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">"/Download/usa-county.tsv"</span><span class="p">)</span>
+<span class="n">rawDf</span><span class="p">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s">"rawdf"</span><span class="p">)</span>
 <span class="n">rawDf</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">rawDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;csv&quot;</span><span class="p">).</span><span class="na">option</span><span class="p">(</span><span class="s">&quot;delimiter&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;\t&quot;</span><span class="p">).</span><span class="na">option</span><span class="p">(</span><span class="s">&quot;header&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">&quot;/Download/usa-county.tsv&quot;</span><span class="p">)</span>
-<span class="n">rawDf</span><span class="p">.</span><span class="na">createOrReplaceTempView</span><span class="p">(</span><span class="s">&quot;rawdf&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">rawDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">"csv"</span><span class="p">).</span><span class="na">option</span><span class="p">(</span><span class="s">"delimiter"</span><span class="p">,</span><span class="w"> </span><span class="s">"\t"</span><span class="p">).</span><span class="na">option</span><span class="p">(</span><span class="s">"header"</span><span class="p">,</span><span class="w"> </span><span class="s">"false"</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">"/Download/usa-county.tsv"</span><span class="p">)</span>
+<span class="n">rawDf</span><span class="p">.</span><span class="na">createOrReplaceTempView</span><span class="p">(</span><span class="s">"rawdf"</span><span class="p">)</span>
 <span class="n">rawDf</span><span class="p">.</span><span class="na">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">rawDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;delimiter&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;header&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/Download/usa-county.tsv&quot;</span><span class="p">)</span>
-<span class="n">rawDf</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;rawdf&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">rawDf</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"csv"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"delimiter"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"header"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/Download/usa-county.tsv"</span><span class="p">)</span>
+<span class="n">rawDf</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"rawdf"</span><span class="p">)</span>
 <span class="n">rawDf</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
@@ -6835,14 +6834,14 @@ POLYGON (..., ...)  Lancaster County
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geojson&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;multiLine&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;PATH/TO/MYFILE.json&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;explode(features) as features&quot;</span><span class="p">)</span>  <span class="c1"># 展开 envelope</span>
-    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;features.*&quot;</span><span class="p">)</span>  <span class="c1"># 解包 features 结构体</span>
-    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;prop0&quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="s2">&quot;properties[&#39;prop0&#39;]&quot;</span><span class="p">))</span>
-    <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;properties&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geojson"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"multiLine"</span><span class="p">,</span> <span class="s2">"true"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"PATH/TO/MYFILE.json"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"explode(features) as features"</span><span class="p">)</span>  <span class="c1"># 展开 envelope</span>
+    <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"features.*"</span><span class="p">)</span>  <span class="c1"># 解包 features 结构体</span>
+    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"prop0"</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="s2">"properties['prop0']"</span><span class="p">))</span>
+    <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"properties"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">"type"</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -6850,19 +6849,19 @@ POLYGON (..., ...)  Lancaster County
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geojson&quot;</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;multiLine&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;PATH/TO/MYFILE.json&quot;</span><span class="p">)</span>
-<span class="kd">val</span><span class="w"> </span><span class="n">parsedDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">&quot;explode(features) as features&quot;</span><span class="p">).</span><span class="n">select</span><span class="p">(</span><span class="s">&quot;features.*&quot;</span><span class="p">)</span>
-<span class="w">        </span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;prop0&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;properties[&#39;prop0&#39;]&quot;</span><span class="p">)).</span><span class="n">drop</span><span class="p">(</span><span class="s">&quot;properties&quot;</span><span class="p">).</span><span class="n">drop</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geojson"</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">"multiLine"</span><span class="p">,</span><span class="w"> </span><span class="s">"true"</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">"PATH/TO/MYFILE.json"</span><span class="p">)</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">parsedDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">"explode(features) as features"</span><span class="p">).</span><span class="n">select</span><span class="p">(</span><span class="s">"features.*"</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">"prop0"</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"properties['prop0']"</span><span class="p">)).</span><span class="n">drop</span><span class="p">(</span><span class="s">"properties"</span><span class="p">).</span><span class="n">drop</span><span class="p">(</span><span class="s">"type"</span><span class="p">)</span>
 
 <span class="n">parsedDf</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
 <span class="n">parsedDf</span><span class="p">.</span><span class="n">printSchema</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;geojson&quot;</span><span class="p">).</span><span class="na">option</span><span class="p">(</span><span class="s">&quot;multiLine&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">&quot;PATH/TO/MYFILE.json&quot;</span><span class="p">)</span>
-<span class="w"> </span><span class="p">.</span><span class="na">selectExpr</span><span class="p">(</span><span class="s">&quot;explode(features) as features&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// 展开 envelope，每行一个 feature</span>
-<span class="w"> </span><span class="p">.</span><span class="na">select</span><span class="p">(</span><span class="s">&quot;features.*&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// 解包 features 结构体</span>
-<span class="w"> </span><span class="p">.</span><span class="na">withColumn</span><span class="p">(</span><span class="s">&quot;prop0&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;properties[&#39;prop0&#39;]&quot;</span><span class="p">)).</span><span class="na">drop</span><span class="p">(</span><span class="s">&quot;properties&quot;</span><span class="p">).</span><span class="na">drop</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">"geojson"</span><span class="p">).</span><span class="na">option</span><span class="p">(</span><span class="s">"multiLine"</span><span class="p">,</span><span class="w"> </span><span class="s">"true"</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">"PATH/TO/MYFILE.json"</span><span class="p">)</span>
+<span class="w"> </span><span class="p">.</span><span class="na">selectExpr</span><span class="p">(</span><span class="s">"explode(features) as features"</span><span class="p">)</span><span class="w"> </span><span class="c1">// 展开 envelope，每行一个 feature</span>
+<span class="w"> </span><span class="p">.</span><span class="na">select</span><span class="p">(</span><span class="s">"features.*"</span><span class="p">)</span><span class="w"> </span><span class="c1">// 解包 features 结构体</span>
+<span class="w"> </span><span class="p">.</span><span class="na">withColumn</span><span class="p">(</span><span class="s">"prop0"</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"properties['prop0']"</span><span class="p">)).</span><span class="na">drop</span><span class="p">(</span><span class="s">"properties"</span><span class="p">).</span><span class="na">drop</span><span class="p">(</span><span class="s">"type"</span><span class="p">)</span>
 
 <span class="n">df</span><span class="p">.</span><span class="na">show</span><span class="p">();</span>
 <span class="n">df</span><span class="p">.</span><span class="na">printSchema</span><span class="p">();</span>
@@ -6876,15 +6875,15 @@ POLYGON (..., ...)  Lancaster County
 <div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Scala/Java</label><label for="__tabbed_7_2">Java</label><label for="__tabbed_7_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;shapefile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/path/to/shapefile&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"shapefile"</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">"/path/to/shapefile"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;shapefile&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">&quot;/path/to/shapefile&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">"shapefile"</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">"/path/to/shapefile"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;shapefile&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/shapefile&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"shapefile"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/path/to/shapefile"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 </div>
@@ -6896,17 +6895,17 @@ POLYGON (..., ...)  Lancaster County
 <div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Scala/Java</label><label for="__tabbed_8_2">Java</label><label for="__tabbed_8_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
 <span class="n">df</span><span class="p">.</span><span class="n">printSchema</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
 <span class="n">df</span><span class="p">.</span><span class="na">printSchema</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geoparquet&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 </code></pre></div>
 </div>
@@ -6927,13 +6926,13 @@ POLYGON (..., ...)  Lancaster County
 <h2 id="stac-catalog">从 STAC catalog 加载数据<a class="headerlink" href="#stac-catalog" title="Permanent link">&para;</a></h2>
 <p>Sedona 的 STAC 数据源允许从 SpatioTemporal Asset Catalog（STAC）API 读取数据，支持读取 STAC items 与 collections。</p>
 <p>可以从 S3 上的 collection 文件加载 STAC collection：</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;stac&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-    <span class="s2">&quot;s3a://example.com/stac_bucket/stac_collection.json&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"stac"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="s2">"s3a://example.com/stac_bucket/stac_collection.json"</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>也可以从 HTTP/HTTPS 端点加载：</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;stac&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-    <span class="s2">&quot;https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"stac"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+    <span class="s2">"https://earth-search.aws.element84.com/v1/collections/sentinel-2-pre-c1-l2a"</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>STAC 数据源支持空间和时间过滤的下推，可以将这些过滤直接下推到底层数据源以减少需要读取的数据量。</p>
@@ -6944,50 +6943,50 @@ POLYGON (..., ...)  Lancaster County
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="c1">// 适用于任意 JDBC 数据源（包括 Postgis）</span>
-<span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;jdbc&quot;</span><span class="p">)</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"jdbc"</span><span class="p">)</span>
 <span class="w">    </span><span class="c1">// 其他选项</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;query&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;SELECT id, ST_AsBinary(geom) as geom FROM my_table&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"query"</span><span class="p">,</span><span class="w"> </span><span class="s">"SELECT id, ST_AsBinary(geom) as geom FROM my_table"</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">load</span><span class="p">()</span>
-<span class="w">    </span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;geom&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_GeomFromWKB(geom)&quot;</span><span class="p">))</span>
+<span class="w">    </span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">"geom"</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"ST_GeomFromWKB(geom)"</span><span class="p">))</span>
 
 <span class="c1">// Postgis 上的简化写法</span>
-<span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;jdbc&quot;</span><span class="p">)</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"jdbc"</span><span class="p">)</span>
 <span class="w">    </span><span class="c1">// 其他选项</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;dbtable&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_table&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"dbtable"</span><span class="p">,</span><span class="w"> </span><span class="s">"my_table"</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">load</span><span class="p">()</span>
-<span class="w">    </span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;geom&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_GeomFromWKB(geom)&quot;</span><span class="p">))</span>
+<span class="w">    </span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">"geom"</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"ST_GeomFromWKB(geom)"</span><span class="p">))</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="c1">// 适用于任意 JDBC 数据源（包括 Postgis）</span>
-<span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;jdbc&quot;</span><span class="p">)</span>
+<span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">"jdbc"</span><span class="p">)</span>
 <span class="w">    </span><span class="c1">// 其他选项</span>
-<span class="w">    </span><span class="p">.</span><span class="na">option</span><span class="p">(</span><span class="s">&quot;query&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;SELECT id, ST_AsBinary(geom) as geom FROM my_table&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">option</span><span class="p">(</span><span class="s">"query"</span><span class="p">,</span><span class="w"> </span><span class="s">"SELECT id, ST_AsBinary(geom) as geom FROM my_table"</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="na">load</span><span class="p">()</span>
-<span class="w">    </span><span class="p">.</span><span class="na">withColumn</span><span class="p">(</span><span class="s">&quot;geom&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_GeomFromWKB(geom)&quot;</span><span class="p">))</span>
+<span class="w">    </span><span class="p">.</span><span class="na">withColumn</span><span class="p">(</span><span class="s">"geom"</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"ST_GeomFromWKB(geom)"</span><span class="p">))</span>
 
 <span class="c1">// Postgis 上的简化写法</span>
-<span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;jdbc&quot;</span><span class="p">)</span>
+<span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">"jdbc"</span><span class="p">)</span>
 <span class="w">    </span><span class="c1">// 其他选项</span>
-<span class="w">    </span><span class="p">.</span><span class="na">option</span><span class="p">(</span><span class="s">&quot;dbtable&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_table&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">option</span><span class="p">(</span><span class="s">"dbtable"</span><span class="p">,</span><span class="w"> </span><span class="s">"my_table"</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="na">load</span><span class="p">()</span>
-<span class="w">    </span><span class="p">.</span><span class="na">withColumn</span><span class="p">(</span><span class="s">&quot;geom&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_GeomFromWKB(geom)&quot;</span><span class="p">))</span>
+<span class="w">    </span><span class="p">.</span><span class="na">withColumn</span><span class="p">(</span><span class="s">"geom"</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"ST_GeomFromWKB(geom)"</span><span class="p">))</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="c1"># 适用于任意 JDBC 数据源（包括 Postgis）</span>
-<span class="n">df</span> <span class="o">=</span> <span class="p">(</span><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;jdbc&quot;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="p">(</span><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"jdbc"</span><span class="p">)</span>
     <span class="c1"># 其他选项</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;query&quot;</span><span class="p">,</span> <span class="s2">&quot;SELECT id, ST_AsBinary(geom) as geom FROM my_table&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"query"</span><span class="p">,</span> <span class="s2">"SELECT id, ST_AsBinary(geom) as geom FROM my_table"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">load</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geom&quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="s2">&quot;ST_GeomFromWKB(geom)&quot;</span><span class="p">)))</span>
+    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geom"</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="s2">"ST_GeomFromWKB(geom)"</span><span class="p">)))</span>
 
 <span class="c1"># Postgis 上的简化写法</span>
-<span class="n">df</span> <span class="o">=</span> <span class="p">(</span><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;jdbc&quot;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="p">(</span><span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"jdbc"</span><span class="p">)</span>
     <span class="c1"># 其他选项</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;dbtable&quot;</span><span class="p">,</span> <span class="s2">&quot;my_table&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"dbtable"</span><span class="p">,</span> <span class="s2">"my_table"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">load</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geom&quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="s2">&quot;ST_GeomFromWKB(geom)&quot;</span><span class="p">)))</span>
+    <span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geom"</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span><span class="s2">"ST_GeomFromWKB(geom)"</span><span class="p">)))</span>
 </code></pre></div>
 </div>
 </div>
@@ -6997,15 +6996,15 @@ POLYGON (..., ...)  Lancaster County
 <div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Scala/Java</label><label for="__tabbed_10_2">Java</label><label for="__tabbed_10_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geopackage&quot;</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;tableName&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;tab&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/path/to/geopackage&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geopackage"</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">"tableName"</span><span class="p">,</span><span class="w"> </span><span class="s">"tab"</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">"/path/to/geopackage"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;geopackage&quot;</span><span class="p">).</span><span class="na">option</span><span class="p">(</span><span class="s">&quot;tableName&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;tab&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">&quot;/path/to/geopackage&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">"geopackage"</span><span class="p">).</span><span class="na">option</span><span class="p">(</span><span class="s">"tableName"</span><span class="p">,</span><span class="w"> </span><span class="s">"tab"</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">"/path/to/geopackage"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geopackage&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tableName&quot;</span><span class="p">,</span> <span class="s2">&quot;tab&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/geopackage&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geopackage"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"tableName"</span><span class="p">,</span> <span class="s2">"tab"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/path/to/geopackage"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 </div>
@@ -7016,15 +7015,15 @@ POLYGON (..., ...)  Lancaster County
 <div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Scala/Java</label><label for="__tabbed_11_2">Java</label><label for="__tabbed_11_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;osmpbf&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/path/to/osmpbf&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"osmpbf"</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">"/path/to/osmpbf"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;osmpbf&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">&quot;/path/to/osmpbf&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">().</span><span class="na">format</span><span class="p">(</span><span class="s">"osmpbf"</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="s">"/path/to/osmpbf"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;osmpbf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/osmpbf&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"osmpbf"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/path/to/osmpbf"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 </div>
@@ -7095,7 +7094,7 @@ only showing top 5 rows
 <p>自 <code>v1.5.0</code> 起，该函数默认使用 lon/lat 顺序（之前为 lat/lon 顺序）。可以使用 <mark>ST_FlipCoordinates</mark> 交换 X 与 Y。</p>
 <p>更多细节请参阅 Sedona API 参考中的 <code>ST_Transform</code> 章节。</p>
 <p>转换前述 Geometry 列的坐标参考系：</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">countyshape</span><span class="p">,</span><span class="w"> </span><span class="ss">&quot;epsg:4326&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">&quot;epsg:3857&quot;</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">newcountyshape</span><span class="p">,</span><span class="w"> </span><span class="n">_c1</span><span class="p">,</span><span class="w"> </span><span class="n">_c2</span><span class="p">,</span><span class="w"> </span><span class="n">_c3</span><span class="p">,</span><span class="w"> </span><span class="n">_c4</span><span class="p">,</span><span class="w"> </span><span class="n">_c5</span><span class="p">,</span><span class="w"> </span><span class="n">_c6</span><span class="p">,</span><span class="w"> </span><span class="n">_c7</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">countyshape</span><span class="p">,</span><span class="w"> </span><span class="ss">"epsg:4326"</span><span class="p">,</span><span class="w"> </span><span class="ss">"epsg:3857"</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">newcountyshape</span><span class="p">,</span><span class="w"> </span><span class="n">_c1</span><span class="p">,</span><span class="w"> </span><span class="n">_c2</span><span class="p">,</span><span class="w"> </span><span class="n">_c3</span><span class="p">,</span><span class="w"> </span><span class="n">_c4</span><span class="p">,</span><span class="w"> </span><span class="n">_c5</span><span class="p">,</span><span class="w"> </span><span class="n">_c6</span><span class="p">,</span><span class="w"> </span><span class="n">_c7</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">spatialdf</span>
 </code></pre></div>
 <p><code>ST_Transform</code> 第一个 EPSG 代码 EPSG:4326 是源 CRS——也就是最常见的基于度的 CRS（WGS84）。</p>
@@ -7220,7 +7219,7 @@ only showing top 5 rows
 
 <span class="kd">val</span><span class="w"> </span><span class="n">distanceRadius</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span>
 <span class="kd">val</span><span class="w"> </span><span class="n">weightedDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">addBinaryDistanceBandColumn</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="w"> </span><span class="n">distanceRadius</span><span class="p">)</span>
-<span class="n">gLocal</span><span class="p">(</span><span class="n">weightedDf</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;val&quot;</span><span class="p">).</span><span class="n">show</span><span class="p">()</span>
+<span class="n">gLocal</span><span class="p">(</span><span class="n">weightedDf</span><span class="p">,</span><span class="w"> </span><span class="s">"val"</span><span class="p">).</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7230,7 +7229,7 @@ only showing top 5 rows
 
 <span class="kt">double</span><span class="w"> </span><span class="n">distanceRadius</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
 <span class="n">DataFrame</span><span class="w"> </span><span class="n">weightedDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Weighting</span><span class="p">.</span><span class="na">addBinaryDistanceBandColumn</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="w"> </span><span class="n">distanceRadius</span><span class="p">);</span>
-<span class="n">GetisOrd</span><span class="p">.</span><span class="na">gLocal</span><span class="p">(</span><span class="n">weightedDf</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;val&quot;</span><span class="p">).</span><span class="na">show</span><span class="p">();</span>
+<span class="n">GetisOrd</span><span class="p">.</span><span class="na">gLocal</span><span class="p">(</span><span class="n">weightedDf</span><span class="p">,</span><span class="w"> </span><span class="s">"val"</span><span class="p">).</span><span class="na">show</span><span class="p">();</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7239,7 +7238,7 @@ only showing top 5 rows
 
 <span class="n">distance_radius</span> <span class="o">=</span> <span class="mf">1.0</span>
 <span class="n">weighted_df</span> <span class="o">=</span> <span class="n">addBinaryDistanceBandColumn</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">distance_radius</span><span class="p">)</span>
-<span class="n">g_local</span><span class="p">(</span><span class="n">weightedDf</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">g_local</span><span class="p">(</span><span class="n">weightedDf</span><span class="p">,</span> <span class="s2">"val"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>
@@ -7316,7 +7315,7 @@ only showing top 5 rows
 <h4 id="sedonapydeck-choropleth">使用 SedonaPyDeck 创建 Choropleth 地图<a class="headerlink" href="#sedonapydeck-choropleth" title="Permanent link">&para;</a></h4>
 <p>SedonaPyDeck 的 <code>create_choropleth_map</code> API 可基于包含多边形与观测值的 SedonaDataFrame 创建 choropleth 地图：</p>
 <p>示例：</p>
-<div class="highlight"><pre><span></span><code><span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">create_choropleth_map</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">groupedresult</span><span class="p">,</span> <span class="n">plot_col</span><span class="o">=</span><span class="s2">&quot;AirportCount&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">create_choropleth_map</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">groupedresult</span><span class="p">,</span> <span class="n">plot_col</span><span class="o">=</span><span class="s2">"AirportCount"</span><span class="p">)</span>
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -7327,7 +7326,7 @@ only showing top 5 rows
 <h4 id="sedonapydeck-geometry">使用 SedonaPyDeck 创建 Geometry 地图<a class="headerlink" href="#sedonapydeck-geometry" title="Permanent link">&para;</a></h4>
 <p>SedonaPyDeck 的 <code>create_geometry_map</code> API 可可视化任意类型几何对象的 SedonaDataFrame：</p>
 <p>示例：</p>
-<div class="highlight"><pre><span></span><code><span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">create_geometry_map</span><span class="p">(</span><span class="n">df_building</span><span class="p">,</span> <span class="n">elevation_col</span><span class="o">=</span><span class="s2">&quot;height&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">create_geometry_map</span><span class="p">(</span><span class="n">df_building</span><span class="p">,</span> <span class="n">elevation_col</span><span class="o">=</span><span class="s2">"height"</span><span class="p">)</span>
 </code></pre></div>
 <p><img alt="使用 SedonaPyDeck 创建 Geometry 地图" src="../../../image/buildings.gif" /></p>
 <div class="admonition tip">
@@ -7359,7 +7358,7 @@ only showing top 5 rows
 </div>
 <p>下面演示如何使用 SedonaKepler 立即可视化地理空间数据。</p>
 <p>示例（取自 binder 提供的示例 notebook）：</p>
-<div class="highlight"><pre><span></span><code><span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">groupedresult</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;AirportCount&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">groupedresult</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"AirportCount"</span><span class="p">)</span>
 </code></pre></div>
 <p><img alt="使用 SedonaKepler 可视化地理空间数据" src="../../../image/sedona_customization.gif" /></p>
 <p>所用数据集见 <a href="https://github.com/apache/sedona/tree/b66e768155866a38ba2e3404f1151cac14fad5ea/docs/usecases/data/ne_50m_airports">此处</a>，示例 notebook 见 <a href="https://github.com/apache/sedona/blob/master/docs/usecases/legacy/ApacheSedonaSQL_SpatialJoin_AirportsPerCountry.ipynb">此处</a>。</p>
@@ -7378,9 +7377,9 @@ only showing top 5 rows
 <span class="w">    </span><span class="n">geom</span><span class="p">.</span><span class="n">getLength</span>
 <span class="p">}</span>
 
-<span class="n">sedona</span><span class="p">.</span><span class="n">udf</span><span class="p">.</span><span class="n">register</span><span class="p">(</span><span class="s">&quot;udf_lengthPoly&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">lengthPoly</span><span class="w"> </span><span class="n">_</span><span class="p">)</span>
+<span class="n">sedona</span><span class="p">.</span><span class="n">udf</span><span class="p">.</span><span class="n">register</span><span class="p">(</span><span class="s">"udf_lengthPoly"</span><span class="p">,</span><span class="w"> </span><span class="n">lengthPoly</span><span class="w"> </span><span class="n">_</span><span class="p">)</span>
 
-<span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">&quot;udf_lengthPoly(geom)&quot;</span><span class="p">).</span><span class="n">show</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">"udf_lengthPoly(geom)"</span><span class="p">).</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7389,11 +7388,11 @@ only showing top 5 rows
 
 <span class="c1">// 使用 lambda 注册 UDF</span>
 <span class="n">sparkSession</span><span class="p">.</span><span class="na">udf</span><span class="p">().</span><span class="na">register</span><span class="p">(</span>
-<span class="w">        </span><span class="s">&quot;udf_lengthPoly&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">"udf_lengthPoly"</span><span class="p">,</span>
 <span class="w">        </span><span class="p">(</span><span class="n">UDF1</span><span class="o">&lt;</span><span class="n">Geometry</span><span class="p">,</span><span class="w"> </span><span class="n">Double</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="n">Geometry</span><span class="p">::</span><span class="n">getLength</span><span class="p">,</span>
 <span class="w">        </span><span class="n">DataTypes</span><span class="p">.</span><span class="na">DoubleType</span><span class="p">);</span>
 
-<span class="n">df</span><span class="p">.</span><span class="na">selectExpr</span><span class="p">(</span><span class="s">&quot;udf_lengthPoly(geom)&quot;</span><span class="p">).</span><span class="na">show</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="na">selectExpr</span><span class="p">(</span><span class="s">"udf_lengthPoly(geom)"</span><span class="p">).</span><span class="na">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7403,9 +7402,9 @@ only showing top 5 rows
 <span class="k">def</span><span class="w"> </span><span class="nf">lengthPoly</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">()):</span>
     <span class="k">return</span> <span class="n">geom</span><span class="o">.</span><span class="n">length</span>
 
-<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;udf_lengthPoly&quot;</span><span class="p">,</span> <span class="n">lengthPoly</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"udf_lengthPoly"</span><span class="p">,</span> <span class="n">lengthPoly</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
 
-<span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;udf_lengthPoly(geom)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"udf_lengthPoly(geom)"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>
@@ -7429,9 +7428,9 @@ only showing top 5 rows
 <span class="w">    </span><span class="n">geom</span><span class="p">.</span><span class="n">buffer</span><span class="p">(</span><span class="mf">5.5</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="n">sedona</span><span class="p">.</span><span class="n">udf</span><span class="p">.</span><span class="n">register</span><span class="p">(</span><span class="s">&quot;udf_bufferFixed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">bufferFixed</span><span class="w"> </span><span class="n">_</span><span class="p">)</span>
+<span class="n">sedona</span><span class="p">.</span><span class="n">udf</span><span class="p">.</span><span class="n">register</span><span class="p">(</span><span class="s">"udf_bufferFixed"</span><span class="p">,</span><span class="w"> </span><span class="n">bufferFixed</span><span class="w"> </span><span class="n">_</span><span class="p">)</span>
 
-<span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">&quot;udf_bufferFixed(geom)&quot;</span><span class="p">).</span><span class="n">show</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">"udf_bufferFixed(geom)"</span><span class="p">).</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7440,12 +7439,12 @@ only showing top 5 rows
 
 <span class="c1">// 使用 lambda 注册 UDF</span>
 <span class="n">sparkSession</span><span class="p">.</span><span class="na">udf</span><span class="p">().</span><span class="na">register</span><span class="p">(</span>
-<span class="w">        </span><span class="s">&quot;udf_bufferFixed&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">"udf_bufferFixed"</span><span class="p">,</span>
 <span class="w">        </span><span class="p">(</span><span class="n">UDF1</span><span class="o">&lt;</span><span class="n">Geometry</span><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="n">geom</span><span class="w"> </span><span class="o">-&gt;</span>
 <span class="w">            </span><span class="n">geom</span><span class="p">.</span><span class="na">buffer</span><span class="p">(</span><span class="mf">5.5</span><span class="p">),</span>
 <span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">GeometryUDT</span><span class="p">());</span>
 
-<span class="n">df</span><span class="p">.</span><span class="na">selectExpr</span><span class="p">(</span><span class="s">&quot;udf_bufferFixed(geom)&quot;</span><span class="p">).</span><span class="na">show</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="na">selectExpr</span><span class="p">(</span><span class="s">"udf_bufferFixed(geom)"</span><span class="p">).</span><span class="na">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7455,9 +7454,9 @@ only showing top 5 rows
 <span class="k">def</span><span class="w"> </span><span class="nf">bufferFixed</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">()):</span>
     <span class="k">return</span> <span class="n">geom</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mf">5.5</span><span class="p">)</span>
 
-<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;udf_bufferFixed&quot;</span><span class="p">,</span> <span class="n">bufferFixed</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">())</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"udf_bufferFixed"</span><span class="p">,</span> <span class="n">bufferFixed</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">())</span>
 
-<span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;udf_bufferFixed(geom)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"udf_bufferFixed(geom)"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>
@@ -7481,9 +7480,9 @@ only showing top 5 rows
 <span class="w">    </span><span class="n">geom</span><span class="p">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="n">sedona</span><span class="p">.</span><span class="n">udf</span><span class="p">.</span><span class="n">register</span><span class="p">(</span><span class="s">&quot;udf_buffer&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">bufferIt</span><span class="w"> </span><span class="n">_</span><span class="p">)</span>
+<span class="n">sedona</span><span class="p">.</span><span class="n">udf</span><span class="p">.</span><span class="n">register</span><span class="p">(</span><span class="s">"udf_buffer"</span><span class="p">,</span><span class="w"> </span><span class="n">bufferIt</span><span class="w"> </span><span class="n">_</span><span class="p">)</span>
 
-<span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">&quot;udf_buffer(geom, distance)&quot;</span><span class="p">).</span><span class="n">show</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">"udf_buffer(geom, distance)"</span><span class="p">).</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7492,11 +7491,11 @@ only showing top 5 rows
 
 <span class="c1">// 使用 lambda 注册 UDF</span>
 <span class="n">sparkSession</span><span class="p">.</span><span class="na">udf</span><span class="p">().</span><span class="na">register</span><span class="p">(</span>
-<span class="w">        </span><span class="s">&quot;udf_buffer&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s">"udf_buffer"</span><span class="p">,</span>
 <span class="w">        </span><span class="p">(</span><span class="n">UDF2</span><span class="o">&lt;</span><span class="n">Geometry</span><span class="p">,</span><span class="w"> </span><span class="n">Double</span><span class="p">,</span><span class="w"> </span><span class="n">Geometry</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="n">Geometry</span><span class="p">::</span><span class="n">buffer</span><span class="p">,</span>
 <span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">GeometryUDT</span><span class="p">());</span>
 
-<span class="n">df</span><span class="p">.</span><span class="na">selectExpr</span><span class="p">(</span><span class="s">&quot;udf_buffer(geom, distance)&quot;</span><span class="p">).</span><span class="na">show</span><span class="p">()</span>
+<span class="n">df</span><span class="p">.</span><span class="na">selectExpr</span><span class="p">(</span><span class="s">"udf_buffer(geom, distance)"</span><span class="p">).</span><span class="na">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
@@ -7506,9 +7505,9 @@ only showing top 5 rows
 <span class="k">def</span><span class="w"> </span><span class="nf">bufferIt</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="n">distance</span><span class="p">:</span> <span class="n">DoubleType</span><span class="p">()):</span>
     <span class="k">return</span> <span class="n">geom</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
 
-<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;udf_buffer&quot;</span><span class="p">,</span> <span class="n">bufferIt</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">())</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"udf_buffer"</span><span class="p">,</span> <span class="n">bufferIt</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">())</span>
 
-<span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">&quot;udf_buffer(geom, distance)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">df</span><span class="o">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s2">"udf_buffer(geom, distance)"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
 </div>
@@ -7530,8 +7529,8 @@ only showing top 5 rows
 <span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">spark</span><span class="p">.</span><span class="nn">sql</span><span class="p">.</span><span class="nn">api</span><span class="p">.</span><span class="nn">java</span><span class="p">.</span><span class="nc">UDF2</span>
 
 <span class="kd">val</span><span class="w"> </span><span class="n">schemaUDF</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">StructType</span><span class="p">(</span><span class="nc">Array</span><span class="p">(</span>
-<span class="w">    </span><span class="nc">StructField</span><span class="p">(</span><span class="s">&quot;buffed&quot;</span><span class="p">,</span><span class="w"> </span><span class="nc">GeometryUDT</span><span class="p">),</span>
-<span class="w">    </span><span class="nc">StructField</span><span class="p">(</span><span class="s">&quot;length&quot;</span><span class="p">,</span><span class="w"> </span><span class="nc">DoubleType</span><span class="p">)</span>
+<span class="w">    </span><span class="nc">StructField</span><span class="p">(</span><span class="s">"buffed"</span><span class="p">,</span><span class="w"> </span><span class="nc">GeometryUDT</span><span class="p">),</span>
+<span class="w">    </span><span class="nc">StructField</span><span class="p">(</span><span class="s">"length"</span><span class="p">,</span><span class="w"> </span><span class="nc">DoubleType</span><span class="p">)</span>
 <span class="p">))</span>
 
 <span class="kd">val</span><span class="w"> </span><span class="n">udf_bufferLength</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">udf</span><span class="p">(</span>
@@ -7543,10 +7542,10 @@ only showing top 5 rows
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="n">schemaUDF</span><span class="p">)</span>
 
-<span class="n">sedona</span><span class="p">.</span><span class="n">udf</span><span class="p">.</span><span class="n">register</span><span class="p">(</span><span class="s">&quot;udf_bufferLength&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">udf_bufferLength</span><span class="p">)</span>
+<span class="n">sedona</span><span class="p">.</span><span class="n">udf</span><span class="p">.</span><span class="n">register</span><span class="p">(</span><span class="s">"udf_bufferLength"</span><span class="p">,</span><span class="w"> </span><span class="n">udf_bufferLength</span><span class="p">)</span>
 
-<span class="n">data</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;bufferLength&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;udf_bufferLengths(geom, distance)&quot;</span><span class="p">))</span>
-<span class="w">    </span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="s">&quot;geom&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;distance&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bufferLength.*&quot;</span><span class="p">)</span>
+<span class="n">data</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">"bufferLength"</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"udf_bufferLengths(geom, distance)"</span><span class="p">))</span>
+<span class="w">    </span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="s">"geom"</span><span class="p">,</span><span class="w"> </span><span class="s">"distance"</span><span class="p">,</span><span class="w"> </span><span class="s">"bufferLength.*"</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
@@ -7557,11 +7556,11 @@ only showing top 5 rows
 <span class="kn">import</span><span class="w"> </span><span class="nn">scala.Tuple2</span><span class="p">;</span>
 
 <span class="n">StructType</span><span class="w"> </span><span class="n">schemaUDF</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">StructType</span><span class="p">()</span>
-<span class="w">            </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;buffedGeom&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">GeometryUDT</span><span class="p">())</span>
-<span class="w">            </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;length&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">DataTypes</span><span class="p">.</span><span class="na">DoubleType</span><span class="p">);</span>
+<span class="w">            </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"buffedGeom"</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">GeometryUDT</span><span class="p">())</span>
+<span class="w">            </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"length"</span><span class="p">,</span><span class="w"> </span><span class="n">DataTypes</span><span class="p">.</span><span class="na">DoubleType</span><span class="p">);</span>
 
 <span class="c1">// 使用 lambda 注册 UDF</span>
-<span class="n">sparkSession</span><span class="p">.</span><span class="na">udf</span><span class="p">().</span><span class="na">register</span><span class="p">(</span><span class="s">&quot;udf_bufferLength&quot;</span><span class="p">,</span>
+<span class="n">sparkSession</span><span class="p">.</span><span class="na">udf</span><span class="p">().</span><span class="na">register</span><span class="p">(</span><span class="s">"udf_bufferLength"</span><span class="p">,</span>
 <span class="w">            </span><span class="p">(</span><span class="n">UDF2</span><span class="o">&lt;</span><span class="n">Geometry</span><span class="p">,</span><span class="w"> </span><span class="n">Double</span><span class="p">,</span><span class="w"> </span><span class="n">Tuple2</span><span class="o">&lt;</span><span class="n">Geometry</span><span class="p">,</span><span class="w"> </span><span class="n">Double</span><span class="o">&gt;&gt;</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="n">distance</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">                </span><span class="n">Geometry</span><span class="w"> </span><span class="n">buffed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">geom</span><span class="p">.</span><span class="na">buffer</span><span class="p">(</span><span class="n">distance</span><span class="p">);</span>
 <span class="w">                </span><span class="n">Double</span><span class="w"> </span><span class="n">length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">buffed</span><span class="p">.</span><span class="na">getLength</span><span class="p">();</span>
@@ -7569,8 +7568,8 @@ only showing top 5 rows
 <span class="w">            </span><span class="p">},</span>
 <span class="w">            </span><span class="n">schemaUDF</span><span class="p">);</span>
 
-<span class="n">df</span><span class="p">.</span><span class="na">withColumn</span><span class="p">(</span><span class="s">&quot;bufferLength&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">functions</span><span class="p">.</span><span class="na">expr</span><span class="p">(</span><span class="s">&quot;udf_bufferLength(geom, distance)&quot;</span><span class="p">))</span>
-<span class="w">            </span><span class="p">.</span><span class="na">select</span><span class="p">(</span><span class="s">&quot;geom&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;distance&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bufferLength.*&quot;</span><span class="p">)</span>
+<span class="n">df</span><span class="p">.</span><span class="na">withColumn</span><span class="p">(</span><span class="s">"bufferLength"</span><span class="p">,</span><span class="w"> </span><span class="n">functions</span><span class="p">.</span><span class="na">expr</span><span class="p">(</span><span class="s">"udf_bufferLength(geom, distance)"</span><span class="p">))</span>
+<span class="w">            </span><span class="p">.</span><span class="na">select</span><span class="p">(</span><span class="s">"geom"</span><span class="p">,</span><span class="w"> </span><span class="s">"distance"</span><span class="p">,</span><span class="w"> </span><span class="s">"bufferLength.*"</span><span class="p">)</span>
 <span class="w">            </span><span class="p">.</span><span class="na">show</span><span class="p">();</span>
 </code></pre></div>
 </div>
@@ -7579,8 +7578,8 @@ only showing top 5 rows
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">schemaUDF</span> <span class="o">=</span> <span class="n">StructType</span><span class="p">([</span>
-    <span class="n">StructField</span><span class="p">(</span><span class="s2">&quot;buffed&quot;</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">()),</span>
-    <span class="n">StructField</span><span class="p">(</span><span class="s2">&quot;length&quot;</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"buffed"</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">()),</span>
+    <span class="n">StructField</span><span class="p">(</span><span class="s2">"length"</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
 <span class="p">])</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">bufferAndLength</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">(),</span> <span class="n">distance</span><span class="p">:</span> <span class="n">DoubleType</span><span class="p">()):</span>
@@ -7588,10 +7587,10 @@ only showing top 5 rows
     <span class="n">length</span> <span class="o">=</span> <span class="n">buffed</span><span class="o">.</span><span class="n">length</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">buffed</span><span class="p">,</span> <span class="n">length</span><span class="p">]</span>
 
-<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;udf_bufferLength&quot;</span><span class="p">,</span> <span class="n">bufferAndLength</span><span class="p">,</span> <span class="n">schemaUDF</span><span class="p">)</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"udf_bufferLength"</span><span class="p">,</span> <span class="n">bufferAndLength</span><span class="p">,</span> <span class="n">schemaUDF</span><span class="p">)</span>
 
-<span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;bufferLength&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;udf_bufferLength(geom, buffer)&quot;</span><span class="p">))</span> \
-            <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;geom&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="s2">&quot;bufferLength.*&quot;</span><span class="p">)</span> \
+<span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"bufferLength"</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">"udf_bufferLength(geom, buffer)"</span><span class="p">))</span> \
+            <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"geom"</span><span class="p">,</span> <span class="s2">"buffer"</span><span class="p">,</span> <span class="s2">"bufferLength.*"</span><span class="p">)</span> \
             <span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 </div>
@@ -7645,10 +7644,10 @@ only showing top 5 rows
 </code></pre></div>
 <p>调用 UDF 的方式如下：</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Shapely 标量 UDF</span>
-<span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;buffered&quot;</span><span class="p">,</span> <span class="n">vectorized_buffer</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geom</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"buffered"</span><span class="p">,</span> <span class="n">vectorized_buffer</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geom</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
 <span class="c1"># GeoSeries UDF</span>
-<span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;buffered&quot;</span><span class="p">,</span> <span class="n">vectorized_geo_series_buffer</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geom</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"buffered"</span><span class="p">,</span> <span class="n">vectorized_geo_series_buffer</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">geom</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="_9">保存到永久存储<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
 <p>要把空间 DataFrame 保存到 Hive 表、HDFS 等永久存储，最简单的做法是把 Geometry 列里的每个几何对象转换回普通字符串，再把得到的 DataFrame 保存到任意位置。</p>
@@ -7658,12 +7657,12 @@ only showing top 5 rows
 </code></pre></div>
 <h2 id="geojson_1">保存为 GeoJSON<a class="headerlink" href="#geojson_1" title="Permanent link">&para;</a></h2>
 <p>自 <code>v1.6.1</code> 起，Sedona 中的 GeoJSON 数据源可把空间 DataFrame 保存为单行 JSON 文件，几何对象按 GeoJSON 格式写出：</p>
-<div class="highlight"><pre><span></span><code>df.write.format(&quot;geojson&quot;).save(&quot;YOUR/PATH.json&quot;)
+<div class="highlight"><pre><span></span><code>df.write.format("geojson").save("YOUR/PATH.json")
 </code></pre></div>
 <p>写出 GeoJSON 的更多信息请参阅 <a href="../files/geojson-sedona-spark/">此页</a>。</p>
 <h2 id="geoparquet_1">保存为 GeoParquet<a class="headerlink" href="#geoparquet_1" title="Permanent link">&para;</a></h2>
 <p>自 v<code>1.3.0</code> 起，Sedona 原生支持写出 GeoParquet 文件：</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">).</span><span class="n">save</span><span class="p">(</span><span class="n">geoparquetoutputlocation</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/GeoParquet_File_Name.parquet&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">).</span><span class="n">save</span><span class="p">(</span><span class="n">geoparquetoutputlocation</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"/GeoParquet_File_Name.parquet"</span><span class="p">)</span>
 </code></pre></div>
 <p>写出 GeoParquet 的更多信息请参阅 <a href="../files/geoparquet-sedona-spark/">此页</a>。</p>
 <h2 id="postgis">保存到 Postgis<a class="headerlink" href="#postgis" title="Permanent link">&para;</a></h2>
@@ -7671,9 +7670,9 @@ only showing top 5 rows
 <p>PostGIS 使用 EWKB 序列化几何对象。如果您在 Sedona 中把几何对象转换为 EWKB 格式，PostGIS 端就无需再做额外转换。</p>
 <div class="highlight"><pre><span></span><code>my_postgis_db# create table my_table (id int8, geom geometry);
 
-df.withColumn(&quot;geom&quot;, expr(&quot;ST_AsEWKB(geom)&quot;)
-    .write.format(&quot;jdbc&quot;)
-    .option(&quot;truncate&quot;,&quot;true&quot;) // 不让 Spark 重建表
+df.withColumn("geom", expr("ST_AsEWKB(geom)")
+    .write.format("jdbc")
+    .option("truncate","true") // 不让 Spark 重建表
     // 其他选项
     .save()
 
@@ -7686,17 +7685,17 @@ my_postgis_db# alter table my_table alter column geom type geometry;
 <div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Scala</label><label for="__tabbed_19_2">Java</label><label for="__tabbed_19_3">Python</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">spatialRDD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">StructuredAdapter</span><span class="p">.</span><span class="n">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;usacounty&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">spatialRDD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">StructuredAdapter</span><span class="p">.</span><span class="n">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span><span class="w"> </span><span class="s">"usacounty"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">SpatialRDD</span><span class="w"> </span><span class="n">spatialRDD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StructuredAdapter</span><span class="p">.</span><span class="na">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;usacounty&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">SpatialRDD</span><span class="w"> </span><span class="n">spatialRDD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">StructuredAdapter</span><span class="p">.</span><span class="na">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span><span class="w"> </span><span class="s">"usacounty"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructuredAdapter</span>
 
-<span class="n">spatialRDD</span> <span class="o">=</span> <span class="n">StructuredAdapter</span><span class="o">.</span><span class="n">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span> <span class="s2">&quot;usacounty&quot;</span><span class="p">)</span>
+<span class="n">spatialRDD</span> <span class="o">=</span> <span class="n">StructuredAdapter</span><span class="o">.</span><span class="n">toSpatialRdd</span><span class="p">(</span><span class="n">spatialDf</span><span class="p">,</span> <span class="s2">"usacounty"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 </div>

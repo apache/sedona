@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.enums.index_type &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -234,15 +233,15 @@
 
 
 <div class="viewcode-block" id="IndexType"><a class="viewcode-back" href="../../../../../sedona.spark.core.enums.html#sedona.spark.core.enums.index_type.IndexType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">IndexType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-    <span class="n">QUADTREE</span> <span class="o">=</span> <span class="s2">&quot;QUADTREE&quot;</span>
-    <span class="n">RTREE</span> <span class="o">=</span> <span class="s2">&quot;RTREE&quot;</span>
+    <span class="n">QUADTREE</span> <span class="o">=</span> <span class="s2">"QUADTREE"</span>
+    <span class="n">RTREE</span> <span class="o">=</span> <span class="s2">"RTREE"</span>
 
 <div class="viewcode-block" id="IndexType.from_string"><a class="viewcode-back" href="../../../../../sedona.spark.core.enums.html#sedona.spark.core.enums.index_type.IndexType.from_string">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">index_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Can not found </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Can not found </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">index_type</span></div></div>
 
 
@@ -258,7 +257,7 @@
         <span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;FileDataSplitter&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"FileDataSplitter"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">jvm_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jvm</span><span class="o">.</span><span class="n">IndexType</span><span class="o">.</span><span class="n">getIndexType</span></div>
 </pre></div>

@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5578,7 +5577,7 @@
 </code></pre></div>
 <p>Return type: <code>String</code></p>
 <p>SQL Example for valid geometry:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_IsValidReason</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON ((100 100, 100 300, 300 300, 300 100, 100 100))&#39;</span><span class="p">))</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">validity_info</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_IsValidReason</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'POLYGON ((100 100, 100 300, 300 300, 300 100, 100 100))'</span><span class="p">))</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">validity_info</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>Valid Geometry

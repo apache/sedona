@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5579,7 +5578,7 @@ a <code>LineString</code>. Empty inputs preserve their input type. Polygon holes
 If the spherical convex hull is the full sphere, the function throws an
 <code>UnsupportedOperationException</code> because the full sphere cannot be represented by OGC WKB.</p>
 <p>SQL Example</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ConvexHull</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))&#39;</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_ConvexHull</span><span class="p">(</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON((175 150, 20 40, 50 60, 125 100, 175 150))'</span><span class="p">))</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>POLYGON ((20 40, 175 150, 125 100, 20 40))
@@ -5588,7 +5587,7 @@ If the spherical convex hull is the full sphere, the function throws an
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeometryType</span><span class="p">(</span>
 <span class="w">    </span><span class="n">ST_ConvexHull</span><span class="p">(</span>
 <span class="w">        </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span>
-<span class="w">            </span><span class="s1">&#39;MULTIPOINT ((170 -10), (170 10), (-170 10), (-170 -10))&#39;</span><span class="p">,</span>
+<span class="w">            </span><span class="s1">'MULTIPOINT ((170 -10), (170 10), (-170 10), (-170 -10))'</span><span class="p">,</span>
 <span class="w">            </span><span class="mi">4326</span>
 <span class="w">        </span><span class="p">)</span>
 <span class="w">    </span><span class="p">)</span>

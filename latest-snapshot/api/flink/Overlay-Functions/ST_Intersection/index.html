@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5581,8 +5580,8 @@
 </div>
 <p>Geometry example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Intersection</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="ss">&quot;POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))&quot;</span><span class="p">),</span>
-<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="ss">&quot;POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="ss">"POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))"</span><span class="p">),</span>
+<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="ss">"POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))"</span><span class="p">)</span>
 <span class="w">    </span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
@@ -5592,8 +5591,8 @@
 <p>The Geography result is two-dimensional and copies the first input's SRID without transforming either input or validating that their SRIDs match. An explicitly empty operand produces <code>GEOMETRYCOLLECTION EMPTY</code>. A disjoint result from two non-empty inputs preserves the lower input dimension.</p>
 <p>Geography example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_Intersection</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (0 -5, 0 5)&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
-<span class="w">    </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (-5 0, 5 0)&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">)</span>
+<span class="w">    </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING (0 -5, 0 5)'</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
+<span class="w">    </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING (-5 0, 5 0)'</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">)</span>
 <span class="p">));</span>
 </code></pre></div>
 <p>Output:</p>

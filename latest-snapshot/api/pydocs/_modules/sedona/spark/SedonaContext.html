@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.SedonaContext &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -243,32 +242,32 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">SedonaContext</span><span class="p">:</span>
 <div class="viewcode-block" id="SedonaContext.create"><a class="viewcode-back" href="../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.create">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spark</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SparkSession</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        This is the core of whole package, It uses py4j to run wrapper which takes existing SparkSession</span>
 <span class="sd">        and register the core logics of Apache Sedona, for this SparkSession.</span>
 
 <span class="sd">        :param spark: pyspark.sql.SparkSession, spark session instance</span>
 <span class="sd">        :return: SedonaContext which is an instance of SparkSession</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT 1 as geom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="sd">        """</span>
+        <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT 1 as geom"</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 
         <span class="c1"># with Spark Connect there is no local JVM</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_remote</span><span class="p">():</span>
             <span class="n">PackageImporter</span><span class="o">.</span><span class="n">import_jvm_lib</span><span class="p">(</span><span class="n">spark</span><span class="o">.</span><span class="n">_jvm</span><span class="p">)</span>
-            <span class="n">spark</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">spark</span><span class="o">.</span><span class="n">_jsparkSession</span><span class="p">,</span> <span class="s2">&quot;python&quot;</span><span class="p">)</span>
+            <span class="n">spark</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">spark</span><span class="o">.</span><span class="n">_jsparkSession</span><span class="p">,</span> <span class="s2">"python"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">spark</span></div>
 
 <div class="viewcode-block" id="SedonaContext.builder"><a class="viewcode-back" href="../../../sedona.spark.html#sedona.spark.SedonaContext.SedonaContext.builder">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">builder</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        This method adds the basic Sedona configuration to the SparkSession builder.</span>
 <span class="sd">        Usually the user does not need to call this method directly, as it is configured when a cluster is created.</span>
 <span class="sd">        This method is needed when the user wants to manually configure Sedona</span>
 <span class="sd">        :return: SparkSession.builder</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">config</span><span class="p">(</span>
-            <span class="s2">&quot;spark.serializer&quot;</span><span class="p">,</span> <span class="n">KryoSerializer</span><span class="o">.</span><span class="n">getName</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.kryo.registrator&quot;</span><span class="p">,</span> <span class="n">SedonaKryoRegistrator</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span></div></div>
+            <span class="s2">"spark.serializer"</span><span class="p">,</span> <span class="n">KryoSerializer</span><span class="o">.</span><span class="n">getName</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.kryo.registrator"</span><span class="p">,</span> <span class="n">SedonaKryoRegistrator</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

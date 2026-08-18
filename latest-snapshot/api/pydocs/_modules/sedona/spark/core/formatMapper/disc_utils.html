@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.formatMapper.disc_utils &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -253,7 +252,7 @@
 <div class="viewcode-block" id="PolygonRDDDiscLoader"><a class="viewcode-back" href="../../../../../sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.PolygonRDDDiscLoader">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PolygonRDDDiscLoader</span><span class="p">(</span><span class="n">DiscLoader</span><span class="p">):</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;SpatialObjectLoaderAdapter&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"SpatialObjectLoaderAdapter"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sc</span><span class="p">:</span> <span class="n">SparkContext</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpatialRDD</span><span class="p">:</span>
         <span class="n">jvm</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">_jvm</span>
         <span class="n">polygon_rdd</span> <span class="o">=</span> <span class="n">PolygonRDD</span><span class="p">()</span>
@@ -265,7 +264,7 @@
 <div class="viewcode-block" id="PointRDDDiscLoader"><a class="viewcode-back" href="../../../../../sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.PointRDDDiscLoader">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PointRDDDiscLoader</span><span class="p">(</span><span class="n">DiscLoader</span><span class="p">):</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;SpatialObjectLoaderAdapter&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"SpatialObjectLoaderAdapter"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sc</span><span class="p">:</span> <span class="n">SparkContext</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpatialRDD</span><span class="p">:</span>
         <span class="n">jvm</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">_jvm</span>
         <span class="n">point_rdd</span> <span class="o">=</span> <span class="n">PointRDD</span><span class="p">()</span>
@@ -277,7 +276,7 @@
 <div class="viewcode-block" id="LineStringRDDDiscLoader"><a class="viewcode-back" href="../../../../../sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.LineStringRDDDiscLoader">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">LineStringRDDDiscLoader</span><span class="p">(</span><span class="n">DiscLoader</span><span class="p">):</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;SpatialObjectLoaderAdapter&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"SpatialObjectLoaderAdapter"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sc</span><span class="p">:</span> <span class="n">SparkContext</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpatialRDD</span><span class="p">:</span>
         <span class="n">jvm</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">_jvm</span>
         <span class="n">line_string_rdd</span> <span class="o">=</span> <span class="n">LineStringRDD</span><span class="p">()</span>
@@ -291,7 +290,7 @@
 <div class="viewcode-block" id="SpatialRDDDiscLoader"><a class="viewcode-back" href="../../../../../sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.SpatialRDDDiscLoader">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SpatialRDDDiscLoader</span><span class="p">(</span><span class="n">DiscLoader</span><span class="p">):</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;SpatialObjectLoaderAdapter&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"SpatialObjectLoaderAdapter"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sc</span><span class="p">:</span> <span class="n">SparkContext</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpatialRDD</span><span class="p">:</span>
         <span class="n">jvm</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">_jvm</span>
         <span class="n">spatial_rdd</span> <span class="o">=</span> <span class="n">SpatialRDD</span><span class="p">()</span>
@@ -301,10 +300,10 @@
 
 
 <div class="viewcode-block" id="GeoType"><a class="viewcode-back" href="../../../../../sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.GeoType">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GeoType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-    <span class="n">POINT</span> <span class="o">=</span> <span class="s2">&quot;POINT&quot;</span>
-    <span class="n">POLYGON</span> <span class="o">=</span> <span class="s2">&quot;POLYGON&quot;</span>
-    <span class="n">LINESTRING</span> <span class="o">=</span> <span class="s2">&quot;LINESTRING&quot;</span>
-    <span class="n">GEOMETRY</span> <span class="o">=</span> <span class="s2">&quot;GEOMETRY&quot;</span></div>
+    <span class="n">POINT</span> <span class="o">=</span> <span class="s2">"POINT"</span>
+    <span class="n">POLYGON</span> <span class="o">=</span> <span class="s2">"POLYGON"</span>
+    <span class="n">LINESTRING</span> <span class="o">=</span> <span class="s2">"LINESTRING"</span>
+    <span class="n">GEOMETRY</span> <span class="o">=</span> <span class="s2">"GEOMETRY"</span></div>
 
 
 <span class="n">loaders</span> <span class="o">=</span> <span class="p">{</span>
@@ -316,13 +315,13 @@
 
 
 <div class="viewcode-block" id="load_spatial_rdd_from_disc"><a class="viewcode-back" href="../../../../../sedona.spark.core.formatMapper.html#sedona.spark.core.formatMapper.disc_utils.load_spatial_rdd_from_disc">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">load_spatial_rdd_from_disc</span><span class="p">(</span><span class="n">sc</span><span class="p">:</span> <span class="n">SparkContext</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">geometry_type</span><span class="p">:</span> <span class="n">GeoType</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 
 <span class="sd">    :param sc:</span>
 <span class="sd">    :param path:</span>
 <span class="sd">    :param geometry_type:</span>
 <span class="sd">    :return:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">loaders</span><span class="p">[</span><span class="n">geometry_type</span><span class="p">]</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
 
 

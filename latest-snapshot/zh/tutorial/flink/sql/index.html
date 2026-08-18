@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6152,7 +6151,7 @@
 
 <p>本页介绍如何使用 SedonaSQL 管理空间数据。<mark>示例代码以 Java 编写，但同样适用于 Scala</mark>。</p>
 <p>SedonaSQL 支持 SQL/MM Part3 空间 SQL 标准，提供四类 SQL 算子（如下文所示），所有算子都可以直接通过以下方式调用：</p>
-<div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">myTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tableEnv</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">&quot;YOUR_SQL&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">myTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tableEnv</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">"YOUR_SQL"</span><span class="p">)</span>
 </code></pre></div>
 <p>SedonaSQL 详细的 API 说明请参阅 <a href="../../../api/flink/Overview/">SedonaSQL API</a>。</p>
 <h2 id="_1">配置依赖<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
@@ -6203,8 +6202,8 @@
 10 rows in set
 </code></pre></div>
 <p>可以这样创建一张带有 Geometry 类型列的 Table：</p>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="p">.</span><span class="na">createTemporaryView</span><span class="p">(</span><span class="s">&quot;myTable&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">tbl</span><span class="p">)</span>
-<span class="n">Table</span><span class="w"> </span><span class="n">geomTbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">&quot;SELECT ST_GeomFromWKT(geom_polygon) as geom_polygon, name_polygon FROM myTable&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="p">.</span><span class="na">createTemporaryView</span><span class="p">(</span><span class="s">"myTable"</span><span class="p">,</span><span class="w"> </span><span class="n">tbl</span><span class="p">)</span>
+<span class="n">Table</span><span class="w"> </span><span class="n">geomTbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">"SELECT ST_GeomFromWKT(geom_polygon) as geom_polygon, name_polygon FROM myTable"</span><span class="p">)</span>
 <span class="n">geomTbl</span><span class="p">.</span><span class="na">execute</span><span class="p">().</span><span class="na">print</span><span class="p">()</span>
 </code></pre></div>
 <p>输出如下：</p>
@@ -6230,7 +6229,7 @@
 </code></pre></div>
 <p>输出：</p>
 <div class="highlight"><pre><span></span><code>(
-  `geom_polygon` RAW(&#39;org.locationtech.jts.geom.Geometry&#39;, &#39;...&#39;),
+  `geom_polygon` RAW('org.locationtech.jts.geom.Geometry', '...'),
   `name_polygon` STRING
 )
 </code></pre></div>
@@ -6241,7 +6240,7 @@
 <h2 id="_2">转换坐标参考系<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p>Sedona 不会自动管理一列 Geometry 中所有几何对象的坐标单位（基于度还是基于米）。SedonaSQL 中所有相关距离的单位与 Geometry 列中几何对象的单位保持一致。</p>
 <p>如需对前面创建的 Geometry 列进行 CRS 转换，可使用以下代码：</p>
-<div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">geomTbl3857</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">&quot;SELECT ST_Transform(countyshape, &quot;</span><span class="n">epsg</span><span class="p">:</span><span class="mi">4326</span><span class="s">&quot;, &quot;</span><span class="n">epsg</span><span class="p">:</span><span class="mi">3857</span><span class="s">&quot;) AS geom_polygon, name_polygon FROM myTable&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">geomTbl3857</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">"SELECT ST_Transform(countyshape, "</span><span class="n">epsg</span><span class="p">:</span><span class="mi">4326</span><span class="s">", "</span><span class="n">epsg</span><span class="p">:</span><span class="mi">3857</span><span class="s">") AS geom_polygon, name_polygon FROM myTable"</span><span class="p">)</span>
 <span class="n">geomTbl3857</span><span class="p">.</span><span class="na">execute</span><span class="p">().</span><span class="na">print</span><span class="p">()</span>
 </code></pre></div>
 <p><code>ST_Transform</code> 第一个 EPSG 代码 EPSG:4326 是源 CRS——也就是最常见的基于度的 CRS（WGS84）。</p>
@@ -6289,11 +6288,11 @@
 <p>使用 <mark>ST_Contains</mark>、<mark>ST_Intersects</mark> 等谓词可以在单列上执行范围查询。</p>
 <p>下例查找位于给定多边形内的所有 county：</p>
 <div class="highlight"><pre><span></span><code><span class="n">geomTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span>
-<span class="w">  </span><span class="s">&quot;</span>
+<span class="w">  </span><span class="s">"</span>
 <span class="s">    SELECT *</span>
 <span class="s">    FROM spatialdf</span>
 <span class="s">    WHERE ST_Contains (ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), newcountyshape)</span>
-<span class="s">  &quot;</span><span class="p">)</span>
+<span class="s">  "</span><span class="p">)</span>
 <span class="n">geomTable</span><span class="p">.</span><span class="na">execute</span><span class="p">().</span><span class="na">print</span><span class="p">()</span>
 </code></pre></div>
 <div class="admonition note">
@@ -6304,12 +6303,12 @@
 <p>使用 <mark>ST_Distance</mark> 计算距离并排序。</p>
 <p>下面的代码返回距离给定多边形最近的 5 个对象：</p>
 <div class="highlight"><pre><span></span><code><span class="n">geomTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span>
-<span class="w">  </span><span class="s">&quot;</span>
+<span class="w">  </span><span class="s">"</span>
 <span class="s">    SELECT countyname, ST_Distance(ST_PolygonFromEnvelope(1.0,100.0,1000.0,1100.0), newcountyshape) AS distance</span>
 <span class="s">    FROM geomTable</span>
 <span class="s">    ORDER BY distance DESC</span>
 <span class="s">    LIMIT 5</span>
-<span class="s">  &quot;</span><span class="p">)</span>
+<span class="s">  "</span><span class="p">)</span>
 <span class="n">geomTable</span><span class="p">.</span><span class="na">execute</span><span class="p">().</span><span class="na">print</span><span class="p">()</span>
 </code></pre></div>
 <h2 id="_4">连接查询<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
@@ -6464,7 +6463,7 @@ FROM rights CROSS JOIN UNNEST(rights.idarray) AS tmpTbl2(cellId)
 <span class="w">            </span><span class="nd">@Override</span>
 <span class="w">            </span><span class="kd">public</span><span class="w"> </span><span class="n">Geometry</span><span class="w"> </span><span class="nf">map</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span>
 <span class="w">            </span><span class="p">{</span>
-<span class="w">                </span><span class="n">FormatUtils</span><span class="o">&lt;</span><span class="n">Geometry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">formatUtils</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FormatUtils</span><span class="p">(</span><span class="s">&quot;,&quot;</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">GeometryType</span><span class="p">.</span><span class="na">POINT</span><span class="p">);</span>
+<span class="w">                </span><span class="n">FormatUtils</span><span class="o">&lt;</span><span class="n">Geometry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">formatUtils</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FormatUtils</span><span class="p">(</span><span class="s">","</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">GeometryType</span><span class="p">.</span><span class="na">POINT</span><span class="p">);</span>
 <span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">formatUtils</span><span class="p">.</span><span class="na">readGeometry</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">        </span><span class="p">})</span>
@@ -6504,13 +6503,13 @@ FROM rights CROSS JOIN UNNEST(rights.idarray) AS tmpTbl2(cellId)
 <span class="w">            </span><span class="kd">public</span><span class="w"> </span><span class="n">Row</span><span class="w"> </span><span class="nf">map</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span>
 <span class="w">            </span><span class="p">{</span>
 <span class="w">                </span><span class="n">FormatUtils</span><span class="w"> </span><span class="n">formatUtils</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FormatUtils</span><span class="p">(</span><span class="n">FileDataSplitter</span><span class="p">.</span><span class="na">WKT</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span>
-<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">Row</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">formatUtils</span><span class="p">.</span><span class="na">readGeometry</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;myName&quot;</span><span class="p">);</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">Row</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">formatUtils</span><span class="p">.</span><span class="na">readGeometry</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="w"> </span><span class="s">"myName"</span><span class="p">);</span>
 <span class="w">            </span><span class="p">}</span>
 <span class="w">        </span><span class="p">})</span>
 </code></pre></div>
 <h3 id="table">得到空间 Table<a class="headerlink" href="#table" title="Permanent link">&para;</a></h3>
 <p>使用 TableEnv 的 <code>fromDataStream</code> 函数，并指定列名 <code>geom</code> 与 <code>geom_name</code>：</p>
-<div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">geomTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">fromDataStream</span><span class="p">(</span><span class="n">geomStream</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;geom&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;geom_name&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Table</span><span class="w"> </span><span class="n">geomTable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">fromDataStream</span><span class="p">(</span><span class="n">geomStream</span><span class="p">,</span><span class="w"> </span><span class="s">"geom"</span><span class="p">,</span><span class="w"> </span><span class="s">"geom_name"</span><span class="p">)</span>
 </code></pre></div>
 
 

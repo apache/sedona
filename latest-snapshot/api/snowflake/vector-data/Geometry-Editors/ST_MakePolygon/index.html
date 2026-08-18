@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5573,8 +5572,8 @@
 <p>Query:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span>
 <span class="w">    </span><span class="n">ST_MakePolygon</span><span class="p">(</span>
-<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;LINESTRING(0 0, 10 0, 10 10, 0 10, 0 0)&#39;</span><span class="p">),</span>
-<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;MultiLINESTRING((2 2, 4 2, 4 4, 2 4, 2 2))&#39;</span><span class="p">)</span>
+<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'LINESTRING(0 0, 10 0, 10 10, 0 10, 0 0)'</span><span class="p">),</span>
+<span class="w">        </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'MultiLINESTRING((2 2, 4 2, 4 4, 2 4, 2 2))'</span><span class="p">)</span>
 <span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">polygon</span>
 </code></pre></div>
 <p>Result:</p>

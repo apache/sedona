@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5705,11 +5704,11 @@
 </div>
 <p>You can use Apache Zeppelin to plot a small number of spatial objects, such as 1000 points. Assume you already have a Spatial DataFrame, you need to convert the geometry column to WKT string column use the following command in your Zeppelin Spark notebook Scala paragraph:</p>
 <div class="highlight"><pre><span></span><code><span class="n">spark</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span>
-<span class="w">  </span><span class="s">&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="s">"""</span>
 <span class="s">    |CREATE OR REPLACE TEMP VIEW wktpoint AS</span>
 <span class="s">    |SELECT ST_AsText(shape) as geom</span>
 <span class="s">    |FROM pointtable</span>
-<span class="s">  &quot;&quot;&quot;</span><span class="p">.</span><span class="n">stripMargin</span><span class="p">)</span>
+<span class="s">  """</span><span class="p">.</span><span class="n">stripMargin</span><span class="p">)</span>
 </code></pre></div>
 <p>Then create an SQL paragraph to fetch the data</p>
 <div class="highlight"><pre><span></span><code><span class="o">%</span><span class="k">sql</span>
@@ -5723,15 +5722,15 @@
 <p>You can use Sedona-Zeppelin to ask Zeppelin to overlay SedonaViz images on a map background. This way, you can easily visualize 1 billion spatial objects or more (depends on your cluster size).</p>
 <p>First, encode images of SedonaViz DataFrame in Zeppelin Spark notebook Scala paragraph,</p>
 <div class="highlight"><pre><span></span><code>spark.sql(
-  &quot;&quot;&quot;
+  """
     |CREATE OR REPLACE TEMP VIEW images AS
     |SELECT ST_EncodeImage(image) AS image, (SELECT ST_AsText(bound) FROM boundtable) AS boundary
     |FROM images
-  &quot;&quot;&quot;.stripMargin)
+  """.stripMargin)
 </code></pre></div>
 <p>Then create an SQL paragraph to fetch the data</p>
 <div class="highlight"><pre><span></span><code><span class="o">%</span><span class="k">sql</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;I am the map center!&#39;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="s1">'I am the map center!'</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">images</span>
 </code></pre></div>
 <p>Select the image and its geospatial boundary:</p>

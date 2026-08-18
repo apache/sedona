@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5976,7 +5975,7 @@
 <p>The initial release of SedonaDB provides a comprehensive suite of geometric vector operations and seamlessly integrates with GeoArrow, GeoParquet, and GeoPandas. Future versions will support all popular spatial functions, including functions for raster data.</p>
 <h2 id="sedonadb-quickstart-example">🚀 SedonaDB quickstart example<a class="headerlink" href="#sedonadb-quickstart-example" title="Permanent link">&para;</a></h2>
 <p>Start by installing SedonaDB:</p>
-<div class="highlight"><pre><span></span><code>pip install &quot;apache-sedona[db]&quot;
+<div class="highlight"><pre><span></span><code>pip install "apache-sedona[db]"
 </code></pre></div>
 <p>Now instantiate the connection:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">sedona.db</span>
@@ -6010,7 +6009,7 @@
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 </code></pre></div>
 <p>Here’s how to perform a spatial join to compute the country of each city:</p>
-<div class="highlight"><pre><span></span><code><span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">select</span>
 <span class="s2">    cities.name as city_name,</span>
 <span class="s2">    countries.name as country_name,</span>
@@ -6018,7 +6017,7 @@
 <span class="s2">from cities</span>
 <span class="s2">join countries</span>
 <span class="s2">where ST_Intersects(cities.geometry, countries.geometry)</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </code></pre></div>
 <p>The code utilizes <code>ST_Intersects</code> to determine if a city is contained within a given country.</p>
 <p>Here's the result of the query:</p>
@@ -6061,27 +6060,27 @@
 └───────────────┴──────────┴─────────────────────┘
 </code></pre></div>
 <p>Here’s the equivalent GeoPandas code:</p>
-<div class="highlight"><pre><span></span><code><span class="n">trips_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">data_paths</span><span class="p">[</span><span class="s2">&quot;trip&quot;</span><span class="p">])</span>
-<span class="n">trips_df</span><span class="p">[</span><span class="s2">&quot;pickup_geom&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="o">.</span><span class="n">from_wkb</span><span class="p">(</span>
-    <span class="n">trips_df</span><span class="p">[</span><span class="s2">&quot;t_pickuploc&quot;</span><span class="p">],</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">trips_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">data_paths</span><span class="p">[</span><span class="s2">"trip"</span><span class="p">])</span>
+<span class="n">trips_df</span><span class="p">[</span><span class="s2">"pickup_geom"</span><span class="p">]</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="o">.</span><span class="n">from_wkb</span><span class="p">(</span>
+    <span class="n">trips_df</span><span class="p">[</span><span class="s2">"t_pickuploc"</span><span class="p">],</span> <span class="n">crs</span><span class="o">=</span><span class="s2">"EPSG:4326"</span>
 <span class="p">)</span>
-<span class="n">pickups_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">trips_df</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">&quot;pickup_geom&quot;</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+<span class="n">pickups_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">trips_df</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">"pickup_geom"</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="s2">"EPSG:4326"</span><span class="p">)</span>
 
-<span class="n">buildings_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">data_paths</span><span class="p">[</span><span class="s2">&quot;building&quot;</span><span class="p">])</span>
-<span class="n">buildings_df</span><span class="p">[</span><span class="s2">&quot;boundary_geom&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="o">.</span><span class="n">from_wkb</span><span class="p">(</span>
-    <span class="n">buildings_df</span><span class="p">[</span><span class="s2">&quot;b_boundary&quot;</span><span class="p">],</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span>
+<span class="n">buildings_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">data_paths</span><span class="p">[</span><span class="s2">"building"</span><span class="p">])</span>
+<span class="n">buildings_df</span><span class="p">[</span><span class="s2">"boundary_geom"</span><span class="p">]</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="o">.</span><span class="n">from_wkb</span><span class="p">(</span>
+    <span class="n">buildings_df</span><span class="p">[</span><span class="s2">"b_boundary"</span><span class="p">],</span> <span class="n">crs</span><span class="o">=</span><span class="s2">"EPSG:4326"</span>
 <span class="p">)</span>
 <span class="n">buildings_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
-    <span class="n">buildings_df</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">&quot;boundary_geom&quot;</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span>
+    <span class="n">buildings_df</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">"boundary_geom"</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="s2">"EPSG:4326"</span>
 <span class="p">)</span>
 
 <span class="n">threshold</span> <span class="o">=</span> <span class="mf">0.0045</span>  <span class="c1"># degrees (~500m)</span>
 <span class="n">result</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">buildings_gdf</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">pickups_gdf</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;dwithin&quot;</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">threshold</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;b_buildingkey&quot;</span><span class="p">,</span> <span class="s2">&quot;b_name&quot;</span><span class="p">],</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">buildings_gdf</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">pickups_gdf</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">"dwithin"</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">threshold</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">"b_buildingkey"</span><span class="p">,</span> <span class="s2">"b_name"</span><span class="p">],</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="o">.</span><span class="n">size</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="s2">&quot;nearby_pickup_count&quot;</span><span class="p">})</span>
-    <span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s2">&quot;nearby_pickup_count&quot;</span><span class="p">,</span> <span class="s2">&quot;b_buildingkey&quot;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">])</span>
+    <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">"size"</span><span class="p">:</span> <span class="s2">"nearby_pickup_count"</span><span class="p">})</span>
+    <span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s2">"nearby_pickup_count"</span><span class="p">,</span> <span class="s2">"b_buildingkey"</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">])</span>
     <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
@@ -6091,7 +6090,7 @@
 <p>Start by reading in a FlatGeobuf file that uses the EPSG 32618 CRS with GeoPandas and then convert it to a SedonaDB DataFrame:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 
-<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/example-crs/files/example-crs_vermont-utm.fgb&quot;</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/example-crs/files/example-crs_vermont-utm.fgb"</span>
 <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 <span class="n">vermont</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">create_data_frame</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span>
 </code></pre></div>
@@ -6104,7 +6103,7 @@ SedonaSchema with 1 field:
 <p>We can see that the <code>vermont</code> DataFrame maintains the CRS that’s specified in the FlatGeobuf file.  SedonaDB doesn’t have a native FlatGeobuf reader yet, but it’s easy to use the GeoPandas FlatGeobuf reader and then convert it to a SedonaDB DataFrame with a single line of code.</p>
 <p>Now read a GeoParquet file into a SedonaDB DataFrame.</p>
 <div class="highlight"><pre><span></span><code><span class="n">buildings</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span>
-    <span class="s2">&quot;https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/microsoft-buildings_point_geo.parquet&quot;</span>
+    <span class="s2">"https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/microsoft-buildings_point_geo.parquet"</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Check the schema of the DataFrame:</p>
@@ -6114,14 +6113,14 @@ SedonaSchema with 1 field:
   geometry: geometry &lt;ogc:crs84&gt;
 </code></pre></div>
 <p>Let’s expose these two tables as views and run a spatial join to see how many buildings are in Vermont:</p>
-<div class="highlight"><pre><span></span><code><span class="n">buildings</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">&quot;buildings&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">vermont</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">&quot;vermont&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">buildings</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">"buildings"</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">vermont</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">"vermont"</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">select count(*) from buildings</span>
 <span class="s2">join vermont</span>
 <span class="s2">where ST_Intersects(buildings.geometry, vermont.geometry)</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>This command correctly errors out because the tables have different CRSs.  For safety, SedonaDB errors out rather than give you the wrong answer! Here's the error message that's easy to debug:</p>
 <div class="highlight"><pre><span></span><code>SedonaError: type_coercion
@@ -6130,11 +6129,11 @@ Error during planning: Mismatched CRS arguments: ogc:crs84 vs epsg:32618
 Use ST_Transform() or ST_SetSRID() to ensure arguments are compatible.
 </code></pre></div>
 <p>Let’s rewrite the spatial join to convert the <code>vermont</code> CRS to EPSG:4326, so it’s compatible with the <code>buildings</code> CRS.</p>
-<div class="highlight"><pre><span></span><code><span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">select count(*) from buildings</span>
 <span class="s2">join vermont</span>
-<span class="s2">where ST_Intersects(buildings.geometry, ST_Transform(vermont.geometry, &#39;EPSG:4326&#39;))</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="s2">where ST_Intersects(buildings.geometry, ST_Transform(vermont.geometry, 'EPSG:4326'))</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>We now get the correct result!</p>
 <div class="highlight"><pre><span></span><code>┌──────────┐
@@ -6188,10 +6187,10 @@ Use ST_Transform() or ST_SetSRID() to ensure arguments are compatible.
 <p>SedonaSpark is well-suited for large-scale geospatial workloads or environments where Spark is already part of your production stack. For instance, joining a 100 GB vector dataset with a large raster dataset. For smaller datasets, however, Spark's distributed architecture can introduce unnecessary overhead, making it slower to run locally, harder to install, and more difficult to tune.</p>
 <p>SedonaDB is better for smaller datasets and when running computations locally. The SedonaDB spatial functions are compatible with the SedonaSpark functions, so SQL chunks that work for one engine will usually work for the other. Over time, we will ensure that both project APIs are fully interoperable. Here's an example of a chunk to analyze the Overture buildings table that works for both engines.</p>
 <div class="highlight"><pre><span></span><code>nyc_bbox_wkt = (
-    &quot;POLYGON((-74.2591 40.4774, -74.2591 40.9176, -73.7004 40.9176, -73.7004 40.4774, -74.2591 40.4774))&quot;
+    "POLYGON((-74.2591 40.4774, -74.2591 40.9176, -73.7004 40.9176, -73.7004 40.4774, -74.2591 40.4774))"
 )
 
-sd.sql(f&quot;&quot;&quot;
+sd.sql(f"""
 SELECT
     id,
     height,
@@ -6204,7 +6203,7 @@ WHERE
     is_underground = FALSE
     AND height IS NOT NULL
     AND height &gt; 20
-    AND ST_Intersects(geometry, ST_SetSRID(ST_GeomFromText(&#39;{nyc_bbox_wkt}&#39;), 4326))
+    AND ST_Intersects(geometry, ST_SetSRID(ST_GeomFromText('{nyc_bbox_wkt}'), 4326))
 LIMIT 5;
 </code></pre></div>
 <h2 id="next-steps">🚀 Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>

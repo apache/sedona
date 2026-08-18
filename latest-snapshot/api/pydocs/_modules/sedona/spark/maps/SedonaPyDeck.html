@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.maps.SedonaPyDeck &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -256,12 +255,12 @@
         <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">stroked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Create a pydeck map with a choropleth layer added</span>
 
 <span class="sd">        :param df: SedonaDataFrame to plot on the choropleth map.</span>
 <span class="sd">        :param fill_color: color scheme to fill the map with.</span>
-<span class="sd">            If no color scheme is given, a default color scheme is created using the &#39;plot_col&#39; column as the quantizing column</span>
+<span class="sd">            If no color scheme is given, a default color scheme is created using the 'plot_col' column as the quantizing column</span>
 <span class="sd">        :param plot_col: Column to be used to create a default color scheme. If fill_color is provided, this parameter is ignored.</span>
 <span class="sd">        :param initial_view_state: Initial view state for the map</span>
 <span class="sd">        :param map_style: Map style to use</span>
@@ -270,7 +269,7 @@
 <span class="sd">        :param api_keys: Optional dictionary of API keys for Map providers</span>
 <span class="sd">        :param stroked: Whether to stroke the polygons</span>
 <span class="sd">        :return: A pydeck Map object with choropleth layer added</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">plot_col</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">dataType</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
@@ -283,8 +282,8 @@
                 <span class="n">ByteType</span><span class="p">(),</span>
             <span class="p">]:</span>
                 <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; must be of numeric type. </span><span class="se">\n</span><span class="s2">If you are importing data from csv set &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;&#39;inferSchema&#39; option as true&quot;</span>
+                    <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">' must be of numeric type. </span><span class="se">\n</span><span class="s2">If you are importing data from csv set "</span>
+                    <span class="sa">f</span><span class="s2">"'inferSchema' option as true"</span>
                 <span class="p">)</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 
@@ -293,7 +292,7 @@
         <span class="k">if</span> <span class="n">initial_view_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">gdf</span> <span class="o">=</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_prepare_df_</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">add_coords</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">initial_view_state</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">data_utils</span><span class="o">.</span><span class="n">compute_view</span><span class="p">(</span>
-                <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;coordinate_array_sedona&quot;</span><span class="p">]</span>
+                <span class="n">gdf</span><span class="p">[</span><span class="s2">"coordinate_array_sedona"</span><span class="p">]</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">gdf</span> <span class="o">=</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_prepare_df_</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
@@ -302,7 +301,7 @@
             <span class="n">fill_color</span> <span class="o">=</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_create_default_fill_color_</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">plot_col</span><span class="p">)</span>
 
         <span class="n">choropleth_layer</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">Layer</span><span class="p">(</span>
-            <span class="s2">&quot;GeoJsonLayer&quot;</span><span class="p">,</span>  <span class="c1"># `type` positional argument is here</span>
+            <span class="s2">"GeoJsonLayer"</span><span class="p">,</span>  <span class="c1"># `type` positional argument is here</span>
             <span class="n">data</span><span class="o">=</span><span class="n">gdf</span><span class="p">,</span>
             <span class="n">auto_highlight</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">get_fill_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
@@ -326,8 +325,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">create_geometry_map</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">df</span><span class="p">,</span>
-        <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span>
-        <span class="n">line_color</span><span class="o">=</span><span class="s2">&quot;[85, 183, 177, 255]&quot;</span><span class="p">,</span>
+        <span class="n">fill_color</span><span class="o">=</span><span class="s2">"[85, 183, 177, 255]"</span><span class="p">,</span>
+        <span class="n">line_color</span><span class="o">=</span><span class="s2">"[85, 183, 177, 255]"</span><span class="p">,</span>
         <span class="n">elevation_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -335,7 +334,7 @@
         <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">stroked</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Create a pydeck map with a GeoJsonLayer added for plotting given geometries.</span>
 <span class="sd">        :param line_color:</span>
 <span class="sd">        :param df: SedonaDataFrame with polygons</span>
@@ -346,7 +345,7 @@
 <span class="sd">        :param map_provider: optional map_provider of the pydeck map</span>
 <span class="sd">        :param api_keys: Optional dictionary of API keys for Map providers</span>
 <span class="sd">        :return: A pydeck map with a GeoJsonLayer map added</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">pdk</span> <span class="o">=</span> <span class="n">_try_import_pydeck</span><span class="p">()</span>
 
         <span class="n">geometry_col</span> <span class="o">=</span> <span class="n">SedonaMapUtils</span><span class="o">.</span><span class="n">__get_geometry_col__</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
@@ -354,8 +353,8 @@
         <span class="n">geom_type</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="n">geometry_col</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">geom_type</span>
         <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_create_coord_column_</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">geometry_col</span><span class="o">=</span><span class="n">geometry_col</span><span class="p">)</span>
         <span class="c1"># if len(type_list) &gt;= 2:  # change line colors if any to make it more visible.</span>
-        <span class="c1">#     if line_color == &quot;[85, 183, 177, 255]&quot;:</span>
-        <span class="c1">#         line_color = &quot;[237, 119, 79]&quot;</span>
+        <span class="c1">#     if line_color == "[85, 183, 177, 255]":</span>
+        <span class="c1">#         line_color = "[237, 119, 79]"</span>
 
         <span class="n">layer</span> <span class="o">=</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_create_fat_layer_</span><span class="p">(</span>
             <span class="n">gdf</span><span class="p">,</span>
@@ -367,10 +366,10 @@
 
         <span class="k">if</span> <span class="n">initial_view_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">initial_view_state</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">data_utils</span><span class="o">.</span><span class="n">compute_view</span><span class="p">(</span>
-                <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;coordinate_array_sedona&quot;</span><span class="p">]</span>
+                <span class="n">gdf</span><span class="p">[</span><span class="s2">"coordinate_array_sedona"</span><span class="p">]</span>
             <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">elevation_col</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;Polygon&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">elevation_col</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"Polygon"</span><span class="p">:</span>
             <span class="n">initial_view_state</span><span class="o">.</span><span class="n">pitch</span> <span class="o">=</span> <span class="mi">45</span>  <span class="c1"># If polygons are elevated, change the pitch to visualize the elevation better</span>
 
         <span class="k">return</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_create_map_obj</span><span class="p">(</span>
@@ -385,7 +384,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">create_scatterplot_map</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">df</span><span class="p">,</span>
-        <span class="n">fill_color</span><span class="o">=</span><span class="s2">&quot;[255, 140, 0]&quot;</span><span class="p">,</span>
+        <span class="n">fill_color</span><span class="o">=</span><span class="s2">"[255, 140, 0]"</span><span class="p">,</span>
         <span class="n">radius_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">radius_min_pixels</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">radius_max_pixels</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
@@ -395,7 +394,7 @@
         <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Create a pydeck map with a scatterplot layer</span>
 <span class="sd">        :param radius_scale:</span>
 <span class="sd">        :param radius_max_pixels:</span>
@@ -408,12 +407,12 @@
 <span class="sd">        :param map_provider: optional map_provider to be added to the pydeck map</span>
 <span class="sd">        :param api_keys: Optional dictionary of API keys for Map providers</span>
 <span class="sd">        :return: A pydeck map object with a scatterplot layer added</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">pdk</span> <span class="o">=</span> <span class="n">_try_import_pydeck</span><span class="p">()</span>
 
         <span class="n">gdf</span> <span class="o">=</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_prepare_df_</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">add_coords</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">layer</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">Layer</span><span class="p">(</span>
-            <span class="s2">&quot;ScatterplotLayer&quot;</span><span class="p">,</span>
+            <span class="s2">"ScatterplotLayer"</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">gdf</span><span class="p">,</span>
             <span class="n">pickable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
@@ -422,13 +421,13 @@
             <span class="n">radius_min_pixels</span><span class="o">=</span><span class="n">radius_min_pixels</span><span class="p">,</span>
             <span class="n">radius_max_pixels</span><span class="o">=</span><span class="n">radius_max_pixels</span><span class="p">,</span>
             <span class="n">radius_scale</span><span class="o">=</span><span class="n">radius_scale</span><span class="p">,</span>
-            <span class="n">get_position</span><span class="o">=</span><span class="s2">&quot;coordinate_array_sedona&quot;</span><span class="p">,</span>
+            <span class="n">get_position</span><span class="o">=</span><span class="s2">"coordinate_array_sedona"</span><span class="p">,</span>
             <span class="n">get_fill_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">initial_view_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">initial_view_state</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">data_utils</span><span class="o">.</span><span class="n">compute_view</span><span class="p">(</span>
-                <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;coordinate_array_sedona&quot;</span><span class="p">]</span>
+                <span class="n">gdf</span><span class="p">[</span><span class="s2">"coordinate_array_sedona"</span><span class="p">]</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_create_map_obj</span><span class="p">(</span>
@@ -445,13 +444,13 @@
         <span class="n">df</span><span class="p">,</span>
         <span class="n">color_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">aggregation</span><span class="o">=</span><span class="s2">&quot;SUM&quot;</span><span class="p">,</span>
+        <span class="n">aggregation</span><span class="o">=</span><span class="s2">"SUM"</span><span class="p">,</span>
         <span class="n">initial_view_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">map_style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">map_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">api_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Create a pydeck map with a heatmap layer added</span>
 <span class="sd">        :param df: SedonaDataFrame to be used to plot the heatmap</span>
 <span class="sd">        :param color_range: Optional color_range for the heatmap</span>
@@ -462,7 +461,7 @@
 <span class="sd">        :param map_provider: Optional map_provider for the pydeck map</span>
 <span class="sd">        :param api_keys: Optional dictionary of API keys for Map providers</span>
 <span class="sd">        :return: A pydeck map with a heatmap layer added</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">pdk</span> <span class="o">=</span> <span class="n">_try_import_pydeck</span><span class="p">()</span>
 
         <span class="n">gdf</span> <span class="o">=</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_prepare_df_</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">add_coords</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -478,12 +477,12 @@
             <span class="p">]</span>
 
         <span class="n">layer</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">Layer</span><span class="p">(</span>
-            <span class="s2">&quot;HeatmapLayer&quot;</span><span class="p">,</span>
+            <span class="s2">"HeatmapLayer"</span><span class="p">,</span>
             <span class="n">gdf</span><span class="p">,</span>
             <span class="n">pickable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
             <span class="n">filled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">get_position</span><span class="o">=</span><span class="s2">&quot;coordinate_array_sedona&quot;</span><span class="p">,</span>
+            <span class="n">get_position</span><span class="o">=</span><span class="s2">"coordinate_array_sedona"</span><span class="p">,</span>
             <span class="n">aggregation</span><span class="o">=</span><span class="n">pdk</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="n">aggregation</span><span class="p">),</span>
             <span class="n">color_range</span><span class="o">=</span><span class="n">color_range</span><span class="p">,</span>
             <span class="n">get_weight</span><span class="o">=</span><span class="n">weight</span><span class="p">,</span>
@@ -491,7 +490,7 @@
 
         <span class="k">if</span> <span class="n">initial_view_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">initial_view_state</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">data_utils</span><span class="o">.</span><span class="n">compute_view</span><span class="p">(</span>
-                <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;coordinate_array_sedona&quot;</span><span class="p">]</span>
+                <span class="n">gdf</span><span class="p">[</span><span class="s2">"coordinate_array_sedona"</span><span class="p">]</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">SedonaPyDeck</span><span class="o">.</span><span class="n">_create_map_obj</span><span class="p">(</span>
@@ -504,12 +503,12 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_df_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">add_coords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">geometry_col</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Convert a SedonaDataFrame to a GeoPandas DataFrame without renaming the column (as it is not necessary while rendering a pydeck map)</span>
 <span class="sd">        :param df: SedonaDataFrame</span>
 <span class="sd">        :param add_coords: Used to decide if a coordinate column containing lists of point coordinates is to be added to the resultant gdf.</span>
 <span class="sd">        :return: GeoPandas DataFrame</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">geometry_col</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">geometry_col</span> <span class="o">=</span> <span class="n">SedonaMapUtils</span><span class="o">.</span><span class="n">__get_geometry_col__</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
         <span class="n">gdf</span> <span class="o">=</span> <span class="n">SedonaMapUtils</span><span class="o">.</span><span class="n">__convert_to_gdf_or_pdf__</span><span class="p">(</span>
@@ -521,23 +520,23 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_default_fill_color_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">gdf</span><span class="p">,</span> <span class="n">plot_col</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a default color for choropleth layer based on a given max value&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Create a default color for choropleth layer based on a given max value"</span>
 <span class="sd">        :param plot_col:</span>
 <span class="sd">        :return: fill_color string for pydeck map</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">plot_max</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="n">plot_col</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;[85, 183, 177, (</span><span class="si">{</span><span class="n">plot_col</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">plot_max</span><span class="si">}</span><span class="s2">) * 255 + 15]&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"[85, 183, 177, (</span><span class="si">{</span><span class="n">plot_col</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">plot_max</span><span class="si">}</span><span class="s2">) * 255 + 15]"</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_coord_column_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">gdf</span><span class="p">,</span> <span class="n">geometry_col</span><span class="p">,</span> <span class="n">add_points</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Create a coordinate column in a given GeoPandas Dataframe, this coordinate column contains coordinates of a ST_Point in a list format of [longitude, latitude]</span>
 <span class="sd">        :param gdf: GeoPandas Dataframe</span>
 <span class="sd">        :param geometry_col: column with ST_Points</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">type_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;coordinate_array_sedona&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="n">gdf</span><span class="p">[</span><span class="s2">"coordinate_array_sedona"</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
             <span class="k">lambda</span> <span class="n">val</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span>
                 <span class="n">SedonaMapUtils</span><span class="o">.</span><span class="n">__extract_coordinate__</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="n">geometry_col</span><span class="p">],</span> <span class="n">type_list</span><span class="p">)</span>
             <span class="p">),</span>
@@ -548,7 +547,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_fat_layer_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">gdf</span><span class="p">,</span> <span class="n">fill_color</span><span class="p">,</span> <span class="n">line_color</span><span class="p">,</span> <span class="n">elevation_col</span><span class="p">,</span> <span class="n">stroked</span><span class="p">):</span>
         <span class="n">pdk</span> <span class="o">=</span> <span class="n">_try_import_pydeck</span><span class="p">()</span>
         <span class="n">layer</span> <span class="o">=</span> <span class="n">pdk</span><span class="o">.</span><span class="n">Layer</span><span class="p">(</span>
-            <span class="s2">&quot;GeoJsonLayer&quot;</span><span class="p">,</span>  <span class="c1"># `type` positional argument is here</span>
+            <span class="s2">"GeoJsonLayer"</span><span class="p">,</span>  <span class="c1"># `type` positional argument is here</span>
             <span class="n">data</span><span class="o">=</span><span class="n">gdf</span><span class="p">,</span>
             <span class="n">auto_highlight</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">get_fill_color</span><span class="o">=</span><span class="n">fill_color</span><span class="p">,</span>
@@ -571,14 +570,14 @@
         <span class="n">pdk</span> <span class="o">=</span> <span class="n">_try_import_pydeck</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">map_provider</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">map_provider</span> <span class="o">=</span> <span class="s2">&quot;carto&quot;</span>
+            <span class="n">map_provider</span> <span class="o">=</span> <span class="s2">"carto"</span>
 
         <span class="k">if</span> <span class="n">map_style</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">map_style</span> <span class="o">=</span> <span class="s2">&quot;dark&quot;</span>
+            <span class="n">map_style</span> <span class="o">=</span> <span class="s2">"dark"</span>
 
-        <span class="c1"># Default to mapbox if user selects &#39;satellite&#39; map_style as pydeck uses mapbox and google maps for satellite basemap</span>
-        <span class="k">if</span> <span class="n">map_style</span> <span class="o">==</span> <span class="s2">&quot;satellite&quot;</span> <span class="ow">and</span> <span class="n">map_provider</span> <span class="o">!=</span> <span class="s2">&quot;google_maps&quot;</span><span class="p">:</span>
-            <span class="n">map_provider</span> <span class="o">=</span> <span class="s2">&quot;mapbox&quot;</span>
+        <span class="c1"># Default to mapbox if user selects 'satellite' map_style as pydeck uses mapbox and google maps for satellite basemap</span>
+        <span class="k">if</span> <span class="n">map_style</span> <span class="o">==</span> <span class="s2">"satellite"</span> <span class="ow">and</span> <span class="n">map_provider</span> <span class="o">!=</span> <span class="s2">"google_maps"</span><span class="p">:</span>
+            <span class="n">map_provider</span> <span class="o">=</span> <span class="s2">"mapbox"</span>
 
         <span class="k">if</span> <span class="n">api_keys</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">api_keys</span> <span class="o">=</span> <span class="n">api_keys</span>
@@ -597,7 +596,7 @@
         <span class="kn">import</span><span class="w"> </span><span class="nn">pydeck</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pdk</span>
 
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Install apache-sedona[pydeck-map] to convert sedona dataframes to pydeck maps.&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Install apache-sedona[pydeck-map] to convert sedona dataframes to pydeck maps."</span>
         <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 
     <span class="k">return</span> <span class="n">pdk</span>

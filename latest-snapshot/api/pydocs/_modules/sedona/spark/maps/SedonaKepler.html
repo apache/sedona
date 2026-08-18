@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.maps.SedonaKepler &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -235,28 +234,28 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">create_map</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;unnamed&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">"unnamed"</span><span class="p">,</span>
         <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
         <span class="n">use_arrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">show_docs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Creates a map visualization using kepler, optionally taking a sedona dataFrame as data input</span>
 <span class="sd">        :param df: [Optional] SedonaDataFrame to plot on the map</span>
 <span class="sd">        :param name: [Optional] Name to be associated with the given</span>
-<span class="sd">        dataframe, if a df is passed with no name, a default name of &#39;unnamed&#39; is set for it.</span>
+<span class="sd">        dataframe, if a df is passed with no name, a default name of 'unnamed' is set for it.</span>
 <span class="sd">        param config: [Optional] A map config to be applied to the rendered map</span>
 <span class="sd">        param height: [Optional] Height of the map in pixels, default is 600</span>
 <span class="sd">        param use_arrow: [Optional] Whether to use arrow for data transfer, default is False</span>
 <span class="sd">        param show_docs: [Optional] Whether to show the documentation, default is False</span>
 <span class="sd">        :return: A map object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">from</span><span class="w"> </span><span class="nn">keplergl</span><span class="w"> </span><span class="kn">import</span> <span class="n">KeplerGl</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Install apache-sedona[kepler-map] to convert sedona dataframes to kepler maps.&quot;</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Install apache-sedona[kepler-map] to convert sedona dataframes to kepler maps."</span>
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 
         <span class="n">kepler_map</span> <span class="o">=</span> <span class="n">KeplerGl</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span> <span class="n">use_arrow</span><span class="o">=</span><span class="n">use_arrow</span><span class="p">,</span> <span class="n">show_docs</span><span class="o">=</span><span class="n">show_docs</span><span class="p">)</span>
@@ -269,14 +268,14 @@
         <span class="k">return</span> <span class="n">kepler_map</span></div>
 
 <div class="viewcode-block" id="SedonaKepler.add_df"><a class="viewcode-back" href="../../../../sedona.spark.maps.html#sedona.spark.maps.SedonaKepler.SedonaKepler.add_df">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_df</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">kepler_map</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;unnamed&quot;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_df</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">kepler_map</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"unnamed"</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Adds a SedonaDataFrame to a given map object.</span>
 <span class="sd">        :param kepler_map: Map object to add SedonaDataFrame to</span>
 <span class="sd">        :param df: SedonaDataFrame to add</span>
-<span class="sd">        :param name: [Optional] Name to assign to the dataframe, default name assigned is &#39;unnamed&#39;</span>
+<span class="sd">        :param name: [Optional] Name to assign to the dataframe, default name assigned is 'unnamed'</span>
 <span class="sd">        :return: Does not return anything, adds df directly to the given map object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">schema</span>
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">dataType</span> <span class="o">==</span> <span class="n">RasterType</span><span class="p">():</span>

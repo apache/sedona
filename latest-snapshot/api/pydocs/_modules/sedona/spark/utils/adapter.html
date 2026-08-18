@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.adapter &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -237,19 +236,19 @@
 
 
 <div class="viewcode-block" id="Adapter"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.adapter.Adapter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Adapter</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">MultipleMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Class which allow to convert between Spark DataFrame and SpatialRDD and reverse.</span>
 <span class="sd">    This class is used to convert between PySpark DataFrame and SpatialRDD. Schema</span>
 <span class="sd">    is lost during the conversion. This should be used if your data starts as a</span>
 <span class="sd">    SpatialRDD and you want to convert it to a DataFrame for further processing.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_dataframe</span><span class="p">(</span><span class="n">jdf</span><span class="p">,</span> <span class="n">sparkSession</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">DataFrame</span><span class="p">(</span><span class="n">jdf</span><span class="p">,</span> <span class="n">sparkSession</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Adapter.toRdd"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.adapter.Adapter.toRdd">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">toRdd</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;JvmSpatialRDD&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">toRdd</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"JvmSpatialRDD"</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.SpatialRDD.spatial_rdd</span><span class="w"> </span><span class="kn">import</span> <span class="n">JvmSpatialRDD</span>
 
         <span class="n">sc</span> <span class="o">=</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">_sc</span>
@@ -261,12 +260,12 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">toSpatialRdd</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">geometryFieldName</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpatialRDD</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param dataFrame:</span>
 <span class="sd">        :param geometryFieldName:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">sc</span> <span class="o">=</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">_sc</span>
         <span class="n">jvm</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">_jvm</span>
 
@@ -281,13 +280,13 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">toSpatialRdd</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">geometryFieldName</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fieldNames</span><span class="p">:</span> <span class="n">List</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpatialRDD</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param dataFrame:</span>
 <span class="sd">        :param geometryFieldName:</span>
 <span class="sd">        :param fieldNames:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">sc</span> <span class="o">=</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">_sc</span>
         <span class="n">jvm</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">_jvm</span>
 
@@ -304,13 +303,13 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">toDf</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">spatialRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span> <span class="n">fieldNames</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">sparkSession</span><span class="p">:</span> <span class="n">SparkSession</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param spatialRDD:</span>
 <span class="sd">        :param fieldNames:</span>
 <span class="sd">        :param sparkSession:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">sc</span> <span class="o">=</span> <span class="n">spatialRDD</span><span class="o">.</span><span class="n">_sc</span>
         <span class="n">jvm</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">_jvm</span>
 
@@ -324,12 +323,12 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">toDf</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spatialRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span> <span class="n">sparkSession</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param spatialRDD:</span>
 <span class="sd">        :param sparkSession:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">sc</span> <span class="o">=</span> <span class="n">spatialRDD</span><span class="o">.</span><span class="n">_sc</span>
         <span class="n">jvm</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">_jvm</span>
 
@@ -341,18 +340,18 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">toDf</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spatialPairRDD</span><span class="p">:</span> <span class="n">RDD</span><span class="p">,</span> <span class="n">sparkSession</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param spatialPairRDD:</span>
 <span class="sd">        :param sparkSession:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">spatial_pair_rdd_mapped</span> <span class="o">=</span> <span class="n">spatialPairRDD</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
             <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span>
                 <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">geom</span><span class="p">,</span>
-                <span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getUserData</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">),</span>
+                <span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getUserData</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">),</span>
                 <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">geom</span><span class="p">,</span>
-                <span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">getUserData</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">),</span>
+                <span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">getUserData</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">),</span>
             <span class="p">]</span>
         <span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">sparkSession</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">spatial_pair_rdd_mapped</span><span class="p">)</span>
@@ -366,22 +365,22 @@
         <span class="n">rightFieldNames</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
         <span class="n">sparkSession</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param spatialPairRDD:</span>
 <span class="sd">        :param leftFieldnames:</span>
 <span class="sd">        :param rightFieldNames:</span>
 <span class="sd">        :param sparkSession:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">df</span> <span class="o">=</span> <span class="n">Adapter</span><span class="o">.</span><span class="n">toDf</span><span class="p">(</span><span class="n">spatialPairRDD</span><span class="p">,</span> <span class="n">sparkSession</span><span class="p">)</span>
         <span class="n">columns_length</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
-        <span class="n">combined_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;geom_1&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">leftFieldnames</span><span class="p">,</span> <span class="s2">&quot;geom_2&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">rightFieldNames</span><span class="p">]</span>
+        <span class="n">combined_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"geom_1"</span><span class="p">,</span> <span class="o">*</span><span class="n">leftFieldnames</span><span class="p">,</span> <span class="s2">"geom_2"</span><span class="p">,</span> <span class="o">*</span><span class="n">rightFieldNames</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">columns_length</span> <span class="o">==</span> <span class="n">combined_columns</span><span class="o">.</span><span class="fm">__len__</span><span class="p">():</span>
             <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">toDF</span><span class="p">(</span><span class="o">*</span><span class="n">combined_columns</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Column length does not match&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"Column length does not match"</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">toDf</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">rawPairRDD</span><span class="p">:</span> <span class="n">SedonaPairRDD</span><span class="p">,</span> <span class="n">sparkSession</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">):</span>

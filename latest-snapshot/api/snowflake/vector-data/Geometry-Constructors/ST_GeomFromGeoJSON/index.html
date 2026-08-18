@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5569,23 +5568,23 @@
 <p>Format: <code>ST_GeomFromGeoJSON (GeoJson:string)</code></p>
 <p>Return type: <code>Geometry</code></p>
 <p>SQL example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromGeoJSON</span><span class="p">(</span><span class="s1">&#39;{</span>
-<span class="s1">   &quot;type&quot;:&quot;Feature&quot;,</span>
-<span class="s1">   &quot;properties&quot;:{</span>
-<span class="s1">      &quot;STATEFP&quot;:&quot;01&quot;,</span>
-<span class="s1">      &quot;COUNTYFP&quot;:&quot;077&quot;,</span>
-<span class="s1">      &quot;TRACTCE&quot;:&quot;011501&quot;,</span>
-<span class="s1">      &quot;BLKGRPCE&quot;:&quot;5&quot;,</span>
-<span class="s1">      &quot;AFFGEOID&quot;:&quot;1500000US010770115015&quot;,</span>
-<span class="s1">      &quot;GEOID&quot;:&quot;010770115015&quot;,</span>
-<span class="s1">      &quot;NAME&quot;:&quot;5&quot;,</span>
-<span class="s1">      &quot;LSAD&quot;:&quot;BG&quot;,</span>
-<span class="s1">      &quot;ALAND&quot;:6844991,</span>
-<span class="s1">      &quot;AWATER&quot;:32636</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromGeoJSON</span><span class="p">(</span><span class="s1">'{</span>
+<span class="s1">   "type":"Feature",</span>
+<span class="s1">   "properties":{</span>
+<span class="s1">      "STATEFP":"01",</span>
+<span class="s1">      "COUNTYFP":"077",</span>
+<span class="s1">      "TRACTCE":"011501",</span>
+<span class="s1">      "BLKGRPCE":"5",</span>
+<span class="s1">      "AFFGEOID":"1500000US010770115015",</span>
+<span class="s1">      "GEOID":"010770115015",</span>
+<span class="s1">      "NAME":"5",</span>
+<span class="s1">      "LSAD":"BG",</span>
+<span class="s1">      "ALAND":6844991,</span>
+<span class="s1">      "AWATER":32636</span>
 <span class="s1">   },</span>
-<span class="s1">   &quot;geometry&quot;:{</span>
-<span class="s1">      &quot;type&quot;:&quot;Polygon&quot;,</span>
-<span class="s1">      &quot;coordinates&quot;:[</span>
+<span class="s1">   "geometry":{</span>
+<span class="s1">      "type":"Polygon",</span>
+<span class="s1">      "coordinates":[</span>
 <span class="s1">         [</span>
 <span class="s1">            [-87.621765, 34.873444],</span>
 <span class="s1">            [-87.617535, 34.873369],</span>
@@ -5595,15 +5594,15 @@
 <span class="s1">         ]</span>
 <span class="s1">      ]</span>
 <span class="s1">   }</span>
-<span class="s1">}&#39;</span><span class="p">)</span>
+<span class="s1">}'</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>POLYGON ((-87.621765 34.873444, -87.617535 34.873369, -87.62119 34.85053, -87.62144 34.865379, -87.621765 34.873444))
 </code></pre></div>
 <p>SQL example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromGeoJSON</span><span class="p">(</span><span class="s1">&#39;{</span>
-<span class="s1">   &quot;type&quot;:&quot;Polygon&quot;,</span>
-<span class="s1">   &quot;coordinates&quot;:[</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromGeoJSON</span><span class="p">(</span><span class="s1">'{</span>
+<span class="s1">   "type":"Polygon",</span>
+<span class="s1">   "coordinates":[</span>
 <span class="s1">      [</span>
 <span class="s1">         [-87.621765, 34.873444],</span>
 <span class="s1">         [-87.617535, 34.873369],</span>
@@ -5612,7 +5611,7 @@
 <span class="s1">         [-87.621765, 34.873444]</span>
 <span class="s1">      ]</span>
 <span class="s1">   ]</span>
-<span class="s1">}&#39;</span><span class="p">)</span>
+<span class="s1">}'</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>POLYGON ((-87.621765 34.873444, -87.617535 34.873369, -87.62119 34.85053, -87.62144 34.865379, -87.621765 34.873444))

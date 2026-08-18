@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.raster.awt_raster &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -230,7 +229,7 @@
 
 
 <div class="viewcode-block" id="AWTRaster"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.awt_raster.AWTRaster">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">AWTRaster</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raster data structure of Java AWT Raster used by GeoTools GridCoverage2D.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Raster data structure of Java AWT Raster used by GeoTools GridCoverage2D."""</span>
 
     <span class="n">min_x</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">min_y</span><span class="p">:</span> <span class="nb">int</span>
@@ -249,7 +248,7 @@
         <span class="n">data_buffer</span><span class="p">:</span> <span class="n">DataBuffer</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">width</span> <span class="o">!=</span> <span class="n">width</span> <span class="ow">or</span> <span class="n">sample_model</span><span class="o">.</span><span class="n">height</span> <span class="o">!=</span> <span class="n">height</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Size of the image does not match with the sample model&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"Size of the image does not match with the sample model"</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_x</span> <span class="o">=</span> <span class="n">min_x</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_y</span> <span class="o">=</span> <span class="n">min_y</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>

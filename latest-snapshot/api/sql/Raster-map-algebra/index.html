@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5772,7 +5771,7 @@ and friends — are not deprecated.</p>
 <li><code>noDataValue</code>: (Not optional) The nodata value of the output raster, <code>null</code> is allowed.</li>
 </ul>
 <p>Spark SQL Example for two raster input <code>RS_MapAlgebra</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast0</span><span class="p">,</span><span class="w"> </span><span class="n">rast1</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;out = rast0[0] * 0.5 + rast1[0] * 0.5;&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">null</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast0</span><span class="p">,</span><span class="w"> </span><span class="n">rast1</span><span class="p">,</span><span class="w"> </span><span class="s1">'D'</span><span class="p">,</span><span class="w"> </span><span class="s1">'out = rast0[0] * 0.5 + rast1[0] * 0.5;'</span><span class="p">,</span><span class="w"> </span><span class="k">null</span><span class="p">)</span>
 </code></pre></div>
 <p><code>RS_MapAlgebra</code> also has good performance, since it is backed by <a href="https://github.com/geosolutions-it/jai-ext/wiki/Jiffle">Jiffle</a> and can be compiled to Java bytecode for
 execution. We'll demonstrate both approaches to implementing commonly used map algebra operations.</p>
@@ -5802,7 +5801,7 @@ execution. We'll demonstrate both approaches to implementing commonly used map a
 </code></pre></div>
 <p>where NIR is the near-infrared band and Red is the red band.</p>
 <p>Assume that we have a bunch of rasters with 4 bands: red, green, blue, and near-infrared. We want to calculate the NDVI for each raster. We can use the <code>RS_MapAlgebra</code> function to do this:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;out = (rast[3] - rast[0]) / (rast[3] + rast[0]);&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">ndvi</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">'D'</span><span class="p">,</span><span class="w"> </span><span class="s1">'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);'</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">ndvi</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 </code></pre></div>
 <p>The Jiffle script is <code>out = (rast[3] - rast[0]) / (rast[3] + rast[0]);</code>. The <code>rast</code> variable is always bound to the input raster, and
 the <code>out</code> variable is bound to the output raster. Jiffle iterates over all the pixels in the input raster and executes the script for each pixel. the <code>rast[3]</code> and <code>rast[0]</code>
@@ -5823,7 +5822,7 @@ refers to the current pixel values of the near-infrared and red bands, respectiv
 </code></pre></div>
 <p>AWEI can be implemented easily using <code>RS_MapAlgebra</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="c1">-- Assume that the raster includes all 13 Sentinel-2 bands</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;out = 4 * (rast[2] - rast[11]) - (0.25 * rast[7] + 2.75 * rast[12]);&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">awei</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">'D'</span><span class="p">,</span><span class="w"> </span><span class="s1">'out = 4 * (rast[2] - rast[11]) - (0.25 * rast[7] + 2.75 * rast[12]);'</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">awei</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 </code></pre></div>
 <p>We can also implement the same AWEI calculation using array based map algebra functions. The code looks more verbose:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_Subtract</span><span class="p">(</span>

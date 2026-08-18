@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.SpatialRDD.point_rdd &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -237,10 +236,10 @@
 <div class="viewcode-block" id="PointRDD"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.point_rdd.PointRDD">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PointRDD</span><span class="p">(</span><span class="n">SpatialRDD</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">MultipleMeta</span><span class="p">):</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rdd</span><span class="p">:</span> <span class="n">RDD</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param rdd: RDD</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">rdd</span><span class="o">.</span><span class="n">ctx</span><span class="p">)</span>
 
         <span class="n">spatial_rdd</span> <span class="o">=</span> <span class="n">PythonRddToJavaRDDAdapter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="p">)</span><span class="o">.</span><span class="n">deserialize_to_point_raw_rdd</span><span class="p">(</span>
@@ -255,10 +254,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm_spatial_rdd</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rawSpatialRDD</span><span class="p">:</span> <span class="n">JvmSpatialRDD</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param rawSpatialRDD: JvmSpatialRDD, jvm representation of spatial rdd RDD</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">rawSpatialRDD</span><span class="o">.</span><span class="n">sc</span><span class="p">)</span>
         <span class="n">jsrdd</span> <span class="o">=</span> <span class="n">rawSpatialRDD</span><span class="o">.</span><span class="n">jsrdd</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm_spatial_rdd</span><span class="p">(</span><span class="n">jsrdd</span><span class="p">)</span>
@@ -272,7 +271,7 @@
         <span class="n">carryInputData</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">partitions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param sparkContext: SparkContext instance</span>
 <span class="sd">        :param InputLocation: str, location for loaded file</span>
@@ -280,7 +279,7 @@
 <span class="sd">        :param splitter: FileDataSplitter, data file splitter</span>
 <span class="sd">        :param carryInputData: bool, if spatial rdd should keep non geometry attributes</span>
 <span class="sd">        :param partitions: int, number of partitions int</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sparkContext</span><span class="p">)</span>
         <span class="n">jvm_splitter</span> <span class="o">=</span> <span class="n">FileSplitterJvm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="p">,</span> <span class="n">splitter</span><span class="p">)</span><span class="o">.</span><span class="n">jvm_instance</span>
@@ -301,14 +300,14 @@
         <span class="n">splitter</span><span class="p">:</span> <span class="n">FileDataSplitter</span><span class="p">,</span>
         <span class="n">carryInputData</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param sparkContext: SparkContext instance</span>
 <span class="sd">        :param InputLocation: str, location for loaded file</span>
 <span class="sd">        :param Offset: int, point offset</span>
 <span class="sd">        :param splitter: FileDataSplitter, data file splitter</span>
 <span class="sd">        :param carryInputData: bool, if spatial rdd should keep non geometry attributes</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sparkContext</span><span class="p">)</span>
         <span class="n">jvm_splitter</span> <span class="o">=</span> <span class="n">FileSplitterJvm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="p">,</span> <span class="n">splitter</span><span class="p">)</span><span class="o">.</span><span class="n">jvm_instance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm_spatial_rdd</span><span class="p">(</span>
@@ -323,14 +322,14 @@
         <span class="n">carryInputData</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">partitions</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param sparkContext: SparkContext instance</span>
 <span class="sd">        :param InputLocation: str, location for loaded file</span>
 <span class="sd">        :param splitter: FileDataSplitter, data file splitter</span>
 <span class="sd">        :param carryInputData: bool, if spatial rdd should keep non geometry attributes</span>
 <span class="sd">        :param partitions: int, number of partitions</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sparkContext</span><span class="p">)</span>
         <span class="n">jvm_splitter</span> <span class="o">=</span> <span class="n">FileSplitterJvm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="p">,</span> <span class="n">splitter</span><span class="p">)</span><span class="o">.</span><span class="n">jvm_instance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_srdd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jvm_spatial_rdd</span><span class="p">(</span>
@@ -344,13 +343,13 @@
         <span class="n">splitter</span><span class="p">:</span> <span class="n">FileDataSplitter</span><span class="p">,</span>
         <span class="n">carryInputData</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param sparkContext: SparkContext instance</span>
 <span class="sd">        :param InputLocation: str, location for loaded file</span>
 <span class="sd">        :param splitter: FileDataSplitter, data file splitter</span>
 <span class="sd">        :param carryInputData: bool, if spatial rdd should keep non geometry attributes</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sparkContext</span><span class="p">)</span>
         <span class="n">jvm_splitter</span> <span class="o">=</span> <span class="n">FileSplitterJvm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_jvm</span><span class="p">,</span> <span class="n">splitter</span><span class="p">)</span><span class="o">.</span><span class="n">jvm_instance</span>
@@ -359,7 +358,7 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="PointRDD.MinimumBoundingRectangle"><a class="viewcode-back" href="../../../../../sedona.spark.core.SpatialRDD.html#sedona.spark.core.SpatialRDD.point_rdd.PointRDD.MinimumBoundingRectangle">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">MinimumBoundingRectangle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;PointRDD has not MinimumBoundingRectangle method.&quot;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">"PointRDD has not MinimumBoundingRectangle method."</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_jvm_spatial_rdd</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

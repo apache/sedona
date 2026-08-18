@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5579,17 +5578,17 @@ Each centroid represents the geometric center of the corresponding pixel's area.
 </code></pre></div>
 <p>Spark SQL example for extracting Point, value, raster x and y coordinates:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">pointDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">...</span>
-<span class="kd">val</span><span class="w"> </span><span class="n">rasterDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;binaryFile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/*.tiff&quot;</span><span class="p">)</span>
-<span class="kd">var</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;binaryFile&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">&quot;/some/path/*.tiff&quot;</span><span class="p">)</span>
-<span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">&quot;RS_FromGeoTiff(content) as raster&quot;</span><span class="p">)</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">rasterDf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"binaryFile"</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">"/some/path/*.tiff"</span><span class="p">)</span>
+<span class="kd">var</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"binaryFile"</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="s">"/some/path/*.tiff"</span><span class="p">)</span>
+<span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">"RS_FromGeoTiff(content) as raster"</span><span class="p">)</span>
 
 <span class="n">df</span><span class="p">.</span><span class="n">selectExpr</span><span class="p">(</span>
-<span class="w">  </span><span class="s">&quot;explode(RS_PixelAsCentroids(raster, 1)) as exploded&quot;</span>
+<span class="w">  </span><span class="s">"explode(RS_PixelAsCentroids(raster, 1)) as exploded"</span>
 <span class="p">).</span><span class="n">selectExpr</span><span class="p">(</span>
-<span class="w">  </span><span class="s">&quot;exploded.geom as geom&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s">&quot;exploded.value as value&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s">&quot;exploded.x as x&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s">&quot;exploded.y as y&quot;</span>
+<span class="w">  </span><span class="s">"exploded.geom as geom"</span><span class="p">,</span>
+<span class="w">  </span><span class="s">"exploded.value as value"</span><span class="p">,</span>
+<span class="w">  </span><span class="s">"exploded.x as x"</span><span class="p">,</span>
+<span class="w">  </span><span class="s">"exploded.y as y"</span>
 <span class="p">).</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.register.geo_registrator &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -241,22 +240,22 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">SedonaRegistrator</span><span class="p">:</span>
 
 <div class="viewcode-block" id="SedonaRegistrator.registerAll"><a class="viewcode-back" href="../../../../sedona.spark.register.html#sedona.spark.register.geo_registrator.SedonaRegistrator.registerAll">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;Deprecated since 1.4.1, use SedonaContext.create() instead.&quot;</span><span class="p">)</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">"Deprecated since 1.4.1, use SedonaContext.create() instead."</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">registerAll</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spark</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        This is the core of whole package, It uses py4j to run wrapper which takes existing SparkSession</span>
 <span class="sd">        and register all User Defined Functions by Apache Sedona developers, for this SparkSession.</span>
 
 <span class="sd">        :param spark: pyspark.sql.SparkSession, spark session instance</span>
 <span class="sd">        :return: bool, True if registration was correct.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT 1 as geom&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="sd">        """</span>
+        <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT 1 as geom"</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
         <span class="n">PackageImporter</span><span class="o">.</span><span class="n">import_jvm_lib</span><span class="p">(</span><span class="n">spark</span><span class="o">.</span><span class="n">_jvm</span><span class="p">)</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">spark</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="SedonaRegistrator.register"><a class="viewcode-back" href="../../../../sedona.spark.register.html#sedona.spark.register.geo_registrator.SedonaRegistrator.register">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">&quot;Deprecated since 1.4.1, use SedonaContext.create() instead.&quot;</span><span class="p">)</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s2">"Deprecated since 1.4.1, use SedonaContext.create() instead."</span><span class="p">)</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spark</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">spark</span><span class="o">.</span><span class="n">_jvm</span><span class="o">.</span><span class="n">SedonaSQLRegistrator</span><span class="o">.</span><span class="n">registerAll</span><span class="p">(</span><span class="n">spark</span><span class="o">.</span><span class="n">_jsparkSession</span><span class="p">)</span></div></div>
 
@@ -267,11 +266,11 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">import_jvm_lib</span><span class="p">(</span><span class="n">jvm</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.core.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">ImportedJvmLib</span>
 
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Imports all the specified methods and functions in jvm</span>
 <span class="sd">        :param jvm: Jvm gateway from py4j</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="n">SedonaJvmLib</span><span class="p">:</span>
             <span class="n">java_import</span><span class="p">(</span><span class="n">jvm</span><span class="p">,</span> <span class="n">lib</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
             <span class="n">ImportedJvmLib</span><span class="o">.</span><span class="n">import_lib</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>

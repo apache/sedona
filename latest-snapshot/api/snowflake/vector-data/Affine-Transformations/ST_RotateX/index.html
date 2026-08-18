@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5570,7 +5569,7 @@
 <p>Format: <code>ST_RotateX(geometry: Geometry, angle: Double)</code></p>
 <p>Return type: <code>Geometry</code></p>
 <p>SQL Example:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_RotateX</span><span class="p">(</span><span class="n">ST_GeomFromEWKT</span><span class="p">(</span><span class="s1">&#39;SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 0))&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_RotateX</span><span class="p">(</span><span class="n">ST_GeomFromEWKT</span><span class="p">(</span><span class="s1">'SRID=4326;POLYGON ((0 0, 1 0, 1 1, 0 0))'</span><span class="p">),</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code>SRID=4326;POLYGON ((0 0, 1 0, 1 -0.8390715290764524, 0 0))

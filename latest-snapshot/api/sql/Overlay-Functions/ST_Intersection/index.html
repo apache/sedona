@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5580,8 +5579,8 @@ spark.executor.extraJavaOptions=-Djts.overlay=ng
 </div>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Intersection</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="ss">&quot;POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))&quot;</span><span class="p">),</span>
-<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="ss">&quot;POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="ss">"POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))"</span><span class="p">),</span>
+<span class="w">    </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="ss">"POLYGON((2 2, 9 2, 9 9, 2 9, 2 2))"</span><span class="p">)</span>
 <span class="w">    </span><span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>

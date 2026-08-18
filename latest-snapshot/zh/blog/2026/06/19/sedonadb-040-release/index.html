@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5893,7 +5892,7 @@
 <li>Improved spatial function coverage and documentation</li>
 <li>Raster infrastructure</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="c1"># pip install --upgrade &quot;apache-sedona[db]&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># pip install --upgrade "apache-sedona[db]"</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sedona.db</span>
 
 <span class="n">sd</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
@@ -5907,11 +5906,11 @@
 <h2 id="python-dataframe-api">Python DataFrame API<a class="headerlink" href="#python-dataframe-api" title="Permanent link">&para;</a></h2>
 <p>While SQL is a powerful, flexible, and well-understood language for describing many of the things one might want to do with spatial data, many Python users prefer using Python functions to interact with data frames and expressions. SedonaDB 0.4.0 adds just this: a basic set of transformation on data frames and expressions drawing inspiration from <a href="https://ibis-project.org">Ibis</a>, <a href="https://duckdb.org/docs/current/clients/python/relational_api">DuckDB Python's relational API</a>, <a href="https://spark.apache.org/docs/latest/api/python/index.html">PySpark</a>, <a href="https://datafusion.apache.org/python/">DataFusion Python</a>, <a href="https://pandas.pydata.org">Pandas</a>, and <a href="https://geopandas.org">GeoPandas</a>.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Load cities and countries from geoarrow-data</span>
-<span class="n">cities_url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities.parquet&quot;</span>
-<span class="n">countries_url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.parquet&quot;</span>
+<span class="n">cities_url</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities.parquet"</span>
+<span class="n">countries_url</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.parquet"</span>
 
-<span class="n">cities</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">cities_url</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;cities&quot;</span><span class="p">)</span>
-<span class="n">countries</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">countries_url</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;countries&quot;</span><span class="p">)</span>
+<span class="n">cities</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">cities_url</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"cities"</span><span class="p">)</span>
+<span class="n">countries</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">countries_url</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"countries"</span><span class="p">)</span>
 
 <span class="c1"># Spatial join using the DataFrame API</span>
 <span class="n">f</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">funcs</span>
@@ -5920,9 +5919,9 @@
         <span class="n">countries</span><span class="p">,</span>
         <span class="n">on</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">st_intersects</span><span class="p">(</span><span class="n">cities</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">countries</span><span class="o">.</span><span class="n">geometry</span><span class="p">),</span>
     <span class="p">)</span>
-    <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">countries</span><span class="o">.</span><span class="n">continent</span> <span class="o">!=</span> <span class="s2">&quot;North America&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">countries</span><span class="o">.</span><span class="n">continent</span> <span class="o">!=</span> <span class="s2">"North America"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">cities</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">country</span><span class="o">=</span><span class="n">countries</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">continent</span><span class="o">=</span><span class="n">countries</span><span class="o">.</span><span class="n">continent</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s2">&quot;country&quot;</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s2">"country"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 <span class="p">)</span>
 <span class="n">result</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -5978,8 +5977,8 @@
 <div class="highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">sdplyr</span><span class="p">)</span>
 
 <span class="c1"># Load cities and countries from geoarrow-data</span>
-<span class="n">cities_url</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities.parquet&quot;</span>
-<span class="n">countries_url</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.parquet&quot;</span>
+<span class="n">cities_url</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">"https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities.parquet"</span>
+<span class="n">countries_url</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">"https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.parquet"</span>
 
 <span class="n">cities</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">sd_read_parquet</span><span class="p">(</span><span class="n">cities_url</span><span class="p">)</span>
 <span class="n">countries</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">sd_read_parquet</span><span class="p">(</span><span class="n">countries_url</span><span class="p">)</span>
@@ -5990,7 +5989,7 @@
 <span class="w">    </span><span class="n">countries</span><span class="p">,</span>
 <span class="w">    </span><span class="n">by</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">sd_join_intersects</span><span class="p">()</span>
 <span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="o">|&gt;</span>
-<span class="w">  </span><span class="nf">filter</span><span class="p">(</span><span class="n">continent</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">&quot;North America&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">|&gt;</span>
+<span class="w">  </span><span class="nf">filter</span><span class="p">(</span><span class="n">continent</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">"North America"</span><span class="p">)</span><span class="w"> </span><span class="o">|&gt;</span>
 <span class="w">  </span><span class="nf">select</span><span class="p">(</span>
 <span class="w">    </span><span class="n">city</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">name.x</span><span class="p">,</span>
 <span class="w">    </span><span class="n">country</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">name.y</span><span class="p">,</span>
@@ -6021,7 +6020,7 @@
 <h2 id="geography-support">Geography Support<a class="headerlink" href="#geography-support" title="Permanent link">&para;</a></h2>
 <p>SedonaDB 0.4.0 introduces expanded support for the Geography data type, including a completely rewritten implementation of most operations using <a href="https://github.com/paleolimbot/s2geography">s2geography</a>, which in turn packages primitives from Google's <a href="https://github.com/google/s2geometry">s2geometry</a> as PostGIS/BigQuery-compatible SQL operators.</p>
 <p>Geography shines for distance queries across large geographical areas. For example, if we wanted to find cities within 200 km of Germany, we'd have to find a local projection and do potentially expensive transformations between coordinate systems. Geography simplifies this to a simple distance-within query:</p>
-<div class="highlight"><pre><span></span><code><span class="n">germany</span> <span class="o">=</span> <span class="n">countries</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">countries</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Germany&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+<div class="highlight"><pre><span></span><code><span class="n">germany</span> <span class="o">=</span> <span class="n">countries</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">countries</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"Germany"</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
     <span class="n">countries</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">to_geography</span><span class="p">()</span>
 <span class="p">)</span>
 
@@ -6050,12 +6049,12 @@
 <p>This works for spatial joins, too. If you'd like to analyze <em>all</em> the countries with their nearby cities, SedonaDB can now do that too.</p>
 <div class="highlight"><pre><span></span><code><span class="n">cities_geog</span> <span class="o">=</span> <span class="n">cities</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
     <span class="n">cities</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">cities</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">to_geography</span><span class="p">()</span>
-<span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;cities_geog&quot;</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"cities_geog"</span><span class="p">)</span>
 <span class="n">countries_geog</span> <span class="o">=</span> <span class="n">countries</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
     <span class="n">countries</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
     <span class="n">countries</span><span class="o">.</span><span class="n">continent</span><span class="p">,</span>
     <span class="n">geometry</span><span class="o">=</span><span class="n">countries</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">to_geography</span><span class="p">(),</span>
-<span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;countries_geog&quot;</span><span class="p">)</span>
+<span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"countries_geog"</span><span class="p">)</span>
 
 <span class="n">cities_geog</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
     <span class="n">countries_geog</span><span class="p">,</span>
@@ -6098,20 +6097,20 @@
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">lonboard</span>
 
 <span class="n">result</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">cities_geog</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">cities_geog</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Toronto&quot;</span><span class="p">)</span>
+    <span class="n">cities_geog</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">cities_geog</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"Toronto"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">name_from</span><span class="o">=</span><span class="n">cities_geog</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pt_from</span><span class="o">=</span><span class="n">cities_geog</span><span class="o">.</span><span class="n">geometry</span><span class="p">)</span>
     <span class="o">.</span><span class="n">cross_join</span><span class="p">(</span><span class="n">cities_geog</span><span class="p">)</span>
     <span class="o">.</span><span class="n">select</span><span class="p">(</span>
-        <span class="n">name_to</span><span class="o">=</span><span class="n">sd</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
-        <span class="n">geometry</span><span class="o">=</span><span class="n">sd</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;pt_from&quot;</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">make_line</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">))</span>
+        <span class="n">name_to</span><span class="o">=</span><span class="n">sd</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"name"</span><span class="p">),</span>
+        <span class="n">geometry</span><span class="o">=</span><span class="n">sd</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"pt_from"</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">make_line</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">))</span>
         <span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">tessellate_geom</span><span class="p">(</span><span class="mi">1_000</span><span class="p">),</span>
     <span class="p">)</span>
 <span class="p">)</span>
 
 <span class="n">lonboard</span><span class="o">.</span><span class="n">viz</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">())</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code>Map(basemap_style=&lt;CartoBasemap.DarkMatter: &#39;https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json&#39;…
+<div class="codehilite"><pre><span></span><code>Map(basemap_style=&lt;CartoBasemap.DarkMatter: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'…
 </code></pre></div>
 
 <p><img alt="Lonboard view of geography segments" src="../../../../intro-sedonadb-0-4-geog-toronto.png" /></p>
@@ -6129,10 +6128,10 @@
 <span class="n">ctx</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 
 <span class="c1"># Enable the GPU feature</span>
-<span class="n">ctx</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SET gpu.enable = true&quot;</span><span class="p">)</span>
+<span class="n">ctx</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SET gpu.enable = true"</span><span class="p">)</span>
 
 <span class="c1"># Increase the batch size to feed sufficient data to the GPU</span>
-<span class="n">ctx</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SET datafusion.execution.batch_size = 100000&quot;</span><span class="p">)</span>
+<span class="n">ctx</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SET datafusion.execution.batch_size = 100000"</span><span class="p">)</span>
 </code></pre></div>
 <p>For more information, see our brand new <a href="https://sedona.apache.org/sedonadb/latest/gpu-acceleration/">GPU Acceleration guide</a>.</p>
 <p>Thanks to <a href="https://github.com/pwrliang">pwrliang</a> for the research, benchmarking, implementation, and documentation for this feature!</p>
@@ -6141,21 +6140,21 @@
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">sedona.db</span>
 
 <span class="n">sd</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-<span class="n">countries_url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.parquet&quot;</span>
-<span class="n">countries</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">countries_url</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;countries&quot;</span><span class="p">)</span>
+<span class="n">countries_url</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.parquet"</span>
+<span class="n">countries</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">countries_url</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"countries"</span><span class="p">)</span>
 
 <span class="n">countries</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
     <span class="n">countries</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">countries</span><span class="o">.</span><span class="n">continent</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">countries</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">to_geography</span><span class="p">()</span>
 <span class="p">)</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span>
-    <span class="s2">&quot;countries-geog.parquet&quot;</span><span class="p">,</span>
-    <span class="n">geoparquet_version</span><span class="o">=</span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
-    <span class="n">sort_by</span><span class="o">=</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span>
+    <span class="s2">"countries-geog.parquet"</span><span class="p">,</span>
+    <span class="n">geoparquet_version</span><span class="o">=</span><span class="s2">"2.0"</span><span class="p">,</span>
+    <span class="n">sort_by</span><span class="o">=</span><span class="s2">"geometry"</span><span class="p">,</span>
     <span class="n">max_row_group_size</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="kn">import</span> <span class="n">parquet</span>
 
-<span class="n">parquet</span><span class="o">.</span><span class="n">ParquetFile</span><span class="p">(</span><span class="s2">&quot;countries-geog.parquet&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">schema</span>
+<span class="n">parquet</span><span class="o">.</span><span class="n">ParquetFile</span><span class="p">(</span><span class="s2">"countries-geog.parquet"</span><span class="p">)</span><span class="o">.</span><span class="n">schema</span>
 </code></pre></div>
 <div class="codehilite"><pre><span></span><code>&lt;pyarrow._parquet.ParquetSchema object at 0x1174f3680&gt;
 required group field_id=-1 arrow_schema {
@@ -6179,15 +6178,15 @@ required group field_id=-1 arrow_schema {
 
 <span class="c1"># A public ERA5 rainfall pyramid (Zarr, anonymous). Reading + inspecting</span>
 <span class="c1"># dimensions is a metadata-only round-trip — no pixel bytes fetched.</span>
-<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://weathermapdata.rdrn.me/era5_2015_2020_l5.zarr/2&quot;</span>
-<span class="n">spec</span> <span class="o">=</span> <span class="n">sedonadb_zarr</span><span class="o">.</span><span class="n">Zarr</span><span class="p">()</span><span class="o">.</span><span class="n">with_options</span><span class="p">({</span><span class="s2">&quot;arrays&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;rain_ok&quot;</span><span class="p">]})</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">"https://weathermapdata.rdrn.me/era5_2015_2020_l5.zarr/2"</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">sedonadb_zarr</span><span class="o">.</span><span class="n">Zarr</span><span class="p">()</span><span class="o">.</span><span class="n">with_options</span><span class="p">({</span><span class="s2">"arrays"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"rain_ok"</span><span class="p">]})</span>
 <span class="n">cube</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">spec</span><span class="p">)</span>
 
 <span class="n">cube</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
-    <span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;ndim&quot;</span><span class="p">),</span>
-    <span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">dim_names</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;dims&quot;</span><span class="p">),</span>
-    <span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">shape</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;shape&quot;</span><span class="p">),</span>
-    <span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">srid</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;srid&quot;</span><span class="p">),</span>
+    <span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">num_dimensions</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"ndim"</span><span class="p">),</span>
+    <span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">dim_names</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"dims"</span><span class="p">),</span>
+    <span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">shape</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"shape"</span><span class="p">),</span>
+    <span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">srid</span><span class="p">()</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"srid"</span><span class="p">),</span>
 <span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
 <div class="codehilite"><pre><span></span><code>┌───────┬──────────────┬───────────────┬────────┐
@@ -6199,7 +6198,7 @@ required group field_id=-1 arrow_schema {
 </code></pre></div>
 
 <p><code>sedonadb-zarr</code> emits one row per Zarr chunk, so the storage layout <em>is</em> the data layout. SedonaDB stays lazy about pixels: reading the group and inspecting its dimensions (<code>RS_DimNames</code>, <code>RS_Shape</code>, <code>RS_DimSize</code>, <code>RS_NumDimensions</code>) touches only the group schema, which is a small metadata round-trip, with no pixel bytes fetched. A chunk's bytes are read only when an operation actually needs them. <code>RS_Slice</code> is currently one such operation: it resolves the chunks the query touches, then slices.</p>
-<div class="highlight"><pre><span></span><code><span class="n">sliced</span> <span class="o">=</span> <span class="n">cube</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">plane</span><span class="o">=</span><span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="n">sliced</span> <span class="o">=</span> <span class="n">cube</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">plane</span><span class="o">=</span><span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="s2">"year"</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 <span class="n">sliced</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
     <span class="n">dims</span><span class="o">=</span><span class="n">sliced</span><span class="o">.</span><span class="n">plane</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">dim_names</span><span class="p">(),</span>
     <span class="n">shape</span><span class="o">=</span><span class="n">sliced</span><span class="o">.</span><span class="n">plane</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">shape</span><span class="p">(),</span>
@@ -6214,7 +6213,7 @@ required group field_id=-1 arrow_schema {
 </code></pre></div>
 
 <p>Because each row is a chunk, <code>.show(5)</code> touches exactly five chunks and a <code>.filter(...)</code> trims the set further, so you only fetch the chunks your query reaches. The data stays in the cloud until then. And because each chunk is a row with a real spatial footprint, you can put a Zarr on a map without decoding a single pixel. <code>RS_Envelope</code> turns each chunk into its bounding geometry, so you can see exactly where the cube's chunks fall:</p>
-<div class="highlight"><pre><span></span><code><span class="n">chunks</span> <span class="o">=</span> <span class="n">cube</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">geom</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">st_transform</span><span class="p">(</span><span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">envelope</span><span class="p">(),</span> <span class="s2">&quot;EPSG:4326&quot;</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="n">chunks</span> <span class="o">=</span> <span class="n">cube</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">geom</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">st_transform</span><span class="p">(</span><span class="n">cube</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rst</span><span class="o">.</span><span class="n">envelope</span><span class="p">(),</span> <span class="s2">"EPSG:4326"</span><span class="p">))</span>
 
 <span class="c1"># Draw outlines only, so the basemap shows through the chunk grid.</span>
 <span class="n">lonboard</span><span class="o">.</span><span class="n">viz</span><span class="p">(</span>
@@ -6233,12 +6232,12 @@ required group field_id=-1 arrow_schema {
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
 <span class="n">usgs_drg_quads</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;https://download.osgeo.org/geotiff/samples/usgs/o41078a1.tif&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;https://download.osgeo.org/geotiff/samples/usgs/o41078a2.tif&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;https://download.osgeo.org/geotiff/samples/usgs/o41078a3.tif&quot;</span><span class="p">,</span>
+    <span class="s2">"https://download.osgeo.org/geotiff/samples/usgs/o41078a1.tif"</span><span class="p">,</span>
+    <span class="s2">"https://download.osgeo.org/geotiff/samples/usgs/o41078a2.tif"</span><span class="p">,</span>
+    <span class="s2">"https://download.osgeo.org/geotiff/samples/usgs/o41078a3.tif"</span><span class="p">,</span>
 <span class="p">]</span>
 
-<span class="n">tiffs</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">create_data_frame</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">usgs_drg_quads</span><span class="p">}))</span>
+<span class="n">tiffs</span> <span class="o">=</span> <span class="n">sd</span><span class="o">.</span><span class="n">create_data_frame</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"url"</span><span class="p">:</span> <span class="n">usgs_drg_quads</span><span class="p">}))</span>
 <span class="n">envelopes</span> <span class="o">=</span> <span class="n">tiffs</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">rs_envelope</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">rs_frompath</span><span class="p">(</span><span class="n">tiffs</span><span class="o">.</span><span class="n">url</span><span class="p">))</span><span class="o">.</span><span class="n">geo</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="mi">4326</span><span class="p">))</span>
 <span class="n">lonboard</span><span class="o">.</span><span class="n">viz</span><span class="p">(</span><span class="n">envelopes</span><span class="p">)</span>
 </code></pre></div>

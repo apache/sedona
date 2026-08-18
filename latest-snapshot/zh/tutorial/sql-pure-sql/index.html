@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5763,13 +5762,13 @@
 <p>使用以下代码加载数据并创建原始 DataFrame：</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">pointraw</span><span class="w"> </span><span class="p">(</span><span class="n">_c0</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">_c1</span><span class="w"> </span><span class="n">string</span><span class="p">)</span>
 <span class="k">USING</span><span class="w"> </span><span class="n">csv</span>
-<span class="k">OPTIONS</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="s1">&#39;false&#39;</span><span class="p">)</span>
-<span class="k">LOCATION</span><span class="w"> </span><span class="s1">&#39;&lt;some path&gt;/sedona/examples/sql/src/test/resources/testpoint.csv&#39;</span><span class="p">;</span>
+<span class="k">OPTIONS</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="s1">'false'</span><span class="p">)</span>
+<span class="k">LOCATION</span><span class="w"> </span><span class="s1">'&lt;some path&gt;/sedona/examples/sql/src/test/resources/testpoint.csv'</span><span class="p">;</span>
 
 <span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">polygonraw</span><span class="w"> </span><span class="p">(</span><span class="n">_c0</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">_c1</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">_c2</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">_c3</span><span class="w"> </span><span class="n">string</span><span class="p">)</span>
 <span class="k">USING</span><span class="w"> </span><span class="n">csv</span>
-<span class="k">OPTIONS</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="s1">&#39;false&#39;</span><span class="p">)</span>
-<span class="k">LOCATION</span><span class="w"> </span><span class="s1">&#39;&lt;some path&gt;/sedona/examples/sql/src/test/resources/testenvelope.csv&#39;</span><span class="p">;</span>
+<span class="k">OPTIONS</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="s1">'false'</span><span class="p">)</span>
+<span class="k">LOCATION</span><span class="w"> </span><span class="s1">'&lt;some path&gt;/sedona/examples/sql/src/test/resources/testenvelope.csv'</span><span class="p">;</span>
 </code></pre></div>
 <h2 id="_3">转换数据<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <p>需要把点和多边形数据转换为对应的几何类型：</p>
@@ -5794,7 +5793,7 @@
 <p>Sedona 提供了一个 Spark SQL 解析器扩展，使 DDL 语句中可以直接使用 <code>GEOMETRY</code> 数据类型。例如，可以在创建表时声明带几何列的 schema：</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">geom_table</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="w"> </span><span class="n">STRING</span><span class="p">,</span><span class="w"> </span><span class="k">version</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w"> </span><span class="n">geometry</span><span class="w"> </span><span class="n">GEOMETRY</span><span class="p">)</span>
 <span class="k">USING</span><span class="w"> </span><span class="n">geoparquet</span>
-<span class="k">LOCATION</span><span class="w"> </span><span class="s1">&#39;/path/to/geoparquet_geom_table&#39;</span><span class="p">;</span>
+<span class="k">LOCATION</span><span class="w"> </span><span class="s1">'/path/to/geoparquet_geom_table'</span><span class="p">;</span>
 
 <span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">geom_table</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
 </code></pre></div>

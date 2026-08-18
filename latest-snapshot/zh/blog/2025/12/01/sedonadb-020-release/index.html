@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5908,24 +5907,24 @@
 <p>Thank you to <a href="https://github.com/Abeeujah">Abeeujah</a>, <a href="https://github.com/ayushjariyal">ayushjariyal</a>, <a href="https://github.com/jesspav">jesspav</a>, <a href="https://github.com/joonaspessi">joonaspessi</a>, <a href="https://github.com/petern48">petern48</a>, and <a href="https://github.com/yutannihilation">yutannihilation</a> for these contributions! (With a special thanks to <a href="https://github.com/petern48">petern48</a> for reviewing nearly all of them!)</p>
 <h2 id="gdalogr-spatial-file-format-read-support">GDAL/OGR spatial file format read support<a class="headerlink" href="#gdalogr-spatial-file-format-read-support" title="Permanent link">&para;</a></h2>
 <p>Whereas SedonaDB 0.1.0 launched with GeoParquet read support and GeoPandas interoperability, support for file formats like GeoPackage, Shapefile, FlatGeoBuf inherited the limitations of GeoPandas (notably, the materialization of an entire layer in memory as a Pandas dataframe). The package powering GeoPandas read support (<a href="https://github.com/geopandas/pyogrio">pyogrio</a>) also exposes the <a href="https://gdal.org/en/stable/development/rfc/rfc86_column_oriented_api.html">underlying provider's (GDAL/OGR) native Arrow interface</a>, which is the exact format that SedonaDB uses under the hood! This allowed us to add support for dozens of vector formats at once wired directly in to DataFusion's flexible <code>FileFormat</code> API. Users can now read from spatial file formats just as they can from Parquet:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># pip install &quot;apache-sedona[db]&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># pip install "apache-sedona[db]"</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sedona.db</span>
 
 <span class="n">sd</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/example-crs/files/example-crs_vermont-utm.fgb&quot;</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/example-crs/files/example-crs_vermont-utm.fgb"</span>
 <span class="n">sd</span><span class="o">.</span><span class="n">read_pyogrio</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </code></pre></div>
 <p>This works for local files, <code>https://</code> urls (via <code>/vsicurl/</code>), and zipped files (via <code>/vsizip/</code>). Globs (i.e., <code>sd.read_pyogrio("path/to/*.gpkg")</code>) resolving to 1 or more local files are also supported.</p>
 <p>Like SedonaDB's GeoParquet support, spatial filters like <code>ST_Intersects()</code> are translated into the GDAL/OGR scan where possible to take advantage of embedded spatial indexes in formats like GeoPackage, FlatGeoBuf, and Shapefile. For example, we can query small areas of a <a href="https://flatgeobuf.org/examples/maplibre/large.html">huge FlatGeoBuf file hosted elsewhere</a> without scanning the entire file:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># 12 GB file</span>
-<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://flatgeobuf.septima.dk/population_areas.fgb&quot;</span>
-<span class="n">sd</span><span class="o">.</span><span class="n">read_pyogrio</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">&quot;population_areas&quot;</span><span class="p">)</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">"https://flatgeobuf.septima.dk/population_areas.fgb"</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">read_pyogrio</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">"population_areas"</span><span class="p">)</span>
 
-<span class="n">wkt</span> <span class="o">=</span> <span class="s2">&quot;POLYGON ((-73.978329 40.767412, -73.950005 40.767412, -73.950005 40.795098, -73.978329 40.795098, -73.978329 40.767412))&quot;</span>
-<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">wkt</span> <span class="o">=</span> <span class="s2">"POLYGON ((-73.978329 40.767412, -73.950005 40.767412, -73.950005 40.795098, -73.978329 40.795098, -73.978329 40.767412))"</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="sa">f</span><span class="s2">"""</span>
 <span class="s2">SELECT sum(population::INTEGER) FROM population_areas</span>
-<span class="s2">WHERE ST_Intersects(wkb_geometry, ST_SetSRID(ST_GeomFromWKT(&#39;</span><span class="si">{</span><span class="n">wkt</span><span class="si">}</span><span class="s2">&#39;), 4326))</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="s2">WHERE ST_Intersects(wkb_geometry, ST_SetSRID(ST_GeomFromWKT('</span><span class="si">{</span><span class="n">wkt</span><span class="si">}</span><span class="s2">'), 4326))</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="c1"># &gt; ┌──────────────────────────────────┐</span>
 <span class="c1"># &gt; │ sum(population_areas.population) │</span>
 <span class="c1"># &gt; │               int64              │</span>
@@ -5935,23 +5934,23 @@
 </code></pre></div>
 <h2 id="geoparquet-11-write-support">GeoParquet 1.1 Write Support<a class="headerlink" href="#geoparquet-11-write-support" title="Permanent link">&para;</a></h2>
 <p>Whereas the initial version of SedonaDB launched with basic write support for GeoParquet files, the latest version of the specification that enables readers to read small portions of the resulting Parquet file was not supported. With the latest release, <code>DataFrame.to_parquet("path/to/parquet", geoparquet_version="1.1")</code> will add a <code>bbox</code> column enabling functions like <code>sd.read_parquet()</code> with a <code>WHERE ST_Intersects()</code> query to read only a portion of the input file.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># pip install &quot;apache-sedona[db]&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># pip install "apache-sedona[db]"</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sedona.db</span>
 
 <span class="n">sd</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/ns-water_water-point.fgb&quot;</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">"https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/ns-water_water-point.fgb"</span>
 
-<span class="n">sd</span><span class="o">.</span><span class="n">read_pyogrio</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="s2">&quot;water_point.parquet&quot;</span><span class="p">,</span> <span class="n">geoparquet_version</span><span class="o">=</span><span class="s2">&quot;1.1&quot;</span><span class="p">)</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">read_pyogrio</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="s2">"water_point.parquet"</span><span class="p">,</span> <span class="n">geoparquet_version</span><span class="o">=</span><span class="s2">"1.1"</span><span class="p">)</span>
 </code></pre></div>
 <p>Shrinking the default row group size to ~100,000 and applying a spatial sort may improve read performance by ensuring that row groups contain related features.</p>
-<div class="highlight"><pre><span></span><code><span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SET datafusion.execution.parquet.max_row_group_size = 100000&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SET datafusion.execution.parquet.max_row_group_size = 100000"</span><span class="p">)</span>
 
-<span class="n">sd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">&quot;water_point&quot;</span><span class="p">)</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">"water_point"</span><span class="p">)</span>
 
-<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">SELECT * FROM water_point</span>
 <span class="s2">ORDER BY sd_order(geometry)</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="s2">&quot;water_point.parquet&quot;</span><span class="p">,</span> <span class="n">geoparquet_version</span><span class="o">=</span><span class="s2">&quot;1.1&quot;</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="s2">"water_point.parquet"</span><span class="p">,</span> <span class="n">geoparquet_version</span><span class="o">=</span><span class="s2">"1.1"</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="python-user-defined-function-support">Python User-Defined Function Support<a class="headerlink" href="#python-user-defined-function-support" title="Permanent link">&para;</a></h2>
 <p>User-defined functions (UDFs) are essential components of many workflows in modern DataFrame engines like Spark, DataFusion, and DuckDB to capture user-specific logic that is difficult or impossible to implement by simply composing existing functions. Just as <a href="https://sedona.apache.org/latest/tutorial/sql/#spatial-vectorized-udfs-python-only">SedonaSpark provides a vectorized UDF framework for geometry types</a>, SedonaDB 0.2.0 exposes a framework that allows user-specific logic (including but not limited to those involving geometry!) to be referenced from SQL workflows. For example, a UDF implementation of <code>ST_Buffer()</code> could be written as:</p>
@@ -5974,7 +5973,7 @@
 
 
 <span class="n">sd</span><span class="o">.</span><span class="n">register_udf</span><span class="p">(</span><span class="n">shapely_udf</span><span class="p">)</span>
-<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT shapely_udf(ST_Point(0, 0), 2.0) as col&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT shapely_udf(ST_Point(0, 0), 2.0) as col"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="c1"># &gt; ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐</span>
 <span class="c1"># &gt; │                                                col                                               │</span>
 <span class="c1"># &gt; │                                             geometry                                             │</span>
@@ -5989,7 +5988,7 @@
 
 <span class="n">sd</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 
-<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT RS_Width(RS_Example()) as width&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT RS_Width(RS_Example()) as width"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 <span class="c1"># &gt; ┌────────┐</span>
 <span class="c1"># &gt; │  width │</span>
 <span class="c1"># &gt; │ uint64 │</span>
@@ -6005,8 +6004,8 @@
 <span class="c1"># ...</span>
 
 <span class="k">[dependencies]</span>
-<span class="n">datafusion</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;50.2.0&quot;</span><span class="p">}</span>
-<span class="n">sedona</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="n">datafusion</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"50.2.0"</span><span class="p">}</span>
+<span class="n">sedona</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"0.2.0"</span><span class="w"> </span><span class="p">}</span>
 <span class="c1"># ...</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">datafusion</span><span class="p">::{</span><span class="n">common</span><span class="p">::</span><span class="nb">Result</span><span class="p">,</span><span class="w"> </span><span class="n">prelude</span><span class="p">::</span><span class="o">*</span><span class="p">};</span>
@@ -6015,13 +6014,13 @@
 <span class="cp">#[tokio::main]</span>
 <span class="k">async</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="p">()</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">ctx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SedonaContext</span><span class="p">::</span><span class="n">new_local_interactive</span><span class="p">().</span><span class="k">await</span><span class="o">?</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_geo.parquet&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities_geo.parquet"</span><span class="p">;</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ctx</span><span class="p">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="w"> </span><span class="nb">Default</span><span class="p">::</span><span class="n">default</span><span class="p">()).</span><span class="k">await</span><span class="o">?</span><span class="p">;</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span>
-<span class="w">        </span><span class="p">.</span><span class="n">sort_by</span><span class="p">(</span><span class="fm">vec!</span><span class="p">[</span><span class="n">col</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">)])</span><span class="o">?</span>
+<span class="w">        </span><span class="p">.</span><span class="n">sort_by</span><span class="p">(</span><span class="fm">vec!</span><span class="p">[</span><span class="n">col</span><span class="p">(</span><span class="s">"name"</span><span class="p">)])</span><span class="o">?</span>
 <span class="w">        </span><span class="p">.</span><span class="n">show_sedona</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ctx</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span><span class="w"> </span><span class="nb">Default</span><span class="p">::</span><span class="n">default</span><span class="p">())</span>
 <span class="w">        </span><span class="p">.</span><span class="k">await</span><span class="o">?</span><span class="p">;</span>
-<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;{output}&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">"{output}"</span><span class="p">);</span>
 <span class="w">    </span><span class="nb">Ok</span><span class="p">(())</span>
 <span class="p">}</span>
 </code></pre></div>

@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.jvm.config &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -242,8 +241,8 @@
 
 <div class="viewcode-block" id="is_greater_or_equal_version"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.is_greater_or_equal_version">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">is_greater_or_equal_version</span><span class="p">(</span><span class="n">version_a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">version_b</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">version_b</span><span class="p">,</span> <span class="n">version_a</span><span class="p">]):</span>
-        <span class="n">version_numbers</span> <span class="o">=</span> <span class="n">version_a</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">),</span> <span class="n">version_b</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">version</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="k">for</span> <span class="n">version</span> <span class="ow">in</span> <span class="n">version_numbers</span><span class="p">]):</span>
+        <span class="n">version_numbers</span> <span class="o">=</span> <span class="n">version_a</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">),</span> <span class="n">version_b</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">version</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">""</span> <span class="k">for</span> <span class="n">version</span> <span class="ow">in</span> <span class="n">version_numbers</span><span class="p">]):</span>
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">for</span> <span class="n">ver_a</span><span class="p">,</span> <span class="n">ver_b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">version_numbers</span><span class="p">):</span>
@@ -262,10 +261,10 @@
             <span class="n">sedona_version</span> <span class="o">=</span> <span class="n">SedonaMeta</span><span class="o">.</span><span class="n">version</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="n">sedona_version</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;This function is not available for </span><span class="si">{</span><span class="n">sedona_version</span><span class="si">}</span><span class="s2">, &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;please use version higher than </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">"This function is not available for </span><span class="si">{</span><span class="n">sedona_version</span><span class="si">}</span><span class="s2">, "</span>
+                    <span class="sa">f</span><span class="s2">"please use version higher than </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">"</span>
                 <span class="p">)</span>
-                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not available before </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2"> sedona version&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Not available before </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2"> sedona version"</span><span class="p">)</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">result</span>
 
@@ -275,28 +274,28 @@
 
 
 <div class="viewcode-block" id="deprecated"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.deprecated">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">deprecated</span><span class="p">(</span><span class="n">reason</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    This is a decorator which can be used to mark functions</span>
 <span class="sd">    as deprecated. It will result in a warning being emitted</span>
 <span class="sd">    when the function is used.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reason</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
 
-        <span class="c1"># The @deprecated is used with a &#39;reason&#39;.</span>
+        <span class="c1"># The @deprecated is used with a 'reason'.</span>
         <span class="c1">#</span>
         <span class="c1"># .. code-block:: python</span>
         <span class="c1">#</span>
-        <span class="c1">#    @deprecated(&quot;please, use another function&quot;)</span>
+        <span class="c1">#    @deprecated("please, use another function")</span>
         <span class="c1">#    def old_function(x, y):</span>
         <span class="c1">#      pass</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">func1</span><span class="p">):</span>
 
             <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">func1</span><span class="p">):</span>
-                <span class="n">fmt1</span> <span class="o">=</span> <span class="s2">&quot;Call to deprecated class </span><span class="si">{name}</span><span class="s2"> (</span><span class="si">{reason}</span><span class="s2">).&quot;</span>
+                <span class="n">fmt1</span> <span class="o">=</span> <span class="s2">"Call to deprecated class </span><span class="si">{name}</span><span class="s2"> (</span><span class="si">{reason}</span><span class="s2">)."</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">fmt1</span> <span class="o">=</span> <span class="s2">&quot;Call to deprecated function </span><span class="si">{name}</span><span class="s2"> (</span><span class="si">{reason}</span><span class="s2">).&quot;</span>
+                <span class="n">fmt1</span> <span class="o">=</span> <span class="s2">"Call to deprecated function </span><span class="si">{name}</span><span class="s2"> (</span><span class="si">{reason}</span><span class="s2">)."</span>
 
             <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func1</span><span class="p">)</span>
             <span class="k">def</span><span class="w"> </span><span class="nf">new_func1</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -313,7 +312,7 @@
 
     <span class="k">elif</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">reason</span><span class="p">)</span> <span class="ow">or</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isfunction</span><span class="p">(</span><span class="n">reason</span><span class="p">):</span>
 
-        <span class="c1"># The @deprecated is used without any &#39;reason&#39;.</span>
+        <span class="c1"># The @deprecated is used without any 'reason'.</span>
         <span class="c1">#</span>
         <span class="c1"># .. code-block:: python</span>
         <span class="c1">#</span>
@@ -324,9 +323,9 @@
         <span class="n">func2</span> <span class="o">=</span> <span class="n">reason</span>
 
         <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">func2</span><span class="p">):</span>
-            <span class="n">fmt2</span> <span class="o">=</span> <span class="s2">&quot;Call to deprecated class </span><span class="si">{name}</span><span class="s2">.&quot;</span>
+            <span class="n">fmt2</span> <span class="o">=</span> <span class="s2">"Call to deprecated class </span><span class="si">{name}</span><span class="s2">."</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">fmt2</span> <span class="o">=</span> <span class="s2">&quot;Call to deprecated function </span><span class="si">{name}</span><span class="s2">.&quot;</span>
+            <span class="n">fmt2</span> <span class="o">=</span> <span class="s2">"Call to deprecated function </span><span class="si">{name}</span><span class="s2">."</span>
 
         <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func2</span><span class="p">)</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">new_func2</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -348,11 +347,11 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_used_jars</span><span class="p">():</span>
         <span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">_instantiatedSession</span>
 
-        <span class="c1"># When deployed normally, Sedona appears in `spark.jars``, when it&#39;s submitted</span>
-        <span class="c1"># via YARN it&#39;s in `spark.yarn.dist.jars`</span>
+        <span class="c1"># When deployed normally, Sedona appears in `spark.jars``, when it's submitted</span>
+        <span class="c1"># via YARN it's in `spark.yarn.dist.jars`</span>
         <span class="n">used_jar_files_lookup_with_errors</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">SparkJars</span><span class="o">.</span><span class="n">get_spark_java_config</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">config_id</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">config_id</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;spark.jars&quot;</span><span class="p">,</span> <span class="s2">&quot;spark.yarn.dist.jars&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">config_id</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"spark.jars"</span><span class="p">,</span> <span class="s2">"spark.yarn.dist.jars"</span><span class="p">)</span>
         <span class="p">]</span>
 
         <span class="n">used_jar_files_lookup</span> <span class="o">=</span> <span class="p">[</span>
@@ -360,7 +359,7 @@
         <span class="p">]</span>
 
         <span class="n">used_jar_files</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">jars</span> <span class="k">for</span> <span class="n">jars</span> <span class="ow">in</span> <span class="n">used_jar_files_lookup</span> <span class="k">if</span> <span class="n">jars</span><span class="p">)</span>
+            <span class="s2">","</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">jars</span> <span class="k">for</span> <span class="n">jars</span> <span class="ow">in</span> <span class="n">used_jar_files_lookup</span> <span class="k">if</span> <span class="n">jars</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">used_jar_files_lookup</span><span class="p">)</span>
             <span class="k">else</span> <span class="kc">None</span>
         <span class="p">)</span>
@@ -370,18 +369,18 @@
             <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">used_jar_files_lookup_with_errors</span><span class="p">:</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
 
-            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Trying to get filenames from the $SPARK_HOME/jars directory&quot;</span><span class="p">)</span>
-            <span class="n">used_jar_files</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;SPARK_HOME&quot;</span><span class="p">],</span> <span class="s2">&quot;jars&quot;</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Trying to get filenames from the $SPARK_HOME/jars directory"</span><span class="p">)</span>
+            <span class="n">used_jar_files</span> <span class="o">=</span> <span class="s2">","</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"SPARK_HOME"</span><span class="p">],</span> <span class="s2">"jars"</span><span class="p">))</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">used_jar_files</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">jars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;__spark_jars&quot;</span><span class="p">):</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;__spark_jars&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_used_jars</span><span class="p">())</span>
-        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;__spark_jars&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"__spark_jars"</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"__spark_jars"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_used_jars</span><span class="p">())</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"__spark_jars"</span><span class="p">)</span>
 
 <div class="viewcode-block" id="SparkJars.get_spark_java_config"><a class="viewcode-back" href="../../../../../sedona.spark.core.jvm.html#sedona.spark.core.jvm.config.SparkJars.get_spark_java_config">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_spark_java_config</span><span class="p">(</span>
@@ -390,7 +389,7 @@
         <span class="k">if</span> <span class="n">spark</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">spark_conf</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">conf</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;SparkSession is not initiated&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"SparkSession is not initiated"</span><span class="p">)</span>
 
         <span class="n">java_spark_conf</span> <span class="o">=</span> <span class="n">spark_conf</span><span class="o">.</span><span class="n">_jconf</span>
         <span class="n">used_jar_files</span> <span class="o">=</span> <span class="kc">None</span>
@@ -399,7 +398,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">used_jar_files</span> <span class="o">=</span> <span class="n">java_spark_conf</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Didn&#39;t find the value of </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> from SparkConf&quot;</span>
+            <span class="n">error_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Didn't find the value of </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> from SparkConf"</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">used_jar_files</span><span class="p">,</span> <span class="n">error_message</span></div></div>
@@ -410,7 +409,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_version</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spark_jars</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="c1"># Find Spark version, Scala version and Sedona version.</span>
         <span class="n">versions</span> <span class="o">=</span> <span class="n">findall</span><span class="p">(</span>
-            <span class="sa">r</span><span class="s2">&quot;sedona-(?:python-adapter|spark-shaded|spark)-([^,\n]</span><span class="si">{3}</span><span class="s2">)_([^,\n]</span><span class="si">{4}</span><span class="s2">)-([^,\n]</span><span class="si">{5}</span><span class="s2">)&quot;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s2">"sedona-(?:python-adapter|spark-shaded|spark)-([^,\n]</span><span class="si">{3}</span><span class="s2">)_([^,\n]</span><span class="si">{4}</span><span class="s2">)-([^,\n]</span><span class="si">{5}</span><span class="s2">)"</span><span class="p">,</span>
             <span class="n">spark_jars</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">versions</span><span class="p">)</span>
@@ -423,17 +422,17 @@
     <span class="nd">@classproperty</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">version</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="n">spark_jars</span> <span class="o">=</span> <span class="n">SparkJars</span><span class="o">.</span><span class="n">get_used_jars</span><span class="p">()</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__version&quot;</span><span class="p">):</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__version&quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_version</span><span class="p">(</span><span class="n">spark_jars</span><span class="p">))</span>
-        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__version&quot;</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">"__version"</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">"__version"</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_version</span><span class="p">(</span><span class="n">spark_jars</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">"__version"</span><span class="p">)</span></div>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">&quot;1.1.5&quot;</span><span class="p">,</span> <span class="s2">&quot;1.2.0&quot;</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">&quot;1.2.0&quot;</span><span class="p">,</span> <span class="s2">&quot;1.1.5&quot;</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">&quot;1.3.5&quot;</span><span class="p">,</span> <span class="s2">&quot;1.2.0&quot;</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;1.2.0&quot;</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">&quot;1.3.5&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">"1.1.5"</span><span class="p">,</span> <span class="s2">"1.2.0"</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">"1.2.0"</span><span class="p">,</span> <span class="s2">"1.1.5"</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">"1.3.5"</span><span class="p">,</span> <span class="s2">"1.2.0"</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="s2">"1.2.0"</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_greater_or_equal_version</span><span class="p">(</span><span class="s2">"1.3.5"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
 </pre></div>
 
            </div>

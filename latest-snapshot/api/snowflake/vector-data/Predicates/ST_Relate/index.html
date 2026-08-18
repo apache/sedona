@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5579,8 +5578,8 @@
 <p>Return type: <code>String</code></p>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Relate</span><span class="p">(</span>
-<span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (1 1, 5 5)&#39;</span><span class="p">),</span>
-<span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))&#39;</span><span class="p">)</span>
+<span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING (1 1, 5 5)'</span><span class="p">),</span>
+<span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))'</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>
@@ -5588,9 +5587,9 @@
 </code></pre></div>
 <p>SQL Example</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Relate</span><span class="p">(</span>
-<span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (1 1, 5 5)&#39;</span><span class="p">),</span>
-<span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))&#39;</span><span class="p">),</span>
-<span class="w">       </span><span class="ss">&quot;1010F0212&quot;</span>
+<span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING (1 1, 5 5)'</span><span class="p">),</span>
+<span class="w">        </span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'POLYGON ((3 3, 3 7, 7 7, 7 3, 3 3))'</span><span class="p">),</span>
+<span class="w">       </span><span class="ss">"1010F0212"</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Output:</p>

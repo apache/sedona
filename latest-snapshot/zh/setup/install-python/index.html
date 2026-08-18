@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5735,13 +5734,13 @@ python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </s
 <span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span>
-        <span class="s2">&quot;spark.jars.packages&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;org.apache.sedona:sedona-spark-3.3_2.12:1.9.1,&quot;</span>
-        <span class="s2">&quot;org.datasyslab:geotools-wrapper:1.9.1-33.5&quot;</span><span class="p">,</span>
+        <span class="s2">"spark.jars.packages"</span><span class="p">,</span>
+        <span class="s2">"org.apache.sedona:sedona-spark-3.3_2.12:1.9.1,"</span>
+        <span class="s2">"org.datasyslab:geotools-wrapper:1.9.1-33.5"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span>
-        <span class="s2">&quot;spark.jars.repositories&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;https://artifacts.unidata.ucar.edu/repository/unidata-all&quot;</span><span class="p">,</span>
+        <span class="s2">"spark.jars.repositories"</span><span class="p">,</span>
+        <span class="s2">"https://artifacts.unidata.ucar.edu/repository/unidata-all"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
@@ -5754,13 +5753,13 @@ python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </s
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaKryoRegistrator</span><span class="p">,</span> <span class="n">KryoSerializer</span>
 
 <span class="n">spark</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">&quot;appName&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.serializer&quot;</span><span class="p">,</span> <span class="n">KryoSerializer</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">&quot;spark.kryo.registrator&quot;</span><span class="p">,</span> <span class="n">SedonaKryoRegistrator</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span>
+    <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s2">"appName"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.serializer"</span><span class="p">,</span> <span class="n">KryoSerializer</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">config</span><span class="p">(</span><span class="s2">"spark.kryo.registrator"</span><span class="p">,</span> <span class="n">SedonaKryoRegistrator</span><span class="o">.</span><span class="n">getName</span><span class="p">)</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span>
-        <span class="s2">&quot;spark.jars.packages&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;org.apache.sedona:sedona-spark-shaded-3.3_2.12:1.9.1,&quot;</span>
-        <span class="s2">&quot;org.datasyslab:geotools-wrapper:1.9.1-33.5&quot;</span><span class="p">,</span>
+        <span class="s2">"spark.jars.packages"</span><span class="p">,</span>
+        <span class="s2">"org.apache.sedona:sedona-spark-shaded-3.3_2.12:1.9.1,"</span>
+        <span class="s2">"org.datasyslab:geotools-wrapper:1.9.1-33.5"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>

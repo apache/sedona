@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.utils.geometry_serde &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -243,19 +242,19 @@
 
 <div class="viewcode-block" id="find_geos_c_dll"><a class="viewcode-back" href="../../../../sedona.spark.utils.html#sedona.spark.utils.geometry_serde.find_geos_c_dll">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">find_geos_c_dll</span><span class="p">():</span>
         <span class="n">packages_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">shapely</span><span class="o">.</span><span class="vm">__file__</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">lib_dirname</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;shapely.libs&quot;</span><span class="p">,</span> <span class="s2">&quot;Shapely.libs&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">lib_dirname</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"shapely.libs"</span><span class="p">,</span> <span class="s2">"Shapely.libs"</span><span class="p">]:</span>
             <span class="n">lib_dirpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">packages_dir</span><span class="p">,</span> <span class="n">lib_dirname</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">lib_dirpath</span><span class="p">):</span>
                 <span class="k">continue</span>
             <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">lib_dirpath</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;geos_c&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">filename</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
-                    <span class="s2">&quot;.dll&quot;</span>
+                <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"geos_c"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">filename</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
+                    <span class="s2">".dll"</span>
                 <span class="p">):</span>
                     <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lib_dirpath</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;geos_c DLL not found in </span><span class="si">{</span><span class="n">packages_dir</span><span class="si">}</span><span class="se">\\</span><span class="s2">[S|s]hapely.libs&quot;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"geos_c DLL not found in </span><span class="si">{</span><span class="n">packages_dir</span><span class="si">}</span><span class="se">\\</span><span class="s2">[S|s]hapely.libs"</span><span class="p">)</span></div>
 
-    <span class="k">if</span> <span class="n">shapely</span><span class="o">.</span><span class="n">__version__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;2.&quot;</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">!=</span> <span class="s2">&quot;win32&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">shapely</span><span class="o">.</span><span class="n">__version__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"2."</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">!=</span> <span class="s2">"win32"</span><span class="p">:</span>
             <span class="c1"># We load geos_c library indirectly by loading shapely.lib</span>
             <span class="kn">import</span><span class="w"> </span><span class="nn">shapely.lib</span>
 
@@ -274,7 +273,7 @@
 
         <span class="n">speedup_enabled</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">elif</span> <span class="n">shapely</span><span class="o">.</span><span class="n">__version__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;1.&quot;</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="n">shapely</span><span class="o">.</span><span class="n">__version__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"1."</span><span class="p">):</span>
         <span class="c1"># Shapely 1.x uses ctypes.CDLL to load geos_c library. We can obtain the</span>
         <span class="c1"># handle of geos_c library from `shapely.geos._lgeos._handle`</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">shapely.geometry.base</span>
@@ -316,21 +315,21 @@
 
             <span class="c1"># The following code is mostly taken from the geom_factory function</span>
             <span class="c1"># in shapely/geometry/base.py, with a few tweaks to eliminate</span>
-            <span class="c1"># invocations to GEOS functions. We&#39;ve also replaced direct</span>
-            <span class="c1"># attribute reference with __dict__[&#39;attr&#39;] to get rid of the extra</span>
+            <span class="c1"># invocations to GEOS functions. We've also replaced direct</span>
+            <span class="c1"># attribute reference with __dict__['attr'] to get rid of the extra</span>
             <span class="c1"># cost of __setattr__ in shapely 1.8.</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">g</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No Shapely geometry can be created from null value&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"No Shapely geometry can be created from null value"</span><span class="p">)</span>
             <span class="n">ob</span> <span class="o">=</span> <span class="n">BaseGeometry</span><span class="p">()</span>
             <span class="n">geom_type</span> <span class="o">=</span> <span class="n">shapely</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">GEOMETRY_TYPES</span><span class="p">[</span><span class="n">geom_type_id</span><span class="p">]</span>
             <span class="n">ob</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="n">GEOMETRY_CLASSES</span><span class="p">[</span><span class="n">geom_type_id</span><span class="p">]</span>
-            <span class="n">ob</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;__geom__&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span>
-            <span class="n">ob</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;__p__&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">ob</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">"__geom__"</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span>
+            <span class="n">ob</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">"__p__"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">has_z</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">ob</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_ndim&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+                <span class="n">ob</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">"_ndim"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">ob</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_ndim&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
-            <span class="n">ob</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;_is_empty&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">ob</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">"_ndim"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">ob</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">"_is_empty"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">return</span> <span class="n">ob</span><span class="p">,</span> <span class="n">bytes_read</span></div>
 
         <span class="n">speedup_enabled</span> <span class="o">=</span> <span class="kc">True</span>
@@ -341,7 +340,7 @@
 
 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
     <span class="n">warn</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Cannot load geomserde_speedup, fallback to general python implementation. Reason: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"Cannot load geomserde_speedup, fallback to general python implementation. Reason: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
     <span class="p">)</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.geometry_serde_general</span><span class="w"> </span><span class="kn">import</span> <span class="n">deserialize</span><span class="p">,</span> <span class="n">serialize</span>
 </pre></div>

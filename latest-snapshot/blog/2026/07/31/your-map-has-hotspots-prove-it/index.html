@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5770,11 +5769,11 @@
 <p>This post works through all four as one investigation, on a dataset that ships in the Sedona repo: <strong>12,873 OpenStreetMap points of interest</strong> from western Poland's Lubusz region. (Poland is the home country of Sedona PMC member Pawel — which is how a slice of it became the project's sample data.) Loaded straight from the bundled shapefile:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark</span><span class="w"> </span><span class="kn">import</span> <span class="n">SedonaContext</span>
 
-<span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">&quot;local[*]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">())</span>
-<span class="n">sedona</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">setCheckpointDir</span><span class="p">(</span><span class="s2">&quot;/tmp/sedona-ckpt&quot;</span><span class="p">)</span>
+<span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span><span class="o">.</span><span class="n">master</span><span class="p">(</span><span class="s2">"local[*]"</span><span class="p">)</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">())</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">sparkContext</span><span class="o">.</span><span class="n">setCheckpointDir</span><span class="p">(</span><span class="s2">"/tmp/sedona-ckpt"</span><span class="p">)</span>
 
-<span class="n">pois</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;shapefile&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;docs/usecases/data&quot;</span><span class="p">)</span>
-<span class="n">pois</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">&quot;pois&quot;</span><span class="p">)</span>
+<span class="n">pois</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"shapefile"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"docs/usecases/data"</span><span class="p">)</span>
+<span class="n">pois</span><span class="o">.</span><span class="n">createOrReplaceTempView</span><span class="p">(</span><span class="s2">"pois"</span><span class="p">)</span>
 </code></pre></div>
 <p>Benches, tourist info, shops, restaurants, memorials — everyday map furniture. Four questions, four functions.</p>
 <h2 id="1-is-anything-actually-clustered-morans-i">1. Is anything actually clustered? — Moran's I<a class="headerlink" href="#1-is-anything-actually-clustered-morans-i" title="Permanent link">&para;</a></h2>
@@ -5782,17 +5781,17 @@
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stats.weighting</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_binary_distance_band_column</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stats.autocorrelation.moran</span><span class="w"> </span><span class="kn">import</span> <span class="n">Moran</span>
 
-<span class="n">cells</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">cells</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT ST_GeoHash(geometry, 5)                        AS id,</span>
 <span class="s2">           CAST(COUNT(*) AS DOUBLE)                       AS poi_count,</span>
 <span class="s2">           ST_Centroid(ST_Envelope_Aggr(geometry))        AS geometry</span>
 <span class="s2">    FROM pois GROUP BY ST_GeoHash(geometry, 5)</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span>
 
 <span class="n">weighted</span> <span class="o">=</span> <span class="n">add_binary_distance_band_column</span><span class="p">(</span>
-    <span class="n">cells</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="n">include_self</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">saved_attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;poi_count&quot;</span><span class="p">]</span>
+    <span class="n">cells</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="n">include_self</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">saved_attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"poi_count"</span><span class="p">]</span>
 <span class="p">)</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">Moran</span><span class="o">.</span><span class="n">get_global</span><span class="p">(</span><span class="n">weighted</span><span class="p">,</span> <span class="n">value_column</span><span class="o">=</span><span class="s2">&quot;poi_count&quot;</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">Moran</span><span class="o">.</span><span class="n">get_global</span><span class="p">(</span><span class="n">weighted</span><span class="p">,</span> <span class="n">value_column</span><span class="o">=</span><span class="s2">"poi_count"</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="s2">"id"</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>I = 0.2519    z = 12.69    p ≈ 0.000000
 </code></pre></div>
@@ -5802,10 +5801,10 @@
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.stats.hotspot_detection.getis_ord</span><span class="w"> </span><span class="kn">import</span> <span class="n">g_local</span>
 
 <span class="n">weighted</span> <span class="o">=</span> <span class="n">add_binary_distance_band_column</span><span class="p">(</span>
-    <span class="n">cells</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="n">include_self</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">saved_attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;poi_count&quot;</span><span class="p">]</span>
+    <span class="n">cells</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="n">include_self</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">saved_attributes</span><span class="o">=</span><span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"poi_count"</span><span class="p">]</span>
 <span class="p">)</span>
-<span class="n">hot</span> <span class="o">=</span> <span class="n">g_local</span><span class="p">(</span><span class="n">weighted</span><span class="p">,</span> <span class="s2">&quot;poi_count&quot;</span><span class="p">,</span> <span class="n">star</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">hot</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">hot</span> <span class="o">=</span> <span class="n">g_local</span><span class="p">(</span><span class="n">weighted</span><span class="p">,</span> <span class="s2">"poi_count"</span><span class="p">,</span> <span class="n">star</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">hot</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"Z"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+-----+---------+-------+-----+---+
 |id   |poi_count|G      |Z    |P  |
@@ -5833,7 +5832,7 @@
 <span class="p">)</span>
 
 <span class="n">lof</span> <span class="o">=</span> <span class="n">local_outlier_factor</span><span class="p">(</span><span class="n">pois</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="n">lof</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">&quot;lof&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;fclass&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;lof&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">lof</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s2">"lof"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">"fclass"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">,</span> <span class="s2">"lof"</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>+-------------+----------------+-----+
 |fclass       |name            |lof  |

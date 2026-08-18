@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5951,13 +5950,13 @@
 +---+----------------------+
 </code></pre></div>
 <p>匹配相互接触的连接：</p>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">SELECT</span>
 <span class="s2">    lines.id as line_id,</span>
 <span class="s2">    polygons.id as polygon_id</span>
 <span class="s2">FROM lines</span>
 <span class="s2">LEFT JOIN polygons ON ST_Touches(lines.geometry, polygons.geometry);</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>连接结果：</p>
 <div class="highlight"><pre><span></span><code>+-------+----------+

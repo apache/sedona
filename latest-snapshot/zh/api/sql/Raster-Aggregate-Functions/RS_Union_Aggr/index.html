@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5583,13 +5582,13 @@
 <p>First, we enrich the dataset with time-based grouping columns and index the rasters based on time intervals:</p>
 <div class="highlight"><pre><span></span><code>// Add yearly and quarterly time interval columns for grouping
 df = df
- .withColumn(&quot;year&quot;, year($&quot;timestamp&quot;))
- .withColumn(&quot;quarter&quot;, quarter($&quot;timestamp&quot;))
+ .withColumn("year", year($"timestamp"))
+ .withColumn("quarter", quarter($"timestamp"))
 
 // Define window specs for quarterly indexing within each geometry-year group
-windowSpecQuarter = Window.partitionBy(&quot;geometry&quot;, &quot;year&quot;, &quot;quarter&quot;).orderBy(&quot;timestamp&quot;)
+windowSpecQuarter = Window.partitionBy("geometry", "year", "quarter").orderBy("timestamp")
 
-indexedDf = df.withColumn(&quot;index&quot;, row_number().over(windowSpecQuarter))
+indexedDf = df.withColumn("index", row_number().over(windowSpecQuarter))
 
 indexedDf.show()
 </code></pre></div>
@@ -5597,36 +5596,36 @@ indexedDf.show()
 <div class="highlight"><pre><span></span><code>+-------------------+-----------------------------+--------------+----+-------+-----+
 |timestamp          |raster                       |geometry      |year|quarter|index|
 +-------------------+-----------------------------+--------------+----+-------+-----+
-|2021-01-10 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (72 120)|2021|1      |1    |
-|2021-01-25 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (72 120)|2021|1      |2    |
-|2021-02-15 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (72 120)|2021|1      |3    |
-|2021-03-15 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (72 120)|2021|1      |4    |
-|2021-03-25 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (72 120)|2021|1      |5    |
-|2021-04-10 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (84 132)|2021|2      |1    |
-|2021-04-22 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (84 132)|2021|2      |2    |
-|2021-05-15 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (84 132)|2021|2      |3    |
-|2021-05-20 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (84 132)|2021|2      |4    |
-|2021-05-29 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (84 132)|2021|2      |5    |
-|2021-06-10 00:00:00|GridCoverage2D[&quot;geotiff_co...|POINT (84 132)|2021|2      |6    |
+|2021-01-10 00:00:00|GridCoverage2D["geotiff_co...|POINT (72 120)|2021|1      |1    |
+|2021-01-25 00:00:00|GridCoverage2D["geotiff_co...|POINT (72 120)|2021|1      |2    |
+|2021-02-15 00:00:00|GridCoverage2D["geotiff_co...|POINT (72 120)|2021|1      |3    |
+|2021-03-15 00:00:00|GridCoverage2D["geotiff_co...|POINT (72 120)|2021|1      |4    |
+|2021-03-25 00:00:00|GridCoverage2D["geotiff_co...|POINT (72 120)|2021|1      |5    |
+|2021-04-10 00:00:00|GridCoverage2D["geotiff_co...|POINT (84 132)|2021|2      |1    |
+|2021-04-22 00:00:00|GridCoverage2D["geotiff_co...|POINT (84 132)|2021|2      |2    |
+|2021-05-15 00:00:00|GridCoverage2D["geotiff_co...|POINT (84 132)|2021|2      |3    |
+|2021-05-20 00:00:00|GridCoverage2D["geotiff_co...|POINT (84 132)|2021|2      |4    |
+|2021-05-29 00:00:00|GridCoverage2D["geotiff_co...|POINT (84 132)|2021|2      |5    |
+|2021-06-10 00:00:00|GridCoverage2D["geotiff_co...|POINT (84 132)|2021|2      |6    |
 +-------------------+-----------------------------+------------- +----+-------+-----+
 </code></pre></div>
 <p>To create a stacked raster by grouping on geometry.</p>
-<div class="highlight"><pre><span></span><code>indexedDf.createOrReplaceTempView(&quot;indexedDf&quot;)
+<div class="highlight"><pre><span></span><code>indexedDf.createOrReplaceTempView("indexedDf")
 
-sedona.sql(&#39;&#39;&#39;
+sedona.sql('''
     SELECT geometry, year, quarter, RS_Union_Aggr(raster, index) AS aggregated_raster
     FROM indexedDf
     WHERE index &lt;= 4
     GROUP BY geometry, year, quarter
-&#39;&#39;&#39;).show()
+''').show()
 </code></pre></div>
 <p>Output:</p>
 <p>The query yields rasters grouped by geometry, year and quarter, each containing the first four time steps combined into a single multiband raster, where each band represents one time step.</p>
 <div class="highlight"><pre><span></span><code>+--------------+----+-------+--------------------+---------+
 |      geometry|year|quarter|              raster|Num_Bands|
 +--------------+----+-------+--------------------+---------+
-|POINT (72 120)|2021|1      |GridCoverage2D[&quot;g...|        4|
-|POINT (84 132)|2021|2      |GridCoverage2D[&quot;g...|        4|
+|POINT (72 120)|2021|1      |GridCoverage2D["g...|        4|
+|POINT (84 132)|2021|2      |GridCoverage2D["g...|        4|
 +--------------+----+-------+--------------------+---------+
 </code></pre></div>
 

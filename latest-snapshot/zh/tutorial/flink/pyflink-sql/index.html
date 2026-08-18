@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5592,13 +5591,13 @@
 <span class="n">flink_settings</span> <span class="o">=</span> <span class="n">EnvironmentSettings</span><span class="o">.</span><span class="n">in_streaming_mode</span><span class="p">()</span>
 <span class="n">table_env</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">stream_env</span><span class="p">,</span> <span class="n">flink_settings</span><span class="p">)</span>
 
-<span class="n">table_env</span><span class="o">.</span><span class="n">sql_query</span><span class="p">(</span><span class="s2">&quot;SELECT ST_Point(1.0, 2.0)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+<span class="n">table_env</span><span class="o">.</span><span class="n">sql_query</span><span class="p">(</span><span class="s2">"SELECT ST_Point(1.0, 2.0)"</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
 </code></pre></div>
 <p>PyFlink 不支持把 Scala 自定义类型（UDT）转换为 Python UDT。
 因此，如果想在 Python 中收集结果，需要使用 <code>ST_AsText</code> 或 <code>ST_ASBinary</code> 等函数把结果转换为字符串或二进制。</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.wkb</span><span class="w"> </span><span class="kn">import</span> <span class="n">loads</span>
 
-<span class="n">table_env</span><span class="o">.</span><span class="n">sql_query</span><span class="p">(</span><span class="s2">&quot;SELECT ST_ASBinary(ST_Point(1.0, 2.0))&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+<span class="n">table_env</span><span class="o">.</span><span class="n">sql_query</span><span class="p">(</span><span class="s2">"SELECT ST_ASBinary(ST_Point(1.0, 2.0))"</span><span class="p">)</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
 
 <span class="p">[</span><span class="n">loads</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">el</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">result</span><span class="p">]</span>
 </code></pre></div>
@@ -5616,11 +5615,11 @@
 
 
 <span class="n">table_env</span><span class="o">.</span><span class="n">create_temporary_function</span><span class="p">(</span>
-    <span class="s2">&quot;ST_BufferPython&quot;</span><span class="p">,</span> <span class="n">udf</span><span class="p">(</span><span class="n">Buffer</span><span class="p">(),</span> <span class="n">result_type</span><span class="o">=</span><span class="s2">&quot;Binary&quot;</span><span class="p">)</span>
+    <span class="s2">"ST_BufferPython"</span><span class="p">,</span> <span class="n">udf</span><span class="p">(</span><span class="n">Buffer</span><span class="p">(),</span> <span class="n">result_type</span><span class="o">=</span><span class="s2">"Binary"</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="n">buffer_table</span> <span class="o">=</span> <span class="n">table_env</span><span class="o">.</span><span class="n">sql_query</span><span class="p">(</span>
-    <span class="s2">&quot;SELECT ST_BufferPython(ST_ASBinary(ST_Point(1.0, 2.0))) AS buffer&quot;</span>
+    <span class="s2">"SELECT ST_BufferPython(ST_ASBinary(ST_Point(1.0, 2.0))) AS buffer"</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>更多 SQL 示例请参阅 FlinkSQL 章节：<a href="../sql/">FlinkSQL</a>。</p>

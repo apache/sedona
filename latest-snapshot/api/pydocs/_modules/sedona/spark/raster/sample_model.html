@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.raster.sample_model &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -235,10 +234,10 @@
 
 
 <div class="viewcode-block" id="SampleModel"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.sample_model.SampleModel">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SampleModel</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The SampleModel class and its subclasses are defined according to the data structure of</span>
+<span class="w">    </span><span class="sd">"""The SampleModel class and its subclasses are defined according to the data structure of</span>
 <span class="sd">    SampleModel class in Java AWT.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">TYPE_BANDED</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">TYPE_PIXEL_INTERLEAVED</span> <span class="o">=</span> <span class="mi">2</span>
@@ -262,15 +261,15 @@
 <div class="viewcode-block" id="SampleModel.as_numpy"><a class="viewcode-back" href="../../../../sedona.spark.raster.html#sedona.spark.raster.sample_model.SampleModel.as_numpy">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">as_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_buffer</span><span class="p">:</span> <span class="n">DataBuffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-            <span class="s2">&quot;Abstract method as_numpy was not implemented by subclass&quot;</span>
+            <span class="s2">"Abstract method as_numpy was not implemented by subclass"</span>
         <span class="p">)</span></div>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_pixel_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pixel_stride</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample position of every pixel, as a (height, width) array of indices.</span>
+<span class="w">        </span><span class="sd">"""Sample position of every pixel, as a (height, width) array of indices.</span>
 
 <span class="sd">        The positions are relative to the start of a bank, so they index the arrays</span>
 <span class="sd">        returned by :meth:`DataBuffer.bank_samples`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanline_stride</span> <span class="o">+</span> <span class="n">offset</span>
         <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span> <span class="o">*</span> <span class="n">pixel_stride</span>
         <span class="k">return</span> <span class="n">rows</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">+</span> <span class="n">cols</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span></div>
@@ -376,10 +375,10 @@
         <span class="c1"># Java extracts the bands with `(value &amp; mask) &gt;&gt;&gt; bitOffset`. Read the samples as</span>
         <span class="c1"># unsigned so that a mask covering the sign bit, such as the alpha mask of an ARGB</span>
         <span class="c1"># raster, does not sign-extend into the band values.</span>
-        <span class="n">unsigned_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;u</span><span class="si">{</span><span class="n">samples</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">unsigned_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="sa">f</span><span class="s2">"u</span><span class="si">{</span><span class="n">samples</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">values</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_pixel_positions</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">unsigned_dtype</span><span class="p">)</span>
         <span class="c1"># The bit masks are deserialized as signed 32 bit integers, so masks covering the</span>
-        <span class="c1"># sign bit arrive negative. Take their two&#39;s complement bits.</span>
+        <span class="c1"># sign bit arrive negative. Take their two's complement bits.</span>
         <span class="n">value_mask</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">samples</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="mi">8</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">band_arrs</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="n">values</span> <span class="o">&amp;</span> <span class="n">unsigned_dtype</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">mask</span> <span class="o">&amp;</span> <span class="n">value_mask</span><span class="p">))</span> <span class="o">&gt;&gt;</span> <span class="n">bit_offset</span>
@@ -425,19 +424,19 @@
         <span class="n">bit_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_bits</span> <span class="o">%</span> <span class="mi">32</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">bit_mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;This raster packs one pixel per 32 bit sample. java.awt.image derives the &quot;</span>
-                <span class="s2">&quot;bit mask for it as `(1 &lt;&lt; 32) - 1`, which is zero on an int, so Java reads &quot;</span>
-                <span class="s2">&quot;every pixel of such a raster as zero and writes to it are no-ops. &quot;</span>
-                <span class="s2">&quot;Returning zeroes to match.&quot;</span>
+                <span class="s2">"This raster packs one pixel per 32 bit sample. java.awt.image derives the "</span>
+                <span class="s2">"bit mask for it as `(1 &lt;&lt; 32) - 1`, which is zero on an int, so Java reads "</span>
+                <span class="s2">"every pixel of such a raster as zero and writes to it are no-ops. "</span>
+                <span class="s2">"Returning zeroes to match."</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="p">(</span><span class="n">shifts</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
             <span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;This raster&#39;s data bit offset (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data_bit_offset</span><span class="si">}</span><span class="s2">) is not a multiple &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;of its </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_bits</span><span class="si">}</span><span class="s2"> bits per pixel, so some pixels straddle two &quot;</span>
-                <span class="s2">&quot;samples. java.awt.image shifts those by a negative distance, which it &quot;</span>
-                <span class="s2">&quot;takes modulo 32, reading the top bits of the sample instead; Java&#39;s own &quot;</span>
-                <span class="s2">&quot;writes to those pixels are lossy in the same way. Returning what Java &quot;</span>
-                <span class="s2">&quot;reads.&quot;</span>
+                <span class="sa">f</span><span class="s2">"This raster's data bit offset (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data_bit_offset</span><span class="si">}</span><span class="s2">) is not a multiple "</span>
+                <span class="sa">f</span><span class="s2">"of its </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_bits</span><span class="si">}</span><span class="s2"> bits per pixel, so some pixels straddle two "</span>
+                <span class="s2">"samples. java.awt.image shifts those by a negative distance, which it "</span>
+                <span class="s2">"takes modulo 32, reading the top bits of the sample instead; Java's own "</span>
+                <span class="s2">"writes to those pixels are lossy in the same way. Returning what Java "</span>
+                <span class="s2">"reads."</span>
             <span class="p">)</span>
 
         <span class="n">values</span> <span class="o">=</span> <span class="n">samples</span><span class="p">[</span><span class="n">positions</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>

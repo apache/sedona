@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5904,16 +5903,16 @@
 <p>先创建一个 Sedona DataFrame：</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
     <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(2.0 5.0,6.0 1.0)&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(7.0 4.0,9.0 2.0)&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(1.0 3.0,3.0 1.0)&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"LINESTRING(2.0 5.0,6.0 1.0)"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"LINESTRING(7.0 4.0,9.0 2.0)"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"LINESTRING(1.0 3.0,3.0 1.0)"</span><span class="p">),</span>
     <span class="p">],</span>
-    <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">],</span>
 <span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)))</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">ST_GeomFromText</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">)))</span>
 </code></pre></div>
 <p>将 DataFrame 写成 GeoParquet 文件：</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geoparquet&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">&quot;overwrite&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;/tmp/somewhere&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="s2">"overwrite"</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"/tmp/somewhere"</span><span class="p">)</span>
 </code></pre></div>
 <p>写出的文件如下：</p>
 <div class="highlight"><pre><span></span><code>somewhere/
@@ -5926,7 +5925,7 @@
 <p>Sedona 会并行写出多个 Parquet 文件，比写单一文件快得多。</p>
 <h2 id="spark-geoparquet-sedona-dataframe">使用 Spark 将 GeoParquet 读入 Sedona DataFrame<a class="headerlink" href="#spark-geoparquet-sedona-dataframe" title="Permanent link">&para;</a></h2>
 <p>将 GeoParquet 文件读入 Sedona DataFrame：</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geoparquet&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/tmp/somewhere&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/somewhere"</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <p>结果如下：</p>
@@ -5952,7 +5951,7 @@
 <div class="tabbed-block"></div>
 </div>
 </div>
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet.metadata&quot;</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">read</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet.metadata"</span><span class="p">).</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
 <span class="n">df</span><span class="p">.</span><span class="n">printSchema</span><span class="p">()</span>
 </code></pre></div>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Java</label></div>
@@ -5960,7 +5959,7 @@
 <div class="tabbed-block"></div>
 </div>
 </div>
-<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;geoparquet.metadata&quot;</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">df</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="na">read</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">"geoparquet.metadata"</span><span class="p">).</span><span class="na">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
 <span class="n">df</span><span class="p">.</span><span class="na">printSchema</span><span class="p">()</span>
 </code></pre></div>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:1"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Python</label></div>
@@ -5968,7 +5967,7 @@
 <div class="tabbed-block"></div>
 </div>
 </div>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geoparquet.metadata&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geoparquet.metadata"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">geoparquetdatalocation1</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
 </code></pre></div>
 <p>输出如下：</p>
@@ -6011,20 +6010,20 @@
 <p><code>columns</code> 列保存了 GeoParquet 数据湖中各文件的边界框信息，可用于跳过整个文件或 row group。下文还会进一步介绍如何利用 bbox 元数据。</p>
 <h2 id="crs-geoparquet">写出带 CRS 元数据的 GeoParquet<a class="headerlink" href="#crs-geoparquet" title="Permanent link">&para;</a></h2>
 <p>自 v<code>1.5.1</code> 起，Sedona 支持以自定义的 GeoParquet 规范版本与 CRS 写出 GeoParquet 文件。默认的 GeoParquet 规范版本为 <code>1.1.0</code>（自 <code>v1.9.0</code> 起），默认 CRS 为 <code>null</code>。可按以下方式指定：</p>
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">projjson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{...}&quot;</span><span class="w"> </span><span class="c1">// 所有几何列共享的 PROJJSON 字符串</span>
-<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.version&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.crs&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">projjson</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="n">geoparquetoutputlocation</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/GeoParquet_File_Name.parquet&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">projjson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"{...}"</span><span class="w"> </span><span class="c1">// 所有几何列共享的 PROJJSON 字符串</span>
+<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.version"</span><span class="p">,</span><span class="w"> </span><span class="s">"1.0.0"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.crs"</span><span class="p">,</span><span class="w"> </span><span class="n">projjson</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="n">geoparquetoutputlocation</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"/GeoParquet_File_Name.parquet"</span><span class="p">)</span>
 </code></pre></div>
 <p>如果 GeoParquet 文件中存在多个几何列，可以为每个列分别指定 CRS。例如 <code>df</code> 中有两列几何列 <code>g0</code> 与 <code>g1</code>，希望分别指定它们的 CRS：</p>
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">projjson_g0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{...}&quot;</span><span class="w"> </span><span class="c1">// g0 的 PROJJSON 字符串</span>
-<span class="kd">val</span><span class="w"> </span><span class="n">projjson_g1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;{...}&quot;</span><span class="w"> </span><span class="c1">// g1 的 PROJJSON 字符串</span>
-<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.version&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;1.0.0&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.crs.g0&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">projjson_g0</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.crs.g1&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">projjson_g1</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="n">geoparquetoutputlocation</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/GeoParquet_File_Name.parquet&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">projjson_g0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"{...}"</span><span class="w"> </span><span class="c1">// g0 的 PROJJSON 字符串</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">projjson_g1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"{...}"</span><span class="w"> </span><span class="c1">// g1 的 PROJJSON 字符串</span>
+<span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.version"</span><span class="p">,</span><span class="w"> </span><span class="s">"1.0.0"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.crs.g0"</span><span class="p">,</span><span class="w"> </span><span class="n">projjson_g0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.crs.g1"</span><span class="p">,</span><span class="w"> </span><span class="n">projjson_g1</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="n">geoparquetoutputlocation</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"/GeoParquet_File_Name.parquet"</span><span class="p">)</span>
 </code></pre></div>
 <p><code>geoparquet.crs</code> 与 <code>geoparquet.crs.&lt;column_name&gt;</code> 可取以下值：</p>
 <ul>
@@ -6045,14 +6044,14 @@
 <a href="../../../api/sql/Geometry-Editors/ST_FlipCoordinates/"><code>ST_FlipCoordinates</code></a>。</p>
 <h2 id="covering-geoparquet">写出带 covering 元数据的 GeoParquet<a class="headerlink" href="#covering-geoparquet" title="Permanent link">&para;</a></h2>
 <p>自 <code>v1.6.1</code> 起，Sedona 支持向几何列元数据写入 <a href="https://github.com/opengeospatial/geoparquet/blob/v1.1.0/format-specs/geoparquet.md#covering"><code>covering</code> 字段</a>。该字段指定一列边界框列以加速空间数据检索。该边界框列必须是顶层结构体列，包含 <code>xmin</code>、<code>ymin</code>、<code>xmax</code>、<code>ymax</code> 四个子列。如果待写入的 DataFrame 已经包含这样的列，可通过 <code>.option("geoparquet.covering.&lt;geometryColumnName&gt;", "&lt;coveringColumnName&gt;")</code> 选项把 <code>covering</code> 元数据写入 GeoParquet：</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering.geometry&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bbox&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.covering.geometry"</span><span class="p">,</span><span class="w"> </span><span class="s">"bbox"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"/path/to/saved_geoparquet.parquet"</span><span class="p">)</span>
 </code></pre></div>
 <p>如果 DataFrame 仅有一列几何列，可以省略列名直接使用 <code>geoparquet.covering</code>：</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bbox&quot;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.covering"</span><span class="p">,</span><span class="w"> </span><span class="s">"bbox"</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"/path/to/saved_geoparquet.parquet"</span><span class="p">)</span>
 </code></pre></div>
 <p>如果未设置 <code>geoparquet.covering</code> 选项，Sedona 在写出 GeoParquet <code>1.1.0</code> 时会自动为您填充 covering 元数据。</p>
 <p>对每个几何列，Sedona 会使用 <code>&lt;geometryColumnName&gt;_bbox</code> 作为 covering 列：</p>
@@ -6066,13 +6065,13 @@
 <li><code>auto</code>（默认）：在写 GeoParquet <code>1.1.0</code> 时启用 covering 元数据/列的自动生成。</li>
 <li><code>legacy</code>：禁用自动 covering 生成。</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering.mode&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;legacy&quot;</span><span class="p">)</span>
-<span class="w">  </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.covering.mode"</span><span class="p">,</span><span class="w"> </span><span class="s">"legacy"</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="n">save</span><span class="p">(</span><span class="s">"/path/to/saved_geoparquet.parquet"</span><span class="p">)</span>
 </code></pre></div>
 <p>如果 DataFrame 中没有 covering 列，可以使用 Sedona 的 SQL 函数构造一个：</p>
-<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df_bbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;bbox&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;struct(ST_XMin(geometry) AS xmin, ST_YMin(geometry) AS ymin, ST_XMax(geometry) AS xmax, ST_YMax(geometry) AS ymax)&quot;</span><span class="p">))</span>
-<span class="n">df_bbox</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">&quot;geoparquet&quot;</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">&quot;geoparquet.covering.geometry&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;bbox&quot;</span><span class="p">).</span><span class="n">save</span><span class="p">(</span><span class="s">&quot;/path/to/saved_geoparquet.parquet&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">val</span><span class="w"> </span><span class="n">df_bbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">df</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">"bbox"</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"struct(ST_XMin(geometry) AS xmin, ST_YMin(geometry) AS ymin, ST_XMax(geometry) AS xmax, ST_YMax(geometry) AS ymax)"</span><span class="p">))</span>
+<span class="n">df_bbox</span><span class="p">.</span><span class="n">write</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s">"geoparquet"</span><span class="p">).</span><span class="n">option</span><span class="p">(</span><span class="s">"geoparquet.covering.geometry"</span><span class="p">,</span><span class="w"> </span><span class="s">"bbox"</span><span class="p">).</span><span class="n">save</span><span class="p">(</span><span class="s">"/path/to/saved_geoparquet.parquet"</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="geoparquet_1">排序后再写出 GeoParquet<a class="headerlink" href="#geoparquet_1" title="Permanent link">&para;</a></h2>
 <p>为了最大程度地发挥 Sedona GeoParquet filter pushdown 的性能，建议先按几何对象的 geohash 值（参见 <a href="../../../api/sql/Geometry-Output/ST_GeoHash/">ST_GeoHash</a>）排序，再写出 GeoParquet。示例如下：</p>
@@ -6089,13 +6088,13 @@ ORDER BY geohash
 <p>应用一个空间过滤器，只读取某个区域内的点：</p>
 <p><img alt="GeoParquet bbox 过滤" src="../../../../image/tutorial/files/geoparquet_bbox2.png" /></p>
 <p>查询代码：</p>
-<div class="highlight"><pre><span></span><code><span class="n">my_shape</span> <span class="o">=</span> <span class="s2">&quot;POLYGON((4.0 3.5, 4.0 6.0, 8.0 6.0, 8.0 4.5, 4.0 3.5))&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">my_shape</span> <span class="o">=</span> <span class="s2">"POLYGON((4.0 3.5, 4.0 6.0, 8.0 6.0, 8.0 4.5, 4.0 3.5))"</span>
 
-<span class="n">res</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="sa">f</span><span class="s2">"""</span>
 <span class="s2">select *</span>
 <span class="s2">from points</span>
-<span class="s2">where st_intersects(geometry, ST_GeomFromWKT(&#39;</span><span class="si">{</span><span class="n">my_shape</span><span class="si">}</span><span class="s2">&#39;))</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="s2">where st_intersects(geometry, ST_GeomFromWKT('</span><span class="si">{</span><span class="n">my_shape</span><span class="si">}</span><span class="s2">'))</span>
+<span class="s2">"""</span><span class="p">)</span>
 <span class="n">res</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">truncate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div>
 <p>结果如下：</p>

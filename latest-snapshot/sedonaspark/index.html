@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5726,43 +5725,43 @@
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">superhero</span><span class="p">.</span><span class="n">name</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">city</span><span class="p">,</span><span class="w"> </span><span class="n">superhero</span>
 <span class="k">WHERE</span><span class="w"> </span><span class="n">ST_Contains</span><span class="p">(</span><span class="n">city</span><span class="p">.</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="n">superhero</span><span class="p">.</span><span class="n">geom</span><span class="p">)</span>
-<span class="k">AND</span><span class="w"> </span><span class="n">city</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Gotham&#39;</span>
+<span class="k">AND</span><span class="w"> </span><span class="n">city</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'Gotham'</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT superhero.name</span>
 <span class="s2">    FROM city, superhero</span>
 <span class="s2">    WHERE ST_Contains(city.geom, superhero.geom)</span>
-<span class="s2">    AND city.name = &#39;Gotham&#39;</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="s2">    AND city.name = 'Gotham'</span>
+<span class="s2">"""</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">spark</span><span class="p">.</span><span class="na">sql</span><span class="p">(</span>
-<span class="s">&quot;SELECT superhero.name &quot;</span><span class="w"> </span><span class="o">+</span>
-<span class="s">&quot;FROM city, superhero &quot;</span><span class="w"> </span><span class="o">+</span>
-<span class="s">&quot;WHERE ST_Contains(city.geom, superhero.geom) &quot;</span><span class="w"> </span><span class="o">+</span>
-<span class="s">&quot;AND city.name = &#39;Gotham&#39;&quot;</span>
+<span class="s">"SELECT superhero.name "</span><span class="w"> </span><span class="o">+</span>
+<span class="s">"FROM city, superhero "</span><span class="w"> </span><span class="o">+</span>
+<span class="s">"WHERE ST_Contains(city.geom, superhero.geom) "</span><span class="w"> </span><span class="o">+</span>
+<span class="s">"AND city.name = 'Gotham'"</span>
 <span class="p">);</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">"""</span>
 <span class="s">    SELECT superhero.name</span>
 <span class="s">    FROM city, superhero</span>
 <span class="s">    WHERE ST_Contains(city.geom, superhero.geom)</span>
-<span class="s">    AND city.name = &#39;Gotham&#39;</span>
-<span class="s">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="s">    AND city.name = 'Gotham'</span>
+<span class="s">"""</span><span class="p">)</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="n">result</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">sql</span><span class="p">(</span><span class="s">&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">result</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">sql</span><span class="p">(</span><span class="s">"</span>
 <span class="s">SELECT superhero.name</span>
 <span class="s">FROM city, superhero</span>
 <span class="s">WHERE ST_Contains(city.geom, superhero.geom)</span>
-<span class="s">AND city.name = &#39;Gotham&#39;</span>
-<span class="s">&quot;</span><span class="p">)</span>
+<span class="s">AND city.name = 'Gotham'</span>
+<span class="s">"</span><span class="p">)</span>
 </code></pre></div>
 </div>
 </div>
@@ -5785,20 +5784,20 @@
 <h2 id="spark-and-sedona-example-with-vector-data">Spark and Sedona example with vector data<a class="headerlink" href="#spark-and-sedona-example-with-vector-data" title="Permanent link">&para;</a></h2>
 <p>Let’s take a look at how to perform a workflow on a vector dataset with Spark and Sedona.</p>
 <p>Let’s use the base water data supplied by the Overture Maps Foundation to map all the bodies of water in the New York City area.  Start by reading the data and creating a view:</p>
-<div class="highlight"><pre><span></span><code>base_water = sedona.table(&quot;open_data.overture_maps_foundation.base_water&quot;)
-base_water.createOrReplaceTempView(&quot;base_water_view&quot;)
+<div class="highlight"><pre><span></span><code>base_water = sedona.table("open_data.overture_maps_foundation.base_water")
+base_water.createOrReplaceTempView("base_water_view")
 </code></pre></div>
 <p>Now filter the dataset to include the bodies of water in the New York City area.</p>
-<div class="highlight"><pre><span></span><code><span class="n">spot</span> <span class="o">=</span> <span class="s2">&quot;POLYGON ((-74.174194 40.509623, -73.635864 40.509623, -73.635864 40.93634, -74.174194 40.93634, -74.174194 40.509623))&quot;</span>
-<span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">spot</span> <span class="o">=</span> <span class="s2">"POLYGON ((-74.174194 40.509623, -73.635864 40.509623, -73.635864 40.93634, -74.174194 40.93634, -74.174194 40.509623))"</span>
+<span class="n">query</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"""</span>
 <span class="s2">select id, geometry from base_water_view</span>
-<span class="s2">where ST_Contains(ST_GeomFromWKT(&#39;</span><span class="si">{</span><span class="n">spot</span><span class="si">}</span><span class="s2">&#39;), geometry)</span>
-<span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">where ST_Contains(ST_GeomFromWKT('</span><span class="si">{</span><span class="n">spot</span><span class="si">}</span><span class="s2">'), geometry)</span>
+<span class="s2">"""</span>
 <span class="n">res</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
 </code></pre></div>
 <p>Sedona integrates seamlessly with popular graphing libraries, making it easy to create graphs from a Sedona DataFrame.  You can build a map with just two lines of code:</p>
 <div class="highlight"><pre><span></span><code><span class="n">kepler_map</span> <span class="o">=</span> <span class="n">SedonaKepler</span><span class="o">.</span><span class="n">create_map</span><span class="p">()</span>
-<span class="n">SedonaKepler</span><span class="o">.</span><span class="n">add_df</span><span class="p">(</span><span class="n">kepler_map</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">res</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tri-state water&quot;</span><span class="p">)</span>
+<span class="n">SedonaKepler</span><span class="o">.</span><span class="n">add_df</span><span class="p">(</span><span class="n">kepler_map</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">res</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Tri-state water"</span><span class="p">)</span>
 </code></pre></div>
 <p>The map looks amazing!</p>
 <p><img alt="New York City water" src="../image/nyc_base_water.png" /></p>

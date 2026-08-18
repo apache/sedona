@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5746,8 +5745,8 @@ Neither is a shared path, so both <code>MultiLineString</code> elements are empt
 <h3 id="same-direction">Same direction<a class="headerlink" href="#same-direction" title="Permanent link">&para;</a></h3>
 <p>The shared interval is returned in element 0 because both inputs traverse it from left to right.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_SharedPaths</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (0 0, 10 0)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (5 0, 15 0)&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING (0 0, 10 0)'</span><span class="p">),</span>
+<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING (5 0, 15 0)'</span><span class="p">)</span>
 <span class="p">));</span>
 </code></pre></div>
 <p>Output:</p>
@@ -5757,8 +5756,8 @@ Neither is a shared path, so both <code>MultiLineString</code> elements are empt
 <p>The shared interval is returned in element 1 because <code>B</code> traverses it from right to left. Its
 coordinates still follow the left-to-right direction of <code>A</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_SharedPaths</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (0 0, 10 0)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (15 0, 5 0)&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING (0 0, 10 0)'</span><span class="p">),</span>
+<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING (15 0, 5 0)'</span><span class="p">)</span>
 <span class="p">));</span>
 </code></pre></div>
 <p>Output:</p>
@@ -5768,8 +5767,8 @@ coordinates still follow the left-to-right direction of <code>A</code>.</p>
 <p>One input pair can populate both elements. Here, <code>B</code> first follows <code>A</code>, leaves it, and later
 returns along <code>A</code> in the opposite direction.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_SharedPaths</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (0 0, 100 0)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (20 0, 30 0, 30 50, 80 0, 70 0)&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING (0 0, 100 0)'</span><span class="p">),</span>
+<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING (20 0, 30 0, 30 50, 80 0, 70 0)'</span><span class="p">)</span>
 <span class="p">));</span>
 </code></pre></div>
 <p>Output:</p>
@@ -5780,10 +5779,10 @@ returns along <code>A</code> in the opposite direction.</p>
 vertices from either input, so a shared path may be shorter than its containing input segment.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_SharedPaths</span><span class="p">(</span>
 <span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span>
-<span class="w">        </span><span class="s1">&#39;MULTILINESTRING ((1 3, 4 2, 7 2, 7 5), (13 10, 14 7, 11 6, 15 5))&#39;</span>
+<span class="w">        </span><span class="s1">'MULTILINESTRING ((1 3, 4 2, 7 2, 7 5), (13 10, 14 7, 11 6, 15 5))'</span>
 <span class="w">    </span><span class="p">),</span>
 <span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span>
-<span class="w">        </span><span class="s1">&#39;LINESTRING (2 1, 4 2, 7 2, 8 3, 10 6, 11 6, 14 7, 16 9)&#39;</span>
+<span class="w">        </span><span class="s1">'LINESTRING (2 1, 4 2, 7 2, 8 3, 10 6, 11 6, 14 7, 16 9)'</span>
 <span class="w">    </span><span class="p">)</span>
 <span class="p">));</span>
 </code></pre></div>
@@ -5793,8 +5792,8 @@ vertices from either input, so a shared path may be shorter than its containing 
 <h3 id="no-lineal-overlap">No lineal overlap<a class="headerlink" href="#no-lineal-overlap" title="Permanent link">&para;</a></h3>
 <p>Lines that cross only at a point do not share a path, so both elements are empty.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">ST_SharedPaths</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (0 0, 10 0)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">&#39;LINESTRING (5 -5, 5 5)&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING (0 0, 10 0)'</span><span class="p">),</span>
+<span class="w">    </span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">'LINESTRING (5 -5, 5 5)'</span><span class="p">)</span>
 <span class="p">));</span>
 </code></pre></div>
 <p>Output:</p>

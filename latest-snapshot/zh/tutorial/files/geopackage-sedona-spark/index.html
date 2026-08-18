@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5778,22 +5777,22 @@
 <span class="n">polygon1</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)])</span>
 
 <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Point A&quot;</span><span class="p">,</span> <span class="s2">&quot;Point B&quot;</span><span class="p">,</span> <span class="s2">&quot;Polygon A&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span>
-    <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">point1</span><span class="p">,</span> <span class="n">point2</span><span class="p">,</span> <span class="n">polygon1</span><span class="p">],</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Point A"</span><span class="p">,</span> <span class="s2">"Point B"</span><span class="p">,</span> <span class="s2">"Polygon A"</span><span class="p">],</span>
+    <span class="s2">"value"</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span>
+    <span class="s2">"geometry"</span><span class="p">:</span> <span class="p">[</span><span class="n">point1</span><span class="p">,</span> <span class="n">point2</span><span class="p">,</span> <span class="n">polygon1</span><span class="p">],</span>
 <span class="p">}</span>
-<span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">"geometry"</span><span class="p">)</span>
 </code></pre></div>
 <p>将 GeoPandas DataFrame 写入 GeoPackage 文件：</p>
-<div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="s2">&quot;/tmp/my_file.gpkg&quot;</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;my_layer&quot;</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;GPKG&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="s2">"/tmp/my_file.gpkg"</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">"my_layer"</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">"GPKG"</span><span class="p">)</span>
 </code></pre></div>
 <p>代码中将 driver 设为 <code>GPKG</code>，因此 GeoPandas 会以 GeoPackage 格式写出。</p>
 <p>可以把 layer 视作表名。</p>
 <p>接下来用 Apache Sedona 与 Spark 读取这个 GeoPackage 文件：</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geopackage&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tableName&quot;</span><span class="p">,</span> <span class="s2">&quot;my_layer&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/tmp/my_file.gpkg&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geopackage"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"tableName"</span><span class="p">,</span> <span class="s2">"my_layer"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/my_file.gpkg"</span><span class="p">)</span>
 <span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
@@ -5809,9 +5808,9 @@
 <p>几何列可以包含点、多边形等多种几何对象。</p>
 <p>也可以查看 GeoPackage 文件的元数据：</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geopackage&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;showMetadata&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/tmp/my_file.gpkg&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geopackage"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"showMetadata"</span><span class="p">,</span> <span class="s2">"true"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/my_file.gpkg"</span><span class="p">)</span>
 <span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
@@ -5829,7 +5828,7 @@
   my_file2.gpkg
 </code></pre></div>
 <p>可以这样读取所有文件：</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geopackage&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tableName&quot;</span><span class="p">,</span> <span class="s2">&quot;my_layer&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/tmp/gpkgs&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geopackage"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"tableName"</span><span class="p">,</span> <span class="s2">"my_layer"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/gpkgs"</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>结果如下：</p>
@@ -5847,20 +5846,20 @@
 <h2 id="geopackage">加载 GeoPackage 中的栅格数据<a class="headerlink" href="#geopackage" title="Permanent link">&para;</a></h2>
 <p>也可以从 GeoPackage 中的栅格表加载数据。代码如下：</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geopackage&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tableName&quot;</span><span class="p">,</span> <span class="s2">&quot;raster_table&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/geopackage&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geopackage"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"tableName"</span><span class="p">,</span> <span class="s2">"raster_table"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/path/to/geopackage"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>DataFrame 内容如下：</p>
 <div class="highlight"><pre><span></span><code>+---+----------+-----------+--------+--------------------+
 | id|zoom_level|tile_column|tile_row|           tile_data|
 +---+----------+-----------+--------+--------------------+
-|  1|        11|        428|     778|GridCoverage2D[&quot;c...|
-|  2|        11|        429|     778|GridCoverage2D[&quot;c...|
-|  3|        11|        428|     779|GridCoverage2D[&quot;c...|
-|  4|        11|        429|     779|GridCoverage2D[&quot;c...|
-|  5|        11|        427|     777|GridCoverage2D[&quot;c...|
+|  1|        11|        428|     778|GridCoverage2D["c...|
+|  2|        11|        429|     778|GridCoverage2D["c...|
+|  3|        11|        428|     779|GridCoverage2D["c...|
+|  4|        11|        429|     779|GridCoverage2D["c...|
+|  5|        11|        427|     777|GridCoverage2D["c...|
 +---+----------+-----------+--------+--------------------+
 </code></pre></div>
 <p>已知限制（v1.7.0）：</p>

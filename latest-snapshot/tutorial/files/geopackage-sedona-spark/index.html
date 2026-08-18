@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5778,22 +5777,22 @@
 <span class="n">polygon1</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">([(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)])</span>
 
 <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Point A&quot;</span><span class="p">,</span> <span class="s2">&quot;Point B&quot;</span><span class="p">,</span> <span class="s2">&quot;Polygon A&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span>
-    <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">point1</span><span class="p">,</span> <span class="n">point2</span><span class="p">,</span> <span class="n">polygon1</span><span class="p">],</span>
+    <span class="s2">"name"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Point A"</span><span class="p">,</span> <span class="s2">"Point B"</span><span class="p">,</span> <span class="s2">"Polygon A"</span><span class="p">],</span>
+    <span class="s2">"value"</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span>
+    <span class="s2">"geometry"</span><span class="p">:</span> <span class="p">[</span><span class="n">point1</span><span class="p">,</span> <span class="n">point2</span><span class="p">,</span> <span class="n">polygon1</span><span class="p">],</span>
 <span class="p">}</span>
-<span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">"geometry"</span><span class="p">)</span>
 </code></pre></div>
 <p>Now write the GeoPandas DataFrame to a GeoPackage file:</p>
-<div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="s2">&quot;/tmp/my_file.gpkg&quot;</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">&quot;my_layer&quot;</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;GPKG&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">gdf</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="s2">"/tmp/my_file.gpkg"</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="s2">"my_layer"</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">"GPKG"</span><span class="p">)</span>
 </code></pre></div>
 <p>GeoPandas knows to write this to a GeoPackage file because the code sets the driver to <code>GPKG</code>.</p>
 <p>You can think of the layer as the table name.</p>
 <p>Now let’s read the GeoPackage file Apache Sedona and Spark:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geopackage&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tableName&quot;</span><span class="p">,</span> <span class="s2">&quot;my_layer&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/tmp/my_file.gpkg&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geopackage"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"tableName"</span><span class="p">,</span> <span class="s2">"my_layer"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/my_file.gpkg"</span><span class="p">)</span>
 <span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
@@ -5809,9 +5808,9 @@
 <p>The geometry column can contain many different geometric objects like points, polygons, and many more.</p>
 <p>You can also see the metadata of the GeoPackage file:</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geopackage&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;showMetadata&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/tmp/my_file.gpkg&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geopackage"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"showMetadata"</span><span class="p">,</span> <span class="s2">"true"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/my_file.gpkg"</span><span class="p">)</span>
 <span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
@@ -5829,7 +5828,7 @@
   my_file2.gpkg
 </code></pre></div>
 <p>Here’s how you can read all the files:</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geopackage&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tableName&quot;</span><span class="p">,</span> <span class="s2">&quot;my_layer&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/tmp/gpkgs&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geopackage"</span><span class="p">)</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"tableName"</span><span class="p">,</span> <span class="s2">"my_layer"</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/tmp/gpkgs"</span><span class="p">)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <p>Here are the results:</p>
@@ -5847,20 +5846,20 @@
 <h2 id="load-raster-data-stored-in-geopackage-files">Load raster data stored in GeoPackage files<a class="headerlink" href="#load-raster-data-stored-in-geopackage-files" title="Permanent link">&para;</a></h2>
 <p>You can also load data from raster tables in the GeoPackage file. To load raster data, you can use the following code.</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;geopackage&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;tableName&quot;</span><span class="p">,</span> <span class="s2">&quot;raster_table&quot;</span><span class="p">)</span>
-    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;/path/to/geopackage&quot;</span><span class="p">)</span>
+    <span class="n">sedona</span><span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">"geopackage"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"tableName"</span><span class="p">,</span> <span class="s2">"raster_table"</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"/path/to/geopackage"</span><span class="p">)</span>
 <span class="p">)</span>
 </code></pre></div>
 <p>Here are the contents of the DataFrame:</p>
 <div class="highlight"><pre><span></span><code>+---+----------+-----------+--------+--------------------+
 | id|zoom_level|tile_column|tile_row|           tile_data|
 +---+----------+-----------+--------+--------------------+
-|  1|        11|        428|     778|GridCoverage2D[&quot;c...|
-|  2|        11|        429|     778|GridCoverage2D[&quot;c...|
-|  3|        11|        428|     779|GridCoverage2D[&quot;c...|
-|  4|        11|        429|     779|GridCoverage2D[&quot;c...|
-|  5|        11|        427|     777|GridCoverage2D[&quot;c...|
+|  1|        11|        428|     778|GridCoverage2D["c...|
+|  2|        11|        429|     778|GridCoverage2D["c...|
+|  3|        11|        428|     779|GridCoverage2D["c...|
+|  4|        11|        429|     779|GridCoverage2D["c...|
+|  5|        11|        427|     777|GridCoverage2D["c...|
 +---+----------+-----------+--------+--------------------+
 </code></pre></div>
 <p>Known limitations (v1.7.0):</p>

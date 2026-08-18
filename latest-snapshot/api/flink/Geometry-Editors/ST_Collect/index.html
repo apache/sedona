@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5580,8 +5579,8 @@ produce a <code>GeometryCollection</code>.</p>
 the first non-null input's SRID for the result.</p>
 <p>Geometry example:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Collect</span><span class="p">(</span>
-<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(21.427834 52.042576573)&#39;</span><span class="p">),</span>
-<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(45.342524 56.342354355)&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(21.427834 52.042576573)'</span><span class="p">),</span>
+<span class="w">    </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(45.342524 56.342354355)'</span><span class="p">)</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span>
 </code></pre></div>
 <p>Result:</p>
@@ -5595,8 +5594,8 @@ the first non-null input's SRID for the result.</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsEWKT</span><span class="p">(</span>
 <span class="w">    </span><span class="n">ST_Collect</span><span class="p">(</span>
 <span class="w">        </span><span class="nb">ARRAY</span><span class="p">[</span>
-<span class="w">            </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT(-122.4 37.8)&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
-<span class="w">            </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT(-122.5 37.7)&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">)</span>
+<span class="w">            </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">'POINT(-122.4 37.8)'</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">),</span>
+<span class="w">            </span><span class="n">ST_GeogFromWKT</span><span class="p">(</span><span class="s1">'POINT(-122.5 37.7)'</span><span class="p">,</span><span class="w"> </span><span class="mi">4326</span><span class="p">)</span>
 <span class="w">        </span><span class="p">]</span>
 <span class="w">    </span><span class="p">)</span>
 <span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geog</span>

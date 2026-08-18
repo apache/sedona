@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -14138,6 +14137,12 @@
   former positional <code>GeoDataFrame.set_crs(crs, inplace, allow_override)</code> signature remain
   temporarily supported with a <code>FutureWarning</code>. When CRS metadata is unavailable, validation can
   require a distributed lookup of the first non-null geometry's SRID.</li>
+<li><strong>Mixed coordinate layouts in polygons and multi-geometries</strong>: Serializing a <code>Polygon</code>,
+  <code>MultiPoint</code>, <code>MultiLineString</code>, or <code>MultiPolygon</code> whose parts mix XY, XYZ, XYM, or XYZM layouts
+  now raises <code>IllegalArgumentException</code> instead of silently losing or corrupting ordinates based on
+  part order. This can affect <code>ST_Collect</code> when same-type inputs use different layouts. Normalize
+  all parts to one layout, or use a <code>GeometryCollection</code>, whose members are serialized
+  independently.</li>
 </ul>
 <h3 id="new-features">New Features<a class="headerlink" href="#new-features" title="Permanent link">&para;</a></h3>
 <h4 id="geopandas-api">GeoPandas API<a class="headerlink" href="#geopandas-api" title="Permanent link">&para;</a></h4>
@@ -15257,8 +15262,8 @@
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
 
 
-<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mean_udf&quot;</span><span class="p">,</span> <span class="n">mean_udf</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
-<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;mean_udf(rast)&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"mean_udf"</span><span class="p">,</span> <span class="n">mean_udf</span><span class="p">,</span> <span class="n">DoubleType</span><span class="p">())</span>
+<span class="n">df_raster</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"mean"</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">"mean_udf(rast)"</span><span class="p">))</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="bug_5">Bug<a class="headerlink" href="#bug_5" title="Permanent link">&para;</a></h3>
 <ul>
@@ -15894,8 +15899,8 @@
 <li>Scala:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">sedona</span><span class="p">.</span><span class="nn">spark</span><span class="p">.</span><span class="nc">SedonaContext</span>
-<span class="kd">val</span><span class="w"> </span><span class="n">sedona</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SedonaContext</span><span class="p">.</span><span class="n">create</span><span class="p">(</span><span class="nc">SedonaContext</span><span class="p">.</span><span class="n">builder</span><span class="p">().</span><span class="n">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">).</span><span class="n">getOrCreate</span><span class="p">())</span>
-<span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;SELECT ST_GeomFromWKT(XXX) FROM&quot;</span><span class="p">)</span>
+<span class="kd">val</span><span class="w"> </span><span class="n">sedona</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SedonaContext</span><span class="p">.</span><span class="n">create</span><span class="p">(</span><span class="nc">SedonaContext</span><span class="p">.</span><span class="n">builder</span><span class="p">().</span><span class="n">master</span><span class="p">(</span><span class="s">"local[*]"</span><span class="p">).</span><span class="n">getOrCreate</span><span class="p">())</span>
+<span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">"SELECT ST_GeomFromWKT(XXX) FROM"</span><span class="p">)</span>
 </code></pre></div>
 <ul>
 <li>Python:</li>
@@ -15905,14 +15910,14 @@
 <span class="n">config</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">SedonaContext</span><span class="o">.</span><span class="n">builder</span><span class="p">()</span>
     <span class="o">.</span><span class="n">config</span><span class="p">(</span>
-        <span class="s2">&quot;spark.jars.packages&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;org.apache.sedona:sedona-spark-shaded-3.3_2.12:1.4.1,&quot;</span>
-        <span class="s2">&quot;org.datasyslab:geotools-wrapper:1.4.0-28.2&quot;</span><span class="p">,</span>
+        <span class="s2">"spark.jars.packages"</span><span class="p">,</span>
+        <span class="s2">"org.apache.sedona:sedona-spark-shaded-3.3_2.12:1.4.1,"</span>
+        <span class="s2">"org.datasyslab:geotools-wrapper:1.4.0-28.2"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 <span class="p">)</span>
 <span class="n">sedona</span> <span class="o">=</span> <span class="n">SedonaContext</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT ST_GeomFromWKT(XXX) FROM&quot;</span><span class="p">)</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT ST_GeomFromWKT(XXX) FROM"</span><span class="p">)</span>
 </code></pre></div>
 </li>
 <li>
@@ -15921,7 +15926,7 @@
 </ul>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">org.apache.sedona.flink.SedonaContext</span><span class="p">;</span>
 <span class="n">StreamTableEnvironment</span><span class="w"> </span><span class="n">sedona</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">SedonaContext</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">env</span><span class="p">,</span><span class="w"> </span><span class="n">tableEnv</span><span class="p">);</span>
-<span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">&quot;SELECT ST_GeomFromWKT(XXX) FROM&quot;</span><span class="p">);</span>
+<span class="n">sedona</span><span class="p">.</span><span class="na">sqlQuery</span><span class="p">(</span><span class="s">"SELECT ST_GeomFromWKT(XXX) FROM"</span><span class="p">);</span>
 </code></pre></div>
 </li>
 </ul>
@@ -16156,16 +16161,16 @@
 </ul>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">GEOGCS[&quot;WGS 84&quot;,</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">DATUM[&quot;WGS_1984&quot;,</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563,</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">PRIMEM[&quot;Greenwich&quot;,0,</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]],</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">UNIT[&quot;degree&quot;,0.0174532925199433,</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">AUTHORITY[&quot;EPSG&quot;,&quot;9122&quot;]],</span>
-<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]]</span>
+<div class="highlight"><pre><span></span><code><span class="l l-Scalar l-Scalar-Plain">GEOGCS["WGS 84",</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">DATUM["WGS_1984",</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">SPHEROID["WGS 84",6378137,298.257223563,</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">AUTHORITY["EPSG","7030"]],</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">AUTHORITY["EPSG","6326"]],</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">PRIMEM["Greenwich",0,</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">AUTHORITY["EPSG","8901"]],</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">UNIT["degree",0.0174532925199433,</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">AUTHORITY["EPSG","9122"]],</span>
+<span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">AUTHORITY["EPSG","4326"]]</span>
 </code></pre></div>
 <h3 id="bug-fixes_4">Bug fixes<a class="headerlink" href="#bug-fixes_4" title="Permanent link">&para;</a></h3>
 <ul>
@@ -16529,7 +16534,7 @@
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 14, 2026 06:17:05 UTC">August 14, 2026 06:17:05</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="August 18, 2026 03:02:16 UTC">August 18, 2026 03:02:16</span>
   </span>
 
     

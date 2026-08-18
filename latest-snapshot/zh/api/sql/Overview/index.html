@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5725,10 +5724,10 @@
 <h1 id="_1">简介<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
 <h2 id="_2">函数列表<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p>SedonaSQL 支持 SQL/MM Part3 空间 SQL 标准，包含以下四种 SQL 算子。所有这些算子都可以通过下面的方式直接调用：</p>
-<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">myDataFrame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;YOUR_SQL&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">myDataFrame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">"YOUR_SQL"</span><span class="p">)</span>
 </code></pre></div>
 <p>此外，也可以使用 <code>expr</code> 和 <code>selectExpr</code> 调用：</p>
-<div class="highlight"><pre><span></span><code><span class="n">myDataFrame</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">&quot;geometry&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_*&quot;</span><span class="p">)).</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">&quot;ST_*&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">myDataFrame</span><span class="p">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s">"geometry"</span><span class="p">,</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"ST_*"</span><span class="p">)).</span><span class="n">selectExpr</span><span class="p">(</span><span class="s">"ST_*"</span><span class="p">)</span>
 </code></pre></div>
 <ul>
 <li>构造函数（Constructor）：根据输入的字符串或坐标构造一个 Geometry<ul>
@@ -5756,7 +5755,7 @@
 <p>SedonaSQL 支持 SparkSQL 查询优化器，相关文档见<a href="../Optimizer/">此处</a></p>
 <h2 id="_3">栅格函数列表<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <p>SedonaSQL 同样支持栅格数据处理。栅格函数以 <code>RS_</code> 为前缀。所有栅格算子的调用方式与矢量算子相同：</p>
-<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">myDataFrame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">&quot;YOUR_SQL&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="kd">var</span><span class="w"> </span><span class="n">myDataFrame</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sedona</span><span class="p">.</span><span class="n">sql</span><span class="p">(</span><span class="s">"YOUR_SQL"</span><span class="p">)</span>
 </code></pre></div>
 <ul>
 <li>构造函数（Constructor）：根据输入的文件或参数构造一个 Raster<ul>
@@ -5790,7 +5789,7 @@
 </ol>
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nn">org</span><span class="p">.</span><span class="nn">apache</span><span class="p">.</span><span class="nn">sedona</span><span class="p">.</span><span class="nn">spark</span><span class="p">.</span><span class="nc">SedonaContext</span>
 <span class="kd">val</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">SedonaContext</span><span class="p">.</span><span class="n">builder</span><span class="p">().</span>
-<span class="w">    </span><span class="n">master</span><span class="p">(</span><span class="s">&quot;local[*]&quot;</span><span class="p">).</span><span class="n">appName</span><span class="p">(</span><span class="s">&quot;SedonaSQL&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">master</span><span class="p">(</span><span class="s">"local[*]"</span><span class="p">).</span><span class="n">appName</span><span class="p">(</span><span class="s">"SedonaSQL"</span><span class="p">)</span>
 <span class="w">    </span><span class="p">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 </code></pre></div>
 <ol>

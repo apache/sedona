@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5920,7 +5919,7 @@ simplicity and speed that distributed systems often cannot.</p>
 <li>Improved spatial function coverage and documentation</li>
 <li>R DataFrame API</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="c1"># pip install &quot;apache-sedona[db]&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># pip install "apache-sedona[db]"</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sedona.db</span>
 
 <span class="n">sd</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
@@ -5936,31 +5935,31 @@ the neighborhood with the most pizza restaurants about as fast as your
 internet connection/hard drive can load <a href="https://docs.overturemaps.org/guides/divisions/">Overture Maps
 Divisions</a> and
 <a href="https://docs.overturemaps.org/guides/places/">Places</a> data.</p>
-<div class="highlight"><pre><span></span><code><span class="n">overture</span> <span class="o">=</span> <span class="s2">&quot;s3://overturemaps-us-west-2/release/2026-02-18.0&quot;</span>
-<span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;aws.skip_signature&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;aws.region&quot;</span><span class="p">:</span> <span class="s2">&quot;us-west-2&quot;</span><span class="p">}</span>
-<span class="n">sd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">overture</span><span class="si">}</span><span class="s2">/theme=places/type=place/&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span>
-    <span class="s2">&quot;places&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">overture</span> <span class="o">=</span> <span class="s2">"s3://overturemaps-us-west-2/release/2026-02-18.0"</span>
+<span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"aws.skip_signature"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"aws.region"</span><span class="p">:</span> <span class="s2">"us-west-2"</span><span class="p">}</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">overture</span><span class="si">}</span><span class="s2">/theme=places/type=place/"</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span>
+    <span class="s2">"places"</span>
 <span class="p">)</span>
 <span class="n">sd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">overture</span><span class="si">}</span><span class="s2">/theme=divisions/type=division_area/&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span>
-<span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">&quot;divisions&quot;</span><span class="p">)</span>
+    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">overture</span><span class="si">}</span><span class="s2">/theme=divisions/type=division_area/"</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span>
+<span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">"divisions"</span><span class="p">)</span>
 
-<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT</span>
-<span class="s2">        get_field(names, &#39;primary&#39;) AS name,</span>
+<span class="s2">        get_field(names, 'primary') AS name,</span>
 <span class="s2">        geometry</span>
 <span class="s2">    FROM places</span>
-<span class="s2">    WHERE get_field(categories, &#39;primary&#39;) = &#39;pizza_restaurant&#39;</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">&quot;pizza_restaurants&quot;</span><span class="p">)</span>
+<span class="s2">    WHERE get_field(categories, 'primary') = 'pizza_restaurant'</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">"pizza_restaurants"</span><span class="p">)</span>
 
-<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">    SELECT divisions.id, get_field(divisions.names, &#39;primary&#39;) AS name, COUNT(*) AS n</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
+<span class="s2">    SELECT divisions.id, get_field(divisions.names, 'primary') AS name, COUNT(*) AS n</span>
 <span class="s2">    FROM divisions</span>
 <span class="s2">    INNER JOIN pizza_restaurants ON ST_Contains(divisions.geometry, pizza_restaurants.geometry)</span>
-<span class="s2">    WHERE divisions.subtype = &#39;neighborhood&#39;</span>
-<span class="s2">    GROUP BY divisions.id, get_field(divisions.names, &#39;primary&#39;)</span>
+<span class="s2">    WHERE divisions.subtype = 'neighborhood'</span>
+<span class="s2">    GROUP BY divisions.id, get_field(divisions.names, 'primary')</span>
 <span class="s2">    ORDER BY n DESC</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="s2">"""</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 <span class="c1"># &gt; ┌──────────────────────────────────────┬────────────────────────────┬───────┐</span>
 <span class="c1"># &gt; │                  id                  ┆            name            ┆   n   │</span>
 <span class="c1"># &gt; │                 utf8                 ┆            utf8            ┆ int64 │</span>
@@ -6007,29 +6006,29 @@ million point dataset in about 30 seconds with only 3 GB of memory!</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">sedona.db</span>
 
 <span class="n">sd</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-<span class="n">sd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">memory_limit</span> <span class="o">=</span> <span class="s2">&quot;3g&quot;</span>
-<span class="n">sd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">memory_pool_type</span> <span class="o">=</span> <span class="s2">&quot;fair&quot;</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">memory_limit</span> <span class="o">=</span> <span class="s2">"3g"</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">memory_pool_type</span> <span class="o">=</span> <span class="s2">"fair"</span>
 
-<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/microsoft-buildings_point.parquet&quot;</span>
-<span class="n">sd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">&quot;buildings&quot;</span><span class="p">)</span>
-<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">"https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/microsoft-buildings_point.parquet"</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">"buildings"</span><span class="p">)</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT ROW_NUMBER() OVER () AS building_id, geometry</span>
 <span class="s2">    FROM buildings</span>
-<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="s2">&quot;buildings_idx.parquet&quot;</span><span class="p">)</span>
+<span class="s2">    """</span><span class="p">)</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="s2">"buildings_idx.parquet"</span><span class="p">)</span>
 
-<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">    SELECT</span>
 <span class="s2">        l.building_id,</span>
 <span class="s2">        r.building_id AS nearest_building_id,</span>
 <span class="s2">        l.geometry AS geometry,</span>
 <span class="s2">        ST_Distance(l.geometry, r.geometry) AS dist</span>
-<span class="s2">    FROM &quot;buildings_idx.parquet&quot; AS l</span>
-<span class="s2">    JOIN &quot;buildings_idx.parquet&quot; AS r</span>
+<span class="s2">    FROM "buildings_idx.parquet" AS l</span>
+<span class="s2">    JOIN "buildings_idx.parquet" AS r</span>
 <span class="s2">        ON l.building_id &lt;&gt; r.building_id</span>
 <span class="s2">        AND ST_DWithin(l.geometry, r.geometry, 1e-10)</span>
-<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_memtable</span><span class="p">()</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">&quot;duplicates&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="s2">    """</span><span class="p">)</span><span class="o">.</span><span class="n">to_memtable</span><span class="p">()</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">"duplicates"</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="n">sd</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s2">&quot;duplicates&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s2">"duplicates"</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 <span class="c1"># &gt; 1017476</span>
 </code></pre></div>
 <p>For some perspective, DuckDB 1.5.0 (beta) needs about 12 GB of memory to
@@ -6059,16 +6058,16 @@ transform some input into a local CRS, SedonaDB can get you there:</p>
 
 <span class="n">cities</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
     <span class="p">{</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Ottawa&quot;</span><span class="p">,</span> <span class="s2">&quot;Vancouver&quot;</span><span class="p">,</span> <span class="s2">&quot;Toronto&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;utm_code&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;EPSG:32618&quot;</span><span class="p">,</span> <span class="s2">&quot;EPSG:32610&quot;</span><span class="p">,</span> <span class="s2">&quot;EPSG:32617&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;srid&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">32618</span><span class="p">,</span> <span class="mi">32610</span><span class="p">,</span> <span class="mi">32617</span><span class="p">],</span>
-        <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">75.7019612</span><span class="p">,</span> <span class="o">-</span><span class="mf">123.1235901</span><span class="p">,</span> <span class="o">-</span><span class="mf">79.38945855491194</span><span class="p">],</span>
-        <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">45.4186427</span><span class="p">,</span> <span class="mf">49.2753624</span><span class="p">,</span> <span class="mf">43.66464454743429</span><span class="p">],</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Ottawa"</span><span class="p">,</span> <span class="s2">"Vancouver"</span><span class="p">,</span> <span class="s2">"Toronto"</span><span class="p">],</span>
+        <span class="s2">"utm_code"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"EPSG:32618"</span><span class="p">,</span> <span class="s2">"EPSG:32610"</span><span class="p">,</span> <span class="s2">"EPSG:32617"</span><span class="p">],</span>
+        <span class="s2">"srid"</span><span class="p">:</span> <span class="p">[</span><span class="mi">32618</span><span class="p">,</span> <span class="mi">32610</span><span class="p">,</span> <span class="mi">32617</span><span class="p">],</span>
+        <span class="s2">"longitude"</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">75.7019612</span><span class="p">,</span> <span class="o">-</span><span class="mf">123.1235901</span><span class="p">,</span> <span class="o">-</span><span class="mf">79.38945855491194</span><span class="p">],</span>
+        <span class="s2">"latitude"</span><span class="p">:</span> <span class="p">[</span><span class="mf">45.4186427</span><span class="p">,</span> <span class="mf">49.2753624</span><span class="p">,</span> <span class="mf">43.66464454743429</span><span class="p">],</span>
     <span class="p">}</span>
 <span class="p">)</span>
 
-<span class="n">sd</span><span class="o">.</span><span class="n">create_data_frame</span><span class="p">(</span><span class="n">cities</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">&quot;cities&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">create_data_frame</span><span class="p">(</span><span class="n">cities</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">"cities"</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"""</span>
 <span class="s2">  SELECT</span>
 <span class="s2">    name,</span>
 <span class="s2">    ST_Transform(</span>
@@ -6076,9 +6075,9 @@ transform some input into a local CRS, SedonaDB can get you there:</p>
 <span class="s2">      utm_code</span>
 <span class="s2">    ) AS geom</span>
 <span class="s2">  FROM cities</span>
-<span class="s2">  &quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">&quot;cities_item_crs&quot;</span><span class="p">)</span>
+<span class="s2">  """</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">"cities_item_crs"</span><span class="p">)</span>
 
-<span class="n">sd</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s2">&quot;cities_item_crs&quot;</span><span class="p">)</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s2">"cities_item_crs"</span><span class="p">)</span>
 </code></pre></div>
 <div class="codehilite"><pre><span></span><code>┌───────────┬───────────────────────────────────────────────────────────────────────┐
 │    name   ┆                                  geom                                 │
@@ -6093,7 +6092,7 @@ transform some input into a local CRS, SedonaDB can get you there:</p>
 </code></pre></div>
 
 <p>Crucially, it can also get you back!</p>
-<div class="highlight"><pre><span></span><code><span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT name, ST_Transform(geom, 4326) FROM cities_item_crs&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT name, ST_Transform(geom, 4326) FROM cities_item_crs"</span><span class="p">)</span>
 </code></pre></div>
 <div class="codehilite"><pre><span></span><code>┌───────────┬────────────────────────────────────────────────┐
 │    name   ┆ st_transform(cities_item_crs.geom,Int64(4326)) │
@@ -6130,13 +6129,13 @@ DataFrame, you can now insert that into any SQL query without worrying
 about setting the CRS or serializing to SQL.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span>
 
-<span class="n">url_countries</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.fgb&quot;</span>
+<span class="n">url_countries</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.fgb"</span>
 <span class="n">countries</span> <span class="o">=</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">url_countries</span><span class="p">)</span>
-<span class="n">canada</span> <span class="o">=</span> <span class="n">countries</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">countries</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Canada&quot;</span><span class="p">]</span>
+<span class="n">canada</span> <span class="o">=</span> <span class="n">countries</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">countries</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"Canada"</span><span class="p">]</span>
 
-<span class="n">url_cities</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities.fgb&quot;</span>
-<span class="n">sd</span><span class="o">.</span><span class="n">read_pyogrio</span><span class="p">(</span><span class="n">url_cities</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">&quot;cities&quot;</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM cities WHERE ST_Contains($1, wkb_geometry)&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">(</span><span class="n">canada</span><span class="p">,))</span>
+<span class="n">url_cities</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_cities.fgb"</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">read_pyogrio</span><span class="p">(</span><span class="n">url_cities</span><span class="p">)</span><span class="o">.</span><span class="n">to_view</span><span class="p">(</span><span class="s2">"cities"</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">sd</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT * FROM cities WHERE ST_Contains($1, wkb_geometry)"</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">(</span><span class="n">canada</span><span class="p">,))</span>
 </code></pre></div>
 <div class="codehilite"><pre><span></span><code>┌───────────┬─────────────────────────────────────────────┐
 │    name   ┆                 wkb_geometry                │
@@ -6161,7 +6160,7 @@ the box! Functionally this means that SedonaDB no longer needs an extra
 efficiently: with the built-in geometry and geography types came
 embedded statistics to reduce file size for many applications.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># A Parquet file with no GeoParquet metadata</span>
-<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.parquet&quot;</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">"https://raw.githubusercontent.com/geoarrow/geoarrow-data/v0.2.0/natural-earth/files/natural-earth_countries.parquet"</span>
 <span class="n">sd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">schema</span>
 </code></pre></div>
 <div class="codehilite"><pre><span></span><code>SedonaSchema with 3 fields:
@@ -6179,12 +6178,12 @@ writing Parquet files. In particular, writing friendly GeoParquet 1.1
 files that work nicely with SedonaDB, GeoPandas, and other engine’s
 spatial filter pushdown. This works nicely with SedonaDB’s GDAL/OGR read
 support to produce optimized GeoParquet files from just about anything:</p>
-<div class="highlight"><pre><span></span><code><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/ns-water_water-point.fgb&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="n">url</span> <span class="o">=</span> <span class="s2">"https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/ns-water_water-point.fgb"</span>
 <span class="n">sd</span><span class="o">.</span><span class="n">read_pyogrio</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span>
-    <span class="s2">&quot;optimized.parquet&quot;</span><span class="p">,</span>
-    <span class="n">geoparquet_version</span><span class="o">=</span><span class="s2">&quot;1.1&quot;</span><span class="p">,</span>
+    <span class="s2">"optimized.parquet"</span><span class="p">,</span>
+    <span class="n">geoparquet_version</span><span class="o">=</span><span class="s2">"1.1"</span><span class="p">,</span>
     <span class="n">max_row_group_size</span><span class="o">=</span><span class="mi">100_000</span><span class="p">,</span>
-    <span class="n">sort_by</span><span class="o">=</span><span class="s2">&quot;wkb_geometry&quot;</span><span class="p">,</span>
+    <span class="n">sort_by</span><span class="o">=</span><span class="s2">"wkb_geometry"</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div>
 <h2 id="gdalogr-write-support">GDAL/OGR Write Support<a class="headerlink" href="#gdalogr-write-support" title="Permanent link">&para;</a></h2>
@@ -6195,7 +6194,7 @@ package</a>’s Arrow interface. In
 0.3.0 we added write support! Because both reads and writes are
 streaming, this makes SedonaDB an excellent choice for arbitrary
 read/write/convert workflows that scale to any size of input.</p>
-<div class="highlight"><pre><span></span><code><span class="n">sd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s2">&quot;optimized.parquet&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_pyogrio</span><span class="p">(</span><span class="s2">&quot;water-point.fgb&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">sd</span><span class="o">.</span><span class="n">read_parquet</span><span class="p">(</span><span class="s2">"optimized.parquet"</span><span class="p">)</span><span class="o">.</span><span class="n">to_pyogrio</span><span class="p">(</span><span class="s2">"water-point.fgb"</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="improved-spatial-function-coverage">Improved spatial function coverage<a class="headerlink" href="#improved-spatial-function-coverage" title="Permanent link">&para;</a></h2>
 <p>Since the 0.2.0 release we have been fortunate to work with contributors to
@@ -6237,7 +6236,7 @@ available from the sf package.</p>
 <div class="highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">sedonadb</span><span class="p">)</span>
 
 <span class="c1"># Works with files</span>
-<span class="n">fgb</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">system.file</span><span class="p">(</span><span class="s">&quot;files/natural-earth_cities.fgb&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">package</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;sedonadb&quot;</span><span class="p">)</span>
+<span class="n">fgb</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">system.file</span><span class="p">(</span><span class="s">"files/natural-earth_cities.fgb"</span><span class="p">,</span><span class="w"> </span><span class="n">package</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"sedonadb"</span><span class="p">)</span>
 <span class="nf">sd_read_sf</span><span class="p">(</span><span class="n">fgb</span><span class="p">)</span>
 </code></pre></div>
 <div class="codehilite"><pre><span></span><code>&lt;sedonab_dataframe: NA x 2&gt;
@@ -6273,7 +6272,7 @@ in the r-spatial ecosystem. This API is experimental and feedback is
 welcome!</p>
 <div class="highlight"><pre><span></span><code><span class="nf">library</span><span class="p">(</span><span class="n">sedonadb</span><span class="p">)</span>
 
-<span class="n">url</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">&quot;https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/ns-water_water-point.parquet&quot;</span>
+<span class="n">url</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s">"https://github.com/geoarrow/geoarrow-data/releases/download/v0.2.0/ns-water_water-point.parquet"</span>
 <span class="n">df</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">sd_read_parquet</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
 
 <span class="n">df</span><span class="w"> </span><span class="o">|&gt;</span>

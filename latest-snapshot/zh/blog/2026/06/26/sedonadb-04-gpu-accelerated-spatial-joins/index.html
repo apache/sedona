@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5770,7 +5769,7 @@
 <p><img alt="Cost-effectiveness on SpatialBench across CPU, L40S, A10, and L4: per-query cost and total workload cost on AWS" src="../../../../sedonadb-gpu-4.png" /></p>
 <h2 id="using-it">Using it<a class="headerlink" href="#using-it" title="Permanent link">&para;</a></h2>
 <p>On a machine with an NVIDIA GPU, pull the official Docker image and enable the feature with a single command:</p>
-<div class="highlight"><pre><span></span><code><span class="n">ctx</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SET gpu.enable = true&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">ctx</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SET gpu.enable = true"</span><span class="p">)</span>
 </code></pre></div>
 <p>The <a href="https://sedona.apache.org/sedonadb/latest/gpu-acceleration/">GPU Acceleration guide</a> walks through launching the Docker image on NVIDIA GPU machines and lists the supported compute capabilities.</p>
 <h2 id="citation">Citation<a class="headerlink" href="#citation" title="Permanent link">&para;</a></h2>

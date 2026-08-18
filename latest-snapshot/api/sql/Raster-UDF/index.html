@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5921,17 +5920,17 @@ hole-free input.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">col</span><span class="p">,</span> <span class="n">udf</span>
 
 
-<span class="nd">@udf</span><span class="p">(</span><span class="n">returnType</span><span class="o">=</span><span class="s2">&quot;double&quot;</span><span class="p">)</span>
+<span class="nd">@udf</span><span class="p">(</span><span class="n">returnType</span><span class="o">=</span><span class="s2">"double"</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">mean_udf</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
 
 
-<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">mean_udf</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;rast&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;mean&quot;</span><span class="p">))</span>
+<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">mean_udf</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"rast"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"mean"</span><span class="p">))</span>
 </code></pre></div>
 <p>The same UDF can be registered by name for use from SQL. Pass the decorated UDF on its own — the return type
 is already attached:</p>
-<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;mean_udf&quot;</span><span class="p">,</span> <span class="n">mean_udf</span><span class="p">)</span>
-<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;SELECT mean_udf(rast) AS mean FROM raster_table&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">sedona</span><span class="o">.</span><span class="n">udf</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"mean_udf"</span><span class="p">,</span> <span class="n">mean_udf</span><span class="p">)</span>
+<span class="n">sedona</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">"SELECT mean_udf(rast) AS mean FROM raster_table"</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="raster-to-raster">Raster to raster<a class="headerlink" href="#raster-to-raster" title="Permanent link">&para;</a></h3>
 <p>To return a raster, declare <code>RasterType()</code> as the return type and build the result with
@@ -5950,7 +5949,7 @@ CRS, affine transform, and other spatial metadata:</p>
     <span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
 
 
-<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">mask_udf</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;rast&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;mask_rast&quot;</span><span class="p">))</span>
+<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">mask_udf</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"rast"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"mask_rast"</span><span class="p">))</span>
 </code></pre></div>
 <p><code>with_bands()</code> accepts CHW order (bands × height × width), or HW order (height × width) as shorthand for a
 single-band result. The band count and the dtype may both differ from the input — the example above turns a
@@ -5975,7 +5974,7 @@ argument:</p>
 </code></pre></div>
 <p>A scalar applies to every output band; pass a sequence to set them individually, one entry per band. Use
 <code>float("nan")</code> for a band that should have no NODATA at all.</p>
-<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">stacked</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">9999.0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">)])</span>
+<div class="highlight"><pre><span></span><code><span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">stacked</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">9999.0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">)])</span>
 </code></pre></div>
 <p>If the output dtype cannot represent the inherited value — say a float64 scene with NODATA <code>-9999</code> narrowed
 to <code>uint8</code> — <code>with_bands()</code> raises rather than producing metadata that no pixel of the output can ever match.
@@ -5988,20 +5987,20 @@ corrected afterwards with
 </div>
 <h3 id="ndvi-as-map-algebra-and-as-a-udf">NDVI, as map algebra and as a UDF<a class="headerlink" href="#ndvi-as-map-algebra-and-as-a-udf" title="Permanent link">&para;</a></h3>
 <p>The same computation written both ways. With <code>RS_MapAlgebra</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;D&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;out = (rast[3] - rast[0]) / (rast[3] + rast[0]);&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">ndvi</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">RS_MapAlgebra</span><span class="p">(</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="s1">'D'</span><span class="p">,</span><span class="w"> </span><span class="s1">'out = (rast[3] - rast[0]) / (rast[3] + rast[0]);'</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">ndvi</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">raster_table</span>
 </code></pre></div>
 <p>As a UDF:</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@udf</span><span class="p">(</span><span class="n">returnType</span><span class="o">=</span><span class="n">RasterType</span><span class="p">())</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">ndvi</span><span class="p">(</span><span class="n">raster</span><span class="p">):</span>
     <span class="c1"># Reads raw values, exactly like the Jiffle script above. If the scene carries</span>
-    <span class="c1"># NODATA, use as_numpy_masked() and re-mark the holes — see &quot;Two rasters&quot; below.</span>
+    <span class="c1"># NODATA, use as_numpy_masked() and re-mark the holes — see "Two rasters" below.</span>
     <span class="n">a</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">as_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
     <span class="n">red</span><span class="p">,</span> <span class="n">nir</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">((</span><span class="n">nir</span> <span class="o">-</span> <span class="n">red</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">nir</span> <span class="o">+</span> <span class="n">red</span> <span class="o">+</span> <span class="mf">1e-10</span><span class="p">))</span>
 
 
-<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">ndvi</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;rast&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;ndvi&quot;</span><span class="p">))</span>
+<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">ndvi</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"rast"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"ndvi"</span><span class="p">))</span>
 </code></pre></div>
 <p>Both produce a single-band <code>double</code> raster on the input's grid. Note that band indexing differs: Jiffle's
 <code>rast[0]</code> and NumPy's <code>a[0]</code> are both the first band, but the SQL functions that consume the result
@@ -6021,7 +6020,7 @@ grid the result belongs to:</p>
     <span class="k">return</span> <span class="n">after</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">diff</span><span class="p">),</span> <span class="n">NODATA</span><span class="p">,</span> <span class="n">diff</span><span class="p">),</span> <span class="n">nodata</span><span class="o">=</span><span class="n">NODATA</span><span class="p">)</span>
 
 
-<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">delta</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;after&quot;</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">&quot;before&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;delta&quot;</span><span class="p">))</span>
+<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">delta</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"after"</span><span class="p">),</span> <span class="n">col</span><span class="p">(</span><span class="s2">"before"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"delta"</span><span class="p">))</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -6051,11 +6050,11 @@ array back through <code>with_bands()</code>:</p>
     <span class="c1"># fillnodata only interpolates within max_search_distance (100 pixels by default)</span>
     <span class="c1"># of valid data — cells deeper inside a hole keep their sentinel value. Keeping</span>
     <span class="c1"># the NODATA declaration leaves those cells invalid. Only switch to</span>
-    <span class="c1"># nodata=float(&quot;nan&quot;) when every hole is small enough to be filled completely.</span>
+    <span class="c1"># nodata=float("nan") when every hole is small enough to be filled completely.</span>
     <span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">with_bands</span><span class="p">(</span><span class="n">filled</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">)</span>
 
 
-<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">fill_udf</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;rast&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;filled&quot;</span><span class="p">))</span>
+<span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">fill_udf</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s2">"rast"</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">"filled"</span><span class="p">))</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -6072,7 +6071,7 @@ see <a href="#limits">Limits</a>.</p>
 <h4 id="the-output-must-sit-on-the-inputs-grid">The output must sit on the input's grid<a class="headerlink" href="#the-output-must-sit-on-the-inputs-grid" title="Permanent link">&para;</a></h4>
 <p><code>with_bands()</code> requires the new array to have the same height and width as the source, and it reuses the
 source's CRS and affine transform. Handing it a differently shaped array raises:</p>
-<div class="highlight"><pre><span></span><code>ValueError: Spatial dimensions (2, 2) don&#39;t match raster (3, 4)
+<div class="highlight"><pre><span></span><code>ValueError: Spatial dimensions (2, 2) don't match raster (3, 4)
 </code></pre></div>
 <p>There is no way to return a raster with a different CRS, cell size, or extent, so reprojection, warping,
 resampling, and cropping to a new extent cannot be done inside a Python UDF. Use
@@ -6121,11 +6120,11 @@ class, so a Scala UDF can take and return raster columns without any extra setup
 
 <span class="c1">// Raster to scalar</span>
 <span class="kd">val</span><span class="w"> </span><span class="n">numBands</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">udf</span><span class="p">((</span><span class="n">raster</span><span class="p">:</span><span class="w"> </span><span class="nc">GridCoverage2D</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">raster</span><span class="p">.</span><span class="n">getNumSampleDimensions</span><span class="p">)</span>
-<span class="n">df</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="n">numBands</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s">&quot;rast&quot;</span><span class="p">)).</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;num_bands&quot;</span><span class="p">))</span>
+<span class="n">df</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="n">numBands</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s">"rast"</span><span class="p">)).</span><span class="n">alias</span><span class="p">(</span><span class="s">"num_bands"</span><span class="p">))</span>
 
 <span class="c1">// Raster to raster</span>
 <span class="kd">val</span><span class="w"> </span><span class="n">process</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">udf</span><span class="p">((</span><span class="n">raster</span><span class="p">:</span><span class="w"> </span><span class="nc">GridCoverage2D</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">transform</span><span class="p">(</span><span class="n">raster</span><span class="p">))</span>
-<span class="n">df</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="n">process</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s">&quot;rast&quot;</span><span class="p">)).</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;rast&quot;</span><span class="p">))</span>
+<span class="n">df</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="n">process</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s">"rast"</span><span class="p">)).</span><span class="n">alias</span><span class="p">(</span><span class="s">"rast"</span><span class="p">))</span>
 </code></pre></div>
 <p>The convenience layer described above — <code>as_numpy()</code>, <code>with_bands()</code>, and the metadata accessors — is
 Python-only. From Scala you work against the GeoTools API directly.</p>

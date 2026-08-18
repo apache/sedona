@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5763,13 +5762,13 @@
 <p>Use the following code to load the data and create a raw DataFrame:</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">pointraw</span><span class="w"> </span><span class="p">(</span><span class="n">_c0</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">_c1</span><span class="w"> </span><span class="n">string</span><span class="p">)</span>
 <span class="k">USING</span><span class="w"> </span><span class="n">csv</span>
-<span class="k">OPTIONS</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="s1">&#39;false&#39;</span><span class="p">)</span>
-<span class="k">LOCATION</span><span class="w"> </span><span class="s1">&#39;&lt;some path&gt;/sedona/examples/sql/src/test/resources/testpoint.csv&#39;</span><span class="p">;</span>
+<span class="k">OPTIONS</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="s1">'false'</span><span class="p">)</span>
+<span class="k">LOCATION</span><span class="w"> </span><span class="s1">'&lt;some path&gt;/sedona/examples/sql/src/test/resources/testpoint.csv'</span><span class="p">;</span>
 
 <span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="k">IF</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">EXISTS</span><span class="w"> </span><span class="n">polygonraw</span><span class="w"> </span><span class="p">(</span><span class="n">_c0</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">_c1</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">_c2</span><span class="w"> </span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">_c3</span><span class="w"> </span><span class="n">string</span><span class="p">)</span>
 <span class="k">USING</span><span class="w"> </span><span class="n">csv</span>
-<span class="k">OPTIONS</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="s1">&#39;false&#39;</span><span class="p">)</span>
-<span class="k">LOCATION</span><span class="w"> </span><span class="s1">&#39;&lt;some path&gt;/sedona/examples/sql/src/test/resources/testenvelope.csv&#39;</span><span class="p">;</span>
+<span class="k">OPTIONS</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="s1">'false'</span><span class="p">)</span>
+<span class="k">LOCATION</span><span class="w"> </span><span class="s1">'&lt;some path&gt;/sedona/examples/sql/src/test/resources/testenvelope.csv'</span><span class="p">;</span>
 </code></pre></div>
 <h2 id="transform-the-data">Transform the data<a class="headerlink" href="#transform-the-data" title="Permanent link">&para;</a></h2>
 <p>We need to transform our point and polygon data into respective types:</p>
@@ -5794,7 +5793,7 @@
 <p>Sedona has a Spark SQL parser extension to support <code>GEOMETRY</code> data type in DDL statements. For example, you can specify a schema with a geometry column when creating the table:</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">geom_table</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="w"> </span><span class="n">STRING</span><span class="p">,</span><span class="w"> </span><span class="k">version</span><span class="w"> </span><span class="nb">INT</span><span class="p">,</span><span class="w"> </span><span class="n">geometry</span><span class="w"> </span><span class="n">GEOMETRY</span><span class="p">)</span>
 <span class="k">USING</span><span class="w"> </span><span class="n">geoparquet</span>
-<span class="k">LOCATION</span><span class="w"> </span><span class="s1">&#39;/path/to/geoparquet_geom_table&#39;</span><span class="p">;</span>
+<span class="k">LOCATION</span><span class="w"> </span><span class="s1">'/path/to/geoparquet_geom_table'</span><span class="p">;</span>
 
 <span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">geom_table</span><span class="w"> </span><span class="k">LIMIT</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
 </code></pre></div>

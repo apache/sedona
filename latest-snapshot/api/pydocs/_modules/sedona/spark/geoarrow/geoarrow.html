@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geoarrow.geoarrow &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -247,7 +246,7 @@
 
 
 <div class="viewcode-block" id="dataframe_to_arrow"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.dataframe_to_arrow">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">dataframe_to_arrow</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Collect a DataFrame as a PyArrow Table</span>
 
 <span class="sd">    In the output Table, geometry will be encoded as a GeoArrow extension type.</span>
@@ -261,7 +260,7 @@
 <span class="sd">      geometries. If omitted, the CRS will be inferred from the values present in</span>
 <span class="sd">      the output if exactly one CRS is present in the output.</span>
 <span class="sd">    :return:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
 
     <span class="n">col_is_geometry</span> <span class="o">=</span> <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">dataType</span><span class="p">,</span> <span class="n">GeometryType</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">fields</span><span class="p">]</span>
@@ -295,7 +294,7 @@
 
         <span class="k">return</span> <span class="n">pa</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">new_cols</span><span class="p">,</span> <span class="n">table</span><span class="o">.</span><span class="n">column_names</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-        <span class="c1"># In the event that we don&#39;t have access to GeoArrow extension types,</span>
+        <span class="c1"># In the event that we don't have access to GeoArrow extension types,</span>
         <span class="c1"># we can still add field metadata that will propagate through some types</span>
         <span class="c1"># of operations (e.g., writing this table to a file or passing it to</span>
         <span class="c1"># DuckDB as long as no intermediate transformations were applied).</span>
@@ -312,7 +311,7 @@
 
 
 <div class="viewcode-block" id="dataframe_to_arrow_raw"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.dataframe_to_arrow_raw">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">dataframe_to_arrow_raw</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Backport of toArrow() (available in Spark 4.0)&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Backport of toArrow() (available in Spark 4.0)"""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.dataframe</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span>
 
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">DataFrame</span><span class="p">)</span>
@@ -348,7 +347,7 @@
 <div class="viewcode-block" id="wrap_geoarrow_extension"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.wrap_geoarrow_extension">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">wrap_geoarrow_extension</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">crs</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">crs</span> <span class="o">=</span> <span class="n">unique_srid_from_ewkb</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="s2">&quot;to_json&quot;</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="s2">"to_json"</span><span class="p">):</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">pyproj</span>
 
         <span class="n">crs</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
@@ -361,20 +360,20 @@
         <span class="n">crs</span> <span class="o">=</span> <span class="n">unique_srid_from_ewkb</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">metadata</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&quot;crs&quot;: </span><span class="si">{</span><span class="n">crs_to_json</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'"crs": </span><span class="si">{</span><span class="n">crs_to_json</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">metadata</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="s2">""</span>
 
     <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">with_metadata</span><span class="p">(</span>
         <span class="p">{</span>
-            <span class="s2">&quot;ARROW:extension:name&quot;</span><span class="p">:</span> <span class="s2">&quot;geoarrow.wkb&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;ARROW:extension:metadata&quot;</span><span class="p">:</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="n">metadata</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span>
+            <span class="s2">"ARROW:extension:name"</span><span class="p">:</span> <span class="s2">"geoarrow.wkb"</span><span class="p">,</span>
+            <span class="s2">"ARROW:extension:metadata"</span><span class="p">:</span> <span class="s2">"{"</span> <span class="o">+</span> <span class="n">metadata</span> <span class="o">+</span> <span class="s2">"}"</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="crs_to_json"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.crs_to_json">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">crs_to_json</span><span class="p">(</span><span class="n">crs</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="s2">&quot;to_json&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="s2">"to_json"</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">crs</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">pyproj</span>
@@ -383,12 +382,12 @@
 
 
 <div class="viewcode-block" id="try_register_extension_types"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.try_register_extension_types">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">try_register_extension_types</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to register extension types using geoarrow-types</span>
+<span class="w">    </span><span class="sd">"""Try to register extension types using geoarrow-types</span>
 
 <span class="sd">    Do this defensively, because it can fail if the extension type was</span>
 <span class="sd">    registered in some other way (notably: old versions of geoarrow-pyarrow,</span>
 <span class="sd">    which is a dependency of Kepler).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">geoarrow.types.type_pyarrow</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_extension_types</span>
 
     <span class="k">try</span><span class="p">:</span>
@@ -404,7 +403,7 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="c1"># Output shouldn&#39;t have mixed endian here</span>
+    <span class="c1"># Output shouldn't have mixed endian here</span>
     <span class="n">endian</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">binary_slice</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">endian</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -415,11 +414,11 @@
     <span class="c1"># High bytes where the SRID is set would be</span>
     <span class="c1"># [0x20, 0x20 | 0x40, 0x20 | 0x80, 0x20 | 0x40 | 0x80]</span>
     <span class="c1"># == [0x20, 0x60, 0xa0, 0xe0]</span>
-    <span class="n">is_little_endian</span> <span class="o">=</span> <span class="n">endian</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">as_py</span><span class="p">()</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\x01</span><span class="s2">&quot;</span>
+    <span class="n">is_little_endian</span> <span class="o">=</span> <span class="n">endian</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">as_py</span><span class="p">()</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">"</span><span class="se">\x01</span><span class="s2">"</span>
     <span class="n">high_byte</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">pc</span><span class="o">.</span><span class="n">binary_slice</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_little_endian</span> <span class="k">else</span> <span class="n">pc</span><span class="o">.</span><span class="n">binary_slice</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">has_srid</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">is_in</span><span class="p">(</span><span class="n">high_byte</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="sa">b</span><span class="s2">&quot;</span><span class="se">\x20</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\x60</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\xa0</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\xe0</span><span class="s2">&quot;</span><span class="p">]))</span>
+    <span class="n">has_srid</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">is_in</span><span class="p">(</span><span class="n">high_byte</span><span class="p">,</span> <span class="n">pa</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="sa">b</span><span class="s2">"</span><span class="se">\x20</span><span class="s2">"</span><span class="p">,</span> <span class="sa">b</span><span class="s2">"</span><span class="se">\x60</span><span class="s2">"</span><span class="p">,</span> <span class="sa">b</span><span class="s2">"</span><span class="se">\xa0</span><span class="s2">"</span><span class="p">,</span> <span class="sa">b</span><span class="s2">"</span><span class="se">\xe0</span><span class="s2">"</span><span class="p">]))</span>
     <span class="n">unique_srids</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">pc</span><span class="o">.</span><span class="n">if_else</span><span class="p">(</span><span class="n">has_srid</span><span class="p">,</span> <span class="n">pc</span><span class="o">.</span><span class="n">binary_slice</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">drop_null</span><span class="p">()</span>
     <span class="p">)</span>
@@ -427,12 +426,12 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">srid_bytes</span> <span class="o">=</span> <span class="n">unique_srids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">as_py</span><span class="p">()</span>
-    <span class="n">endian</span> <span class="o">=</span> <span class="s2">&quot;little&quot;</span> <span class="k">if</span> <span class="n">is_little_endian</span> <span class="k">else</span> <span class="s2">&quot;big&quot;</span>
+    <span class="n">endian</span> <span class="o">=</span> <span class="s2">"little"</span> <span class="k">if</span> <span class="n">is_little_endian</span> <span class="k">else</span> <span class="s2">"big"</span>
     <span class="n">epsg_code</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">srid_bytes</span><span class="p">,</span> <span class="n">endian</span><span class="p">)</span>
 
     <span class="kn">import</span><span class="w"> </span><span class="nn">pyproj</span>
 
-    <span class="k">return</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;EPSG:</span><span class="si">{</span><span class="n">epsg_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">CRS</span><span class="p">(</span><span class="sa">f</span><span class="s2">"EPSG:</span><span class="si">{</span><span class="n">epsg_code</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_dedup_names</span><span class="p">(</span><span class="n">names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -442,7 +441,7 @@
 
         <span class="k">def</span><span class="w"> </span><span class="nf">_gen_dedup</span><span class="p">(</span><span class="n">_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span><span class="p">]:</span>
             <span class="n">_i</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
-            <span class="k">return</span> <span class="k">lambda</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">_i</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">return</span> <span class="k">lambda</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">next</span><span class="p">(</span><span class="n">_i</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">_gen_identity</span><span class="p">(</span><span class="n">_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span><span class="p">]:</span>
             <span class="k">return</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">_name</span>
@@ -484,21 +483,21 @@
         <span class="k">return</span> <span class="n">dt</span>
 
 
-<div class="viewcode-block" id="infer_schema"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.infer_schema">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">infer_schema</span><span class="p">(</span><span class="n">gdf</span><span class="p">:</span> <span class="s2">&quot;gpd.GeoDataFrame&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructType</span><span class="p">:</span>
+<div class="viewcode-block" id="infer_schema"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.infer_schema">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">infer_schema</span><span class="p">(</span><span class="n">gdf</span><span class="p">:</span> <span class="s2">"gpd.GeoDataFrame"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructType</span><span class="p">:</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">pyarrow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
 
     <span class="n">fields</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
     <span class="n">geom_fields</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;geometry&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s2">"geometry"</span><span class="p">:</span>
             <span class="n">geom_fields</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
             <span class="k">continue</span>
 
         <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">geom_fields</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No geometry field found in the GeoDataFrame&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"No geometry field found in the GeoDataFrame"</span><span class="p">)</span>
 
     <span class="n">pa_schema</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Schema</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span>
         <span class="n">gdf</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="n">name</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">geom_fields</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -519,7 +518,7 @@
 
 <span class="c1"># Modified backport from Spark 4.0</span>
 <span class="c1"># https://github.com/apache/spark/blob/3515b207c41d78194d11933cd04bddc21f8418dd/python/pyspark/sql/pandas/conversion.py#L632</span>
-<div class="viewcode-block" id="create_spatial_dataframe"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.create_spatial_dataframe">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">create_spatial_dataframe</span><span class="p">(</span><span class="n">spark</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="s2">&quot;gpd.GeoDataFrame&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="create_spatial_dataframe"><a class="viewcode-back" href="../../../../sedona.spark.geoarrow.html#sedona.spark.geoarrow.geoarrow.create_spatial_dataframe">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">create_spatial_dataframe</span><span class="p">(</span><span class="n">spark</span><span class="p">:</span> <span class="n">SparkSession</span><span class="p">,</span> <span class="n">gdf</span><span class="p">:</span> <span class="s2">"gpd.GeoDataFrame"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.pandas.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
         <span class="n">to_arrow_type</span><span class="p">,</span>
     <span class="p">)</span>

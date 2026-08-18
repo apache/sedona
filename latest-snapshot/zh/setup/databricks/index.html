@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5811,9 +5810,9 @@
 mkdir<span class="w"> </span>-p<span class="w"> </span>/Workspace/Shared/sedona/1.9.1
 
 <span class="c1"># 从 Maven 下载依赖到 DBFS</span>
-curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.9.1/geotools-wrapper-1.9.1-33.5.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.9.1-33.5/geotools-wrapper-1.9.1-33.5.jar&quot;</span>
+curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.9.1/geotools-wrapper-1.9.1-33.5.jar<span class="w"> </span><span class="s2">"https://repo1.maven.org/maven2/org/datasyslab/geotools-wrapper/1.9.1-33.5/geotools-wrapper-1.9.1-33.5.jar"</span>
 
-curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.9.1/sedona-spark-shaded-3.5_2.12-1.9.1.jar<span class="w"> </span><span class="s2">&quot;https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.9.1/sedona-spark-shaded-3.5_2.12-1.9.1.jar&quot;</span>
+curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1.9.1/sedona-spark-shaded-3.5_2.12-1.9.1.jar<span class="w"> </span><span class="s2">"https://repo1.maven.org/maven2/org/apache/sedona/sedona-spark-shaded-3.5_2.12/1.9.1/sedona-spark-shaded-3.5_2.12-1.9.1.jar"</span>
 </code></pre></div>
 <p><code>sedona-spark-shaded-3.5_2.12-1.9.1.jar</code> 的编译环境如下：</p>
 <ul>
@@ -5831,7 +5830,7 @@ curl<span class="w"> </span>-o<span class="w"> </span>/Workspace/Shared/sedona/1
 mkdir -p /Workspace/Shared/sedona/
 
 # 创建初始化脚本
-cat &gt; /Workspace/Shared/sedona/sedona-init.sh &lt;&lt;&#39;EOF&#39;
+cat &gt; /Workspace/Shared/sedona/sedona-init.sh &lt;&lt;'EOF'
 #!/bin/bash
 #
 # File: sedona-init.sh
@@ -5885,16 +5884,16 @@ pydeck==0.9.1
 <p>下面演示如何创建带几何列的 Sedona DataFrame：</p>
 <div class="highlight"><pre><span></span><code><span class="n">df</span> <span class="o">=</span> <span class="n">sedona</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
     <span class="p">[</span>
-        <span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;POLYGON((1.0 1.0,1.0 3.0,2.0 3.0,2.0 1.0,1.0 1.0))&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;LINESTRING(4.0 1.0,4.0 2.0,6.0 4.0)&quot;</span><span class="p">),</span>
-        <span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;POINT(9.0 2.0)&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"POLYGON((1.0 1.0,1.0 3.0,2.0 3.0,2.0 1.0,1.0 1.0))"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"b"</span><span class="p">,</span> <span class="s2">"LINESTRING(4.0 1.0,4.0 2.0,6.0 4.0)"</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"c"</span><span class="p">,</span> <span class="s2">"POINT(9.0 2.0)"</span><span class="p">),</span>
     <span class="p">],</span>
-    <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"geometry"</span><span class="p">],</span>
 <span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">&quot;ST_GeomFromWKT(geometry)&quot;</span><span class="p">))</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s2">"geometry"</span><span class="p">,</span> <span class="n">expr</span><span class="p">(</span><span class="s2">"ST_GeomFromWKT(geometry)"</span><span class="p">))</span>
 </code></pre></div>
 <p>将 Sedona DataFrame 写入 Delta Lake 表：</p>
-<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">&quot;your_org.default.geotable&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">write</span><span class="o">.</span><span class="n">saveAsTable</span><span class="p">(</span><span class="s2">"your_org.default.geotable"</span><span class="p">)</span>
 </code></pre></div>
 <p>读取该表的方式：<code>sedona.table("your_org.default.geotable").display()</code></p>
 <p>在 Databricks 中的结果大致如下：</p>

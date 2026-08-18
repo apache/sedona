@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stac.client &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -236,47 +235,47 @@
 
 <div class="viewcode-block" id="Client"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Client</span><span class="p">:</span>
 <div class="viewcode-block" id="Client.__init__"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.__init__">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Initializes a STAC client with optional authentication headers.</span>
 
 <span class="sd">        :param url: The URL of the STAC API to connect to.</span>
 <span class="sd">        :param headers: Optional dictionary of HTTP headers to include in requests.</span>
 <span class="sd">            Can be used for authentication or custom headers.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="n">headers</span> <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span></div>
 
 <div class="viewcode-block" id="Client.open"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.open">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">open</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Opens a connection to the specified STAC API URL.</span>
 
 <span class="sd">        This class method creates an instance of the Client class with the given URL</span>
 <span class="sd">        and optional authentication headers.</span>
 
-<span class="sd">        :param url: The URL of the STAC API to connect to. Example: &quot;https://planetarycomputer.microsoft.com/api/stac/v1&quot;</span>
+<span class="sd">        :param url: The URL of the STAC API to connect to. Example: "https://planetarycomputer.microsoft.com/api/stac/v1"</span>
 <span class="sd">        :param headers: Optional dictionary of HTTP headers for authentication.</span>
-<span class="sd">            Example: {&quot;Authorization&quot;: &quot;Bearer token123&quot;}</span>
+<span class="sd">            Example: {"Authorization": "Bearer token123"}</span>
 <span class="sd">        :return: An instance of the Client class connected to the specified URL.</span>
 
 <span class="sd">        Example usage:</span>
 <span class="sd">            # Without authentication</span>
-<span class="sd">            client = Client.open(&quot;https://planetarycomputer.microsoft.com/api/stac/v1&quot;)</span>
+<span class="sd">            client = Client.open("https://planetarycomputer.microsoft.com/api/stac/v1")</span>
 
 <span class="sd">            # With custom headers</span>
 <span class="sd">            client = Client.open(</span>
-<span class="sd">                &quot;https://example.com/stac/v1&quot;,</span>
-<span class="sd">                headers={&quot;Authorization&quot;: &quot;Bearer token123&quot;}</span>
+<span class="sd">                "https://example.com/stac/v1",</span>
+<span class="sd">                headers={"Authorization": "Bearer token123"}</span>
 <span class="sd">            )</span>
 
 <span class="sd">            # Using convenience methods</span>
-<span class="sd">            client = Client.open(&quot;https://example.com/stac/v1&quot;)</span>
-<span class="sd">            client.with_basic_auth(&quot;username&quot;, &quot;password&quot;)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            client = Client.open("https://example.com/stac/v1")</span>
+<span class="sd">            client.with_basic_auth("username", "password")</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Client.with_basic_auth"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.with_basic_auth">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">with_basic_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Adds HTTP Basic Authentication to the client.</span>
 
 <span class="sd">        This method encodes the username and password using Base64 and adds</span>
@@ -288,24 +287,24 @@
 
 <span class="sd">        Example usage:</span>
 <span class="sd">            # Standard basic auth</span>
-<span class="sd">            client = Client.open(&quot;https://example.com/stac/v1&quot;)</span>
-<span class="sd">            client.with_basic_auth(&quot;user&quot;, &quot;pass&quot;)</span>
+<span class="sd">            client = Client.open("https://example.com/stac/v1")</span>
+<span class="sd">            client.with_basic_auth("user", "pass")</span>
 
 <span class="sd">            # API key as username (common pattern)</span>
-<span class="sd">            client.with_basic_auth(&quot;api_key_xyz&quot;, &quot;&quot;)</span>
+<span class="sd">            client.with_basic_auth("api_key_xyz", "")</span>
 
 <span class="sd">            # Method chaining</span>
-<span class="sd">            df = Client.open(url).with_basic_auth(api_key, &quot;&quot;).search(collection_id=&quot;test&quot;)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            df = Client.open(url).with_basic_auth(api_key, "").search(collection_id="test")</span>
+<span class="sd">        """</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">base64</span>
 
-        <span class="n">userpass</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">password</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">userpass</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">password</span><span class="si">}</span><span class="s2">"</span>
         <span class="n">b64_userpass</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">userpass</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Authorization&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Basic </span><span class="si">{</span><span class="n">b64_userpass</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">"Authorization"</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Basic </span><span class="si">{</span><span class="n">b64_userpass</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="Client.with_bearer_token"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.with_bearer_token">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">with_bearer_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Adds Bearer Token Authentication to the client.</span>
 
 <span class="sd">        This method adds the appropriate Authorization header for Bearer Token</span>
@@ -316,36 +315,36 @@
 
 <span class="sd">        Example usage:</span>
 <span class="sd">            # Bearer token auth</span>
-<span class="sd">            client = Client.open(&quot;https://example.com/stac/v1&quot;)</span>
-<span class="sd">            client.with_bearer_token(&quot;your_access_token_here&quot;)</span>
+<span class="sd">            client = Client.open("https://example.com/stac/v1")</span>
+<span class="sd">            client.with_bearer_token("your_access_token_here")</span>
 
 <span class="sd">            # Method chaining</span>
-<span class="sd">            df = Client.open(url).with_bearer_token(token).search(collection_id=&quot;test&quot;)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;Authorization&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="sd">            df = Client.open(url).with_bearer_token(token).search(collection_id="test")</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">"Authorization"</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Bearer </span><span class="si">{</span><span class="n">token</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="Client.get_collection"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.get_collection">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Retrieves a collection client for the specified collection ID.</span>
 
 <span class="sd">        This method creates an instance of the CollectionClient class for the given collection ID,</span>
 <span class="sd">        allowing interaction with the specified collection in the STAC API.</span>
 
-<span class="sd">        :param collection_id: The ID of the collection to retrieve. Example: &quot;aster-l1t&quot;</span>
+<span class="sd">        :param collection_id: The ID of the collection to retrieve. Example: "aster-l1t"</span>
 <span class="sd">        :return: An instance of the CollectionClient class for the specified collection.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="n">CollectionClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">collection_id</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Client.get_collection_from_catalog"><a class="viewcode-back" href="../../../../sedona.spark.stac.html#sedona.spark.stac.client.Client.get_collection_from_catalog">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_collection_from_catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Retrieves the catalog from the STAC API.</span>
 
 <span class="sd">        This method fetches the root catalog from the STAC API, providing access to all collections and items.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            dict: The root catalog of the STAC API.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Implement logic to fetch and return the root catalog</span>
         <span class="k">return</span> <span class="n">CollectionClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span></div>
 
@@ -361,36 +360,36 @@
         <span class="n">max_items</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">return_dataframe</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Iterator</span><span class="p">,</span> <span class="n">DataFrame</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Searches for items in the specified collection with optional filters.</span>
 
 <span class="sd">        :param ids: A variable number of item IDs to filter the items.</span>
-<span class="sd">            Example: &quot;item_id1&quot; or [&quot;item_id1&quot;, &quot;item_id2&quot;]</span>
+<span class="sd">            Example: "item_id1" or ["item_id1", "item_id2"]</span>
 <span class="sd">        :param collection_id: The ID of the collection to search in.</span>
-<span class="sd">            Example: &quot;aster-l1t&quot;</span>
+<span class="sd">            Example: "aster-l1t"</span>
 <span class="sd">        :param bbox: A list of bounding boxes for filtering the items.</span>
 <span class="sd">            Each bounding box is represented as a list of four float values: [min_lon, min_lat, max_lon, max_lat].</span>
 <span class="sd">            Example: [[-180.0, -90.0, 180.0, 90.0]]  # This bounding box covers the entire world.</span>
 <span class="sd">        :param geometry: Shapely geometry object(s) or WKT string(s) for spatial filtering.</span>
 <span class="sd">            Can be a single geometry, WKT string, or a list of geometries/WKT strings.</span>
 <span class="sd">            If both bbox and geometry are provided, geometry takes precedence.</span>
-<span class="sd">            Example: Polygon(...) or &quot;POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))&quot; or [Polygon(...), Polygon(...)]</span>
+<span class="sd">            Example: Polygon(...) or "POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))" or [Polygon(...), Polygon(...)]</span>
 <span class="sd">        :param datetime: A single datetime, RFC 3339-compliant timestamp,</span>
 <span class="sd">            or a list of date-time ranges for filtering the items. The datetime can be specified in various formats:</span>
 
-<span class="sd">            - &quot;YYYY&quot; expands to [&quot;YYYY-01-01T00:00:00Z&quot;, &quot;YYYY-12-31T23:59:59.999999Z&quot;]</span>
-<span class="sd">            - &quot;YYYY-mm&quot; expands to [&quot;YYYY-mm-01T00:00:00Z&quot;, &quot;YYYY-mm-&lt;last_day&gt;T23:59:59.999999Z&quot;]</span>
-<span class="sd">            - &quot;YYYY-mm-dd&quot; expands to [&quot;YYYY-mm-ddT00:00:00Z&quot;, &quot;YYYY-mm-ddT23:59:59.999999Z&quot;]</span>
-<span class="sd">            - &quot;YYYY-mm-ddTHH:MM:SSZ&quot; remains as [&quot;YYYY-mm-ddTHH:MM:SSZ&quot;, &quot;YYYY-mm-ddTHH:MM:SSZ&quot;]</span>
+<span class="sd">            - "YYYY" expands to ["YYYY-01-01T00:00:00Z", "YYYY-12-31T23:59:59.999999Z"]</span>
+<span class="sd">            - "YYYY-mm" expands to ["YYYY-mm-01T00:00:00Z", "YYYY-mm-&lt;last_day&gt;T23:59:59.999999Z"]</span>
+<span class="sd">            - "YYYY-mm-dd" expands to ["YYYY-mm-ddT00:00:00Z", "YYYY-mm-ddT23:59:59.999999Z"]</span>
+<span class="sd">            - "YYYY-mm-ddTHH:MM:SSZ" remains as ["YYYY-mm-ddTHH:MM:SSZ", "YYYY-mm-ddTHH:MM:SSZ"]</span>
 <span class="sd">            - A list of date-time ranges can be provided for multiple intervals.</span>
 
-<span class="sd">            Example: &quot;2020-01-01T00:00:00Z&quot; or python_datetime.datetime(2020, 1, 1) or [[&quot;2020-01-01T00:00:00Z&quot;, &quot;2021-01-01T00:00:00Z&quot;]]</span>
+<span class="sd">            Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]</span>
 <span class="sd">        :param max_items: The maximum number of items to return from the search, even if there are more matching results.</span>
 <span class="sd">            Example: 100</span>
 <span class="sd">        :param return_dataframe: If True, return the result as a Spark DataFrame instead of an iterator of PyStacItem objects.</span>
 <span class="sd">            Example: True</span>
 <span class="sd">        :return: An iterator of PyStacItem objects or a Spark DataFrame that match the specified filters.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">collection_id</span><span class="p">:</span>
             <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_collection</span><span class="p">(</span><span class="n">collection_id</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

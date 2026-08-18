@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5801,13 +5800,13 @@
 <li>在终端中打开该文件（必要时使用 <code>sudo</code>）。内容大致如下：</li>
 </ol>
 <div class="highlight"><pre><span></span><code>#!/bin/bash
-JAVA_HOME=&quot;${JAVA_HOME:-$(/usr/libexec/java_home)}&quot; exec &quot;/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn&quot; &quot;$@&quot;
+JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home)}" exec "/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn" "$@"
 </code></pre></div>
 <ol>
 <li>将 <code>JAVA_HOME:-$(/usr/libexec/java_home)}</code> 改为 <code>JAVA_HOME:-$(/usr/libexec/java_home -v 11)}</code> 或 <code>JAVA_HOME:-$(/usr/libexec/java_home -v 17)}</code>。修改后大致如下：</li>
 </ol>
 <div class="highlight"><pre><span></span><code>#!/bin/bash
-JAVA_HOME=&quot;${JAVA_HOME:-$(/usr/libexec/java_home -v 11)}&quot; exec &quot;/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn&quot; &quot;$@&quot;
+JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 11)}" exec "/usr/local/Cellar/maven/3.6.3/libexec/bin/mvn" "$@"
 </code></pre></div>
 <ol>
 <li>再次运行 <code>mvn --version</code>，此时应已指向 JDK 11 或 17。</li>
@@ -5861,8 +5860,8 @@ svn<span class="w"> </span>checkout<span class="w"> </span>https://dist.apache.o
 <li>把 armored key 粘贴到这两个文件末尾。注意：<code>-----BEGIN PGP PUBLIC KEY BLOCK-----</code> 与实际 key 之间必须有一空行。</li>
 <li>提交两个 KEYS。SVN 可能会要求输入您的 ASF ID 与密码——请输入，以便 SVN 在本地保存您的凭据。</li>
 </ol>
-<div class="highlight"><pre><span></span><code>svn<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Update KEYS&quot;</span><span class="w"> </span>sedona-dev/KEYS
-svn<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Update KEYS&quot;</span><span class="w"> </span>sedona-release/KEYS
+<div class="highlight"><pre><span></span><code>svn<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Update KEYS"</span><span class="w"> </span>sedona-dev/KEYS
+svn<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Update KEYS"</span><span class="w"> </span>sedona-release/KEYS
 </code></pre></div>
 <ol>
 <li>然后删除两个 svn 工作目录：</li>

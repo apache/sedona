@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6149,8 +6148,8 @@
 <h2 id="_1">创建示例表<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <p>下面创建一个 <code>city_tbl</code>，其中包含城市的位置与名称。每个位置以 WKT 字符串表示：</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">city_tbl</span><span class="w"> </span><span class="p">(</span><span class="n">wkt</span><span class="w"> </span><span class="n">STRING</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span><span class="w"> </span><span class="n">STRING</span><span class="p">);</span>
-<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">city_tbl</span><span class="p">(</span><span class="n">wkt</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;POINT (-122.33 47.61)&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Seattle&#39;</span><span class="p">);</span>
-<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">city_tbl</span><span class="p">(</span><span class="n">wkt</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;POINT (-122.42 37.76)&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;San Francisco&#39;</span><span class="p">);</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">city_tbl</span><span class="p">(</span><span class="n">wkt</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">'POINT (-122.33 47.61)'</span><span class="p">,</span><span class="w"> </span><span class="s1">'Seattle'</span><span class="p">);</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">city_tbl</span><span class="p">(</span><span class="n">wkt</span><span class="p">,</span><span class="w"> </span><span class="n">city_name</span><span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span><span class="s1">'POINT (-122.42 37.76)'</span><span class="p">,</span><span class="w"> </span><span class="s1">'San Francisco'</span><span class="p">);</span>
 </code></pre></div>
 <p>可以查看该表的内容：</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
@@ -6240,7 +6239,7 @@ POINT (37.76 -122.42)   San Francisco
 <p>该函数在 1.5.0+ 中使用 lon/lat 顺序，在 1.4.1 及之前使用 lat/lon 顺序。可以使用 <code>SEDONA.ST_FlipCoordinates</code> 交换 X 与 Y。</p>
 </div>
 <p>按以下方式转换示例数据：</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;epsg:4326&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;epsg:3857&#39;</span><span class="p">)),</span><span class="w"> </span><span class="n">city_name</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="s1">'epsg:4326'</span><span class="p">,</span><span class="w"> </span><span class="s1">'epsg:3857'</span><span class="p">)),</span><span class="w"> </span><span class="n">city_name</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl_geom</span>
 </code></pre></div>
 <p>输出：</p>
@@ -6248,28 +6247,28 @@ POINT (37.76 -122.42)   San Francisco
 POINT (4545577.120361927 -13627732.06291255)  San Francisco
 </code></pre></div>
 <p><code>SEDONA.ST_Transform</code> 同样支持 OGC WKT 格式的 CRS 字符串。下面的查询输出与上面相同，但目标 CRS 以 OGC WKT 字符串给出：</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;epsg:4326&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;PROJCS[&quot;WGS 84 / Pseudo-Mercator&quot;,</span>
-<span class="s1">     GEOGCS[&quot;WGS 84&quot;,</span>
-<span class="s1">         DATUM[&quot;WGS_1984&quot;,</span>
-<span class="s1">             SPHEROID[&quot;WGS 84&quot;,6378137,298.257223563,</span>
-<span class="s1">                 AUTHORITY[&quot;EPSG&quot;,&quot;7030&quot;]],</span>
-<span class="s1">             AUTHORITY[&quot;EPSG&quot;,&quot;6326&quot;]],</span>
-<span class="s1">         PRIMEM[&quot;Greenwich&quot;,0,</span>
-<span class="s1">             AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]],</span>
-<span class="s1">         UNIT[&quot;degree&quot;,0.0174532925199433,</span>
-<span class="s1">             AUTHORITY[&quot;EPSG&quot;,&quot;9122&quot;]],</span>
-<span class="s1">         AUTHORITY[&quot;EPSG&quot;,&quot;4326&quot;]],</span>
-<span class="s1">     PROJECTION[&quot;Mercator_1SP&quot;],</span>
-<span class="s1">     PARAMETER[&quot;central_meridian&quot;,0],</span>
-<span class="s1">     PARAMETER[&quot;scale_factor&quot;,1],</span>
-<span class="s1">     PARAMETER[&quot;false_easting&quot;,0],</span>
-<span class="s1">     PARAMETER[&quot;false_northing&quot;,0],</span>
-<span class="s1">     UNIT[&quot;metre&quot;,1,</span>
-<span class="s1">         AUTHORITY[&quot;EPSG&quot;,&quot;9001&quot;]],</span>
-<span class="s1">     AXIS[&quot;Easting&quot;,EAST],</span>
-<span class="s1">     AXIS[&quot;Northing&quot;,NORTH],</span>
-<span class="s1">     EXTENSION[&quot;PROJ4&quot;,&quot;+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs&quot;],</span>
-<span class="s1">     AUTHORITY[&quot;EPSG&quot;,&quot;3857&quot;]]&#39;</span><span class="p">)),</span><span class="w"> </span><span class="n">city_name</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_AsText</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_Transform</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="s1">'epsg:4326'</span><span class="p">,</span><span class="w"> </span><span class="s1">'PROJCS["WGS 84 / Pseudo-Mercator",</span>
+<span class="s1">     GEOGCS["WGS 84",</span>
+<span class="s1">         DATUM["WGS_1984",</span>
+<span class="s1">             SPHEROID["WGS 84",6378137,298.257223563,</span>
+<span class="s1">                 AUTHORITY["EPSG","7030"]],</span>
+<span class="s1">             AUTHORITY["EPSG","6326"]],</span>
+<span class="s1">         PRIMEM["Greenwich",0,</span>
+<span class="s1">             AUTHORITY["EPSG","8901"]],</span>
+<span class="s1">         UNIT["degree",0.0174532925199433,</span>
+<span class="s1">             AUTHORITY["EPSG","9122"]],</span>
+<span class="s1">         AUTHORITY["EPSG","4326"]],</span>
+<span class="s1">     PROJECTION["Mercator_1SP"],</span>
+<span class="s1">     PARAMETER["central_meridian",0],</span>
+<span class="s1">     PARAMETER["scale_factor",1],</span>
+<span class="s1">     PARAMETER["false_easting",0],</span>
+<span class="s1">     PARAMETER["false_northing",0],</span>
+<span class="s1">     UNIT["metre",1,</span>
+<span class="s1">         AUTHORITY["EPSG","9001"]],</span>
+<span class="s1">     AXIS["Easting",EAST],</span>
+<span class="s1">     AXIS["Northing",NORTH],</span>
+<span class="s1">     EXTENSION["PROJ4","+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs"],</span>
+<span class="s1">     AUTHORITY["EPSG","3857"]]'</span><span class="p">)),</span><span class="w"> </span><span class="n">city_name</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">city_tbl_geom</span>
 </code></pre></div>
 <h2 id="_4">范围查询<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
@@ -6300,10 +6299,10 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <p>示例：</p>
 <p>构造演示用的表：</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">polygondf</span><span class="w"> </span><span class="k">AS</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">polygonshape</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'</span><span class="p">)</span><span class="w"> </span><span class="n">polygonshape</span><span class="p">;</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">pointdf</span><span class="w"> </span><span class="k">AS</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(0.5 0.5)&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">pointshape</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(0.5 0.5)'</span><span class="p">)</span><span class="w"> </span><span class="n">pointshape</span><span class="p">;</span>
 </code></pre></div>
 <p>使用不同的空间谓词执行查询：</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
@@ -6320,10 +6319,10 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 </code></pre></div>
 <p>对应的更快的空间连接（仅使用 Snowflake 原生函数）写法：</p>
 <div class="highlight"><pre><span></span><code><span class="k">WITH</span><span class="w"> </span><span class="n">polygondf</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">polygonshape</span>
+<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'</span><span class="p">)</span><span class="w"> </span><span class="n">polygonshape</span>
 <span class="p">),</span>
 <span class="n">pointdf</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
-<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(0.5 0.5)&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">pointshape</span>
+<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(0.5 0.5)'</span><span class="p">)</span><span class="w"> </span><span class="n">pointshape</span>
 <span class="p">)</span>
 <span class="k">SELECT</span><span class="w"> </span><span class="o">*</span>
 <span class="k">FROM</span><span class="w"> </span><span class="n">polygondf</span><span class="p">,</span><span class="w"> </span><span class="n">pointdf</span>
@@ -6338,10 +6337,10 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <p>简介：从 A、B 两侧的几何对象中找到所有距离小于等于某阈值的对组合。支持的平面欧氏距离函数包括 <code>SEDONA.ST_Distance</code>、<code>SEDONA.ST_HausdorffDistance</code>、<code>SEDONA.ST_FrechetDistance</code>，基于米的测地距离函数包括 <code>SEDONA.ST_DistanceSpheroid</code> 与 <code>SEDONA.ST_DistanceSphere</code>。Snowflake 仅原生支持 <code>ST_Distance</code>。</p>
 <p>先创建两个仅含一个几何对象的演示表：</p>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">pointdf2</span><span class="w"> </span><span class="k">AS</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POINT(0 0)&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">pointshape</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POINT(0 0)'</span><span class="p">)</span><span class="w"> </span><span class="n">pointshape</span><span class="p">;</span>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">polygondf2</span><span class="w"> </span><span class="k">AS</span>
-<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0.5 0.5, 0.5 1, 1 1, 1 0.5, 0.5 0.5))&#39;</span><span class="p">)</span><span class="w"> </span><span class="n">polygonshape</span><span class="p">;</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON((0.5 0.5, 0.5 1, 1 1, 1 0.5, 0.5 0.5))'</span><span class="p">)</span><span class="w"> </span><span class="n">polygonshape</span><span class="p">;</span>
 </code></pre></div>
 <p>平面欧氏距离示例：</p>
 <p><code>POINT(0 0)</code> 与 <code>POINT(0.5 0.5)</code> 之间的常规 L2 欧氏距离是 0.5 的平方根，因此下面这条查询返回这唯一一对点：</p>
@@ -6457,7 +6456,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <span class="k">with</span><span class="w"> </span><span class="n">lefts</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
 <span class="w">  </span><span class="k">SELECT</span><span class="w"> </span><span class="k">index</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">poly_id_left</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">wkt</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">TABLE</span><span class="p">(</span>
 <span class="w">      </span><span class="n">SPLIT_TO_TABLE</span><span class="w"> </span><span class="p">(</span>
-<span class="w">          </span><span class="s1">&#39;POLYGON ((-74.64966372842101805 44.92318068906040196, -73.05513946490677313 44.92318068906040196, -73.05513946490677313 45.9127817308399031, -74.64966372842101805 45.9127817308399031, -74.64966372842101805 44.92318068906040196))|POLYGON ((-71.72125014775386376 46.58534825561803672, -70.72763860520016976 46.58534825561803672, -70.72763860520016976 47.26007441306773416, -71.72125014775386376 47.26007441306773416, -71.72125014775386376 46.58534825561803672))&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;|&#39;</span>
+<span class="w">          </span><span class="s1">'POLYGON ((-74.64966372842101805 44.92318068906040196, -73.05513946490677313 44.92318068906040196, -73.05513946490677313 45.9127817308399031, -74.64966372842101805 45.9127817308399031, -74.64966372842101805 44.92318068906040196))|POLYGON ((-71.72125014775386376 46.58534825561803672, -70.72763860520016976 46.58534825561803672, -70.72763860520016976 47.26007441306773416, -71.72125014775386376 47.26007441306773416, -71.72125014775386376 46.58534825561803672))'</span><span class="p">,</span><span class="w"> </span><span class="s1">'|'</span>
 <span class="w">          </span><span class="p">)</span>
 <span class="w">      </span><span class="p">)</span>
 
@@ -6471,7 +6470,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <span class="n">rights</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
 <span class="w">  </span><span class="k">SELECT</span><span class="w"> </span><span class="k">index</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">poly_id_right</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">wkt</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="k">TABLE</span><span class="p">(</span>
 <span class="w">      </span><span class="n">SPLIT_TO_TABLE</span><span class="w"> </span><span class="p">(</span>
-<span class="w">          </span><span class="s1">&#39;POLYGON ((-73.51160030163114811 45.54300066590783302, -71.31736631503980561 45.54300066590783302, -71.31736631503980561 46.82515071005796869, -73.51160030163114811 46.82515071005796869, -73.51160030163114811 45.54300066590783302))|POLYGON ((-75.26522832 44.23585380, -69.77500453509208 44.23585380, -69.77500453509208 47.59180373699041411, -75.26522832 47.59180373699041411, -75.26522832 44.23585380))|POLYGON ((-73.82001807503861812 45.0759163125215423, -73.34011383205873358 45.0759163125215423, -73.34011383205873358 45.35768613572972185, -73.82001807503861812 45.35768613572972185, -73.82001807503861812 45.0759163125215423))|POLYGON ((-74.64966372842101805 44.92318068906040196, -75.26522832 44.92318068906040196, -75.26522832 44.23585380, -74.64966372842101805 44.23585380, -74.64966372842101805 44.92318068906040196))|POLYGON ((-71.65791191749059408 44.19369241163229844, -70.2497216546401404 44.19369241163229844, -70.2497216546401404 44.96946189775351144, -71.65791191749059408 44.96946189775351144, -71.65791191749059408 44.19369241163229844))&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;|&#39;</span>
+<span class="w">          </span><span class="s1">'POLYGON ((-73.51160030163114811 45.54300066590783302, -71.31736631503980561 45.54300066590783302, -71.31736631503980561 46.82515071005796869, -73.51160030163114811 46.82515071005796869, -73.51160030163114811 45.54300066590783302))|POLYGON ((-75.26522832 44.23585380, -69.77500453509208 44.23585380, -69.77500453509208 47.59180373699041411, -75.26522832 47.59180373699041411, -75.26522832 44.23585380))|POLYGON ((-73.82001807503861812 45.0759163125215423, -73.34011383205873358 45.0759163125215423, -73.34011383205873358 45.35768613572972185, -73.82001807503861812 45.35768613572972185, -73.82001807503861812 45.0759163125215423))|POLYGON ((-74.64966372842101805 44.92318068906040196, -75.26522832 44.92318068906040196, -75.26522832 44.23585380, -74.64966372842101805 44.23585380, -74.64966372842101805 44.92318068906040196))|POLYGON ((-71.65791191749059408 44.19369241163229844, -70.2497216546401404 44.19369241163229844, -70.2497216546401404 44.96946189775351144, -71.65791191749059408 44.96946189775351144, -71.65791191749059408 44.19369241163229844))'</span><span class="p">,</span><span class="w"> </span><span class="s1">'|'</span>
 <span class="w">          </span><span class="p">)</span>
 <span class="w">      </span><span class="p">)</span>
 <span class="p">),</span>
@@ -6526,11 +6525,11 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 <p>这种情况下 Sedona 使用 EWKB 作为几何对象的输入/输出类型。如果数据集中已是内置的 Snowflake GEOMETRY/GEOGRAPHY 类型，可以通过该函数轻松转换为 EWKB。</p>
 <h4 id="snowflake-sedona_1">从 Snowflake 原生函数到 Sedona 函数<a class="headerlink" href="#snowflake-sedona_1" title="Permanent link">&para;</a></h4>
 <p>下例中 <code>SEDONA.ST_X</code> 是 Sedona 函数，<code>ST_GeommetryFromWkt</code> 与 <code>ST_AsEWKB</code> 是 Snowflake 原生函数：</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_X</span><span class="p">(</span><span class="n">ST_AsEWKB</span><span class="p">(</span><span class="n">ST_GeometryFromWkt</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">)))</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="n">geometry_table</span><span class="w"> </span><span class="err">}}</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_X</span><span class="p">(</span><span class="n">ST_AsEWKB</span><span class="p">(</span><span class="n">ST_GeometryFromWkt</span><span class="p">(</span><span class="s1">'POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'</span><span class="p">)))</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="err">{{</span><span class="w"> </span><span class="n">geometry_table</span><span class="w"> </span><span class="err">}}</span><span class="p">;</span>
 </code></pre></div>
 <h4 id="sedona-snowflake">从 Sedona 函数到 Snowflake 原生函数<a class="headerlink" href="#sedona-snowflake" title="Permanent link">&para;</a></h4>
 <p>下例中 <code>SEDONA.ST_GeomFromText</code> 是 Sedona 函数，<code>ST_AREA</code> 与 <code>to_geometry</code> 是 Snowflake 原生函数：</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AREA</span><span class="p">(</span><span class="n">to_geometry</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">)));</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AREA</span><span class="p">(</span><span class="n">to_geometry</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_GeomFromText</span><span class="p">(</span><span class="s1">'POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'</span><span class="p">)));</span>
 </code></pre></div>
 <h4 id="_7">优点：<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h4>
 <p>Sedona 的几何构造器比 Snowflake 原生函数更强大，主要优势如下：</p>
@@ -6541,7 +6540,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 </ul>
 <h3 id="snowflake-geometry-geography">由 Snowflake 几何构造器创建的 Geometry / Geography<a class="headerlink" href="#snowflake-geometry-geography" title="Permanent link">&para;</a></h3>
 <p>这种情况下 Sedona 使用 Snowflake 原生 GEOMETRY/GEOGRAPHY 类型作为输入/输出类型，序列化格式为 GeoJSON 字符串。</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AREA</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_Buffer</span><span class="p">(</span><span class="n">ST_GeometryFromWkt</span><span class="p">(</span><span class="s1">&#39;POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AREA</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_Buffer</span><span class="p">(</span><span class="n">ST_GeometryFromWkt</span><span class="p">(</span><span class="s1">'POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))'</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span>
 </code></pre></div>
 <p>下例中 <code>SEDONA.ST_Buffer</code> 是 Sedona 函数，<code>ST_GeommetryFromWkt</code> 与 <code>ST_AREA</code> 是 Snowflake 原生函数。</p>
 <p>可以看到，Sedona 函数与 Snowflake 原生函数可以混用而无需显式转换。</p>
@@ -6551,7 +6550,7 @@ POINT (4545577.120361927 -13627732.06291255)  San Francisco
 </ul>
 <p>注意：Snowflake 原生会把 Geometry 类型数据序列化为 GeoJSON 字符串再传给 UDF。GeoJSON 规范不包含 SRID。因此，如果直接混用 Snowflake 函数与 Sedona 函数而不使用 <code>WKB</code>，SRID 信息会丢失。</p>
 <p>下例中 SRID=4326 信息会丢失：</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsEWKT</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">&#39;POINT(1 2)&#39;</span><span class="p">),</span><span class="w"> </span><span class="mi">4326</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsEWKT</span><span class="p">(</span><span class="n">SEDONA</span><span class="p">.</span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">ST_GeometryFromWKT</span><span class="p">(</span><span class="s1">'POINT(1 2)'</span><span class="p">),</span><span class="w"> </span><span class="mi">4326</span><span class="p">))</span>
 </code></pre></div>
 <p>输出：</p>
 <div class="highlight"><pre><span></span><code>SRID=0;POINT(1 2)

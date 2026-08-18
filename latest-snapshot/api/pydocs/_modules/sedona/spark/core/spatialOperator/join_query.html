@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.core.spatialOperator.join_query &mdash; Apache Sedona Python Documentation</title>
@@ -213,14 +212,14 @@
 <span class="c1"># distributed with this work for additional information</span>
 <span class="c1"># regarding copyright ownership.  The ASF licenses this file</span>
 <span class="c1"># to you under the Apache License, Version 2.0 (the</span>
-<span class="c1"># &quot;License&quot;); you may not use this file except in compliance</span>
+<span class="c1"># "License"); you may not use this file except in compliance</span>
 <span class="c1"># with the License.  You may obtain a copy of the License at</span>
 <span class="c1">#</span>
 <span class="c1">#   http://www.apache.org/licenses/LICENSE-2.0</span>
 <span class="c1">#</span>
 <span class="c1"># Unless required by applicable law or agreed to in writing,</span>
 <span class="c1"># software distributed under the License is distributed on an</span>
-<span class="c1"># &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
+<span class="c1"># "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY</span>
 <span class="c1"># KIND, either express or implied.  See the License for the</span>
 <span class="c1"># specific language governing permissions and limitations</span>
 <span class="c1"># under the License.</span>
@@ -236,7 +235,7 @@
 <div class="viewcode-block" id="JoinQuery"><a class="viewcode-back" href="../../../../../sedona.spark.core.spatialOperator.html#sedona.spark.core.spatialOperator.join_query.JoinQuery">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">JoinQuery</span><span class="p">:</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;JoinQuery&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"JoinQuery"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">SpatialJoinQuery</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">spatialRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span>
@@ -244,14 +243,14 @@
         <span class="n">useIndex</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">considerBoundaryIntersection</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RDD</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param spatialRDD: SpatialRDD</span>
 <span class="sd">        :param queryRDD: SpatialRDD</span>
 <span class="sd">        :param useIndex: bool</span>
 <span class="sd">        :param considerBoundaryIntersection: bool</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">pair_rdd</span> <span class="o">=</span> <span class="n">JoinQueryRaw</span><span class="o">.</span><span class="n">SpatialJoinQuery</span><span class="p">(</span>
             <span class="n">spatialRDD</span><span class="p">,</span> <span class="n">queryRDD</span><span class="p">,</span> <span class="n">useIndex</span><span class="p">,</span> <span class="n">considerBoundaryIntersection</span>
@@ -259,7 +258,7 @@
         <span class="k">return</span> <span class="n">pair_rdd</span><span class="o">.</span><span class="n">to_rdd</span><span class="p">()</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;JoinQuery&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"JoinQuery"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">DistanceJoinQuery</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">spatialRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span>
@@ -267,14 +266,14 @@
         <span class="n">useIndex</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">considerBoundaryIntersection</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RDD</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param spatialRDD: SpatialRDD</span>
 <span class="sd">        :param queryRDD: SpatialRDD</span>
 <span class="sd">        :param useIndex: bool</span>
 <span class="sd">        :param considerBoundaryIntersection: bool</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">pair_rdd</span> <span class="o">=</span> <span class="n">JoinQueryRaw</span><span class="o">.</span><span class="n">DistanceJoinQuery</span><span class="p">(</span>
             <span class="n">spatialRDD</span><span class="p">,</span> <span class="n">queryRDD</span><span class="p">,</span> <span class="n">useIndex</span><span class="p">,</span> <span class="n">considerBoundaryIntersection</span>
@@ -282,23 +281,23 @@
         <span class="k">return</span> <span class="n">pair_rdd</span><span class="o">.</span><span class="n">to_rdd</span><span class="p">()</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;JoinQuery&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"JoinQuery"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">spatialJoin</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">queryWindowRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span> <span class="n">objectRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span> <span class="n">joinParams</span><span class="p">:</span> <span class="n">JoinParams</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RDD</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param queryWindowRDD: SpatialRDD</span>
 <span class="sd">        :param objectRDD: SpatialRDD</span>
 <span class="sd">        :param joinParams: JoinParams</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">pair_rdd</span> <span class="o">=</span> <span class="n">JoinQueryRaw</span><span class="o">.</span><span class="n">spatialJoin</span><span class="p">(</span><span class="n">queryWindowRDD</span><span class="p">,</span> <span class="n">objectRDD</span><span class="p">,</span> <span class="n">joinParams</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pair_rdd</span><span class="o">.</span><span class="n">to_rdd</span><span class="p">()</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;JoinQuery&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"JoinQuery"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">DistanceJoinQueryFlat</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">spatialRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span>
@@ -306,7 +305,7 @@
         <span class="n">useIndex</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">considerBoundaryIntersection</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RDD</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 
 <span class="sd">        :param spatialRDD: SpatialRDD</span>
 <span class="sd">        :param queryRDD: SpatialRDD</span>
@@ -319,7 +318,7 @@
 <span class="sd">        &gt;&gt; spatial_join_result.collect()</span>
 <span class="sd">        [GeoData(), GeoData()]</span>
 <span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">pair_rdd</span> <span class="o">=</span> <span class="n">JoinQueryRaw</span><span class="o">.</span><span class="n">DistanceJoinQueryFlat</span><span class="p">(</span>
             <span class="n">spatialRDD</span><span class="p">,</span> <span class="n">queryRDD</span><span class="p">,</span> <span class="n">useIndex</span><span class="p">,</span> <span class="n">considerBoundaryIntersection</span>
@@ -327,7 +326,7 @@
         <span class="k">return</span> <span class="n">pair_rdd</span><span class="o">.</span><span class="n">to_rdd</span><span class="p">()</span>
 
     <span class="nd">@classmethod</span>
-    <span class="nd">@require</span><span class="p">([</span><span class="s2">&quot;JoinQuery&quot;</span><span class="p">])</span>
+    <span class="nd">@require</span><span class="p">([</span><span class="s2">"JoinQuery"</span><span class="p">])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">SpatialJoinQueryFlat</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">spatialRDD</span><span class="p">:</span> <span class="n">SpatialRDD</span><span class="p">,</span>
@@ -335,7 +334,7 @@
         <span class="n">useIndex</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">considerBoundaryIntersection</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RDD</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Function takes SpatialRDD and other SpatialRDD and based on two parameters</span>
 <span class="sd">        - useIndex</span>
 <span class="sd">        - considerBoundaryIntersection</span>
@@ -352,7 +351,7 @@
 <span class="sd">        &gt;&gt; )</span>
 <span class="sd">        &gt;&gt; spatial_join_result.collect()</span>
 <span class="sd">        [[GeoData(Polygon, ), GeoData()], [GeoData(), GeoData()], [GeoData(), GeoData()]]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">pair_rdd</span> <span class="o">=</span> <span class="n">JoinQueryRaw</span><span class="o">.</span><span class="n">SpatialJoinQueryFlat</span><span class="p">(</span>
             <span class="n">spatialRDD</span><span class="p">,</span> <span class="n">queryRDD</span><span class="p">,</span> <span class="n">useIndex</span><span class="p">,</span> <span class="n">considerBoundaryIntersection</span>

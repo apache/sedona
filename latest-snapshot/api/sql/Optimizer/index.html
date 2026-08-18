@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6172,7 +6171,7 @@ The supported join type - broadcast side combinations are:</p>
 <li>Left outer - broadcast right</li>
 <li>Right outer - broadcast left</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="n">pointDf</span><span class="p">.</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;pointDf&quot;</span><span class="p">).</span><span class="n">join</span><span class="p">(</span><span class="n">broadcast</span><span class="p">(</span><span class="n">polygonDf</span><span class="p">).</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;polygonDf&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_Contains(polygonDf.polygonshape, pointDf.pointshape)&quot;</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="n">pointDf</span><span class="p">.</span><span class="n">alias</span><span class="p">(</span><span class="s">"pointDf"</span><span class="p">).</span><span class="n">join</span><span class="p">(</span><span class="n">broadcast</span><span class="p">(</span><span class="n">polygonDf</span><span class="p">).</span><span class="n">alias</span><span class="p">(</span><span class="s">"polygonDf"</span><span class="p">),</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"ST_Contains(polygonDf.polygonshape, pointDf.pointshape)"</span><span class="p">))</span>
 </code></pre></div>
 <p>To specify a broadcast hint in SQL, use the following syntax:</p>
 <div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="cm">/*+ BROADCAST(polygonDf) */</span>
@@ -6192,7 +6191,7 @@ BroadcastIndexJoin pointshape#52: geometry, BuildRight, BuildRight, false ST_Con
       +- FileScan csv
 </code></pre></div>
 <p>This also works for distance joins with <code>ST_Distance</code>, <code>ST_DistanceSpheroid</code>, <code>ST_DistanceSphere</code>, <code>ST_HausdorffDistance</code> or <code>ST_FrechetDistance</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="n">pointDf1</span><span class="p">.</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;pointDf1&quot;</span><span class="p">).</span><span class="n">join</span><span class="p">(</span><span class="n">broadcast</span><span class="p">(</span><span class="n">pointDf2</span><span class="p">).</span><span class="n">alias</span><span class="p">(</span><span class="s">&quot;pointDf2&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">&quot;ST_Distance(pointDf1.pointshape, pointDf2.pointshape) &lt;= 2&quot;</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="n">pointDf1</span><span class="p">.</span><span class="n">alias</span><span class="p">(</span><span class="s">"pointDf1"</span><span class="p">).</span><span class="n">join</span><span class="p">(</span><span class="n">broadcast</span><span class="p">(</span><span class="n">pointDf2</span><span class="p">).</span><span class="n">alias</span><span class="p">(</span><span class="s">"pointDf2"</span><span class="p">),</span><span class="w"> </span><span class="n">expr</span><span class="p">(</span><span class="s">"ST_Distance(pointDf1.pointshape, pointDf2.pointshape) &lt;= 2"</span><span class="p">))</span>
 </code></pre></div>
 <p>Spark SQL Physical plan:</p>
 <div class="highlight"><pre><span></span><code>== Physical Plan ==

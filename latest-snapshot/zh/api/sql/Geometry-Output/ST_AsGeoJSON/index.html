@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -5582,12 +5581,12 @@
 <p>Return type: <code>String</code></p>
 <p>Since: <code>v1.0.0</code></p>
 <p>SQL Example (Simple GeoJSON):</p>
-<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsGeoJSON</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">&#39;POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))&#39;</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AsGeoJSON</span><span class="p">(</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="s1">'POLYGON((1 1, 8 1, 8 8, 1 8, 1 1))'</span><span class="p">))</span>
 </code></pre></div>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Polygon&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;coordinates&quot;</span><span class="p">:[</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="s2">"Polygon"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"coordinates"</span><span class="p">:[</span>
 <span class="w">    </span><span class="p">[[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span>
 <span class="w">      </span><span class="p">[</span><span class="mf">8.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span>
 <span class="w">      </span><span class="p">[</span><span class="mf">8.0</span><span class="p">,</span><span class="mf">8.0</span><span class="p">],</span>
@@ -5599,10 +5598,10 @@
 <p>SQL Example (Feature GeoJSON):</p>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Polygon&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;coordinates&quot;</span><span class="p">:[</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="s2">"Feature"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"geometry"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="s2">"Polygon"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"coordinates"</span><span class="p">:[</span>
 <span class="w">        </span><span class="p">[[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span>
 <span class="w">          </span><span class="p">[</span><span class="mf">8.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span>
 <span class="w">          </span><span class="p">[</span><span class="mf">8.0</span><span class="p">,</span><span class="mf">8.0</span><span class="p">],</span>
@@ -5615,12 +5614,12 @@
 <p>SQL Example (FeatureCollection GeoJSON):</p>
 <p>Output:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;FeatureCollection&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;features&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span>
-<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;geometry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="s2">&quot;Polygon&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;coordinates&quot;</span><span class="p">:[</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="s2">"FeatureCollection"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"features"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="s2">"Feature"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"geometry"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="s2">"Polygon"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"coordinates"</span><span class="p">:[</span>
 <span class="w">            </span><span class="p">[[</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span>
 <span class="w">              </span><span class="p">[</span><span class="mf">8.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span>
 <span class="w">              </span><span class="p">[</span><span class="mf">8.0</span><span class="p">,</span><span class="mf">8.0</span><span class="p">],</span>
