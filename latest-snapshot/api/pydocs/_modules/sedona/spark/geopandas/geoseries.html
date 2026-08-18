@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -3059,6 +3058,44 @@
             <span class="n">align</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+<div class="viewcode-block" id="GeoSeries.geom_equals_identical"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.geom_equals_identical">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">geom_equals_identical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
+            <span class="c1"># JTS's WKB reader loses measure metadata on typed empty values,</span>
+            <span class="c1"># while its WKT reader retains the explicit M/ZM layout tags.</span>
+            <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
+                <span class="n">other_wkt</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">wkt</span>
+                <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"LinearRing"</span><span class="p">:</span>
+                    <span class="c1"># GeometryUDT stores standalone rings as LineStrings.</span>
+                    <span class="n">other_wkt</span> <span class="o">=</span> <span class="n">other_wkt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"LINEARRING"</span><span class="p">,</span> <span class="s2">"LINESTRING"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">other_geometry</span> <span class="o">=</span> <span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromWKT</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">other_wkt</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">other_geometry</span> <span class="o">=</span> <span class="n">stc</span><span class="o">.</span><span class="n">ST_GeomFromWKB</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">wkb</span><span class="p">))</span>
+            <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stp</span><span class="o">.</span><span class="n">ST_EqualsIdentical</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">,</span>
+                <span class="n">other_geometry</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boolean_result_preserving_index</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">spark_expr</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">)),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_fields</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">_to_bool</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">GeoSeries</span><span class="p">,</span> <span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">"'other' must be a GeoSeries, GeoDataFrame, "</span>
+                <span class="s2">"pandas-on-Spark Series, or geometry"</span>
+            <span class="p">)</span>
+
+        <span class="n">other_series</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_series</span><span class="p">,</span> <span class="n">GeoSeries</span><span class="p">):</span>
+            <span class="n">warn_crs_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="n">other_series</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geom_equals_identical_series</span><span class="p">(</span><span class="n">other_series</span><span class="p">,</span> <span class="n">align</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="GeoSeries.interpolate"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.interpolate">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"GeoSeries"</span><span class="p">:</span>
         <span class="n">other_series</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span>
         <span class="n">align</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">extended</span>
@@ -3633,6 +3670,25 @@
         <span class="n">align</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Execute exact equality with GeoPandas-compatible row alignment."""</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stp</span><span class="o">.</span><span class="n">ST_EqualsExact</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span> <span class="n">tolerance</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boolean_result_with_alignment</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="p">,</span> <span class="n">spark_expr</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_geom_equals_identical_series</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">other</span><span class="p">:</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">align</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Execute identical equality with GeoPandas-compatible row alignment."""</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stp</span><span class="o">.</span><span class="n">ST_EqualsIdentical</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boolean_result_with_alignment</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="p">,</span> <span class="n">spark_expr</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_boolean_result_with_alignment</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">other</span><span class="p">:</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">align</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+        <span class="n">spark_expr</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Evaluate a native boolean expression after binary row alignment."""</span>
         <span class="p">(</span>
             <span class="n">aligned_frame</span><span class="p">,</span>
             <span class="n">result_index_columns</span><span class="p">,</span>
@@ -3641,18 +3697,18 @@
         <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_binary_geometry_series</span><span class="p">(</span>
             <span class="n">other</span><span class="p">,</span>
             <span class="n">align</span><span class="p">,</span>
-            <span class="n">warning_stacklevel</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="n">warning_stacklevel</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stp</span><span class="o">.</span><span class="n">ST_EqualsExact</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span> <span class="n">tolerance</span><span class="p">)</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boolean_result_preserving_index</span><span class="p">(</span>
-            <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">spark_expr</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">)),</span>
-            <span class="n">aligned_frame</span><span class="p">,</span>
-            <span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">aligned_frame</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">result_index_columns</span><span class="p">],</span>
-            <span class="n">result_index_fields</span><span class="p">,</span>
-            <span class="n">result_index_names</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">_to_bool</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_boolean_result_preserving_index</span><span class="p">(</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">spark_expr</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">)),</span>
+                <span class="n">aligned_frame</span><span class="p">,</span>
+                <span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">aligned_frame</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">result_index_columns</span><span class="p">],</span>
+                <span class="n">result_index_fields</span><span class="p">,</span>
+                <span class="n">result_index_names</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">_to_bool</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_align_single_index_series_lazily</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

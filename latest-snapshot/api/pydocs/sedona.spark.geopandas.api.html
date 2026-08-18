@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -2542,6 +2541,71 @@ input types when their coordinates match.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.geom_equals" title="sedona.spark.geopandas.GeoSeries.geom_equals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.geom_equals</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.geom_equals_identical">
+<span class="sig-name descname"><span class="pre">geom_equals_identical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">align</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://spark.apache.org/docs/latest/api/python/reference/pyspark.pandas/api/pyspark.pandas.Series.html#pyspark.pandas.Series" title="(in PySpark vmaster)"><span class="pre">pyspark.pandas.Series</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.geom_equals_identical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.geom_equals_identical" title="Permalink to this definition"></a></dt>
+<dd><p>Return <code class="docutils literal notranslate"><span class="pre">True</span></code> for geometries that are identical to aligned
+<cite>other</cite>, otherwise <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p>Equality is structural: geometry types, component ordering, ring
+ordering, vertex ordering, coordinate dimensions, and every ordinate
+value must match. Unlike <a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.geom_equals_exact" title="sedona.spark.geopandas.GeoSeries.geom_equals_exact"><code class="xref py py-meth docutils literal notranslate"><span class="pre">geom_equals_exact()</span></code></a>, this method checks
+Z and M coordinates and does not accept a tolerance. NaN ordinates in
+the same position are considered equal.</p>
+<p>The operation works in a 1-to-1 row-wise manner.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries"><em>GeoSeries</em></a><em> or </em><em>geometric object</em>) – The GeoSeries (elementwise) or geometric object to compare to.</p></li>
+<li><p><strong>align</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em> | </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – If True, automatically align GeoSeries based on their indices.
+If False, compare values in their existing order. None defaults
+to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Series (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a>)</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">geom_equals_identical</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="go">0    False</span>
+<span class="go">1     True</span>
+<span class="go">2    False</span>
+<span class="go">dtype: bool</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This method checks geometries row by row; it does not compare each
+geometry with every value in <cite>other</cite>.</p>
+<p>As elsewhere in Sedona’s GeoPandas compatibility layer, standalone
+<code class="docutils literal notranslate"><span class="pre">LinearRing</span></code> geometries are serialized as <code class="docutils literal notranslate"><span class="pre">LineString</span></code> geometries.
+Consequently, this method cannot distinguish those two standalone
+input types when their coordinates match.</p>
+<p>Values are compared using the representation stored in Spark. JTS
+cannot distinguish ordinary XY from declared XYZ when every Z
+ordinate is NaN, including empty XYZ values and zero-member
+collections. Shapely inputs with mixed coordinate layouts inside a
+Polygon or same-type multi-geometry may be normalized to one layout
+by Python GeometryUDT serialization; JVM-created mixed layouts are
+rejected when their layouts remain distinguishable in JTS. Use a
+GeometryCollection when members need independent layouts. Passing
+Shapely M and ZM objects through GeometryUDT requires Sedona’s native
+geometry serializer with GEOS 3.12 or newer; the pure-Python fallback
+rejects them instead of silently discarding measures.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.geom_equals" title="sedona.spark.geopandas.GeoSeries.geom_equals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.geom_equals</span></code></a>, <a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.geom_equals_exact" title="sedona.spark.geopandas.GeoSeries.geom_equals_exact"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.geom_equals_exact</span></code></a></p>
 </div>
 </dd></dl>
 
