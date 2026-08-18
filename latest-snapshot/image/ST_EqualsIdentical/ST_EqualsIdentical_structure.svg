@@ -1,0 +1,135 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 830" width="1200" height="830" role="img" aria-labelledby="equals-identical-structure-title equals-identical-structure-description">
+  <title id="equals-identical-structure-title">ST_EqualsIdentical compares stored geometry structure and coordinate order</title>
+  <desc id="equals-identical-structure-description">Three comparisons with input A and input B shown in separate panels. Two line strings with the same coordinate sequence return true. The same line traced in reverse order returns false. A MultiPoint and a GeometryCollection containing the same two visible points return false because their geometry types and structures differ.</desc>
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; }
+      text:not([fill]) { fill: #172033; }
+      .comparison { fill: #f8fafc; stroke: #b8c3d1; stroke-width: 1.5; }
+      .input-card { fill: #ffffff; stroke-width: 2; }
+      .input-a-card { stroke: #005ea8; }
+      .input-b-card { stroke: #b8324a; stroke-dasharray: 8 5; }
+      .row-title { font-size: 15px; font-weight: 700; }
+      .input-title { font-size: 14px; font-weight: 700; }
+      .caption { font-size: 12px; fill: #475569; }
+      .small { font-size: 11px; fill: #475569; }
+      .wkt { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; fill: #334155; }
+      .a-line { fill: none; stroke: #005ea8; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+      .b-line { fill: none; stroke: #b8324a; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 10 6; }
+      .a-vertex { fill: #ffffff; stroke: #005ea8; stroke-width: 2; }
+      .b-vertex { fill: #ffffff; stroke: #b8324a; stroke-width: 2; }
+      .vertex-label { font-size: 10px; font-weight: 700; }
+      .result-true { fill: #e6f5ef; stroke: #08775f; stroke-width: 2; }
+      .result-false { fill: #fff0f1; stroke: #a92e43; stroke-width: 2; }
+      .result-word { font-size: 20px; font-weight: 800; }
+    </style>
+    <marker id="structure-a-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#005ea8"/>
+    </marker>
+    <marker id="structure-b-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#b8324a"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="830" fill="#ffffff"/>
+  <text x="600" y="32" text-anchor="middle" font-size="22" font-weight="700">Exact structure and coordinate order</text>
+  <text x="600" y="57" text-anchor="middle" class="caption">The visible shape is not enough: geometry type, nesting, component order, and vertex order must all match.</text>
+
+  <!-- Same coordinate order: true. -->
+  <rect x="25" y="80" width="1150" height="225" rx="10" class="comparison"/>
+  <text x="45" y="108" class="row-title">1 · Same type, structure, and vertex order</text>
+  <text x="45" y="128" class="caption">Both lines visit vertices 1 → 2 → 3.</text>
+
+  <rect x="45" y="143" width="435" height="142" rx="8" class="input-card input-a-card"/>
+  <text x="62" y="166" class="input-title" fill="#005ea8">Input A · solid</text>
+  <path d="M90 232 L260 187 L430 232" class="a-line" marker-end="url(#structure-a-arrow)"/>
+  <circle cx="90" cy="232" r="10" class="a-vertex"/><text x="90" y="236" text-anchor="middle" class="vertex-label" fill="#005ea8">1</text>
+  <circle cx="260" cy="187" r="10" class="a-vertex"/><text x="260" y="191" text-anchor="middle" class="vertex-label" fill="#005ea8">2</text>
+  <circle cx="430" cy="232" r="10" class="a-vertex"/><text x="430" y="236" text-anchor="middle" class="vertex-label" fill="#005ea8">3</text>
+  <text x="262" y="270" text-anchor="middle" class="wkt">LINESTRING (0 0, 2 2, 4 0)</text>
+
+  <rect x="500" y="143" width="435" height="142" rx="8" class="input-card input-b-card"/>
+  <text x="517" y="166" class="input-title" fill="#a92e43">Input B · dashed</text>
+  <path d="M545 232 L715 187 L885 232" class="b-line" marker-end="url(#structure-b-arrow)"/>
+  <circle cx="545" cy="232" r="10" class="b-vertex"/><text x="545" y="236" text-anchor="middle" class="vertex-label" fill="#a92e43">1</text>
+  <circle cx="715" cy="187" r="10" class="b-vertex"/><text x="715" y="191" text-anchor="middle" class="vertex-label" fill="#a92e43">2</text>
+  <circle cx="885" cy="232" r="10" class="b-vertex"/><text x="885" y="236" text-anchor="middle" class="vertex-label" fill="#a92e43">3</text>
+  <text x="717" y="270" text-anchor="middle" class="wkt">LINESTRING (0 0, 2 2, 4 0)</text>
+
+  <rect x="955" y="164" width="200" height="100" rx="9" class="result-true"/>
+  <text x="1055" y="191" text-anchor="middle" class="small">ST_EqualsIdentical(A, B)</text>
+  <text x="1055" y="225" text-anchor="middle" class="result-word" fill="#08775f">TRUE</text>
+  <text x="1055" y="247" text-anchor="middle" class="small">all compared details match</text>
+
+  <!-- Reverse coordinate order: false. -->
+  <rect x="25" y="320" width="1150" height="225" rx="10" class="comparison"/>
+  <text x="45" y="348" class="row-title">2 · Same trace, opposite vertex order</text>
+  <text x="45" y="368" class="caption">The paths are topologically equal, but B stores the coordinates in reverse.</text>
+
+  <rect x="45" y="383" width="435" height="142" rx="8" class="input-card input-a-card"/>
+  <text x="62" y="406" class="input-title" fill="#005ea8">Input A · solid</text>
+  <path d="M90 472 L260 427 L430 472" class="a-line" marker-end="url(#structure-a-arrow)"/>
+  <circle cx="90" cy="472" r="10" class="a-vertex"/><text x="90" y="476" text-anchor="middle" class="vertex-label" fill="#005ea8">1</text>
+  <circle cx="260" cy="427" r="10" class="a-vertex"/><text x="260" y="431" text-anchor="middle" class="vertex-label" fill="#005ea8">2</text>
+  <circle cx="430" cy="472" r="10" class="a-vertex"/><text x="430" y="476" text-anchor="middle" class="vertex-label" fill="#005ea8">3</text>
+  <text x="262" y="510" text-anchor="middle" class="wkt">LINESTRING (0 0, 2 2, 4 0)</text>
+
+  <rect x="500" y="383" width="435" height="142" rx="8" class="input-card input-b-card"/>
+  <text x="517" y="406" class="input-title" fill="#a92e43">Input B · dashed</text>
+  <path d="M885 472 L715 427 L545 472" class="b-line" marker-end="url(#structure-b-arrow)"/>
+  <circle cx="885" cy="472" r="10" class="b-vertex"/><text x="885" y="476" text-anchor="middle" class="vertex-label" fill="#a92e43">1</text>
+  <circle cx="715" cy="427" r="10" class="b-vertex"/><text x="715" y="431" text-anchor="middle" class="vertex-label" fill="#a92e43">2</text>
+  <circle cx="545" cy="472" r="10" class="b-vertex"/><text x="545" y="476" text-anchor="middle" class="vertex-label" fill="#a92e43">3</text>
+  <text x="717" y="510" text-anchor="middle" class="wkt">LINESTRING (4 0, 2 2, 0 0)</text>
+
+  <rect x="955" y="404" width="200" height="100" rx="9" class="result-false"/>
+  <text x="1055" y="431" text-anchor="middle" class="small">ST_EqualsIdentical(A, B)</text>
+  <text x="1055" y="465" text-anchor="middle" class="result-word" fill="#a92e43">FALSE</text>
+  <text x="1055" y="487" text-anchor="middle" class="small">coordinate order differs</text>
+
+  <!-- Same visible members, different structural type: false. -->
+  <rect x="25" y="560" width="1150" height="225" rx="10" class="comparison"/>
+  <text x="45" y="588" class="row-title">3 · Same visible points, different container structure</text>
+  <text x="45" y="608" class="caption">A MultiPoint and a GeometryCollection remain distinct even when their child points match.</text>
+
+  <rect x="45" y="623" width="435" height="142" rx="8" class="input-card input-a-card"/>
+  <text x="62" y="646" class="input-title" fill="#005ea8">Input A · MultiPoint</text>
+  <rect x="80" y="660" width="365" height="54" rx="20" fill="#eef6fb" stroke="#005ea8" stroke-width="1.5"/>
+  <circle cx="160" cy="687" r="11" fill="#005ea8"/><text x="160" y="691" text-anchor="middle" class="vertex-label" fill="#ffffff">1</text>
+  <circle cx="365" cy="687" r="11" fill="#005ea8"/><text x="365" y="691" text-anchor="middle" class="vertex-label" fill="#ffffff">2</text>
+  <text x="262" y="749" text-anchor="middle" class="wkt">MULTIPOINT ((0 0), (4 0))</text>
+
+  <rect x="500" y="623" width="435" height="142" rx="8" class="input-card input-b-card"/>
+  <text x="517" y="646" class="input-title" fill="#a92e43">Input B · GeometryCollection</text>
+  <rect x="530" y="660" width="375" height="54" rx="8" fill="#fff5f5" stroke="#b8324a" stroke-width="1.5" stroke-dasharray="7 4"/>
+  <rect x="555" y="669" width="125" height="36" rx="16" fill="#ffffff" stroke="#b8324a"/><circle cx="575" cy="687" r="8" fill="#b8324a"/><text x="618" y="692" text-anchor="middle" class="small">POINT 1</text>
+  <rect x="755" y="669" width="125" height="36" rx="16" fill="#ffffff" stroke="#b8324a"/><circle cx="775" cy="687" r="8" fill="#b8324a"/><text x="818" y="692" text-anchor="middle" class="small">POINT 2</text>
+  <text x="717" y="738" text-anchor="middle" class="wkt">GEOMETRYCOLLECTION (POINT (0 0),</text>
+  <text x="717" y="754" text-anchor="middle" class="wkt">POINT (4 0))</text>
+
+  <rect x="955" y="644" width="200" height="100" rx="9" class="result-false"/>
+  <text x="1055" y="671" text-anchor="middle" class="small">ST_EqualsIdentical(A, B)</text>
+  <text x="1055" y="705" text-anchor="middle" class="result-word" fill="#a92e43">FALSE</text>
+  <text x="1055" y="727" text-anchor="middle" class="small">type and nesting differ</text>
+
+  <rect x="25" y="800" width="1150" height="22" rx="6" fill="#eef2ff" stroke="#b7b9e6"/>
+  <text x="600" y="815" text-anchor="middle" class="small" fill="#4338ca">Use ST_Equals when only topology matters; use ST_EqualsIdentical to verify type, structure, order, and coordinates.</text>
+</svg>

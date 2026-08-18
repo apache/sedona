@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_predicates &mdash; Apache Sedona Python Documentation</title>
@@ -322,6 +321,24 @@
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="n">_call_predicate_function</span><span class="p">(</span><span class="s2">"ST_EqualsExact"</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ST_EqualsIdentical"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_predicates.ST_EqualsIdentical">[docs]</a><span class="nd">@validate_argument_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ST_EqualsIdentical</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Check whether two geometries are structurally identical in every dimension.</span>
+
+<span class="sd">    Geometry types, component ordering, vertex ordering, dimensionality, and all</span>
+<span class="sd">    coordinate values must match exactly. NaN ordinate values compare equal to</span>
+<span class="sd">    other NaN values.</span>
+
+<span class="sd">    :param a: One geometry column to check.</span>
+<span class="sd">    :type a: ColumnOrName</span>
+<span class="sd">    :param b: Other geometry column to check.</span>
+<span class="sd">    :type b: ColumnOrName</span>
+<span class="sd">    :return: True if a and b are identical, otherwise False.</span>
+<span class="sd">    :rtype: Column</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">_call_predicate_function</span><span class="p">(</span><span class="s2">"ST_EqualsIdentical"</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="ST_Intersects"><a class="viewcode-back" href="../../../../sedona.spark.sql.html#sedona.spark.sql.st_predicates.ST_Intersects">[docs]</a><span class="nd">@validate_argument_types</span>
