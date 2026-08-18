@@ -351,6 +351,29 @@ public class CogWriterTest {
   }
 
   @Test
+  public void testWriteAlignedTiledByteSourceAsCog() throws Exception {
+    // GH-3245: a source already tiled on the output grid with tight, zero-offset buffers
+    // takes the zero-copy fast path — verify that path produces identical pixels too.
+    int size = 1024;
+    double[] bandValues = new double[size * size];
+    for (int i = 0; i < bandValues.length; i++) {
+      bandValues[i] = (i * 13) % 256;
+    }
+    GridCoverage2D raster =
+        RasterConstructors.makeNonEmptyRaster(
+            1, "b", size, size, 0, 0, 1, -1, 0, 0, 4326, new double[][] {bandValues});
+    GridCoverage2D fromFile = RasterConstructors.fromGeoTiff(writeTiledGeoTiff(raster, 256));
+    assertEquals(256, fromFile.getRenderedImage().getTileWidth());
+    assertEquals(256, fromFile.getRenderedImage().getTileHeight());
+
+    byte[] cogBytes = RasterOutputs.asCloudOptimizedGeoTiff(fromFile, CogOptions.defaults());
+
+    GridCoverage2D readBack = RasterConstructors.fromGeoTiff(cogBytes);
+    double[] readValues = MapAlgebra.bandAsArray(readBack, 1);
+    assertArrayEquals(bandValues, readValues, 0.0);
+  }
+
+  @Test
   public void testWriteOffsetBufferByteSourceAsCog() throws Exception {
     // GH-3245: a DataBufferByte may carry a positive array offset independent of the
     // sample model. The TIFF writer's direct-buffer path and Raster bulk-copy shortcuts
@@ -448,7 +471,7 @@ public class CogWriterTest {
     }
   }
 
-  private static byte[] writeTiledGeoTiff(GridCoverage2D raster, int tileSize) throws IOException {
+  static byte[] writeTiledGeoTiff(GridCoverage2D raster, int tileSize) throws IOException {
     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
       GeoTiffWriter writer = new GeoTiffWriter(out);
       try {

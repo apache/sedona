@@ -20,7 +20,9 @@ package org.apache.sedona.common.raster.cog;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.image.ComponentSampleModel;
 import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
@@ -29,6 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.imageio.ImageWriteParam;
 import javax.media.jai.ImageLayout;
@@ -284,15 +287,21 @@ public class CogWriter {
    * pixel data (unlike {@link javax.media.jai.TiledImage}, which holds every realized tile
    * strongly).
    *
-   * <p>Pixels are copied through SampleModel/DataBuffer accessors, which honor the source
-   * DataBuffer's offset. Raster bulk-copy shortcuts must not be used here: {@code
+   * <p>Pixels are copied with explicit DataBuffer bank offsets (or through SampleModel/DataBuffer
+   * accessors, which honor them). Raster bulk-copy shortcuts must not be used here: {@code
    * WritableRaster.setRect} and the getDataElements-based cobbling inside {@code
    * PlanarImage.getData} read the backing array directly and silently drop a nonzero DataBuffer
    * offset, corrupting every pixel. For the same reason tiles are read straight from the source
    * with {@code getTile} rather than through {@code getData}.
+   *
+   * <p>When the source's tile grid already coincides with the output grid, each source tile whose
+   * concrete raster is verifiably safe for the writer (full-size, tight stride, zero buffer offset)
+   * is returned as-is, so already well-tiled sources are written without any copy.
    */
   private static final class RetilingImage extends PlanarImage {
     private final RenderedImage source;
+    /** Source tile grid coincides with this image's grid, so source tiles can be reused. */
+    private final boolean sameTileGrid;
 
     RetilingImage(RenderedImage source, int tileSize) {
       super(
@@ -310,10 +319,21 @@ public class CogWriter {
           null,
           null);
       this.source = source;
+      this.sameTileGrid =
+          source.getTileWidth() == tileSize
+              && source.getTileHeight() == tileSize
+              && source.getTileGridXOffset() == source.getMinX()
+              && source.getTileGridYOffset() == source.getMinY();
     }
 
     @Override
     public Raster getTile(int tileX, int tileY) {
+      if (sameTileGrid) {
+        Raster srcTile = source.getTile(tileX, tileY);
+        if (isWriterSafe(srcTile)) {
+          return srcTile;
+        }
+      }
       WritableRaster tile =
           Raster.createWritableRaster(
               getSampleModel(), new Point(tileXToX(tileX), tileYToY(tileY)));
@@ -339,8 +359,53 @@ public class CogWriter {
       return tile;
     }
 
-    /** Row-wise copy through SampleModel/DataBuffer accessors; see the class comment for why. */
+    /**
+     * Whether the writer can consume this concrete tile as-is: a full-size byte component tile
+     * whose samples fill a single-bank, zero-offset buffer exactly, with the pixel's bytes packed
+     * in [0, pixelStride). This must be judged per tile — the DataBuffer offset is a property of
+     * each tile's buffer, not of the image layout.
+     */
+    private boolean isWriterSafe(Raster tile) {
+      int tileSize = getTileWidth();
+      if (tile.getWidth() != tileSize
+          || tile.getHeight() != tileSize
+          || tile.getSampleModelTranslateX() != tile.getMinX()
+          || tile.getSampleModelTranslateY() != tile.getMinY()) {
+        return false;
+      }
+      SampleModel sm = tile.getSampleModel();
+      if (!(sm instanceof ComponentSampleModel)
+          || sm.getWidth() != tileSize
+          || sm.getHeight() != tileSize) {
+        return false;
+      }
+      ComponentSampleModel csm = (ComponentSampleModel) sm;
+      int ps = csm.getPixelStride();
+      if (csm.getScanlineStride() != tileSize * ps) {
+        return false;
+      }
+      int[] bandOffsets = csm.getBandOffsets();
+      int maxOff = 0;
+      for (int off : bandOffsets) {
+        if (off < 0 || off >= ps) {
+          return false;
+        }
+        maxOff = Math.max(maxOff, off);
+      }
+      if (bandOffsets[0] != 0 || maxOff != ps - 1) {
+        return false;
+      }
+      DataBuffer db = tile.getDataBuffer();
+      return db instanceof DataBufferByte && db.getNumBanks() == 1 && db.getOffset() == 0;
+    }
+
+    /** Copy a region between rasters without ever dropping DataBuffer offsets. */
     private static void copyPixels(Raster src, WritableRaster dest, Rectangle region) {
+      if (copyRowsDirectly(src, dest, region)) {
+        return;
+      }
+      // Fallback for layout pairs the bulk path does not cover: per-sample accessors, which
+      // are offset-aware by specification.
       SampleModel srcSm = src.getSampleModel();
       SampleModel destSm = dest.getSampleModel();
       DataBuffer srcDb = src.getDataBuffer();
@@ -354,6 +419,83 @@ public class CogWriter {
         srcSm.getPixels(region.x - srcTx, y - srcTy, region.width, 1, row, srcDb);
         destSm.setPixels(region.x - destTx, y - destTy, region.width, 1, row, destDb);
       }
+    }
+
+    /**
+     * Row-wise System.arraycopy for standard byte component layouts, applying each side's
+     * DataBuffer bank offsets explicitly. Returns false when the layout pair is not eligible.
+     */
+    private static boolean copyRowsDirectly(Raster src, WritableRaster dest, Rectangle region) {
+      if (!(src.getSampleModel() instanceof ComponentSampleModel)
+          || !(dest.getSampleModel() instanceof ComponentSampleModel)
+          || !(src.getDataBuffer() instanceof DataBufferByte)
+          || !(dest.getDataBuffer() instanceof DataBufferByte)) {
+        return false;
+      }
+      ComponentSampleModel srcSm = (ComponentSampleModel) src.getSampleModel();
+      ComponentSampleModel destSm = (ComponentSampleModel) dest.getSampleModel();
+      DataBufferByte srcDb = (DataBufferByte) src.getDataBuffer();
+      DataBufferByte destDb = (DataBufferByte) dest.getDataBuffer();
+      int ps = srcSm.getPixelStride();
+      if (destSm.getPixelStride() != ps || srcSm.getNumBands() != destSm.getNumBands()) {
+        return false;
+      }
+      int srcX = region.x - src.getSampleModelTranslateX();
+      int srcY = region.y - src.getSampleModelTranslateY();
+      int destX = region.x - dest.getSampleModelTranslateX();
+      int destY = region.y - dest.getSampleModelTranslateY();
+      int srcStride = srcSm.getScanlineStride();
+      int destStride = destSm.getScanlineStride();
+      if (ps == 1) {
+        // One byte per band sample: copy each band's rows within its own bank.
+        for (int b = 0; b < srcSm.getNumBands(); b++) {
+          byte[] srcArr = srcDb.getData(srcSm.getBankIndices()[b]);
+          byte[] destArr = destDb.getData(destSm.getBankIndices()[b]);
+          int srcBase = srcDb.getOffsets()[srcSm.getBankIndices()[b]] + srcSm.getBandOffsets()[b];
+          int destBase =
+              destDb.getOffsets()[destSm.getBankIndices()[b]] + destSm.getBandOffsets()[b];
+          for (int y = 0; y < region.height; y++) {
+            System.arraycopy(
+                srcArr,
+                srcBase + (srcY + y) * srcStride + srcX,
+                destArr,
+                destBase + (destY + y) * destStride + destX,
+                region.width);
+          }
+        }
+        return true;
+      }
+      // Interleaved pixels: rows are contiguous byte blocks only when both sides pack the
+      // pixel's bytes identically across [0, pixelStride) in a single bank.
+      int[] bandOffsets = srcSm.getBandOffsets();
+      if (!Arrays.equals(bandOffsets, destSm.getBandOffsets())
+          || srcDb.getNumBanks() != 1
+          || destDb.getNumBanks() != 1) {
+        return false;
+      }
+      int minOff = ps;
+      int maxOff = -1;
+      for (int off : bandOffsets) {
+        minOff = Math.min(minOff, off);
+        maxOff = Math.max(maxOff, off);
+      }
+      if (minOff != 0 || maxOff != ps - 1) {
+        return false;
+      }
+      byte[] srcArr = srcDb.getData();
+      byte[] destArr = destDb.getData();
+      int srcBase = srcDb.getOffset();
+      int destBase = destDb.getOffset();
+      int len = region.width * ps;
+      for (int y = 0; y < region.height; y++) {
+        System.arraycopy(
+            srcArr,
+            srcBase + (srcY + y) * srcStride + srcX * ps,
+            destArr,
+            destBase + (destY + y) * destStride + destX * ps,
+            len);
+      }
+      return true;
     }
   }
 
