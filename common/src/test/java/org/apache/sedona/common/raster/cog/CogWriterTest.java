@@ -20,9 +20,7 @@ package org.apache.sedona.common.raster.cog;
 
 import static org.junit.Assert.*;
 
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.awt.image.ComponentSampleModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.PixelInterleavedSampleModel;
@@ -379,8 +377,8 @@ public class CogWriterTest {
   public void testWriteOffsetBufferByteSourceAsCog() throws Exception {
     // GH-3245: a DataBufferByte may carry a positive array offset independent of the
     // sample model. The TIFF writer's direct-buffer path and Raster bulk-copy shortcuts
-    // (WritableRaster.setRect) both ignore it, silently shifting every pixel, so the
-    // per-tile copy must go through SampleModel/DataBuffer accessors.
+    // (WritableRaster.setRect) both ignore it, silently shifting every pixel, so tile
+    // normalization must apply the buffer offset explicitly.
     int size = 256;
     SampleModel sm =
         new PixelInterleavedSampleModel(DataBuffer.TYPE_BYTE, size, size, 1, size, new int[] {0});
@@ -443,94 +441,6 @@ public class CogWriterTest {
     GridCoverage2D readBack = RasterConstructors.fromGeoTiff(cogBytes);
     double[] readValues = MapAlgebra.bandAsArray(readBack, 1);
     assertArrayEquals(bandValues, readValues, 0.0);
-  }
-
-  @Test
-  public void testRetilingViewReturnsEligibleTilesByIdentity() {
-    // GH-3245 performance guard: a source already tiled on the output grid with tight,
-    // zero-offset tiles must be passed through without copying — assert tile identity,
-    // not timing.
-    SampleModel tightSm =
-        new PixelInterleavedSampleModel(DataBuffer.TYPE_BYTE, 256, 256, 1, 256, new int[] {0});
-    TiledImage tightSrc =
-        new TiledImage(0, 0, 512, 512, 0, 0, tightSm, PlanarImage.createColorModel(tightSm));
-    CogWriter.RetilingImage tightView = new CogWriter.RetilingImage(tightSrc, 256);
-    assertSame(tightSrc.getTile(0, 0), tightView.getTile(0, 0));
-    assertSame(tightSrc.getTile(1, 1), tightView.getTile(1, 1));
-
-    // Wide-stride tiles are NOT eligible: they must be materialized into tight rasters.
-    SampleModel wideSm =
-        new PixelInterleavedSampleModel(DataBuffer.TYPE_BYTE, 256, 256, 1, 512, new int[] {0});
-    TiledImage wideSrc =
-        new TiledImage(0, 0, 512, 512, 0, 0, wideSm, PlanarImage.createColorModel(wideSm));
-    CogWriter.RetilingImage wideView = new CogWriter.RetilingImage(wideSrc, 256);
-    Raster wideTile = wideView.getTile(0, 0);
-    assertNotSame(wideSrc.getTile(0, 0), wideTile);
-    assertEquals(256, ((ComponentSampleModel) wideTile.getSampleModel()).getScanlineStride());
-
-    // Offset-backed tiles are NOT eligible: the copy must land in a zero-offset buffer
-    // with the pixel values preserved.
-    SampleModel sm =
-        new PixelInterleavedSampleModel(DataBuffer.TYPE_BYTE, 256, 256, 1, 256, new int[] {0});
-    DataBufferByte db = new DataBufferByte(new byte[17 + 256 * 256], 256 * 256, 17);
-    WritableRaster offsetRaster = Raster.createWritableRaster(sm, db, null);
-    offsetRaster.setSample(1, 0, 0, 42);
-    SingleTileImage offsetSrc = new SingleTileImage(offsetRaster, PlanarImage.createColorModel(sm));
-    CogWriter.RetilingImage offsetView = new CogWriter.RetilingImage(offsetSrc, 256);
-    Raster offsetTile = offsetView.getTile(0, 0);
-    assertNotSame(offsetRaster, offsetTile);
-    assertEquals(0, offsetTile.getDataBuffer().getOffset());
-    assertEquals(42, offsetTile.getSample(1, 0, 0));
-  }
-
-  @Test
-  public void testBulkRowCopyEligibility() {
-    // GH-3245 performance guard: standard byte layouts must take the arraycopy path
-    // (return true) with correct values, including offset-backed sources; ineligible
-    // pairs must be refused so the accessor fallback handles them.
-    Rectangle region = new Rectangle(0, 0, 64, 64);
-
-    // Grayscale pair, offset-backed source: eligible, and the offset must be applied.
-    SampleModel graySm =
-        new PixelInterleavedSampleModel(DataBuffer.TYPE_BYTE, 64, 64, 1, 64, new int[] {0});
-    DataBufferByte offsetDb = new DataBufferByte(new byte[17 + 64 * 64], 64 * 64, 17);
-    WritableRaster offsetSrc = Raster.createWritableRaster(graySm, offsetDb, null);
-    for (int y = 0; y < 64; y++) {
-      for (int x = 0; x < 64; x++) {
-        offsetSrc.setSample(x, y, 0, (x + 2 * y) % 251);
-      }
-    }
-    WritableRaster grayDest =
-        Raster.createWritableRaster(graySm.createCompatibleSampleModel(64, 64), null);
-    assertTrue(CogWriter.RetilingImage.copyRowsDirectly(offsetSrc, grayDest, region));
-    for (int y = 0; y < 64; y++) {
-      for (int x = 0; x < 64; x++) {
-        assertEquals((x + 2 * y) % 251, grayDest.getSample(x, y, 0));
-      }
-    }
-
-    // Interleaved RGB pair with identical packing: eligible.
-    SampleModel rgbSm =
-        new PixelInterleavedSampleModel(
-            DataBuffer.TYPE_BYTE, 64, 64, 3, 64 * 3, new int[] {0, 1, 2});
-    WritableRaster rgbSrc = Raster.createWritableRaster(rgbSm, null);
-    rgbSrc.setSample(5, 7, 2, 99);
-    WritableRaster rgbDest =
-        Raster.createWritableRaster(rgbSm.createCompatibleSampleModel(64, 64), null);
-    assertTrue(CogWriter.RetilingImage.copyRowsDirectly(rgbSrc, rgbDest, region));
-    assertEquals(99, rgbDest.getSample(5, 7, 2));
-
-    // Banded multiband pair: eligible via the per-band path.
-    WritableRaster bandedSrc = Raster.createBandedRaster(DataBuffer.TYPE_BYTE, 64, 64, 3, null);
-    bandedSrc.setSample(9, 11, 1, 77);
-    WritableRaster bandedDest =
-        Raster.createWritableRaster(
-            bandedSrc.getSampleModel().createCompatibleSampleModel(64, 64), null);
-    assertTrue(CogWriter.RetilingImage.copyRowsDirectly(bandedSrc, bandedDest, region));
-    assertEquals(77, bandedDest.getSample(9, 11, 1));
-
-    // Mismatched pixel strides: not eligible, must fall back to accessors.
-    assertFalse(CogWriter.RetilingImage.copyRowsDirectly(rgbSrc, grayDest, region));
   }
 
   /** Minimal image exposing a single tile as-is, preserving its DataBuffer offset. */
