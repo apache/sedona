@@ -267,10 +267,11 @@ public class CogWriter {
    * layout of that array (a buffer wider than the output tile overruns and throws
    * ArrayIndexOutOfBoundsException) and the DataBuffer's own offset (a nonzero offset silently
    * shifts every pixel). Whether a given tile is safe depends on its DataBuffer, which cannot be
-   * verified up front, so every byte-band image is rewrapped unconditionally: the writer only ever
-   * sees freshly materialized tiles backed by tight, zero-offset buffers. Pixel data and the
-   * written TIFF are unchanged; tiles are copied one at a time and never cached, so no second copy
-   * of the raster is retained.
+   * verified up front, so every byte-band image is wrapped unconditionally. The wrapper vets each
+   * tile as it is requested: a tile whose concrete raster is already writer-safe passes through
+   * unchanged, and only unsafe tiles are materialized into fresh tiles backed by tight, zero-offset
+   * buffers. Pixel data and the written TIFF are unchanged; materialized tiles are copied one at a
+   * time and never cached, so no second copy of the raster is retained.
    */
   private static GridCoverage2D alignTileLayoutForByteBands(GridCoverage2D raster, int tileSize) {
     RenderedImage image = raster.getRenderedImage();
@@ -298,7 +299,8 @@ public class CogWriter {
    * concrete raster is verifiably safe for the writer (full-size, tight stride, zero buffer offset)
    * is returned as-is, so already well-tiled sources are written without any copy.
    */
-  private static final class RetilingImage extends PlanarImage {
+  // Package-private so tests can assert on tile reuse and copy behavior directly.
+  static final class RetilingImage extends PlanarImage {
     private final RenderedImage source;
     /** Source tile grid coincides with this image's grid, so source tiles can be reused. */
     private final boolean sameTileGrid;
@@ -425,7 +427,7 @@ public class CogWriter {
      * Row-wise System.arraycopy for standard byte component layouts, applying each side's
      * DataBuffer bank offsets explicitly. Returns false when the layout pair is not eligible.
      */
-    private static boolean copyRowsDirectly(Raster src, WritableRaster dest, Rectangle region) {
+    static boolean copyRowsDirectly(Raster src, WritableRaster dest, Rectangle region) {
       if (!(src.getSampleModel() instanceof ComponentSampleModel)
           || !(dest.getSampleModel() instanceof ComponentSampleModel)
           || !(src.getDataBuffer() instanceof DataBufferByte)
