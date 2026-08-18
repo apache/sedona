@@ -316,6 +316,8 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
 - `buffer()` - Geometric buffering
 - `distance()` - Distance calculations
 - `intersects()`, `contains()`, `within()` - Spatial predicates
+- `geom_equals_identical()` - Exact structural equality across every stored
+  coordinate dimension
 - `sindex` - Spatial indexing (limited functionality)
 
 ### CRS Operations

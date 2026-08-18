@@ -2849,6 +2849,44 @@ class GeoSeries(GeoFrame, pspd.Series):
             align,
         )
 
+    def geom_equals_identical(self, other, align=None) -> pspd.Series:
+        if isinstance(other, BaseGeometry):
+            # JTS's WKB reader loses measure metadata on typed empty values,
+            # while its WKT reader retains the explicit M/ZM layout tags.
+            if other.is_empty:
+                other_wkt = other.wkt
+                if other.geom_type == "LinearRing":
+                    # GeometryUDT stores standalone rings as LineStrings.
+                    other_wkt = other_wkt.replace("LINEARRING", "LINESTRING", 1)
+                other_geometry = stc.ST_GeomFromWKT(F.lit(other_wkt))
+            else:
+                other_geometry = stc.ST_GeomFromWKB(F.lit(other.wkb))
+            spark_expr = stp.ST_EqualsIdentical(
+                self.spark.column,
+                other_geometry,
+            )
+            result = self._boolean_result_preserving_index(
+                F.coalesce(spark_expr, F.lit(False)),
+                self._internal.spark_frame,
+                self._internal.index_spark_columns,
+                self._internal.index_fields,
+                self._internal.index_names,
+            )
+            return _to_bool(result)
+
+        if not isinstance(other, (GeoSeries, GeoDataFrame, PandasOnSparkSeries)):
+            raise TypeError(
+                "'other' must be a GeoSeries, GeoDataFrame, "
+                "pandas-on-Spark Series, or geometry"
+            )
+
+        other_series, extended = self._make_series_of_val(other)
+        align = False if extended else align
+        if isinstance(other_series, GeoSeries):
+            warn_crs_mismatch(self.crs, other_series.crs)
+
+        return self._geom_equals_identical_series(other_series, align)
+
     def interpolate(self, distance, normalized=False) -> "GeoSeries":
         other_series, extended = self._make_series_of_val(distance)
         align = not extended
@@ -3423,6 +3461,25 @@ class GeoSeries(GeoFrame, pspd.Series):
         align: Union[bool, None],
     ) -> pspd.Series:
         """Execute exact equality with GeoPandas-compatible row alignment."""
+        spark_expr = stp.ST_EqualsExact(F.col("L"), F.col("R"), tolerance)
+        return self._boolean_result_with_alignment(other, align, spark_expr)
+
+    def _geom_equals_identical_series(
+        self,
+        other: pspd.Series,
+        align: Union[bool, None],
+    ) -> pspd.Series:
+        """Execute identical equality with GeoPandas-compatible row alignment."""
+        spark_expr = stp.ST_EqualsIdentical(F.col("L"), F.col("R"))
+        return self._boolean_result_with_alignment(other, align, spark_expr)
+
+    def _boolean_result_with_alignment(
+        self,
+        other: pspd.Series,
+        align: Union[bool, None],
+        spark_expr: PySparkColumn,
+    ) -> pspd.Series:
+        """Evaluate a native boolean expression after binary row alignment."""
         (
             aligned_frame,
             result_index_columns,
@@ -3431,18 +3488,18 @@ class GeoSeries(GeoFrame, pspd.Series):
         ) = self._align_binary_geometry_series(
             other,
             align,
-            warning_stacklevel=4,
+            warning_stacklevel=5,
         )
 
-        spark_expr = stp.ST_EqualsExact(F.col("L"), F.col("R"), tolerance)
-        result = self._boolean_result_preserving_index(
-            F.coalesce(spark_expr, F.lit(False)),
-            aligned_frame,
-            [scol_for(aligned_frame, name) for name in result_index_columns],
-            result_index_fields,
-            result_index_names,
+        return _to_bool(
+            self._boolean_result_preserving_index(
+                F.coalesce(spark_expr, F.lit(False)),
+                aligned_frame,
+                [scol_for(aligned_frame, name) for name in result_index_columns],
+                result_index_fields,
+                result_index_names,
+            )
         )
-        return _to_bool(result)
 
     def _align_single_index_series_lazily(
         self,
