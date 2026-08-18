@@ -139,7 +139,7 @@ identical
 NULL
 ```
 
-## Practical use: lossless geometry validation
+## Practical use: geometry round-trip validation
 
 Use `ST_EqualsIdentical` for deterministic change detection after serialization, storage, or an
 ETL rewrite. It can reveal a reversed coordinate sequence or changed geometry container even

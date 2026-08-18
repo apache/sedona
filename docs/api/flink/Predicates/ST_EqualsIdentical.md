@@ -58,6 +58,12 @@ For ZM geometries, both the Z and M values participate in the comparison.
 `ST_EqualsIdentical` does not compare SRID, precision model, user data, or the coordinate-sequence
 implementation. Compare SRIDs separately when CRS identity is also required.
 
+The predicate compares the dimensions retained by the geometry value it receives. At Spark and
+Flink serialization boundaries, JTS cannot distinguish ordinary XY coordinates from declared XYZ
+coordinates when every Z ordinate is NaN; those values may normalize to XY. Empty XYZ values and
+zero-member collections have the same limitation. Mixed layouts within a Polygon or multi-geometry
+are rejected by the serializer; use a GeometryCollection when members need independent layouts.
+
 ## SQL examples
 
 ### Identical XYZ geometries
@@ -186,7 +192,7 @@ matching_nan | null_result
 true         | NULL
 ```
 
-## Practical use: lossless geometry validation
+## Practical use: geometry round-trip validation
 
 Use `ST_EqualsIdentical` for deterministic change detection after serialization, storage, or an
 ETL rewrite. It can reveal a reversed coordinate sequence, a changed geometry container, or a

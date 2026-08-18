@@ -382,6 +382,9 @@ public class PredicatesTest extends TestBase {
 
   @Test
   public void testEqualsIdenticalDimensionsAndOrdinateValues() {
+    // Construct explicit coordinate sequences here so the predicate receives the dimensional
+    // metadata being compared. Default JTS sequences cannot distinguish ordinary XY from declared
+    // XYZ when every Z ordinate is NaN after some serialization boundaries.
     GeometryFactory factory = coordinateArrayFactory(0);
     Point xy = point(factory, false, false, 1, 2, Double.NaN, Double.NaN);
     Point xyz = point(factory, true, false, 1, 2, 3, Double.NaN);
@@ -422,7 +425,9 @@ public class PredicatesTest extends TestBase {
   }
 
   @Test
-  public void testEqualsIdenticalPreservesEmptyDimensions() {
+  public void testEqualsIdenticalComparesRepresentedEmptyDimensions() {
+    // These empty geometries retain explicit sequence dimensions in memory. Some empty and
+    // zero-member values do not retain that declaration after serialization.
     GeometryFactory factory = coordinateArrayFactory(0);
     Point emptyXY = emptyPoint(factory, false, false);
     Point emptyXYZ = emptyPoint(factory, true, false);
