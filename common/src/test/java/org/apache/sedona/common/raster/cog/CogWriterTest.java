@@ -22,6 +22,7 @@ import static org.junit.Assert.*;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
 import java.awt.image.PixelInterleavedSampleModel;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
@@ -38,6 +39,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.stream.ImageInputStream;
+import javax.media.jai.ImageLayout;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.TiledImage;
 import org.apache.sedona.common.raster.MapAlgebra;
@@ -318,7 +320,7 @@ public class CogWriterTest {
   public void testWriteWideStrideByteSourceAsCog() throws Exception {
     // GH-3245: matching 256x256 tile dimensions are not sufficient — a legal byte sample
     // model whose scanline stride is wider than the tile still overruns in the writer's
-    // direct-buffer path, so the layout check must validate the backing stride too.
+    // direct-buffer path, so byte sources are normalized regardless of declared layout.
     int size = 512;
     SampleModel wideSm =
         new PixelInterleavedSampleModel(DataBuffer.TYPE_BYTE, 256, 256, 1, 512, new int[] {0});
@@ -346,6 +348,104 @@ public class CogWriterTest {
     GridCoverage2D readBack = RasterConstructors.fromGeoTiff(cogBytes);
     double[] readValues = MapAlgebra.bandAsArray(readBack, 1);
     assertArrayEquals(bandValues, readValues, 0.0);
+  }
+
+  @Test
+  public void testWriteOffsetBufferByteSourceAsCog() throws Exception {
+    // GH-3245: a DataBufferByte may carry a positive array offset independent of the
+    // sample model. The TIFF writer's direct-buffer path and Raster bulk-copy shortcuts
+    // (WritableRaster.setRect) both ignore it, silently shifting every pixel, so the
+    // per-tile copy must go through SampleModel/DataBuffer accessors.
+    int size = 256;
+    SampleModel sm =
+        new PixelInterleavedSampleModel(DataBuffer.TYPE_BYTE, size, size, 1, size, new int[] {0});
+    DataBufferByte db = new DataBufferByte(new byte[17 + size * size], size * size, 17);
+    WritableRaster raster = Raster.createWritableRaster(sm, db, null);
+    double[] bandValues = new double[size * size];
+    for (int y = 0; y < size; y++) {
+      for (int x = 0; x < size; x++) {
+        int v = (x + 3 * y) % 251;
+        bandValues[y * size + x] = v;
+        raster.setSample(x, y, 0, v);
+      }
+    }
+    // Fixture sanity: the pattern really lives at the offset positions
+    assertEquals(1, db.getData()[18] & 0xff);
+    assertEquals(1, raster.getSample(1, 0, 0));
+
+    SingleTileImage image = new SingleTileImage(raster, PlanarImage.createColorModel(sm));
+    GridCoverage2D reference =
+        RasterConstructors.makeEmptyRaster(
+            1, "B", size, size, 10.0, 52.0, 0.001, -0.001, 0, 0, 4326);
+    GridCoverage2D coverage =
+        RasterUtils.clone(image, reference.getSampleDimensions(), reference, null, false);
+
+    byte[] cogBytes = RasterOutputs.asCloudOptimizedGeoTiff(coverage, CogOptions.defaults());
+
+    GridCoverage2D readBack = RasterConstructors.fromGeoTiff(cogBytes);
+    double[] readValues = MapAlgebra.bandAsArray(readBack, 1);
+    assertArrayEquals(bandValues, readValues, 0.0);
+  }
+
+  @Test
+  public void testWriteSmallTiledByteSourceAsCog() throws Exception {
+    // GH-3245: source tiles smaller than the COG tile size make each output tile span
+    // several source tiles, exercising the multi-tile copy in the retiling view.
+    int size = 512;
+    SampleModel sm =
+        new PixelInterleavedSampleModel(DataBuffer.TYPE_BYTE, 128, 128, 1, 128, new int[] {0});
+    TiledImage image = new TiledImage(0, 0, size, size, 0, 0, sm, PlanarImage.createColorModel(sm));
+    double[] bandValues = new double[size * size];
+    WritableRaster values =
+        Raster.createWritableRaster(sm.createCompatibleSampleModel(size, size), null);
+    for (int y = 0; y < size; y++) {
+      for (int x = 0; x < size; x++) {
+        int v = (3 * x + y) % 253;
+        bandValues[y * size + x] = v;
+        values.setSample(x, y, 0, v);
+      }
+    }
+    image.setData(values);
+
+    GridCoverage2D reference =
+        RasterConstructors.makeEmptyRaster(
+            1, "B", size, size, 10.0, 52.0, 0.001, -0.001, 0, 0, 4326);
+    GridCoverage2D coverage =
+        RasterUtils.clone(image, reference.getSampleDimensions(), reference, null, false);
+
+    byte[] cogBytes = RasterOutputs.asCloudOptimizedGeoTiff(coverage, CogOptions.defaults());
+
+    GridCoverage2D readBack = RasterConstructors.fromGeoTiff(cogBytes);
+    double[] readValues = MapAlgebra.bandAsArray(readBack, 1);
+    assertArrayEquals(bandValues, readValues, 0.0);
+  }
+
+  /** Minimal image exposing a single tile as-is, preserving its DataBuffer offset. */
+  private static final class SingleTileImage extends PlanarImage {
+    private final WritableRaster raster;
+
+    SingleTileImage(WritableRaster raster, java.awt.image.ColorModel cm) {
+      super(
+          new ImageLayout(
+              0,
+              0,
+              raster.getWidth(),
+              raster.getHeight(),
+              0,
+              0,
+              raster.getWidth(),
+              raster.getHeight(),
+              raster.getSampleModel(),
+              cm),
+          null,
+          null);
+      this.raster = raster;
+    }
+
+    @Override
+    public Raster getTile(int tileX, int tileY) {
+      return raster;
+    }
   }
 
   private static byte[] writeTiledGeoTiff(GridCoverage2D raster, int tileSize) throws IOException {
