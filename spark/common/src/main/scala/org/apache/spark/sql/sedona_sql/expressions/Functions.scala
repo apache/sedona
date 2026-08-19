@@ -1511,6 +1511,7 @@ private[apache] case class ST_PointN(inputExpressions: Seq[Expression])
  */
 private[apache] case class ST_Force_2D(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.force2D _) {
+  DeprecationWarning.warnOnce("ST_Force_2D", "ST_Force2D")
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

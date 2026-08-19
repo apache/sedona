@@ -19,7 +19,7 @@
 
 # ST_Force2D
 
-Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. This function is an alias of [ST_Force_2D](ST_Force_2D.md).
+Introduction: Forces the geometries into a "2-dimensional mode" so that all output representations will only have the X and Y coordinates. [ST_Force_2D](ST_Force_2D.md) is a deprecated alias of this function.
 
 ![ST_Force2D](../../../image/ST_Force2D/ST_Force2D.svg "ST_Force2D")
 

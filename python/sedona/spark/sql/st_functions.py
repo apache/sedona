@@ -16,6 +16,7 @@
 # under the License.
 import inspect
 import sys
+import warnings
 from functools import partial
 from typing import Optional, Union
 
@@ -750,11 +751,19 @@ def ST_FlipCoordinates(geometry: ColumnOrName) -> Column:
 def ST_Force_2D(geometry: ColumnOrName) -> Column:
     """Force the geometry column to only output two dimensional representations.
 
+    .. deprecated:: 2.0.0
+        Use :py:func:`ST_Force2D` instead.
+
     :param geometry: Geometry column to force to be 2D.
     :type geometry: ColumnOrName
     :return: Geometry column identical to geometry except with only X and Y coordinates.
     :rtype: Column
     """
+    warnings.warn(
+        "ST_Force_2D is deprecated. Use ST_Force2D instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return _call_st_function("ST_Force_2D", geometry)
 
 
