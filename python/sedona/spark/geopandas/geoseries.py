@@ -2802,8 +2802,27 @@ class GeoSeries(GeoFrame, pspd.Series):
         return result
 
     def geom_equals(self, other, align=None) -> pspd.Series:
+        return self._geom_equals_impl(other, align, warning_stacklevel=4)
+
+    def _geom_equals_impl(
+        self,
+        other,
+        align,
+        *,
+        warning_stacklevel: int,
+    ) -> pspd.Series:
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align
+        other_series, other_crs = self._geometry_series_and_crs(
+            other_series,
+            extended,
+        )
+        if other_crs is not NO_CRS_OVERRIDE:
+            warn_crs_mismatch(
+                self.crs,
+                other_crs,
+                stacklevel=warning_stacklevel,
+            )
 
         spark_expr = stp.ST_Equals(F.col("L"), F.col("R"))
         result = self._row_wise_operation(
@@ -2812,10 +2831,26 @@ class GeoSeries(GeoFrame, pspd.Series):
             align,
             returns_geom=False,
             default_val=False,
+            alignment_warning_stacklevel=warning_stacklevel + 1,
         )
         return _to_bool(result)
 
     def geom_equals_exact(self, other, tolerance, align=None) -> pspd.Series:
+        return self._geom_equals_exact_impl(
+            other,
+            tolerance,
+            align,
+            warning_stacklevel=4,
+        )
+
+    def _geom_equals_exact_impl(
+        self,
+        other,
+        tolerance,
+        align,
+        *,
+        warning_stacklevel: int,
+    ) -> pspd.Series:
         tolerance = _normalize_numeric_scalar(
             tolerance, "'tolerance' must be a numeric scalar"
         )
@@ -2842,12 +2877,42 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         other_series, extended = self._make_series_of_val(other)
         align = False if extended else align
+        other_series, other_crs = self._geometry_series_and_crs(
+            other_series,
+            extended,
+        )
+        if other_crs is not NO_CRS_OVERRIDE:
+            warn_crs_mismatch(
+                self.crs,
+                other_crs,
+                stacklevel=warning_stacklevel,
+            )
 
         return self._geom_equals_exact_series(
             other_series,
             tolerance,
             align,
+            alignment_warning_stacklevel=warning_stacklevel + 2,
         )
+
+    def _geometry_series_and_crs(self, other, extended):
+        """Normalize a geometry Series and return its CRS when applicable."""
+        if extended:
+            return other, NO_CRS_OVERRIDE
+        if isinstance(other, GeoSeries):
+            return other, other.crs
+        if isinstance(other, PandasOnSparkSeries):
+            internal = other._psdf._internal
+            column_label = other._column_label
+            if column_label not in internal.column_labels:
+                if len(internal.column_labels) != 1:
+                    return other, NO_CRS_OVERRIDE
+                # pandas-on-Spark may expose an unnamed Series as ``None``
+                # while its one-column InternalFrame uses ``(None,)``.
+                other = first_series(PandasOnSparkDataFrame(internal))
+            geometry_series = GeoSeries(other)
+            return geometry_series, geometry_series.crs
+        return other, NO_CRS_OVERRIDE
 
     def geom_equals_identical(self, other, align=None) -> pspd.Series:
         if isinstance(other, BaseGeometry):
@@ -3459,10 +3524,16 @@ class GeoSeries(GeoFrame, pspd.Series):
         other: pspd.Series,
         tolerance: float,
         align: Union[bool, None],
+        alignment_warning_stacklevel: int = 5,
     ) -> pspd.Series:
         """Execute exact equality with GeoPandas-compatible row alignment."""
         spark_expr = stp.ST_EqualsExact(F.col("L"), F.col("R"), tolerance)
-        return self._boolean_result_with_alignment(other, align, spark_expr)
+        return self._boolean_result_with_alignment(
+            other,
+            align,
+            spark_expr,
+            warning_stacklevel=alignment_warning_stacklevel,
+        )
 
     def _geom_equals_identical_series(
         self,
@@ -3478,6 +3549,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         other: pspd.Series,
         align: Union[bool, None],
         spark_expr: PySparkColumn,
+        warning_stacklevel: int = 5,
     ) -> pspd.Series:
         """Evaluate a native boolean expression after binary row alignment."""
         (
@@ -3488,7 +3560,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         ) = self._align_binary_geometry_series(
             other,
             align,
-            warning_stacklevel=5,
+            warning_stacklevel=warning_stacklevel,
         )
 
         return _to_bool(
@@ -3574,6 +3646,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         default_val: Any = None,
         keep_name: bool = False,
         validate_alignment: bool = False,
+        alignment_warning_stacklevel: int = 4,
     ):
         """
         Helper function to perform a row-wise operation on two GeoSeries.
@@ -3617,7 +3690,7 @@ class GeoSeries(GeoFrame, pspd.Series):
                 other,
                 align,
                 validate_alignment=validate_alignment,
-                warning_stacklevel=4,
+                warning_stacklevel=alignment_warning_stacklevel,
             )
         (
             aligned_frame,

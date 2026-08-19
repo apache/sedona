@@ -17,6 +17,7 @@
 
 from decimal import Decimal
 import typing
+import warnings
 
 import shapely
 import numpy as np
@@ -5621,6 +5622,146 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         df_result = s1.to_geoframe().geom_equals(s2, align=False)
         expected = pd.Series([True, False, True])
         self.check_pd_series_equal(df_result, expected)
+
+    @pytest.mark.parametrize(
+        ("method", "kwargs"),
+        [
+            ("geom_equals", {}),
+            ("geom_equals_exact", {"tolerance": 0}),
+        ],
+    )
+    def test_equality_predicates_warn_on_crs_mismatch(self, method, kwargs):
+        left = GeoSeries([Point(0, 0)], crs="EPSG:4326")
+
+        right = GeoSeries([Point(0, 0)], crs="EPSG:3857")
+        right_operands = [
+            right,
+            right.to_geoframe(),
+            right.to_spark_pandas(),
+            GeoSeries([Point(0, 0)]),
+        ]
+        for right_operand in right_operands:
+            with pytest.warns(UserWarning, match="CRS mismatch") as warning_info:
+                result = getattr(left, method)(
+                    right_operand,
+                    align=False,
+                    **kwargs,
+                )
+
+            crs_warnings = [
+                warning
+                for warning in warning_info
+                if "CRS mismatch" in str(warning.message)
+            ]
+            assert len(crs_warnings) == 1
+            assert crs_warnings[0].filename == __file__
+            self.check_pd_series_equal(result, pd.Series([True]))
+
+        with pytest.warns(UserWarning, match="CRS mismatch") as warning_info:
+            frame_result = getattr(left.to_geoframe(), method)(
+                right,
+                align=False,
+                **kwargs,
+            )
+        crs_warnings = [
+            warning
+            for warning in warning_info
+            if "CRS mismatch" in str(warning.message)
+        ]
+        assert len(crs_warnings) == 1
+        assert crs_warnings[0].filename == __file__
+        self.check_pd_series_equal(frame_result, pd.Series([True]))
+
+    @pytest.mark.parametrize(
+        ("method", "kwargs"),
+        [
+            ("geom_equals", {}),
+            ("geom_equals_exact", {"tolerance": 0}),
+        ],
+    )
+    def test_equality_predicates_avoid_spurious_crs_warnings(self, method, kwargs):
+        left = GeoSeries([Point(0, 0)], crs="EPSG:4326")
+        right = GeoSeries([Point(0, 0)], crs="EPSG:4326")
+
+        with warnings.catch_warnings(record=True) as warning_info:
+            warnings.simplefilter("always")
+            matching_result = getattr(left, method)(right, align=False, **kwargs)
+            spark_pandas_result = getattr(left, method)(
+                right.to_spark_pandas(),
+                align=False,
+                **kwargs,
+            )
+            scalar_result = getattr(left, method)(Point(0, 0), **kwargs)
+            crsless_result = getattr(GeoSeries([Point(0, 0)]), method)(
+                GeoSeries([Point(0, 0)]),
+                align=False,
+                **kwargs,
+            )
+
+        assert not any(
+            "CRS mismatch" in str(warning.message) for warning in warning_info
+        )
+        self.check_pd_series_equal(matching_result, pd.Series([True]))
+        self.check_pd_series_equal(spark_pandas_result, pd.Series([True]))
+        self.check_pd_series_equal(scalar_result, pd.Series([True]))
+        self.check_pd_series_equal(crsless_result, pd.Series([True]))
+
+    @pytest.mark.parametrize(
+        ("method", "kwargs"),
+        [
+            ("geom_equals", {}),
+            ("geom_equals_exact", {"tolerance": 0}),
+        ],
+    )
+    def test_equality_predicate_crs_warning_preserves_alignment(self, method, kwargs):
+        left = GeoSeries([Point(0, 0)], index=[1], crs="EPSG:4326")
+        right = GeoSeries([Point(0, 0)], index=[0], crs="EPSG:3857")
+
+        with pytest.warns(UserWarning, match="CRS mismatch") as warning_info:
+            result = getattr(left, method)(right, align=True, **kwargs)
+
+        crs_warnings = [
+            warning
+            for warning in warning_info
+            if "CRS mismatch" in str(warning.message)
+        ]
+        assert len(crs_warnings) == 1
+        assert crs_warnings[0].filename == __file__
+        self.check_pd_series_equal(result, pd.Series([False, False], index=[0, 1]))
+
+    @pytest.mark.parametrize(
+        ("method", "kwargs"),
+        [
+            ("geom_equals", {}),
+            ("geom_equals_exact", {"tolerance": 0}),
+        ],
+    )
+    def test_equality_predicate_alignment_warning_stays_at_user_call(
+        self, method, kwargs
+    ):
+        left_index = pd.MultiIndex.from_tuples(
+            [("left", 0)],
+            names=["side", "row"],
+        )
+        right_index = pd.MultiIndex.from_tuples(
+            [("right", 0)],
+            names=["side", "row"],
+        )
+        left = GeoSeries([Point(0, 0)], index=left_index)
+        right = GeoSeries([Point(0, 0)], index=right_index)
+
+        with pytest.warns(
+            UserWarning,
+            match="indices of the left and right GeoSeries",
+        ) as warning_info:
+            getattr(left, method)(right, **kwargs)
+
+        alignment_warning = next(
+            warning
+            for warning in warning_info
+            if "indices of the left and right GeoSeries" in str(warning.message)
+        )
+        assert alignment_warning.filename == __file__
 
     def test_binary_operation_with_projected_multiindex(self):
         index = pd.MultiIndex.from_tuples([("a", 1), ("b", 2)], names=["group", "row"])

@@ -50,6 +50,12 @@
 * [<a href='https://github.com/apache/sedona/issues/3257'>GH-3257</a>] - Implement distributed GeoSeries and GeoDataFrame Hilbert-distance spatial ordering
 * [<a href='https://github.com/apache/sedona/issues/3260'>GH-3260</a>] - Implement distributed GeoSeries and GeoDataFrame identical-geometry equality
 
+### Bug Fixes
+
+#### GeoPandas API
+
+* [<a href='https://github.com/apache/sedona/issues/3269'>GH-3269</a>] - Warn when `geom_equals` or `geom_equals_exact` compares geometry operands with mismatched CRSs
+
 ## Sedona 1.9.1
 
 Sedona 1.9.1 is compiled against:

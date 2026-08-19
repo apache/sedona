@@ -3356,7 +3356,11 @@ class GeoFrame(metaclass=ABCMeta):
         --------
         GeoSeries.geom_equals_exact
         """
-        return _delegate_to_geometry_column("geom_equals", self, other, align)
+        return self.geometry._geom_equals_impl(
+            other,
+            align,
+            warning_stacklevel=4,
+        )
 
     def geom_equals_exact(self, other, tolerance, align=None):
         """Return ``True`` for geometries that equal aligned `other` to a
@@ -3421,8 +3425,11 @@ class GeoFrame(metaclass=ABCMeta):
         --------
         GeoSeries.geom_equals
         """
-        return _delegate_to_geometry_column(
-            "geom_equals_exact", self, other, tolerance, align
+        return self.geometry._geom_equals_exact_impl(
+            other,
+            tolerance,
+            align,
+            warning_stacklevel=4,
         )
 
     def geom_equals_identical(self, other, align=None):
