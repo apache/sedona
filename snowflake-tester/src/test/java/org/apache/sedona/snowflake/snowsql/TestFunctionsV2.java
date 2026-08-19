@@ -530,9 +530,11 @@ public class TestFunctionsV2 extends TestBase {
   @Test
   public void test_ST_SharedPaths() {
     registerUDFV2("ST_SharedPaths", String.class, String.class);
+    // Snowflake's GEOMETRY type rejects GeoJSON with empty coordinates, so use inputs
+    // that produce shared paths in both directions (no empty collection element).
     verifySqlSingleRes(
-        "select ST_AsText(sedona.ST_SharedPaths(ST_GeometryFromWKT('LINESTRING(0 0, 10 0)'), ST_GeometryFromWKT('LINESTRING(15 0, 5 0)')))",
-        "GEOMETRYCOLLECTION(MULTILINESTRING EMPTY,MULTILINESTRING((5 0,10 0)))");
+        "select ST_AsText(sedona.ST_SharedPaths(ST_GeometryFromWKT('LINESTRING(0 0, 100 0)'), ST_GeometryFromWKT('LINESTRING(20 0, 30 0, 30 50, 80 0, 70 0)')))",
+        "GEOMETRYCOLLECTION(MULTILINESTRING((20 0,30 0)),MULTILINESTRING((70 0,80 0)))");
   }
 
   @Test
