@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.sql.st_functions &mdash; Apache Sedona Python Documentation</title>
@@ -226,6 +225,7 @@
 <span class="c1"># under the License.</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
@@ -960,11 +960,19 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">ST_Force_2D</span><span class="p">(</span><span class="n">geometry</span><span class="p">:</span> <span class="n">ColumnOrName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Column</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Force the geometry column to only output two dimensional representations.</span>
 
+<span class="sd">    .. deprecated:: 2.0.0</span>
+<span class="sd">        Use :py:func:`ST_Force2D` instead.</span>
+
 <span class="sd">    :param geometry: Geometry column to force to be 2D.</span>
 <span class="sd">    :type geometry: ColumnOrName</span>
 <span class="sd">    :return: Geometry column identical to geometry except with only X and Y coordinates.</span>
 <span class="sd">    :rtype: Column</span>
 <span class="sd">    """</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s2">"ST_Force_2D is deprecated. Use ST_Force2D instead."</span><span class="p">,</span>
+        <span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="n">_call_st_function</span><span class="p">(</span><span class="s2">"ST_Force_2D"</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span></div>
 
 

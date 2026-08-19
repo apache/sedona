@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -2702,7 +2701,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span><span class="n">spark_expr</span><span class="p">,</span> <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.force_2d"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.force_2d">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">force_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"GeoSeries"</span><span class="p">:</span>
-        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Force_2D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
+        <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stf</span><span class="o">.</span><span class="n">ST_Force2D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_geometry_column</span><span class="p">(</span><span class="n">spark_expr</span><span class="p">,</span> <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeoSeries.force_3d"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.force_3d">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">force_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"GeoSeries"</span><span class="p">:</span>
@@ -3012,8 +3011,27 @@
         <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="GeoSeries.geom_equals"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.geom_equals">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">geom_equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geom_equals_impl</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="p">,</span> <span class="n">warning_stacklevel</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_geom_equals_impl</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">other</span><span class="p">,</span>
+        <span class="n">align</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">warning_stacklevel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
         <span class="n">other_series</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
         <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
+        <span class="n">other_series</span><span class="p">,</span> <span class="n">other_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_series_and_crs</span><span class="p">(</span>
+            <span class="n">other_series</span><span class="p">,</span>
+            <span class="n">extended</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">other_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NO_CRS_OVERRIDE</span><span class="p">:</span>
+            <span class="n">warn_crs_mismatch</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+                <span class="n">other_crs</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="n">warning_stacklevel</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stp</span><span class="o">.</span><span class="n">ST_Equals</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">))</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_row_wise_operation</span><span class="p">(</span>
@@ -3022,10 +3040,26 @@
             <span class="n">align</span><span class="p">,</span>
             <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">default_val</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">alignment_warning_stacklevel</span><span class="o">=</span><span class="n">warning_stacklevel</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">_to_bool</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">_to_bool</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GeoSeries.geom_equals_exact"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.geom_equals_exact">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">geom_equals_exact</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geom_equals_exact_impl</span><span class="p">(</span>
+            <span class="n">other</span><span class="p">,</span>
+            <span class="n">tolerance</span><span class="p">,</span>
+            <span class="n">align</span><span class="p">,</span>
+            <span class="n">warning_stacklevel</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_geom_equals_exact_impl</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">other</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="p">,</span>
+        <span class="n">align</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">warning_stacklevel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
         <span class="n">tolerance</span> <span class="o">=</span> <span class="n">_normalize_numeric_scalar</span><span class="p">(</span>
             <span class="n">tolerance</span><span class="p">,</span> <span class="s2">"'tolerance' must be a numeric scalar"</span>
         <span class="p">)</span>
@@ -3052,12 +3086,42 @@
 
         <span class="n">other_series</span><span class="p">,</span> <span class="n">extended</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_series_of_val</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
         <span class="n">align</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">extended</span> <span class="k">else</span> <span class="n">align</span>
+        <span class="n">other_series</span><span class="p">,</span> <span class="n">other_crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry_series_and_crs</span><span class="p">(</span>
+            <span class="n">other_series</span><span class="p">,</span>
+            <span class="n">extended</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">other_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NO_CRS_OVERRIDE</span><span class="p">:</span>
+            <span class="n">warn_crs_mismatch</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+                <span class="n">other_crs</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="n">warning_stacklevel</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geom_equals_exact_series</span><span class="p">(</span>
             <span class="n">other_series</span><span class="p">,</span>
             <span class="n">tolerance</span><span class="p">,</span>
             <span class="n">align</span><span class="p">,</span>
-        <span class="p">)</span></div>
+            <span class="n">alignment_warning_stacklevel</span><span class="o">=</span><span class="n">warning_stacklevel</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_geometry_series_and_crs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">extended</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Normalize a geometry Series and return its CRS when applicable."""</span>
+        <span class="k">if</span> <span class="n">extended</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">other</span><span class="p">,</span> <span class="n">NO_CRS_OVERRIDE</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">GeoSeries</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">other</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">crs</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">PandasOnSparkSeries</span><span class="p">):</span>
+            <span class="n">internal</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_psdf</span><span class="o">.</span><span class="n">_internal</span>
+            <span class="n">column_label</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_column_label</span>
+            <span class="k">if</span> <span class="n">column_label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">internal</span><span class="o">.</span><span class="n">column_labels</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">column_labels</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">other</span><span class="p">,</span> <span class="n">NO_CRS_OVERRIDE</span>
+                <span class="c1"># pandas-on-Spark may expose an unnamed Series as ``None``</span>
+                <span class="c1"># while its one-column InternalFrame uses ``(None,)``.</span>
+                <span class="n">other</span> <span class="o">=</span> <span class="n">first_series</span><span class="p">(</span><span class="n">PandasOnSparkDataFrame</span><span class="p">(</span><span class="n">internal</span><span class="p">))</span>
+            <span class="n">geometry_series</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">geometry_series</span><span class="p">,</span> <span class="n">geometry_series</span><span class="o">.</span><span class="n">crs</span>
+        <span class="k">return</span> <span class="n">other</span><span class="p">,</span> <span class="n">NO_CRS_OVERRIDE</span>
 
 <div class="viewcode-block" id="GeoSeries.geom_equals_identical"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.geom_equals_identical">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">geom_equals_identical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">BaseGeometry</span><span class="p">):</span>
@@ -3669,10 +3733,16 @@
         <span class="n">other</span><span class="p">:</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
         <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">align</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+        <span class="n">alignment_warning_stacklevel</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Execute exact equality with GeoPandas-compatible row alignment."""</span>
         <span class="n">spark_expr</span> <span class="o">=</span> <span class="n">stp</span><span class="o">.</span><span class="n">ST_EqualsExact</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"L"</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">"R"</span><span class="p">),</span> <span class="n">tolerance</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boolean_result_with_alignment</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">align</span><span class="p">,</span> <span class="n">spark_expr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boolean_result_with_alignment</span><span class="p">(</span>
+            <span class="n">other</span><span class="p">,</span>
+            <span class="n">align</span><span class="p">,</span>
+            <span class="n">spark_expr</span><span class="p">,</span>
+            <span class="n">warning_stacklevel</span><span class="o">=</span><span class="n">alignment_warning_stacklevel</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_geom_equals_identical_series</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -3688,6 +3758,7 @@
         <span class="n">other</span><span class="p">:</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
         <span class="n">align</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
         <span class="n">spark_expr</span><span class="p">:</span> <span class="n">PySparkColumn</span><span class="p">,</span>
+        <span class="n">warning_stacklevel</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Evaluate a native boolean expression after binary row alignment."""</span>
         <span class="p">(</span>
@@ -3698,7 +3769,7 @@
         <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_align_binary_geometry_series</span><span class="p">(</span>
             <span class="n">other</span><span class="p">,</span>
             <span class="n">align</span><span class="p">,</span>
-            <span class="n">warning_stacklevel</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">warning_stacklevel</span><span class="o">=</span><span class="n">warning_stacklevel</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">_to_bool</span><span class="p">(</span>
@@ -3784,6 +3855,7 @@
         <span class="n">default_val</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">keep_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">validate_alignment</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">alignment_warning_stacklevel</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Helper function to perform a row-wise operation on two GeoSeries.</span>
@@ -3827,7 +3899,7 @@
                 <span class="n">other</span><span class="p">,</span>
                 <span class="n">align</span><span class="p">,</span>
                 <span class="n">validate_alignment</span><span class="o">=</span><span class="n">validate_alignment</span><span class="p">,</span>
-                <span class="n">warning_stacklevel</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                <span class="n">warning_stacklevel</span><span class="o">=</span><span class="n">alignment_warning_stacklevel</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">(</span>
             <span class="n">aligned_frame</span><span class="p">,</span>
