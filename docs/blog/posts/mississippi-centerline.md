@@ -12,7 +12,7 @@ title: "Find the Middle of the Mississippi"
 
 # Find the Middle of the Mississippi
 
-Every shape in a raster has a middle. A river has a centerline, a glacier has a flowline, a runway has a heading. Once you have the middle, you can measure the thing: how long, how wide, how crooked. Below, Apache Sedona pulls the Mississippi's centerline out of raw Sentinel-2 pixels, **148 km of it, in 56 seconds**, and one function does the geometry: `ST_ApproximateMedialAxis`.
+Apache Sedona can extract a river centerline from Sentinel-2 pixels with `ST_ApproximateMedialAxis`. This post walks through one scene near Greenville, Mississippi: raster operators turn the water pixels into a polygon, the medial axis turns the polygon into a **147.6 km centerline in 56 seconds**, and the centerline supports length, sinuosity, and width measurements in plain SQL.
 
 ![A Sentinel-2 view of the Mississippi's meanders near Greenville, Mississippi, with the detected river polygon in cyan and its computed centerline in orange; a stats panel lists 148 km of centerline, sinuosity 1.43, widths from 131 to 2,975 m, and a 56-second runtime](mississippi-centerline-cover.png)
 
@@ -124,7 +124,7 @@ The scene holds 5,429 water bodies: oxbow lakes, catfish ponds, borrow pits. The
 
 ## Find the middle
 
-`ST_ApproximateMedialAxis` computes a polygon's straight skeleton and keeps the interior edges, which is the centerline. Two preparations make it fast and clean on a real river. Fewer vertices, because skeleton cost climbs steeply with vertex count and a pixel-derived outline is all stair-steps. No holes, because every island spawns a loop. So: smooth the outline with a buffer out and back in, simplify to 80 m, keep the exterior ring, then skeletonize and merge the pieces.
+`ST_ApproximateMedialAxis` computes a polygon's straight skeleton and keeps the interior edges, which is the centerline. The function runs fast and clean on a real river after two preparations. The vertex count has to come down, because skeleton cost climbs steeply with it and a pixel-derived outline is all stair-steps. The holes have to go, because every island spawns a loop in the skeleton. The query below smooths the outline with a buffer out and back in, simplifies it to 80 m, keeps the exterior ring, then skeletonizes and merges the pieces.
 
 ```sql
 WITH river AS (SELECT geom FROM bodies ORDER BY ST_Area(geom) DESC LIMIT 1),
@@ -205,20 +205,16 @@ FROM (SELECT ROUND(2 * ST_Distance(pt, ST_Boundary(channel)), 0) AS w FROM pts)
 
 ![Line chart of river width along 148 km of centerline, sampled every 2 km: mostly between 500 and 1,500 m with a median of 1,032 m, a narrowest point of 131 m in a side channel near the end, and a widest point of 2,975 m](mississippi-centerline-width-profile.png)
 
-A kilometre wide on a typical day. Three kilometres where the channel balloons around mid-river bars. The final 12 km drop to about 200 m: there the 10 km rule kept a long side channel at the scene edge over the main channel's shorter last reach, and the 131 m minimum sits in that side channel. Every number comes from pixels that left S3 less than a minute earlier.
+The river is about a kilometre wide for most of the reach and close to three kilometres where the channel balloons around mid-river bars. The final 12 km drop to about 200 m: there the 10 km rule kept a long side channel at the scene edge over the main channel's shorter last reach, and the 131 m minimum sits in that side channel. Every number comes from pixels that left S3 less than a minute earlier.
 
-## Built for hundreds of machines and millions of shapes
+## How the pipeline distributes work
 
-Every stage of this pipeline is a table of rows, and rows are what Sedona spreads across a cluster. Tiles are rows: once the band join shuffles them, the UDF, the resampling, and the per-tile unions run on every executor at once, so a cluster of a hundred workers processes a hundred tiles at a time. Water bodies are rows too. This one scene produced 5,429 of them, and the skeleton step runs once per body, in parallel, with no change to the SQL. Point the same query at every Sentinel-2 tile over a continent and the work becomes millions of detected shapes, each one cleaned, skeletonized, and measured on whichever worker holds it.
+Every stage of this pipeline is a table of rows, and Sedona spreads rows across executors. After the band join, the UDF, the resampling, and the per-tile unions run independently on each executor. Skeletonization runs once per water-body row; this scene produced 5,429 such rows, and the SQL does not change when a larger input produces more. The global union is the remaining aggregation point, and larger workloads can partition that union by region.
 
-One detail shapes the plan: the `raster` reader emits a file's tiles from a single task, so the fan-out begins at the join. After that, nothing in the pipeline funnels through one machine until the optional final union, and that union can be replaced by a union per region when the lake grows. The centerline comes out as an ordinary geometry column. Index it with the [`geotiff.metadata`](https://sedona.apache.org/latest/blog/2026/08/07/index-a-million-rasters-without-reading-a-pixel/) footprints, join it to gauges and bridges, write it to GeoParquet.
+One detail shapes the plan: the `raster` reader emits a file's tiles from a single task, so the fan-out begins at the join. The centerline comes out as an ordinary geometry column. Index it with the [`geotiff.metadata`](https://sedona.apache.org/latest/blog/2026/08/07/index-a-million-rasters-without-reading-a-pixel/) footprints, join it to gauges and bridges, write it to GeoParquet.
 
 ## Roads are next
 
 The recipe, mask to polygons to union to medial axis, works on any detected shape with width. Road networks are the next target, and they come with their own lessons: a road needs several pixels of width before a skeleton can find it, and a street grid is made of holes that the pipeline has to keep. Roads get their own post next week.
-
-## The point
-
-A raster knows where the water is. Sedona's raster ops turn that into a polygon, and `ST_ApproximateMedialAxis` turns the polygon into the one line that lets you measure a river: 148 km long, a kilometre wide, 1.43 times longer than a straight line. From S3 to answer in 56 seconds, on one laptop, with the same SQL ready for a cluster.
 
 *Function references: [ST_ApproximateMedialAxis](https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_ApproximateMedialAxis/), [RS_PixelAsPolygons](https://sedona.apache.org/latest/api/sql/Pixel-Functions/RS_PixelAsPolygons/), [RS_Resample](https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_Resample/). The UDF pattern is in the [Raster UDF reference](https://sedona.apache.org/latest/api/sql/Raster-UDF/).*
