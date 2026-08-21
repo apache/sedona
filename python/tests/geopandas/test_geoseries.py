@@ -31,6 +31,7 @@ from pyspark.pandas.utils import scol_for
 from pyspark.sql import functions as F
 from sedona.spark.geopandas import GeoSeries, GeoDataFrame
 from sedona.spark.geopandas.geoseries import _to_bool
+from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from shapely import wkt
@@ -120,6 +121,402 @@ class TestGeoSeries(TestGeopandasBase):
                 index=pd.Index([0, 1, 2], name="id"),
                 name="value",
             ),
+        )
+
+    @pytest.mark.parametrize(
+        ("geometries", "expected_edges"),
+        [
+            (
+                [
+                    wkt.loads("POLYGON ((0 0, 1 1, 1 0, 0 0))"),
+                    wkt.loads("POLYGON ((0 0, 0.5 0.5, 1 1, 0 1, 0 0))"),
+                ],
+                [
+                    wkt.loads("LINESTRING (0 0, 1 1)"),
+                    wkt.loads("LINESTRING (0 0, 0.5 0.5, 1 1)"),
+                ],
+            ),
+            (
+                [box(0, 0, 1, 1), box(0.5, 0, 1.5, 1)],
+                [
+                    wkt.loads("LINESTRING (0 0, 1 0, 1 1, 0 1)"),
+                    wkt.loads("LINESTRING (1.5 1, 0.5 1, 0.5 0, 1.5 0)"),
+                ],
+            ),
+        ],
+    )
+    def test_coverage_validation_reports_expected_edges(
+        self, geometries, expected_edges
+    ):
+        series = GeoSeries(geometries)
+
+        actual = series.invalid_coverage_edges().to_geopandas()
+
+        assert series.is_valid_coverage() is False
+        assert len(actual) == len(expected_edges)
+        assert all(
+            actual_geometry.equals_exact(expected_geometry, tolerance=0)
+            for actual_geometry, expected_geometry in zip(actual, expected_edges)
+        )
+
+    @pytest.mark.parametrize(
+        ("geometries", "expected_valid"),
+        [
+            ([box(0, 0, 1, 1), box(0, 0, 1, 1)], False),
+            (
+                [
+                    wkt.loads(
+                        "POLYGON ((0 0, 3 0, 3 3, 0 3, 0 0), "
+                        "(1 1, 1 2, 2 2, 2 1, 1 1))"
+                    ),
+                    box(1, 1, 2, 2),
+                ],
+                True,
+            ),
+            (
+                [
+                    MultiPolygon([box(0, 0, 1, 1), box(2, 0, 3, 1)]),
+                    box(1, 0, 2, 1),
+                ],
+                True,
+            ),
+        ],
+        ids=["duplicates", "hole-fill", "multipolygon-middle"],
+    )
+    def test_coverage_validation_edge_matrix(self, geometries, expected_valid):
+        series = GeoSeries(geometries)
+
+        actual = series.invalid_coverage_edges().to_geopandas()
+
+        assert series.is_valid_coverage() is expected_valid
+        assert [edge.is_empty for edge in actual] == [expected_valid] * 2
+
+    @pytest.mark.parametrize(
+        "geometries",
+        [
+            [],
+            [
+                None,
+                Point(0, 0),
+                LineString([(0, 0), (1, 1)]),
+                Polygon(),
+                Polygon([(0, 0), (1, 1), (1, 0), (0, 1), (0, 0)]),
+            ],
+        ],
+    )
+    def test_coverage_validation_empty_or_all_ignored(self, geometries):
+        if geometries:
+            # Spark 3 cannot infer a geometry column when the first local value
+            # is null. Construct from a non-null first value, then restore the
+            # intended physical order through a distributed operation.
+            series = GeoSeries(
+                geometries[1:] + geometries[:1],
+                index=list(range(1, len(geometries))) + [0],
+            )
+            series = GeoSeries(series.sort_index())
+        else:
+            series = GeoSeries([])
+
+        actual = series.invalid_coverage_edges().to_geopandas()
+
+        assert actual.name is None
+        assert len(actual) == len(geometries)
+        if geometries:
+            assert actual.iloc[0] is None
+            assert all(
+                geometry.geom_type == "LineString" and geometry.is_empty
+                for geometry in actual.iloc[1:]
+            )
+        assert series.is_valid_coverage() is True
+
+    def test_geodataframe_delegates_coverage_validation_to_active_geometry(self):
+        series = GeoSeries([box(0, 0, 1, 1), box(0.5, 0, 1.5, 1)])
+        frame = series.to_geoframe(name="shape")
+
+        actual = frame.invalid_coverage_edges().to_geopandas()
+
+        assert all(not geometry.is_empty for geometry in actual)
+        assert frame.is_valid_coverage() is False
+
+    def test_coverage_validation_gap_width(self):
+        series = GeoSeries([box(0, 0, 1, 1), box(1.2, 0, 2.2, 1)])
+
+        at_zero = series.invalid_coverage_edges(gap_width=0).to_geopandas()
+        at_threshold = series.invalid_coverage_edges(gap_width=0.2).to_geopandas()
+
+        assert all(geometry.is_empty for geometry in at_zero)
+        assert all(not geometry.is_empty for geometry in at_threshold)
+        assert series.is_valid_coverage(gap_width=0) is True
+        assert series.is_valid_coverage(gap_width=0.2) is False
+
+    @pytest.mark.parametrize("null_position", [0, 1])
+    def test_coverage_validation_preserves_null_position_and_index(self, null_position):
+        geometries = [box(0, 0, 1, 1), box(0.5, 0, 1.5, 1)]
+        geometries.insert(null_position, None)
+        index = pd.MultiIndex.from_tuples(
+            [("duplicate", 7)] * 3,
+            names=["group", "feature_id"],
+        )
+        source_frame = self.spark.createDataFrame(
+            [
+                (geometry.wkt if geometry is not None else None, "duplicate", 7)
+                for geometry in geometries
+            ],
+            "wkt string, group string, feature_id long",
+        ).select(
+            "group",
+            "feature_id",
+            stc.ST_GeomFromWKT("wkt").alias("source_geometry"),
+        )
+        source = GeoSeries(
+            source_frame.pandas_api(index_col=["group", "feature_id"])[
+                "source_geometry"
+            ],
+            crs="EPSG:3857",
+        )
+
+        result = source.invalid_coverage_edges()
+        actual = result.to_geopandas()
+
+        assert actual.name is None
+        assert actual.crs == source.crs
+        pd.testing.assert_index_equal(actual.index, index)
+        assert actual.iloc[null_position] is None
+        assert all(geometry is None or not geometry.is_empty for geometry in actual)
+        srids = {
+            row.srid
+            for row in result._internal.spark_frame.select(
+                stf.ST_SRID(result.spark.column).alias("srid")
+            )
+            .where(F.col("srid").isNotNull())
+            .collect()
+        }
+        assert srids == {3857}
+
+    def test_coverage_validation_preserves_multiplied_alignment_rows(self):
+        index = pd.Index(["duplicate", "duplicate"], name="feature")
+        left = GeoSeries(
+            [box(0, 0, 2, 2), box(10, 0, 12, 2)],
+            index=index,
+        )
+        right = GeoSeries(
+            [
+                MultiPolygon([box(0, 0, 2, 2), box(10, 0, 12, 2)]),
+                MultiPolygon([box(0, 0, 1, 2), box(10, 0, 11, 2)]),
+                box(20, 0, 21, 1),
+            ],
+            index=pd.Index(["duplicate", "duplicate", "right-only"], name="feature"),
+        )
+        multiplied = left.intersection(right)
+        old_order = [
+            row.order
+            for row in multiplied._internal.spark_frame.select(
+                F.col(NATURAL_ORDER_COLUMN_NAME).alias("order")
+            ).collect()
+        ]
+        assert len(set(old_order)) < len(old_order)
+        assert any(order is None for order in old_order)
+
+        targets = multiplied.to_geopandas()
+        actual = multiplied.invalid_coverage_edges().to_geopandas()
+
+        assert len(actual) == 5
+        pd.testing.assert_index_equal(
+            actual.index.sort_values(), targets.index.sort_values()
+        )
+        assert actual.loc["right-only"] is None
+        remaining_edges = list(actual.loc["duplicate"])
+        for target in targets.loc["duplicate"]:
+            matching_edge = next(
+                (
+                    position
+                    for position, edge in enumerate(remaining_edges)
+                    if not edge.is_empty and target.boundary.covers(edge)
+                ),
+                None,
+            )
+            assert matching_edge is not None
+            remaining_edges.pop(matching_edge)
+        assert remaining_edges == []
+
+    def test_coverage_validation_handles_polygonal_collections_and_ignored_rows(self):
+        series = GeoSeries(
+            [
+                GeometryCollection([box(0, 0, 1, 1)]),
+                box(0.5, 0, 1.5, 1),
+                Polygon(),
+                Point(0.5, 0.5),
+                LineString([(0, 0), (1, 1)]),
+                GeometryCollection(),
+                None,
+            ]
+        )
+
+        actual = series.invalid_coverage_edges().to_geopandas()
+
+        assert not actual.iloc[0].is_empty
+        assert not actual.iloc[1].is_empty
+        assert all(
+            geometry.geom_type == "LineString" and geometry.is_empty
+            for geometry in actual.iloc[2:6]
+        )
+        assert actual.iloc[6] is None
+        assert series.is_valid_coverage() is False
+
+    @pytest.mark.parametrize("gap_width", [None, "1", [1], np.array([0.2])])
+    def test_coverage_validation_rejects_non_scalar_gap_width(self, gap_width):
+        series = GeoSeries([box(0, 0, 1, 1)])
+
+        with pytest.raises(TypeError, match="numeric scalar"):
+            series.invalid_coverage_edges(gap_width=gap_width)
+        with pytest.raises(TypeError, match="numeric scalar"):
+            series.is_valid_coverage(gap_width=gap_width)
+
+    @pytest.mark.parametrize(
+        "gap_width", [-1, float("nan"), float("inf"), float("-inf")]
+    )
+    def test_coverage_validation_rejects_invalid_gap_width(self, gap_width):
+        series = GeoSeries([box(0, 0, 1, 1)])
+
+        with pytest.raises(ValueError, match="finite and non-negative"):
+            series.invalid_coverage_edges(gap_width=gap_width)
+        with pytest.raises(ValueError, match="finite and non-negative"):
+            series.is_valid_coverage(gap_width=gap_width)
+
+    @pytest.mark.parametrize("gap_width", [True, np.int64(0), np.float64(0.0)])
+    def test_coverage_validation_accepts_numeric_scalars(self, gap_width):
+        series = GeoSeries([box(0, 0, 1, 1)])
+
+        assert series.is_valid_coverage(gap_width=gap_width) is True
+
+    def test_coverage_validation_plan_is_native_and_lazy(self, monkeypatch):
+        series = GeoSeries([box(0, 0, 1, 1), box(0.5, 0, 1.5, 1)])
+        spark_dataframe_type = type(series._internal.spark_frame)
+
+        def unexpected_driver_collection(*args, **kwargs):
+            raise AssertionError("coverage construction must stay distributed")
+
+        monkeypatch.setattr(
+            spark_dataframe_type, "collect", unexpected_driver_collection
+        )
+        monkeypatch.setattr(
+            spark_dataframe_type, "toPandas", unexpected_driver_collection
+        )
+
+        result = series.invalid_coverage_edges()
+        plan = (
+            result._internal.spark_frame._jdf.queryExecution().executedPlan().toString()
+        )
+
+        assert "RangeJoin" in plan or "BroadcastIndexJoin" in plan
+        assert "CartesianProduct" not in plan
+        assert "BatchEvalPython" not in plan
+        assert "ArrowEvalPython" not in plan
+        assert "PythonUDF" not in plan
+
+    def test_is_valid_coverage_uses_one_summary_action(self, monkeypatch):
+        series = GeoSeries([box(0, 0, 1, 1), box(0.5, 0, 1.5, 1)])
+        spark_dataframe_type = type(series._internal.spark_frame)
+        original_first = spark_dataframe_type.first
+        action_count = 0
+
+        def counting_first(frame):
+            nonlocal action_count
+            action_count += 1
+            return original_first(frame)
+
+        monkeypatch.setattr(spark_dataframe_type, "first", counting_first)
+
+        result = series.invalid_coverage_edges()
+        assert action_count == 0
+        assert result is not None
+        assert series.is_valid_coverage() is False
+        assert action_count == 1
+
+    def test_coverage_validation_row_id_survives_final_distributed_plan(self):
+        row_count = 10_004
+        left_rows = self.spark.range(row_count, numPartitions=8).repartition(8, "id")
+        right_rows = self.spark.range(row_count, numPartitions=7).repartition(7, "id")
+        source_rows = (
+            left_rows.alias("left")
+            .hint("shuffle_hash")
+            .join(
+                right_rows.alias("right").hint("shuffle_hash"),
+                F.col("left.id") == F.col("right.id"),
+                "inner",
+            )
+            .select(F.col("left.id").alias("id"))
+        )
+        row_id = F.col("id")
+        block_x = F.floor(row_id / F.lit(4)).cast("double") * F.lit(10.0)
+        row_kind = row_id % F.lit(4)
+        left_polygon = stc.ST_PolygonFromEnvelope(
+            block_x, F.lit(0.0), block_x + F.lit(1.0), F.lit(1.0)
+        )
+        right_polygon = stc.ST_PolygonFromEnvelope(
+            block_x + F.lit(0.5),
+            F.lit(0.0),
+            block_x + F.lit(1.5),
+            F.lit(1.0),
+        )
+        geometry = (
+            F.when(row_kind == 0, left_polygon)
+            .when(row_kind == 1, stc.ST_Point(block_x, F.lit(0.5)))
+            .when(row_kind == 2, F.lit(None))
+            .otherwise(right_polygon)
+        )
+        source_frame = source_rows.select(
+            row_id,
+            geometry.alias("geometry"),
+        )
+        source = GeoSeries(source_frame.pandas_api(index_col="id")["geometry"])
+
+        actual = source.invalid_coverage_edges().to_geopandas().sort_index()
+
+        assert len(actual) == row_count
+        expected_index = pd.Index(
+            np.arange(row_count, dtype=np.int64),
+            name="id",
+        )
+        pd.testing.assert_index_equal(actual.index, expected_index)
+        for source_id, geometry in actual.items():
+            if source_id % 4 == 2:
+                assert geometry is None
+            elif source_id % 4 == 1:
+                assert geometry.is_empty
+            else:
+                assert not geometry.is_empty
+
+    def test_coverage_validation_row_id_preserves_sequence_index_lineage(self):
+        row_count = 1_000
+        rows = self.spark.range(row_count, numPartitions=8)
+        row_id = F.col("id")
+        block_x = F.floor(row_id / F.lit(2)).cast("double") * F.lit(10.0)
+        geometry = F.when(
+            row_id % F.lit(2) == 0,
+            stc.ST_PolygonFromEnvelope(
+                block_x, F.lit(0.0), block_x + F.lit(1.0), F.lit(1.0)
+            ),
+        ).otherwise(
+            stc.ST_PolygonFromEnvelope(
+                block_x + F.lit(0.5),
+                F.lit(0.0),
+                block_x + F.lit(1.5),
+                F.lit(1.0),
+            )
+        )
+        source_frame = rows.select(geometry.alias("geometry"))
+        with ps.option_context("compute.default_index_type", "sequence"):
+            source = GeoSeries(source_frame.pandas_api()["geometry"])
+
+        targets = source.to_geopandas().sort_index()
+        actual = source.invalid_coverage_edges().to_geopandas().sort_index()
+
+        pd.testing.assert_index_equal(actual.index, targets.index)
+        assert len(actual) == row_count
+        assert all(
+            not edge.is_empty and target.boundary.covers(edge)
+            for target, edge in zip(targets, actual)
         )
 
     def test_non_geom_fails(self):

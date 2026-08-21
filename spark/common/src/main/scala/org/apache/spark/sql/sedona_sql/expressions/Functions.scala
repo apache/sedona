@@ -21,7 +21,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 import org.apache.sedona.common.{Functions, FunctionsGeoTools, FunctionsProj4}
 import org.apache.sedona.common.geometryObjects.{Box2D, Box3D}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
-import org.apache.sedona.common.utils.{HilbertDistance, InscribedCircle, ValidDetail}
+import org.apache.sedona.common.utils.{CoverageValidation, HilbertDistance, InscribedCircle, ValidDetail}
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
@@ -483,6 +483,63 @@ private[apache] case class ST_MakeValid(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.makeValid _) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class __sedona_internal_coverage_invalid_edges_for_target(
+    inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction3((target: Geometry, adjacent: Array[Geometry], gapWidth: Double) =>
+        CoverageValidation.invalidEdges(target, adjacent, gapWidth))) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+/**
+ * Assign an operation-local row ID while retaining the lineage of every value in `dependency`.
+ *
+ * Spark may evaluate separate consumers of a DataFrame over differently pruned child plans. A
+ * partition-based ID would then describe different physical rows in those consumers. Keeping the
+ * complete source-row dependency inside this opaque, nondeterministic expression prevents that
+ * pruning while avoiding a cache, checkpoint, or global sort.
+ */
+private[apache] case class __sedona_internal_operation_row_id(inputExpressions: Seq[Expression])
+    extends Expression
+    with ExpectsInputTypes
+    with Nondeterministic
+    with CodegenFallback {
+
+  @transient private var count: Long = _
+  @transient private var partitionMask: Long = _
+
+  override def children: Seq[Expression] = inputExpressions
+
+  override def inputTypes: Seq[AbstractDataType] = Seq(AnyDataType)
+
+  override def nullable: Boolean = false
+
+  override def dataType: DataType = LongType
+
+  override def stateful: Boolean = true
+
+  override protected def initializeInternal(partitionIndex: Int): Unit = {
+    count = 0L
+    partitionMask = partitionIndex.toLong << 33
+  }
+
+  override protected def evalInternal(input: InternalRow): Any = {
+    // `dependency` is a lineage-only child: its references keep the complete source plan below
+    // this opaque expression, while deliberately not evaluating it avoids materializing the
+    // source-row struct for every record.
+    val currentCount = count
+    count += 1
+    partitionMask + currentCount
+  }
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]): Expression = {
     copy(inputExpressions = newChildren)
   }
 }

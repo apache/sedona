@@ -34,6 +34,7 @@ from pyspark.pandas.internal import InternalField, InternalFrame
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import same_anchor, scol_for, verify_temp_column_name
 from pyspark.sql.types import (
+    ArrayType,
     BooleanType,
     DoubleType,
     FloatType,
@@ -1139,6 +1140,128 @@ class GeoSeries(GeoFrame, pspd.Series):
             spark_col,
             returns_geom=False,
         )
+
+    def _coverage_invalid_edges_frame(self, gap_width: float):
+        """Build the distributed per-row coverage-validation frame."""
+        source_internal = self._internal.resolved_copy
+        source_sdf = source_internal.spark_frame
+        geometry_name = "__coverage_geometry__"
+        row_id_name = "__coverage_row_id__"
+        target_id_name = "__coverage_target_id__"
+        target_geometry_name = "__coverage_target_geometry__"
+        neighbor_id_name = "__coverage_neighbor_id__"
+        neighbor_geometry_name = "__coverage_neighbor_geometry__"
+        neighbors_name = "__coverage_neighbors__"
+        dependency_name = "__coverage_row_dependency__"
+        gap_width_name = "__coverage_gap_width__"
+        index_names = [
+            f"__coverage_index_{level}__"
+            for level in range(len(source_internal.index_spark_columns))
+        ]
+
+        geometry_field = source_internal.data_fields[0]
+        source = source_sdf.select(
+            source_internal.data_spark_columns[0].alias(
+                geometry_name, metadata=geometry_field.metadata
+            ),
+            *[
+                index_column.alias(index_name)
+                for index_column, index_name in zip(
+                    source_internal.index_spark_columns, index_names
+                )
+            ],
+            scol_for(source_sdf, NATURAL_ORDER_COLUMN_NAME),
+        )
+        # Alignment can duplicate or null the pandas-on-Spark natural-order
+        # column. Attach a fresh operation-local identity before this shared
+        # source is forked for self-exclusion and result restoration. The
+        # opaque dependency keeps every retained source lineage below the
+        # partition-based ID in every fork, including complex-valued indexes.
+        source_dependency = F.struct(
+            scol_for(source, geometry_name),
+            *[scol_for(source, name) for name in index_names],
+            scol_for(source, NATURAL_ORDER_COLUMN_NAME),
+        )
+        source = source.withColumn(dependency_name, source_dependency)
+        source = source.withColumn(
+            row_id_name,
+            F.expr(f"__sedona_internal_operation_row_id(`{dependency_name}`)"),
+        ).drop(dependency_name)
+
+        empty_neighbors = F.array().cast(ArrayType(GeometryType(), containsNull=False))
+        geometry = scol_for(source, geometry_name)
+        polygon_source = source.where(stf.ST_Dimension(geometry) == 2)
+        targets = polygon_source.select(
+            scol_for(polygon_source, row_id_name).alias(target_id_name),
+            scol_for(polygon_source, geometry_name).alias(target_geometry_name),
+        )
+        candidates = polygon_source.select(
+            scol_for(polygon_source, row_id_name).alias(neighbor_id_name),
+            scol_for(polygon_source, geometry_name).alias(neighbor_geometry_name),
+        )
+        target_geometry = scol_for(targets, target_geometry_name)
+        neighbor_geometry = scol_for(candidates, neighbor_geometry_name)
+        spatial_condition = stp.ST_Intersects(
+            stf.ST_Expand(stf.ST_Envelope(target_geometry), gap_width),
+            stf.ST_Envelope(neighbor_geometry),
+        )
+        pairs = targets.join(candidates, spatial_condition, "inner").where(
+            scol_for(targets, target_id_name) != scol_for(candidates, neighbor_id_name)
+        )
+        neighbors = pairs.groupBy(target_id_name).agg(
+            F.collect_list(scol_for(pairs, neighbor_geometry_name)).alias(
+                neighbors_name
+            )
+        )
+        neighbors = neighbors.withColumnRenamed(target_id_name, row_id_name)
+
+        restored = source.join(neighbors, row_id_name, "left")
+        restored = restored.withColumn(
+            neighbors_name,
+            F.coalesce(scol_for(restored, neighbors_name), empty_neighbors),
+        ).withColumn(gap_width_name, F.lit(gap_width))
+        invalid_edges = F.expr(
+            f"__sedona_internal_coverage_invalid_edges_for_target("
+            f"`{geometry_name}`, `{neighbors_name}`, `{gap_width_name}`)"
+        )
+        return (
+            restored,
+            invalid_edges,
+            [scol_for(restored, name) for name in index_names],
+            source_internal,
+        )
+
+    def invalid_coverage_edges(self, *, gap_width=0.0) -> "GeoSeries":
+        gap_width = _normalize_numeric_scalar(
+            gap_width, "'gap_width' must be a numeric scalar"
+        )
+        if gap_width < 0 or not np.isfinite(gap_width):
+            raise ValueError("'gap_width' must be finite and non-negative")
+        frame, invalid_edges, index_columns, source_internal = (
+            self._coverage_invalid_edges_frame(gap_width)
+        )
+        return self._result_preserving_index(
+            invalid_edges,
+            frame,
+            index_columns,
+            source_internal.index_fields,
+            source_internal.index_names,
+            returns_geom=True,
+        )
+
+    def is_valid_coverage(self, *, gap_width=0.0) -> bool:
+        edges = self.invalid_coverage_edges(gap_width=gap_width)
+        frame = edges._internal.spark_frame
+        geometry = edges.spark.column
+        invalid = F.coalesce(
+            geometry.isNotNull() & ~stf.ST_IsEmpty(geometry), F.lit(False)
+        )
+        summary = frame.agg(
+            F.coalesce(F.max(invalid.cast("int")), F.lit(0)).alias(
+                "__coverage_has_invalid_edges__"
+            )
+        ).first()
+        return summary["__coverage_has_invalid_edges__"] == 0
 
     @property
     def is_empty(self) -> pspd.Series:
