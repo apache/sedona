@@ -124,7 +124,7 @@ The scene holds 5,429 water bodies: oxbow lakes, catfish ponds, borrow pits. The
 
 ## Find the middle
 
-`ST_ApproximateMedialAxis` computes a polygon's straight skeleton and keeps the interior edges, which is the centerline. The function runs fast and clean on a real river after two preparations. The vertex count has to come down, because skeleton cost climbs steeply with it and a pixel-derived outline is all stair-steps. The holes have to go, because every island spawns a loop in the skeleton. The query below smooths the outline with a buffer out and back in, simplifies it to 80 m, keeps the exterior ring, then skeletonizes and merges the pieces.
+`ST_ApproximateMedialAxis` computes a polygon's straight skeleton and keeps the interior edges, which is the centerline. Two preprocessing steps reduce work and noise: simplify the stair-stepped boundary, since skeleton cost climbs steeply with vertex count, then remove holes so islands do not create loops in the skeleton. The query below smooths the outline with a buffer out and back in, simplifies it to 80 m, keeps the exterior ring, then skeletonizes and merges the pieces.
 
 ```sql
 WITH river AS (SELECT geom FROM bodies ORDER BY ST_Area(geom) DESC LIMIT 1),
@@ -215,6 +215,6 @@ One detail shapes the plan: the `raster` reader emits a file's tiles from a sing
 
 ## Roads are next
 
-The recipe, mask to polygons to union to medial axis, works on any detected shape with width. Road networks are the next target, and they come with their own lessons: a road needs several pixels of width before a skeleton can find it, and a street grid is made of holes that the pipeline has to keep. Roads get their own post next week.
+The same pipeline, mask to polygons to union to medial axis, can apply to other sufficiently wide polygonal features, including roads. Road networks are the next target, and they come with their own lessons: a road needs several pixels of width before a skeleton can find it, and a street grid is made of holes that the pipeline has to keep. Roads get their own post next week.
 
 *Function references: [ST_ApproximateMedialAxis](https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_ApproximateMedialAxis/), [RS_PixelAsPolygons](https://sedona.apache.org/latest/api/sql/Pixel-Functions/RS_PixelAsPolygons/), [RS_Resample](https://sedona.apache.org/latest/api/sql/Raster-Operators/RS_Resample/). The UDF pattern is in the [Raster UDF reference](https://sedona.apache.org/latest/api/sql/Raster-UDF/).*
