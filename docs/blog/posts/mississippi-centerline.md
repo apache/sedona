@@ -12,7 +12,7 @@ title: "Find the Middle of the Mississippi"
 
 # Find the Middle of the Mississippi
 
-Apache Sedona can extract a river centerline from Sentinel-2 pixels with `ST_ApproximateMedialAxis`. This post walks through one scene near Greenville, Mississippi: raster operators turn the water pixels into a polygon, the medial axis turns the polygon into a **147.6 km centerline in 56 seconds**, and the centerline supports length, sinuosity, and width measurements in plain SQL.
+The Mississippi wanders. Between the two edges of a single Sentinel-2 scene it travels **147.6 km** to cover 103 km of ground, and its width swings from 131 m to almost 3 km. Every one of those numbers came out of raw pixels in **56 seconds**: Apache Sedona's raster operators built the river polygon, and `ST_ApproximateMedialAxis` drew the line down the middle of it.
 
 ![A Sentinel-2 view of the Mississippi's meanders near Greenville, Mississippi, with the detected river polygon in cyan and its computed centerline in orange; a stats panel lists 148 km of centerline, sinuosity 1.43, widths from 131 to 2,975 m, and a 56-second runtime](mississippi-centerline-cover.png)
 
