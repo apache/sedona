@@ -141,7 +141,7 @@ SELECT channel, ST_LineMerge(ST_ApproximateMedialAxis(channel)) AS axis FROM cle
 
 Under the hood, `ST_ApproximateMedialAxis` is built on [`ST_StraightSkeleton`](https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_StraightSkeleton/), which shrinks every edge of the polygon inward at the same speed and records where the edges meet. On this channel the straight skeleton has 943 edges and 437.7 km of line: ribs run from every bend in the bank to the spine. The medial axis keeps the 470 edges that never touch the bank. Call `ST_StraightSkeleton` directly when the ribs are the point, as in roof modeling or polygon offsetting.
 
-![Two panels of the same 12 km river reach: the straight skeleton with 943 grey edges, ribs fanning from every bank vertex to the spine, and the medial axis with 470 orange edges along the spine only](mississippi-centerline-skeleton.png)
+![Two panels of the same 16 km river reach as the figure above: the straight skeleton with 943 grey edges, ribs fanning from every bank vertex to the spine, and the medial axis with 470 orange edges along the spine only](mississippi-centerline-skeleton.png)
 
 ![Three panels over satellite imagery of a 22 km reach: wet pixels vectorized as a cyan polygon; the smoothed channel outline with the raw skeleton forking around a sandbar; the pruned centerline in orange with white width ticks every 2 km](mississippi-centerline-steps.png)
 
