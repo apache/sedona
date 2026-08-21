@@ -2004,6 +2004,67 @@ class TestDataFrameAPI(TestBase):
         for future in futures:
             future.result()
 
+    def test_coverage_validation_catalog_calls(self):
+        rows = self.spark.createDataFrame(
+            [
+                (
+                    "valid",
+                    "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))",
+                    "POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))",
+                    None,
+                ),
+                (
+                    "overlap",
+                    "POLYGON ((0 0, 0 1, 1 1, 1 0, 0 0))",
+                    "POLYGON ((0.5 0, 0.5 1, 1.5 1, 1.5 0, 0.5 0))",
+                    None,
+                ),
+                (
+                    "null",
+                    None,
+                    "POLYGON ((1 0, 1 1, 2 1, 2 0, 1 0))",
+                    None,
+                ),
+            ],
+            "kind string, target_wkt string, adjacent_wkt string, "
+            "nullable_adjacent_wkt string",
+        ).select(
+            "kind",
+            stc.ST_GeomFromWKT("target_wkt").alias("target"),
+            f.array(
+                stc.ST_GeomFromWKT("adjacent_wkt"),
+                stc.ST_GeomFromWKT("nullable_adjacent_wkt"),
+            ).alias("adjacent"),
+        )
+
+        actual = {
+            row.kind: row.edges
+            for row in rows.select(
+                "kind",
+                f.expr("ST_CoverageInvalidEdgesForTarget(target, adjacent, 0.0)").alias(
+                    "edges"
+                ),
+            ).collect()
+        }
+
+        assert actual["valid"].is_empty
+        assert not actual["overlap"].is_empty
+        assert actual["null"] is None
+
+        identity_source = self.spark.range(64, numPartitions=4).select(
+            "id",
+            f.create_map(f.lit("id"), f.col("id")).alias("map_index"),
+        )
+        identity_rows = identity_source.select(
+            "id",
+            f.expr("__sedona_internal_operation_row_id(struct(id, map_index))").alias(
+                "row_id"
+            ),
+        ).collect()
+
+        assert len(identity_rows) == 64
+        assert len({row.row_id for row in identity_rows}) == 64
+
     @pytest.mark.skipif(
         os.getenv("SPARK_REMOTE") is not None and pyspark.__version__ < "4.0.0",
         reason="DBSCAN requires checkpoint directory which is not available in Spark Connect mode before Spark 4.0.0",

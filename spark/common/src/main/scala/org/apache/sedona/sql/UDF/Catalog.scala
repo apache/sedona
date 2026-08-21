@@ -278,6 +278,7 @@ object Catalog extends AbstractCatalog with Logging {
 
   // Geometry-Validation
   val geometryValidationExprs: Seq[FunctionDescription] = Seq(
+    function[ST_CoverageInvalidEdgesForTarget](0.0),
     function[ST_IsValid](),
     function[ST_IsValidDetail](),
     function[ST_IsValidReason](),
@@ -327,7 +328,8 @@ object Catalog extends AbstractCatalog with Logging {
     Seq(function[ExpandAddress](), function[ParseAddress]())
 
   // Other / utility expressions not in any docs category
-  val otherExprs: Seq[FunctionDescription] = Seq(function[Barrier]())
+  val otherExprs: Seq[FunctionDescription] =
+    Seq(function[Barrier](), function[__sedona_internal_operation_row_id]())
 
   // Aggregate functions implemented as native Catalyst expressions
   val catalystAggregateExprs: Seq[FunctionDescription] = Seq(function[ST_Collect_Agg]())

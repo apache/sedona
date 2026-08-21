@@ -343,6 +343,10 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
 - `intersects()`, `contains()`, `within()` - Spatial predicates
 - `intersection()` - Geometric intersection
 - `make_valid()` - Geometry validation and repair
+- `is_valid_coverage()` - Validate non-overlapping, edge-matched polygonal
+  coverages
+- `invalid_coverage_edges()` - Return per-row invalid coverage edges,
+  optionally detecting narrow gaps
 - `sample_points()` - Sample polygons by area and lines by length with native
   distributed expressions
 - `GeoSeries.explode()` and `GeoDataFrame.explode()` - Expand multipart
@@ -352,6 +356,27 @@ The GeoPandas API for Apache Sedona implements the most commonly used GeoSeries 
 - `overlay()` - Distributed intersection, difference, identity, symmetric
   difference, and union between GeoDataFrames
 - `sindex` - Spatial indexing (limited functionality)
+
+```python
+from shapely.geometry import box
+
+coverage = gpd.GeoSeries([box(0, 0, 1, 1), box(1, 0, 2, 1)])
+assert coverage.is_valid_coverage()
+
+with_gap = gpd.GeoSeries([box(0, 0, 1, 1), box(1.1, 0, 2.1, 1)])
+assert not with_gap.is_valid_coverage(gap_width=0.2)
+invalid_edges = with_gap.invalid_coverage_edges(gap_width=0.2)
+```
+
+`invalid_coverage_edges()` keeps geometry rows distributed. Sedona finds
+candidate neighbors with a spatial self-join over envelopes expanded by
+`gap_width`, groups only each target row's candidates, and validates them on
+executors. It preserves every input row, index level, and CRS; rows without
+invalid edges or polygonal components contain empty lines, and missing
+geometries remain missing. `is_valid_coverage()` performs a distributed
+reduction and returns one Python `bool`. Dense or highly overlapping
+coverages, and larger `gap_width` values, can increase each target's candidate
+array and executor memory use. `gap_width` must be finite and non-negative.
 
 `hilbert_distance()` keeps its per-row ordering keys distributed and uses only
 native Spark expressions. When `total_bounds` is omitted, one distributed

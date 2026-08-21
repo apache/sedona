@@ -51,6 +51,17 @@ requires_geopandas_geom_equals_identical = pytest.mark.skipif(
     ),
 )
 
+requires_geopandas_coverage_validation = pytest.mark.skipif(
+    parse_version(gpd.__version__) < parse_version("1.1.0")
+    or parse_version(shapely.__version__) < parse_version("2.1.0")
+    or getattr(shapely, "geos_version", (0, 0, 0)) < (3, 12, 0),
+    reason=(
+        "Tests require geopandas>=1.1.0, shapely>=2.1.0, and GEOS>=3.12.0, "
+        f"but found geopandas {gpd.__version__}, shapely {shapely.__version__}, "
+        f"and GEOS {getattr(shapely, 'geos_version_string', 'unknown')}"
+    ),
+)
+
 requires_geopandas_geom_equals_identical_m = pytest.mark.skipif(
     parse_version(gpd.__version__) < parse_version("1.1.0")
     or parse_version(shapely.__version__) < parse_version("2.1.0")
@@ -648,6 +659,22 @@ class TestMatchGeopandasSeries(TestGeopandasBase):
                 assert "Self-intersection" in e
             else:
                 raise ValueError(f"Unexpected result: {a} not equivalent to {e}")
+
+    @requires_geopandas_coverage_validation
+    def test_coverage_validation(self):
+        local = gpd.GeoSeries(
+            [
+                shapely.wkt.loads("POLYGON ((0 0, 1 1, 1 0, 0 0))"),
+                shapely.wkt.loads("POLYGON ((0 0, 0.5 0.5, 1 1, 0 1, 0 0))"),
+            ],
+            index=pd.Index(["left", "right"], name="feature"),
+        )
+        distributed = GeoSeries(local)
+
+        self.check_sgpd_equals_gpd(
+            distributed.invalid_coverage_edges(), local.invalid_coverage_edges()
+        )
+        assert distributed.is_valid_coverage() == local.is_valid_coverage()
 
     def test_is_empty(self):
         for geom in self.geoms:

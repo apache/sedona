@@ -311,10 +311,11 @@ These functions work with the Spatial Reference System of geometries.
 
 ## Geometry Validation
 
-These functions test whether geometries are valid and can repair invalid geometries.
+These functions test geometries and polygonal coverages and can repair invalid geometries.
 
 | Function | Return type | Description | Since |
 | :--- | :--- | :--- | :--- |
+| [ST_CoverageInvalidEdgesForTarget](Geometry-Validation/ST_CoverageInvalidEdgesForTarget.md) | Geometry | Returns target boundary edges that are invalid relative to a supplied array of neighboring coverage geometries. | v2.0.0 |
 | [ST_IsValid](Geometry-Validation/ST_IsValid.md) | Boolean | Test if a geometry is well-formed. The function can be invoked with just the geometry or with an additional flag (from `v1.5.1`). The flag alters the validity checking behavior. The flags parameter... | v1.0.0 |
 | [ST_IsValidDetail](Geometry-Validation/ST_IsValidDetail.md) | Struct | Returns a row, containing a boolean `valid` stating if a geometry is valid, a string `reason` stating why it is invalid and a geometry `location` pointing out where it is invalid. | v1.6.1 |
 | [ST_IsValidReason](Geometry-Validation/ST_IsValidReason.md) | String | Returns text stating if the geometry is valid. If not, it provides a reason why it is invalid. The function can be invoked with just the geometry or with an additional flag. The flag alters the val... | v1.5.1 |
