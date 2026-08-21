@@ -341,6 +341,8 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 - `intersects()`、`contains()`、`within()` —— 空间谓词
 - `intersection()` —— 几何相交
 - `make_valid()` —— 几何校验与修复
+- `is_valid_coverage()` —— 校验多边形覆盖的内部是否互不重叠、共享边界是否完全匹配
+- `invalid_coverage_edges()` —— 按输入行返回导致覆盖无效的边，并可选择检测狭窄间隙
 - `sample_points()` —— 使用原生分布式表达式按面积对多边形采样、按长度对线采样
 - `GeoSeries.explode()` 与 `GeoDataFrame.explode()` —— 将多部件几何展开为多行，
   其中 GeoDataFrame 方法会保留对应的属性列
@@ -348,6 +350,25 @@ Apache Sedona 的 GeoPandas API 已实现最常用的 GeoSeries 与 GeoDataFrame
 - `clip()` —— 分布式几何裁剪
 - `overlay()` —— GeoDataFrame 之间的分布式相交、差集、恒等、对称差和并集
 - `sindex` —— 空间索引（功能有限）
+
+```python
+from shapely.geometry import box
+
+coverage = gpd.GeoSeries([box(0, 0, 1, 1), box(1, 0, 2, 1)])
+assert coverage.is_valid_coverage()
+
+with_gap = gpd.GeoSeries([box(0, 0, 1, 1), box(1.1, 0, 2.1, 1)])
+assert not with_gap.is_valid_coverage(gap_width=0.2)
+invalid_edges = with_gap.invalid_coverage_edges(gap_width=0.2)
+```
+
+`invalid_coverage_edges()` 会让几何行保持分布式执行。Sedona 对按
+`gap_width` 扩展的包围盒执行空间自连接来寻找候选邻居，仅按目标行聚合这些
+候选，并在 executor 上执行校验。该方法保留所有输入行、各级索引和 CRS；没有
+无效边或多边形分量的行返回空线，缺失几何保持缺失。`is_valid_coverage()`
+通过分布式归约返回一个 Python `bool`。在高密度或大量重叠的覆盖中，或
+`gap_width` 较大时，每个目标的候选数组和 executor 内存开销都会增加。
+`gap_width` 必须是有限的非负数。
 
 `hilbert_distance()` 使用原生 Spark 表达式，并让逐行排序键保持分布式执行。
 未提供 `total_bounds` 时，该方法会通过一次分布式聚合计算所有包围盒中点的
