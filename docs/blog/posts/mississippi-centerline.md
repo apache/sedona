@@ -12,9 +12,9 @@ title: "Find the Middle of the Mississippi"
 
 # Find the Middle of the Mississippi
 
-The Mississippi wanders. Between the two edges of a single Sentinel-2 scene it travels **147.6 km** to cover 103 km of ground, and its width swings from 131 m to almost 3 km. Every one of those numbers came out of raw pixels in **56 seconds**: Apache Sedona's raster operators built the river polygon, and `ST_ApproximateMedialAxis` drew the line down the middle of it.
+The Mississippi wanders. Between the two edges of a single Sentinel-2 scene it travels **147.6 km** to cover 103 km of ground, and its width swings from 131 m to almost 3 km. Every one of those numbers came out of raw pixels: Apache Sedona's raster operators built the river polygon, and `ST_ApproximateMedialAxis` drew the line down the middle of it.
 
-![A Sentinel-2 view of the Mississippi's meanders near Greenville, Mississippi, with the detected river polygon in cyan and its computed centerline in orange; a stats panel lists 148 km of centerline, sinuosity 1.43, widths from 131 to 2,975 m, and a 56-second runtime](mississippi-centerline-cover.png)
+![A Sentinel-2 view of the Mississippi's meanders near Greenville, Mississippi, with the detected river polygon in cyan and its computed centerline in orange; a stats panel lists 148 km of centerline, sinuosity 1.43, widths from 131 to 2,975 m, and the 5,429 water bodies found in the scene](mississippi-centerline-cover.png)
 
 <!-- more -->
 
@@ -98,7 +98,7 @@ FROM px WHERE p.value > 0.0
 GROUP BY x, y
 ```
 
-That step produces 410 tile-polygons in 51 seconds, S3 read included. One more union and an `ST_Dump` give every water body its own row:
+That step produces 410 tile-polygons. One more union and an `ST_Dump` give every water body its own row:
 
 ```sql
 WITH all_water AS (SELECT ST_Union_Aggr(geom) AS geom FROM tile_water),
@@ -137,7 +137,7 @@ clean AS (
 SELECT channel, ST_LineMerge(ST_ApproximateMedialAxis(channel)) AS axis FROM clean
 ```
 
-17,530 vertices become 474, and the medial axis takes **1.1 seconds**: 470 raw edges, 81 line parts after `ST_LineMerge`, 205 km of skeleton including every spur into a side channel or around a sandbar.
+17,530 vertices become 474, and the medial axis returns 470 raw edges, 81 line parts after `ST_LineMerge`, 205 km of skeleton including every spur into a side channel or around a sandbar.
 
 Under the hood, `ST_ApproximateMedialAxis` is built on [`ST_StraightSkeleton`](https://sedona.apache.org/latest/api/sql/Geometry-Processing/ST_StraightSkeleton/), which shrinks every edge of the polygon inward at the same speed and records where the edges meet. On this channel the straight skeleton has 943 edges and 437.7 km of line: ribs run from every bend in the bank to the spine. The medial axis keeps the 470 edges that never touch the bank. Call `ST_StraightSkeleton` directly when the ribs are the point, as in roof modeling or polygon offsetting.
 
@@ -205,7 +205,7 @@ FROM (SELECT ROUND(2 * ST_Distance(pt, ST_Boundary(channel)), 0) AS w FROM pts)
 
 ![Line chart of river width along 148 km of centerline, sampled every 2 km: mostly between 500 and 1,500 m with a median of 1,032 m, a narrowest point of 131 m in a side channel near the end, and a widest point of 2,975 m](mississippi-centerline-width-profile.png)
 
-The river is about a kilometre wide for most of the reach and close to three kilometres where the channel balloons around mid-river bars. The final 12 km drop to about 200 m: there the 10 km rule kept a long side channel at the scene edge over the main channel's shorter last reach, and the 131 m minimum sits in that side channel. Every number comes from pixels that left S3 less than a minute earlier.
+The river is about a kilometre wide for most of the reach and close to three kilometres where the channel balloons around mid-river bars. The final 12 km drop to about 200 m: there the 10 km rule kept a long side channel at the scene edge over the main channel's shorter last reach, and the 131 m minimum sits in that side channel. Every number comes from the pixels of one scene, read straight from S3.
 
 ## How the pipeline distributes work
 
