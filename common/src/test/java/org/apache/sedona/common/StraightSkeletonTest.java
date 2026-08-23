@@ -20,6 +20,10 @@ package org.apache.sedona.common;
 
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
@@ -437,5 +441,42 @@ public class StraightSkeletonTest {
     // Represents main trunk centerline plus 6 branch centerlines
     // Use relaxed validation since complex road networks may have precision issues
     testPolygon("Complex Branching Road Network", complexRoad, 71, false);
+  }
+
+  /**
+   * GH-3276: outlines traced from rasterised pixels have many short, near-collinear edges that
+   * trigger degenerate collision events inside campskeleton. The library used to print a stack
+   * trace to stderr for every one of them (130+ per call for this polygon) while still returning a
+   * result. A successful call must write nothing to stderr.
+   */
+  @Test
+  public void rasterizedOutlineWritesNothingToStderr() throws Exception {
+    String wkt;
+    try (InputStream in =
+        getClass().getResourceAsStream("/straight-skeleton/rasterized-outline-epsg5070.wkt")) {
+      assertNotNull("test resource missing", in);
+      wkt = new String(in.readAllBytes(), StandardCharsets.UTF_8).trim();
+    }
+    Geometry polygon = Constructors.geomFromWKT(wkt, 5070);
+    assertEquals(557, polygon.getNumPoints());
+    assertTrue(polygon.isValid());
+
+    PrintStream originalErr = System.err;
+    ByteArrayOutputStream captured = new ByteArrayOutputStream();
+    Geometry skeleton;
+    Geometry medialAxis;
+    try {
+      System.setErr(new PrintStream(captured, true, "UTF-8"));
+      skeleton = Functions.straightSkeleton(polygon);
+      medialAxis = Functions.approximateMedialAxis(polygon);
+    } finally {
+      System.setErr(originalErr);
+    }
+
+    assertEquals("skeleton computation must not write to stderr", "", captured.toString("UTF-8"));
+    assertTrue(skeleton instanceof MultiLineString);
+    assertTrue(skeleton.getNumGeometries() > 0);
+    assertTrue(medialAxis instanceof MultiLineString);
+    assertTrue(medialAxis.getNumGeometries() > 0);
   }
 }
