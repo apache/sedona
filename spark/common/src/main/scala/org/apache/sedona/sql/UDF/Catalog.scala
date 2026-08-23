@@ -328,10 +328,7 @@ object Catalog extends AbstractCatalog with Logging {
 
   // Other / utility expressions not in any docs category
   val otherExprs: Seq[FunctionDescription] =
-    Seq(
-      function[Barrier](),
-      function[__sedona_internal_coverage_invalid_edges_for_target](),
-      function[__sedona_internal_operation_row_id]())
+    Seq(function[Barrier](), function[__sedona_internal_coverage_invalid_edges_for_target]())
 
   // Aggregate functions implemented as native Catalyst expressions
   val catalystAggregateExprs: Seq[FunctionDescription] = Seq(function[ST_Collect_Agg]())

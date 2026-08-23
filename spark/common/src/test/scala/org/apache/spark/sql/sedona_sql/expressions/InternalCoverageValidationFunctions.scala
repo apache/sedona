@@ -56,6 +56,17 @@ class InternalCoverageValidationFunctions extends TestBaseScala with Matchers {
       invalid.getDimension should equal(1)
     }
 
+    it("ignores exactly one matching target from self-included candidates") {
+      val row = coverageSource
+        .selectExpr(
+          s"$functionName(target, ARRAY(target), 0.0) AS self",
+          s"$functionName(target, ARRAY(target, target), 0.0) AS duplicate")
+        .first()
+
+      row.getAs[Geometry]("self").isEmpty should be(true)
+      row.getAs[Geometry]("duplicate").isEmpty should be(false)
+    }
+
     it("accepts zero and an explicit gap width") {
       val result = coverageSource.selectExpr(
         s"$functionName(target, across_gap_adjacent, 0.0) AS zero_width",

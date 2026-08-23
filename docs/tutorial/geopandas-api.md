@@ -370,13 +370,14 @@ invalid_edges = with_gap.invalid_coverage_edges(gap_width=0.2)
 
 `invalid_coverage_edges()` keeps geometry rows distributed. Sedona finds
 candidate neighbors with a spatial self-join over envelopes expanded by
-`gap_width`, groups only each target row's candidates, and validates them on
-executors. It preserves every input row, index level, and CRS; rows without
+`gap_width`, groups the candidates, and validates them on executors before
+mapping the diagnostics back to the input rows. It preserves every input row,
+index level, and CRS; rows without
 invalid edges or polygonal components contain empty lines, and missing
 geometries remain missing. `is_valid_coverage()` performs a distributed
-reduction and returns one Python `bool`. Dense or highly overlapping
-coverages, and larger `gap_width` values, can increase each target's candidate
-array and executor memory use. `gap_width` must be finite and non-negative.
+reduction and returns one Python `bool`. Dense or highly overlapping coverages,
+and larger `gap_width` values, can increase each target's candidate array and
+executor memory use. `gap_width` must be finite and non-negative.
 
 `hilbert_distance()` keeps its per-row ordering keys distributed and uses only
 native Spark expressions. When `total_bounds` is omitted, one distributed

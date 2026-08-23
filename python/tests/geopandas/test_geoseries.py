@@ -26,6 +26,7 @@ import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
 import sedona.spark.geopandas as sgpd
+from pyspark import TaskContext
 from pyspark.pandas.internal import InternalFrame, NATURAL_ORDER_COLUMN_NAME
 from pyspark.pandas.utils import scol_for
 from pyspark.sql import functions as F
@@ -204,7 +205,7 @@ class TestGeoSeries(TestGeopandasBase):
             ],
         ],
     )
-    def test_coverage_validation_empty_or_all_ignored(self, geometries):
+    def test_coverage_validation_empty_or_without_interactions(self, geometries):
         if geometries:
             # Spark 3 cannot infer a geometry column when the first local value
             # is null. Construct from a non-null first value, then restore the
@@ -433,7 +434,7 @@ class TestGeoSeries(TestGeopandasBase):
         assert series.is_valid_coverage() is False
         assert action_count == 1
 
-    def test_coverage_validation_row_id_survives_final_distributed_plan(self):
+    def test_coverage_validation_survives_shuffled_distributed_plan(self):
         row_count = 10_004
         left_rows = self.spark.range(row_count, numPartitions=8).repartition(8, "id")
         right_rows = self.spark.range(row_count, numPartitions=7).repartition(7, "id")
@@ -446,6 +447,10 @@ class TestGeoSeries(TestGeopandasBase):
                 "inner",
             )
             .select(F.col("left.id").alias("id"))
+            .groupBy("id")
+            .count()
+            .drop("count")
+            .repartition(8, "id")
         )
         row_id = F.col("id")
         block_x = F.floor(row_id / F.lit(4)).cast("double") * F.lit(10.0)
@@ -487,7 +492,42 @@ class TestGeoSeries(TestGeopandasBase):
             else:
                 assert not geometry.is_empty
 
-    def test_coverage_validation_row_id_preserves_sequence_index_lineage(self):
+    def test_coverage_validation_preserves_map_index(self):
+        row_id = F.col("id")
+        block_x = F.floor(row_id / F.lit(2)).cast("double") * F.lit(10.0)
+        geometry = F.when(
+            row_id % F.lit(2) == 0,
+            stc.ST_PolygonFromEnvelope(
+                block_x, F.lit(0.0), block_x + F.lit(1.0), F.lit(1.0)
+            ),
+        ).otherwise(
+            stc.ST_PolygonFromEnvelope(
+                block_x + F.lit(0.5),
+                F.lit(0.0),
+                block_x + F.lit(1.5),
+                F.lit(1.0),
+            )
+        )
+        source_frame = self.spark.range(4, numPartitions=2).select(
+            F.create_map(F.lit("id"), row_id).alias("feature"),
+            geometry.alias("geometry"),
+        )
+        source = GeoSeries(source_frame.pandas_api(index_col="feature")["geometry"])
+
+        result = source.invalid_coverage_edges()
+        actual = result._internal.spark_frame.select(
+            result._internal.index_spark_columns[0].alias("feature"),
+            stf.ST_IsEmpty(result.spark.column).alias("is_empty"),
+        ).collect()
+
+        assert sorted((row.feature["id"], row.is_empty) for row in actual) == [
+            (0, False),
+            (1, False),
+            (2, False),
+            (3, False),
+        ]
+
+    def test_coverage_validation_preserves_sequence_index_lineage(self):
         row_count = 1_000
         rows = self.spark.range(row_count, numPartitions=8)
         row_id = F.col("id")
@@ -518,6 +558,49 @@ class TestGeoSeries(TestGeopandasBase):
             not edge.is_empty and target.boundary.covers(edge)
             for target, edge in zip(targets, actual)
         )
+
+    def test_coverage_validation_preserves_generated_distributed_sequence_index(self):
+        row_count = 200
+        num_partitions = 4
+        partition_size = row_count // num_partitions
+
+        def rotate_for_stage(rows):
+            rows = list(rows)
+            if rows:
+                shift = (TaskContext.get().stageId() + 1) % len(rows)
+                rows = rows[shift:] + rows[:shift]
+            return iter(rows)
+
+        row_ids = self.spark.sparkContext.parallelize(
+            range(row_count), num_partitions
+        ).mapPartitions(rotate_for_stage)
+        rows = self.spark.createDataFrame(
+            row_ids.map(lambda row_id: (row_id,)), "id long"
+        )
+        x = F.col("id").cast("double") * F.lit(3.0)
+        is_polygon = F.pmod(F.col("id"), F.lit(partition_size)) < F.lit(
+            partition_size // 2
+        )
+        geometry = F.when(
+            is_polygon,
+            stc.ST_PolygonFromEnvelope(x, F.lit(0.0), x + F.lit(1.0), F.lit(1.0)),
+        ).otherwise(stc.ST_Point(x, F.lit(0.0)))
+        source_frame = rows.select(geometry.alias("geometry"))
+
+        with ps.option_context("compute.default_index_type", "distributed-sequence"):
+            source = GeoSeries(source_frame.pandas_api()["geometry"])
+
+        result = source.invalid_coverage_edges()
+        index_column = result._internal.index_spark_columns[0]
+        indexes = [
+            row["generated_index"]
+            for row in result._internal.spark_frame.select(
+                index_column.alias("generated_index")
+            ).collect()
+        ]
+
+        assert len(indexes) == row_count
+        assert sorted(indexes) == list(range(row_count))
 
     def test_non_geom_fails(self):
         with pytest.raises(TypeError):

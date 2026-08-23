@@ -1146,20 +1146,26 @@ class GeoSeries(GeoFrame, pspd.Series):
         source_internal = self._internal.resolved_copy
         source_sdf = source_internal.spark_frame
         geometry_name = "__coverage_geometry__"
-        row_id_name = "__coverage_row_id__"
-        target_id_name = "__coverage_target_id__"
+        polygonal_shape_name = "__coverage_polygonal_shape__"
         target_geometry_name = "__coverage_target_geometry__"
-        neighbor_id_name = "__coverage_neighbor_id__"
+        target_shape_name = "__coverage_target_shape__"
         neighbor_geometry_name = "__coverage_neighbor_geometry__"
+        neighbor_shape_name = "__coverage_neighbor_shape__"
         neighbors_name = "__coverage_neighbors__"
-        dependency_name = "__coverage_row_dependency__"
         gap_width_name = "__coverage_gap_width__"
+        diagnostic_edges_name = "__coverage_diagnostic_edges__"
+        invalid_edges_name = "__coverage_invalid_edges__"
         index_names = [
             f"__coverage_index_{level}__"
             for level in range(len(source_internal.index_spark_columns))
         ]
 
         geometry_field = source_internal.data_fields[0]
+        geometry_source = source_sdf.select(
+            source_internal.data_spark_columns[0].alias(
+                geometry_name, metadata=geometry_field.metadata
+            )
+        )
         source = source_sdf.select(
             source_internal.data_spark_columns[0].alias(
                 geometry_name, metadata=geometry_field.metadata
@@ -1172,62 +1178,110 @@ class GeoSeries(GeoFrame, pspd.Series):
             ],
             scol_for(source_sdf, NATURAL_ORDER_COLUMN_NAME),
         )
-        # Alignment can duplicate or null the pandas-on-Spark natural-order
-        # column. Attach a fresh operation-local identity before this shared
-        # source is forked for self-exclusion and result restoration. The
-        # opaque dependency keeps every retained source lineage below the
-        # partition-based ID in every fork, including complex-valued indexes.
-        source_dependency = F.struct(
-            scol_for(source, geometry_name),
-            *[scol_for(source, name) for name in index_names],
-            scol_for(source, NATURAL_ORDER_COLUMN_NAME),
-        )
-        source = source.withColumn(dependency_name, source_dependency)
-        source = source.withColumn(
-            row_id_name,
-            F.expr(f"__sedona_internal_operation_row_id(`{dependency_name}`)"),
-        ).drop(dependency_name)
 
         empty_neighbors = F.array().cast(ArrayType(GeometryType(), containsNull=False))
-        geometry = scol_for(source, geometry_name)
-        polygon_source = source.where(stf.ST_Dimension(geometry) == 2)
-        targets = polygon_source.select(
-            scol_for(polygon_source, row_id_name).alias(target_id_name),
-            scol_for(polygon_source, geometry_name).alias(target_geometry_name),
-        )
-        candidates = polygon_source.select(
-            scol_for(polygon_source, row_id_name).alias(neighbor_id_name),
-            scol_for(polygon_source, geometry_name).alias(neighbor_geometry_name),
-        )
-        target_geometry = scol_for(targets, target_geometry_name)
-        neighbor_geometry = scol_for(candidates, neighbor_geometry_name)
-        spatial_condition = stp.ST_Intersects(
-            stf.ST_Expand(stf.ST_Envelope(target_geometry), gap_width),
-            stf.ST_Envelope(neighbor_geometry),
-        )
-        pairs = targets.join(candidates, spatial_condition, "inner").where(
-            scol_for(targets, target_id_name) != scol_for(candidates, neighbor_id_name)
-        )
-        neighbors = pairs.groupBy(target_id_name).agg(
-            F.collect_list(scol_for(pairs, neighbor_geometry_name)).alias(
-                neighbors_name
+        geometry = scol_for(geometry_source, geometry_name)
+        nonempty_source = geometry_source.where(
+            F.coalesce(
+                geometry.isNotNull() & ~stf.ST_IsEmpty(geometry),
+                F.lit(False),
             )
         )
-        neighbors = neighbors.withColumnRenamed(target_id_name, row_id_name)
+        # Flattening mixed-layout collection members directly can create an
+        # unserializable multipart geometry. Empty values are already excluded
+        # because their declared layouts cannot always be normalized. Only the 2D
+        # join shape is changed; the exact source value remains the key.
+        polygonal_source = nonempty_source.withColumn(
+            polygonal_shape_name,
+            stf.ST_CollectionExtract(
+                stf.ST_Force2D(scol_for(nonempty_source, geometry_name)), 3
+            ),
+        )
+        polygonal_shape = scol_for(polygonal_source, polygonal_shape_name)
+        active_source = polygonal_source.where(
+            F.coalesce(~stf.ST_IsEmpty(polygonal_shape), F.lit(False))
+        )
 
-        restored = source.join(neighbors, row_id_name, "left")
-        restored = restored.withColumn(
-            neighbors_name,
-            F.coalesce(scol_for(restored, neighbors_name), empty_neighbors),
+        # Coverage diagnostics are a function of an exact represented geometry
+        # value and the multiset of physical candidate geometries. Validate each
+        # distinct target value once, but retain duplicates on the candidate side
+        # so duplicate coverage members remain observable as overlaps.
+        targets = active_source.select(
+            scol_for(active_source, geometry_name).alias(
+                target_geometry_name, metadata=geometry_field.metadata
+            ),
+            scol_for(active_source, polygonal_shape_name).alias(target_shape_name),
+        ).dropDuplicates([target_geometry_name])
+        candidates = active_source.select(
+            scol_for(active_source, geometry_name).alias(neighbor_geometry_name),
+            scol_for(active_source, polygonal_shape_name).alias(neighbor_shape_name),
+        )
+        target_geometry = scol_for(targets, target_geometry_name)
+        target_shape = scol_for(targets, target_shape_name)
+        neighbor_geometry = scol_for(candidates, neighbor_geometry_name)
+        neighbor_shape = scol_for(candidates, neighbor_shape_name)
+        spatial_condition = stp.ST_Intersects(
+            stf.ST_Expand(stf.ST_Envelope(target_shape), gap_width),
+            stf.ST_Envelope(neighbor_shape),
+        )
+        pairs = targets.join(candidates, spatial_condition, "inner")
+
+        diagnostics = pairs.groupBy(target_geometry_name).agg(
+            F.collect_list(scol_for(pairs, neighbor_geometry_name)).alias(
+                neighbors_name
+            ),
+        )
+        diagnostics = diagnostics.withColumn(gap_width_name, F.lit(gap_width))
+        diagnostics = diagnostics.withColumn(
+            diagnostic_edges_name,
+            F.expr(
+                f"__sedona_internal_coverage_invalid_edges_for_target("
+                f"`{target_geometry_name}`, `{neighbors_name}`, `{gap_width_name}`)"
+            ),
+        ).select(
+            target_geometry_name,
+            diagnostic_edges_name,
+        )
+
+        # Join the geometry-keyed diagnostics onto one final evaluation of the
+        # source carrying index and ordering columns. Normal GeometryUDT equality
+        # compares the exact represented value and maps one diagnostic back to
+        # every physical duplicate row.
+        validation_rows = source.join(
+            diagnostics,
+            scol_for(source, geometry_name)
+            == scol_for(diagnostics, target_geometry_name),
+            "left",
+        )
+        validation_rows = validation_rows.withColumn(
+            neighbors_name, empty_neighbors
         ).withColumn(gap_width_name, F.lit(gap_width))
-        invalid_edges = F.expr(
+        unmatched_edges = F.expr(
             f"__sedona_internal_coverage_invalid_edges_for_target("
             f"`{geometry_name}`, `{neighbors_name}`, `{gap_width_name}`)"
         )
+        validation_rows = validation_rows.withColumn(
+            invalid_edges_name,
+            F.when(
+                scol_for(validation_rows, target_geometry_name).isNotNull(),
+                scol_for(validation_rows, diagnostic_edges_name),
+            ).otherwise(unmatched_edges),
+        ).select(
+            invalid_edges_name,
+            *[scol_for(validation_rows, name) for name in index_names],
+            scol_for(validation_rows, NATURAL_ORDER_COLUMN_NAME),
+        )
+        # The spatial aggregation and lookup join do not preserve physical row
+        # order. Restore the represented pandas-on-Spark natural order before
+        # rebuilding the result. Project first so the sort does not shuffle
+        # the full candidate arrays.
+        validation_rows = validation_rows.orderBy(
+            scol_for(validation_rows, NATURAL_ORDER_COLUMN_NAME).asc_nulls_last()
+        )
         return (
-            restored,
-            invalid_edges,
-            [scol_for(restored, name) for name in index_names],
+            validation_rows,
+            scol_for(validation_rows, invalid_edges_name),
+            [scol_for(validation_rows, name) for name in index_names],
             source_internal,
         )
 

@@ -43,6 +43,44 @@ public final class CoverageValidation {
     if (!Double.isFinite(gapWidth) || gapWidth < 0) {
       throw new IllegalArgumentException("gapWidth must be finite and non-negative");
     }
-    return CoveragePolygonValidator.validate(target, adjacent, gapWidth);
+    Geometry invalidEdges = CoveragePolygonValidator.validate(target, adjacent, gapWidth);
+    if (invalidEdges == null) {
+      return null;
+    }
+    // GEOS coverage validation drops M while preserving Z. Normalize the JTS result to the same
+    // layout and avoid heterogeneous XYZ/XYM components in a MultiLineString.
+    return GeometryForce3DTransformer.transform(invalidEdges, Double.NaN);
+  }
+
+  /**
+   * Returns the invalid target edges after ignoring one adjacent geometry structurally equal to the
+   * target.
+   *
+   * <p>This helper is for candidate arrays that may contain the target row itself. It removes at
+   * most one match using {@link Geometry#equalsExact(Geometry)}. Any additional exact matches stay
+   * in the adjacent array so duplicate coverage members are still validated as overlaps.
+   *
+   * @param target geometry to validate
+   * @param adjacent candidate geometries, which may include the target itself
+   * @param gapWidth maximum width of gaps to report
+   * @return target boundary edges causing coverage invalidity, or an empty line
+   * @throws IllegalArgumentException if {@code gapWidth} is negative or non-finite
+   */
+  public static Geometry invalidEdgesIgnoringOneMatchingTarget(
+      Geometry target, Geometry[] adjacent, double gapWidth) {
+    if (target == null || adjacent == null) {
+      return invalidEdges(target, adjacent, gapWidth);
+    }
+
+    for (int i = 0; i < adjacent.length; i++) {
+      Geometry candidate = adjacent[i];
+      if (candidate != null && target.equalsExact(candidate)) {
+        Geometry[] neighbors = new Geometry[adjacent.length - 1];
+        System.arraycopy(adjacent, 0, neighbors, 0, i);
+        System.arraycopy(adjacent, i + 1, neighbors, i, adjacent.length - i - 1);
+        return invalidEdges(target, neighbors, gapWidth);
+      }
+    }
+    return invalidEdges(target, adjacent, gapWidth);
   }
 }

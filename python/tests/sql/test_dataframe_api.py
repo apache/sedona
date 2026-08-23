@@ -2052,20 +2052,6 @@ class TestDataFrameAPI(TestBase):
         assert not actual["overlap"].is_empty
         assert actual["null"] is None
 
-        identity_source = self.spark.range(64, numPartitions=4).select(
-            "id",
-            f.create_map(f.lit("id"), f.col("id")).alias("map_index"),
-        )
-        identity_rows = identity_source.select(
-            "id",
-            f.expr("__sedona_internal_operation_row_id(struct(id, map_index))").alias(
-                "row_id"
-            ),
-        ).collect()
-
-        assert len(identity_rows) == 64
-        assert len({row.row_id for row in identity_rows}) == 64
-
     @pytest.mark.skipif(
         os.getenv("SPARK_REMOTE") is not None and pyspark.__version__ < "4.0.0",
         reason="DBSCAN requires checkpoint directory which is not available in Spark Connect mode before Spark 4.0.0",
