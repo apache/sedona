@@ -797,6 +797,20 @@ class StacUtilsTest extends AnyFunSuite {
     assert(result == expectedUrl)
   }
 
+  test("addFiltersToUrl preserves endpoint datetime while adding a spatial filter") {
+    val baseUrl = "http://example.com/stac?token=x&datetime=2025-02-01/2025-02-28"
+    val envelope = new Envelope(1.0, 2.0, 3.0, 4.0)
+    val queryWindow = geometryFactory.toGeometry(envelope)
+    val spatialFilter = Some(
+      GeoParquetSpatialFilter.LeafFilter("geometry", SpatialPredicate.INTERSECTS, queryWindow))
+    val temporalFilter = Some(
+      TemporalFilter.GreaterThanFilter("timestamp", LocalDateTime.parse("2025-03-06T00:00:00")))
+
+    assert(
+      StacUtils.addFiltersToUrl(baseUrl, spatialFilter, temporalFilter) ==
+        s"$baseUrl&bbox=1.0%2C3.0%2C2.0%2C4.0")
+  }
+
   // Tests for authentication headers
 
   test("parseHeaders should return empty map when no headers option provided") {

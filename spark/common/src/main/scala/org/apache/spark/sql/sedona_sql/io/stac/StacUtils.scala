@@ -27,9 +27,12 @@ import org.apache.spark.sql.execution.datasources.geoparquet.GeoParquetSpatialFi
 import org.apache.spark.sql.types.{MetadataBuilder, StructField, StructType}
 import org.locationtech.jts.geom.Envelope
 
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import scala.io.Source
+import scala.util.Try
 
 object StacUtils {
 
@@ -479,10 +482,27 @@ object StacUtils {
       spatialFilter: Option[GeoParquetSpatialFilter],
       temporalFilter: Option[TemporalFilter]): String = {
     val spatialFilterStr = spatialFilter.map(StacUtils.getFilterBBox).getOrElse("")
-    val temporalFilterStr = temporalFilter.map(StacUtils.getFilterTemporal).getOrElse("")
+    val temporalFilterStr =
+      if (hasQueryParameter(baseUrl, "datetime")) ""
+      else temporalFilter.map(StacUtils.getFilterTemporal).getOrElse("")
 
     val filters = Seq(spatialFilterStr, temporalFilterStr).filter(_.nonEmpty).mkString("&")
     val urlWithFilters = if (filters.nonEmpty) s"&$filters" else ""
     s"$baseUrl$urlWithFilters"
+  }
+
+  private def hasQueryParameter(url: String, parameterName: String): Boolean = {
+    val queryStart = url.indexOf('?')
+    val fragmentStart = url.indexOf('#')
+    if (queryStart < 0 || (fragmentStart >= 0 && fragmentStart < queryStart)) return false
+
+    val queryEnd = if (fragmentStart < 0) url.length else fragmentStart
+    val query = url.substring(queryStart + 1, queryEnd)
+
+    query.split("&", -1).exists { parameter =>
+      val rawName = parameter.takeWhile(_ != '=')
+      Try(URLDecoder.decode(rawName, StandardCharsets.UTF_8.name())).getOrElse(rawName) ==
+        parameterName
+    }
   }
 }
