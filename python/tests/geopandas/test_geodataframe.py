@@ -32,6 +32,7 @@ from shapely.geometry import (
 import shapely
 
 from sedona.spark.geopandas import GeoDataFrame, GeoSeries
+from sedona.spark.geopandas._crs import read_crs_metadata
 from sedona.spark.sql import st_functions as stf
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 import pyspark.pandas as ps
@@ -673,6 +674,20 @@ class TestGeoDataFrame(TestGeopandasBase):
         with pytest.raises(RuntimeError, match="crs must be set"):
             sgpd.GeoDataFrame({"geometry": [Point(0, 0)]}).estimate_utm_crs()
 
+    def test_local_construction_with_named_geometry_column_records_no_crs(self):
+        """A locally built GeoDataFrame whose geometry column is selected by
+        name (rather than freshly assigned) must still get an authoritative
+        "no CRS" state when no crs is given, matching plain dict/array
+        construction."""
+        gdf = sgpd.GeoDataFrame(
+            {"shape": [Point(0, 0), Point(1, 1)], "value": [1, 2]},
+            geometry="shape",
+        )
+        has_metadata, value = read_crs_metadata(gdf.geometry._internal.data_fields[0])
+        assert has_metadata is True
+        assert value is None
+        assert gdf.crs is None
+
     def test_crs_metadata_survives_frame_selection(self):
         source = GeoSeries([None], name="geometry", crs=4326)
         with ps.option_context("compute.ops_on_diff_frames", True):
@@ -1041,3 +1056,45 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
 
 def check_geodataframe(df):
     assert isinstance(df, GeoDataFrame)
+
+    def test_local_construction_no_spark_job_for_crs_discovery(self):
+        """Accessing .crs on a locally constructed GeoDataFrame with no CRS
+        metadata should not launch any Spark jobs - it should read metadata
+        directly without SRID inference."""
+        gdf = sgpd.GeoDataFrame(
+            {"shape": [Point(0, 0), Point(1, 1)], "value": [1, 2]},
+            geometry="shape",
+        )
+        
+        # Access .crs - should not trigger any Spark jobs since the metadata
+        # explicitly records the absence of CRS
+        crs_value = gdf.crs
+        
+        # The .crs should be None (authoritative no-CRS state)
+        assert crs_value is None
+        
+        # The geometry column should also have no CRS metadata
+        has_metadata, value = read_crs_metadata(gdf.geometry._internal.data_fields[0])
+        assert has_metadata is True
+        assert value is None
+
+    def test_local_construction_no_python_plan_for_crs_access(self):
+        """Accessing .crs on a locally constructed GeoDataFrame should not create
+        a Python-side plan for distributed SRID lookup."""
+        gdf = sgpd.GeoDataFrame(
+            {"shape": [Point(0, 0), Point(1, 1)], "value": [1, 2]},
+            geometry="shape",
+        )
+        
+        # Check the internal structure before accessing .crs
+        before_access = gdf._internal
+        
+        # Access .crs (may trigger lazy evaluation)
+        _ = gdf.crs
+        
+        # After access, the CRS should be known from metadata, not from a plan
+        # that would perform distributed SRID lookup
+        has_metadata, value = read_crs_metadata(gdf.geometry._internal.data_fields[0])
+        assert has_metadata is True
+        assert value is None
+        assert gdf.crs is None

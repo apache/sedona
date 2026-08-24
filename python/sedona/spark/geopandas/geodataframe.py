@@ -57,7 +57,11 @@ from pyspark.sql.types import (
 )
 from pyspark.pandas.utils import log_advice
 
-from sedona.spark.geopandas._crs import copy_crs_metadata, with_crs_metadata
+from sedona.spark.geopandas._crs import (
+    copy_crs_metadata,
+    read_crs_metadata,
+    with_crs_metadata,
+)
 from sedona.spark.geopandas._explode import expand_geometry_column
 from sedona.spark.geopandas._typing import Label
 from sedona.spark.geopandas.base import GeoFrame
@@ -708,6 +712,23 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
         from sedona.spark.geopandas import GeoSeries
         from pyspark.sql import DataFrame as SparkDataFrame
 
+        # Data built from a Python-native structure (dict, list of records,
+        # pandas/geopandas DataFrame, ...) is locally owned: we can safely
+        # record an authoritative "no CRS" state for its geometry column
+        # below when the caller didn't pass one. Wrapping an existing Sedona
+        # or raw distributed structure instead inherits whatever CRS state it
+        # already had.
+        is_locally_owned = not isinstance(
+            data,
+            (
+                GeoDataFrame,
+                GeoSeries,
+                PandasOnSparkDataFrame,
+                SparkDataFrame,
+                PandasOnSparkSeries,
+            ),
+        )
+
         if isinstance(data, (GeoDataFrame, GeoSeries)):
             if crs:
                 data.crs = crs
@@ -829,6 +850,21 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 "supported. Supply geometry using the 'geometry=' keyword argument, "
                 "or by providing a DataFrame with column name 'geometry'",
             )
+
+        # A locally owned geometry column that still carries no CRS metadata
+        # at this point genuinely has no CRS (it was never derived from a raw
+        # or Sedona-managed source with its own CRS state) -- record that
+        # explicitly so later `.crs` reads don't fall back to a distributed
+        # SRID lookup just to discover there isn't one.
+        if crs is None and is_locally_owned and self._geometry_column_name is not None:
+            active_geometry = self.geometry
+            has_crs_metadata, _ = read_crs_metadata(
+                active_geometry._internal.data_fields[0]
+            )
+            if not has_crs_metadata:
+                self[self._geometry_column_name] = (
+                    active_geometry._record_no_crs_metadata()
+                )
 
     # ============================================================================
     # GEOMETRY COLUMN MANAGEMENT
@@ -1000,7 +1036,11 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 else:
                     level = col.rename(geo_column_name)
             else:
-                level = pspd.Series(col, name=geo_column_name)
+                # Construct directly from the local array-like data (rather than
+                # pre-wrapping into a bare pspd.Series) so GeoSeries.__init__ can
+                # tell this is locally owned data and record authoritative
+                # no-CRS metadata below when 'crs' isn't given.
+                level = sgpd.GeoSeries(col, name=geo_column_name)
 
             if not isinstance(level, sgpd.GeoSeries):
                 # Set the crs later, so we can allow_override=True

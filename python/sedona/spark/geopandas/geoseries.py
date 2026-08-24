@@ -588,6 +588,17 @@ class GeoSeries(GeoFrame, pspd.Series):
         if crs is None and isinstance(data, gpd.GeoSeries):
             crs = data.crs
 
+        # Locally owned data (a Python list, WKT/WKB, a plain pandas Series, a
+        # bare geopandas.GeoSeries, ...) is distinct from wrapping an existing
+        # Sedona-managed or raw distributed structure: only in the former case
+        # do we know, right now, whether a CRS is set, so only there do we
+        # need to record an authoritative "no CRS" state below when the user
+        # didn't pass one. Wrapping an existing structure just inherits
+        # whatever CRS state (known, known-absent, or unknown) it already had.
+        is_locally_owned = not isinstance(
+            data, (GeoDataFrame, GeoSeries, PandasOnSparkSeries, PandasOnSparkDataFrame)
+        )
+
         self._anchor: GeoDataFrame
         self._col_label: Label
         self._sindex: SpatialIndex = None
@@ -662,6 +673,26 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         if crs is not None:
             self.set_crs(crs, inplace=True, allow_override=True)
+        elif is_locally_owned:
+            self._record_no_crs_metadata(inplace=True)
+
+    def _record_no_crs_metadata(self, inplace: bool = False) -> "GeoSeries":
+        """Record authoritative "no CRS" metadata without touching geometry bytes.
+
+        Unlike ``set_crs``, this never calls ``ST_SetSRID``, so any SRID
+        already embedded in the geometry (e.g. from WKB/EWKB input) survives
+        untouched even though the public ``.crs`` becomes authoritatively
+        ``None`` instead of falling back to a distributed SRID lookup.
+        """
+        result = self._query_geometry_column(
+            self.spark.column,
+            keep_name=True,
+            crs_override=None,
+        )
+        if inplace:
+            self._update_inplace(result, invalidate_sindex=False)
+            return self
+        return result
 
     def _is_empty(self) -> bool:
         """Check if this GeoSeries has no rows without triggering a full Spark scan."""
@@ -4376,7 +4407,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         ps_series = first_series(PandasOnSparkDataFrame(internal))
         name = None if name == SPARK_DEFAULT_SERIES_NAME else name
         ps_series.rename(name, inplace=True)
-        return GeoSeries(ps_series, index, crs=crs)
+        result = GeoSeries(ps_series, index, crs=crs)
+        if crs is None:
+            # ST_GeomFromWKB/WKT always produce fresh geometries with no
+            # embedded SRID, so the resulting column is authoritatively
+            # CRS-less rather than of unknown provenance.
+            result._record_no_crs_metadata(inplace=True)
+        return result
 
     # ============================================================================
     # DATA ACCESS AND MANIPULATION
