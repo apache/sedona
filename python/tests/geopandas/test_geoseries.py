@@ -409,7 +409,8 @@ class TestGeoSeries(TestGeopandasBase):
             result._internal.spark_frame._jdf.queryExecution().executedPlan().toString()
         )
 
-        assert "RangeJoin" in plan or "BroadcastIndexJoin" in plan
+        assert "DistanceJoin" in plan or "BroadcastIndexJoin" in plan
+        assert "ST_DWithin" in plan
         assert "CartesianProduct" not in plan
         assert "BatchEvalPython" not in plan
         assert "ArrowEvalPython" not in plan

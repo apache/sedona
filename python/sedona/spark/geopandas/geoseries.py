@@ -1220,9 +1220,10 @@ class GeoSeries(GeoFrame, pspd.Series):
         target_shape = scol_for(targets, target_shape_name)
         neighbor_geometry = scol_for(candidates, neighbor_geometry_name)
         neighbor_shape = scol_for(candidates, neighbor_shape_name)
-        spatial_condition = stp.ST_Intersects(
-            stf.ST_Expand(stf.ST_Envelope(target_shape), gap_width),
-            stf.ST_Envelope(neighbor_shape),
+        spatial_condition = stp.ST_DWithin(
+            target_shape,
+            neighbor_shape,
+            gap_width,
         )
         pairs = targets.join(candidates, spatial_condition, "inner")
 
