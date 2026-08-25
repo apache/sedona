@@ -459,7 +459,7 @@ df.show()
 
 ---
 
-**`search(*ids: Union[str, list], collection_id: str, bbox: Optional[list] = None, datetime: Optional[Union[str, datetime.datetime, list]] = None, max_items: Optional[int] = None, return_dataframe: bool = True) -> Union[Iterator[PyStacItem], DataFrame]`**
+**`search(*ids: Union[str, list], collection_id: str, bbox: Optional[list] = None, geometry: Optional[Union[str, BaseGeometry, list]] = None, datetime: Optional[Union[str, datetime.datetime, list]] = None, max_items: Optional[int] = None, return_dataframe: bool = True) -> Union[Iterator[PyStacItem], DataFrame]`**
 在指定 collection 中按可选过滤条件搜索 item。
 
 参数：
@@ -467,6 +467,7 @@ df.show()
 * `ids` (*Union[str, list]*)：可变数量的 item ID，用于过滤。例如 `"item_id1"` 或 `["item_id1", "item_id2"]`。
 * `collection_id` (*str*)：要搜索的 collection ID。例如 `"aster-l1t"`。
 * `bbox` (*Optional[list]*)：用于过滤 item 的边界框列表，每项形如 `[min_lon, min_lat, max_lon, max_lat]`。例如 `[[ -180.0, -90.0, 180.0, 90.0 ]]`。
+* `geometry` (*Optional[Union[str, BaseGeometry, list]]*)：用于空间过滤的 Shapely 几何对象或 WKT 字符串；可以是单个几何、WKT 字符串或它们的列表。同时提供 `bbox` 和 `geometry` 时以 `geometry` 为准。geometry 过滤由 Spark 执行，而非 STAC API。例如 `"POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))"`。
 * `datetime` (*Optional[Union[str, datetime.datetime, list]]*)：单个日期时间、符合 RFC 3339 的时间戳，或一组时间区间。例如 `"2020-01-01T00:00:00Z"`、`datetime.datetime(2020, 1, 1)`、`[["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]`。
 * `max_items` (*Optional[int]*)：返回 item 的最大数量。例如 `100`。
 * `return_dataframe` (*bool*)：若为 `True`（默认），返回 Spark DataFrame，而不是 `PyStacItem` 迭代器。例如 `True`。
