@@ -448,8 +448,9 @@ public class StraightSkeletonTest {
    * write nothing to stderr.
    *
    * <p>The polygon is a 10-vertex fragment of the 557-vertex polygon reported in the issue
-   * (EPSG:5070 metres), minimised while preserving the trigger: with campskeleton 0.0.2-20260118 it
-   * deterministically prints six "Planes do not intersect at a single point" stack traces per call.
+   * (EPSG:5070 metres), minimised while preserving the trigger: with campskeleton 0.0.2-20260118
+   * every skeleton computation deterministically prints three "Planes do not intersect at a single
+   * point" stack traces, so the two calls below capture six.
    */
   @Test
   public void rasterizedOutlineWritesNothingToStderr() throws Exception {
