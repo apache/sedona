@@ -18,6 +18,12 @@
  */
 package org.apache.sedona.common.approximate;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import javax.vecmath.Point3d;
 import org.locationtech.jts.algorithm.Orientation;
@@ -66,6 +72,22 @@ public class StraightSkeleton {
    */
   private static final double BOUNDARY_EDGE_EPSILON = 1e-10;
 
+  /**
+   * Prefix of the message campskeleton uses for {@code java.lang.Error: Planes do not intersect
+   * at a single point.}, thrown by {@code org.twak.camp.CoSitedCollision.validateChains} for
+   * degenerate collision events (typically caused by many short, near-collinear polygon edges).
+   * The library catches this error itself and prints the full stack trace to stderr instead of
+   * failing, which can flood logs with hundreds of traces for a single polygon. See {@link
+   * #ensureStderrFilterInstalled()}.
+   */
+  private static final String DEGENERATE_COLLISION_ERROR_PREFIX =
+      "java.lang.Error: Planes do not intersect at a single point";
+
+  private static final Object STDERR_FILTER_LOCK = new Object();
+
+  /** The exact stream we last installed as {@code System.err}, used to detect if it changed. */
+  private static volatile PrintStream installedStderrFilter;
+
   public StraightSkeleton() {}
 
   /**
@@ -113,6 +135,7 @@ public class StraightSkeleton {
       LoopL<Edge> input = convertPolygonToEdges(normalizedPolygon);
 
       // Step 4: Compute straight skeleton
+      ensureStderrFilterInstalled();
       Skeleton skeleton = new Skeleton(input, true);
       skeleton.skeleton();
 
@@ -396,5 +419,103 @@ public class StraightSkeleton {
     }
 
     return edges;
+  }
+
+  /**
+   * Installs a process-wide filter on {@code System.err} that silently drops the {@code
+   * java.lang.Error: Planes do not intersect at a single point.} stack traces campskeleton prints
+   * (but does not rethrow) for degenerate collision events. A single polygon can trigger this
+   * hundreds of times, so instead of catching it around every call (which would require holding a
+   * global lock for the duration of each skeleton computation, serializing an otherwise
+   * parallelizable operation), we filter the specific, known-harmless message at the stream
+   * level. Everything else written to stderr passes through unchanged.
+   *
+   * <p>Re-checks on every call (cheaply, via reference equality) rather than installing once,
+   * since something else may have replaced {@code System.err} after we last wrapped it.
+   */
+  private static void ensureStderrFilterInstalled() {
+    if (System.err == installedStderrFilter) {
+      return;
+    }
+    synchronized (STDERR_FILTER_LOCK) {
+      PrintStream current = System.err;
+      if (current == installedStderrFilter) {
+        return;
+      }
+      PrintStream wrapped =
+          new PrintStream(
+              new DegenerateCollisionFilterStream(current), true, StandardCharsets.UTF_8);
+      System.setErr(wrapped);
+      installedStderrFilter = wrapped;
+    }
+  }
+
+  /**
+   * Line-buffering filter that drops {@link #DEGENERATE_COLLISION_ERROR_PREFIX} stack traces and
+   * forwards everything else to the delegate stream unchanged.
+   *
+   * <p>{@link Throwable#printStackTrace(PrintStream)} synchronizes on the target {@link
+   * PrintStream} for the whole trace, and {@link PrintStream}'s own print/write methods likewise
+   * synchronize on the stream instance, so concurrent writers (including concurrent skeleton
+   * computations on other threads) cannot interleave partial lines here.
+   */
+  private static final class DegenerateCollisionFilterStream extends FilterOutputStream {
+    private final ByteArrayOutputStream lineBuffer = new ByteArrayOutputStream(256);
+    private boolean dropping = false;
+
+    DegenerateCollisionFilterStream(OutputStream delegate) {
+      super(delegate);
+    }
+
+    @Override
+    public void write(int b) throws IOException {
+      lineBuffer.write(b);
+      if (b == '\n') {
+        flushLine();
+      }
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+      for (int i = off; i < off + len; i++) {
+        write(b[i]);
+      }
+    }
+
+    @Override
+    public void flush() throws IOException {
+      if (lineBuffer.size() > 0) {
+        flushLine();
+      }
+      out.flush();
+    }
+
+    private void flushLine() throws IOException {
+      byte[] lineBytes = lineBuffer.toByteArray();
+      lineBuffer.reset();
+      String trimmed = new String(lineBytes, StandardCharsets.UTF_8).trim();
+
+      // Checked unconditionally (not just "when not already dropping"): consecutive suppressed
+      // traces are common (one degenerate polygon can trigger hundreds back-to-back), and a new
+      // header must restart dropping even if the previous trace's frames were still being
+      // dropped when it arrived.
+      if (trimmed.startsWith(DEGENERATE_COLLISION_ERROR_PREFIX)) {
+        dropping = true;
+        log.debug(
+            "Suppressed a campskeleton degenerate collision stack trace ({}); this is caused by "
+                + "near-collinear polygon edges and is handled internally by the library.",
+            DEGENERATE_COLLISION_ERROR_PREFIX);
+        return;
+      }
+
+      if (dropping) {
+        if (trimmed.startsWith("at ") || trimmed.startsWith("...")) {
+          return; // still part of the suppressed stack trace
+        }
+        dropping = false; // trace ended; fall through and print this line normally
+      }
+
+      out.write(lineBytes);
+    }
   }
 }
