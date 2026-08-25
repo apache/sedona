@@ -240,6 +240,8 @@ items = client.search(
 )
 ```
 
+`max_items` follows pystac-client semantics: it is the total number of Items returned by the STAC API, while `itemsLimitPerRequest` is only the requested page size. For a named collection with at most one `bbox` and one `datetime` interval (and no ID or geometry filter), Sedona sends those constraints to the Collection's advertised Items endpoint, trusts the conforming STAC API's spatial and temporal matching semantics, and stops enumeration after `max_items` server results. Multiple bounding boxes or datetime intervals, ID filters, and geometry filters are Sedona extensions evaluated by Spark; those shapes are fully enumerated before Spark applies the filters and final limit.
+
 #### Search Items with Bounding Box and Interval
 
 ```python

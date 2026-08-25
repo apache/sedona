@@ -53,4 +53,30 @@ class StacBatchUrlTest extends AnyFunSuite {
       assert(batch.getItemLink(input, 2, None, temporalFilter) == expected)
     }
   }
+  test("applyClientApiSearchParameters should append encoded search parameters") {
+    val url = StacBatch.applyClientApiSearchParameters(
+      "https://example.test/items?token=x#results",
+      Some("-10.0,-5.0,20.0,30.0"),
+      Some("2025-01-01T00:00:00Z/2025-02-01T00:00:00Z"))
+    assert(
+      url == "https://example.test/items?token=x" +
+        "&bbox=-10.0%2C-5.0%2C20.0%2C30.0" +
+        "&datetime=2025-01-01T00%3A00%3A00Z%2F2025-02-01T00%3A00%3A00Z#results")
+  }
+
+  test("applyClientApiSearchParameters should reject conflicting endpoint constraints") {
+    intercept[IllegalArgumentException] {
+      StacBatch.applyClientApiSearchParameters(
+        "https://example.test/items?bbox=0,0,1,1",
+        Some("2,2,3,3"),
+        None)
+    }
+    intercept[IllegalArgumentException] {
+      StacBatch.applyClientApiSearchParameters(
+        "https://example.test/items?dat%65time=2025-01-01T00:00:00Z",
+        None,
+        Some("2025-02-01T00:00:00Z/2025-03-01T00:00:00Z"))
+    }
+  }
+
 }
