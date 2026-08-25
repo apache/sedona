@@ -23,6 +23,7 @@ from typing import Any, Union, Literal, List
 
 import numpy as np
 import geopandas as gpd
+from geopandas.array import GeometryArray
 import sedona.spark.geopandas as sgpd
 import pandas as pd
 import pyspark.pandas as pspd
@@ -585,8 +586,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         dtype: geometry
         """
         assert data is not None
-        if crs is None and isinstance(data, gpd.GeoSeries):
-            crs = data.crs
+        if crs is None:
+            if isinstance(data, gpd.GeoSeries):
+                crs = data.crs
+            elif isinstance(data, GeometryArray):
+                crs = data.crs
+            elif isinstance(data, pd.Series) and isinstance(
+                getattr(data, "array", None), GeometryArray
+            ):
+                crs = data.array.crs
 
         # Locally owned data (a Python list, WKT/WKB, a plain pandas Series, a
         # bare geopandas.GeoSeries, ...) is distinct from wrapping an existing
@@ -920,7 +928,7 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         rename = SPARK_DEFAULT_SERIES_NAME
 
-        if keep_name and self.name:
+        if keep_name and self.name is not None:
             rename = self.name
 
         result_field = None
@@ -4080,7 +4088,16 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoDataFrame.to_file : Write a ``GeoDataFrame`` to a file.
         """
         df = sgpd.io.read_file(filename, format, **kwargs)
-        return GeoSeries(df.geometry, crs=df.crs)
+        # Read df.crs once: it can trigger a distributed SRID-inference job
+        # for a file whose geometry column carries no Sedona CRS metadata.
+        # Passing the (possibly None) result through explicitly means a
+        # later `.crs` access on the result reads cached metadata instead of
+        # repeating that inference.
+        file_crs = df.crs
+        result = GeoSeries(df.geometry, crs=file_crs)
+        if file_crs is None:
+            result._record_no_crs_metadata(inplace=True)
+        return result
 
     # GeoSeries-only (not in GeoDataFrame)
     @classmethod
@@ -4409,9 +4426,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         ps_series.rename(name, inplace=True)
         result = GeoSeries(ps_series, index, crs=crs)
         if crs is None:
-            # ST_GeomFromWKB/WKT always produce fresh geometries with no
-            # embedded SRID, so the resulting column is authoritatively
-            # CRS-less rather than of unknown provenance.
+            # WKT and ordinary WKB are generally SRID-less, though EWKB may
+            # carry an embedded SRID (ST_GeomFromWKB preserves it). Either
+            # way the caller passed no explicit crs, so the resulting column
+            # is authoritatively CRS-less rather than of unknown provenance;
+            # this is metadata-only and must not rewrite any embedded SRID.
             result._record_no_crs_metadata(inplace=True)
         return result
 

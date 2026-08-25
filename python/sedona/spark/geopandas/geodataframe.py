@@ -851,20 +851,15 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
                 "or by providing a DataFrame with column name 'geometry'",
             )
 
-        # A locally owned geometry column that still carries no CRS metadata
-        # at this point genuinely has no CRS (it was never derived from a raw
-        # or Sedona-managed source with its own CRS state) -- record that
+        # Locally owned geometry columns that still carry no CRS metadata at
+        # this point genuinely have no CRS (they were never derived from a
+        # raw or Sedona-managed source with its own CRS state) -- record that
         # explicitly so later `.crs` reads don't fall back to a distributed
-        # SRID lookup just to discover there isn't one.
-        if crs is None and is_locally_owned and self._geometry_column_name is not None:
-            active_geometry = self.geometry
-            has_crs_metadata, _ = read_crs_metadata(
-                active_geometry._internal.data_fields[0]
-            )
-            if not has_crs_metadata:
-                self[self._geometry_column_name] = (
-                    active_geometry._record_no_crs_metadata()
-                )
+        # SRID lookup just to discover there isn't one. This covers every
+        # geometry column, not just the active one, since inactive geometry
+        # columns can later become active via set_geometry().
+        if crs is None and is_locally_owned:
+            self._stamp_local_no_crs_metadata()
 
     # ============================================================================
     # GEOMETRY COLUMN MANAGEMENT
@@ -1759,6 +1754,60 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
             data_fields=output_fields,
         )
         return PandasOnSparkDataFrame(result_internal)
+
+    def _stamp_local_no_crs_metadata(self) -> None:
+        """Record an authoritative "no CRS" state on every geometry column
+        that doesn't carry CRS metadata yet.
+
+        Built as a single projection over the whole frame, mirroring
+        ``_serialize_geometry_columns``: touching each geometry column
+        through a separately projected Series (e.g. ``self[col] =
+        col_series._record_no_crs_metadata()``) would cross pandas-on-Spark
+        anchors, and with ``compute.ops_on_diff_frames`` enabled could join
+        on duplicate indexes and multiply rows.
+        """
+        internal = self._internal.resolved_copy
+
+        needs_stamp = False
+        output_columns = []
+        output_fields = []
+        for spark_column, spark_name, field in zip(
+            internal.data_spark_columns,
+            internal.data_spark_column_names,
+            internal.data_fields,
+        ):
+            if (
+                isinstance(field.spark_type, GeometryType)
+                and not read_crs_metadata(field)[0]
+            ):
+                needs_stamp = True
+                field = with_crs_metadata(field, None).copy(name=spark_name)
+                spark_column = spark_column.alias(spark_name, metadata=field.metadata)
+            output_columns.append(spark_column)
+            output_fields.append(field)
+
+        if not needs_stamp:
+            return
+
+        output_sdf = internal.spark_frame.select(
+            *[
+                scol_for(internal.spark_frame, name)
+                for name in internal.index_spark_column_names
+            ],
+            *output_columns,
+            scol_for(internal.spark_frame, NATURAL_ORDER_COLUMN_NAME),
+        )
+        result_internal = internal.copy(
+            spark_frame=output_sdf,
+            index_spark_columns=[
+                scol_for(output_sdf, name) for name in internal.index_spark_column_names
+            ],
+            data_spark_columns=[
+                scol_for(output_sdf, name) for name in internal.data_spark_column_names
+            ],
+            data_fields=output_fields,
+        )
+        self._update_internal_frame(result_internal)
 
     @staticmethod
     def _validate_serialization_kwargs(method_name: str, kwargs: dict) -> None:

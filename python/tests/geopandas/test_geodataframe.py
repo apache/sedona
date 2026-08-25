@@ -1048,15 +1048,6 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         gpd_df = gpd.GeoDataFrame.from_arrow(result)
         assert_geodataframe_equal(gpd_df, expected)
 
-
-# -----------------------------------------------------------------------------
-# # Utils
-# -----------------------------------------------------------------------------
-
-
-def check_geodataframe(df):
-    assert isinstance(df, GeoDataFrame)
-
     def test_local_construction_no_spark_job_for_crs_discovery(self):
         """Accessing .crs on a locally constructed GeoDataFrame with no CRS
         metadata should not launch any Spark jobs - it should read metadata
@@ -1065,36 +1056,51 @@ def check_geodataframe(df):
             {"shape": [Point(0, 0), Point(1, 1)], "value": [1, 2]},
             geometry="shape",
         )
-        
-        # Access .crs - should not trigger any Spark jobs since the metadata
-        # explicitly records the absence of CRS
-        crs_value = gdf.crs
-        
-        # The .crs should be None (authoritative no-CRS state)
+
+        job_group = "test_local_construction_no_spark_job_for_crs_discovery"
+        self.sc.setJobGroup(job_group, "crs access should not trigger a job")
+        try:
+            crs_value = gdf.crs
+            job_ids = self.sc.statusTracker().getJobIdsForGroup(job_group)
+        finally:
+            self.sc.setJobGroup(None, None)
+
         assert crs_value is None
-        
-        # The geometry column should also have no CRS metadata
+        assert len(job_ids) == 0
+
         has_metadata, value = read_crs_metadata(gdf.geometry._internal.data_fields[0])
         assert has_metadata is True
         assert value is None
 
     def test_local_construction_no_python_plan_for_crs_access(self):
-        """Accessing .crs on a locally constructed GeoDataFrame should not create
-        a Python-side plan for distributed SRID lookup."""
+        """The optimized plan behind a locally constructed GeoDataFrame's
+        geometry column must not contain a Python UDF/eval node stemming
+        from a distributed SRID lookup for CRS discovery."""
         gdf = sgpd.GeoDataFrame(
             {"shape": [Point(0, 0), Point(1, 1)], "value": [1, 2]},
             geometry="shape",
         )
-        
-        # Check the internal structure before accessing .crs
-        before_access = gdf._internal
-        
-        # Access .crs (may trigger lazy evaluation)
-        _ = gdf.crs
-        
-        # After access, the CRS should be known from metadata, not from a plan
-        # that would perform distributed SRID lookup
+
+        assert gdf.crs is None
+
+        plan = (
+            gdf._internal.spark_frame._jdf.queryExecution()
+            .optimizedPlan()
+            .toString()
+        )
+        assert "BatchEvalPython" not in plan
+        assert "ArrowEvalPython" not in plan
+        assert "PythonUDF" not in plan
+
         has_metadata, value = read_crs_metadata(gdf.geometry._internal.data_fields[0])
         assert has_metadata is True
         assert value is None
-        assert gdf.crs is None
+
+
+# -----------------------------------------------------------------------------
+# # Utils
+# -----------------------------------------------------------------------------
+
+
+def check_geodataframe(df):
+    assert isinstance(df, GeoDataFrame)

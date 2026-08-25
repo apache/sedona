@@ -6742,41 +6742,39 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert embedded_srid == 4326
 
     def test_local_construction_no_spark_job_for_crs_discovery(self):
-        """Accessing .crs on a locally constructed GeoSeries with no CRS
-        metadata should not launch any Spark jobs - it should read metadata
-        directly without SRID inference."""
-        s = sgpd.GeoSeries([Point(1, 1), Point(2, 2)])
-        
-        # Capture the number of pending jobs before access
-        before_jobs = 0
+        """A binary predicate between two locally constructed, CRS-less
+        GeoSeries reads both operands' authoritative "no CRS" metadata for
+        its mismatch check without launching a distributed SRID-inference
+        job."""
+        s1 = sgpd.GeoSeries([Point(1, 1), Point(2, 2)])
+        s2 = sgpd.GeoSeries([Point(1, 1), Point(3, 3)])
+
+        job_group = "test_local_construction_no_spark_job_for_crs_discovery"
+        self.sc.setJobGroup(job_group, "crs discovery for a binary predicate")
         try:
-            _ = s.crs
-            after_jobs = len(self.session._sc._jvm.scala.concurrent.FutureCache.getPythonPlans(s))
-        except Exception:
-            # If job tracking isn't available, at least verify we got a CRS value
-            after_jobs = 0
-        else:
-            # No jobs should be pending if the CRS is known from metadata
-            assert after_jobs == 0 or len(s.spark._jsc.jobs().waitingJobCount()) == 0
-        
-        # The .crs should be None (authoritative no-CRS state)
-        assert s.crs is None
+            # geom_equals() is lazy: building it (which internally reads
+            # .crs on both operands to check for a mismatch) must not by
+            # itself submit any Spark job.
+            s1.geom_equals(s2)
+            job_ids = self.sc.statusTracker().getJobIdsForGroup(job_group)
+        finally:
+            self.sc.setJobGroup(None, None)
+
+        assert len(job_ids) == 0
 
     def test_local_construction_no_python_plan_for_crs_access(self):
-        """Accessing .crs on a locally constructed GeoSeries should not create
-        a Python-side plan for distributed SRID lookup."""
-        s = sgpd.GeoSeries([Point(1, 1), Point(2, 2)])
-        
-        # Check the internal structure before accessing .crs
-        before_access = s._internal
-        
-        # Access .crs (may trigger lazy evaluation)
-        _ = s.crs
-        
-        # After access, the CRS should be known from metadata, not from a plan
-        # that would perform distributed SRID lookup
-        # The key is that has_crs_metadata should return (True, None)
-        has_metadata, value = read_crs_metadata(s._internal.data_fields[0])
-        assert has_metadata is True
-        assert value is None
-        assert s.crs is None
+        """The optimized plan for a binary predicate between two locally
+        constructed, CRS-less GeoSeries must not contain a Python UDF/eval
+        node stemming from the CRS mismatch check."""
+        s1 = sgpd.GeoSeries([Point(1, 1), Point(2, 2)])
+        s2 = sgpd.GeoSeries([Point(1, 1), Point(3, 3)])
+
+        result = s1.geom_equals(s2)
+        plan = (
+            result._internal.spark_frame._jdf.queryExecution()
+            .optimizedPlan()
+            .toString()
+        )
+        assert "BatchEvalPython" not in plan
+        assert "ArrowEvalPython" not in plan
+        assert "PythonUDF" not in plan
