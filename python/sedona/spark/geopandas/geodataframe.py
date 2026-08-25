@@ -1485,9 +1485,103 @@ class GeoDataFrame(GeoFrame, pspd.DataFrame):
 
     @classmethod
     def from_features(
-        cls, features, crs: Any | None = None, columns: Iterable[str] | None = None
+        cls,
+        features,
+        crs: Any | None = None,
+        columns: typing.Iterable[str] | None = None,
     ) -> GeoDataFrame:
-        raise NotImplementedError("from_features() is not implemented yet.")
+        """Construct a GeoDataFrame from GeoJSON-like features.
+
+        .. versionadded:: 2.0.0
+
+        Parameters
+        ----------
+        features
+            An iterable of feature mappings or objects implementing
+            ``__geo_interface__``; a FeatureCollection dictionary; or an object
+            whose ``__geo_interface__`` is a FeatureCollection.
+        crs : str, dict, pyproj.CRS, optional
+            Coordinate reference system to assign to the resulting frame. The
+            coordinates are not transformed.
+        columns : iterable of str, optional
+            Column names to include and their order in the resulting frame.
+
+        Returns
+        -------
+        GeoDataFrame
+
+        Notes
+        -----
+        This constructor first materializes all features in a local GeoPandas
+        GeoDataFrame on the driver. It is intended for small in-memory feature
+        collections. For large datasets, use Sedona's distributed GeoJSON or
+        GeoParquet Spark data source instead.
+
+        GeoPandas controls feature parsing and column selection; feature ``id``,
+        ``bbox``, and collection metadata are not added as columns. Once the
+        result is distributed, property values follow Spark schema inference:
+        nested mappings become structs, and columns with incompatible mixed
+        types are not supported.
+
+        Examples
+        --------
+        >>> from sedona.spark.geopandas import GeoDataFrame
+        >>> feature_collection = {
+        ...     "type": "FeatureCollection",
+        ...     "features": [
+        ...         {
+        ...             "type": "Feature",
+        ...             "properties": {"name": "first"},
+        ...             "geometry": {
+        ...                 "type": "Point",
+        ...                 "coordinates": (1.0, 2.0),
+        ...             },
+        ...         },
+        ...         {
+        ...             "type": "Feature",
+        ...             "properties": {"name": "second"},
+        ...             "geometry": {
+        ...                 "type": "Point",
+        ...                 "coordinates": (2.0, 1.0),
+        ...             },
+        ...         },
+        ...     ],
+        ... }
+        >>> GeoDataFrame.from_features(feature_collection)
+              geometry    name
+        0  POINT (1 2)   first
+        1  POINT (2 1)  second
+        """
+        local = gpd.GeoDataFrame.from_features(
+            features,
+            crs=crs,
+            columns=columns,
+        )
+
+        # Spark 3 pandas-on-Spark only checks the first object value when
+        # looking for a user-defined type. Move one geometry forward for
+        # schema inference, then restore the GeoPandas RangeIndex order.
+        restore_order = False
+        geometry_name = local._geometry_column_name
+        if geometry_name is not None and len(local) > 0:
+            missing = local[geometry_name].isna().to_numpy()
+            non_missing = np.flatnonzero(~missing)
+            if missing[0] and len(non_missing) > 0:
+                first_geometry = non_missing[0]
+                order = np.concatenate(
+                    (
+                        [first_geometry],
+                        np.arange(first_geometry),
+                        np.arange(first_geometry + 1, len(local)),
+                    )
+                )
+                local = local.iloc[order]
+                restore_order = True
+
+        result = cls(local)
+        if restore_order:
+            result.sort_index(inplace=True)
+        return result
 
     @classmethod
     def from_postgis(

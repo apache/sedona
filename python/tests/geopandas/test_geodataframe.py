@@ -43,6 +43,103 @@ from pandas.testing import assert_frame_equal
 from packaging.version import parse as parse_version
 
 
+class TestGeoDataFrameFromFeatures(TestGeopandasBase):
+    def test_input_forms(self):
+        feature_collection = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"name": "first"},
+                    "geometry": {"type": "Point", "coordinates": (1.0, 2.0)},
+                },
+                {
+                    "type": "Feature",
+                    "properties": {"name": "second"},
+                    "geometry": {"type": "Point", "coordinates": (2.0, 1.0)},
+                },
+            ],
+        }
+
+        class FeatureCollection:
+            __geo_interface__ = feature_collection
+
+        class Feature:
+            def __init__(self, mapping):
+                self.__geo_interface__ = mapping
+
+        expected = gpd.GeoDataFrame.from_features(feature_collection)
+        inputs = [
+            feature_collection,
+            (feature for feature in feature_collection["features"]),
+            FeatureCollection(),
+            [Feature(feature) for feature in feature_collection["features"]],
+        ]
+
+        for features in inputs:
+            result = GeoDataFrame.from_features(features)
+            self.check_sgpd_df_equals_gpd_df(result, expected)
+
+    def test_columns_crs_and_nulls_match_geopandas(self):
+        from geopandas.testing import assert_geodataframe_equal
+
+        features = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "id": "first",
+                    "type": "Feature",
+                    "properties": {"other": 2},
+                    "geometry": None,
+                },
+                {
+                    "id": "second",
+                    "type": "Feature",
+                    "properties": {"value": 1},
+                    "geometry": {"type": "Point", "coordinates": (1.0, 2.0)},
+                },
+                {
+                    "id": "third",
+                    "type": "Feature",
+                    "properties": None,
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": ((0.0, 0.0), (1.0, 1.0)),
+                    },
+                },
+            ],
+        }
+        kwargs = {
+            "crs": "EPSG:4326",
+            "columns": ["other", "geometry", "value"],
+        }
+
+        result = GeoDataFrame.from_features(features, **kwargs)
+        expected = gpd.GeoDataFrame.from_features(features, **kwargs)
+        materialized = result.to_geopandas()
+
+        assert list(result.columns) == list(expected.columns)
+        assert result.crs == expected.crs
+        assert materialized.index.tolist() == expected.index.tolist()
+        assert_geodataframe_equal(materialized, expected)
+
+    def test_empty_with_schema(self):
+        expected = gpd.GeoDataFrame.from_features(
+            [],
+            crs="EPSG:4326",
+            columns=["geometry", "name"],
+        )
+        result = GeoDataFrame.from_features(
+            [],
+            crs="EPSG:4326",
+            columns=["geometry", "name"],
+        )
+
+        assert list(result.columns) == list(expected.columns)
+        assert result.crs == expected.crs
+        assert len(result) == 0
+
+
 @pytest.mark.skipif(
     parse_version(shapely.__version__) < parse_version("2.0.0"),
     reason=f"Tests require shapely>=2.0.0, but found v{shapely.__version__}",
