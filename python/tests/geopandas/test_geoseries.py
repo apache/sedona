@@ -3406,19 +3406,20 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             index=pd.Index(["duplicate"] * 4, name="feature_id"),
         )
         test_position_col = "__sample_points_test_position__"
+        resolved_source = identical_source._internal.resolved_copy
         positioned_frame = InternalFrame.attach_distributed_sequence_column(
-            identical_source._internal.spark_frame.orderBy(NATURAL_ORDER_COLUMN_NAME),
+            resolved_source.spark_frame.orderBy(NATURAL_ORDER_COLUMN_NAME),
             test_position_col,
         )
         ordered_rows = positioned_frame.select(
             F.col(test_position_col).alias("position"),
             scol_for(
                 positioned_frame,
-                identical_source._internal.index_spark_column_names[0],
+                resolved_source.index_spark_column_names[0],
             ).alias("feature_id"),
             scol_for(
                 positioned_frame,
-                identical_source._internal.data_spark_column_names[0],
+                resolved_source.data_spark_column_names[0],
             ).alias("geometry"),
         )
 
