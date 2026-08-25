@@ -928,9 +928,8 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         # Series names are arbitrary hashable Python objects (including
         # falsy ones like 0 or ""), while Spark aliases must be strings.
-        # Keep the physical name fixed and apply the logical Series name
-        # only after rebuilding the result below, mirroring
-        # `_result_preserving_index`.
+        # Keep the physical name fixed and carry the logical Series name in
+        # the rebuilt InternalFrame below, mirroring `_result_preserving_index`.
         rename = SPARK_DEFAULT_SERIES_NAME
 
         result_field = None
@@ -982,12 +981,13 @@ class GeoSeries(GeoFrame, pspd.Series):
                 nullable=schema_field.nullable,
             )
 
+        result_column_label = self._column_label if keep_name else None
         internal = self._internal.copy(
             spark_frame=sdf,
             index_fields=index_fields,
             index_spark_columns=index_spark_columns,
             index_names=index_names if index_spark_columns else [None],
-            column_labels=([(rename,)] if is_aggr else self._internal.column_labels),
+            column_labels=[result_column_label],
             data_spark_columns=[scol_for(sdf, rename)],
             data_fields=[
                 (
@@ -996,12 +996,11 @@ class GeoSeries(GeoFrame, pspd.Series):
                     else InternalField.from_struct_field(sdf.schema[rename])
                 )
             ],
-            column_label_names=[(rename,)],
+            column_label_names=(
+                self._internal.column_label_names if keep_name else [None]
+            ),
         )
         ps_series = first_series(PandasOnSparkDataFrame(internal))
-
-        series_name = self.name if keep_name else None
-        ps_series = ps_series.rename(series_name)
 
         return GeoSeries(ps_series) if returns_geom else ps_series
 
@@ -4089,16 +4088,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoDataFrame.to_file : Write a ``GeoDataFrame`` to a file.
         """
         df = sgpd.io.read_file(filename, format, **kwargs)
-        # Read df.crs once: it can trigger a distributed SRID-inference job
-        # for a file whose geometry column carries no Sedona CRS metadata.
-        # Passing the (possibly None) result through explicitly means a
-        # later `.crs` access on the result reads cached metadata instead of
-        # repeating that inference.
-        file_crs = df.crs
-        result = GeoSeries(df.geometry, crs=file_crs)
-        if file_crs is None:
-            result._record_no_crs_metadata(inplace=True)
-        return result
+        # File-backed columns have distributed provenance. Until a reader
+        # exposes authoritative CRS field metadata, retain the unknown state
+        # so `.crs` can use the embedded-SRID fallback on demand rather than
+        # launching an eager aggregation during construction.
+        return GeoSeries(df.geometry)
 
     # GeoSeries-only (not in GeoDataFrame)
     @classmethod
@@ -5371,7 +5365,8 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
     # -----------------------------------------------------------------------------
 
     def _update_inplace(self, result: "GeoSeries", invalidate_sindex: bool = True):
-        self.rename(result.name, inplace=True)
+        if self._column_label != result._column_label:
+            self.rename(result.name, inplace=True)
         self._update_anchor(result._anchor)
         if invalidate_sindex:
             self._sindex = None
@@ -5422,7 +5417,7 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
 
 
 def _get_series_col_name(ps_series: pspd.Series) -> str:
-    return ps_series.name if ps_series.name else SPARK_DEFAULT_SERIES_NAME
+    return ps_series._internal.data_spark_column_names[0]
 
 
 def _to_bool(ps_series: pspd.Series, default: bool = False) -> pspd.Series:

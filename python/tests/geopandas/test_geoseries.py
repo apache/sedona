@@ -192,6 +192,13 @@ class TestGeoSeries(TestGeopandasBase):
         # This is challenging to support due to gdf.__setitem__ casting GeoSeries into pspd.Series
         # assert gdf.has_sindex
 
+    def test_named_series_sindex_uses_physical_column(self):
+        series = GeoSeries([Point(x, x) for x in range(5)], name="geometry")
+
+        result = series.sindex.query(box(1, 1, 3, 3))
+
+        assert result == [Point(1, 1), Point(2, 2), Point(3, 3)]
+
     def test_invalidate_sindex(self):
         geoseries = GeoSeries([Point(0, 0), None, Point(2, 2)])
 
@@ -6703,6 +6710,14 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             sgpd.GeoSeries.from_wkb([Point(1, 1).wkb, Point(2, 2).wkb])
         )
 
+        for name in (None, 0, ""):
+            named = sgpd.GeoSeries([Point(1, 1)], name=name)
+            assert_no_crs_metadata(named)
+            assert named.name == name
+            physical_name = named._internal.data_spark_column_names[0]
+            assert isinstance(physical_name, str)
+            assert physical_name in named._internal.spark_frame.columns
+
         gdf = sgpd.GeoDataFrame({"geometry": [Point(1, 1), Point(2, 2)]})
         assert_no_crs_metadata(gdf.geometry)
 
@@ -6712,19 +6727,35 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             )
         assert_no_crs_metadata(set_via_array.geometry)
 
-    def test_wrapped_raw_column_keeps_unknown_crs_state(self):
+    def test_wrapped_raw_columns_keep_srid_inference_and_mismatch_warning(self):
         """Wrapping an existing distributed column of unknown provenance (no
         Sedona CRS metadata) must not fabricate a "no CRS" state -- the
         legacy SRID-inference fallback must still apply."""
-        raw_ps_series = (
-            self.spark.createDataFrame([(Point(1, 1).wkb,)], "wkb binary")
-            .selectExpr("ST_GeomFromWKB(wkb) as geometry")
-            .pandas_api()["geometry"]
-        )
 
-        wrapped = GeoSeries(raw_ps_series)
-        has_metadata, _ = read_crs_metadata(wrapped._internal.data_fields[0])
-        assert has_metadata is False
+        def raw_series(srid):
+            return GeoSeries(
+                self.spark.range(1)
+                .selectExpr(f"ST_SetSRID(ST_Point(0D, 0D), {srid}) AS geometry")
+                .pandas_api()["geometry"]
+            )
+
+        left = raw_series(4326)
+        right = raw_series(3857)
+        for series, expected_srid in ((left, 4326), (right, 3857)):
+            has_metadata, _ = read_crs_metadata(series._internal.data_fields[0])
+            assert has_metadata is False
+            assert series.crs.to_epsg() == expected_srid
+
+        job_group = "test_wrapped_raw_columns_keep_srid_inference_and_mismatch_warning"
+        self.sc.setJobGroup(job_group, "raw-column CRS inference")
+        try:
+            with pytest.warns(UserWarning, match="CRS mismatch"):
+                left.geom_equals(right, align=False)
+            job_ids = self.sc.statusTracker().getJobIdsForGroup(job_group)
+        finally:
+            self.sc.setJobGroup(None, None)
+
+        assert len(job_ids) >= 2
 
     def test_no_crs_stamp_preserves_embedded_srid(self):
         """Recording an authoritative "no CRS" state must be metadata-only:

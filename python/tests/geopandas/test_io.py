@@ -22,8 +22,10 @@ import shapely
 import pandas as pd
 import geopandas as gpd
 import pyspark.pandas as ps
+import sedona.spark.geopandas as sgpd
 from functools import partial
 from sedona.spark.geopandas import GeoDataFrame, GeoSeries, read_file, read_parquet
+from sedona.spark.geopandas._crs import read_crs_metadata
 from tests import tests_resource
 from tests.geopandas.test_geopandas_base import TestGeopandasBase
 from shapely.geometry import (
@@ -132,13 +134,53 @@ class TestIO(TestGeopandasBase):
         table_name = "GB_Hex_5km_GS_CompressibleGround_v8"
         expected_cnt = 4233
         df = read_func(datafile, table_name=table_name)
+        assert df.active_geometry_name == "geom"
         assert df["geom"].count() == expected_cnt
 
         # Ensure inference works
         table_name = "GB_Hex_5km_GS_Landslides_v8"
         expected_cnt = 4228
         df = read_func(datafile, table_name=table_name)
+        assert df.active_geometry_name == "geom"
         assert df["geom"].count() == expected_cnt
+
+    def test_geoseries_from_geopackage_uses_source_geometry_name(self):
+        datafile = os.path.join(TEST_DATA_DIR, "geopackage/features.gpkg")
+
+        result = GeoSeries.from_file(
+            datafile,
+            format="geopackage",
+            table_name="GB_Hex_5km_GS_CompressibleGround_v8",
+        )
+
+        assert result.name == "geom"
+        assert result.count() == 4233
+
+    def test_file_constructors_do_not_eagerly_infer_unknown_crs(self, monkeypatch):
+        source = GeoDataFrame(
+            self.spark.range(1).selectExpr(
+                "ST_SetSRID(ST_Point(0D, 0D), 4326) AS geometry"
+            )
+        )
+        assert read_crs_metadata(source.geometry._internal.data_fields[0])[0] is False
+        monkeypatch.setattr(sgpd.io, "read_file", lambda *args, **kwargs: source)
+
+        constructors = (GeoDataFrame.from_file, GeoSeries.from_file)
+        for position, constructor in enumerate(constructors):
+            job_group = (
+                "test_file_constructors_do_not_eagerly_infer_unknown_crs_" f"{position}"
+            )
+            self.sc.setJobGroup(job_group, "file constructor CRS handling")
+            try:
+                result = constructor("unused.parquet", format="geoparquet")
+                job_ids = self.sc.statusTracker().getJobIdsForGroup(job_group)
+            finally:
+                self.sc.setJobGroup(None, None)
+
+            assert len(job_ids) == 0
+            geometry = result.geometry if isinstance(result, GeoDataFrame) else result
+            assert read_crs_metadata(geometry._internal.data_fields[0])[0] is False
+            assert geometry.crs.to_epsg() == 4326
 
     #########################################################
     # File writing tests

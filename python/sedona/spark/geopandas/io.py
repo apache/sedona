@@ -25,6 +25,7 @@ from pyspark.pandas.internal import SPARK_DEFAULT_INDEX_NAME, NATURAL_ORDER_COLU
 from pyspark.pandas.frame import InternalFrame
 from pyspark.pandas.utils import validate_mode, log_advice
 from pandas.api.types import is_integer_dtype
+from sedona.spark.sql.types import GeometryType
 
 
 def _to_file(
@@ -231,7 +232,25 @@ def read_file(filename: str, format: Union[str, None] = None, **kwargs):
         index_spark_columns = [scol_for(sdf, SPARK_DEFAULT_INDEX_NAME)]
 
     internal = InternalFrame(spark_frame=sdf, index_spark_columns=index_spark_columns)
-    return GeoDataFrame(ps.DataFrame(internal))
+    result = GeoDataFrame(ps.DataFrame(internal))
+
+    # Most readers use "geometry", but formats such as GeoPackage retain the
+    # source geometry column name (for example, "geom"). Selecting the sole
+    # GeometryType makes single-geometry file constructors usable without
+    # inspecting rows or triggering CRS inference. Prefer the conventional
+    # name when present; an ambiguous multi-geometry source needs reader-level
+    # primary-column metadata before one can be selected safely.
+    geometry_columns = [
+        field.name
+        for field in sdf.schema.fields
+        if isinstance(field.dataType, GeometryType)
+    ]
+    if "geometry" in geometry_columns:
+        result._geometry_column_name = "geometry"
+    elif len(geometry_columns) == 1:
+        result._geometry_column_name = geometry_columns[0]
+
+    return result
 
 
 def read_parquet(

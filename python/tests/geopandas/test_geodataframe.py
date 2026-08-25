@@ -88,6 +88,142 @@ class TestGeoDataFrame(TestGeopandasBase):
         assert all_null_sgpd.to_geopandas().crs == "EPSG:4326"
 
     @pytest.mark.parametrize(
+        "active_crs, secondary_crs",
+        [(4326, None), (None, 3857)],
+    )
+    def test_local_geopandas_preserves_each_geometry_crs(
+        self, active_crs, secondary_crs
+    ):
+        source = gpd.GeoDataFrame(
+            {
+                "geometry": gpd.GeoSeries([Point(0, 0)], crs=active_crs),
+                "secondary": gpd.GeoSeries([Point(1, 1)], crs=secondary_crs),
+            },
+            geometry="geometry",
+        )
+
+        result = GeoDataFrame(source)
+
+        def assert_crs(actual, expected):
+            if expected is None:
+                assert actual is None
+            else:
+                assert actual.to_epsg() == expected
+
+        for column, expected in (
+            ("geometry", active_crs),
+            ("secondary", secondary_crs),
+        ):
+            series = result[column]
+            has_metadata, metadata_crs = read_crs_metadata(
+                series._internal.data_fields[0]
+            )
+            assert has_metadata is True
+            assert_crs(metadata_crs, expected)
+            assert_crs(series.crs, expected)
+
+            embedded_srid = result._internal.spark_frame.select(
+                stf.ST_SRID(series.spark.column).alias("srid")
+            ).first()["srid"]
+            assert embedded_srid == (expected or 0)
+
+        assert_crs(result.crs, active_crs)
+        assert_crs(result.set_geometry("secondary").crs, secondary_crs)
+
+    def test_local_all_null_geometry_arrays_preserve_each_crs(self):
+        source = gpd.GeoDataFrame(
+            {
+                "geometry": gpd.GeoSeries([None], crs=None),
+                "secondary": gpd.GeoSeries([None], crs=3857),
+            },
+            geometry="geometry",
+        )
+
+        result = GeoDataFrame(source)
+
+        assert result.crs is None
+        assert result["secondary"].crs.to_epsg() == 3857
+        assert result.set_geometry("secondary").crs.to_epsg() == 3857
+        assert read_crs_metadata(result.geometry._internal.data_fields[0]) == (
+            True,
+            None,
+        )
+        has_metadata, secondary_crs = read_crs_metadata(
+            result["secondary"]._internal.data_fields[0]
+        )
+        assert has_metadata is True
+        assert secondary_crs.to_epsg() == 3857
+
+    def test_explicit_crs_overrides_only_active_geometry(self):
+        primary = gpd.GeoSeries([Point(0, 0)], crs=4326)
+        secondary = gpd.GeoSeries([Point(1, 1)], crs=3857)
+        source = pd.DataFrame(
+            {
+                "geometry": primary.array,
+                "secondary": secondary.array,
+            }
+        )
+
+        result = GeoDataFrame(source, geometry="geometry", crs=26909)
+
+        assert result.crs.to_epsg() == 26909
+        assert result["secondary"].crs.to_epsg() == 3857
+        assert result.set_geometry("secondary").crs.to_epsg() == 3857
+        assert source["geometry"].array.crs.to_epsg() == 4326
+        assert source["secondary"].array.crs.to_epsg() == 3857
+
+        for column, expected_srid in (("geometry", 26909), ("secondary", 3857)):
+            embedded_srid = result._internal.spark_frame.select(
+                stf.ST_SRID(result[column].spark.column).alias("srid")
+            ).first()["srid"]
+            assert embedded_srid == expected_srid
+
+    def test_local_all_null_crs_access_submits_no_spark_job(self):
+        result = GeoDataFrame({"geometry": [None], "value": [1]})
+
+        job_group = "test_local_all_null_crs_access_submits_no_spark_job"
+        self.sc.setJobGroup(job_group, "all-null CRS metadata lookup")
+        try:
+            assert result.crs is None
+            job_ids = self.sc.statusTracker().getJobIdsForGroup(job_group)
+        finally:
+            self.sc.setJobGroup(None, None)
+
+        assert len(job_ids) == 0
+        assert read_crs_metadata(result.geometry._internal.data_fields[0]) == (
+            True,
+            None,
+        )
+
+    def test_local_frame_preserves_unknown_distributed_geometry_crs(self):
+        raw_geometry = GeoSeries(
+            self.spark.range(1)
+            .selectExpr("ST_SetSRID(ST_Point(0D, 0D), 3857) AS geometry")
+            .pandas_api()["geometry"]
+        )
+
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            result = GeoDataFrame({"value": [1]}, geometry=raw_geometry)
+
+        assert read_crs_metadata(result.geometry._internal.data_fields[0])[0] is False
+        assert result.crs.to_epsg() == 3857
+
+    @pytest.mark.parametrize("geometry_name", [0, ""])
+    def test_constructor_preserves_falsy_active_geometry_name(self, geometry_name):
+        result = GeoDataFrame(
+            {geometry_name: [Point(0, 0)]},
+            geometry=geometry_name,
+        )
+
+        assert result.active_geometry_name == geometry_name
+        assert result.geometry.name == geometry_name
+        assert result.crs is None
+        assert read_crs_metadata(result.geometry._internal.data_fields[0]) == (
+            True,
+            None,
+        )
+
+    @pytest.mark.parametrize(
         "obj",
         [
             pd.DataFrame(
