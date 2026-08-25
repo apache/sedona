@@ -926,10 +926,12 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         df = self._internal.spark_frame if df is None else df
 
+        # Series names are arbitrary hashable Python objects (including
+        # falsy ones like 0 or ""), while Spark aliases must be strings.
+        # Keep the physical name fixed and apply the logical Series name
+        # only after rebuilding the result below, mirroring
+        # `_result_preserving_index`.
         rename = SPARK_DEFAULT_SERIES_NAME
-
-        if keep_name and self.name is not None:
-            rename = self.name
 
         result_field = None
         if returns_geom:
@@ -998,8 +1000,7 @@ class GeoSeries(GeoFrame, pspd.Series):
         )
         ps_series = first_series(PandasOnSparkDataFrame(internal))
 
-        # Convert Spark series default name to pandas series default name (None) if needed.
-        series_name = None if rename == SPARK_DEFAULT_SERIES_NAME else rename
+        series_name = self.name if keep_name else None
         ps_series = ps_series.rename(series_name)
 
         return GeoSeries(ps_series) if returns_geom else ps_series
