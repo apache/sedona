@@ -34,6 +34,7 @@ from pyspark.pandas.internal import InternalField, InternalFrame
 from pyspark.pandas.series import first_series
 from pyspark.pandas.utils import same_anchor, scol_for, verify_temp_column_name
 from pyspark.sql.types import (
+    ArrayType,
     BooleanType,
     DoubleType,
     FloatType,
@@ -1139,6 +1140,183 @@ class GeoSeries(GeoFrame, pspd.Series):
             spark_col,
             returns_geom=False,
         )
+
+    def _coverage_invalid_edges_frame(self, gap_width: float):
+        """Build the distributed per-row coverage-validation frame."""
+        source_internal = self._internal.resolved_copy
+        source_sdf = source_internal.spark_frame
+        geometry_name = "__coverage_geometry__"
+        polygonal_shape_name = "__coverage_polygonal_shape__"
+        target_geometry_name = "__coverage_target_geometry__"
+        target_shape_name = "__coverage_target_shape__"
+        neighbor_geometry_name = "__coverage_neighbor_geometry__"
+        neighbor_shape_name = "__coverage_neighbor_shape__"
+        neighbors_name = "__coverage_neighbors__"
+        gap_width_name = "__coverage_gap_width__"
+        diagnostic_edges_name = "__coverage_diagnostic_edges__"
+        invalid_edges_name = "__coverage_invalid_edges__"
+        index_names = [
+            f"__coverage_index_{level}__"
+            for level in range(len(source_internal.index_spark_columns))
+        ]
+
+        geometry_field = source_internal.data_fields[0]
+        geometry_source = source_sdf.select(
+            source_internal.data_spark_columns[0].alias(
+                geometry_name, metadata=geometry_field.metadata
+            )
+        )
+        source = source_sdf.select(
+            source_internal.data_spark_columns[0].alias(
+                geometry_name, metadata=geometry_field.metadata
+            ),
+            *[
+                index_column.alias(index_name)
+                for index_column, index_name in zip(
+                    source_internal.index_spark_columns, index_names
+                )
+            ],
+            scol_for(source_sdf, NATURAL_ORDER_COLUMN_NAME),
+        )
+
+        empty_neighbors = F.array().cast(ArrayType(GeometryType(), containsNull=False))
+        geometry = scol_for(geometry_source, geometry_name)
+        nonempty_source = geometry_source.where(
+            F.coalesce(
+                geometry.isNotNull() & ~stf.ST_IsEmpty(geometry),
+                F.lit(False),
+            )
+        )
+        # Flattening mixed-layout collection members directly can create an
+        # unserializable multipart geometry. Empty values are already excluded
+        # because their declared layouts cannot always be normalized. Only the 2D
+        # join shape is changed; the exact source value remains the key.
+        polygonal_source = nonempty_source.withColumn(
+            polygonal_shape_name,
+            stf.ST_CollectionExtract(
+                stf.ST_Force2D(scol_for(nonempty_source, geometry_name)), 3
+            ),
+        )
+        polygonal_shape = scol_for(polygonal_source, polygonal_shape_name)
+        active_source = polygonal_source.where(
+            F.coalesce(~stf.ST_IsEmpty(polygonal_shape), F.lit(False))
+        )
+
+        # Coverage diagnostics are a function of an exact represented geometry
+        # value and the multiset of physical candidate geometries. Validate each
+        # distinct target value once, but retain duplicates on the candidate side
+        # so duplicate coverage members remain observable as overlaps.
+        targets = active_source.select(
+            scol_for(active_source, geometry_name).alias(
+                target_geometry_name, metadata=geometry_field.metadata
+            ),
+            scol_for(active_source, polygonal_shape_name).alias(target_shape_name),
+        ).dropDuplicates([target_geometry_name])
+        candidates = active_source.select(
+            scol_for(active_source, geometry_name).alias(neighbor_geometry_name),
+            scol_for(active_source, polygonal_shape_name).alias(neighbor_shape_name),
+        )
+        target_geometry = scol_for(targets, target_geometry_name)
+        target_shape = scol_for(targets, target_shape_name)
+        neighbor_geometry = scol_for(candidates, neighbor_geometry_name)
+        neighbor_shape = scol_for(candidates, neighbor_shape_name)
+        spatial_condition = stp.ST_DWithin(
+            target_shape,
+            neighbor_shape,
+            gap_width,
+        )
+        pairs = targets.join(candidates, spatial_condition, "inner")
+
+        diagnostics = pairs.groupBy(target_geometry_name).agg(
+            F.collect_list(scol_for(pairs, neighbor_geometry_name)).alias(
+                neighbors_name
+            ),
+        )
+        diagnostics = diagnostics.withColumn(gap_width_name, F.lit(gap_width))
+        diagnostics = diagnostics.withColumn(
+            diagnostic_edges_name,
+            F.expr(
+                f"__sedona_internal_coverage_invalid_edges_for_target("
+                f"`{target_geometry_name}`, `{neighbors_name}`, `{gap_width_name}`)"
+            ),
+        ).select(
+            target_geometry_name,
+            diagnostic_edges_name,
+        )
+
+        # Join the geometry-keyed diagnostics onto one final evaluation of the
+        # source carrying index and ordering columns. Normal GeometryUDT equality
+        # compares the exact represented value and maps one diagnostic back to
+        # every physical duplicate row.
+        validation_rows = source.join(
+            diagnostics,
+            scol_for(source, geometry_name)
+            == scol_for(diagnostics, target_geometry_name),
+            "left",
+        )
+        validation_rows = validation_rows.withColumn(
+            neighbors_name, empty_neighbors
+        ).withColumn(gap_width_name, F.lit(gap_width))
+        unmatched_edges = F.expr(
+            f"__sedona_internal_coverage_invalid_edges_for_target("
+            f"`{geometry_name}`, `{neighbors_name}`, `{gap_width_name}`)"
+        )
+        validation_rows = validation_rows.withColumn(
+            invalid_edges_name,
+            F.when(
+                scol_for(validation_rows, target_geometry_name).isNotNull(),
+                scol_for(validation_rows, diagnostic_edges_name),
+            ).otherwise(unmatched_edges),
+        ).select(
+            invalid_edges_name,
+            *[scol_for(validation_rows, name) for name in index_names],
+            scol_for(validation_rows, NATURAL_ORDER_COLUMN_NAME),
+        )
+        # The spatial aggregation and lookup join do not preserve physical row
+        # order. Restore the represented pandas-on-Spark natural order before
+        # rebuilding the result. Project first so the sort does not shuffle
+        # the full candidate arrays.
+        validation_rows = validation_rows.orderBy(
+            scol_for(validation_rows, NATURAL_ORDER_COLUMN_NAME).asc_nulls_last()
+        )
+        return (
+            validation_rows,
+            scol_for(validation_rows, invalid_edges_name),
+            [scol_for(validation_rows, name) for name in index_names],
+            source_internal,
+        )
+
+    def invalid_coverage_edges(self, *, gap_width=0.0) -> "GeoSeries":
+        gap_width = _normalize_numeric_scalar(
+            gap_width, "'gap_width' must be a numeric scalar"
+        )
+        if gap_width < 0 or not np.isfinite(gap_width):
+            raise ValueError("'gap_width' must be finite and non-negative")
+        frame, invalid_edges, index_columns, source_internal = (
+            self._coverage_invalid_edges_frame(gap_width)
+        )
+        return self._result_preserving_index(
+            invalid_edges,
+            frame,
+            index_columns,
+            source_internal.index_fields,
+            source_internal.index_names,
+            returns_geom=True,
+        )
+
+    def is_valid_coverage(self, *, gap_width=0.0) -> bool:
+        edges = self.invalid_coverage_edges(gap_width=gap_width)
+        frame = edges._internal.spark_frame
+        geometry = edges.spark.column
+        invalid = F.coalesce(
+            geometry.isNotNull() & ~stf.ST_IsEmpty(geometry), F.lit(False)
+        )
+        summary = frame.agg(
+            F.coalesce(F.max(invalid.cast("int")), F.lit(0)).alias(
+                "__coverage_has_invalid_edges__"
+            )
+        ).first()
+        return summary["__coverage_has_invalid_edges__"] == 0
 
     @property
     def is_empty(self) -> pspd.Series:

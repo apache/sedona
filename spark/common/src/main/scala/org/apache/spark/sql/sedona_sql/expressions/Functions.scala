@@ -21,7 +21,7 @@ package org.apache.spark.sql.sedona_sql.expressions
 import org.apache.sedona.common.{Functions, FunctionsGeoTools, FunctionsProj4}
 import org.apache.sedona.common.geometryObjects.{Box2D, Box3D}
 import org.apache.sedona.common.sphere.{Haversine, Spheroid}
-import org.apache.sedona.common.utils.{HilbertDistance, InscribedCircle, ValidDetail}
+import org.apache.sedona.common.utils.{CoverageValidation, HilbertDistance, InscribedCircle, ValidDetail}
 import org.apache.sedona.core.utils.SedonaConf
 import org.apache.sedona.sql.utils.GeometrySerializer
 import org.apache.spark.sql.catalyst.InternalRow
@@ -481,6 +481,17 @@ private[apache] case class ST_Intersection(inputExpressions: Seq[Expression])
  */
 private[apache] case class ST_MakeValid(inputExpressions: Seq[Expression])
     extends InferredExpression(Functions.makeValid _) {
+
+  protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
+    copy(inputExpressions = newChildren)
+  }
+}
+
+private[apache] case class __sedona_internal_coverage_invalid_edges_for_target(
+    inputExpressions: Seq[Expression])
+    extends InferredExpression(
+      inferrableFunction3((target: Geometry, adjacent: Array[Geometry], gapWidth: Double) =>
+        CoverageValidation.invalidEdgesIgnoringOneMatchingTarget(target, adjacent, gapWidth))) {
 
   protected def withNewChildrenInternal(newChildren: IndexedSeq[Expression]) = {
     copy(inputExpressions = newChildren)

@@ -49,6 +49,7 @@
 
 * [<a href='https://github.com/apache/sedona/issues/3257'>GH-3257</a>] - Implement distributed GeoSeries and GeoDataFrame Hilbert-distance spatial ordering
 * [<a href='https://github.com/apache/sedona/issues/3260'>GH-3260</a>] - Implement distributed GeoSeries and GeoDataFrame identical-geometry equality
+* [<a href='https://github.com/apache/sedona/issues/3273'>GH-3273</a>] - Implement distributed GeoSeries and GeoDataFrame polygonal coverage validation and invalid-edge diagnostics
 
 ### Bug Fixes
 
