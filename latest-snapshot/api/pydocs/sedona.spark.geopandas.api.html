@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -3255,6 +3254,52 @@ of one GeoSeries <code class="docutils literal notranslate"><span class="pre">cr
 </div>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.invalid_coverage_edges">
+<span class="sig-name descname"><span class="pre">invalid_coverage_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gap_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.geoseries.GeoSeries"><span class="pre">GeoSeries</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.invalid_coverage_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.invalid_coverage_edges" title="Permalink to this definition"></a></dt>
+<dd><p>Return edges causing invalid polygonal coverage for each geometry.</p>
+<p>The result preserves every input row and index level. Polygon candidate
+neighbours are discovered with a native spatial join over envelopes
+expanded by <code class="docutils literal notranslate"><span class="pre">gap_width</span></code> and aggregated on Spark executors; geometry
+rows are not collected to the driver.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gap_width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default 0.0</em>) – Finite, non-negative maximum width of gaps to report as coverage
+invalidities.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Invalid <code class="docutils literal notranslate"><span class="pre">LineString</span></code> or <code class="docutils literal notranslate"><span class="pre">MultiLineString</span></code> edges for each input
+geometry. Rows without invalid edges or polygonal components
+contain an empty line, missing geometries remain missing, and the
+returned GeoSeries is unnamed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries" title="sedona.spark.geopandas.GeoSeries">GeoSeries</a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Executor memory for an individual source row scales with the number of
+polygon candidates whose envelopes fall within <code class="docutils literal notranslate"><span class="pre">gap_width</span></code>.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">overlapping</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="n">box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">box</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">edges</span> <span class="o">=</span> <span class="n">overlapping</span><span class="o">.</span><span class="n">invalid_coverage_edges</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">edges</span><span class="o">.</span><span class="n">to_geopandas</span><span class="p">()</span><span class="o">.</span><span class="n">is_empty</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[False, False]</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.is_valid_coverage" title="sedona.spark.geopandas.GeoSeries.is_valid_coverage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.is_valid_coverage</span></code></a></dt><dd><p>test whether the full geometry column is a coverage</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.is_ccw">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_ccw</span></span><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.is_ccw" title="Permalink to this definition"></a></dt>
@@ -3451,6 +3496,63 @@ and one missing geometry:</p>
 <p class="admonition-title">See also</p>
 <dl class="simple">
 <dt><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.is_valid_reason" title="sedona.spark.geopandas.GeoSeries.is_valid_reason"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.is_valid_reason</span></code></a></dt><dd><p>reason for invalidity</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sedona.spark.geopandas.GeoSeries.is_valid_coverage">
+<span class="sig-name descname"><span class="pre">is_valid_coverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gap_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/sedona/spark/geopandas/geoseries.html#GeoSeries.is_valid_coverage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sedona.spark.geopandas.GeoSeries.is_valid_coverage" title="Permalink to this definition"></a></dt>
+<dd><p>Return whether the geometry column forms a valid polygonal coverage.</p>
+<p>A coverage is valid when polygon interiors do not overlap and shared
+boundaries are edge-matched. Geometries without polygonal components
+and missing geometries are ignored. A positive <code class="docutils literal notranslate"><span class="pre">gap_width</span></code>
+additionally detects narrow gaps up to that width.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gap_width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default 0.0</em>) – Finite, non-negative maximum width of gaps to report as coverage
+invalidities.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> when no invalid coverage edges are found.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method discovers and validates neighbouring polygons on Spark
+executors, then reduces the invalid-edge results to one Python
+<code class="docutils literal notranslate"><span class="pre">bool</span></code>.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">sedona.spark.geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoSeries</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coverage</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">([</span><span class="n">box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">box</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coverage</span><span class="o">.</span><span class="n">is_valid_coverage</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Overlapping polygon interiors make a coverage invalid:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">overlapping</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="n">box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">box</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">overlapping</span><span class="o">.</span><span class="n">is_valid_coverage</span><span class="p">()</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<p>A positive gap width can also detect narrow gaps:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">separated</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="n">box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">box</span><span class="p">(</span><span class="mf">1.1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">separated</span><span class="o">.</span><span class="n">is_valid_coverage</span><span class="p">(</span><span class="n">gap_width</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#sedona.spark.geopandas.GeoSeries.invalid_coverage_edges" title="sedona.spark.geopandas.GeoSeries.invalid_coverage_edges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoSeries.invalid_coverage_edges</span></code></a></dt><dd><p>return invalid edges for each input geometry</p>
 </dd>
 </dl>
 </div>

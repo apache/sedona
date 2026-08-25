@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.geopandas.geoseries &mdash; Apache Sedona Python Documentation</title>
@@ -244,6 +243,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">first_series</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.pandas.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">same_anchor</span><span class="p">,</span> <span class="n">scol_for</span><span class="p">,</span> <span class="n">verify_temp_column_name</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyspark.sql.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ArrayType</span><span class="p">,</span>
     <span class="n">BooleanType</span><span class="p">,</span>
     <span class="n">DoubleType</span><span class="p">,</span>
     <span class="n">FloatType</span><span class="p">,</span>
@@ -1349,6 +1349,183 @@
             <span class="n">spark_col</span><span class="p">,</span>
             <span class="n">returns_geom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_coverage_invalid_edges_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gap_width</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Build the distributed per-row coverage-validation frame."""</span>
+        <span class="n">source_internal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">resolved_copy</span>
+        <span class="n">source_sdf</span> <span class="o">=</span> <span class="n">source_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+        <span class="n">geometry_name</span> <span class="o">=</span> <span class="s2">"__coverage_geometry__"</span>
+        <span class="n">polygonal_shape_name</span> <span class="o">=</span> <span class="s2">"__coverage_polygonal_shape__"</span>
+        <span class="n">target_geometry_name</span> <span class="o">=</span> <span class="s2">"__coverage_target_geometry__"</span>
+        <span class="n">target_shape_name</span> <span class="o">=</span> <span class="s2">"__coverage_target_shape__"</span>
+        <span class="n">neighbor_geometry_name</span> <span class="o">=</span> <span class="s2">"__coverage_neighbor_geometry__"</span>
+        <span class="n">neighbor_shape_name</span> <span class="o">=</span> <span class="s2">"__coverage_neighbor_shape__"</span>
+        <span class="n">neighbors_name</span> <span class="o">=</span> <span class="s2">"__coverage_neighbors__"</span>
+        <span class="n">gap_width_name</span> <span class="o">=</span> <span class="s2">"__coverage_gap_width__"</span>
+        <span class="n">diagnostic_edges_name</span> <span class="o">=</span> <span class="s2">"__coverage_diagnostic_edges__"</span>
+        <span class="n">invalid_edges_name</span> <span class="o">=</span> <span class="s2">"__coverage_invalid_edges__"</span>
+        <span class="n">index_names</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">"__coverage_index_</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s2">__"</span>
+            <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">source_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">))</span>
+        <span class="p">]</span>
+
+        <span class="n">geometry_field</span> <span class="o">=</span> <span class="n">source_internal</span><span class="o">.</span><span class="n">data_fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">geometry_source</span> <span class="o">=</span> <span class="n">source_sdf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="n">source_internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
+                <span class="n">geometry_name</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">geometry_field</span><span class="o">.</span><span class="n">metadata</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">source_sdf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="n">source_internal</span><span class="o">.</span><span class="n">data_spark_columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
+                <span class="n">geometry_name</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">geometry_field</span><span class="o">.</span><span class="n">metadata</span>
+            <span class="p">),</span>
+            <span class="o">*</span><span class="p">[</span>
+                <span class="n">index_column</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">index_name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">index_column</span><span class="p">,</span> <span class="n">index_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">source_internal</span><span class="o">.</span><span class="n">index_spark_columns</span><span class="p">,</span> <span class="n">index_names</span>
+                <span class="p">)</span>
+            <span class="p">],</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">source_sdf</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">empty_neighbors</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">array</span><span class="p">()</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">ArrayType</span><span class="p">(</span><span class="n">GeometryType</span><span class="p">(),</span> <span class="n">containsNull</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">geometry</span> <span class="o">=</span> <span class="n">scol_for</span><span class="p">(</span><span class="n">geometry_source</span><span class="p">,</span> <span class="n">geometry_name</span><span class="p">)</span>
+        <span class="n">nonempty_source</span> <span class="o">=</span> <span class="n">geometry_source</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span>
+                <span class="n">geometry</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">()</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_IsEmpty</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span>
+                <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># Flattening mixed-layout collection members directly can create an</span>
+        <span class="c1"># unserializable multipart geometry. Empty values are already excluded</span>
+        <span class="c1"># because their declared layouts cannot always be normalized. Only the 2D</span>
+        <span class="c1"># join shape is changed; the exact source value remains the key.</span>
+        <span class="n">polygonal_source</span> <span class="o">=</span> <span class="n">nonempty_source</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
+            <span class="n">polygonal_shape_name</span><span class="p">,</span>
+            <span class="n">stf</span><span class="o">.</span><span class="n">ST_CollectionExtract</span><span class="p">(</span>
+                <span class="n">stf</span><span class="o">.</span><span class="n">ST_Force2D</span><span class="p">(</span><span class="n">scol_for</span><span class="p">(</span><span class="n">nonempty_source</span><span class="p">,</span> <span class="n">geometry_name</span><span class="p">)),</span> <span class="mi">3</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">polygonal_shape</span> <span class="o">=</span> <span class="n">scol_for</span><span class="p">(</span><span class="n">polygonal_source</span><span class="p">,</span> <span class="n">polygonal_shape_name</span><span class="p">)</span>
+        <span class="n">active_source</span> <span class="o">=</span> <span class="n">polygonal_source</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="o">~</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_IsEmpty</span><span class="p">(</span><span class="n">polygonal_shape</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">))</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Coverage diagnostics are a function of an exact represented geometry</span>
+        <span class="c1"># value and the multiset of physical candidate geometries. Validate each</span>
+        <span class="c1"># distinct target value once, but retain duplicates on the candidate side</span>
+        <span class="c1"># so duplicate coverage members remain observable as overlaps.</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="n">active_source</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">active_source</span><span class="p">,</span> <span class="n">geometry_name</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
+                <span class="n">target_geometry_name</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="n">geometry_field</span><span class="o">.</span><span class="n">metadata</span>
+            <span class="p">),</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">active_source</span><span class="p">,</span> <span class="n">polygonal_shape_name</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">target_shape_name</span><span class="p">),</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">dropDuplicates</span><span class="p">([</span><span class="n">target_geometry_name</span><span class="p">])</span>
+        <span class="n">candidates</span> <span class="o">=</span> <span class="n">active_source</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">active_source</span><span class="p">,</span> <span class="n">geometry_name</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">neighbor_geometry_name</span><span class="p">),</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">active_source</span><span class="p">,</span> <span class="n">polygonal_shape_name</span><span class="p">)</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">neighbor_shape_name</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">target_geometry</span> <span class="o">=</span> <span class="n">scol_for</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">target_geometry_name</span><span class="p">)</span>
+        <span class="n">target_shape</span> <span class="o">=</span> <span class="n">scol_for</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">target_shape_name</span><span class="p">)</span>
+        <span class="n">neighbor_geometry</span> <span class="o">=</span> <span class="n">scol_for</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">neighbor_geometry_name</span><span class="p">)</span>
+        <span class="n">neighbor_shape</span> <span class="o">=</span> <span class="n">scol_for</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">neighbor_shape_name</span><span class="p">)</span>
+        <span class="n">spatial_condition</span> <span class="o">=</span> <span class="n">stp</span><span class="o">.</span><span class="n">ST_DWithin</span><span class="p">(</span>
+            <span class="n">target_shape</span><span class="p">,</span>
+            <span class="n">neighbor_shape</span><span class="p">,</span>
+            <span class="n">gap_width</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">spatial_condition</span><span class="p">,</span> <span class="s2">"inner"</span><span class="p">)</span>
+
+        <span class="n">diagnostics</span> <span class="o">=</span> <span class="n">pairs</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="n">target_geometry_name</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">collect_list</span><span class="p">(</span><span class="n">scol_for</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span> <span class="n">neighbor_geometry_name</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
+                <span class="n">neighbors_name</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">diagnostics</span> <span class="o">=</span> <span class="n">diagnostics</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="n">gap_width_name</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">gap_width</span><span class="p">))</span>
+        <span class="n">diagnostics</span> <span class="o">=</span> <span class="n">diagnostics</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
+            <span class="n">diagnostic_edges_name</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"__sedona_internal_coverage_invalid_edges_for_target("</span>
+                <span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">target_geometry_name</span><span class="si">}</span><span class="s2">`, `</span><span class="si">{</span><span class="n">neighbors_name</span><span class="si">}</span><span class="s2">`, `</span><span class="si">{</span><span class="n">gap_width_name</span><span class="si">}</span><span class="s2">`)"</span>
+            <span class="p">),</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="n">target_geometry_name</span><span class="p">,</span>
+            <span class="n">diagnostic_edges_name</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Join the geometry-keyed diagnostics onto one final evaluation of the</span>
+        <span class="c1"># source carrying index and ordering columns. Normal GeometryUDT equality</span>
+        <span class="c1"># compares the exact represented value and maps one diagnostic back to</span>
+        <span class="c1"># every physical duplicate row.</span>
+        <span class="n">validation_rows</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">diagnostics</span><span class="p">,</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">geometry_name</span><span class="p">)</span>
+            <span class="o">==</span> <span class="n">scol_for</span><span class="p">(</span><span class="n">diagnostics</span><span class="p">,</span> <span class="n">target_geometry_name</span><span class="p">),</span>
+            <span class="s2">"left"</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">validation_rows</span> <span class="o">=</span> <span class="n">validation_rows</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
+            <span class="n">neighbors_name</span><span class="p">,</span> <span class="n">empty_neighbors</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="n">gap_width_name</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="n">gap_width</span><span class="p">))</span>
+        <span class="n">unmatched_edges</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">expr</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"__sedona_internal_coverage_invalid_edges_for_target("</span>
+            <span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">geometry_name</span><span class="si">}</span><span class="s2">`, `</span><span class="si">{</span><span class="n">neighbors_name</span><span class="si">}</span><span class="s2">`, `</span><span class="si">{</span><span class="n">gap_width_name</span><span class="si">}</span><span class="s2">`)"</span>
+        <span class="p">)</span>
+        <span class="n">validation_rows</span> <span class="o">=</span> <span class="n">validation_rows</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span>
+            <span class="n">invalid_edges_name</span><span class="p">,</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">when</span><span class="p">(</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">validation_rows</span><span class="p">,</span> <span class="n">target_geometry_name</span><span class="p">)</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">(),</span>
+                <span class="n">scol_for</span><span class="p">(</span><span class="n">validation_rows</span><span class="p">,</span> <span class="n">diagnostic_edges_name</span><span class="p">),</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">otherwise</span><span class="p">(</span><span class="n">unmatched_edges</span><span class="p">),</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="n">invalid_edges_name</span><span class="p">,</span>
+            <span class="o">*</span><span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">validation_rows</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">index_names</span><span class="p">],</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">validation_rows</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="c1"># The spatial aggregation and lookup join do not preserve physical row</span>
+        <span class="c1"># order. Restore the represented pandas-on-Spark natural order before</span>
+        <span class="c1"># rebuilding the result. Project first so the sort does not shuffle</span>
+        <span class="c1"># the full candidate arrays.</span>
+        <span class="n">validation_rows</span> <span class="o">=</span> <span class="n">validation_rows</span><span class="o">.</span><span class="n">orderBy</span><span class="p">(</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">validation_rows</span><span class="p">,</span> <span class="n">NATURAL_ORDER_COLUMN_NAME</span><span class="p">)</span><span class="o">.</span><span class="n">asc_nulls_last</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">validation_rows</span><span class="p">,</span>
+            <span class="n">scol_for</span><span class="p">(</span><span class="n">validation_rows</span><span class="p">,</span> <span class="n">invalid_edges_name</span><span class="p">),</span>
+            <span class="p">[</span><span class="n">scol_for</span><span class="p">(</span><span class="n">validation_rows</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">index_names</span><span class="p">],</span>
+            <span class="n">source_internal</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="GeoSeries.invalid_coverage_edges"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.invalid_coverage_edges">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">invalid_coverage_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">gap_width</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"GeoSeries"</span><span class="p">:</span>
+        <span class="n">gap_width</span> <span class="o">=</span> <span class="n">_normalize_numeric_scalar</span><span class="p">(</span>
+            <span class="n">gap_width</span><span class="p">,</span> <span class="s2">"'gap_width' must be a numeric scalar"</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">gap_width</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">gap_width</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"'gap_width' must be finite and non-negative"</span><span class="p">)</span>
+        <span class="n">frame</span><span class="p">,</span> <span class="n">invalid_edges</span><span class="p">,</span> <span class="n">index_columns</span><span class="p">,</span> <span class="n">source_internal</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_coverage_invalid_edges_frame</span><span class="p">(</span><span class="n">gap_width</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result_preserving_index</span><span class="p">(</span>
+            <span class="n">invalid_edges</span><span class="p">,</span>
+            <span class="n">frame</span><span class="p">,</span>
+            <span class="n">index_columns</span><span class="p">,</span>
+            <span class="n">source_internal</span><span class="o">.</span><span class="n">index_fields</span><span class="p">,</span>
+            <span class="n">source_internal</span><span class="o">.</span><span class="n">index_names</span><span class="p">,</span>
+            <span class="n">returns_geom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeoSeries.is_valid_coverage"><a class="viewcode-back" href="../../../../sedona.spark.geopandas.api.html#sedona.spark.geopandas.GeoSeries.is_valid_coverage">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">is_valid_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">gap_width</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid_coverage_edges</span><span class="p">(</span><span class="n">gap_width</span><span class="o">=</span><span class="n">gap_width</span><span class="p">)</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">edges</span><span class="o">.</span><span class="n">_internal</span><span class="o">.</span><span class="n">spark_frame</span>
+        <span class="n">geometry</span> <span class="o">=</span> <span class="n">edges</span><span class="o">.</span><span class="n">spark</span><span class="o">.</span><span class="n">column</span>
+        <span class="n">invalid</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span>
+            <span class="n">geometry</span><span class="o">.</span><span class="n">isNotNull</span><span class="p">()</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">stf</span><span class="o">.</span><span class="n">ST_IsEmpty</span><span class="p">(</span><span class="n">geometry</span><span class="p">),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+            <span class="n">F</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">invalid</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="s2">"int"</span><span class="p">)),</span> <span class="n">F</span><span class="o">.</span><span class="n">lit</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span>
+                <span class="s2">"__coverage_has_invalid_edges__"</span>
+            <span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">summary</span><span class="p">[</span><span class="s2">"__coverage_has_invalid_edges__"</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pspd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>

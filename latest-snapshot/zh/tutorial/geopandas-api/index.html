@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="zh" class="no-js">
   <head>
-    <meta name="robots" content="noindex, follow">
     
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6633,6 +6632,8 @@
 <li><code>intersects()</code>、<code>contains()</code>、<code>within()</code> —— 空间谓词</li>
 <li><code>intersection()</code> —— 几何相交</li>
 <li><code>make_valid()</code> —— 几何校验与修复</li>
+<li><code>is_valid_coverage()</code> —— 校验多边形覆盖的内部是否互不重叠、共享边界是否完全匹配</li>
+<li><code>invalid_coverage_edges()</code> —— 按输入行返回导致覆盖无效的边，并可选择检测狭窄间隙</li>
 <li><code>sample_points()</code> —— 使用原生分布式表达式按面积对多边形采样、按长度对线采样</li>
 <li><code>GeoSeries.explode()</code> 与 <code>GeoDataFrame.explode()</code> —— 将多部件几何展开为多行，
   其中 GeoDataFrame 方法会保留对应的属性列</li>
@@ -6641,6 +6642,22 @@
 <li><code>overlay()</code> —— GeoDataFrame 之间的分布式相交、差集、恒等、对称差和并集</li>
 <li><code>sindex</code> —— 空间索引（功能有限）</li>
 </ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
+
+<span class="n">coverage</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">([</span><span class="n">box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">box</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+<span class="k">assert</span> <span class="n">coverage</span><span class="o">.</span><span class="n">is_valid_coverage</span><span class="p">()</span>
+
+<span class="n">with_gap</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">([</span><span class="n">box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">box</span><span class="p">(</span><span class="mf">1.1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+<span class="k">assert</span> <span class="ow">not</span> <span class="n">with_gap</span><span class="o">.</span><span class="n">is_valid_coverage</span><span class="p">(</span><span class="n">gap_width</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="n">invalid_edges</span> <span class="o">=</span> <span class="n">with_gap</span><span class="o">.</span><span class="n">invalid_coverage_edges</span><span class="p">(</span><span class="n">gap_width</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+</code></pre></div>
+<p><code>invalid_coverage_edges()</code> 会让几何行保持分布式执行。Sedona 对按
+<code>gap_width</code> 扩展的包围盒执行空间自连接来寻找候选邻居，聚合候选并在 executor
+上执行校验，再将诊断结果映射回输入行。该方法
+保留所有输入行、各级索引和 CRS；没有无效边或多边形分量的行返回空线，缺失
+几何保持缺失。<code>is_valid_coverage()</code> 通过分布式归约返回一个 Python <code>bool</code>。
+在高密度或大量重叠的覆盖中，或 <code>gap_width</code> 较大时，每个目标的候选数组和
+executor 内存开销都会增加。<code>gap_width</code> 必须是有限的非负数。</p>
 <p><code>hilbert_distance()</code> 使用原生 Spark 表达式，并让逐行排序键保持分布式执行。
 未提供 <code>total_bounds</code> 时，该方法会通过一次分布式聚合计算所有包围盒中点的
 范围，只有这个有界摘要会返回 driver。由于 Spark 没有无符号整数类型，
@@ -6783,7 +6800,7 @@ MultiIndex 在内的输入行索引会被新的分布式索引替代。除 <code
     <span class="md-icon" title="最后更新">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年8月18日 07:13:03 UTC">2026年8月18日 07:13:03</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-datetime" title="2026年8月25日 05:32:21 UTC">2026年8月25日 05:32:21</span>
   </span>
 
     
