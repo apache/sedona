@@ -25,6 +25,8 @@ This function uses the weighted straight skeleton algorithm based on Felkel's ap
 
 This function may have significant performance limitations when processing polygons with a very large number of vertices. For very large polygons (e.g., 10,000+ vertices), applying vertex reduction or simplification is essential to achieve practical computation times.
 
+Outlines traced from raster pixels, or pieces cut by `ST_SubDivide`, often contain many short, near-collinear edges. These trigger degenerate events in the skeleton algorithm: the call still returns a result, but the skeleton can be degraded around such edges. Simplifying the input first, for example with `ST_SimplifyPreserveTopology`, avoids this and also reduces computation time.
+
 Format: `ST_StraightSkeleton(geom: Geometry)`
 
 Return type: `Geometry`

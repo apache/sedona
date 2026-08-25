@@ -20,6 +20,8 @@ package org.apache.sedona.common;
 
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
@@ -437,5 +439,45 @@ public class StraightSkeletonTest {
     // Represents main trunk centerline plus 6 branch centerlines
     // Use relaxed validation since complex road networks may have precision issues
     testPolygon("Complex Branching Road Network", complexRoad, 71, false);
+  }
+
+  /**
+   * GH-3276: outlines traced from rasterised pixels have many short, near-collinear edges that
+   * trigger degenerate collision events inside campskeleton. The library used to print a stack
+   * trace to stderr for every one of them while still returning a result. A successful call must
+   * write nothing to stderr.
+   *
+   * <p>The polygon is a 10-vertex fragment of the 557-vertex polygon reported in the issue
+   * (EPSG:5070 metres), minimised while preserving the trigger: with campskeleton 0.0.2-20260118
+   * every skeleton computation deterministically prints three "Planes do not intersect at a single
+   * point" stack traces, so the two calls below capture six.
+   */
+  @Test
+  public void rasterizedOutlineWritesNothingToStderr() throws Exception {
+    String wkt =
+        "POLYGON ((472409 1164929, 471811 1164929, 471808.3035137968 1164876.1108762717, "
+            + "471509 1164809, 471749 1164931, 471756.1108762717 1164988.3035137968, "
+            + "471899 1164991, 472591 1165229, 473639 1164631, 473639 1150616.313708499, "
+            + "472409 1164929))";
+    Geometry polygon = Constructors.geomFromWKT(wkt, 5070);
+    assertTrue(polygon.isValid());
+
+    PrintStream originalErr = System.err;
+    ByteArrayOutputStream captured = new ByteArrayOutputStream();
+    Geometry skeleton;
+    Geometry medialAxis;
+    try {
+      System.setErr(new PrintStream(captured, true, "UTF-8"));
+      skeleton = Functions.straightSkeleton(polygon);
+      medialAxis = Functions.approximateMedialAxis(polygon);
+    } finally {
+      System.setErr(originalErr);
+    }
+
+    assertEquals("skeleton computation must not write to stderr", "", captured.toString("UTF-8"));
+    assertTrue(skeleton instanceof MultiLineString);
+    assertTrue(skeleton.getNumGeometries() > 0);
+    assertTrue(medialAxis instanceof MultiLineString);
+    assertTrue(medialAxis.getNumGeometries() > 0);
   }
 }
