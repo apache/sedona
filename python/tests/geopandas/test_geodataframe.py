@@ -1084,9 +1084,7 @@ es": {"name": "urn:ogc:def:crs:EPSG::3857"}}}'
         assert gdf.crs is None
 
         plan = (
-            gdf._internal.spark_frame._jdf.queryExecution()
-            .optimizedPlan()
-            .toString()
+            gdf._internal.spark_frame._jdf.queryExecution().optimizedPlan().toString()
         )
         assert "BatchEvalPython" not in plan
         assert "ArrowEvalPython" not in plan
