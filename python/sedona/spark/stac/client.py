@@ -178,8 +178,9 @@ class Client:
             Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]
         :param max_items: The maximum number of STAC API results to return. Supported
             single-collection bbox/datetime searches follow pystac-client semantics and
-            trust the API's matching behavior; extended Spark-side filters are applied
-            before the final result limit. Example: 100
+            trust the API's matching behavior. Multiple bboxes are queried independently,
+            unioned, and deduplicated before the final result limit; extended Spark-side
+            filters are applied before that limit. Example: 100
         :param return_dataframe: If True, return the result as a Spark DataFrame instead of an iterator of PyStacItem objects.
             Example: True
         :return: An iterator of PyStacItem objects or a Spark DataFrame that match the specified filters.

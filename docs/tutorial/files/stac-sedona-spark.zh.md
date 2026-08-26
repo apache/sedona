@@ -240,7 +240,7 @@ items = client.search(
 )
 ```
 
-`max_items` 遵循 pystac-client 的语义：它限制 STAC API 返回的 Item 总数，而 `itemsLimitPerRequest` 仅控制建议的单页大小。对于指定 collection、最多包含一个 `bbox` 和一个 `datetime` 区间（且没有 ID 或 geometry 过滤）的搜索，Sedona 会把这些约束发送到 collection 公告的 Items 端点，信任符合规范的 STAC API 的空间和时间匹配语义，并在服务端返回 `max_items` 个结果后停止枚举。多个 bbox 或 datetime 区间、ID 过滤以及 `search()` 的 `geometry` 参数属于由 Spark 执行的 Sedona 扩展；这些搜索会先完整枚举，再由 Spark 应用过滤条件和最终 limit。
+`max_items` 遵循 pystac-client 的语义：它限制最终返回的 Item 总数，而 `itemsLimitPerRequest` 仅控制建议的单页大小。当 `max_items` 为正数、指定了 collection、最多包含一个 `datetime` 区间、可选一个或多个 `bbox`（且没有 ID 或 geometry 过滤）时，Sedona 会把每个 bbox 作为一个独立且有上限的搜索发送到 collection 公告的 Items 端点。多个 bbox 的结果会先合并并按 `(collection, id)` 去重，再应用全局 `max_items` 限制。多个 datetime 区间、ID 过滤以及 `search()` 的 `geometry` 参数属于由 Spark 执行的 Sedona 扩展；这些搜索在读取器层保持无上限，以便 Spark 检查每个 Item，但单次请求最多获取 200 个 Item，从而减少分页开销。
 
 #### 按 bbox 与时间区间搜索
 
@@ -258,7 +258,12 @@ items = client.search(
 
 ```python
 bbox_list = [[-180.0, -90.0, 180.0, 90.0], [-100.0, -50.0, 100.0, 50.0]]
-items = client.search(collection_id="aster-l1t", bbox=bbox_list, return_dataframe=False)
+items = client.search(
+    collection_id="aster-l1t",
+    bbox=bbox_list,
+    max_items=200,
+    return_dataframe=False,
+)
 ```
 
 #### 在多个时间区间内搜索并以 DataFrame 返回

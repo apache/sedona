@@ -27,6 +27,8 @@ import datetime as python_datetime
 from pyspark.sql import DataFrame, SparkSession
 from shapely.geometry.base import BaseGeometry
 
+_CLIENT_ITEMS_LIMIT_PER_REQUEST = 200
+
 
 def get_collection_url(url: str, collection_id: Optional[str] = None) -> str:
     """
@@ -370,8 +372,9 @@ class CollectionClient:
             or a list of date-time ranges for filtering the items.
         :param max_items: The maximum number of STAC API results to return. Supported
             single-collection bbox/datetime searches follow pystac-client semantics and
-            trust the API's matching behavior; extended Spark-side filters are applied
-            before the final result limit.
+            trust the API's matching behavior. Multiple bboxes are queried independently,
+            unioned, and deduplicated before the final result limit; extended Spark-side
+            filters are applied before that limit.
         :return: An iterator of PyStacItem objects that match the specified filters.
             If no filters are provided, the iterator contains all items in the collection.
         :raises RuntimeError: If there is an error loading the data or applying the filters, a RuntimeError
@@ -433,8 +436,9 @@ class CollectionClient:
             Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]
         :param max_items: The maximum number of STAC API results to return. Supported
             single-collection bbox/datetime searches follow pystac-client semantics and
-            trust the API's matching behavior; extended Spark-side filters are applied
-            before the final result limit.
+            trust the API's matching behavior. Multiple bboxes are queried independently,
+            unioned, and deduplicated before the final result limit; extended Spark-side
+            filters are applied before that limit.
         :return: A Spark DataFrame containing the filtered items. If no filters are provided,
             the DataFrame contains all items in the collection.
         :raises RuntimeError: If there is an error loading the data or applying the filters, a RuntimeError
@@ -537,7 +541,9 @@ class CollectionClient:
             return {}
         return {
             "itemsLimitMax": str(max_items),
-            "itemsLimitPerRequest": str(min(200, max_items)),
+            "itemsLimitPerRequest": str(
+                min(_CLIENT_ITEMS_LIMIT_PER_REQUEST, max_items)
+            ),
         }
 
     def _api_search_options(self, bbox, geometry, datetime, ids, max_items):
@@ -545,9 +551,10 @@ class CollectionClient:
 
         A single bbox and a single datetime interval map directly to STAC API
         Collection Items parameters. Their semantics are owned by the API, including
-        interval-valued Items. Multiple bboxes/intervals and geometry filters
-        are Sedona extensions implemented with Spark predicates, so they keep
-        the uncapped fallback instead of applying a raw reader cap too early.
+        interval-valued Items. ``_api_search_option_sets`` decomposes multiple bboxes
+        into calls to this method. Multiple datetime intervals and geometry filters
+        remain Sedona extensions implemented with Spark predicates, so they keep the
+        uncapped fallback instead of applying a raw reader cap too early.
 
         The datasource applies these private options to the Collection's advertised
         JSON ``rel=items`` link. Keeping endpoint discovery in the datasource preserves
@@ -607,6 +614,33 @@ class CollectionClient:
 
         return options
 
+    def _api_search_option_sets(self, bbox, geometry, datetime, ids, max_items):
+        """Build independently capped API searches for representable predicates.
+
+        A STAC Collection Items request accepts one bbox. Sedona's list-of-bboxes
+        extension represents their union, so issue one exact API request per bbox
+        and let ``load_items_df`` union and deduplicate the results. Each request
+        may safely use the full ``max_items`` cap: if the bbox union contains at
+        least that many distinct Items, fetching up to that many from every bbox
+        is sufficient to produce the requested global result size.
+
+        Shapes that still require a Spark-side predicate return ``None`` and use
+        the uncapped fallback.
+        """
+        if bbox and len(bbox) > 1:
+            option_sets = []
+            for coordinates in bbox:
+                options = self._api_search_options(
+                    [coordinates], geometry, datetime, ids, max_items
+                )
+                if options is None:
+                    return None
+                option_sets.append(options)
+            return option_sets
+
+        options = self._api_search_options(bbox, geometry, datetime, ids, max_items)
+        return None if options is None else [options]
+
     def load_items_df(self, bbox, geometry, datetime, ids, max_items):
         """
         Loads items from the STAC collection as a Spark DataFrame.
@@ -642,28 +676,49 @@ class CollectionClient:
             elif isinstance(datetime, (list, tuple)) and isinstance(datetime[0], str):
                 datetime = [list(datetime)]
 
-        api_search_options = self._api_search_options(
+        api_search_option_sets = self._api_search_option_sets(
             bbox, geometry, datetime, ids, max_items
         )
 
-        # Prepare Spark DataFrameReader with headers if present
-        reader = self.spark.read.format("stac")
-        if self.headers:
-            reader = reader.option("headers", json.dumps(self.headers))
+        def new_reader():
+            reader = self.spark.read.format("stac")
+            if self.headers:
+                reader = reader.option("headers", json.dumps(self.headers))
+            return reader
 
         # In the PySTAC-compatible path, the datasource puts every search predicate
         # on the advertised endpoint and itemsLimitMax counts exactly what the API returns.
         has_client_side_filters = bool(ids or bbox or geometry or datetime)
-        if api_search_options is not None or not has_client_side_filters:
-            for key, value in self._enumeration_cap_options(max_items).items():
-                reader = reader.option(key, value)
-        if api_search_options is not None:
-            for key, value in api_search_options.items():
-                reader = reader.option(key, value)
+        if api_search_option_sets is not None:
+            dataframes = []
+            for api_search_options in api_search_option_sets:
+                reader = new_reader()
+                for key, value in self._enumeration_cap_options(max_items).items():
+                    reader = reader.option(key, value)
+                for key, value in api_search_options.items():
+                    reader = reader.option(key, value)
+                dataframes.append(reader.load(self.collection_url))
 
-        df = reader.load(self.collection_url)
+            df = dataframes[0]
+            for next_df in dataframes[1:]:
+                df = df.unionByName(next_df)
+            if len(dataframes) > 1:
+                df = df.dropDuplicates(["collection", "id"])
+        else:
+            reader = new_reader()
+            if has_client_side_filters:
+                # Residual predicates must stay uncapped, but larger pages reduce
+                # pagination overhead without changing which rows Spark evaluates.
+                reader = reader.option(
+                    "itemsLimitPerRequest", str(_CLIENT_ITEMS_LIMIT_PER_REQUEST)
+                )
+            else:
+                # An unfiltered max_items request can safely cap raw API Items.
+                for key, value in self._enumeration_cap_options(max_items).items():
+                    reader = reader.option(key, value)
+            df = reader.load(self.collection_url)
 
-        if api_search_options is None:
+        if api_search_option_sets is None:
             # These extended shapes are evaluated by Spark. They deliberately
             # stay uncapped in the reader so a residual cannot exhaust the cap
             # before a later matching Item is reached.
@@ -675,7 +730,8 @@ class CollectionClient:
                 df = df.filter(df.id.isin(ids))
             df = self._apply_spatial_temporal_filters(df, bbox, geometry, datetime)
 
-        # Limit the number of items if max_items is specified
+        # Limit the number of items if max_items is specified. Multiple API
+        # requests are deduplicated before this global result cap is applied.
         if max_items is not None:
             df = df.limit(max_items)
         return df
