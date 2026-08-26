@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sedona.spark.stac.client &mdash; Apache Sedona Python Documentation</title>
@@ -388,8 +387,9 @@
 <span class="sd">            Example: "2020-01-01T00:00:00Z" or python_datetime.datetime(2020, 1, 1) or [["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]]</span>
 <span class="sd">        :param max_items: The maximum number of STAC API results to return. Supported</span>
 <span class="sd">            single-collection bbox/datetime searches follow pystac-client semantics and</span>
-<span class="sd">            trust the API's matching behavior; extended Spark-side filters are applied</span>
-<span class="sd">            before the final result limit. Example: 100</span>
+<span class="sd">            trust the API's matching behavior. Multiple bboxes are queried independently,</span>
+<span class="sd">            unioned, and deduplicated before the final result limit; extended Spark-side</span>
+<span class="sd">            filters are applied before that limit. Example: 100</span>
 <span class="sd">        :param return_dataframe: If True, return the result as a Spark DataFrame instead of an iterator of PyStacItem objects.</span>
 <span class="sd">            Example: True</span>
 <span class="sd">        :return: An iterator of PyStacItem objects or a Spark DataFrame that match the specified filters.</span>

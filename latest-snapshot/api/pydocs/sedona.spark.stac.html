@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
-    <meta name="robots" content="noindex, follow">
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -334,8 +333,9 @@ or a list of date-time ranges for filtering the items. The datetime can be speci
 </p></li>
 <li><p><strong>max_items</strong> – The maximum number of STAC API results to return. Supported
 single-collection bbox/datetime searches follow pystac-client semantics and
-trust the API’s matching behavior; extended Spark-side filters are applied
-before the final result limit. Example: 100</p></li>
+trust the API’s matching behavior. Multiple bboxes are queried independently,
+unioned, and deduplicated before the final result limit; extended Spark-side
+filters are applied before that limit. Example: 100</p></li>
 <li><p><strong>return_dataframe</strong> – If True, return the result as a Spark DataFrame instead of an iterator of PyStacItem objects.
 Example: True</p></li>
 </ul>
@@ -447,8 +447,9 @@ or a list of date-time ranges for filtering the items.
 Example: “2020-01-01T00:00:00Z” or python_datetime.datetime(2020, 1, 1) or [[“2020-01-01T00:00:00Z”, “2021-01-01T00:00:00Z”]]</p></li>
 <li><p><strong>max_items</strong> – The maximum number of STAC API results to return. Supported
 single-collection bbox/datetime searches follow pystac-client semantics and
-trust the API’s matching behavior; extended Spark-side filters are applied
-before the final result limit.</p></li>
+trust the API’s matching behavior. Multiple bboxes are queried independently,
+unioned, and deduplicated before the final result limit; extended Spark-side
+filters are applied before that limit.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -480,8 +481,9 @@ If both bbox and geometry are provided, geometry takes precedence.</p></li>
 or a list of date-time ranges for filtering the items.</p></li>
 <li><p><strong>max_items</strong> – The maximum number of STAC API results to return. Supported
 single-collection bbox/datetime searches follow pystac-client semantics and
-trust the API’s matching behavior; extended Spark-side filters are applied
-before the final result limit.</p></li>
+trust the API’s matching behavior. Multiple bboxes are queried independently,
+unioned, and deduplicated before the final result limit; extended Spark-side
+filters are applied before that limit.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
