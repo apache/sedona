@@ -587,7 +587,52 @@ class TestStacReader(TestBase):
             "160.0,-10.0,-170.0,10.0"
         )
 
-    def test_api_search_options_fall_back_for_extended_search_shapes(self) -> None:
+    def test_api_search_option_sets_decompose_multiple_bboxes(self) -> None:
+        client = CollectionClient.__new__(CollectionClient)
+        client.url = "https://stac.example.test/api/v1"
+        client.collection_id = "sentinel-2"
+        client.collection_url = (
+            "https://stac.example.test/api/v1/collections/sentinel-2"
+        )
+        interval = [["2025-01-01T00:00:00Z", "2025-02-01T00:00:00Z"]]
+
+        option_sets = client._api_search_option_sets(
+            bbox=[[-10.0, -5.0, 20.0, 30.0], [40.0, 10.0, 50.0, 20.0]],
+            geometry=None,
+            datetime=interval,
+            ids=(),
+            max_items=100,
+        )
+
+        assert option_sets == [
+            {
+                "__stacApiSearchBbox": "-10.0,-5.0,20.0,30.0",
+                "__stacApiSearchDatetime": (
+                    "2025-01-01T00:00:00Z/2025-02-01T00:00:00Z"
+                ),
+            },
+            {
+                "__stacApiSearchBbox": "40.0,10.0,50.0,20.0",
+                "__stacApiSearchDatetime": (
+                    "2025-01-01T00:00:00Z/2025-02-01T00:00:00Z"
+                ),
+            },
+        ]
+
+        assert (
+            client._api_search_option_sets(
+                bbox=[[-10.0, -5.0, 20.0, 30.0], [181.0, 10.0, 190.0, 20.0]],
+                geometry=None,
+                datetime=interval,
+                ids=(),
+                max_items=100,
+            )
+            is None
+        )
+
+    def test_api_search_options_reject_unsupported_single_request_shapes(
+        self,
+    ) -> None:
         client = CollectionClient.__new__(CollectionClient)
         client.url = "https://stac.example.test/api/v1"
         client.collection_id = "sentinel-2"
@@ -598,7 +643,6 @@ class TestStacReader(TestBase):
         one_interval = [["2025-01-01T00:00:00Z", "2025-02-01T00:00:00Z"]]
 
         unsupported = [
-            (one_bbox * 2, None, one_interval, ()),
             (one_bbox, None, one_interval * 2, ()),
             (one_bbox, "POINT (0 0)", one_interval, ()),
             (one_bbox, None, one_interval, ("item-1",)),
@@ -690,6 +734,99 @@ class TestStacReader(TestBase):
         assert "secret" in reader.options["headers"]
         assert reader.loaded_url == client.collection_url
 
+    def test_load_items_df_bounds_and_deduplicates_multiple_bboxes(self) -> None:
+        class FakeDataFrame:
+            def __init__(self, name):
+                self.name = name
+                self.unions = []
+                self.deduplications = []
+                self.limits = []
+
+            def unionByName(self, other):
+                self.unions.append(other)
+                return self
+
+            def dropDuplicates(self, columns):
+                self.deduplications.append(columns)
+                return self
+
+            def limit(self, value):
+                self.limits.append(value)
+                return self
+
+        class RecordingReader:
+            def __init__(self, dataframe):
+                self.dataframe = dataframe
+                self.options = {}
+                self.loaded_url = None
+
+            def format(self, value):
+                assert value == "stac"
+                return self
+
+            def option(self, key, value):
+                self.options[key] = str(value)
+                return self
+
+            def load(self, url):
+                self.loaded_url = url
+                return self.dataframe
+
+        class FakeSpark:
+            def __init__(self, dataframes):
+                self.dataframes = iter(dataframes)
+                self.readers = []
+
+            @property
+            def read(self):
+                reader = RecordingReader(next(self.dataframes))
+                self.readers.append(reader)
+                return reader
+
+        first = FakeDataFrame("world")
+        second = FakeDataFrame("contained")
+        client = CollectionClient.__new__(CollectionClient)
+        client.url = "https://stac.example.test/api/v1"
+        client.collection_id = "sentinel-2"
+        client.collection_url = (
+            "https://stac.example.test/api/v1/collections/sentinel-2"
+        )
+        client.headers = {"Authorization": "Bearer secret"}
+        client.spark = FakeSpark([first, second])
+
+        with patch.object(
+            CollectionClient,
+            "_apply_spatial_temporal_filters",
+            side_effect=AssertionError("API-owned bboxes must not be reinterpreted"),
+        ):
+            result = client.load_items_df(
+                bbox=[
+                    [-180.0, -90.0, 180.0, 90.0],
+                    [-100.0, -50.0, 100.0, 50.0],
+                ],
+                geometry=None,
+                datetime=None,
+                ids=(),
+                max_items=200,
+            )
+
+        assert result is first
+        assert len(client.spark.readers) == 2
+        assert [
+            reader.options["__stacApiSearchBbox"] for reader in client.spark.readers
+        ] == [
+            "-180.0,-90.0,180.0,90.0",
+            "-100.0,-50.0,100.0,50.0",
+        ]
+        for reader in client.spark.readers:
+            assert reader.options["itemsLimitMax"] == "200"
+            assert reader.options["itemsLimitPerRequest"] == "200"
+            assert "secret" in reader.options["headers"]
+            assert reader.loaded_url == client.collection_url
+        assert first.unions == [second]
+        assert first.deduplications == [["collection", "id"]]
+        assert first.limits == [200]
+
     def test_load_items_df_fallback_keeps_spark_filter_and_limit(self) -> None:
         class FakeDataFrame:
             def __init__(self):
@@ -751,7 +888,7 @@ class TestStacReader(TestBase):
         assert result is dataframe
         assert reader.loaded_url == client.collection_url
         assert "itemsLimitMax" not in reader.options
-        assert "itemsLimitPerRequest" not in reader.options
+        assert reader.options["itemsLimitPerRequest"] == "200"
         apply_filters.assert_called_once_with(dataframe, None, None, intervals)
         assert dataframe.limits == [5]
 
