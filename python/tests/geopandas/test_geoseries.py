@@ -31,6 +31,7 @@ from pyspark.pandas.internal import InternalFrame, NATURAL_ORDER_COLUMN_NAME
 from pyspark.pandas.utils import scol_for
 from pyspark.sql import functions as F
 from sedona.spark.geopandas import GeoSeries, GeoDataFrame
+from sedona.spark.geopandas._crs import read_crs_metadata
 from sedona.spark.geopandas.geoseries import _to_bool
 from sedona.spark.sql import st_constructors as stc
 from sedona.spark.sql import st_functions as stf
@@ -672,6 +673,14 @@ class TestGeoSeries(TestGeopandasBase):
         # This is challenging to support due to gdf.__setitem__ casting GeoSeries into pspd.Series
         # assert gdf.has_sindex
 
+    def test_renamed_series_sindex_uses_resolved_physical_column(self):
+        series = GeoSeries([Point(x, x) for x in range(5)], name="source")
+        series.rename("geometry", inplace=True)
+
+        result = series.sindex.query(box(1, 1, 3, 3))
+
+        assert result == [Point(1, 1), Point(2, 2), Point(3, 3)]
+
     def test_invalidate_sindex(self):
         geoseries = GeoSeries([Point(0, 0), None, Point(2, 2)])
 
@@ -827,6 +836,22 @@ class TestGeoSeries(TestGeopandasBase):
         s = sgpd.GeoSeries.from_wkt(wkts)
         expected = gpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         self.check_sgpd_equals_gpd(s, expected)
+
+    @pytest.mark.parametrize(
+        "constructor,value",
+        [
+            (GeoSeries.from_wkt, "POINT (1 1)"),
+            (GeoSeries.from_wkb, Point(1, 1).wkb),
+        ],
+        ids=["wkt", "wkb"],
+    )
+    def test_wkt_wkb_from_renamed_pandas_on_spark_series(self, constructor, value):
+        source = ps.Series([value], name="source")
+        source.rename("renamed", inplace=True)
+
+        result = constructor(source)
+
+        assert result.to_geopandas().iloc[0] == Point(1, 1)
 
     def test_from_xy(self):
         x = [2.5, 5, -3.0]
@@ -3886,19 +3911,20 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
             index=pd.Index(["duplicate"] * 4, name="feature_id"),
         )
         test_position_col = "__sample_points_test_position__"
+        resolved_source = identical_source._internal.resolved_copy
         positioned_frame = InternalFrame.attach_distributed_sequence_column(
-            identical_source._internal.spark_frame.orderBy(NATURAL_ORDER_COLUMN_NAME),
+            resolved_source.spark_frame.orderBy(NATURAL_ORDER_COLUMN_NAME),
             test_position_col,
         )
         ordered_rows = positioned_frame.select(
             F.col(test_position_col).alias("position"),
             scol_for(
                 positioned_frame,
-                identical_source._internal.index_spark_column_names[0],
+                resolved_source.index_spark_column_names[0],
             ).alias("feature_id"),
             scol_for(
                 positioned_frame,
-                identical_source._internal.data_spark_column_names[0],
+                resolved_source.data_spark_column_names[0],
             ).alias("geometry"),
         )
 
@@ -7159,3 +7185,126 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         assert frame.crs.to_epsg() == 4326
         assert round_tripped.crs.to_epsg() == 4326
         assert transformed.crs.to_epsg() == 3857
+
+    def test_local_construction_records_authoritative_no_crs(self):
+        """Locally built GeoSeries with no explicit crs must record an
+        authoritative "no CRS" state (metadata present, value None) instead
+        of being left indistinguishable from a raw column of unknown CRS
+        provenance (metadata absent)."""
+
+        def assert_no_crs_metadata(series: GeoSeries):
+            has_metadata, value = read_crs_metadata(series._internal.data_fields[0])
+            assert has_metadata is True
+            assert value is None
+            assert series.crs is None
+
+        assert_no_crs_metadata(sgpd.GeoSeries([Point(1, 1), Point(2, 2)]))
+        assert_no_crs_metadata(sgpd.GeoSeries([Point(1, 1)], crs=None))
+        assert_no_crs_metadata(sgpd.GeoSeries([], name="polygons", crs=None))
+        assert_no_crs_metadata(sgpd.GeoSeries([None, None]))
+        assert_no_crs_metadata(sgpd.GeoSeries(gpd.GeoSeries([Point(1, 1)])))
+        assert_no_crs_metadata(sgpd.GeoSeries.from_wkt(["POINT (1 1)", "POINT (2 2)"]))
+        assert_no_crs_metadata(
+            sgpd.GeoSeries.from_wkb([Point(1, 1).wkb, Point(2, 2).wkb])
+        )
+
+        for name in (None, 0, ""):
+            named = sgpd.GeoSeries([Point(1, 1)], name=name)
+            assert_no_crs_metadata(named)
+            assert named.name == name
+            physical_name = named._internal.data_spark_column_names[0]
+            assert isinstance(physical_name, str)
+            assert physical_name in named._internal.spark_frame.columns
+
+        gdf = sgpd.GeoDataFrame({"geometry": [Point(1, 1), Point(2, 2)]})
+        assert_no_crs_metadata(gdf.geometry)
+
+        with ps.option_context("compute.ops_on_diff_frames", True):
+            set_via_array = sgpd.GeoDataFrame({"value": [1, 2]}).set_geometry(
+                [Point(0, 0), Point(1, 1)]
+            )
+        assert_no_crs_metadata(set_via_array.geometry)
+
+    def test_wrapped_raw_columns_keep_srid_inference_and_mismatch_warning(self):
+        """Wrapping an existing distributed column of unknown provenance (no
+        Sedona CRS metadata) must not fabricate a "no CRS" state -- the
+        legacy SRID-inference fallback must still apply."""
+
+        def raw_series(srid):
+            return GeoSeries(
+                self.spark.range(1)
+                .selectExpr(f"ST_SetSRID(ST_Point(0D, 0D), {srid}) AS geometry")
+                .pandas_api()["geometry"]
+            )
+
+        left = raw_series(4326)
+        right = raw_series(3857)
+        for series, expected_srid in ((left, 4326), (right, 3857)):
+            has_metadata, _ = read_crs_metadata(series._internal.data_fields[0])
+            assert has_metadata is False
+            assert series.crs.to_epsg() == expected_srid
+
+        job_group = "test_wrapped_raw_columns_keep_srid_inference_and_mismatch_warning"
+        self.sc.setJobGroup(job_group, "raw-column CRS inference")
+        try:
+            with pytest.warns(UserWarning, match="CRS mismatch"):
+                left.geom_equals(right, align=False)
+            job_ids = self.sc.statusTracker().getJobIdsForGroup(job_group)
+        finally:
+            self.sc.setJobGroup(None, None)
+
+        assert len(job_ids) >= 2
+
+    def test_no_crs_stamp_preserves_embedded_srid(self):
+        """Recording an authoritative "no CRS" state must be metadata-only:
+        it must never rewrite the geometry bytes, so any SRID already
+        embedded via WKB/EWKB survives untouched."""
+        srid_series = sgpd.GeoSeries([Point(1, 1)]).set_crs(4326, allow_override=True)
+        # Detach the authoritative CRS metadata but keep the embedded SRID,
+        # simulating a column whose bytes carry a SRID Sedona doesn't yet
+        # know about as metadata.
+        srid_series._record_no_crs_metadata(inplace=True)
+
+        assert srid_series.crs is None
+        embedded_srid = srid_series._internal.spark_frame.select(
+            stf.ST_SRID(srid_series.spark.column).alias("srid")
+        ).first()["srid"]
+        assert embedded_srid == 4326
+
+    def test_local_construction_no_spark_job_for_crs_discovery(self):
+        """A binary predicate between two locally constructed, CRS-less
+        GeoSeries reads both operands' authoritative "no CRS" metadata for
+        its mismatch check without launching a distributed SRID-inference
+        job."""
+        s1 = sgpd.GeoSeries([Point(1, 1), Point(2, 2)])
+        s2 = sgpd.GeoSeries([Point(1, 1), Point(3, 3)])
+
+        job_group = "test_local_construction_no_spark_job_for_crs_discovery"
+        self.sc.setJobGroup(job_group, "crs discovery for a binary predicate")
+        try:
+            # geom_equals() is lazy: building it (which internally reads
+            # .crs on both operands to check for a mismatch) must not by
+            # itself submit any Spark job.
+            s1.geom_equals(s2)
+            job_ids = self.sc.statusTracker().getJobIdsForGroup(job_group)
+        finally:
+            self.sc.setJobGroup(None, None)
+
+        assert len(job_ids) == 0
+
+    def test_local_construction_no_python_plan_for_crs_access(self):
+        """The optimized plan for a binary predicate between two locally
+        constructed, CRS-less GeoSeries must not contain a Python UDF/eval
+        node stemming from the CRS mismatch check."""
+        s1 = sgpd.GeoSeries([Point(1, 1), Point(2, 2)])
+        s2 = sgpd.GeoSeries([Point(1, 1), Point(3, 3)])
+
+        result = s1.geom_equals(s2)
+        plan = (
+            result._internal.spark_frame._jdf.queryExecution()
+            .optimizedPlan()
+            .toString()
+        )
+        assert "BatchEvalPython" not in plan
+        assert "ArrowEvalPython" not in plan
+        assert "PythonUDF" not in plan

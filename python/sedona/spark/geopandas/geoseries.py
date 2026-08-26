@@ -23,6 +23,7 @@ from typing import Any, Union, Literal, List
 
 import numpy as np
 import geopandas as gpd
+from geopandas.array import GeometryArray
 import sedona.spark.geopandas as sgpd
 import pandas as pd
 import pyspark.pandas as pspd
@@ -586,8 +587,26 @@ class GeoSeries(GeoFrame, pspd.Series):
         dtype: geometry
         """
         assert data is not None
-        if crs is None and isinstance(data, gpd.GeoSeries):
-            crs = data.crs
+        if crs is None:
+            if isinstance(data, gpd.GeoSeries):
+                crs = data.crs
+            elif isinstance(data, GeometryArray):
+                crs = data.crs
+            elif isinstance(data, pd.Series) and isinstance(
+                getattr(data, "array", None), GeometryArray
+            ):
+                crs = data.array.crs
+
+        # Locally owned data (a Python list, WKT/WKB, a plain pandas Series, a
+        # bare geopandas.GeoSeries, ...) is distinct from wrapping an existing
+        # Sedona-managed or raw distributed structure: only in the former case
+        # do we know, right now, whether a CRS is set, so only there do we
+        # need to record an authoritative "no CRS" state below when the user
+        # didn't pass one. Wrapping an existing structure just inherits
+        # whatever CRS state (known, known-absent, or unknown) it already had.
+        is_locally_owned = not isinstance(
+            data, (GeoDataFrame, GeoSeries, PandasOnSparkSeries, PandasOnSparkDataFrame)
+        )
 
         self._anchor: GeoDataFrame
         self._col_label: Label
@@ -663,6 +682,26 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         if crs is not None:
             self.set_crs(crs, inplace=True, allow_override=True)
+        elif is_locally_owned:
+            self._record_no_crs_metadata(inplace=True)
+
+    def _record_no_crs_metadata(self, inplace: bool = False) -> "GeoSeries":
+        """Record authoritative "no CRS" metadata without touching geometry bytes.
+
+        Unlike ``set_crs``, this never calls ``ST_SetSRID``, so any SRID
+        already embedded in the geometry (e.g. from WKB/EWKB input) survives
+        untouched even though the public ``.crs`` becomes authoritatively
+        ``None`` instead of falling back to a distributed SRID lookup.
+        """
+        result = self._query_geometry_column(
+            self.spark.column,
+            keep_name=True,
+            crs_override=None,
+        )
+        if inplace:
+            self._update_inplace(result, invalidate_sindex=False)
+            return self
+        return result
 
     def _is_empty(self) -> bool:
         """Check if this GeoSeries has no rows without triggering a full Spark scan."""
@@ -888,10 +927,11 @@ class GeoSeries(GeoFrame, pspd.Series):
 
         df = self._internal.spark_frame if df is None else df
 
+        # Series names are arbitrary hashable Python objects (including
+        # falsy ones like 0 or ""), while Spark aliases must be strings.
+        # Keep the physical name fixed and carry the logical Series name in
+        # the rebuilt InternalFrame below, mirroring `_result_preserving_index`.
         rename = SPARK_DEFAULT_SERIES_NAME
-
-        if keep_name and self.name:
-            rename = self.name
 
         result_field = None
         if returns_geom:
@@ -942,12 +982,13 @@ class GeoSeries(GeoFrame, pspd.Series):
                 nullable=schema_field.nullable,
             )
 
+        result_column_label = self._column_label if keep_name else None
         internal = self._internal.copy(
             spark_frame=sdf,
             index_fields=index_fields,
             index_spark_columns=index_spark_columns,
             index_names=index_names if index_spark_columns else [None],
-            column_labels=([(rename,)] if is_aggr else self._internal.column_labels),
+            column_labels=[result_column_label],
             data_spark_columns=[scol_for(sdf, rename)],
             data_fields=[
                 (
@@ -956,13 +997,11 @@ class GeoSeries(GeoFrame, pspd.Series):
                     else InternalField.from_struct_field(sdf.schema[rename])
                 )
             ],
-            column_label_names=[(rename,)],
+            column_label_names=(
+                self._internal.column_label_names if keep_name else [None]
+            ),
         )
         ps_series = first_series(PandasOnSparkDataFrame(internal))
-
-        # Convert Spark series default name to pandas series default name (None) if needed.
-        series_name = None if rename == SPARK_DEFAULT_SERIES_NAME else rename
-        ps_series = ps_series.rename(series_name)
 
         return GeoSeries(ps_series) if returns_geom else ps_series
 
@@ -1029,9 +1068,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def sindex(self) -> SpatialIndex:
-        geometry_column = _get_series_col_name(self)
-        if geometry_column is None:
-            raise ValueError("No geometry column found in GeoSeries")
         if self._sindex is None:
             self._sindex = SpatialIndex(self)
         return self._sindex
@@ -4227,7 +4263,11 @@ class GeoSeries(GeoFrame, pspd.Series):
         GeoDataFrame.to_file : Write a ``GeoDataFrame`` to a file.
         """
         df = sgpd.io.read_file(filename, format, **kwargs)
-        return GeoSeries(df.geometry, crs=df.crs)
+        # File-backed columns have distributed provenance. Until a reader
+        # exposes authoritative CRS field metadata, retain the unknown state
+        # so `.crs` can use the embedded-SRID fallback on demand rather than
+        # launching an eager aggregation during construction.
+        return GeoSeries(df.geometry)
 
     # GeoSeries-only (not in GeoDataFrame)
     @classmethod
@@ -4533,10 +4573,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         name = kwargs.get("name", SPARK_DEFAULT_SERIES_NAME)
 
         if isinstance(data, pspd.Series):
-            spark_df = data._internal.spark_frame
+            # A public Series rename can remain a lazy alias in the InternalFrame.
+            # Resolve the Spark frame and its physical data-column name together.
+            data_internal = data._internal.resolved_copy
+            spark_df = data_internal.spark_frame
             assert len(schema) == 1
             spark_df = spark_df.withColumnRenamed(
-                _get_series_col_name(data), schema[0].name
+                data_internal.data_spark_column_names[0], schema[0].name
             )
         else:
             spark_df = default_session().createDataFrame(data, schema=schema)
@@ -4554,7 +4597,15 @@ class GeoSeries(GeoFrame, pspd.Series):
         ps_series = first_series(PandasOnSparkDataFrame(internal))
         name = None if name == SPARK_DEFAULT_SERIES_NAME else name
         ps_series.rename(name, inplace=True)
-        return GeoSeries(ps_series, index, crs=crs)
+        result = GeoSeries(ps_series, index, crs=crs)
+        if crs is None:
+            # WKT and ordinary WKB are generally SRID-less, though EWKB may
+            # carry an embedded SRID (ST_GeomFromWKB preserves it). Either
+            # way the caller passed no explicit crs, so the resulting column
+            # is authoritatively CRS-less rather than of unknown provenance;
+            # this is metadata-only and must not rewrite any embedded SRID.
+            result._record_no_crs_metadata(inplace=True)
+        return result
 
     # ============================================================================
     # DATA ACCESS AND MANIPULATION
@@ -5492,7 +5543,8 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
     # -----------------------------------------------------------------------------
 
     def _update_inplace(self, result: "GeoSeries", invalidate_sindex: bool = True):
-        self.rename(result.name, inplace=True)
+        if self._column_label != result._column_label:
+            self.rename(result.name, inplace=True)
         self._update_anchor(result._anchor)
         if invalidate_sindex:
             self._sindex = None
@@ -5535,15 +5587,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result._geometry_column_name = renamed.name
         result.index.name = self.index.name
         return result
-
-
-# -----------------------------------------------------------------------------
-# # Utils
-# -----------------------------------------------------------------------------
-
-
-def _get_series_col_name(ps_series: pspd.Series) -> str:
-    return ps_series.name if ps_series.name else SPARK_DEFAULT_SERIES_NAME
 
 
 def _to_bool(ps_series: pspd.Series, default: bool = False) -> pspd.Series:
