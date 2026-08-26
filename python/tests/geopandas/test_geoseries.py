@@ -192,8 +192,9 @@ class TestGeoSeries(TestGeopandasBase):
         # This is challenging to support due to gdf.__setitem__ casting GeoSeries into pspd.Series
         # assert gdf.has_sindex
 
-    def test_named_series_sindex_uses_physical_column(self):
-        series = GeoSeries([Point(x, x) for x in range(5)], name="geometry")
+    def test_renamed_series_sindex_uses_resolved_physical_column(self):
+        series = GeoSeries([Point(x, x) for x in range(5)], name="source")
+        series.rename("geometry", inplace=True)
 
         result = series.sindex.query(box(1, 1, 3, 3))
 
@@ -354,6 +355,22 @@ class TestGeoSeries(TestGeopandasBase):
         s = sgpd.GeoSeries.from_wkt(wkts)
         expected = gpd.GeoSeries([Point(1, 1), Point(2, 2), Point(3, 3)])
         self.check_sgpd_equals_gpd(s, expected)
+
+    @pytest.mark.parametrize(
+        "constructor,value",
+        [
+            (GeoSeries.from_wkt, "POINT (1 1)"),
+            (GeoSeries.from_wkb, Point(1, 1).wkb),
+        ],
+        ids=["wkt", "wkb"],
+    )
+    def test_wkt_wkb_from_renamed_pandas_on_spark_series(self, constructor, value):
+        source = ps.Series([value], name="source")
+        source.rename("renamed", inplace=True)
+
+        result = constructor(source)
+
+        assert result.to_geopandas().iloc[0] == Point(1, 1)
 
     def test_from_xy(self):
         x = [2.5, 5, -3.0]

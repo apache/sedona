@@ -1067,9 +1067,6 @@ class GeoSeries(GeoFrame, pspd.Series):
 
     @property
     def sindex(self) -> SpatialIndex:
-        geometry_column = _get_series_col_name(self)
-        if geometry_column is None:
-            raise ValueError("No geometry column found in GeoSeries")
         if self._sindex is None:
             self._sindex = SpatialIndex(self)
         return self._sindex
@@ -4398,10 +4395,13 @@ class GeoSeries(GeoFrame, pspd.Series):
         name = kwargs.get("name", SPARK_DEFAULT_SERIES_NAME)
 
         if isinstance(data, pspd.Series):
-            spark_df = data._internal.spark_frame
+            # A public Series rename can remain a lazy alias in the InternalFrame.
+            # Resolve the Spark frame and its physical data-column name together.
+            data_internal = data._internal.resolved_copy
+            spark_df = data_internal.spark_frame
             assert len(schema) == 1
             spark_df = spark_df.withColumnRenamed(
-                _get_series_col_name(data), schema[0].name
+                data_internal.data_spark_column_names[0], schema[0].name
             )
         else:
             spark_df = default_session().createDataFrame(data, schema=schema)
@@ -5409,15 +5409,6 @@ e": "Feature", "properties": {}, "geometry": {"type": "Point", "coordinates": [3
         result._geometry_column_name = renamed.name
         result.index.name = self.index.name
         return result
-
-
-# -----------------------------------------------------------------------------
-# # Utils
-# -----------------------------------------------------------------------------
-
-
-def _get_series_col_name(ps_series: pspd.Series) -> str:
-    return ps_series._internal.data_spark_column_names[0]
 
 
 def _to_bool(ps_series: pspd.Series, default: bool = False) -> pspd.Series:

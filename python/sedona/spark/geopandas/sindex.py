@@ -51,10 +51,11 @@ class SpatialIndex:
         from sedona.spark.geopandas import GeoSeries
 
         if isinstance(geometry, GeoSeries):
-            from sedona.spark.geopandas.geoseries import _get_series_col_name
-
-            column_name = _get_series_col_name(geometry)
-            geometry = geometry._internal.spark_frame
+            # A public Series rename can remain a lazy alias in the InternalFrame.
+            # Resolve the Spark frame and its physical data-column name together.
+            geometry_internal = geometry._internal.resolved_copy
+            column_name = geometry_internal.data_spark_column_names[0]
+            geometry = geometry_internal.spark_frame
 
         if isinstance(geometry, np.ndarray):
             self.geometry = geometry
